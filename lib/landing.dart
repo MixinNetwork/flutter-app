@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:uuid/uuid.dart';
+import 'dart:convert';
 
 class LandingPage extends StatefulWidget {
   LandingPage({Key key, this.title}) : super(key: key);
@@ -16,8 +17,8 @@ class _MyHomePageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     var uuid = Uuid().v4();
-    final keypair = x25519.newKeyPair();
-    var pubKey = Uri.encodeComponent(keypair.publicKey.toBase64());
+    final keypair = x25519.newKeyPairSync();
+    var pubKey = Uri.encodeComponent(base64.encode(keypair.publicKey.bytes));
 
     return Scaffold(
       appBar: AppBar(
@@ -51,7 +52,7 @@ class _MyHomePageState extends State<LandingPage> {
               height: 30,
             ),
             QrImage(
-              data: "mixin://device/auth?id="+uuid + "&pub_key=" + pubKey,
+              data: "mixin://device/auth?id=" + uuid + "&pub_key=" + pubKey,
               version: QrVersions.auto,
               size: 300.0,
               foregroundColor: Color(0xFF4A4A4A),
