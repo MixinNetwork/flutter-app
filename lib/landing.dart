@@ -17,6 +17,7 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   bool _showRetry = false;
+  bool _provisioning = false;
   String _authUrl;
   void showRetryTask() {
     Timer.periodic(Duration(seconds: 5), (timer) {
@@ -65,7 +66,7 @@ class _LandingPageState extends State<LandingPage> {
                 ),
               ),
               Visibility(
-                  visible: _showRetry,
+                  visible: _showRetry || _provisioning,
                   child: InkWell(
                       onTap: () {
                         setState(() {
@@ -75,30 +76,42 @@ class _LandingPageState extends State<LandingPage> {
                         });
                       },
                       child: Container(
-                        width: 300.0,
-                        height: 300.0,
-                        decoration: new BoxDecoration(color: Color(0xAAFFFFFF)),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Container(
-                              constraints: BoxConstraints.tightForFinite(
-                                  width: 150, height: 150),
+                          width: 300.0,
+                          height: 300.0,
+                          decoration:
+                              new BoxDecoration(color: Color(0xAAFFFFFF)),
+                          child: Align(
                               alignment: Alignment.center,
-                              decoration: new BoxDecoration(
-                                  color: Color(0xFF3a7ee4),
-                                  borderRadius: BorderRadius.circular(75)),
-                              child: Padding(
-                                padding: EdgeInsets.all(0.0),
-                                child: Text("点击重试",
-                                    style: TextStyle(
-                                        fontSize: 14.0, color: Colors.white)),
-                              )),
-                        ),
-                      )))
+                              child: _buildCoverWidget()))))
             ]),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildCoverWidget() {
+    if (_provisioning) {
+      return SizedBox(
+          height: 100,
+          width: 100,
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(Colors.blue),
+          ));
+    } else if (_showRetry) {
+      return Container(
+          constraints: BoxConstraints.tightForFinite(width: 150, height: 150),
+          alignment: Alignment.center,
+          decoration: new BoxDecoration(
+              color: Color(0xFF3a7ee4),
+              borderRadius: BorderRadius.circular(75)),
+          child: Padding(
+            padding: EdgeInsets.all(0.0),
+            child: Text("点击重试",
+                style: TextStyle(fontSize: 14.0, color: Colors.white)),
+          ));
+    } else {
+      return Container();
+    }
   }
 }
