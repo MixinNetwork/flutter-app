@@ -17,7 +17,7 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   bool _showRetry = false;
-
+  String _authUrl;
   void showRetryTask() {
     Timer.periodic(Duration(seconds: 5), (timer) {
       setState(() {
@@ -28,10 +28,20 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    _authUrl = generateAuthUrl();
+  }
+
+  String generateAuthUrl() {
     var deviceId = Uuid().v4();
     final keypair = x25519.newKeyPairSync();
     var pubKey = Uri.encodeComponent(base64.encode(keypair.publicKey.bytes));
+    return "mixin://device/auth?id=$deviceId&pub_key=$pubKey";
+  }
+
+  @override
+  Widget build(BuildContext context) {
     showRetryTask();
     return Scaffold(
       body: Center(
@@ -45,8 +55,7 @@ class _LandingPageState extends State<LandingPage> {
             ),
             Stack(alignment: AlignmentDirectional.center, children: [
               QrImage(
-                data:
-                    "mixin://device/auth?id=" + deviceId + "&pub_key=" + pubKey,
+                data: this._authUrl,
                 version: QrVersions.auto,
                 size: 300.0,
                 foregroundColor: Color(0xFF4A4A4A),
@@ -61,6 +70,7 @@ class _LandingPageState extends State<LandingPage> {
                       onTap: () {
                         setState(() {
                           this._showRetry = false;
+                          this._authUrl = generateAuthUrl();
                           showRetryTask();
                         });
                       },
