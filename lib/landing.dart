@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:bot_api_dart_client/bot_api_dart_client.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:cryptography/cryptography.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'mixin_client.dart';
@@ -57,9 +57,9 @@ class _LandingPageState extends State<LandingPage> {
       response.data.handleResponse<Provisioning>(
           onSuccess: (Provisioning provisioning) {
         setState(() {
-          final keypair = x25519.newKeyPairSync();
+          final keypair = signal.Curve.generateKeyPair();
           var pubKey =
-              Uri.encodeComponent(base64.encode(keypair.publicKey.bytes));
+              Uri.encodeComponent(base64.encode(keypair.publicKey.serialize()));
           this._authUrl =
               "mixin://device/auth?id=${provisioning.deviceId}&pub_key=$pubKey";
           this._provisioning = false;
