@@ -21,12 +21,24 @@ class _LandingPageState extends State<LandingPage> {
   bool _showRetry = false;
   bool _provisioning = true;
   String _authUrl;
-  void showRetryTask() {
-    Timer.periodic(Duration(seconds: 5), (timer) {
-      setState(() {
-        this._showRetry = true;
-      });
-      timer.cancel();
+  Timer _timer;
+  void showRetryTask(String deviceId) {
+    int count = 1;
+    _timer?.cancel();
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (count >= 60) {
+        timer.cancel();
+        setState(() {
+          this._showRetry = true;
+        });
+      } else {
+        count++;
+        MixinClient()
+            .client
+            .provisioningApi
+            .getProvisioning(deviceId)
+            .then((response) => {print(response.data)});
+      }
     });
   }
 
@@ -36,9 +48,8 @@ class _LandingPageState extends State<LandingPage> {
     generateAuthUrl();
   }
 
-  void generateAuthUrl() async {
-    print(Platform.operatingSystem);
-    await MixinClient()
+  void generateAuthUrl() {
+    MixinClient()
         .client
         .provisioningApi
         .getProvisioningId(Platform.operatingSystem)
@@ -53,7 +64,7 @@ class _LandingPageState extends State<LandingPage> {
               "mixin://device/auth?id=${provisioning.deviceId}&pub_key=$pubKey";
           this._provisioning = false;
         });
-        showRetryTask();
+        showRetryTask(provisioning.deviceId);
       }, onFailure: (MixinError error) {
         print(error.toJson());
       });
@@ -62,7 +73,6 @@ class _LandingPageState extends State<LandingPage> {
 
   @override
   Widget build(BuildContext context) {
-    showRetryTask();
     return Scaffold(
       body: Center(
         child: Column(
