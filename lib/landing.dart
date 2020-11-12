@@ -37,7 +37,21 @@ class _LandingPageState extends State<LandingPage> {
             .client
             .provisioningApi
             .getProvisioning(deviceId)
-            .then((response) => {print(response.data)});
+            .then((response) => {
+                  response.data.handleResponse<Provisioning>(
+                      onSuccess: (Provisioning provisioning) {
+                        if (provisioning.secret?.isNotEmpty == true) {
+                          _timer?.cancel();
+                          // Todo
+                          setState(() {
+                            this._provisioning = true;
+                          });
+                          print(provisioning.secret);
+                        }
+                      },
+                      onFailure: (MixinError error) =>
+                          {print(error.toString())})
+                });
       }
     });
   }
