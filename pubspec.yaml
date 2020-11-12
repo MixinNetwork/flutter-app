@@ -20,7 +20,7 @@ dependencies:
   bot_api_dart_client:
     # git: https://github.com/MixinNetwork/bot_api_dart_client.git
     # local path
-    path: ../bot-api-dart-client
+    path: ../bot_api_dart_client
   flutter:
     sdk: flutter
   http: ^0.12.1

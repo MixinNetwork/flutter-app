@@ -25,7 +25,7 @@ packages:
   bot_api_dart_client:
     dependency: "direct main"
     description:
-      path: "../bot-api-dart-client"
+      path: "../bot_api_dart_client"
       relative: true
     source: path
     version: "0.0.1"
