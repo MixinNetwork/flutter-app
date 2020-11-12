@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:bot_api_dart_client/bot_api_dart_client.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:uuid/uuid.dart';
 import 'dart:convert';
+import 'dart:io';
+import 'mixin_client.dart';
 
 class LandingPage extends StatefulWidget {
   LandingPage({Key key, this.title}) : super(key: key);
@@ -17,7 +19,7 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   bool _showRetry = false;
-  bool _provisioning = false;
+  bool _provisioning = true;
   String _authUrl;
   void showRetryTask() {
     Timer.periodic(Duration(seconds: 5), (timer) {
@@ -31,14 +33,31 @@ class _LandingPageState extends State<LandingPage> {
   @override
   void initState() {
     super.initState();
-    _authUrl = generateAuthUrl();
+    generateAuthUrl();
   }
 
-  String generateAuthUrl() {
-    var deviceId = Uuid().v4();
-    final keypair = x25519.newKeyPairSync();
-    var pubKey = Uri.encodeComponent(base64.encode(keypair.publicKey.bytes));
-    return "mixin://device/auth?id=$deviceId&pub_key=$pubKey";
+  void generateAuthUrl() async {
+    print(Platform.operatingSystem);
+    await MixinClient()
+        .client
+        .provisioningApi
+        .getProvisioningId(Platform.operatingSystem)
+        .then((response) {
+      response.data.handleResponse<Provisioning>(
+          onSuccess: (Provisioning provisioning) {
+        setState(() {
+          final keypair = x25519.newKeyPairSync();
+          var pubKey =
+              Uri.encodeComponent(base64.encode(keypair.publicKey.bytes));
+          this._authUrl =
+              "mixin://device/auth?id=${provisioning.deviceId}&pub_key=$pubKey";
+          this._provisioning = false;
+        });
+        showRetryTask();
+      }, onFailure: (MixinError error) {
+        print(error.toJson());
+      });
+    });
   }
 
   @override
@@ -55,24 +74,25 @@ class _LandingPageState extends State<LandingPage> {
               height: 30,
             ),
             Stack(alignment: AlignmentDirectional.center, children: [
-              QrImage(
-                data: this._authUrl,
-                version: QrVersions.auto,
-                size: 300.0,
-                foregroundColor: Color(0xFF4A4A4A),
-                embeddedImage: AssetImage('assets/images/logo.png'),
-                embeddedImageStyle: QrEmbeddedImageStyle(
-                  size: Size(60, 60),
-                ),
-              ),
+              Visibility(
+                  visible: this._authUrl != null,
+                  child: QrImage(
+                    data: this._authUrl,
+                    version: QrVersions.auto,
+                    size: 300.0,
+                    foregroundColor: Color(0xFF4A4A4A),
+                    embeddedImage: AssetImage('assets/images/logo.png'),
+                    embeddedImageStyle: QrEmbeddedImageStyle(
+                      size: Size(60, 60),
+                    ),
+                  )),
               Visibility(
                   visible: _showRetry || _provisioning,
                   child: InkWell(
                       onTap: () {
                         setState(() {
                           this._showRetry = false;
-                          this._authUrl = generateAuthUrl();
-                          showRetryTask();
+                          generateAuthUrl();
                         });
                       },
                       child: Container(
