@@ -29,7 +29,8 @@ dependencies:
   cryptography: ^1.4.1
   web_socket_channel: ^1.1.0
   sqflite_common_ffi: ^1.1.0+1
-  libsignal_protocol_dart: ^0.1.2
+  libsignal_protocol_dart:
+    path: ../libsignal_protocol_dart
 
 
   # The following adds the Cupertino Icons font to your application.

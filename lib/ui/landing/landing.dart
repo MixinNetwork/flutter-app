@@ -22,6 +22,7 @@ class _LandingPageState extends State<LandingPage> {
   bool _provisioning = true;
   String _authUrl;
   Timer _timer;
+  signal.ECKeyPair keyPair;
   void showRetryTask(String deviceId) {
     int count = 1;
     _timer?.cancel();
@@ -42,11 +43,14 @@ class _LandingPageState extends State<LandingPage> {
                       onSuccess: (Provisioning provisioning) {
                         if (provisioning.secret?.isNotEmpty == true) {
                           _timer?.cancel();
-                          // Todo
                           setState(() {
                             this._provisioning = true;
                           });
-                          print(provisioning.secret);
+                          //decrypt
+                          var result = signal.decrypt(
+                              base64.encode(keyPair.privateKey.serialize()),
+                              provisioning.secret);
+                          print(String.fromCharCodes(result));
                         }
                       },
                       onFailure: (MixinError error) =>
@@ -71,9 +75,9 @@ class _LandingPageState extends State<LandingPage> {
       response.data.handleResponse<Provisioning>(
           onSuccess: (Provisioning provisioning) {
         setState(() {
-          final keypair = signal.Curve.generateKeyPair();
+          keyPair = signal.Curve.generateKeyPair();
           var pubKey =
-              Uri.encodeComponent(base64.encode(keypair.publicKey.serialize()));
+              Uri.encodeComponent(base64.encode(keyPair.publicKey.serialize()));
           this._authUrl =
               "mixin://device/auth?id=${provisioning.deviceId}&pub_key=$pubKey";
           this._provisioning = false;

@@ -108,13 +108,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.1.3"
-  dartx:
-    dependency: transitive
-    description:
-      name: dartx
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.5.0"
   dio:
     dependency: transitive
     description:
@@ -221,9 +214,9 @@ packages:
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
-      name: libsignal_protocol_dart
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../libsignal_protocol_dart"
+      relative: true
+    source: path
     version: "0.1.2"
   logging:
     dependency: transitive
@@ -386,13 +379,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.19-nullsafety.6"
-  time:
-    dependency: transitive
-    description:
-      name: time
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.3.0"
   tuple:
     dependency: transitive
     description:
