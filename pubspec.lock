@@ -214,10 +214,10 @@ packages:
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
-      path: "../libsignal_protocol_dart"
-      relative: true
-    source: path
-    version: "0.1.2"
+      name: libsignal_protocol_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.2.0"
   logging:
     dependency: transitive
     description:
