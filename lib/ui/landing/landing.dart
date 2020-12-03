@@ -4,6 +4,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../../mixin_client.dart';
@@ -50,7 +51,21 @@ class _LandingPageState extends State<LandingPage> {
                           var result = signal.decrypt(
                               base64.encode(keyPair.privateKey.serialize()),
                               provisioning.secret);
-                          print(String.fromCharCodes(result));
+                          var msg = json.decode(String.fromCharCodes(result));
+
+                          var registrationId =
+                              signal.KeyHelper.generateRegistrationId(false)
+                                  .toString();
+                          verify(ProvisioningRequest(
+                              code: msg['provisioning_code'],
+                              userId: msg['user_id'],
+                              sessionId: msg['session_id'],
+                              platform: 'desktop',
+                              purpose: 'SESSION',
+                              sessionSecret:
+                                  base64.encode(keyPair.publicKey.serialize()),
+                              registrationId: registrationId.toString(),
+                              platformVersion: 'OS X 10.15.6'));
                         }
                       },
                       onFailure: (MixinError error) =>
@@ -58,6 +73,14 @@ class _LandingPageState extends State<LandingPage> {
                 });
       }
     });
+  }
+
+  void verify(ProvisioningRequest request) {
+    MixinClient()
+        .client
+        .provisioningApi
+        .verifyProvisioning(request)
+        .then((value) => {print(value)}); //Todo
   }
 
   @override
