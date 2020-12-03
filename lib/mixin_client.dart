@@ -1,4 +1,4 @@
-import 'package:bot_api_dart_client/bot_api_dart_client.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class MixinClient {
   static final MixinClient _singleton = MixinClient._internal();

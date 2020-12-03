@@ -17,7 +17,7 @@ environment:
   sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
-  bot_api_dart_client:
+  mixin_bot_sdk_dart:
     # git: https://github.com/MixinNetwork/bot_api_dart_client.git
     # local path
     path: ../bot_api_dart_client

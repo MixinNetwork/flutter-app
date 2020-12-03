@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:bot_api_dart_client/bot_api_dart_client.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -39,7 +39,7 @@ class _LandingPageState extends State<LandingPage> {
             .provisioningApi
             .getProvisioning(deviceId)
             .then((response) => {
-                  response.data.handleResponse<Provisioning>(
+                  response.handleResponse(
                       onSuccess: (Provisioning provisioning) {
                         if (provisioning.secret?.isNotEmpty == true) {
                           _timer?.cancel();
@@ -72,8 +72,7 @@ class _LandingPageState extends State<LandingPage> {
         .provisioningApi
         .getProvisioningId(Platform.operatingSystem)
         .then((response) {
-      response.data.handleResponse<Provisioning>(
-          onSuccess: (Provisioning provisioning) {
+      response.handleResponse(onSuccess: (Provisioning provisioning) {
         setState(() {
           keyPair = signal.Curve.generateKeyPair();
           var pubKey =

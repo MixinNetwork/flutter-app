@@ -22,13 +22,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0-nullsafety.3"
-  bot_api_dart_client:
-    dependency: "direct main"
-    description:
-      path: "../bot_api_dart_client"
-      relative: true
-    source: path
-    version: "0.0.1"
   built_collection:
     dependency: transitive
     description:
@@ -239,6 +232,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.0-nullsafety.6"
+  mixin_bot_sdk_dart:
+    dependency: "direct main"
+    description:
+      path: "../bot_api_dart_client"
+      relative: true
+    source: path
+    version: "0.0.1"
   optional:
     dependency: transitive
     description:
