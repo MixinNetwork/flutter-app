@@ -8,6 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'dart:io';
 import '../../mixin_client.dart';
+import 'loading.dart';
 
 class LandingPage extends StatefulWidget {
   LandingPage({Key key, this.title}) : super(key: key);
@@ -81,6 +82,10 @@ class _LandingPageState extends State<LandingPage> {
         .provisioningApi
         .verifyProvisioning(request)
         .then((value) => {print(value)}); //Todo
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => LoadingPage()),
+    );
   }
 
   @override
