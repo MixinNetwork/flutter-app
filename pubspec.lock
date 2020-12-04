@@ -235,7 +235,7 @@ packages:
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
-      path: "../bot_api_dart_client"
+      path: "../mixin_bot_sdk_dart"
       relative: true
     source: path
     version: "0.0.1"

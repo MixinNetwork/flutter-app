@@ -18,9 +18,9 @@ environment:
 
 dependencies:
   mixin_bot_sdk_dart:
-    # git: https://github.com/MixinNetwork/bot_api_dart_client.git
+    # git: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
     # local path
-    path: ../bot_api_dart_client
+    path: ../mixin_bot_sdk_dart
   flutter:
     sdk: flutter
   http: ^0.12.1
