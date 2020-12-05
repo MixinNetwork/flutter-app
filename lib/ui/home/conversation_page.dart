@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import '../../widgets/avatar_view.dart';
+import '../../utils/avatar_mock.dart';
 
 class ConversationPage extends StatelessWidget {
   final bool isSmallScreen;
 
-  const ConversationPage({Key key, this.isSmallScreen}) : super(key: key);
+  ConversationPage({Key key, this.isSmallScreen}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -26,10 +30,8 @@ class ConversationPage extends StatelessWidget {
               onChanged: (string) => {},
               style: TextStyle(color: Colors.white),
               decoration: InputDecoration(
-                icon: Icon(
-                  Icons.search,
-                  color: Colors.white.withOpacity(0.08),
-                ),
+                icon: Image.asset('assets/images/ic_search.png',
+                    width: 24, height: 24),
                 hintText: "Search",
                 hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
                 focusedBorder: InputBorder.none,
@@ -53,9 +55,9 @@ class ConversationPage extends StatelessWidget {
       padding: EdgeInsets.only(left: 16, right: 16, bottom: 8),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: Colors.grey,
+          AvatarView(
+            size: 50,
+            avatars: moackAvatar(index),
           ),
           SizedBox(width: 16),
           Column(
