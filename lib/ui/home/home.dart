@@ -1,15 +1,34 @@
 import 'package:flutter/material.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
+import './responsive_layout.dart';
+import './chat_page.dart';
+import './slide_page.dart';
+import './conversation_page.dart';
 
-class _HomePageState extends State<HomePage> {
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(),
-    );
+        backgroundColor: Colors.transparent,
+        body: ResponsiveLayout(
+          largeScreen: Row(
+            children: [
+              SlidePage(),
+              ConversationPage(isSmallScreen: false),
+              Expanded(
+                flex: 1,
+                child: ChatPage(),
+              ),
+            ],
+          ),
+          mediumScreen: Row(children: [
+            ConversationPage(isSmallScreen: false),
+            Expanded(flex: 1, child: ChatPage()),
+          ]),
+          smallScreen: Container(
+              child: ConversationPage(
+            isSmallScreen: true,
+          )),
+        ));
   }
 }

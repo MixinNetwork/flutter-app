@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-class SlidePage extends StatelessWidget {
+class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(color: Colors.red, width: 200);
+    return Container(color: Color(0xFF23272B));
   }
 }
