@@ -1,7 +1,41 @@
 import 'package:flutter/material.dart';
 import '../../widgets/avatar_view.dart';
 
-class ChatPage extends StatelessWidget {
+class ChatPage extends StatefulWidget {
+  @override
+  _ChatPageState createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  bool expaned = false;
+  @override
+  Widget build(BuildContext context) {
+    return Row(children: [
+      Expanded(
+          flex: 1,
+          child: ChatContainer(
+            onPressed: () {
+              setState(() {
+                this.expaned = !this.expaned;
+              });
+            },
+          )),
+      AnimatedContainer(
+        width: expaned ? 300 : 0,
+        decoration: BoxDecoration(color: Color(0xFF2C3136)),
+        duration: Duration(milliseconds: 120),
+      )
+    ]);
+  }
+}
+
+class ChatContainer extends StatelessWidget {
+  final Function onPressed;
+  const ChatContainer({
+    Key key,
+    this.onPressed,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -33,7 +67,7 @@ class ChatPage extends StatelessWidget {
               SizedBox(width: 16),
               IconButton(
                 icon: Image.asset("assets/images/ic_screen.png"),
-                onPressed: () {},
+                onPressed: onPressed,
               ),
             ]),
           ),
