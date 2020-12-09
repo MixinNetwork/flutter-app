@@ -11,7 +11,7 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       customBorder: CircleBorder(),
       child: Padding(
         padding: EdgeInsets.all(padding),
