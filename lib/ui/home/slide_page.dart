@@ -7,7 +7,7 @@ class SlidePage extends StatelessWidget {
       width: 200,
       color: Color(0xFF2C3136).withOpacity(0.8),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           SizedBox(
             height: 48,

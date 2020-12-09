@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/widgets/search_bar.dart';
 import '../../widgets/avatar_view.dart';
 import '../../utils/avatar_mock.dart';
 
@@ -20,25 +21,7 @@ class ConversationPage extends StatelessWidget {
       color: Color(0xFF2C3136),
       child: Column(
         children: [
-          Container(
-            margin: EdgeInsets.all(16),
-            padding: EdgeInsets.only(left: 12, right: 12),
-            decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(26)),
-            child: TextField(
-              onChanged: (string) => {},
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                icon: Image.asset('assets/images/ic_search.png',
-                    width: 24, height: 24),
-                hintText: "Search",
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-              ),
-            ),
-          ),
+          SearchBar(),
           Expanded(
               flex: 1,
               child: ListView.builder(
