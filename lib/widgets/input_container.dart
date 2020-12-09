@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'action_button.dart';
+
 class InputContainer extends StatelessWidget {
   const InputContainer({
     Key key,
@@ -7,36 +9,37 @@ class InputContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 64,
+    return Material(
       color: Color(0xFF2C3136),
-      padding: EdgeInsets.only(left: 16, right: 16),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Image.asset("assets/images/ic_file.png"),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: Image.asset("assets/images/ic_sticker.png"),
-            onPressed: () {},
-          ),
-          SizedBox(width: 16),
-          Expanded(
-            flex: 1,
-            child: TextField(
-              decoration: InputDecoration(
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            children: [
+              ActionButton(
+                name: "assets/images/ic_file.png",
+                onTap: () {},
               ),
-            ),
+              ActionButton(
+                name: "assets/images/ic_sticker.png",
+                onTap: () {},
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                flex: 1,
+                child: TextField(
+                  decoration: InputDecoration(
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                  ),
+                ),
+              ),
+              SizedBox(width: 16),
+              ActionButton(name: "assets/images/ic_send.png", onTap: () {})
+            ],
           ),
-          SizedBox(width: 16),
-          IconButton(
-            icon: Image.asset("assets/images/ic_send.png"),
-            onPressed: () {},
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
 import '../../widgets/avatar_view.dart';
