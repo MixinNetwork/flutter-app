@@ -84,7 +84,10 @@ class CreateGroupContanier extends StatelessWidget {
               children: [
                 Row(children: [
                   ActionButton(
-                      name: "assets/images/ic_close.png", onTap: () {}),
+                      name: "assets/images/ic_close.png",
+                      onTap: () {
+                        Navigator.pop(context);
+                      }),
                   Spacer(),
                   Text.rich(
                     TextSpan(children: [
