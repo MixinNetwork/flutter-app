@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/widgets/select_item.dart';
 
-class SlidePage extends StatelessWidget {
+class SlidePage extends StatefulWidget {
+  @override
+  _SlidePageState createState() => _SlidePageState();
+}
+
+class _SlidePageState extends State<SlidePage> {
+  int _selected = -1;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -24,10 +32,23 @@ class SlidePage extends StatelessWidget {
           SelectItem(
               asset: 'assets/images/contacts.png',
               title: "Contacts",
-              isSelected: true),
-          SelectItem(asset: 'assets/images/group.png', title: "Group"),
-          SelectItem(asset: 'assets/images/bot.png', title: "Bots"),
-          SelectItem(asset: 'assets/images/strangers.png', title: "Strangers"),
+              onTap: () => {_select(-1)},
+              isSelected: _selected == -1),
+          SelectItem(
+              asset: 'assets/images/group.png',
+              title: "Group",
+              onTap: () => {_select(-2)},
+              isSelected: _selected == -2),
+          SelectItem(
+              asset: 'assets/images/bot.png',
+              title: "Bots",
+              onTap: () => {_select(-3)},
+              isSelected: _selected == -3),
+          SelectItem(
+              asset: 'assets/images/strangers.png',
+              title: "Strangers",
+              onTap: () => {_select(-4)},
+              isSelected: _selected == -4),
           SizedBox(
             height: 16,
           ),
@@ -44,7 +65,11 @@ class SlidePage extends StatelessWidget {
             flex: 1,
             child: ListView(
               children: [
-                SelectItem(asset: 'assets/images/circle.png', title: "Mixin"),
+                SelectItem(
+                    asset: 'assets/images/circle.png',
+                    title: "Mixin",
+                    onTap: () => {_select(0)},
+                    isSelected: _selected == 0),
               ],
             ),
           ),
@@ -53,34 +78,10 @@ class SlidePage extends StatelessWidget {
       ),
     );
   }
-}
 
-class SelectItem extends StatelessWidget {
-  final String asset;
-  final String title;
-  final isSelected;
-  const SelectItem({Key key, this.title, this.isSelected = false, this.asset})
-      : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    BoxDecoration background;
-    if (isSelected) {
-      background = BoxDecoration(
-          color: Colors.white.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(8));
-    }
-    return Container(
-      decoration: background,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Image.asset(asset, width: 24),
-            SizedBox(width: 12),
-            Text(title, style: TextStyle(color: Colors.white, fontSize: 14))
-          ],
-        ),
-      ),
-    );
+  _select(int i) {
+    setState(() {
+      _selected = i;
+    });
   }
 }

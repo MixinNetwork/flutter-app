@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './responsive_layout.dart';
+import '../../widgets/responsive_layout.dart';
 import './chat_page.dart';
 import './slide_page.dart';
 import './conversation_page.dart';
