@@ -7,7 +7,7 @@ class SlidePage extends StatefulWidget {
 }
 
 class _SlidePageState extends State<SlidePage> {
-  int _selected = -1;
+  int _group = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -33,22 +33,26 @@ class _SlidePageState extends State<SlidePage> {
               asset: 'assets/images/contacts.png',
               title: "Contacts",
               onTap: () => {_select(-1)},
-              isSelected: isSelected(-1)),
+              value: -1,
+              groupValue: _group),
           SelectItem(
               asset: 'assets/images/group.png',
               title: "Group",
+              value: -2,
               onTap: () => {_select(-2)},
-              isSelected: isSelected(-2)),
+              groupValue: _group),
           SelectItem(
               asset: 'assets/images/bot.png',
               title: "Bots",
+              value: -3,
               onTap: () => {_select(-3)},
-              isSelected: isSelected(-3)),
+              groupValue: _group),
           SelectItem(
               asset: 'assets/images/strangers.png',
               title: "Strangers",
+              value: -4,
               onTap: () => {_select(-4)},
-              isSelected: isSelected(-4)),
+              groupValue: _group),
           SizedBox(
             height: 16,
           ),
@@ -69,7 +73,8 @@ class _SlidePageState extends State<SlidePage> {
                     asset: 'assets/images/circle.png',
                     title: "Mixin",
                     onTap: () => {_select(0)},
-                    isSelected: isSelected(0)),
+                    value: 0,
+                    groupValue: _group),
               ],
             ),
           ),
@@ -80,13 +85,12 @@ class _SlidePageState extends State<SlidePage> {
   }
 
   bool isSelected(int index) {
-    return _selected == index;
+    return _group == index;
   }
 
   _select(int i) {
-    if (i == _selected) return;
     setState(() {
-      _selected = i;
+      _group = i;
     });
   }
 }
