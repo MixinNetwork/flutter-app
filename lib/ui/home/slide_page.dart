@@ -33,22 +33,22 @@ class _SlidePageState extends State<SlidePage> {
               asset: 'assets/images/contacts.png',
               title: "Contacts",
               onTap: () => {_select(-1)},
-              isSelected: _selected == -1),
+              isSelected: isSelected(-1)),
           SelectItem(
               asset: 'assets/images/group.png',
               title: "Group",
               onTap: () => {_select(-2)},
-              isSelected: _selected == -2),
+              isSelected: isSelected(-2)),
           SelectItem(
               asset: 'assets/images/bot.png',
               title: "Bots",
               onTap: () => {_select(-3)},
-              isSelected: _selected == -3),
+              isSelected: isSelected(-3)),
           SelectItem(
               asset: 'assets/images/strangers.png',
               title: "Strangers",
               onTap: () => {_select(-4)},
-              isSelected: _selected == -4),
+              isSelected: isSelected(-4)),
           SizedBox(
             height: 16,
           ),
@@ -69,7 +69,7 @@ class _SlidePageState extends State<SlidePage> {
                     asset: 'assets/images/circle.png',
                     title: "Mixin",
                     onTap: () => {_select(0)},
-                    isSelected: _selected == 0),
+                    isSelected: isSelected(0)),
               ],
             ),
           ),
@@ -79,7 +79,12 @@ class _SlidePageState extends State<SlidePage> {
     );
   }
 
+  bool isSelected(int index) {
+    return _selected == index;
+  }
+
   _select(int i) {
+    if (i == _selected) return;
     setState(() {
       _selected = i;
     });

@@ -5,10 +5,11 @@ class HoverContainer extends StatefulWidget {
   final Decoration decoration;
   final Decoration hoverDecoration;
 
-  const HoverContainer(
-      {@required this.child,
-      @required this.decoration,
-      @required this.hoverDecoration});
+  const HoverContainer({
+    @required this.child,
+    @required this.decoration,
+    @required this.hoverDecoration,
+  });
 
   @override
   _HoverContainerState createState() => _HoverContainerState();
@@ -16,6 +17,7 @@ class HoverContainer extends StatefulWidget {
 
 class _HoverContainerState extends State<HoverContainer> {
   Decoration _decoration;
+
   @override
   void initState() {
     super.initState();
@@ -36,20 +38,21 @@ class _HoverContainerState extends State<HoverContainer> {
   }
 
   void _onEnter(_) {
-    setState(() {
-      _decoration = widget.decoration ?? widget.hoverDecoration;
-    });
+    // // setState(() {
+    //   _decoration = widget.decoration ?? widget.hoverDecoration;
+    // });
   }
 
   void _onHover(_) {
-    setState(() {
-      _decoration = widget.decoration ?? widget.hoverDecoration;
-    });
+    // setState(() {
+    //   _decoration = widget.decoration ?? widget.hoverDecoration;
+    // });
   }
 
   void _onExit(_) {
-    setState(() {
-      _decoration = widget.decoration;
-    });
+    // setState(() {
+    //   print("${widget.decoration == null} \n");
+    //   _decoration = widget.decoration;
+    // });
   }
 }

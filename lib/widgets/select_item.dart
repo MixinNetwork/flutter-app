@@ -18,17 +18,18 @@ class SelectItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("$title $isSelected \n");
     return GestureDetector(
       onTap: onTap,
-      child: HoverContainer(
+      child: Container(
         decoration: isSelected
             ? BoxDecoration(
                 color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(8))
             : null,
-        hoverDecoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8)),
+        // hoverDecoration: BoxDecoration(
+        //     color: Colors.white.withOpacity(0.1),
+        //     borderRadius: BorderRadius.circular(8)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
