@@ -28,8 +28,11 @@ dependencies:
   uuid: 2.2.0
   cryptography: ^1.4.1
   web_socket_channel: ^1.1.0
-  sqflite_common_ffi: ^1.1.0+1
+  moor: ^3.4.0
+  sqlite3_flutter_libs: ^0.3.0
   libsignal_protocol_dart: ^0.2.0
+  path_provider: ^1.6.24
+  path: ^1.7.0
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -37,6 +40,8 @@ dependencies:
   cupertino_icons: ^0.1.2
   
 dev_dependencies:
+  moor_generator: ^3.4.0
+  build_runner: ^1.10.11
   flutter_test:
     sdk: flutter
 
