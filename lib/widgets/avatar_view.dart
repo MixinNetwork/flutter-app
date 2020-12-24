@@ -1,7 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-class AvatarView extends StatelessWidget {
-  const AvatarView({Key key, this.avatars, this.size})
+class AvatarsWidget extends StatelessWidget {
+  const AvatarsWidget({Key key, this.avatars, this.size})
       : assert(avatars.length > 0 && avatars.length <= 4),
         assert(size > 0),
         super(key: key);
@@ -10,104 +11,79 @@ class AvatarView extends StatelessWidget {
   final double size;
 
   @override
-  Widget build(BuildContext context) {
-    if (avatars.length == 1) {
-      return CircleAvatar(
-        radius: size / 2,
-        backgroundImage: NetworkImage(avatars[0]),
-        backgroundColor: Colors.transparent,
-      );
-    } else if (avatars.length == 2) {
-      return SizedBox(
-          width: size,
-          height: size,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(size / 2),
-            child: _buildContent(),
-          ));
-    } else if (avatars.length == 3) {
-      return SizedBox(
-        width: size,
-        height: size,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(size / 2),
-          child: _buildContent(),
+  Widget build(BuildContext context) => SizedBox.fromSize(
+        size: Size.square(size),
+        child: ClipOval(
+          child: _AvatarPuzzlesWidget(avatars, size),
         ),
       );
-    } else {
-      return SizedBox(
-          width: size,
-          height: size,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(size / 2),
-            child: _buildContent(),
-          ));
+}
+
+class _AvatarPuzzlesWidget extends StatelessWidget {
+  const _AvatarPuzzlesWidget(this.avatars, this.size, {Key key})
+      : super(key: key);
+
+  final List<String> avatars;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (avatars.length) {
+      case 1:
+        return _AvatarImage(avatars.single, size);
+      case 2:
+        return Row(
+          children: avatars.map(_buildAvatarImage).toList(),
+        );
+      case 3:
+        return Row(
+          children: [
+            _AvatarImage(avatars[0], size),
+            Expanded(
+              child: Column(
+                children: avatars.sublist(1).map(_buildAvatarImage).toList(),
+              ),
+            ),
+          ],
+        );
+      default:
+        return Row(
+          children: [
+            avatars.sublist(0, 2),
+            avatars.sublist(2),
+          ]
+              .map((e) => Expanded(
+                    child: Column(
+                      children: e.map(_buildAvatarImage).toList(),
+                    ),
+                  ))
+              .toList(),
+        );
     }
   }
 
-  Widget _buildContent() {
-    if (avatars.length == 2) {
-      return Row(
-        children: [
-          Image.network(
-            avatars[0],
-            width: size / 2,
-            height: size,
-            fit: BoxFit.cover,
-          ),
-          Image.network(
-            avatars[1],
-            width: size / 2,
-            height: size,
-            fit: BoxFit.cover,
-          ),
-        ],
+  Widget _buildAvatarImage(String e) => Expanded(
+        child: _AvatarImage(e, size),
       );
-    } else if (avatars.length == 3) {
-      return Row(
-        children: [
-          Image.network(
-            avatars[0],
-            width: size / 2,
-            height: size,
-            fit: BoxFit.cover,
-          ),
-          Column(
-            children: [
-              Image.network(
-                avatars[1],
-                width: size / 2,
-                height: size / 2,
-                fit: BoxFit.cover,
-              ),
-              Image.network(
-                avatars[2],
-                width: size / 2,
-                height: size / 2,
-                fit: BoxFit.cover,
-              ),
-            ],
-          )
-        ],
+}
+
+class _AvatarImage extends StatelessWidget {
+  const _AvatarImage(
+    this.src,
+    this.size, {
+    Key key,
+  }) : super(key: key);
+
+  final String src;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) => CachedNetworkImage(
+        imageUrl: src,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        fadeInDuration: Duration.zero,
+        fadeOutDuration: Duration.zero,
       );
-    } else {
-      return Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Column(children: [
-              Image.network(avatars[0]),
-              Image.network(avatars[1]),
-            ]),
-          ),
-          Expanded(
-              flex: 1,
-              child: Column(children: [
-                Image.network(avatars[2]),
-                Image.network(avatars[3]),
-              ]))
-        ],
-      );
-    }
-  }
 }

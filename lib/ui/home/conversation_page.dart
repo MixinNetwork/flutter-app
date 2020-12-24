@@ -37,7 +37,7 @@ class ConversationPage extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
       child: Row(
         children: [
-          AvatarView(
+          AvatarsWidget(
             size: 50,
             avatars: moackAvatar(index),
           ),

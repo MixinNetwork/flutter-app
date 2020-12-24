@@ -22,7 +22,7 @@ class ChatBar extends StatelessWidget {
             Expanded(
                 flex: 1,
                 child: Row(children: [
-                  AvatarView(
+                  AvatarsWidget(
                     size: 50,
                     avatars: [
                       'https://i1.hdslb.com/bfs/face/3e285abab2a9fd1d52fb640a03f7d458bf139045.jpg',
