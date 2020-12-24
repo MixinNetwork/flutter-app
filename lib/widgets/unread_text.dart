@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 class UnreadText extends StatelessWidget {
-  final Color backgroundColor;
-  final Color textColor;
   const UnreadText({
     Key key,
     @required this.count,
@@ -10,6 +8,8 @@ class UnreadText extends StatelessWidget {
     this.textColor,
   }) : super(key: key);
 
+  final Color backgroundColor;
+  final Color textColor;
   final int count;
 
   @override
@@ -17,10 +17,10 @@ class UnreadText extends StatelessWidget {
     return Visibility(
       visible: count > 0,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
         decoration: BoxDecoration(
             color: backgroundColor, borderRadius: BorderRadius.circular(8)),
-        child: Text("$count", style: TextStyle(color: textColor, fontSize: 8)),
+        child: Text('$count', style: TextStyle(color: textColor, fontSize: 8)),
       ),
     );
   }

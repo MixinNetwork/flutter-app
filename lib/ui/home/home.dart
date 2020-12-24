@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../widgets/responsive_layout.dart';
-import './chat_page.dart';
-import './slide_page.dart';
-import './conversation_page.dart';
+import 'package:flutter_app/ui/home/chat_page.dart';
+import 'package:flutter_app/ui/home/conversation_page.dart';
+import 'package:flutter_app/ui/home/slide_page.dart';
+import 'package:flutter_app/widgets/responsive_layout.dart';
 
 class HomePage extends StatelessWidget {
   @override
@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
           largeScreen: Row(
             children: [
               SlidePage(),
-              ConversationPage(isSmallScreen: false),
+              const ConversationPage(isSmallScreen: false),
               Expanded(
                 flex: 1,
                 child: ChatPage(),
@@ -22,13 +22,12 @@ class HomePage extends StatelessWidget {
             ],
           ),
           mediumScreen: Row(children: [
-            ConversationPage(isSmallScreen: false),
+            const ConversationPage(isSmallScreen: false),
             Expanded(flex: 1, child: ChatPage()),
           ]),
-          smallScreen: Container(
-              child: ConversationPage(
+          smallScreen: const ConversationPage(
             isSmallScreen: true,
-          )),
+          ),
         ));
   }
 }

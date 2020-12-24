@@ -13,56 +13,56 @@ class _SlidePageState extends State<SlidePage> {
   Widget build(BuildContext context) {
     return Container(
       width: 200,
-      color: Color(0xFF2C3136).withOpacity(0.8),
+      color: const Color(0xFF2C3136).withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          SizedBox(
+          const SizedBox(
             height: 48,
           ),
           Text(
-            "People",
+            'People',
             style: TextStyle(
               color: Colors.white.withOpacity(0.3),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           SelectItem(
               asset: 'assets/images/contacts.png',
-              title: "Contacts",
+              title: 'Contacts',
               onTap: () => {_select(-1)},
               value: -1,
               groupValue: _group),
           SelectItem(
               asset: 'assets/images/group.png',
-              title: "Group",
+              title: 'Group',
               value: -2,
               onTap: () => {_select(-2)},
               groupValue: _group),
           SelectItem(
               asset: 'assets/images/bot.png',
-              title: "Bots",
+              title: 'Bots',
               value: -3,
               onTap: () => {_select(-3)},
               groupValue: _group),
           SelectItem(
               asset: 'assets/images/strangers.png',
-              title: "Strangers",
+              title: 'Strangers',
               value: -4,
               onTap: () => {_select(-4)},
               groupValue: _group),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           Text(
-            "Circle",
+            'Circle',
             style: TextStyle(
               color: Colors.white.withOpacity(0.3),
             ),
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           Expanded(
@@ -71,14 +71,14 @@ class _SlidePageState extends State<SlidePage> {
               children: [
                 SelectItem(
                     asset: 'assets/images/circle.png',
-                    title: "Mixin",
+                    title: 'Mixin',
                     onTap: () => {_select(0)},
                     value: 0,
                     groupValue: _group),
               ],
             ),
           ),
-          SelectItem(asset: 'assets/images/avatar.png', title: "Mixin"),
+          const SelectItem(asset: 'assets/images/avatar.png', title: 'Mixin'),
         ]),
       ),
     );
@@ -88,7 +88,7 @@ class _SlidePageState extends State<SlidePage> {
     return _group == index;
   }
 
-  _select(int i) {
+  void _select(int i) {
     setState(() {
       _group = i;
     });

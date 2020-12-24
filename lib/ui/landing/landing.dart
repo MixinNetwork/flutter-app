@@ -1,17 +1,17 @@
 import 'dart:async';
-
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
-import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:uuid/uuid.dart';
 import 'dart:convert';
 import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+
 import '../../mixin_client.dart';
 import 'loading.dart';
 
 class LandingPage extends StatefulWidget {
-  LandingPage({Key key, this.title}) : super(key: key);
+  const LandingPage({Key key, this.title}) : super(key: key);
 
   final String title;
 
@@ -25,14 +25,15 @@ class _LandingPageState extends State<LandingPage> {
   String _authUrl;
   Timer _timer;
   signal.ECKeyPair keyPair;
+
   void showRetryTask(String deviceId) {
-    int count = 1;
+    var count = 1;
     _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (count >= 60) {
         timer.cancel();
         setState(() {
-          this._showRetry = true;
+          _showRetry = true;
         });
       } else {
         count++;
@@ -46,15 +47,15 @@ class _LandingPageState extends State<LandingPage> {
                         if (provisioning.secret?.isNotEmpty == true) {
                           _timer?.cancel();
                           setState(() {
-                            this._provisioning = true;
+                            _provisioning = true;
                           });
                           //decrypt
-                          var result = signal.decrypt(
+                          final result = signal.decrypt(
                               base64.encode(keyPair.privateKey.serialize()),
                               provisioning.secret);
-                          var msg = json.decode(String.fromCharCodes(result));
+                          final msg = json.decode(String.fromCharCodes(result));
 
-                          var registrationId =
+                          final registrationId =
                               signal.KeyHelper.generateRegistrationId(false)
                                   .toString();
                           verify(ProvisioningRequest(
@@ -70,7 +71,7 @@ class _LandingPageState extends State<LandingPage> {
                         }
                       },
                       onFailure: (MixinError error) =>
-                          {print(error.toString())})
+                          {debugPrint(error.toString())})
                 });
       }
     });
@@ -81,7 +82,7 @@ class _LandingPageState extends State<LandingPage> {
         .client
         .provisioningApi
         .verifyProvisioning(request)
-        .then((value) => {print(value)}); //Todo
+        .then((value) => {debugPrint('$value')}); //Todo
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => LoadingPage()),
@@ -103,15 +104,15 @@ class _LandingPageState extends State<LandingPage> {
       response.handleResponse(onSuccess: (Provisioning provisioning) {
         setState(() {
           keyPair = signal.Curve.generateKeyPair();
-          var pubKey =
+          final pubKey =
               Uri.encodeComponent(base64.encode(keyPair.publicKey.serialize()));
-          this._authUrl =
-              "mixin://device/auth?id=${provisioning.deviceId}&pub_key=$pubKey";
-          this._provisioning = false;
+          _authUrl =
+              'mixin://device/auth?id=${provisioning.deviceId}&pub_key=$pubKey';
+          _provisioning = false;
         });
         showRetryTask(provisioning.deviceId);
       }, onFailure: (MixinError error) {
-        print(error.toJson());
+        debugPrint('${error.toJson()}');
       });
     });
   }
@@ -124,22 +125,22 @@ class _LandingPageState extends State<LandingPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('Open Mixin Messenger on your phone, capture the code',
+            const Text('Open Mixin Messenger on your phone, capture the code',
                 style: TextStyle(fontSize: 18.0), textAlign: TextAlign.center),
-            SizedBox(
+            const SizedBox(
               height: 30,
             ),
             Stack(alignment: AlignmentDirectional.center, children: [
               Visibility(
-                  visible: this._authUrl != null,
+                  visible: _authUrl != null,
                   child: QrImage(
-                    data: this._authUrl,
+                    data: _authUrl,
                     version: QrVersions.auto,
                     size: 300.0,
-                    foregroundColor: Color(0xFF4A4A4A),
-                    embeddedImage: AssetImage('assets/images/logo.png'),
+                    foregroundColor: const Color(0xFF4A4A4A),
+                    embeddedImage: const AssetImage('assets/images/logo.png'),
                     embeddedImageStyle: QrEmbeddedImageStyle(
-                      size: Size(60, 60),
+                      size: const Size(60, 60),
                     ),
                   )),
               Visibility(
@@ -147,7 +148,7 @@ class _LandingPageState extends State<LandingPage> {
                   child: InkWell(
                       onTap: () {
                         setState(() {
-                          this._showRetry = false;
+                          _showRetry = false;
                           generateAuthUrl();
                         });
                       },
@@ -155,7 +156,7 @@ class _LandingPageState extends State<LandingPage> {
                           width: 300.0,
                           height: 300.0,
                           decoration:
-                              new BoxDecoration(color: Color(0xAAFFFFFF)),
+                              const BoxDecoration(color: Color(0xAAFFFFFF)),
                           child: Align(
                               alignment: Alignment.center,
                               child: _buildCoverWidget()))))
@@ -168,7 +169,7 @@ class _LandingPageState extends State<LandingPage> {
 
   Widget _buildCoverWidget() {
     if (_provisioning) {
-      return SizedBox(
+      return const SizedBox(
           height: 100,
           width: 100,
           child: CircularProgressIndicator(
@@ -176,14 +177,15 @@ class _LandingPageState extends State<LandingPage> {
           ));
     } else if (_showRetry) {
       return Container(
-          constraints: BoxConstraints.tightForFinite(width: 150, height: 150),
+          constraints:
+              const BoxConstraints.tightForFinite(width: 150, height: 150),
           alignment: Alignment.center,
-          decoration: new BoxDecoration(
-              color: Color(0xFF3a7ee4),
+          decoration: BoxDecoration(
+              color: const Color(0xFF3a7ee4),
               borderRadius: BorderRadius.circular(75)),
-          child: Padding(
+          child: const Padding(
             padding: EdgeInsets.all(0.0),
-            child: Text("点击重试",
+            child: Text('点击重试',
                 style: TextStyle(fontSize: 14.0, color: Colors.white)),
           ));
     } else {

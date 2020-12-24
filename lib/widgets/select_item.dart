@@ -4,12 +4,6 @@ import 'package:flutter_app/widgets/unread_text.dart';
 import 'hover_container.dart';
 
 class SelectItem extends StatelessWidget {
-  final String asset;
-  final String title;
-  final int groupValue;
-  final int value;
-  final int count;
-  final Function onTap;
   const SelectItem(
       {this.title,
       this.asset,
@@ -17,6 +11,13 @@ class SelectItem extends StatelessWidget {
       this.onTap,
       this.groupValue,
       this.value});
+
+  final String asset;
+  final String title;
+  final int groupValue;
+  final int value;
+  final int count;
+  final Function onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -35,18 +36,18 @@ class SelectItem extends StatelessWidget {
         child: Row(
           children: [
             Image.asset(asset, width: 24),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               flex: 1,
               child: Text(
                 title,
-                style: TextStyle(color: Colors.white, fontSize: 14),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
               ),
             ),
             UnreadText(
               count: count,
               backgroundColor: Colors.white.withOpacity(0.4),
-              textColor: Color(0x2c3136).withOpacity(0.8),
+              textColor: const Color(0x2c3136).withOpacity(0.8),
             )
           ],
         ),

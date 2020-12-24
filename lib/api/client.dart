@@ -1,32 +1,34 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:jose/jose.dart';
 import 'package:x509/x509.dart';
-import 'dart:convert';
 
 class BearerClient extends http.BaseClient {
+  BearerClient(this.userId, this.sessionId, this._inner);
+
   final String userId;
   final String sessionId;
   final http.Client _inner;
 
-  BearerClient(this.userId, this.sessionId, this._inner);
-
   void auth(userId, sessionId) {
-    var claims = JsonWebTokenClaims.fromJson({
-      'exp': Duration(hours: 4).inSeconds,
+    final claims = JsonWebTokenClaims.fromJson({
+      'exp': const Duration(hours: 4).inSeconds,
       'iss': 'alice',
     });
 
-    var builder = JsonWebSignatureBuilder();
-    builder.jsonContent = claims.toJson();
+    final builder = JsonWebSignatureBuilder()..jsonContent = claims.toJson();
 
     // add a key to sign, can only add one for JWT
-    var key = _readPrivateKey('example/jwtRS512.key');
+    final key = _readPrivateKey('example/jwtRS512.key');
     builder.addRecipient(key, algorithm: 'RS512');
 
-    var jws = builder.build();
-    print('jwt compact serialization: ${jws.toCompactSerialization()}');
+    final jws = builder.build();
+    debugPrint('jwt compact serialization: ${jws.toCompactSerialization()}');
   }
 
+  @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
     request.headers['user-agent'] = 'Mixin/0.0.1 Flutter';
     request.headers['Accept-Language'] = 'en';
@@ -36,10 +38,10 @@ class BearerClient extends http.BaseClient {
   }
 
   JsonWebKey _readPrivateKey(String pem) {
-    var v = parsePem(pem).first;
-    var keyPair = (v is PrivateKeyInfo) ? v.keyPair : v as KeyPair;
-    var pKey = keyPair.privateKey as RsaPrivateKey;
-    print(pKey);
+    final v = parsePem(pem).first;
+    final keyPair = (v is PrivateKeyInfo) ? v.keyPair : v as KeyPair;
+    final pKey = keyPair.privateKey as RsaPrivateKey;
+    debugPrint('$pKey');
 
     String _bytesToBase64(List<int> bytes) {
       return base64Url.encode(bytes).replaceAll('=', '');

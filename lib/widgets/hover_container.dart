@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
+// TODO
 class HoverContainer extends StatefulWidget {
-  final Widget child;
-  final Decoration decoration;
-  final Decoration hoverDecoration;
-  final int groupValue;
-  final int value;
-  final Function onTap;
-
   const HoverContainer(
       {@required this.child,
       @required this.decoration,
@@ -16,21 +10,24 @@ class HoverContainer extends StatefulWidget {
       @required this.value,
       this.onTap});
 
+  final Widget child;
+  final Decoration decoration;
+  final Decoration hoverDecoration;
+  final int groupValue;
+  final int value;
+  final Function onTap;
+
   @override
   _HoverContainerState createState() => _HoverContainerState();
 }
 
 class _HoverContainerState extends State<HoverContainer> {
-  Decoration _decoration;
-
   bool get _selected => widget.value == widget.groupValue;
 
   @override
   void initState() {
     super.initState();
-    if (_selected) {
-      _decoration = widget.decoration;
-    }
+    if (_selected) {}
   }
 
   @override
@@ -38,23 +35,22 @@ class _HoverContainerState extends State<HoverContainer> {
     return InkWell(
       onTap: widget.onTap,
       child: MouseRegion(
-          onHover: _onHover,
-          onExit: _onExit,
-          child: Container(
-            margin: const EdgeInsets.only(top: 8),
-            child: widget.child,
-            decoration: defaultDecoration(),
-          )),
+        onHover: _onHover,
+        onExit: _onExit,
+        child: Container(
+          margin: const EdgeInsets.only(top: 8),
+          child: widget.child,
+          decoration: defaultDecoration(),
+        ),
+      ),
     );
   }
 
   void _onHover(_) {
-    setState(() {
-      _decoration = defaultDecoration() ?? widget.hoverDecoration;
-    });
+    setState(() {});
   }
 
-  defaultDecoration() {
+  Decoration defaultDecoration() {
     if (widget.groupValue == null) {
       return null;
     }
@@ -66,8 +62,6 @@ class _HoverContainerState extends State<HoverContainer> {
   }
 
   void _onExit(_) {
-    setState(() {
-      _decoration = defaultDecoration();
-    });
+    setState(() {});
   }
 }

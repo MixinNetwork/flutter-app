@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/chat_bar.dart';
 import 'package:flutter_app/widgets/input_container.dart';
-import '../../widgets/avatar_view.dart';
 
 class ChatPage extends StatefulWidget {
   @override
@@ -20,32 +19,33 @@ class _ChatPageState extends State<ChatPage> {
             isSelected: expaned,
             onPressed: () {
               setState(() {
-                this.expaned = !this.expaned;
+                expaned = !expaned;
               });
             },
           )),
       AnimatedContainer(
         width: expaned ? 300 : 0,
-        decoration: BoxDecoration(color: Color(0xFF2C3136)),
-        duration: Duration(milliseconds: 120),
+        decoration: const BoxDecoration(color: Color(0xFF2C3136)),
+        duration: const Duration(milliseconds: 120),
       )
     ]);
   }
 }
 
 class ChatContainer extends StatelessWidget {
-  final Function onPressed;
-  final bool isSelected;
   const ChatContainer({
     Key key,
     this.onPressed,
     this.isSelected,
   }) : super(key: key);
 
+  final Function onPressed;
+  final bool isSelected;
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Color(0xFF23272B),
+      color: const Color(0xFF23272B),
       child: Column(
         children: [
           ChatBar(onPressed: onPressed, isSelected: isSelected),
@@ -53,7 +53,7 @@ class ChatContainer extends StatelessWidget {
             flex: 1,
             child: Container(),
           ),
-          InputContainer()
+          const InputContainer()
         ],
       ),
     );

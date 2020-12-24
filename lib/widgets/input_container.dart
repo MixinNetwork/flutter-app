@@ -10,7 +10,7 @@ class InputContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Color(0xFF2C3136),
+      color: const Color(0xFF2C3136),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: SizedBox(
@@ -18,15 +18,15 @@ class InputContainer extends StatelessWidget {
           child: Row(
             children: [
               ActionButton(
-                name: "assets/images/ic_file.png",
+                name: 'assets/images/ic_file.png',
                 onTap: () {},
               ),
               ActionButton(
-                name: "assets/images/ic_sticker.png",
+                name: 'assets/images/ic_sticker.png',
                 onTap: () {},
               ),
-              SizedBox(width: 16),
-              Expanded(
+              const SizedBox(width: 16),
+              const Expanded(
                 flex: 1,
                 child: TextField(
                   decoration: InputDecoration(
@@ -35,8 +35,8 @@ class InputContainer extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(width: 16),
-              ActionButton(name: "assets/images/ic_send.png", onTap: () {})
+              const SizedBox(width: 16),
+              ActionButton(name: 'assets/images/ic_send.png', onTap: () {})
             ],
           ),
         ),

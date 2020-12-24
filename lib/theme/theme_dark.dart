@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 final ThemeData myTheme = ThemeData(
-  primarySwatch: MaterialColor(4280361249, {
+  primarySwatch: const MaterialColor(4280361249, {
     50: Color(0xfff2f2f2),
     100: Color(0xffe6e6e6),
     200: Color(0xffcccccc),
@@ -14,31 +14,31 @@ final ThemeData myTheme = ThemeData(
     900: Color(0xff191919)
   }),
   brightness: Brightness.dark,
-  primaryColor: Color(0xff212121),
+  primaryColor: const Color(0xff212121),
   primaryColorBrightness: Brightness.dark,
-  primaryColorLight: Color(0xff9e9e9e),
-  primaryColorDark: Color(0xff000000),
-  accentColor: Color(0xff64ffda),
+  primaryColorLight: const Color(0xff9e9e9e),
+  primaryColorDark: const Color(0xff000000),
+  accentColor: const Color(0xff64ffda),
   accentColorBrightness: Brightness.light,
-  canvasColor: Color(0xff303030),
-  scaffoldBackgroundColor: Color(0xff303030),
-  bottomAppBarColor: Color(0xff424242),
-  cardColor: Color(0xff424242),
-  dividerColor: Color(0x1fffffff),
-  highlightColor: Color(0x40cccccc),
-  splashColor: Color(0x40cccccc),
-  selectedRowColor: Color(0xfff5f5f5),
-  unselectedWidgetColor: Color(0xb3ffffff),
-  disabledColor: Color(0x62ffffff),
-  buttonColor: Color(0xff1e88e5),
-  toggleableActiveColor: Color(0xff64ffda),
-  secondaryHeaderColor: Color(0xff616161),
-  backgroundColor: Color(0xff616161),
-  dialogBackgroundColor: Color(0xff424242),
-  indicatorColor: Color(0xff64ffda),
-  hintColor: Color(0x80ffffff),
-  errorColor: Color(0xffd32f2f),
-  buttonTheme: ButtonThemeData(
+  canvasColor: const Color(0xff303030),
+  scaffoldBackgroundColor: const Color(0xff303030),
+  bottomAppBarColor: const Color(0xff424242),
+  cardColor: const Color(0xff424242),
+  dividerColor: const Color(0x1fffffff),
+  highlightColor: const Color(0x40cccccc),
+  splashColor: const Color(0x40cccccc),
+  selectedRowColor: const Color(0xfff5f5f5),
+  unselectedWidgetColor: const Color(0xb3ffffff),
+  disabledColor: const Color(0x62ffffff),
+  buttonColor: const Color(0xff1e88e5),
+  toggleableActiveColor: const Color(0xff64ffda),
+  secondaryHeaderColor: const Color(0xff616161),
+  backgroundColor: const Color(0xff616161),
+  dialogBackgroundColor: const Color(0xff424242),
+  indicatorColor: const Color(0xff64ffda),
+  hintColor: const Color(0x80ffffff),
+  errorColor: const Color(0xffd32f2f),
+  buttonTheme: const ButtonThemeData(
     textTheme: ButtonTextTheme.normal,
     minWidth: 88,
     height: 36,
@@ -74,7 +74,7 @@ final ThemeData myTheme = ThemeData(
       brightness: Brightness.dark,
     ),
   ),
-  textTheme: TextTheme(
+  textTheme: const TextTheme(
     caption: TextStyle(
       color: Color(0xb3ffffff),
       fontSize: null,
@@ -94,7 +94,7 @@ final ThemeData myTheme = ThemeData(
       fontStyle: FontStyle.normal,
     ),
   ),
-  primaryTextTheme: TextTheme(
+  primaryTextTheme: const TextTheme(
     caption: TextStyle(
       color: Color(0xb3ffffff),
       fontSize: null,
@@ -114,7 +114,7 @@ final ThemeData myTheme = ThemeData(
       fontStyle: FontStyle.normal,
     ),
   ),
-  accentTextTheme: TextTheme(
+  accentTextTheme: const TextTheme(
     caption: TextStyle(
       color: Color(0x8a000000),
       fontSize: null,
@@ -134,7 +134,7 @@ final ThemeData myTheme = ThemeData(
       fontStyle: FontStyle.normal,
     ),
   ),
-  inputDecorationTheme: InputDecorationTheme(
+  inputDecorationTheme: const InputDecorationTheme(
     labelStyle: TextStyle(
       color: Color(0xffffffff),
       fontSize: null,
@@ -232,17 +232,17 @@ final ThemeData myTheme = ThemeData(
       borderRadius: BorderRadius.all(Radius.circular(4.0)),
     ),
   ),
-  iconTheme: IconThemeData(
+  iconTheme: const IconThemeData(
     color: Color(0xffffffff),
     opacity: 1,
     size: 24,
   ),
-  primaryIconTheme: IconThemeData(
+  primaryIconTheme: const IconThemeData(
     color: Color(0xffffffff),
     opacity: 1,
     size: 24,
   ),
-  accentIconTheme: IconThemeData(
+  accentIconTheme: const IconThemeData(
     color: Color(0xff000000),
     opacity: 1,
     size: 24,
@@ -263,19 +263,19 @@ final ThemeData myTheme = ThemeData(
     valueIndicatorColor: null,
     valueIndicatorShape: null(),
     showValueIndicator: null,
-    valueIndicatorTextStyle: TextStyle(
+    valueIndicatorTextStyle: const TextStyle(
       color: Color(0xdd000000),
       fontSize: null,
       fontWeight: FontWeight.w400,
       fontStyle: FontStyle.normal,
     ),
   ),
-  tabBarTheme: TabBarTheme(
+  tabBarTheme: const TabBarTheme(
     indicatorSize: TabBarIndicatorSize.tab,
     labelColor: Color(0xffffffff),
     unselectedLabelColor: Color(0xb2ffffff),
   ),
-  chipTheme: ChipThemeData(
+  chipTheme: const ChipThemeData(
     backgroundColor: Color(0x1fffffff),
     brightness: Brightness.dark,
     deleteIconColor: Color(0xdeffffff),
@@ -303,7 +303,7 @@ final ThemeData myTheme = ThemeData(
       style: BorderStyle.none,
     )),
   ),
-  dialogTheme: DialogTheme(
+  dialogTheme: const DialogTheme(
       shape: RoundedRectangleBorder(
     side: BorderSide(
       color: Color(0xff000000),

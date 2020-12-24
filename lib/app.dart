@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/ui/home/home.dart';
-import './ui/landing/landing.dart';
 
 class App extends StatelessWidget {
   @override

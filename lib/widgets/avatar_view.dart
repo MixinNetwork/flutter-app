@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
 class AvatarView extends StatelessWidget {
-  final List<String> avatars;
-  final double size;
-
   const AvatarView({Key key, this.avatars, this.size})
       : assert(avatars.length > 0 && avatars.length <= 4),
         assert(size > 0),
         super(key: key);
+
+  final List<String> avatars;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class AvatarView extends StatelessWidget {
         backgroundColor: Colors.transparent,
       );
     } else if (avatars.length == 2) {
-      return Container(
+      return SizedBox(
           width: size,
           height: size,
           child: ClipRRect(
@@ -26,7 +26,7 @@ class AvatarView extends StatelessWidget {
             child: _buildContent(),
           ));
     } else if (avatars.length == 3) {
-      return Container(
+      return SizedBox(
         width: size,
         height: size,
         child: ClipRRect(
@@ -35,7 +35,7 @@ class AvatarView extends StatelessWidget {
         ),
       );
     } else {
-      return Container(
+      return SizedBox(
           width: size,
           height: size,
           child: ClipRRect(

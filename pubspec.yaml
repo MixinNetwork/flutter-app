@@ -1,5 +1,6 @@
 name: flutter_app
 description: A new Flutter project.
+publish_to: none
 
 # The following defines the version and build number for your application.
 # A version number is three numbers separated by dots, like 1.2.43
@@ -23,9 +24,9 @@ dependencies:
     path: ../mixin_bot_sdk_dart
   flutter:
     sdk: flutter
-  http: ^0.12.1
+  http: ^0.12.2
   qr_flutter: ^3.2.0
-  uuid: 2.2.0
+  uuid: ^2.2.2
   cryptography: ^1.4.1
   web_socket_channel: ^1.1.0
   moor: ^3.4.0
@@ -35,12 +36,13 @@ dependencies:
   path: ^1.7.0
   hive: ^1.4.4+1
   hive_flutter: ^0.3.1
+  very_good_analysis: ^1.0.4
 
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
-  
+  cupertino_icons: ^1.0.2
+
 dev_dependencies:
   hive_generator: ^0.8.2
   moor_generator: ^3.4.0
