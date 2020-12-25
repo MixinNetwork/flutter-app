@@ -1,13 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/widgets/select_item.dart';
+import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SlidePage extends StatefulWidget {
-  @override
-  _SlidePageState createState() => _SlidePageState();
-}
-
-class _SlidePageState extends State<SlidePage> {
-  int _group = -1;
+class SlidePage extends StatelessWidget {
+  static const peopleType = [
+    {
+      'asset': Assets.assetsImagesContactsPng,
+      'title': 'Contacts',
+    },
+    {
+      'asset': Assets.assetsImagesGroupPng,
+      'title': 'Group',
+    },
+    {
+      'asset': Assets.assetsImagesBotPng,
+      'title': 'Bots',
+    },
+    {
+      'asset': Assets.assetsImagesStrangersPng,
+      'title': 'Strangers',
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -27,31 +43,24 @@ class _SlidePageState extends State<SlidePage> {
             ),
           ),
           const SizedBox(
-            height: 16,
+            height: 8,
           ),
-          SelectItem(
-            asset: 'assets/images/contacts.png',
-            title: 'Contacts',
-            onTap: () => {_select(-1)},
-            selected: -1 == _group,
-          ),
-          SelectItem(
-            asset: 'assets/images/group.png',
-            title: 'Group',
-            onTap: () => {_select(-2)},
-            selected: -2 == _group,
-          ),
-          SelectItem(
-            asset: 'assets/images/bot.png',
-            title: 'Bots',
-            onTap: () => {_select(-3)},
-            selected: -3 == _group,
-          ),
-          SelectItem(
-            asset: 'assets/images/strangers.png',
-            title: 'Strangers',
-            onTap: () => {_select(-4)},
-            selected: -4 == _group,
+          ...peopleType.map(
+            (e) => BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+              converter: (state) =>
+                  state?.type == SlideCategoryType.people &&
+                  state?.name == e['title'],
+              builder: (BuildContext context, bool selected) => SelectItem(
+                asset: e['asset'],
+                title: e['title'],
+                onTap: () =>
+                    BlocProvider.of<SlideCategoryCubit>(context).select(
+                  SlideCategoryType.people,
+                  e['title'],
+                ),
+                selected: selected,
+              ),
+            ),
           ),
           const SizedBox(
             height: 16,
@@ -63,34 +72,52 @@ class _SlidePageState extends State<SlidePage> {
             ),
           ),
           const SizedBox(
-            height: 16,
+            height: 8,
           ),
           Expanded(
-            flex: 1,
-            child: ListView(
-              children: [
-                SelectItem(
-                  asset: 'assets/images/circle.png',
-                  title: 'Mixin',
-                  onTap: () => {_select(0)},
-                  selected: -0 == _group,
-                ),
-              ],
-            ),
+            // TODO circle list 回调
+            child: Builder(builder: (context) {
+              const circleType = [
+                {
+                  'asset': Assets.assetsImagesCirclePng,
+                  'title': 'Mixin',
+                },
+              ];
+              return ListView.builder(
+                itemCount: 1,
+                itemBuilder: (BuildContext context, int index) {
+                  return BlocConverter<SlideCategoryCubit, SlideCategoryState,
+                      bool>(
+                    converter: (state) =>
+                        state?.type == SlideCategoryType.people &&
+                        state?.name == circleType[index]['title'],
+                    builder: (BuildContext context, bool selected) {
+                      final circle = circleType[index];
+                      return SelectItem(
+                        asset: circle['asset'],
+                        title: circle['title'],
+                        onTap: () =>
+                            BlocProvider.of<SlideCategoryCubit>(context).select(
+                          SlideCategoryType.people,
+                          circle['title'],
+                        ),
+                        selected: selected,
+                      );
+                    },
+                  );
+                },
+              );
+            }),
           ),
-          const SelectItem(asset: 'assets/images/avatar.png', title: 'Mixin'),
+          // TODO 用户信息回调
+          Builder(
+            builder: (context) => const SelectItem(
+                asset: Assets.assetsImagesAvatarPng,
+                title: 'Mixin',
+              )
+          ),
         ]),
       ),
     );
-  }
-
-  bool isSelected(int index) {
-    return _group == index;
-  }
-
-  void _select(int i) {
-    setState(() {
-      _group = i;
-    });
   }
 }
