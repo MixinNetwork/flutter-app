@@ -17,10 +17,20 @@ class UnreadText extends StatelessWidget {
     return Visibility(
       visible: count > 0,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 5),
         decoration: BoxDecoration(
-            color: backgroundColor, borderRadius: BorderRadius.circular(8)),
-        child: Text('$count', style: TextStyle(color: textColor, fontSize: 8)),
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          '$count',
+          style: TextStyle(
+            color: textColor,
+            fontSize: 12,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

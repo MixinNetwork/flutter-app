@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
+import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class App extends StatelessWidget {
@@ -14,9 +15,8 @@ class App extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Mixin',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
+        builder: (context, child) => BrightnessObserver(
+          child: child,
         ),
         home: HomePage(),
       ),
