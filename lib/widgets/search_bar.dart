@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/widgets/brightness_observer.dart';
 
 import 'action_button.dart';
 
@@ -9,47 +11,89 @@ class SearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Row(
-        children: [
-          Expanded(
-            flex: 1,
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(24)),
+    const outlineInputBorder = OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Colors.transparent,
+      ),
+      borderRadius: BorderRadius.all(
+        Radius.circular(20.0),
+      ),
+      gapPadding: 0,
+    );
+    final backgroundColor = BrightnessData.dynamicColor(
+      context,
+      const Color.fromRGBO(245, 247, 250, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+    );
+    final hintColor = BrightnessData.dynamicColor(
+      context,
+      const Color.fromRGBO(184, 189, 199, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.3),
+    );
+    return Row(
+      children: [
+        const SizedBox(width: 20),
+        Expanded(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: SizedBox(
+              height: 32,
               child: TextField(
                 onChanged: (string) => {},
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(51, 51, 51, 1),
+                    darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                  ),
+                  fontSize: 14,
                 ),
                 scrollPadding: EdgeInsets.zero,
                 decoration: InputDecoration(
-                  icon: Image.asset('assets/images/ic_search.png',
-                      width: 20, height: 20),
-                  contentPadding: const EdgeInsets.all(0),
                   isDense: true,
+                  border: outlineInputBorder,
+                  focusedBorder: outlineInputBorder,
+                  enabledBorder: outlineInputBorder,
+                  filled: true,
+                  fillColor: backgroundColor,
+                  hoverColor: backgroundColor,
+                  focusColor: backgroundColor,
+                  prefixIconConstraints:
+                      const BoxConstraints.expand(width: 40, height: 32),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 8),
+                    child: Image.asset(
+                      Assets.assetsImagesIcSearchPng,
+                      color: hintColor,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.only(right: 8),
                   hintText: 'Search',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
+                  hintStyle: TextStyle(
+                    color: hintColor,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            child: ActionButton(
-                name: 'assets/images/ic_create_group.png',
-                onTap: () {
-                  _showDialog(context);
-                }),
+        ),
+        const SizedBox(width: 8),
+        ActionButton(
+          name: Assets.assetsImagesIcCreateGroupPng,
+          onTap: () {
+            _showDialog(context);
+          },
+          padding: const EdgeInsets.all(8),
+          size: 24,
+          color: BrightnessData.dynamicColor(
+            context,
+            const Color.fromRGBO(47, 48, 50, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(width: 12),
+      ],
     );
   }
 

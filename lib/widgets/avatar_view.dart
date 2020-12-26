@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class AvatarsWidget extends StatelessWidget {
   const AvatarsWidget({Key key, this.avatars, this.size})
-      : assert(avatars.length > 0 && avatars.length <= 4),
+      : assert(avatars.length > 0),
         assert(size > 0),
         super(key: key);
 
@@ -38,7 +38,7 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
       case 3:
         return Row(
           children: [
-            _AvatarImage(avatars[0], size),
+            Expanded(child: _AvatarImage(avatars[0], size)),
             Expanded(
               child: Column(
                 children: avatars.sublist(1).map(_buildAvatarImage).toList(),

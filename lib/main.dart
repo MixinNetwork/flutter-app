@@ -5,6 +5,7 @@ import 'package:flutter_app/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await DesktopWindow.setMinWindowSize(const Size(600, 500));
+  await DesktopWindow.setWindowSize(const Size(1280, 750));
+  await DesktopWindow.setMinWindowSize(const Size(940, 640));
   runApp(App());
 }

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class UnreadText extends StatelessWidget {
@@ -17,14 +19,15 @@ class UnreadText extends StatelessWidget {
     return Visibility(
       visible: count > 0,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 5),
+        height: 20,
+        width: 26,
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(10),
         ),
         alignment: Alignment.center,
         child: Text(
-          '$count',
+          '${min(count, 99)}',
           style: TextStyle(
             color: textColor,
             fontSize: 12,

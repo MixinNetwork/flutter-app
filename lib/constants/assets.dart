@@ -12,6 +12,9 @@ class Assets {
 
   static const String assetsImagesContactsPng = 'assets/images/contacts.png';
 
+  static const String assetsImagesConversationEmptySvg =
+      'assets/images/conversation_empty.svg';
+
   static const String assetsImagesGroupPng = 'assets/images/group.png';
 
   static const String assetsImagesIcClosePng = 'assets/images/ic_close.png';
