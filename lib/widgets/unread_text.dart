@@ -8,10 +8,12 @@ class UnreadText extends StatelessWidget {
     @required this.count,
     this.backgroundColor,
     this.textColor,
+    this.fontWeight,
   }) : super(key: key);
 
   final Color backgroundColor;
   final Color textColor;
+  final FontWeight fontWeight;
   final int count;
 
   @override
@@ -31,6 +33,7 @@ class UnreadText extends StatelessWidget {
           style: TextStyle(
             color: textColor,
             fontSize: 12,
+            fontWeight: fontWeight,
           ),
           textAlign: TextAlign.center,
         ),

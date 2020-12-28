@@ -23,11 +23,6 @@ class SelectItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(51, 51, 51, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-    );
     final boxDecoration = BoxDecoration(
       borderRadius: BorderRadius.circular(8),
     );
@@ -63,7 +58,11 @@ class SelectItem extends StatelessWidget {
                 title,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                  color: textColor,
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(51, 51, 51, 1),
+                    darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                  ),
                   fontSize: 14,
                 ),
               ),
@@ -75,7 +74,12 @@ class SelectItem extends StatelessWidget {
                 const Color.fromRGBO(51, 51, 51, 0.16),
                 darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
               ),
-              textColor: textColor,
+              textColor: BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(51, 51, 51, 1),
+                darkColor: const Color.fromRGBO(44, 49, 54, 0.8),
+              ),
+              fontWeight: FontWeight.w700,
             ),
           ],
         ),
