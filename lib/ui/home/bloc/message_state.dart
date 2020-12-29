@@ -1,13 +1,15 @@
 part of 'message_bloc.dart';
 
 class MessageState extends Equatable {
-  const MessageState({
+  const MessageState( {
     this.messages,
     this.noMoreData = false,
+    this.conversation,
   });
 
   final List<Message> messages;
   final bool noMoreData;
+  final Conversation conversation;
 
   @override
   List<Object> get props => [messages, noMoreData];
@@ -15,10 +17,12 @@ class MessageState extends Equatable {
   MessageState copyWith({
     final List<Message> messages,
     final bool noMoreData,
+    final Conversation conversation,
   }) {
     return MessageState(
       messages: messages ?? this.messages,
       noMoreData: noMoreData ?? this.noMoreData,
+      conversation: conversation ?? this.conversation,
     );
   }
 }

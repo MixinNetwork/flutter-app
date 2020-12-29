@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 
@@ -68,6 +68,15 @@ class _InsertAllMessageEvent extends _MessageEvent {
   List<Object> get props => [messages];
 }
 
+class _ReplaceMessageEvent extends _MessageEvent {
+  const _ReplaceMessageEvent(this.messages);
+
+  final List<Message> messages;
+
+  @override
+  List<Object> get props => [messages];
+}
+
 class _InsertOrReplaceMessageEvent extends _MessageEvent {
   const _InsertOrReplaceMessageEvent(this.message);
 
@@ -110,14 +119,18 @@ class _LoadMoreMessageCubit extends Cubit<List<Message>> {
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
     with SubscribeMixin {
-  MessageBloc(this.conversation) : super(const MessageState()) {
+  MessageBloc([Conversation conversation]) : super(const MessageState()) {
+    setConversation(conversation);
+  }
+
+  Conversation conversation;
+  _LoadMoreMessageCubit loadMoreMessageCubit;
+
+  void setConversation(Conversation conversation) {
+    this.conversation = conversation;
     setupLoadMore();
     firstLoad();
   }
-
-  final Conversation conversation;
-
-  _LoadMoreMessageCubit loadMoreMessageCubit;
 
   @override
   Stream<MessageState> mapEventToState(
@@ -125,6 +138,13 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   ) async* {
     final messages = state.messages ?? [];
 
+    if (event is _ReplaceMessageEvent) {
+      yield state.copyWith(
+        noMoreData: false,
+        messages: event.messages,
+        conversation: conversation,
+      );
+    }
     if (event is _InsertAllMessageEvent) {
       yield state.copyWith(
         messages: messages + event.messages,
@@ -146,13 +166,14 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   }
 
   void setupLoadMore() {
+    loadMoreMessageCubit?.close();
     loadMoreMessageCubit = _LoadMoreMessageCubit();
     addSubscription(loadMoreMessageCubit
         .listen((messages) => add(_InsertAllMessageEvent(messages))));
   }
 
   void loadMore() {
-    if(state.messages?.isEmpty == true) return;
+    if (state.messages?.isEmpty == true || state.noMoreData) return;
     assert(loadMoreMessageCubit != null);
     loadMoreMessageCubit?.loadMore(state.messages.last.id);
   }
@@ -160,7 +181,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   void firstLoad() {
     //mock
     add(
-      _InsertAllMessageEvent(
+      _ReplaceMessageEvent(
         List.generate(
           20,
           (index) => Message(
@@ -170,8 +191,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
             createdAt: DateTime.now().subtract(const Duration(minutes: 1)),
             unread: false,
             status: MessageStatus.delivered,
-            message:
-                'mock first message $index mock first message $index mock first message $index mock first message $index mock first message $index mock first message $index mock first message $index mock first message $index ',
+            message: 'mock first message $index',
           ),
         ),
       ),

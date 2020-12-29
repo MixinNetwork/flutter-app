@@ -12,7 +12,7 @@ String convertStringTime(DateTime _dateTime) {
   if (isSameWeek(now, dateTime)) {
     return DateFormat.EEEE().format(dateTime);
   }
-  return DateFormat.yMd().format(dateTime);
+  return DateFormat.Md().format(dateTime);
 }
 
 bool isSameWeek(DateTime a, DateTime b) =>
