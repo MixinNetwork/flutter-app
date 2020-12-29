@@ -26,7 +26,7 @@ class SelectItem extends StatelessWidget {
     final boxDecoration = BoxDecoration(
       borderRadius: BorderRadius.circular(8),
     );
-    return InteractableDecoratedBox(
+    return InteractableDecoratedBox.color(
       onTap: onTap,
       decoration: selected == true
           ? boxDecoration.copyWith(
@@ -36,12 +36,10 @@ class SelectItem extends StatelessWidget {
               darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
             ))
           : boxDecoration,
-      hoveringDecoration: boxDecoration.copyWith(
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(0, 0, 0, 0.03),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
-        ),
+      hoveringColor: BrightnessData.dynamicColor(
+        context,
+        const Color.fromRGBO(0, 0, 0, 0.03),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),

@@ -75,7 +75,7 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
 class InteractableDecoratedBox extends StatelessWidget {
   const InteractableDecoratedBox({
     Key key,
-    this.decoration,
+    Decoration decoration,
     this.hoveringDecoration,
     this.tapDowningDecoration,
     this.inDuration = const Duration(milliseconds: 120),
@@ -84,9 +84,30 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
-  }) : super(key: key);
+  })  : _decoration = decoration,
+        super(key: key);
 
-  final Decoration decoration;
+  InteractableDecoratedBox.color({
+    Key key,
+    BoxDecoration decoration,
+    Color hoveringColor,
+    Color tapDowningColor,
+    this.inDuration = const Duration(milliseconds: 120),
+    this.outDuration = const Duration(milliseconds: 60),
+    this.child,
+    this.onTap,
+    this.onDoubleTap,
+    this.onLongPress,
+  })  : _decoration = decoration,
+        hoveringDecoration = hoveringColor != null
+            ? decoration?.copyWith(color: hoveringColor)
+            : null,
+        tapDowningDecoration = tapDowningColor != null
+            ? decoration?.copyWith(color: tapDowningColor)
+            : null,
+        super(key: key);
+
+  final Decoration _decoration;
   final Decoration hoveringDecoration;
   final Decoration tapDowningDecoration;
 
@@ -99,38 +120,35 @@ class InteractableDecoratedBox extends StatelessWidget {
   final VoidCallback onLongPress;
 
   @override
-  Widget build(BuildContext context) {
-    return InteracterBuilder(
-      child: child,
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      onLongPress: onLongPress,
-      builder: (BuildContext context, InteracteStatus status,
-              InteracteStatus lastStatus, Widget child) =>
-          TweenAnimationBuilder<Decoration>(
-        tween: DecorationTween(
-          end: {
-            InteracteStatus.interactable: decoration ?? const BoxDecoration(),
-            InteracteStatus.hovering: hoveringDecoration ??
-                tapDowningDecoration ??
-                const BoxDecoration(),
-            InteracteStatus.tapDowning: tapDowningDecoration ??
-                hoveringDecoration ??
-                const BoxDecoration(),
-          }[status],
-        ),
-        duration: lastStatus == InteracteStatus.interactable &&
-                status != InteracteStatus.interactable
-            ? inDuration
-            : outDuration,
-        curve: Curves.decelerate,
+  Widget build(BuildContext context) => InteracterBuilder(
         child: child,
-        builder: (BuildContext context, Decoration value, Widget child) =>
-            DecoratedBox(
-          decoration: value,
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        onLongPress: onLongPress,
+        builder: (BuildContext context, InteracteStatus status,
+                InteracteStatus lastStatus, Widget child) =>
+            TweenAnimationBuilder<Decoration>(
+          tween: DecorationTween(
+            end: {
+              InteracteStatus.interactable:
+                  _decoration ?? const BoxDecoration(),
+              InteracteStatus.hovering:
+                  hoveringDecoration ?? tapDowningDecoration ?? _decoration,
+              InteracteStatus.tapDowning:
+                  tapDowningDecoration ?? hoveringDecoration ?? _decoration,
+            }[status],
+          ),
+          duration: lastStatus == InteracteStatus.interactable &&
+                  status != InteracteStatus.interactable
+              ? inDuration
+              : outDuration,
+          curve: Curves.decelerate,
           child: child,
+          builder: (BuildContext context, Decoration value, Widget child) =>
+              DecoratedBox(
+            decoration: value,
+            child: child,
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

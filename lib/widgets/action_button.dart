@@ -18,18 +18,14 @@ class ActionButton extends StatelessWidget {
   final Color color;
 
   @override
-  Widget build(BuildContext context) {
-    const boxDecoration = BoxDecoration(shape: BoxShape.circle);
-    return InteractableDecoratedBox(
+  Widget build(BuildContext context) => InteractableDecoratedBox.color(
       onTap: onTap,
-      hoveringDecoration: boxDecoration.copyWith(
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(0, 0, 0, 0.03),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
-        ),
+      decoration: const BoxDecoration(shape: BoxShape.circle),
+      hoveringColor: BrightnessData.dynamicColor(
+        context,
+        const Color.fromRGBO(0, 0, 0, 0.03),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
       ),
-      decoration: boxDecoration,
       child: Padding(
         padding: padding,
         child: Image.asset(
@@ -40,5 +36,4 @@ class ActionButton extends StatelessWidget {
         ),
       ),
     );
-  }
 }

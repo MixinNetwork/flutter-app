@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
@@ -18,7 +19,10 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (BuildContext context) => ConversationListCubit(slideCategoryCubit),
-        )
+        ),
+        BlocProvider(
+          create: (BuildContext context) => ConversationCubit(),
+        ),
       ],
       child: MaterialApp(
         title: 'Mixin',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
@@ -78,27 +79,31 @@ class _List extends StatelessWidget {
   final int itemCount;
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
+  Widget build(BuildContext context) => BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
       builder: (context, slideCategoryState) => ListView.builder(
         key: PageStorageKey(slideCategoryState),
         itemCount: itemCount,
         itemBuilder: (BuildContext context, int index) => BlocConverter<
             ConversationListCubit, List<Conversation>, Conversation>(
           converter: (state) => state[index],
-          builder: (context, message) => _Item(
-            avatars: message.avatars,
-            name: message.name,
-            dateTime: message.dateTime,
-            messageStatus: message.messageStatus,
-            message: message.message,
-            count: message.count,
-            unread: message.unread,
+          builder: (context, message) =>
+              BlocConverter<ConversationCubit, Conversation, bool>(
+            converter: (state) => message == state,
+            builder: (context, selected) => _Item(
+                selected: selected,
+                avatars: message.avatars,
+                name: message.name,
+                dateTime: message.dateTime,
+                messageStatus: message.messageStatus,
+                message: message.message,
+                count: message.count,
+                unread: message.unread,
+                onTap: () => BlocProvider.of<ConversationCubit>(context).emit(message),
+              ),
           ),
         ),
       ),
     );
-  }
 }
 
 class _Item extends StatelessWidget {
@@ -112,6 +117,7 @@ class _Item extends StatelessWidget {
     @required this.message,
     this.count = 0,
     this.unread = false,
+    this.onTap,
   }) : super(key: key);
 
   final bool selected;
@@ -122,6 +128,7 @@ class _Item extends StatelessWidget {
   final String message;
   final int count;
   final bool unread;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -130,100 +137,115 @@ class _Item extends StatelessWidget {
       const Color.fromRGBO(184, 189, 199, 1),
       darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
     );
-    return DecoratedBox(
-      decoration: const BoxDecoration(),
+    return GestureDetector(
+      onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Row(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: AvatarsWidget(
-                size: 50,
-                avatars: avatars,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 20),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: DecoratedBox(
+          decoration: selected
+              ? BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(246, 247, 250, 1),
+                    darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                  ),
+                )
+              : const BoxDecoration(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  child: AvatarsWidget(
+                    size: 50,
+                    avatars: avatars,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: Text(
-                            name,
-                            style: TextStyle(
-                              color: BrightnessData.dynamicColor(
-                                context,
-                                const Color.fromRGBO(51, 51, 51, 1),
-                                darkColor:
-                                    const Color.fromRGBO(255, 255, 255, 0.9),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                name,
+                                style: TextStyle(
+                                  color: BrightnessData.dynamicColor(
+                                    context,
+                                    const Color.fromRGBO(51, 51, 51, 1),
+                                    darkColor: const Color.fromRGBO(
+                                        255, 255, 255, 0.9),
+                                  ),
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              fontSize: 16,
                             ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                            Text(
+                              convertStringTime(dateTime),
+                              style: TextStyle(
+                                color: messageColor,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
                         ),
-                        Text(
-                          convertStringTime(dateTime),
-                          style: TextStyle(
-                            color: messageColor,
-                            fontSize: 12,
+                        SizedBox(
+                          height: 20,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: _MessagePreview(
+                                  messageColor: messageColor,
+                                  messageStatus: messageStatus,
+                                  message: message,
+                                ),
+                              ),
+                              UnreadText(
+                                count: count,
+                                backgroundColor: unread
+                                    ? BrightnessData.dynamicColor(
+                                        context,
+                                        const Color.fromRGBO(61, 117, 227, 1),
+                                        darkColor: const Color.fromRGBO(
+                                            65, 145, 255, 1),
+                                      )
+                                    : BrightnessData.dynamicColor(
+                                        context,
+                                        const Color.fromRGBO(184, 189, 199, 1),
+                                        darkColor: const Color.fromRGBO(
+                                            255, 255, 255, 0.4),
+                                      ),
+                                textColor: unread
+                                    ? BrightnessData.dynamicColor(
+                                        context,
+                                        const Color.fromRGBO(255, 255, 255, 1),
+                                        darkColor: const Color.fromRGBO(
+                                            255, 255, 255, 1),
+                                      )
+                                    : BrightnessData.dynamicColor(
+                                        context,
+                                        const Color.fromRGBO(255, 255, 255, 1),
+                                        darkColor:
+                                            const Color.fromRGBO(44, 49, 54, 1),
+                                      ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(
-                      height: 20,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _MessagePreview(
-                              messageColor: messageColor,
-                              messageStatus: messageStatus,
-                              message: message,
-                            ),
-                          ),
-                          UnreadText(
-                            count: count,
-                            backgroundColor: unread
-                                ? BrightnessData.dynamicColor(
-                                    context,
-                                    const Color.fromRGBO(61, 117, 227, 1),
-                                    darkColor:
-                                        const Color.fromRGBO(65, 145, 255, 1),
-                                  )
-                                : BrightnessData.dynamicColor(
-                                    context,
-                                    const Color.fromRGBO(184, 189, 199, 1),
-                                    darkColor: const Color.fromRGBO(
-                                        255, 255, 255, 0.4),
-                                  ),
-                            textColor: unread
-                                ? BrightnessData.dynamicColor(
-                                    context,
-                                    const Color.fromRGBO(255, 255, 255, 1),
-                                    darkColor:
-                                        const Color.fromRGBO(255, 255, 255, 1),
-                                  )
-                                : BrightnessData.dynamicColor(
-                                    context,
-                                    const Color.fromRGBO(255, 255, 255, 1),
-                                    darkColor:
-                                        const Color.fromRGBO(44, 49, 54, 1),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ],
+                  ),
+                )
+              ],
+            ),
+          ),
         ),
       ),
     );

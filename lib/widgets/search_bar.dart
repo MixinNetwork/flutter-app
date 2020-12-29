@@ -36,43 +36,40 @@ class SearchBar extends StatelessWidget {
         Expanded(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
-            child: SizedBox(
-              height: 32,
-              child: TextField(
-                onChanged: (string) => {},
-                style: TextStyle(
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(51, 51, 51, 1),
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                  ),
-                  fontSize: 14,
+            child: TextField(
+              onChanged: (string) => {},
+              style: TextStyle(
+                color: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(51, 51, 51, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
                 ),
-                scrollPadding: EdgeInsets.zero,
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: outlineInputBorder,
-                  focusedBorder: outlineInputBorder,
-                  enabledBorder: outlineInputBorder,
-                  filled: true,
-                  fillColor: backgroundColor,
-                  hoverColor: backgroundColor,
-                  focusColor: backgroundColor,
-                  prefixIconConstraints:
-                      const BoxConstraints.expand(width: 40, height: 32),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 8),
-                    child: Image.asset(
-                      Assets.assetsImagesIcSearchPng,
-                      color: hintColor,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.only(right: 8),
-                  hintText: 'Search',
-                  hintStyle: TextStyle(
+                fontSize: 14,
+              ),
+              scrollPadding: EdgeInsets.zero,
+              decoration: InputDecoration(
+                isDense: true,
+                border: outlineInputBorder,
+                focusedBorder: outlineInputBorder,
+                enabledBorder: outlineInputBorder,
+                filled: true,
+                fillColor: backgroundColor,
+                hoverColor: Colors.transparent,
+                focusColor: Colors.transparent,
+                prefixIconConstraints:
+                    const BoxConstraints.expand(width: 40, height: 32),
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.only(left: 16, right: 8),
+                  child: Image.asset(
+                    Assets.assetsImagesIcSearchPng,
                     color: hintColor,
-                    fontSize: 14,
                   ),
+                ),
+                contentPadding: const EdgeInsets.only(right: 8),
+                hintText: 'Search',
+                hintStyle: TextStyle(
+                  color: hintColor,
+                  fontSize: 14,
                 ),
               ),
             ),

@@ -15,6 +15,12 @@ class Assets {
   static const String assetsImagesConversationEmptySvg =
       'assets/images/conversation_empty.svg';
 
+  static const String assetsImagesDarkReceiverNipBubblePng =
+      'assets/images/dark_receiver_nip_bubble.png';
+
+  static const String assetsImagesDarkSenderNipBubblePng =
+      'assets/images/dark_sender_nip_bubble.png';
+
   static const String assetsImagesGroupPng = 'assets/images/group.png';
 
   static const String assetsImagesIcClosePng = 'assets/images/ic_close.png';
@@ -33,6 +39,12 @@ class Assets {
   static const String assetsImagesIcSendPng = 'assets/images/ic_send.png';
 
   static const String assetsImagesIcStickerPng = 'assets/images/ic_sticker.png';
+
+  static const String assetsImagesLightReceiverNipBubblePng =
+      'assets/images/light_receiver_nip_bubble.png';
+
+  static const String assetsImagesLightSenderNipBubblePng =
+      'assets/images/light_sender_nip_bubble.png';
 
   static const String assetsImagesLogoPng = 'assets/images/logo.png';
 
