@@ -90,8 +90,8 @@ class ChatContainer extends StatelessWidget {
                   },
                   child: BlocConverter<MessageBloc, MessageState,
                       Tuple2<Conversation, int>>(
-                    converter: (state) => Tuple2(
-                        state.conversation, state.messages?.length ?? 0),
+                    converter: (state) =>
+                        Tuple2(state.conversation, state.messages?.length ?? 0),
                     builder: (context, tuple2) => ListView.builder(
                       key: ValueKey(tuple2.item1),
                       controller: ScrollController(keepScrollOffset: false),
@@ -121,59 +121,141 @@ class _Message extends StatelessWidget {
   final int index;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConverter<MessageBloc, MessageState, bool>(
-        converter: (state) => state.messages[index].isCurrentUser,
-        builder: (context, isCurrentUser) => _MessageBubbleMargin(
-          isCurrentUser: isCurrentUser,
-          child: BlocConverter<MessageBloc, MessageState, bool>(
-              converter: (state) {
-            if (index == 0) return true;
+  Widget build(BuildContext context) => BlocConverter<MessageBloc, MessageState,
+          Tuple4<bool, DateTime, String, bool>>(
+        converter: (state) {
+          final messages = state.messages;
+          final message = messages[index];
+          final prev = index == 0 ? null : messages[index - 1];
+          final next =
+              messages.length == index + 1 ? null : messages[index + 1];
 
-            final messages = state.messages;
-            final message = messages[index];
-            final prev = messages[index - 1];
+          final isCurrentUser = message.isCurrentUser;
 
-            return !(prev.isCurrentUser == message.isCurrentUser &&
-                isSameDay(prev.createdAt, message.createdAt));
-          }, builder: (context, showNip) {
-            return _MessageBubble(
-              showNip: showNip,
-              isCurrentUser: isCurrentUser,
-              child: BlocConverter<MessageBloc, MessageState, Message>(
-                converter: (state) => state.messages[index],
-                builder: (context, message) => Wrap(
-                  alignment: WrapAlignment.end,
-                  crossAxisAlignment: WrapCrossAlignment.end,
-                  children: [
-                    Text(
-                      message.message,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: BrightnessData.dynamicColor(
-                          context,
-                          const Color.fromRGBO(51, 51, 51, 1),
-                          darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                        ),
+          final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
+          final sameUserPrev = prev?.isCurrentUser == isCurrentUser;
+          final sameUserNext = next?.isCurrentUser == isCurrentUser;
+
+          final showNip = !(sameUserPrev && sameDayPrev);
+          final sameDayNext = isSameDay(next?.createdAt, message.createdAt);
+          final datetime = sameDayNext ? null : message.createdAt;
+          final user = !isCurrentUser && (!sameUserNext || !sameDayNext)
+              ? message.user
+              : null;
+
+          return Tuple4(isCurrentUser, datetime, user, showNip);
+        },
+        builder: (context, Tuple4<bool, DateTime, String, bool> tuple) =>
+            Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (tuple.item2 != null) _DayTime(dateTime: tuple.item2),
+            _MessageBubbleMargin(
+              isCurrentUser: tuple.item1,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (tuple.item3 != null) _Name(user: tuple.item3),
+                  _MessageBubble(
+                    showNip: tuple.item4,
+                    isCurrentUser: tuple.item1,
+                    child: BlocConverter<MessageBloc, MessageState, Message>(
+                      converter: (state) => state.messages[index],
+                      builder: (context, message) => Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: [
+                          Text(
+                            message.message,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: BrightnessData.dynamicColor(
+                                context,
+                                const Color.fromRGBO(51, 51, 51, 1),
+                                darkColor:
+                                    const Color.fromRGBO(255, 255, 255, 0.9),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            DateFormat.jm().format(message.createdAt),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: BrightnessData.dynamicColor(
+                                context,
+                                const Color.fromRGBO(131, 145, 158, 1),
+                                darkColor:
+                                    const Color.fromRGBO(128, 131, 134, 1),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      DateFormat.jm().format(message.createdAt),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: BrightnessData.dynamicColor(
-                          context,
-                          const Color.fromRGBO(131, 145, 158, 1),
-                          darkColor: const Color.fromRGBO(128, 131, 134, 1),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          }),
+            ),
+          ],
+        ),
+      );
+}
+
+class _Name extends StatelessWidget {
+  const _Name({
+    Key key,
+    this.user,
+  }) : super(key: key);
+
+  final String user;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(
+          left: 10,
+          bottom: 2,
+        ),
+        child: Text(
+          user,
+          style: TextStyle(
+            fontSize: 15,
+            color: BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(0, 122, 255, 1),
+            ),
+          ),
+        ),
+      );
+}
+
+class _DayTime extends StatelessWidget {
+  const _DayTime({
+    Key key,
+    this.dateTime,
+  }) : super(key: key);
+
+  final DateTime dateTime;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 60,
+        alignment: Alignment.center,
+        child: Container(
+          height: 22,
+          width: 90,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(213, 211, 243, 1),
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            DateFormat.MEd().format(dateTime),
+          ),
         ),
       );
 }

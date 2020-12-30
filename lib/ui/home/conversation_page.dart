@@ -79,17 +79,18 @@ class _List extends StatelessWidget {
   final int itemCount;
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
-      builder: (context, slideCategoryState) => ListView.builder(
-        key: PageStorageKey(slideCategoryState),
-        itemCount: itemCount,
-        itemBuilder: (BuildContext context, int index) => BlocConverter<
-            ConversationListCubit, List<Conversation>, Conversation>(
-          converter: (state) => state[index],
-          builder: (context, message) =>
-              BlocConverter<ConversationCubit, Conversation, bool>(
-            converter: (state) => message == state,
-            builder: (context, selected) => _Item(
+  Widget build(BuildContext context) =>
+      BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
+        builder: (context, slideCategoryState) => ListView.builder(
+          key: PageStorageKey(slideCategoryState),
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) => BlocConverter<
+              ConversationListCubit, List<Conversation>, Conversation>(
+            converter: (state) => state[index],
+            builder: (context, message) =>
+                BlocConverter<ConversationCubit, Conversation, bool>(
+              converter: (state) => message == state,
+              builder: (context, selected) => _Item(
                 selected: selected,
                 avatars: message.avatars,
                 name: message.name,
@@ -98,12 +99,13 @@ class _List extends StatelessWidget {
                 message: message.message,
                 count: message.count,
                 unread: message.unread,
-                onTap: () => BlocProvider.of<ConversationCubit>(context).emit(message),
+                onTap: () =>
+                    BlocProvider.of<ConversationCubit>(context).emit(message),
               ),
+            ),
           ),
         ),
-      ),
-    );
+      );
 }
 
 class _Item extends StatelessWidget {

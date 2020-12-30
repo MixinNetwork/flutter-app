@@ -23,5 +23,7 @@ DateTime startOfWeek(DateTime a) => a.subtract(Duration(days: a.weekday));
 bool isYesterday(DateTime a, DateTime b) =>
     isSameDay(a.subtract(const Duration(days: 1)), b);
 
-bool isSameDay(DateTime a, DateTime b) =>
-    a.year == b.year && a.month == b.month && a.day == b.day;
+bool isSameDay(DateTime a, DateTime b) {
+  if (a == null || b == null) return false;
+  return a.year == b.year && a.month == b.month && a.day == b.day;
+}

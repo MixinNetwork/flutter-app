@@ -25,6 +25,7 @@ enum MessageStatus {
 class Message extends Equatable {
   const Message({
     @required this.id,
+    @required this.user,
     @required this.message,
     @required this.unread,
     @required this.createdAt,
@@ -33,6 +34,7 @@ class Message extends Equatable {
     @required this.isCurrentUser,
   });
 
+  final String user;
   final String id;
   final bool isCurrentUser;
 
@@ -46,6 +48,7 @@ class Message extends Equatable {
   @override
   List<Object> get props => [
         id,
+        user,
         message,
         unread,
         createdAt,
@@ -100,6 +103,7 @@ class _LoadMoreMessageCubit extends Cubit<List<Message>> {
         20,
         (index) => Message(
           id: '',
+          user: 'loadMore user name',
           isCurrentUser: index < 10,
           conversation: null,
           createdAt: DateTime.now()
@@ -186,9 +190,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           20,
           (index) => Message(
             id: '',
+            user: conversation.name,
             isCurrentUser: index < 10,
             conversation: null,
-            createdAt: DateTime.now().subtract(const Duration(minutes: 1)),
+            createdAt: DateTime.now().subtract(Duration(hours: index)),
             unread: false,
             status: MessageStatus.delivered,
             message: 'mock first message $index',
