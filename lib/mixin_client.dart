@@ -8,5 +8,5 @@ class MixinClient {
   MixinClient._internal();
 
   static final MixinClient _singleton = MixinClient._internal();
-  final Client client = Client('UA');
+  final Client client = Client();
 }

@@ -62,8 +62,8 @@ abstract class _MessageEvent extends Equatable {
   const _MessageEvent();
 }
 
-class _InsertAllMessageEvent extends _MessageEvent {
-  const _InsertAllMessageEvent(this.messages);
+class _LoadMoreMessageEvent extends _MessageEvent {
+  const _LoadMoreMessageEvent(this.messages);
 
   final List<Message> messages;
 
@@ -140,7 +140,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Stream<MessageState> mapEventToState(
     _MessageEvent event,
   ) async* {
-    final messages = state.messages ?? [];
+    final messages = state.messages?.toList() ?? [];
 
     if (event is _ReplaceMessageEvent) {
       yield state.copyWith(
@@ -149,7 +149,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         conversation: conversation,
       );
     }
-    if (event is _InsertAllMessageEvent) {
+    if (event is _LoadMoreMessageEvent) {
       yield state.copyWith(
         messages: messages + event.messages,
         noMoreData: messages.length < 20,
@@ -162,7 +162,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       if (index >= 0) {
         messages[index] = event.message;
       } else {
-        messages.insert(index, event.message);
+        messages.insert(0, event.message);
       }
       yield state.copyWith(messages: messages);
       return;
@@ -173,7 +173,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     loadMoreMessageCubit?.close();
     loadMoreMessageCubit = _LoadMoreMessageCubit();
     addSubscription(loadMoreMessageCubit
-        .listen((messages) => add(_InsertAllMessageEvent(messages))));
+        .listen((messages) => add(_LoadMoreMessageEvent(messages))));
   }
 
   void loadMore() {
@@ -198,6 +198,23 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
             status: MessageStatus.delivered,
             message: 'mock first message $index',
           ),
+        ),
+      ),
+    );
+  }
+
+  void send(String text) {
+    add(
+      _InsertOrReplaceMessageEvent(
+        Message(
+          id: text,
+          user: conversation.name,
+          isCurrentUser: true,
+          conversation: null,
+          createdAt: DateTime.now(),
+          unread: false,
+          status: MessageStatus.delivered,
+          message: text,
         ),
       ),
     );
