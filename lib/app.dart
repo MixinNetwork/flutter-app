@@ -15,9 +15,7 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (BuildContext context) {
-            return slideCategoryCubit;
-          },
+          create: (BuildContext context) => slideCategoryCubit,
         ),
         BlocProvider(
           create: (BuildContext context) => ConversationListCubit(slideCategoryCubit),
@@ -26,9 +24,7 @@ class App extends StatelessWidget {
           create: (BuildContext context) => ConversationCubit(draftCubit),
         ),
         BlocProvider(
-          create: (BuildContext context) {
-            return draftCubit;
-          },
+          create: (BuildContext context) => draftCubit,
         ),
       ],
       child: MaterialApp(

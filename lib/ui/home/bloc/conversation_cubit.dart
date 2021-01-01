@@ -11,6 +11,6 @@ class ConversationCubit extends SimpleCubit<Conversation> {
   void emit(Conversation state) {
     draftCubit.update(this.state?.name);
     super.emit(state);
-    draftCubit.show(state.name);
+    if (state != null) draftCubit.show(state.name);
   }
 }

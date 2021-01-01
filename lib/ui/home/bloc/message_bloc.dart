@@ -133,7 +133,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   void setConversation(Conversation conversation) {
     this.conversation = conversation;
     setupLoadMore();
-    firstLoad();
+    if (conversation != null) firstLoad();
   }
 
   @override

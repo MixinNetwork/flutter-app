@@ -23,6 +23,8 @@ class Assets {
 
   static const String assetsImagesGroupPng = 'assets/images/group.png';
 
+  static const String assetsImagesIcBackPng = 'assets/images/ic_back.png';
+
   static const String assetsImagesIcClosePng = 'assets/images/ic_close.png';
 
   static const String assetsImagesIcCreateGroupPng =

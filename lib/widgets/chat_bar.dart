@@ -5,6 +5,7 @@ import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'avatar_view.dart';
 
@@ -21,10 +22,10 @@ class ChatBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actionColor = BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(47, 48, 50, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-            );
+      context,
+      const Color.fromRGBO(47, 48, 50, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+    );
     return DecoratedBox(
       decoration: BoxDecoration(
         color: BrightnessData.dynamicColor(
@@ -36,6 +37,20 @@ class ChatBar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(children: [
+          Builder(
+            builder: (context) => ModalRoute.of(context)?.canPop ?? false
+                ? Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ActionButton(
+                      name: Assets.assetsImagesIcBackPng,
+                      color: actionColor,
+                      onTap: () {
+                        BlocProvider.of<ConversationCubit>(context).emit(null);
+                      },
+                    ),
+                  )
+                : const SizedBox(),
+          ),
           Expanded(
             flex: 1,
             child: Row(
