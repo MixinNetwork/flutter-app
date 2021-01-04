@@ -67,7 +67,6 @@ class HomePage extends StatelessWidget {
                         ),
                   ),
                 ),
-                // ignore: missing_return
                 pushPage: (String name, Object arguments) {
                   if (name == 'chatPage') {
                     return MaterialPage(
@@ -76,6 +75,7 @@ class HomePage extends StatelessWidget {
                       child: ChatPage(key: _chatPageKey),
                     );
                   }
+                  throw ArgumentError('Invalid route');
                 },
               ),
             ),
