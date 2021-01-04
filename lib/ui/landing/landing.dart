@@ -86,7 +86,7 @@ class _LandingPageState extends State<LandingPage> {
         .verifyProvisioning(request)
         .then((value) {
       if (value.data != null) {
-        Preferences().putAccount(value.data.toJson().toString());
+        Preferences().putAccount(value.data);
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => LoadingPage()),

@@ -33,6 +33,7 @@ class App extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'Mixin',
+        debugShowCheckedModeBanner: false,
         builder: (context, child) => BrightnessObserver(
           child: child,
         ),

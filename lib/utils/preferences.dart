@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path_provider/path_provider.dart';
 
 class Preferences {
@@ -11,12 +14,17 @@ class Preferences {
 
   factory Preferences() => _instance;
 
-  void putAccount(String string) {
-    box.put('account', string);
+  void putAccount(Account account) {
+    box.put('account', jsonEncode(account).toString());
   }
 
-  String getAccount() {
-    return box.get('account');
+  Account getAccount() {
+    final String local = box.get('account');
+    if (local == null) {
+      return null;
+    } else {
+      return Account.fromJson(jsonDecode(local));
+    }
   }
 
   static Future<void> init() async {
