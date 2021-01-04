@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
@@ -64,7 +65,8 @@ class _LandingPageState extends State<LandingPage> {
                               platform: 'Desktop',
                               purpose: 'SESSION',
                               sessionSecret: base64.encode(
-                                  keyPair.publicKey.serialize().sublist(1)),
+                                  (keyPair.publicKey as DjbECPublicKey)
+                                      .publicKey),
                               appVersion: '0.0.1',
                               registrationId: registrationId,
                               platformVersion: 'OS X 10.15.6'));
