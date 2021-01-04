@@ -56,17 +56,17 @@ class _LandingPageState extends State<LandingPage> {
                           final msg = json.decode(String.fromCharCodes(result));
 
                           final registrationId =
-                              signal.KeyHelper.generateRegistrationId(false)
-                                  .toString();
+                              signal.KeyHelper.generateRegistrationId(false);
                           verify(ProvisioningRequest(
                               code: msg['provisioning_code'],
                               userId: msg['user_id'],
                               sessionId: msg['session_id'],
-                              platform: 'desktop',
+                              platform: 'Desktop',
                               purpose: 'SESSION',
-                              sessionSecret:
-                                  base64.encode(keyPair.publicKey.serialize()),
-                              registrationId: registrationId.toString(),
+                              sessionSecret: base64.encode(
+                                  keyPair.publicKey.serialize().sublist(1)),
+                              appVersion: '0.0.1',
+                              registrationId: registrationId,
                               platformVersion: 'OS X 10.15.6'));
                         }
                       },
@@ -120,7 +120,7 @@ class _LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
