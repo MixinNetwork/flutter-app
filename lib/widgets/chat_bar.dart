@@ -46,6 +46,7 @@ class ChatBar extends StatelessWidget {
                       color: actionColor,
                       onTap: () {
                         BlocProvider.of<ConversationCubit>(context).emit(null);
+                        Navigator.pop(context);
                       },
                     ),
                   )
@@ -117,7 +118,7 @@ class _Name extends StatelessWidget {
     return BlocConverter<ConversationCubit, Conversation, String>(
       converter: (state) => state?.name,
       builder: (context, name) => Text(
-        name,
+        name ?? '',
         style: TextStyle(
           color: BrightnessData.dynamicColor(
             context,

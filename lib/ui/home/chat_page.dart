@@ -28,30 +28,9 @@ class ChatPage extends StatelessWidget {
         ),
         child: BlocConverter<ConversationCubit, Conversation, bool>(
           converter: (state) => state != null,
-          builder: (context, selected) {
-            if (!selected) return const _Empty();
-            return ChatContainer(
+          builder: (context, selected) => ChatContainer(
               onPressed: () {},
-            );
-          },
-        ),
-      );
-}
-
-class _Empty extends StatelessWidget {
-  const _Empty({Key key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => Center(
-        child: Text(
-          'Select a group to start messaging',
-          style: TextStyle(
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(184, 189, 199, 1),
-              darkColor: const Color.fromRGBO(184, 189, 199, 1),
             ),
-          ),
         ),
       );
 }

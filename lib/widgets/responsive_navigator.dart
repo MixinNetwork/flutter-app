@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -5,37 +8,36 @@ class ResponsiveNavigator extends StatefulWidget {
   const ResponsiveNavigator({
     Key key,
     @required this.leftPage,
-    @required this.rightPage,
+    @required this.rightEmptyPage,
     @required this.switchWidth,
     @required this.pushPage,
   }) : super(key: key);
 
   final MaterialPage leftPage;
-  final MaterialPage rightPage;
+  final MaterialPage rightEmptyPage;
   final double switchWidth;
-  final Page Function(String name, Object arguments) pushPage;
+  final MaterialPage Function(String name, Object arguments) pushPage;
 
   @override
   ResponsiveNavigatorState createState() => ResponsiveNavigatorState();
 }
 
 class ResponsiveNavigatorState extends State<ResponsiveNavigator> {
-  bool _showRight = false;
-  final _pages = <Page>[];
+  final _pages = <MaterialPage>[];
 
-  void showRightPage(bool value, bool force) {
-    setState(() {
-      _showRight = value;
-      if (force) _pages.clear();
-    });
+  void clearRightPage() {
+    setState(_pages.clear);
   }
 
-  void pushPage(
-    String name,
-    Object arguments,
-  ) =>
-      setState(() {
-        _pages.add(widget.pushPage(name, arguments));
+  void pushPage(String name, [Object arguments]) => setState(() {
+        final page = widget.pushPage(name, arguments);
+        final index = page.child.key is GlobalKey
+            ? _pages.indexWhere(
+                (element) => identical(element.child.key, page.child.key))
+            : -1;
+        _pages
+          ..removeRange(max(index, 0), _pages.length)
+          ..add(page);
       });
 
   @override
@@ -48,21 +50,25 @@ class ResponsiveNavigatorState extends State<ResponsiveNavigator> {
           Expanded(
             child: ClipRect(
               child: Navigator(
-                transitionDelegate: const DefaultTransitionDelegate(),
+                transitionDelegate: DefaultTransitionDelegate(
+                  routeWithoutAnimation: {
+                    widget.leftPage.name,
+                    widget.rightEmptyPage.name,
+                  },
+                ),
                 onPopPage: (Route<dynamic> route, dynamic result) {
                   final bool = _pages.isNotEmpty == true;
                   if (bool) setState(_pages.removeLast);
-                  return bool;
+                  return route.didPop(result);
                 },
                 pages: [
                   if (navigationMode) widget.leftPage,
-                  if (!navigationMode || _showRight) widget.rightPage,
+                  if (!navigationMode && _pages.isEmpty) widget.rightEmptyPage,
                   ..._pages,
                 ],
               ),
             ),
           ),
-
         ],
       );
     });
@@ -71,7 +77,9 @@ class ResponsiveNavigatorState extends State<ResponsiveNavigator> {
 
 class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
   /// Creates a default transition delegate.
-  const DefaultTransitionDelegate() : super();
+  const DefaultTransitionDelegate({this.routeWithoutAnimation}) : super();
+
+  final Set<String> routeWithoutAnimation;
 
   @override
   Iterable<RouteTransitionRecord> resolve({
@@ -131,8 +139,7 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
       if (pageRoute.isWaitingForEnteringDecision) {
         if (!locationToExitingPageRoute.containsKey(pageRoute) &&
             isLastIteration &&
-            !globalPageRouteChange(
-                newPageRouteHistory, locationToExitingPageRoute)) {
+            showAnimation(pageRoute, locationToExitingPageRoute)) {
           pageRoute.markForPush();
         } else {
           pageRoute.markForAdd();
@@ -144,20 +151,15 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
     return results;
   }
 
-  bool globalPageRouteChange(
-    List<RouteTransitionRecord> newPageRouteHistory,
-    Map<RouteTransitionRecord, RouteTransitionRecord>
-        locationToExitingPageRoute,
-  ) =>
-      newPageRouteHistory.length == 1 &&
-      locationToExitingPageRoute.length == 1 &&
-      [...newPageRouteHistory, ...locationToExitingPageRoute.values].every(
-        (element) {
-          try {
-            return (element.route.settings as dynamic).child.key is GlobalKey;
-          } catch (e) {
-            return false;
-          }
-        },
-      );
+  bool showAnimation(
+      RouteTransitionRecord pageRoute,
+      Map<RouteTransitionRecord, RouteTransitionRecord>
+          locationToExitingPageRoute) {
+    final routes = {
+      pageRoute,
+      ...locationToExitingPageRoute.keys,
+      ...locationToExitingPageRoute.values
+    }.map((e) => e?.route?.settings?.name).where((element) => element != null).toSet();
+    return !setEquals(routeWithoutAnimation, routes);
+  }
 }

@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 class AvatarsWidget extends StatelessWidget {
   const AvatarsWidget({Key key, this.avatars, this.size})
-      : assert(avatars.length > 0),
-        assert(size > 0),
+      : assert(size > 0),
         super(key: key);
 
   final List<String> avatars;
@@ -28,6 +27,8 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (avatars?.isEmpty ?? true)
+      return SizedBox.fromSize(size: Size.square(size));
     switch (avatars.length) {
       case 1:
         return _AvatarImage(avatars.single, size);

@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 
 import 'package:flutter_app/ui/home/chat_page.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/ui/home/slide_page.dart';
+import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/empty.dart';
 import 'package:flutter_app/widgets/responsive_navigator.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;
 const responsiveNavigationMinWidth = 460.0;
 
+final _conversationPageKey = GlobalKey();
+final _chatPageKey = GlobalKey();
+final chatResponsiveNavigation = GlobalKey<ResponsiveNavigatorState>();
+
 class HomePage extends StatelessWidget {
-  final _conversationPageKey = GlobalKey();
-  final _chatPageKey = GlobalKey();
-  final _chatResponsiveNavigation = GlobalKey<ResponsiveNavigatorState>();
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) =>
+      Scaffold(
         backgroundColor: Colors.transparent,
         body: SizePolicyRow(
           children: [
@@ -31,33 +34,49 @@ class HomePage extends StatelessWidget {
             ),
             SizePolicyData(
               minWidth: responsiveNavigationMinWidth,
-              child: BlocListener<ConversationCubit, Conversation>(
-                listenWhen: (a, b) => (a != null) != (b != null),
-                listener: (context, state) {
-                  _chatResponsiveNavigation.currentState
-                      .showRightPage(state != null, false);
-                },
-                child: ResponsiveNavigator(
-                  key: _chatResponsiveNavigation,
-                  switchWidth: responsiveNavigationMinWidth + 260,
-                  leftPage: MaterialPage(
-                    key: const Key('conversation'),
-                    name: 'conversation',
-                    child: SizedBox(
-                      key: _conversationPageKey,
-                      width: 300,
-                      child: const ConversationPage(),
-                    ),
+              child: ResponsiveNavigator(
+                key: chatResponsiveNavigation,
+                switchWidth: responsiveNavigationMinWidth + 260,
+                leftPage: MaterialPage(
+                  key: const Key('conversation'),
+                  name: 'conversation',
+                  child: SizedBox(
+                    key: _conversationPageKey,
+                    width: 300,
+                    child: const ConversationPage(),
                   ),
-                  rightPage: MaterialPage(
-                    key: const Key('chatPage'),
-                    name: 'chatPage',
-                    child: ChatPage(key: _chatPageKey),
-                  ),
-                  // TODO Other pages of the current route
-                  // ignore: missing_return
-                  pushPage: (String name, Object arguments) {},
                 ),
+                rightEmptyPage: MaterialPage(
+                  key: const Key('empty'),
+                  name: 'empty',
+                  child: BlocConverter<SlideCategoryCubit,
+                      SlideCategoryState,
+                      String>(
+                    converter: (state) => state.name,
+                    builder: (context, name) =>
+                        DecoratedBox(
+                          child: Empty(
+                              text: 'Select a $name to start messaging'),
+                          decoration: BoxDecoration(
+                            color: BrightnessData.dynamicColor(
+                              context,
+                              const Color.fromRGBO(237, 238, 238, 1),
+                              darkColor: const Color.fromRGBO(35, 39, 43, 1),
+                            ),
+                          ),
+                        ),
+                  ),
+                ),
+                // ignore: missing_return
+                pushPage: (String name, Object arguments) {
+                  if (name == 'chatPage') {
+                    return MaterialPage(
+                      key: const Key('chatPage'),
+                      name: 'chatPage',
+                      child: ChatPage(key: _chatPageKey),
+                    );
+                  }
+                },
               ),
             ),
           ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
@@ -99,8 +100,10 @@ class _List extends StatelessWidget {
                 message: message.message,
                 count: message.count,
                 unread: message.unread,
-                onTap: () =>
-                    BlocProvider.of<ConversationCubit>(context).emit(message),
+                onTap: () {
+                  BlocProvider.of<ConversationCubit>(context).emit(message);
+                  chatResponsiveNavigation.currentState.pushPage('chatPage');
+                },
               ),
             ),
           ),
