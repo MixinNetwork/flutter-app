@@ -9,7 +9,6 @@ import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/utils/Preferences.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive/hive.dart';
 
 import 'mixin_client.dart';
 
