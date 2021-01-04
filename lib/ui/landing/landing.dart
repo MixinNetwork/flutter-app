@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/utils/Preferences.dart';
-import 'package:hive/hive.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -28,7 +27,6 @@ class _LandingPageState extends State<LandingPage> {
   String _authUrl;
   Timer _timer;
   signal.ECKeyPair keyPair;
-
   void showRetryTask(String deviceId) {
     var count = 1;
     _timer?.cancel();

@@ -5,6 +5,7 @@ import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
+import 'package:flutter_app/utils/Preferences.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
@@ -35,8 +36,16 @@ class App extends StatelessWidget {
         builder: (context, child) => BrightnessObserver(
           child: child,
         ),
-        home: const LandingPage(),
+        home: _getHomePage(),
       ),
     );
+  }
+
+  Widget _getHomePage() {
+    if (Preferences().getAccount() != null) {
+      return HomePage();
+    } else {
+      return const LandingPage();
+    }
   }
 }
