@@ -41,47 +41,51 @@ class SelectItem extends StatelessWidget {
         const Color.fromRGBO(0, 0, 0, 0.03),
         darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Row(
-          children: [
-            Image.asset(
-              asset,
-              width: 24,
-              color: iconColor,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                title,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(51, 51, 51, 1),
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+      child: LayoutBuilder(builder: (context, boxConstraints) {
+        final hideTitle = boxConstraints.maxWidth < 75;
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Image.asset(
+                asset,
+                width: 24,
+                color: iconColor,
+              ),
+              const SizedBox(width: 8),
+              if (!hideTitle)
+                Expanded(
+                  child: Text(
+                    title,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: BrightnessData.dynamicColor(
+                        context,
+                        const Color.fromRGBO(51, 51, 51, 1),
+                        darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                      ),
+                      fontSize: 14,
+                    ),
                   ),
-                  fontSize: 14,
                 ),
+              UnreadText(
+                count: count,
+                backgroundColor: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(51, 51, 51, 0.16),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                ),
+                textColor: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(51, 51, 51, 1),
+                  darkColor: const Color.fromRGBO(44, 49, 54, 0.8),
+                ),
+                fontWeight: FontWeight.w700,
               ),
-            ),
-            UnreadText(
-              count: count,
-              backgroundColor: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(51, 51, 51, 0.16),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-              ),
-              textColor: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(51, 51, 51, 1),
-                darkColor: const Color.fromRGBO(44, 49, 54, 0.8),
-              ),
-              fontWeight: FontWeight.w700,
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

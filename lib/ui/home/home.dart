@@ -23,7 +23,11 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: BrightnessData.dynamicColor(
+          context,
+          const Color.fromRGBO(255, 255, 255, 1),
+          darkColor: const Color.fromRGBO(44, 49, 54, 1),
+        ),
         body: SizePolicyRow(
           children: [
             SizePolicyData(

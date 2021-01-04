@@ -27,13 +27,8 @@ class SlidePage extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => SizedBox(
         width: 200,
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(255, 255, 255, 0.8),
-          darkColor: const Color.fromRGBO(44, 49, 54, 0.8),
-        ),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child:
