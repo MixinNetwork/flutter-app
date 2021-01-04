@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/utils/Preferences.dart';
+import 'package:hive/hive.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -84,11 +86,19 @@ class _LandingPageState extends State<LandingPage> {
         .client
         .provisioningApi
         .verifyProvisioning(request)
-        .then((value) => {debugPrint('$value')}); //Todo
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => LoadingPage()),
-    );
+        .then((value) {
+      if (value.data != null) {
+        Preferences().putAccount(value.data.toJson().toString());
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => LoadingPage()),
+        );
+      } else {
+        setState(() {
+          _showRetry = true;
+        });
+      }
+    });
   }
 
   @override

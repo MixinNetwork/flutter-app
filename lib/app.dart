@@ -4,8 +4,10 @@ import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
+import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 
 class App extends StatelessWidget {
   @override
@@ -18,7 +20,8 @@ class App extends StatelessWidget {
           create: (BuildContext context) => slideCategoryCubit,
         ),
         BlocProvider(
-          create: (BuildContext context) => ConversationListCubit(slideCategoryCubit),
+          create: (BuildContext context) =>
+              ConversationListCubit(slideCategoryCubit),
         ),
         BlocProvider(
           create: (BuildContext context) => ConversationCubit(draftCubit),
@@ -32,7 +35,7 @@ class App extends StatelessWidget {
         builder: (context, child) => BrightnessObserver(
           child: child,
         ),
-        home: HomePage(),
+        home: const LandingPage(),
       ),
     );
   }

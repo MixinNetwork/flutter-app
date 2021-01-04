@@ -3876,6 +3876,524 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   bool get dontWriteConstraints => true;
 }
 
+class Job extends DataClass implements Insertable<Job> {
+  final String jobId;
+  final String createdAt;
+  final int orderId;
+  final int priority;
+  final String userId;
+  final String blazeMessage;
+  final String conversationId;
+  final String resendMessageId;
+  final int runCount;
+  Job(
+      {@required this.jobId,
+      @required this.createdAt,
+      this.orderId,
+      @required this.priority,
+      this.userId,
+      this.blazeMessage,
+      this.conversationId,
+      this.resendMessageId,
+      @required this.runCount});
+  factory Job.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final intType = db.typeSystem.forDartType<int>();
+    return Job(
+      jobId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}job_id']),
+      createdAt: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      orderId:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}order_id']),
+      priority:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}priority']),
+      userId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      blazeMessage: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}blaze_message']),
+      conversationId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
+      resendMessageId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}resend_message_id']),
+      runCount:
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}run_count']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || jobId != null) {
+      map['job_id'] = Variable<String>(jobId);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<String>(createdAt);
+    }
+    if (!nullToAbsent || orderId != null) {
+      map['order_id'] = Variable<int>(orderId);
+    }
+    if (!nullToAbsent || priority != null) {
+      map['priority'] = Variable<int>(priority);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || blazeMessage != null) {
+      map['blaze_message'] = Variable<String>(blazeMessage);
+    }
+    if (!nullToAbsent || conversationId != null) {
+      map['conversation_id'] = Variable<String>(conversationId);
+    }
+    if (!nullToAbsent || resendMessageId != null) {
+      map['resend_message_id'] = Variable<String>(resendMessageId);
+    }
+    if (!nullToAbsent || runCount != null) {
+      map['run_count'] = Variable<int>(runCount);
+    }
+    return map;
+  }
+
+  JobsCompanion toCompanion(bool nullToAbsent) {
+    return JobsCompanion(
+      jobId:
+          jobId == null && nullToAbsent ? const Value.absent() : Value(jobId),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      orderId: orderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderId),
+      priority: priority == null && nullToAbsent
+          ? const Value.absent()
+          : Value(priority),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      blazeMessage: blazeMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(blazeMessage),
+      conversationId: conversationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conversationId),
+      resendMessageId: resendMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resendMessageId),
+      runCount: runCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(runCount),
+    );
+  }
+
+  factory Job.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return Job(
+      jobId: serializer.fromJson<String>(json['job_id']),
+      createdAt: serializer.fromJson<String>(json['created_at']),
+      orderId: serializer.fromJson<int>(json['order_id']),
+      priority: serializer.fromJson<int>(json['priority']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      blazeMessage: serializer.fromJson<String>(json['blaze_message']),
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      resendMessageId: serializer.fromJson<String>(json['resend_message_id']),
+      runCount: serializer.fromJson<int>(json['run_count']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'job_id': serializer.toJson<String>(jobId),
+      'created_at': serializer.toJson<String>(createdAt),
+      'order_id': serializer.toJson<int>(orderId),
+      'priority': serializer.toJson<int>(priority),
+      'user_id': serializer.toJson<String>(userId),
+      'blaze_message': serializer.toJson<String>(blazeMessage),
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'resend_message_id': serializer.toJson<String>(resendMessageId),
+      'run_count': serializer.toJson<int>(runCount),
+    };
+  }
+
+  Job copyWith(
+          {String jobId,
+          String createdAt,
+          int orderId,
+          int priority,
+          String userId,
+          String blazeMessage,
+          String conversationId,
+          String resendMessageId,
+          int runCount}) =>
+      Job(
+        jobId: jobId ?? this.jobId,
+        createdAt: createdAt ?? this.createdAt,
+        orderId: orderId ?? this.orderId,
+        priority: priority ?? this.priority,
+        userId: userId ?? this.userId,
+        blazeMessage: blazeMessage ?? this.blazeMessage,
+        conversationId: conversationId ?? this.conversationId,
+        resendMessageId: resendMessageId ?? this.resendMessageId,
+        runCount: runCount ?? this.runCount,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Job(')
+          ..write('jobId: $jobId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderId: $orderId, ')
+          ..write('priority: $priority, ')
+          ..write('userId: $userId, ')
+          ..write('blazeMessage: $blazeMessage, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('resendMessageId: $resendMessageId, ')
+          ..write('runCount: $runCount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      jobId.hashCode,
+      $mrjc(
+          createdAt.hashCode,
+          $mrjc(
+              orderId.hashCode,
+              $mrjc(
+                  priority.hashCode,
+                  $mrjc(
+                      userId.hashCode,
+                      $mrjc(
+                          blazeMessage.hashCode,
+                          $mrjc(
+                              conversationId.hashCode,
+                              $mrjc(resendMessageId.hashCode,
+                                  runCount.hashCode)))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is Job &&
+          other.jobId == this.jobId &&
+          other.createdAt == this.createdAt &&
+          other.orderId == this.orderId &&
+          other.priority == this.priority &&
+          other.userId == this.userId &&
+          other.blazeMessage == this.blazeMessage &&
+          other.conversationId == this.conversationId &&
+          other.resendMessageId == this.resendMessageId &&
+          other.runCount == this.runCount);
+}
+
+class JobsCompanion extends UpdateCompanion<Job> {
+  final Value<String> jobId;
+  final Value<String> createdAt;
+  final Value<int> orderId;
+  final Value<int> priority;
+  final Value<String> userId;
+  final Value<String> blazeMessage;
+  final Value<String> conversationId;
+  final Value<String> resendMessageId;
+  final Value<int> runCount;
+  const JobsCompanion({
+    this.jobId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.blazeMessage = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.resendMessageId = const Value.absent(),
+    this.runCount = const Value.absent(),
+  });
+  JobsCompanion.insert({
+    @required String jobId,
+    @required String createdAt,
+    this.orderId = const Value.absent(),
+    @required int priority,
+    this.userId = const Value.absent(),
+    this.blazeMessage = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.resendMessageId = const Value.absent(),
+    @required int runCount,
+  })  : jobId = Value(jobId),
+        createdAt = Value(createdAt),
+        priority = Value(priority),
+        runCount = Value(runCount);
+  static Insertable<Job> custom({
+    Expression<String> jobId,
+    Expression<String> createdAt,
+    Expression<int> orderId,
+    Expression<int> priority,
+    Expression<String> userId,
+    Expression<String> blazeMessage,
+    Expression<String> conversationId,
+    Expression<String> resendMessageId,
+    Expression<int> runCount,
+  }) {
+    return RawValuesInsertable({
+      if (jobId != null) 'job_id': jobId,
+      if (createdAt != null) 'created_at': createdAt,
+      if (orderId != null) 'order_id': orderId,
+      if (priority != null) 'priority': priority,
+      if (userId != null) 'user_id': userId,
+      if (blazeMessage != null) 'blaze_message': blazeMessage,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (resendMessageId != null) 'resend_message_id': resendMessageId,
+      if (runCount != null) 'run_count': runCount,
+    });
+  }
+
+  JobsCompanion copyWith(
+      {Value<String> jobId,
+      Value<String> createdAt,
+      Value<int> orderId,
+      Value<int> priority,
+      Value<String> userId,
+      Value<String> blazeMessage,
+      Value<String> conversationId,
+      Value<String> resendMessageId,
+      Value<int> runCount}) {
+    return JobsCompanion(
+      jobId: jobId ?? this.jobId,
+      createdAt: createdAt ?? this.createdAt,
+      orderId: orderId ?? this.orderId,
+      priority: priority ?? this.priority,
+      userId: userId ?? this.userId,
+      blazeMessage: blazeMessage ?? this.blazeMessage,
+      conversationId: conversationId ?? this.conversationId,
+      resendMessageId: resendMessageId ?? this.resendMessageId,
+      runCount: runCount ?? this.runCount,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (jobId.present) {
+      map['job_id'] = Variable<String>(jobId.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<int>(orderId.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (blazeMessage.present) {
+      map['blaze_message'] = Variable<String>(blazeMessage.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (resendMessageId.present) {
+      map['resend_message_id'] = Variable<String>(resendMessageId.value);
+    }
+    if (runCount.present) {
+      map['run_count'] = Variable<int>(runCount.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JobsCompanion(')
+          ..write('jobId: $jobId, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderId: $orderId, ')
+          ..write('priority: $priority, ')
+          ..write('userId: $userId, ')
+          ..write('blazeMessage: $blazeMessage, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('resendMessageId: $resendMessageId, ')
+          ..write('runCount: $runCount')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Jobs extends Table with TableInfo<Jobs, Job> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  Jobs(this._db, [this._alias]);
+  final VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
+  GeneratedTextColumn _jobId;
+  GeneratedTextColumn get jobId => _jobId ??= _constructJobId();
+  GeneratedTextColumn _constructJobId() {
+    return GeneratedTextColumn('job_id', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  GeneratedTextColumn _createdAt;
+  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedTextColumn _constructCreatedAt() {
+    return GeneratedTextColumn('created_at', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  final VerificationMeta _orderIdMeta = const VerificationMeta('orderId');
+  GeneratedIntColumn _orderId;
+  GeneratedIntColumn get orderId => _orderId ??= _constructOrderId();
+  GeneratedIntColumn _constructOrderId() {
+    return GeneratedIntColumn('order_id', $tableName, true,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _priorityMeta = const VerificationMeta('priority');
+  GeneratedIntColumn _priority;
+  GeneratedIntColumn get priority => _priority ??= _constructPriority();
+  GeneratedIntColumn _constructPriority() {
+    return GeneratedIntColumn('priority', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedTextColumn _userId;
+  GeneratedTextColumn get userId => _userId ??= _constructUserId();
+  GeneratedTextColumn _constructUserId() {
+    return GeneratedTextColumn('user_id', $tableName, true,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _blazeMessageMeta =
+      const VerificationMeta('blazeMessage');
+  GeneratedTextColumn _blazeMessage;
+  GeneratedTextColumn get blazeMessage =>
+      _blazeMessage ??= _constructBlazeMessage();
+  GeneratedTextColumn _constructBlazeMessage() {
+    return GeneratedTextColumn('blaze_message', $tableName, true,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  GeneratedTextColumn _conversationId;
+  GeneratedTextColumn get conversationId =>
+      _conversationId ??= _constructConversationId();
+  GeneratedTextColumn _constructConversationId() {
+    return GeneratedTextColumn('conversation_id', $tableName, true,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _resendMessageIdMeta =
+      const VerificationMeta('resendMessageId');
+  GeneratedTextColumn _resendMessageId;
+  GeneratedTextColumn get resendMessageId =>
+      _resendMessageId ??= _constructResendMessageId();
+  GeneratedTextColumn _constructResendMessageId() {
+    return GeneratedTextColumn('resend_message_id', $tableName, true,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _runCountMeta = const VerificationMeta('runCount');
+  GeneratedIntColumn _runCount;
+  GeneratedIntColumn get runCount => _runCount ??= _constructRunCount();
+  GeneratedIntColumn _constructRunCount() {
+    return GeneratedIntColumn('run_count', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [
+        jobId,
+        createdAt,
+        orderId,
+        priority,
+        userId,
+        blazeMessage,
+        conversationId,
+        resendMessageId,
+        runCount
+      ];
+  @override
+  Jobs get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'jobs';
+  @override
+  final String actualTableName = 'jobs';
+  @override
+  VerificationContext validateIntegrity(Insertable<Job> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('job_id')) {
+      context.handle(
+          _jobIdMeta, jobId.isAcceptableOrUnknown(data['job_id'], _jobIdMeta));
+    } else if (isInserting) {
+      context.missing(_jobIdMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(_orderIdMeta,
+          orderId.isAcceptableOrUnknown(data['order_id'], _orderIdMeta));
+    }
+    if (data.containsKey('priority')) {
+      context.handle(_priorityMeta,
+          priority.isAcceptableOrUnknown(data['priority'], _priorityMeta));
+    } else if (isInserting) {
+      context.missing(_priorityMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
+    }
+    if (data.containsKey('blaze_message')) {
+      context.handle(
+          _blazeMessageMeta,
+          blazeMessage.isAcceptableOrUnknown(
+              data['blaze_message'], _blazeMessageMeta));
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id'], _conversationIdMeta));
+    }
+    if (data.containsKey('resend_message_id')) {
+      context.handle(
+          _resendMessageIdMeta,
+          resendMessageId.isAcceptableOrUnknown(
+              data['resend_message_id'], _resendMessageIdMeta));
+    }
+    if (data.containsKey('run_count')) {
+      context.handle(_runCountMeta,
+          runCount.isAcceptableOrUnknown(data['run_count'], _runCountMeta));
+    } else if (isInserting) {
+      context.missing(_runCountMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {jobId};
+  @override
+  Job map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return Job.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  Jobs createAlias(String alias) {
+    return Jobs(_db, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(job_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 class MessageMention extends DataClass implements Insertable<MessageMention> {
   final String messageId;
   final String conversationId;
@@ -7039,6 +7557,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   FloodMessages get floodMessages => _floodMessages ??= FloodMessages(this);
   Hyperlinks _hyperlinks;
   Hyperlinks get hyperlinks => _hyperlinks ??= Hyperlinks(this);
+  Jobs _jobs;
+  Jobs get jobs => _jobs ??= Jobs(this);
   MessageMentions _messageMentions;
   MessageMentions get messageMentions =>
       _messageMentions ??= MessageMentions(this);
@@ -7069,6 +7589,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         conversations,
         floodMessages,
         hyperlinks,
+        jobs,
         messageMentions,
         messages,
         messagesHistory,
