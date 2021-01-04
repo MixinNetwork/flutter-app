@@ -10,6 +10,8 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 
+import 'mixin_client.dart';
+
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -43,7 +45,14 @@ class App extends StatelessWidget {
   }
 
   Widget _getHomePage() {
-    if (Preferences().getAccount() != null) {
+    final account = Preferences().getAccount();
+    final privateKey = Preferences().getPrivateKey();
+    if (account != null || privateKey != null) {
+      MixinClient().client.initMixin(
+          account.userId,
+          account.sessionId,
+          privateKey,
+          'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE');
       return HomePage();
     } else {
       return const LandingPage();

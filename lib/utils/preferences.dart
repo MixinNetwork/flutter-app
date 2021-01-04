@@ -27,6 +27,14 @@ class Preferences {
     }
   }
 
+  void putPrivateKey(String privateKey) {
+    box.put('private_key', privateKey);
+  }
+
+  String getPrivateKey() {
+    return box.get('private_key');
+  }
+
   static Future<void> init() async {
     final dbFolder = await getApplicationDocumentsDirectory();
     debugPrint(dbFolder.path);

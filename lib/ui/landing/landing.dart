@@ -5,9 +5,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/utils/Preferences.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
-import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 
 import '../../mixin_client.dart';
 import 'loading.dart';
@@ -38,6 +38,7 @@ class _LandingPageState extends State<LandingPage> {
         });
       } else {
         count++;
+
         MixinClient()
             .client
             .provisioningApi
@@ -56,20 +57,22 @@ class _LandingPageState extends State<LandingPage> {
                               provisioning.secret);
                           final msg = json.decode(String.fromCharCodes(result));
 
+                          final edKeyPair = ed.generateKey();
                           final registrationId =
                               signal.KeyHelper.generateRegistrationId(false);
-                          verify(ProvisioningRequest(
-                              code: msg['provisioning_code'],
-                              userId: msg['user_id'],
-                              sessionId: msg['session_id'],
-                              platform: 'Desktop',
-                              purpose: 'SESSION',
-                              sessionSecret: base64.encode(
-                                  (keyPair.publicKey as DjbECPublicKey)
-                                      .publicKey),
-                              appVersion: '0.0.1',
-                              registrationId: registrationId,
-                              platformVersion: 'OS X 10.15.6'));
+                          verify(
+                              ProvisioningRequest(
+                                  code: msg['provisioning_code'],
+                                  userId: msg['user_id'],
+                                  sessionId: msg['session_id'],
+                                  platform: 'Desktop',
+                                  purpose: 'SESSION',
+                                  sessionSecret:
+                                      base64.encode(edKeyPair.publicKey.bytes),
+                                  appVersion: '0.0.1',
+                                  registrationId: registrationId,
+                                  platformVersion: 'OS X 10.15.6'),
+                              base64.encode(edKeyPair.privateKey.bytes));
                         }
                       },
                       onFailure: (MixinError error) =>
@@ -79,14 +82,21 @@ class _LandingPageState extends State<LandingPage> {
     });
   }
 
-  void verify(ProvisioningRequest request) {
+  void verify(ProvisioningRequest request, String privateKey) {
     MixinClient()
         .client
         .provisioningApi
         .verifyProvisioning(request)
         .then((value) {
       if (value.data != null) {
-        Preferences().putAccount(value.data);
+        final account = value.data;
+        Preferences().putAccount(account);
+        Preferences().putPrivateKey(privateKey);
+        MixinClient().client.initMixin(
+            account.userId,
+            account.sessionId,
+            privateKey,
+            'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE');
         Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => LoadingPage()),
