@@ -3,16 +3,19 @@ part of 'slide_category_cubit.dart';
 enum SlideCategoryType {
   people,
   circle,
+  setting,
 }
 
 class SlideCategoryState extends Equatable {
   const SlideCategoryState({
-    this.type,
+    @required this.type,
     this.name,
+    this.id,
   });
 
   final SlideCategoryType type;
   final String name;
+  final String id;
 
   @override
   List<Object> get props => [type, name];
@@ -20,10 +23,12 @@ class SlideCategoryState extends Equatable {
   SlideCategoryState copyWith({
     final SlideCategoryType type,
     final String name,
+    final String id,
   }) {
     return SlideCategoryState(
       type: type ?? this.type,
       name: name ?? this.name,
+      id: id ?? this.id,
     );
   }
 }

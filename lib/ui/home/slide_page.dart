@@ -43,10 +43,18 @@ class SlidePage extends StatelessWidget {
             const _CircleList(),
             // TODO user profile callback
             Builder(
-              builder: (context) => const SelectItem(
-                asset: Assets.assetsImagesAvatarPng,
-                title: 'Mixin',
-              ),
+              builder: (context) =>
+                  BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+                      converter: (state) =>
+                          state?.type == SlideCategoryType.setting,
+                      builder: (context, selected) => SelectItem(
+                            asset: Assets.assetsImagesAvatarPng,
+                            title: 'Mixin',
+                            selected: selected,
+                            onTap: () =>
+                                BlocProvider.of<SlideCategoryCubit>(context)
+                                    .select(SlideCategoryType.setting),
+                          )),
             ),
             const SizedBox(height: 4),
           ]),

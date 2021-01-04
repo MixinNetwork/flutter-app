@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
-import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
+import 'package:flutter_app/ui/route.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -102,7 +102,7 @@ class _List extends StatelessWidget {
                 unread: message.unread,
                 onTap: () {
                   BlocProvider.of<ConversationCubit>(context).emit(message);
-                  chatResponsiveNavigation.currentState.pushPage('chatPage');
+                  MixinRouter.instance.pushPage(MixinRouter.chatPage);
                 },
               ),
             ),

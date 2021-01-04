@@ -2,8 +2,12 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class AvatarsWidget extends StatelessWidget {
-  const AvatarsWidget({Key key, this.avatars, this.size})
-      : assert(size > 0),
+  const AvatarsWidget({
+    Key key,
+    @required this.avatars,
+    this.size,
+  })  : assert(avatars.length > 0),
+        assert(size > 0),
         super(key: key);
 
   final List<String> avatars;

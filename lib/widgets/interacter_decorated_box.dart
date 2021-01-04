@@ -98,7 +98,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
-  })  : _decoration = decoration,
+  })  : _decoration = decoration ?? const BoxDecoration(),
         hoveringDecoration = hoveringColor != null
             ? decoration?.copyWith(color: hoveringColor)
             : null,

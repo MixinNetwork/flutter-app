@@ -4,6 +4,7 @@ import 'package:flutter_app/constants/assets.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/widgets/action_button.dart';
+import 'package:flutter_app/widgets/back_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -35,22 +36,17 @@ class ChatBar extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
         child: Row(children: [
           Builder(
             builder: (context) => ModalRoute.of(context)?.canPop ?? false
-                ? Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: ActionButton(
-                      name: Assets.assetsImagesIcBackPng,
-                      color: actionColor,
-                      onTap: () {
-                        BlocProvider.of<ConversationCubit>(context).emit(null);
-                        Navigator.pop(context);
-                      },
-                    ),
-                  )
-                : const SizedBox(),
+                ? MixinBackButton(
+                    color: actionColor,
+                    onTap: () {
+                      BlocProvider.of<ConversationCubit>(context).emit(null);
+                      Navigator.pop(context);
+                    })
+                : const SizedBox(width: 16),
           ),
           Expanded(
             flex: 1,
@@ -114,22 +110,22 @@ class _Name extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocConverter<ConversationCubit, Conversation, String>(
-      converter: (state) => state?.name,
-      builder: (context, name) => Text(
-        name ?? '',
-        style: TextStyle(
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(0, 0, 0, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+  Widget build(BuildContext context) =>
+      BlocConverter<ConversationCubit, Conversation, String>(
+        converter: (state) => state?.name,
+        buildWhen: (a, b) => b != null,
+        builder: (context, name) => Text(
+          name,
+          style: TextStyle(
+            color: BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(0, 0, 0, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+            ),
+            fontSize: 20,
           ),
-          fontSize: 20,
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _Avatar extends StatelessWidget {
@@ -138,13 +134,13 @@ class _Avatar extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocConverter<ConversationCubit, Conversation, List<String>>(
-      converter: (state) => state?.avatars,
-      builder: (context, avatars) => AvatarsWidget(
-        size: 50,
-        avatars: avatars,
-      ),
-    );
-  }
+  Widget build(BuildContext context) =>
+      BlocConverter<ConversationCubit, Conversation, List<String>>(
+        converter: (state) => state?.avatars,
+        buildWhen: (a, b) => b?.isNotEmpty == true,
+        builder: (context, avatars) => AvatarsWidget(
+          size: 50,
+          avatars: avatars,
+        ),
+      );
 }

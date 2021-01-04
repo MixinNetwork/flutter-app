@@ -4,6 +4,7 @@ import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
+import 'package:flutter_app/ui/setting/bloc/setting_selected_cubit.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/utils/Preferences.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -31,6 +32,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (BuildContext context) => draftCubit,
+        ),
+        BlocProvider(
+          create: (BuildContext context) => SettingSelectedCubit(),
         ),
       ],
       child: MaterialApp(

@@ -24,55 +24,53 @@ class ResponsiveNavigator extends StatefulWidget {
 
 class ResponsiveNavigatorState extends State<ResponsiveNavigator> {
   final _pages = <MaterialPage>[];
+  bool navigationMode;
 
-  void clearRightPage() {
-    setState(_pages.clear);
-  }
-
-  void pushPage(String name, [Object arguments]) => setState(() {
+  void pushPage(String name, {Object arguments}) => setState(() {
         final page = widget.pushPage(name, arguments);
-        final index = page.child.key is GlobalKey
-            ? _pages.indexWhere(
-                (element) => identical(element.child.key, page.child.key))
-            : -1;
-        _pages
-          ..removeRange(max(index, 0), _pages.length)
-          ..add(page);
+        var index = -1;
+        index = _pages.indexWhere(
+            (element) => identical(element.child.key, page.child.key));
+        if (index != -1) _pages.removeRange(max(index, 0), _pages.length);
+        _pages.add(page);
       });
 
+  void popWhere(bool Function(MaterialPage page) test) =>
+      setState(() => _pages.removeWhere(test));
+
   @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, boxConstraints) {
-      final navigationMode = boxConstraints.maxWidth < widget.switchWidth;
-      return Row(
-        children: [
-          if (!navigationMode) widget.leftPage.child,
-          Expanded(
-            child: ClipRect(
-              child: Navigator(
-                transitionDelegate: DefaultTransitionDelegate(
-                  routeWithoutAnimation: {
-                    widget.leftPage.name,
-                    widget.rightEmptyPage.name,
+  Widget build(BuildContext context) =>
+      LayoutBuilder(builder: (context, boxConstraints) {
+        navigationMode = boxConstraints.maxWidth < widget.switchWidth;
+        return Row(
+          children: [
+            if (!navigationMode) widget.leftPage.child,
+            Expanded(
+              child: ClipRect(
+                child: Navigator(
+                  transitionDelegate: DefaultTransitionDelegate(
+                    routeWithoutAnimation: {
+                      widget.leftPage.name,
+                      widget.rightEmptyPage.name,
+                    },
+                  ),
+                  onPopPage: (Route<dynamic> route, dynamic result) {
+                    final bool = _pages.isNotEmpty == true;
+                    if (bool) setState(_pages.removeLast);
+                    return route.didPop(result);
                   },
+                  pages: [
+                    if (navigationMode) widget.leftPage,
+                    if (!navigationMode && _pages.isEmpty)
+                      widget.rightEmptyPage,
+                    ..._pages,
+                  ],
                 ),
-                onPopPage: (Route<dynamic> route, dynamic result) {
-                  final bool = _pages.isNotEmpty == true;
-                  if (bool) setState(_pages.removeLast);
-                  return route.didPop(result);
-                },
-                pages: [
-                  if (navigationMode) widget.leftPage,
-                  if (!navigationMode && _pages.isEmpty) widget.rightEmptyPage,
-                  ..._pages,
-                ],
               ),
             ),
-          ),
-        ],
-      );
-    });
-  }
+          ],
+        );
+      });
 }
 
 class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
@@ -159,7 +157,10 @@ class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
       pageRoute,
       ...locationToExitingPageRoute.keys,
       ...locationToExitingPageRoute.values
-    }.map((e) => e?.route?.settings?.name).where((element) => element != null).toSet();
+    }
+        .map((e) => e?.route?.settings?.name)
+        .where((element) => element != null)
+        .toSet();
     return !setEquals(routeWithoutAnimation, routes);
   }
 }
