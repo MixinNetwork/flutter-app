@@ -132,4 +132,10 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       ));
     }));
   }
+
+  @override
+  Future<void> close() async {
+    await super.close();
+    await periodicStreamController.close();
+  }
 }
