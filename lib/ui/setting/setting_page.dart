@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
 import 'package:flutter_app/ui/route.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
@@ -61,7 +62,7 @@ class SettingPage extends StatelessWidget {
               child: _Item(
                 assetName: Assets.assetsImagesIcSignOutSvg,
                 title: 'Sign Out',
-                onTap: () {},
+                onTap: () => AuthCubit.of(context).signOut(),
                 color: BrightnessData.dynamicColor(
                   context,
                   const Color.fromRGBO(246, 112, 112, 1),

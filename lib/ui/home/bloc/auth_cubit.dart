@@ -16,4 +16,8 @@ class AuthCubit extends HydratedCubit<AuthState> {
   Map<String, dynamic> toJson(AuthState state) => AuthState.toJson(state);
 
   static AuthCubit of(BuildContext context) => BlocProvider.of<AuthCubit>(context);
+
+  void signOut() {
+    emit(null);
+  }
 }

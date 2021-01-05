@@ -102,9 +102,9 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
         .listen((event) {
       streamSubscription?.cancel();
       emit(state.copyWith(
-              status: LandingStatus.needRetry,
-            ));
-        }));
+        status: LandingStatus.needRetry,
+      ));
+    }));
 
     addSubscription(secretStream.listen((event) {
       streamSubscription?.cancel();
