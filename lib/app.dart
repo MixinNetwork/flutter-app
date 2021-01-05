@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
+import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
@@ -56,6 +57,16 @@ class App extends StatelessWidget {
           account.sessionId,
           privateKey,
           'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE');
+      final token = signAuthTokenWithEdDSA(
+          account.userId,
+          account.sessionId,
+          privateKey,
+          'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE',
+          'GET',
+          '/',
+          '');
+
+      Blaze().connect(token);
       return HomePage();
     } else {
       return const LandingPage();
