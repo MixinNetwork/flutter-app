@@ -30,7 +30,7 @@ class Blaze {
     _sendGZip(BlazeMessage(Uuid().v4(), 'LIST_PENDING_MESSAGES'));
   }
 
-  void _sendGZip(msg) {
+  void _sendGZip(BlazeMessage msg) {
     channel.sink.add(
         GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }

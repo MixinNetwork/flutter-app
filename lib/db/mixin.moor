@@ -2,7 +2,7 @@
 
 CREATE TABLE addresses ( address_id TEXT NOT NULL, type TEXT NOT NULL, asset_id TEXT NOT NULL, public_key TEXT, label TEXT, updated_at TEXT NOT NULL, reserve TEXT NOT NULL, fee TEXT NOT NULL, account_name TEXT, account_tag TEXT, dust TEXT, PRIMARY KEY(address_id) );
 
-CREATE TABLE "apps" ( app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT NOT NULL, redirect_uri TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, description TEXT NOT NULL, capabilites TEXT, creator_id TEXT NOT NULL, PRIMARY KEY(app_id) );
+CREATE TABLE apps ( app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT NOT NULL, redirect_uri TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, description TEXT NOT NULL, capabilites TEXT, creator_id TEXT NOT NULL, PRIMARY KEY(app_id) );
 
 CREATE TABLE assets (asset_id TEXT NOT NULL,symbol TEXT NOT NULL,name TEXT NOT NULL,icon_url TEXT NOT NULL,balance TEXT NOT NULL,destination TEXT NOT NULL,tag TEXT,price_btc TEXT NOT NULL,price_usd TEXT NOT NULL,chain_id TEXT NOT NULL,change_usd TEXT NOT NULL,change_btc TEXT NOT NULL,confirmations INTEGER NOT NULL,asset_key TEXT,PRIMARY KEY(asset_id));
 
@@ -16,15 +16,15 @@ CREATE TABLE flood_messages ( message_id TEXT NOT NULL, data TEXT NOT NULL, crea
 
 CREATE TABLE hyperlinks ( hyperlink TEXT NOT NULL, site_name TEXT NOT NULL, site_title TEXT NOT NULL, site_description TEXT, site_image TEXT, PRIMARY KEY(hyperlink) );
 
-CREATE TABLE jobs ( job_id TEXT NOT NULL, action TEXT NOT NULL, created_at TEXT NOT NULL, order_id INTEGER, priority INTEGER NOT NULL, user_id TEXT, blaze_message TEXT, conversation_id TEXT, resend_message_id TEXT, run_count INTEGER NOT NULL, PRIMARY KEY(job_id) );
+CREATE TABLE jobs ( job_id TEXT NOT NULL, "action" TEXT NOT NULL, created_at TEXT NOT NULL, order_id INTEGER, priority INTEGER NOT NULL, user_id TEXT, blaze_message TEXT, conversation_id TEXT, resend_message_id TEXT, run_count INTEGER NOT NULL, PRIMARY KEY(job_id) );
 
 CREATE TABLE message_mentions ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, mentions TEXT NOT NULL, has_read INTEGER, PRIMARY KEY(message_id) );
 
-CREATE TABLE messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, content TEXT, media_url TEXT, media_mime_type TEXT, media_size INTEGER, media_duration TEXT, media_width INTEGER, media_height INTEGER, media_hash TEXT, thumb_image TEXT, media_key TEXT, media_digest TEXT, media_status TEXT, status TEXT NOT NULL, created_at TEXT NOT NULL, action TEXT, participant_id TEXT, snapshot_id TEXT, hyperlink TEXT, name TEXT, album_id TEXT, sticker_id TEXT, shared_user_id TEXT, media_waveform TEXT, quote_message_id TEXT, quote_content TEXT, thumb_url TEXT, PRIMARY KEY(message_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
+CREATE TABLE messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, content TEXT, media_url TEXT, media_mime_type TEXT, media_size INTEGER, media_duration TEXT, media_width INTEGER, media_height INTEGER, media_hash TEXT, thumb_image TEXT, media_key TEXT, media_digest TEXT, media_status TEXT, status TEXT NOT NULL, created_at TEXT NOT NULL, "action" TEXT, participant_id TEXT, snapshot_id TEXT, hyperlink TEXT, name TEXT, album_id TEXT, sticker_id TEXT, shared_user_id TEXT, media_waveform TEXT, quote_message_id TEXT, quote_content TEXT, thumb_url TEXT, PRIMARY KEY(message_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
 CREATE TABLE messages_history ( message_id TEXT NOT NULL, PRIMARY KEY(message_id) );
 
-CREATE TABLE offsets ( key TEXT NOT NULL, timestamp TEXT NOT NULL, PRIMARY KEY(key) );
+CREATE TABLE offsets ( "key" TEXT NOT NULL, timestamp TEXT NOT NULL, PRIMARY KEY("key") );
 
 CREATE TABLE participant_session ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER, created_at TEXT, PRIMARY KEY(conversation_id, user_id, session_id) );
 
@@ -32,17 +32,17 @@ CREATE TABLE participants ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL
 
 CREATE TABLE ratchet_sender_keys ( group_id TEXT NOT NULL, sender_id TEXT NOT NULL, status TEXT NOT NULL, message_id TEXT, created_at TEXT NOT NULL, PRIMARY KEY(group_id, sender_id) );
 
-CREATE TABLE resend_session_messages ( message_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, status INTEGER NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(message_id, user_id, session_id) )
+CREATE TABLE resend_session_messages ( message_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, status INTEGER NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY(message_id, user_id, session_id) );
 
-CREATE TABLE sent_session_sender_keys ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER NOT NULL, sender_key_id INTEGER, created_at TEXT, PRIMARY KEY(conversation_id,user_id, session_id) )
+CREATE TABLE sent_session_sender_keys ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER NOT NULL, sender_key_id INTEGER, created_at TEXT, PRIMARY KEY(conversation_id,user_id, session_id) );
 
-CREATE TABLE snapshots (snapshot_id TEXT NOT NULL,type TEXT NOT NULL,asset_id TEXT NOT NULL,amount TEXT NOT NULL,created_at TEXT NOT NULL,opponent_id TEXT,transaction_hash TEXT,sender TEXT,receiver TEXT,memo TEXT,confirmations INTEGER,PRIMARY KEY(snapshot_id))
+CREATE TABLE snapshots (snapshot_id TEXT NOT NULL,type TEXT NOT NULL,asset_id TEXT NOT NULL,amount TEXT NOT NULL,created_at TEXT NOT NULL,opponent_id TEXT,transaction_hash TEXT,sender TEXT,receiver TEXT,memo TEXT,confirmations INTEGER,PRIMARY KEY(snapshot_id));
 
-CREATE TABLE sticker_albums ( album_id TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, created_at TEXT NOT NULL, update_at TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL, PRIMARY KEY(album_id) )
+CREATE TABLE sticker_albums ( album_id TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, created_at TEXT NOT NULL, update_at TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL, PRIMARY KEY(album_id) );
 
-CREATE TABLE sticker_relationships ( album_id TEXT NOT NULL, sticker_id TEXT NOT NULL, PRIMARY KEY(album_id,sticker_id) )
+CREATE TABLE sticker_relationships ( album_id TEXT NOT NULL, sticker_id TEXT NOT NULL, PRIMARY KEY(album_id,sticker_id) );
 
-CREATE TABLE stickers ( sticker_id TEXT NOT NULL, album_id TEXT, name TEXT NOT NULL, asset_url TEXT NOT NULL, asset_type TEXT NOT NULL, asset_width INTEGER NOT NULL, asset_height INTEGER NOT NULL, created_at TEXT NOT NULL, last_use_at TEXT, PRIMARY KEY(sticker_id) )
+CREATE TABLE stickers ( sticker_id TEXT NOT NULL, album_id TEXT, name TEXT NOT NULL, asset_url TEXT NOT NULL, asset_type TEXT NOT NULL, asset_width INTEGER NOT NULL, asset_height INTEGER NOT NULL, created_at TEXT NOT NULL, last_use_at TEXT, PRIMARY KEY(sticker_id) );
 
-CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT NOT NULL, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified INTEGER, created_at TEXT, mute_until TEXT, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) )
+CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT NOT NULL, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified INTEGER, created_at TEXT, mute_until TEXT, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) );
 

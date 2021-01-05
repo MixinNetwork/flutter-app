@@ -1,9 +1,9 @@
-class Message {
+class BlazeMessage {
   final String id;
   final String action;
-  Message(this.id, this.action);
+  BlazeMessage(this.id, this.action);
 
-  Message.fromJson(Map<String, dynamic> json)
+  BlazeMessage.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         action = json['action'];
 
