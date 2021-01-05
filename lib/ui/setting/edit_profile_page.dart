@@ -6,76 +6,77 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 
 class EditProfilePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      appBar: MixinAppBar.builderAppBar(
-        context,
-        title: 'Edit Profile',
-        actions: [
-          TextButton(
-            onPressed: () {},
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 40),
-            ClipOval(
-              child: Image.asset(
-                Assets.assetsImagesAvatarPng,
-                width: 100,
-                height: 100,
-              ),
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: BrightnessData.dynamicColor(
+          context,
+          const Color.fromRGBO(246, 247, 250, 0.9),
+          darkColor: const Color.fromRGBO(40, 44, 48, 1),
+        ),
+        appBar: MixinAppBar(
+          title: 'Edit Profile',
+          actions: [
+            TextButton(
+              onPressed: () {},
+              child: const Text('Save'),
             ),
-            const SizedBox(height: 10),
-            Text(
-              'Mixin ID: 220021',
-              style: TextStyle(
-                fontSize: 14,
-                color: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(188, 190, 195, 1),
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-                ),
-              ),
-            ),
-            _Item(
-              title: 'Name',
-              controller: TextEditingController(text: 'Diego Morata'),
-            ),
-            const SizedBox(height: 32),
-            _Item(
-              title: 'Introduction',
-              controller:
-                  TextEditingController(text: 'Long XIN short the world'),
-            ),
-            const SizedBox(height: 32),
-            _Item(
-              title: 'Phone number',
-              controller: TextEditingController(text: '18612345678'),
-              readOnly: true,
-            ),
-            const SizedBox(height: 70),
-            Text(
-              '2016年3月21日 加入',
-              style: TextStyle(
-                fontSize: 14,
-                color: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(184, 189, 199, 1),
-                  darkColor: const Color.fromRGBO(184, 189, 199, 1),
-                ),
-              ),
-            ),
-            const SizedBox(height: 48),
           ],
         ),
-      ),
-    );
-  }
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 40),
+              ClipOval(
+                child: Image.asset(
+                  Assets.assetsImagesAvatarPng,
+                  width: 100,
+                  height: 100,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'Mixin ID: 220021',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(188, 190, 195, 1),
+                    darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                  ),
+                ),
+              ),
+              _Item(
+                title: 'Name',
+                controller: TextEditingController(text: 'Diego Morata'),
+              ),
+              const SizedBox(height: 32),
+              _Item(
+                title: 'Introduction',
+                controller:
+                    TextEditingController(text: 'Long XIN short the world'),
+              ),
+              const SizedBox(height: 32),
+              _Item(
+                title: 'Phone number',
+                controller: TextEditingController(text: '18612345678'),
+                readOnly: true,
+              ),
+              const SizedBox(height: 70),
+              Text(
+                '2016年3月21日 加入',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(184, 189, 199, 1),
+                    darkColor: const Color.fromRGBO(184, 189, 199, 1),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 48),
+            ],
+          ),
+        ),
+      );
 }
 
 class _Item extends StatelessWidget {

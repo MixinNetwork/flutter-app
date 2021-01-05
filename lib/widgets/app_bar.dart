@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/back_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 
-class MixinAppBar extends StatelessWidget {
+class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MixinAppBar({
     Key key,
     this.title,
@@ -13,17 +13,7 @@ class MixinAppBar extends StatelessWidget {
   final List<Widget> actions;
 
   @override
-  Widget build(BuildContext context) => builderAppBar(
-        context,
-        title: title,
-        actions: actions,
-      );
-
-  static PreferredSizeWidget builderAppBar(
-    BuildContext context, {
-    dynamic title,
-    List<Widget> actions,
-  }) {
+  Widget build(BuildContext context) {
     assert(title is Widget || title is String);
     final actionTextStyle = TextStyle(
       fontSize: 16,
@@ -62,4 +52,7 @@ class MixinAppBar extends StatelessWidget {
       ),
     );
   }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
