@@ -5,6 +5,6 @@ part 'sent_session_sender_keys_dao.g.dart';
 
 @UseDao(tables: [SentSessionSenderKeys])
 class SentSessionSenderKeysDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$SentSessionSenderKeysDaoMixin {
   SentSessionSenderKeysDao(MixinDatabase db) : super(db);
 }

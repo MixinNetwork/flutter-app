@@ -5,6 +5,6 @@ part 'resend_session_messages_dao.g.dart';
 
 @UseDao(tables: [ResendSessionMessages])
 class ResendSessionMessagesDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$ResendSessionMessagesDaoMixin {
   ResendSessionMessagesDao(MixinDatabase db) : super(db);
 }

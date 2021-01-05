@@ -5,6 +5,6 @@ part 'flood_messages_dao.g.dart';
 
 @UseDao(tables: [FloodMessages])
 class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$FloodMessagesDaoMixin {
   FloodMessagesDao(MixinDatabase db) : super(db);
 }

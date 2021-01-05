@@ -5,6 +5,6 @@ part 'offsets_dao.g.dart';
 
 @UseDao(tables: [Offsets])
 class OffsetsDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$OffsetsDaoMixin {
   OffsetsDao(MixinDatabase db) : super(db);
 }

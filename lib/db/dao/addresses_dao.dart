@@ -5,6 +5,6 @@ part 'addresses_dao.g.dart';
 
 @UseDao(tables: [Addresses])
 class AddressesDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$AddressesDaoMixin {
   AddressesDao(MixinDatabase db) : super(db);
 }

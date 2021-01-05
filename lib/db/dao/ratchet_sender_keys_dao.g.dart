@@ -6,4 +6,4 @@ part of 'ratchet_sender_keys_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$MessagesHistoryDaoMixin on DatabaseAccessor<MixinDatabase> {}
+mixin _$RatchetSenderKeysDaoMixin on DatabaseAccessor<MixinDatabase> {}

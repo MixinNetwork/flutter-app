@@ -5,6 +5,6 @@ part 'stickers_dao.g.dart';
 
 @UseDao(tables: [Sticker])
 class StickerDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$StickerDaoMixin {
   StickerDao(MixinDatabase db) : super(db);
 }

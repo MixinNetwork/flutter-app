@@ -5,6 +5,6 @@ part 'circle_conversations_dao.g.dart';
 
 @UseDao(tables: [CircleConversation])
 class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$CircleConversationDaoMixin {
   CircleConversationDao(MixinDatabase db) : super(db);
 }

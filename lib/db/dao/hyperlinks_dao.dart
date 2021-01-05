@@ -5,6 +5,6 @@ part 'hyperlinks_dao.g.dart';
 
 @UseDao(tables: [Hyperlinks])
 class HyperlinksDao extends DatabaseAccessor<MixinDatabase>
-    with _$MessagesHistoryDaoMixin {
+    with _$HyperlinksDaoMixin {
   HyperlinksDao(MixinDatabase db) : super(db);
 }

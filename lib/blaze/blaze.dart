@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/db/dao/messages_history_dao.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -16,7 +18,8 @@ class Blaze {
         protocols: ['Mixin-Blaze-1']);
     debugPrint('wss://blaze.mixin.one?access_token=$token');
     channel.stream.listen((message) {
-      debugPrint(String.fromCharCodes(GZipDecoder().decodeBytes(message)));
+      MessagesHistoryDao(MixinDatabase())
+          .debugPrint(String.fromCharCodes(GZipDecoder().decodeBytes(message)));
     }, onError: (error) {
       debugPrint('onError');
     }, onDone: () {

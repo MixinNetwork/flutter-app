@@ -6,4 +6,4 @@ part of 'assets_dao.dart';
 // DaoGenerator
 // **************************************************************************
 
-mixin _$AssetssDaoMixin on DatabaseAccessor<MixinDatabase> {}
+mixin _$AssetsDaoMixin on DatabaseAccessor<MixinDatabase> {}

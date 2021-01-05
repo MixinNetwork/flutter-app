@@ -10746,6 +10746,71 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Stickers get stickers => _stickers ??= Stickers(this);
   Users _users;
   Users get users => _users ??= Users(this);
+  AddressesDao _addressesDao;
+  AddressesDao get addressesDao =>
+      _addressesDao ??= AddressesDao(this as MixinDatabase);
+  AppsDao _appsDao;
+  AppsDao get appsDao => _appsDao ??= AppsDao(this as MixinDatabase);
+  AssetsDao _assetsDao;
+  AssetsDao get assetsDao => _assetsDao ??= AssetsDao(this as MixinDatabase);
+  CircleConversationDao _circleConversationDao;
+  CircleConversationDao get circleConversationDao =>
+      _circleConversationDao ??= CircleConversationDao(this as MixinDatabase);
+  CirclesDao _circlesDao;
+  CirclesDao get circlesDao =>
+      _circlesDao ??= CirclesDao(this as MixinDatabase);
+  ConversationsDao _conversationsDao;
+  ConversationsDao get conversationsDao =>
+      _conversationsDao ??= ConversationsDao(this as MixinDatabase);
+  FloodMessagesDao _floodMessagesDao;
+  FloodMessagesDao get floodMessagesDao =>
+      _floodMessagesDao ??= FloodMessagesDao(this as MixinDatabase);
+  HyperlinksDao _hyperlinksDao;
+  HyperlinksDao get hyperlinksDao =>
+      _hyperlinksDao ??= HyperlinksDao(this as MixinDatabase);
+  JobsDao _jobsDao;
+  JobsDao get jobsDao => _jobsDao ??= JobsDao(this as MixinDatabase);
+  MessageMentionsDao _messageMentionsDao;
+  MessageMentionsDao get messageMentionsDao =>
+      _messageMentionsDao ??= MessageMentionsDao(this as MixinDatabase);
+  MessagesDao _messagesDao;
+  MessagesDao get messagesDao =>
+      _messagesDao ??= MessagesDao(this as MixinDatabase);
+  MessagesHistoryDao _messagesHistoryDao;
+  MessagesHistoryDao get messagesHistoryDao =>
+      _messagesHistoryDao ??= MessagesHistoryDao(this as MixinDatabase);
+  OffsetsDao _offsetsDao;
+  OffsetsDao get offsetsDao =>
+      _offsetsDao ??= OffsetsDao(this as MixinDatabase);
+  ParticipantsDao _participantsDao;
+  ParticipantsDao get participantsDao =>
+      _participantsDao ??= ParticipantsDao(this as MixinDatabase);
+  ParticipantsDao _participantsDao;
+  ParticipantsDao get participantsDao =>
+      _participantsDao ??= ParticipantsDao(this as MixinDatabase);
+  ResendSessionMessagesDao _resendSessionMessagesDao;
+  ResendSessionMessagesDao get resendSessionMessagesDao =>
+      _resendSessionMessagesDao ??=
+          ResendSessionMessagesDao(this as MixinDatabase);
+  SentSessionSenderKeysDao _sentSessionSenderKeysDao;
+  SentSessionSenderKeysDao get sentSessionSenderKeysDao =>
+      _sentSessionSenderKeysDao ??=
+          SentSessionSenderKeysDao(this as MixinDatabase);
+  SnapshotsDao _snapshotsDao;
+  SnapshotsDao get snapshotsDao =>
+      _snapshotsDao ??= SnapshotsDao(this as MixinDatabase);
+  StickerDao _stickerDao;
+  StickerDao get stickerDao =>
+      _stickerDao ??= StickerDao(this as MixinDatabase);
+  StickerAlbumsDao _stickerAlbumsDao;
+  StickerAlbumsDao get stickerAlbumsDao =>
+      _stickerAlbumsDao ??= StickerAlbumsDao(this as MixinDatabase);
+  StickerRelationshipsDao _stickerRelationshipsDao;
+  StickerRelationshipsDao get stickerRelationshipsDao =>
+      _stickerRelationshipsDao ??=
+          StickerRelationshipsDao(this as MixinDatabase);
+  UserDao _userDao;
+  UserDao get userDao => _userDao ??= UserDao(this as MixinDatabase);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
