@@ -1,76 +1,59 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ResponsiveNavigator extends StatefulWidget {
+class ResponsiveNavigator extends StatelessWidget {
   const ResponsiveNavigator({
     Key key,
-    @required this.leftPage,
-    @required this.rightEmptyPage,
-    @required this.switchWidth,
-    @required this.pushPage,
+    this.leftPage,
+    this.rightEmptyPage,
+    this.switchWidth,
   }) : super(key: key);
 
   final MaterialPage leftPage;
   final MaterialPage rightEmptyPage;
   final double switchWidth;
-  final MaterialPage Function(String name, Object arguments) pushPage;
 
   @override
-  ResponsiveNavigatorState createState() => ResponsiveNavigatorState();
-}
-
-class ResponsiveNavigatorState extends State<ResponsiveNavigator> {
-  final _pages = <MaterialPage>[];
-  bool navigationMode;
-
-  void pushPage(String name, {Object arguments}) => setState(() {
-        final page = widget.pushPage(name, arguments);
-        var index = -1;
-        index = _pages.indexWhere(
-            (element) => identical(element.child.key, page.child.key));
-        if (index != -1) _pages.removeRange(max(index, 0), _pages.length);
-        _pages.add(page);
-      });
-
-  void popWhere(bool Function(MaterialPage page) test) =>
-      setState(() => _pages.removeWhere(test));
-
-  @override
-  Widget build(BuildContext context) =>
-      LayoutBuilder(builder: (context, boxConstraints) {
-        navigationMode = boxConstraints.maxWidth < widget.switchWidth;
-        return Row(
-          children: [
-            if (!navigationMode) widget.leftPage.child,
-            Expanded(
-              child: ClipRect(
-                child: Navigator(
-                  transitionDelegate: DefaultTransitionDelegate(
-                    routeWithoutAnimation: {
-                      widget.leftPage.name,
-                      widget.rightEmptyPage.name,
-                    },
-                  ),
-                  onPopPage: (Route<dynamic> route, dynamic result) {
-                    final bool = _pages.isNotEmpty == true;
-                    if (bool) setState(_pages.removeLast);
-                    return route.didPop(result);
+  Widget build(BuildContext context) => LayoutBuilder(builder: (context, boxConstraints) {
+    final navigationMode = boxConstraints.maxWidth < switchWidth;
+    BlocProvider.of<ResponsiveNavigatorCubit>(context)
+        .updateNavigationMode(navigationMode);
+    return Row(
+      children: [
+        if (!navigationMode) leftPage.child,
+        Expanded(
+          child: ClipRect(
+            child: BlocConverter<ResponsiveNavigatorCubit,
+                ResponsiveNavigatorState, List<MaterialPage>>(
+              converter: (state) => state.pages,
+              builder: (context, pages) => Navigator(
+                transitionDelegate: DefaultTransitionDelegate(
+                  routeWithoutAnimation: {
+                    leftPage.name,
+                    rightEmptyPage.name,
                   },
-                  pages: [
-                    if (navigationMode) widget.leftPage,
-                    if (!navigationMode && _pages.isEmpty)
-                      widget.rightEmptyPage,
-                    ..._pages,
-                  ],
                 ),
+                onPopPage: (Route<dynamic> route, dynamic result) {
+                  BlocProvider.of<ResponsiveNavigatorCubit>(context)
+                      .onPopPage();
+                  return route.didPop(result);
+                },
+                pages: [
+                  if (navigationMode) leftPage,
+                  if (!navigationMode && pages.isEmpty) rightEmptyPage,
+                  ...pages,
+                ],
               ),
             ),
-          ],
-        );
-      });
+          ),
+        ),
+      ],
+    );
+  });
 }
 
 class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {

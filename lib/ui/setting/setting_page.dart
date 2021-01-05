@@ -1,11 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
-import 'package:flutter_app/ui/route.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
-import 'package:flutter_app/ui/setting/bloc/setting_selected_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -103,11 +101,15 @@ class _Item extends StatelessWidget {
       const Color.fromRGBO(246, 247, 250, 1),
       darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
     );
-    return BlocConverter<SettingSelectedCubit, String, bool>(
-        converter: (state) => state == title,
+    return BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState,
+            bool>(
+        converter: (state) => !state.navigationMode &&
+            state.pages.any((element) =>
+                ResponsiveNavigatorCubit.settingTitlePageMap[title] ==
+                element.name),
         builder: (context, selected) {
           var selectedBackgroundColor = backgroundColor;
-          if (selected) {
+          if (selected && !ResponsiveNavigatorCubit.of(context).state.navigationMode) {
             selectedBackgroundColor = Color.alphaBlend(
               BrightnessData.dynamicColor(
                 context,
@@ -123,9 +125,8 @@ class _Item extends StatelessWidget {
             ),
             onTap: () {
               if (onTap == null) {
-                BlocProvider.of<SettingSelectedCubit>(context).emit(title);
-                MixinRouter.instance.pushPage(SettingSelectedCubit.titlePageMap[
-                    BlocProvider.of<SettingSelectedCubit>(context).state]);
+                ResponsiveNavigatorCubit.of(context).pushPage(
+                    ResponsiveNavigatorCubit.settingTitlePageMap[title]);
                 return;
               }
 

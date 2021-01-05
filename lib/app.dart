@@ -6,10 +6,12 @@ import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
-import 'package:flutter_app/ui/setting/bloc/setting_selected_cubit.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+ResponsiveNavigatorCubit responsiveNavigatorCubit;
 
 class App extends StatelessWidget {
   @override
@@ -17,6 +19,7 @@ class App extends StatelessWidget {
     final slideCategoryCubit = SlideCategoryCubit();
     final draftCubit = DraftCubit();
     final authCubit = AuthCubit();
+    responsiveNavigatorCubit ??= ResponsiveNavigatorCubit();
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -33,10 +36,10 @@ class App extends StatelessWidget {
           create: (BuildContext context) => draftCubit,
         ),
         BlocProvider(
-          create: (BuildContext context) => SettingSelectedCubit(),
+          create: (BuildContext context) => authCubit,
         ),
         BlocProvider(
-          create: (BuildContext context) => authCubit,
+          create: (BuildContext context) => responsiveNavigatorCubit,
         ),
       ],
       child: MaterialApp(
