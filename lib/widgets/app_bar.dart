@@ -25,7 +25,23 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
     return AppBar(
-      title: title is Widget ? title : Text(title),
+      toolbarHeight: 64,
+      title: DefaultTextStyle(
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          color: BrightnessData.dynamicColor(
+            context,
+            const Color.fromRGBO(51, 51, 51, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+          ),
+        ),
+        child: title is Widget
+            ? title
+            : Text(
+                title,
+              ),
+      ),
       actions: actions
           ?.map((e) => DefaultTextStyle(style: actionTextStyle, child: e))
           ?.toList(),
@@ -41,18 +57,9 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
             ? const MixinBackButton()
             : const SizedBox(width: 56),
       ),
-      titleTextStyle: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w600,
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(51, 51, 51, 1),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-        ),
-      ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(64);
 }
