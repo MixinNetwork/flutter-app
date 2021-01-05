@@ -7,4 +7,8 @@ part 'offsets_dao.g.dart';
 class OffsetsDao extends DatabaseAccessor<MixinDatabase>
     with _$OffsetsDaoMixin {
   OffsetsDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(Offset offset) => into(db.offsets).insert(offset);
+
+  Future deleteOffset(Offset offset) => delete(db.offsets).delete(offset);
 }

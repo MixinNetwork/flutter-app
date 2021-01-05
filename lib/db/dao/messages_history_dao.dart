@@ -7,4 +7,10 @@ part 'messages_history_dao.g.dart';
 class MessagesHistoryDao extends DatabaseAccessor<MixinDatabase>
     with _$MessagesHistoryDaoMixin {
   MessagesHistoryDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(MessagesHistoryData messagesHistory) =>
+      into(db.messagesHistory).insert(messagesHistory);
+
+  Future deleteMessagesHistory(MessagesHistoryData messagesHistory) =>
+      delete(db.messagesHistory).delete(messagesHistory);
 }

@@ -7,4 +7,10 @@ part 'sticker_relationships_dao.g.dart';
 class StickerRelationshipsDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerRelationshipsDaoMixin {
   StickerRelationshipsDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(StickerRelationship stickerRelationship) =>
+      into(db.stickerRelationships).insert(stickerRelationship);
+
+  Future deleteStickerRelationship(StickerRelationship stickerRelationship) =>
+      delete(db.stickerRelationships).delete(stickerRelationship);
 }

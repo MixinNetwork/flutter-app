@@ -7,4 +7,8 @@ part 'stickers_dao.g.dart';
 class StickerDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerDaoMixin {
   StickerDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(Sticker sticker) => into(db.stickers).insert(sticker);
+
+  Future deleteSticker(Sticker sticker) => delete(db.stickers).delete(sticker);
 }

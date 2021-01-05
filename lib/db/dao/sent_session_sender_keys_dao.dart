@@ -7,4 +7,10 @@ part 'sent_session_sender_keys_dao.g.dart';
 class SentSessionSenderKeysDao extends DatabaseAccessor<MixinDatabase>
     with _$SentSessionSenderKeysDaoMixin {
   SentSessionSenderKeysDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(SentSessionSenderKey key) =>
+      into(db.sentSessionSenderKeys).insert(key);
+
+  Future deleteSentSessionSenderKey(SentSessionSenderKey key) =>
+      delete(db.sentSessionSenderKeys).delete(key);
 }

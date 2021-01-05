@@ -7,4 +7,8 @@ part 'assets_dao.g.dart';
 @UseDao(tables: [Assets])
 class AssetsDao extends DatabaseAccessor<MixinDatabase> with _$AssetsDaoMixin {
   AssetsDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(Asset asset) => into(db.assets).insert(asset);
+
+  Future deleteAsset(Asset asset) => delete(db.assets).delete(asset);
 }

@@ -7,4 +7,10 @@ part 'flood_messages_dao.g.dart';
 class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
     with _$FloodMessagesDaoMixin {
   FloodMessagesDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(FloodMessage message) =>
+      into(db.floodMessages).insert(message);
+
+  Future deleteFloodMessage(FloodMessage message) =>
+      delete(db.floodMessages).delete(message);
 }

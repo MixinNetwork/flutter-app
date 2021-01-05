@@ -7,4 +7,10 @@ part 'conversations_dao.g.dart';
 class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationsDaoMixin {
   ConversationsDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(Conversation conversation) =>
+      into(db.conversations).insert(conversation);
+
+  Future deleteConversation(Conversation conversation) =>
+      delete(db.conversations).delete(conversation);
 }

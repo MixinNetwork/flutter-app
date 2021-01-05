@@ -7,4 +7,10 @@ part 'circle_conversations_dao.g.dart';
 class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$CircleConversationDaoMixin {
   CircleConversationDao(MixinDatabase db) : super(db);
+
+  Future<int> insert(CircleConversation circleConversation) =>
+      into(db.circleConversations).insert(circleConversation);
+
+  Future deleteCircleConversation(CircleConversation circleConversation) =>
+      delete(db.circleConversations).delete(circleConversation);
 }
