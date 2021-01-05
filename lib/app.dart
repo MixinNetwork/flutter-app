@@ -10,6 +10,7 @@ import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/utils/Preferences.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import 'mixin_client.dart';
 

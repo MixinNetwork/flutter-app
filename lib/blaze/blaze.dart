@@ -1,15 +1,19 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/utils/preferences.dart';
+import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
+import 'blaze_message.dart';
 
 class Blaze {
+  IOWebSocketChannel channel;
   void connect(String token) {
-    final channel = IOWebSocketChannel.connect(
+    channel = IOWebSocketChannel.connect(
         'wss://blaze.mixin.one?access_token=$token',
         protocols: ['Mixin-Blaze-1']);
-    ;
     debugPrint('wss://blaze.mixin.one?access_token=$token');
     channel.stream.listen((message) {
       debugPrint(String.fromCharCodes(GZipDecoder().decodeBytes(message)));
@@ -19,6 +23,15 @@ class Blaze {
       debugPrint('onDone');
     }, cancelOnError: true);
 
-    channel.sink.add('test');
+    _sendListPending();
+  }
+
+  void _sendListPending() {
+    _sendGZip(BlazeMessage(Uuid().v4(), 'LIST_PENDING_MESSAGES'));
+  }
+
+  void _sendGZip(msg) {
+    channel.sink.add(
+        GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }
 }
