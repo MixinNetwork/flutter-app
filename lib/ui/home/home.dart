@@ -13,7 +13,6 @@ import 'package:flutter_app/widgets/empty.dart';
 import 'package:flutter_app/widgets/responsive_navigator.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;

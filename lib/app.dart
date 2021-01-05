@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
+import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
@@ -6,17 +8,15 @@ import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/setting/bloc/setting_selected_cubit.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
-import 'package:flutter_app/utils/Preferences.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'mixin_client.dart';
 
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final slideCategoryCubit = SlideCategoryCubit();
     final draftCubit = DraftCubit();
+    final authCubit = AuthCubit();
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -35,6 +35,9 @@ class App extends StatelessWidget {
         BlocProvider(
           create: (BuildContext context) => SettingSelectedCubit(),
         ),
+        BlocProvider(
+          create: (BuildContext context) => authCubit,
+        ),
       ],
       child: MaterialApp(
         title: 'Mixin',
@@ -42,23 +45,16 @@ class App extends StatelessWidget {
         builder: (context, child) => BrightnessObserver(
           child: child,
         ),
-        home: _getHomePage(),
+        home: BlocConverter<AuthCubit, AuthState, bool>(
+          cubit: authCubit,
+          converter: (state) =>
+              state.account != null && state.privateKey != null,
+          builder: (context, authAvailable) {
+            if (authAvailable) return HomePage();
+            return const LandingPage();
+          },
+        ),
       ),
     );
-  }
-
-  Widget _getHomePage() {
-    final account = Preferences().getAccount();
-    final privateKey = Preferences().getPrivateKey();
-    if (account != null || privateKey != null) {
-      MixinClient().client.initMixin(
-          account.userId,
-          account.sessionId,
-          privateKey,
-          'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE');
-      return HomePage();
-    } else {
-      return const LandingPage();
-    }
   }
 }
