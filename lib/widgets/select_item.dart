@@ -7,15 +7,13 @@ import 'interacter_decorated_box.dart';
 class SelectItem extends StatelessWidget {
   const SelectItem({
     this.title,
-    this.asset,
+    this.icon,
     this.count = 0,
     this.onTap,
     this.selected = false,
-    this.iconColor,
   });
 
-  final Color iconColor;
-  final String asset;
+  final Widget icon;
   final String title;
   final bool selected;
   final int count;
@@ -47,11 +45,7 @@ class SelectItem extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              Image.asset(
-                asset,
-                width: 24,
-                color: iconColor,
-              ),
+              icon,
               const SizedBox(width: 8),
               if (!hideTitle)
                 Expanded(

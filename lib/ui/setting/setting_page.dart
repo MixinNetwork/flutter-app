@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
@@ -103,13 +104,15 @@ class _Item extends StatelessWidget {
     );
     return BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState,
             bool>(
-        converter: (state) => !state.navigationMode &&
+        converter: (state) =>
+            !state.navigationMode &&
             state.pages.any((element) =>
                 ResponsiveNavigatorCubit.settingTitlePageMap[title] ==
                 element.name),
         builder: (context, selected) {
           var selectedBackgroundColor = backgroundColor;
-          if (selected && !ResponsiveNavigatorCubit.of(context).state.navigationMode) {
+          if (selected &&
+              !ResponsiveNavigatorCubit.of(context).state.navigationMode) {
             selectedBackgroundColor = Color.alphaBlend(
               BrightnessData.dynamicColor(
                 context,
@@ -202,34 +205,43 @@ class _UserProfile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ClipOval(
-          child: Image.asset(
-            Assets.assetsImagesAvatarPng,
-            width: 90,
-            height: 90,
+          child: BlocConverter<AuthCubit, AuthState, String>(
+            converter: (state) => state.account.avatarUrl,
+            builder: (context, avatarUrl) => CachedNetworkImage(
+              imageUrl: avatarUrl,
+              width: 90,
+              height: 90,
+            ),
           ),
         ),
         const SizedBox(height: 10),
-        Text(
-          'Diego Morata',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(51, 51, 51, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+        BlocConverter<AuthCubit, AuthState, String>(
+          converter: (state) => state.account.fullName,
+          builder: (context, fullName) => Text(
+            fullName,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+              color: BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(51, 51, 51, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+              ),
             ),
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          'Mixin ID: 220021',
-          style: TextStyle(
-            fontSize: 14,
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(188, 190, 195, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+        BlocConverter<AuthCubit, AuthState, String>(
+          converter: (state) => state.account.identityNumber,
+          builder: (context, identityNumber) => Text(
+            'Mixin ID: $identityNumber',
+            style: TextStyle(
+              fontSize: 14,
+              color: BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(188, 190, 195, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+              ),
             ),
           ),
         ),

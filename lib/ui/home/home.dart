@@ -53,7 +53,7 @@ class HomePage extends StatelessWidget {
                   child: BlocConverter<SlideCategoryCubit, SlideCategoryState,
                       String>(
                     converter: (state) => state.name,
-                    buildWhen: (a, b) => b != null,
+                    when: (a, b) => b != null,
                     builder: (context, name) => DecoratedBox(
                       child: Empty(text: 'Select a $name to start messaging'),
                       decoration: BoxDecoration(
@@ -80,12 +80,9 @@ class _CenterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocListener<SlideCategoryCubit, SlideCategoryState>(
-        listenWhen: (a, b) =>
-            (a.type == SlideCategoryType.setting) !=
-            (b.type == SlideCategoryType.setting),
-        listener: (context, state) {
-          final isSetting = state.type == SlideCategoryType.setting;
+      BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+        converter: (state) => state.type == SlideCategoryType.setting,
+        listener: (context, isSetting) {
           final responsiveNavigatorCubit = ResponsiveNavigatorCubit.of(context);
 
           responsiveNavigatorCubit.popWhere((page) {

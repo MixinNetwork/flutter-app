@@ -1,12 +1,29 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:intl/intl.dart';
+import 'package:tuple/tuple.dart';
 
 class EditProfilePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final nameTextEditingController = TextEditingController();
+    final bioTextEditingController = TextEditingController();
+    return BlocConverter<AuthCubit, AuthState, Tuple2<String, String>>(
+      converter: (state) => Tuple2(
+        state.account.fullName,
+        state.account.biography,
+      ),
+      immediatelyCallListener: true,
+      listener: (context, state) {
+        nameTextEditingController.text = state.item1;
+        bioTextEditingController.text = state.item2;
+      },
+      child: Scaffold(
         backgroundColor: BrightnessData.dynamicColor(
           context,
           const Color.fromRGBO(246, 247, 250, 0.9),
@@ -26,49 +43,62 @@ class EditProfilePage extends StatelessWidget {
             children: [
               const SizedBox(height: 40),
               ClipOval(
-                child: Image.asset(
-                  Assets.assetsImagesAvatarPng,
-                  width: 100,
-                  height: 100,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Mixin ID: 220021',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(188, 190, 195, 1),
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                child: BlocConverter<AuthCubit, AuthState, String>(
+                  converter: (state) => state.account.avatarUrl,
+                  builder: (context, avatarUrl) => CachedNetworkImage(
+                    imageUrl: avatarUrl,
+                    width: 100,
+                    height: 100,
                   ),
                 ),
               ),
+              const SizedBox(height: 10),
+              BlocConverter<AuthCubit, AuthState, String>(
+                converter: (state) => state.account.identityNumber,
+                builder: (context, identityNumber) => Text(
+                  'Mixin ID: $identityNumber',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: BrightnessData.dynamicColor(
+                      context,
+                      const Color.fromRGBO(188, 190, 195, 1),
+                      darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
               _Item(
                 title: 'Name',
-                controller: TextEditingController(text: 'Diego Morata'),
+                controller: nameTextEditingController,
               ),
               const SizedBox(height: 32),
               _Item(
                 title: 'Introduction',
-                controller:
-                    TextEditingController(text: 'Long XIN short the world'),
+                controller: bioTextEditingController,
               ),
               const SizedBox(height: 32),
-              _Item(
-                title: 'Phone number',
-                controller: TextEditingController(text: '18612345678'),
-                readOnly: true,
+              BlocConverter<AuthCubit, AuthState, String>(
+                converter: (state) => state.account.phone,
+                builder: (context, phone) => _Item(
+                  title: 'Phone number',
+                  controller: TextEditingController(text: phone),
+                  readOnly: true,
+                ),
               ),
               const SizedBox(height: 70),
-              Text(
-                '2016年3月21日 加入',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(184, 189, 199, 1),
-                    darkColor: const Color.fromRGBO(184, 189, 199, 1),
+              BlocConverter<AuthCubit, AuthState, String>(
+                converter: (state) => DateFormat.yMMMd()
+                    .format(DateTime.tryParse(state.account.createdAt)),
+                builder: (context, createdAt) => Text(
+                  '$createdAt join',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: BrightnessData.dynamicColor(
+                      context,
+                      const Color.fromRGBO(184, 189, 199, 1),
+                      darkColor: const Color.fromRGBO(184, 189, 199, 1),
+                    ),
                   ),
                 ),
               ),
@@ -76,7 +106,9 @@ class EditProfilePage extends StatelessWidget {
             ],
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _Item extends StatelessWidget {

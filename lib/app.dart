@@ -50,8 +50,7 @@ class App extends StatelessWidget {
         ),
         home: BlocConverter<AuthCubit, AuthState, bool>(
           cubit: authCubit,
-          converter: (state) =>
-              state?.account != null && state?.privateKey != null,
+          converter: (state) => state?.account != null && state?.privateKey != null,
           builder: (context, authAvailable) {
             if (authAvailable) return HomePage();
             return const LandingPage();
