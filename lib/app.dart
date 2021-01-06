@@ -11,7 +11,7 @@ import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-ResponsiveNavigatorCubit responsiveNavigatorCubit;
+ResponsiveNavigatorCubit _responsiveNavigatorCubit;
 
 class App extends StatelessWidget {
   @override
@@ -19,7 +19,7 @@ class App extends StatelessWidget {
     final slideCategoryCubit = SlideCategoryCubit();
     final draftCubit = DraftCubit();
     final authCubit = AuthCubit();
-    responsiveNavigatorCubit ??= ResponsiveNavigatorCubit();
+    _responsiveNavigatorCubit ??= ResponsiveNavigatorCubit();
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -39,7 +39,7 @@ class App extends StatelessWidget {
           create: (BuildContext context) => authCubit,
         ),
         BlocProvider(
-          create: (BuildContext context) => responsiveNavigatorCubit,
+          create: (BuildContext context) => _responsiveNavigatorCubit,
         ),
       ],
       child: MaterialApp(
