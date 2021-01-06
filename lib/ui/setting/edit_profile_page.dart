@@ -20,8 +20,8 @@ class EditProfilePage extends StatelessWidget {
       ),
       immediatelyCallListener: true,
       listener: (context, state) {
-        nameTextEditingController.text = state.item1;
-        bioTextEditingController.text = state.item2;
+        nameTextEditingController.text = state?.item1;
+        bioTextEditingController.text = state?.item2;
       },
       child: Scaffold(
         backgroundColor: BrightnessData.dynamicColor(
