@@ -113,7 +113,7 @@ class _Name extends StatelessWidget {
   Widget build(BuildContext context) =>
       BlocConverter<ConversationCubit, Conversation, String>(
         converter: (state) => state?.name,
-        buildWhen: (a, b) => b != null,
+        when: (a, b) => b != null,
         builder: (context, name) => Text(
           name,
           style: TextStyle(
@@ -137,7 +137,7 @@ class _Avatar extends StatelessWidget {
   Widget build(BuildContext context) =>
       BlocConverter<ConversationCubit, Conversation, List<String>>(
         converter: (state) => state?.avatars,
-        buildWhen: (a, b) => b?.isNotEmpty == true,
+        when: (a, b) => b?.isNotEmpty == true,
         builder: (context, avatars) => AvatarsWidget(
           size: 50,
           avatars: avatars,

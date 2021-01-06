@@ -47,6 +47,8 @@ class Assets {
 
   static const String assetsImagesIcProfileSvg = 'assets/images/ic_profile.svg';
 
+  static const String assetsImagesIcRetrySvg = 'assets/images/ic_retry.svg';
+
   static const String assetsImagesIcScreenPng = 'assets/images/ic_screen.png';
 
   static const String assetsImagesIcSearchPng = 'assets/images/ic_search.png';

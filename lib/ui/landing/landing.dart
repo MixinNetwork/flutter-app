@@ -1,215 +1,220 @@
-import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_app/utils/Preferences.dart';
-import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
+import 'package:flutter_app/ui/landing/bloc/landing_cubit.dart';
+import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 
-import '../../mixin_client.dart';
-import 'loading.dart';
-
-class LandingPage extends StatefulWidget {
-  const LandingPage({Key key, this.title}) : super(key: key);
-
-  final String title;
+class LandingPage extends StatelessWidget {
+  const LandingPage({Key key}) : super(key: key);
 
   @override
-  _LandingPageState createState() => _LandingPageState();
+  Widget build(BuildContext context) => BlocProvider(
+        create: (context) => LandingCubit(AuthCubit.of(context)),
+        child: Builder(
+          builder: (BuildContext context) => Scaffold(
+            backgroundColor: BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(255, 255, 255, 1),
+              darkColor: const Color.fromRGBO(35, 39, 43, 1),
+            ),
+            body: Center(
+              child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
+                converter: (state) => state.status,
+                builder: (context, status) {
+                  if (status == LandingStatus.init)
+                    return const _Loading(
+                      title: 'Initializing',
+                      message: 'Please wait a moment',
+                    );
+
+                  if (status == LandingStatus.provisioning)
+                    return const _Loading(
+                      title: 'Provisioning',
+                      message: 'Please wait a moment',
+                    );
+
+                  return const _QrCode();
+                },
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
-class _LandingPageState extends State<LandingPage> {
-  bool _showRetry = false;
-  bool _provisioning = true;
-  String _authUrl;
-  Timer _timer;
-  signal.ECKeyPair keyPair;
-  void showRetryTask(String deviceId) {
-    var count = 1;
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (count >= 60) {
-        timer.cancel();
-        setState(() {
-          _showRetry = true;
-        });
-      } else {
-        count++;
-
-        MixinClient()
-            .client
-            .provisioningApi
-            .getProvisioning(deviceId)
-            .then((response) => {
-                  response.handleResponse(
-                      onSuccess: (Provisioning provisioning) {
-                        if (provisioning.secret?.isNotEmpty == true) {
-                          _timer?.cancel();
-                          setState(() {
-                            _provisioning = true;
-                          });
-                          //decrypt
-                          final result = signal.decrypt(
-                              base64.encode(keyPair.privateKey.serialize()),
-                              provisioning.secret);
-                          final msg = json.decode(String.fromCharCodes(result));
-
-                          final edKeyPair = ed.generateKey();
-                          final registrationId =
-                              signal.KeyHelper.generateRegistrationId(false);
-                          verify(
-                              ProvisioningRequest(
-                                  code: msg['provisioning_code'],
-                                  userId: msg['user_id'],
-                                  sessionId: msg['session_id'],
-                                  platform: 'Desktop',
-                                  purpose: 'SESSION',
-                                  sessionSecret:
-                                      base64.encode(edKeyPair.publicKey.bytes),
-                                  appVersion: '0.0.1',
-                                  registrationId: registrationId,
-                                  platformVersion: 'OS X 10.15.6'),
-                              base64.encode(edKeyPair.privateKey.bytes));
-                        }
-                      },
-                      onFailure: (MixinError error) =>
-                          {debugPrint(error.toString())})
-                });
-      }
-    });
-  }
-
-  void verify(ProvisioningRequest request, String privateKey) {
-    MixinClient()
-        .client
-        .provisioningApi
-        .verifyProvisioning(request)
-        .then((value) {
-      if (value.data != null) {
-        final account = value.data;
-        Preferences().putAccount(account);
-        Preferences().putPrivateKey(privateKey);
-        MixinClient().client.initMixin(
-            account.userId,
-            account.sessionId,
-            privateKey,
-            'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE');
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => LoadingPage()),
-        );
-      } else {
-        setState(() {
-          _showRetry = true;
-        });
-      }
-    });
-  }
+class _QrCode extends StatelessWidget {
+  const _QrCode({
+    Key key,
+  }) : super(key: key);
 
   @override
-  void initState() {
-    super.initState();
-    generateAuthUrl();
-  }
+  Widget build(BuildContext context) => SizedBox(
+        width: 423,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: SizedBox.fromSize(
+                size: const Size.square(200),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    BlocConverter<LandingCubit, LandingState, String>(
+                      converter: (state) => state.authUrl,
+                      builder: (context, url) => QrImage(
+                        data: url,
+                        version: QrVersions.auto,
+                        foregroundColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        embeddedImage:
+                            const AssetImage(Assets.assetsImagesLogoPng),
+                        embeddedImageStyle: QrEmbeddedImageStyle(
+                          size: const Size(44, 44),
+                        ),
+                      ),
+                    ),
+                    BlocConverter<LandingCubit, LandingState, bool>(
+                      converter: (state) =>
+                          state.status == LandingStatus.needRetry,
+                      builder: (context, visible) => Visibility(
+                        visible: visible,
+                        child: _Retry(
+                          onTap: () => BlocProvider.of<LandingCubit>(context)
+                              .requestAuthUrl(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Log in to Mixin Messenger by QR Code',
+              style: TextStyle(
+                fontSize: 22,
+                color: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(51, 51, 51, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(187, 190, 195, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+}
 
-  void generateAuthUrl() {
-    MixinClient()
-        .client
-        .provisioningApi
-        .getProvisioningId(Platform.operatingSystem)
-        .then((response) {
-      response.handleResponse(onSuccess: (Provisioning provisioning) {
-        setState(() {
-          keyPair = signal.Curve.generateKeyPair();
-          final pubKey =
-              Uri.encodeComponent(base64.encode(keyPair.publicKey.serialize()));
-          _authUrl =
-              'mixin://device/auth?id=${provisioning.deviceId}&pub_key=$pubKey';
-          _provisioning = false;
-        });
-        showRetryTask(provisioning.deviceId);
-      }, onFailure: (MixinError error) {
-        debugPrint('${error.toJson()}');
-      });
-    });
-  }
+class _Loading extends StatelessWidget {
+  const _Loading({
+    Key key,
+    this.title,
+    this.message,
+  }) : super(key: key);
+
+  final String title;
+  final String message;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Open Mixin Messenger on your phone, capture the code',
-                style: TextStyle(fontSize: 18.0), textAlign: TextAlign.center),
-            const SizedBox(
-              height: 30,
+    final primaryColor = BrightnessData.dynamicColor(
+      context,
+      const Color.fromRGBO(51, 51, 51, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+    );
+    return SizedBox(
+      width: 375,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation(primaryColor),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            title,
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
-            Stack(alignment: AlignmentDirectional.center, children: [
-              Visibility(
-                  visible: _authUrl != null,
-                  child: QrImage(
-                    data: _authUrl,
-                    version: QrVersions.auto,
-                    size: 300.0,
-                    foregroundColor: const Color(0xFF4A4A4A),
-                    embeddedImage: const AssetImage('assets/images/logo.png'),
-                    embeddedImageStyle: QrEmbeddedImageStyle(
-                      size: const Size(60, 60),
-                    ),
-                  )),
-              Visibility(
-                  visible: _showRetry || _provisioning,
-                  child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          _showRetry = false;
-                          generateAuthUrl();
-                        });
-                      },
-                      child: Container(
-                          width: 300.0,
-                          height: 300.0,
-                          decoration:
-                              const BoxDecoration(color: Color(0xAAFFFFFF)),
-                          child: Align(
-                              alignment: Alignment.center,
-                              child: _buildCoverWidget()))))
-            ]),
-          ],
-        ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(188, 190, 195, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+              ),
+              fontSize: 16,
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildCoverWidget() {
-    if (_provisioning) {
-      return const SizedBox(
-          height: 100,
-          width: 100,
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation(Colors.blue),
-          ));
-    } else if (_showRetry) {
-      return Container(
-          constraints:
-              const BoxConstraints.tightForFinite(width: 150, height: 150),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-              color: const Color(0xFF3a7ee4),
-              borderRadius: BorderRadius.circular(75)),
-          child: const Padding(
-            padding: EdgeInsets.all(0.0),
-            child: Text('点击重试',
-                style: TextStyle(fontSize: 14.0, color: Colors.white)),
-          ));
-    } else {
-      return Container();
-    }
-  }
+class _Retry extends StatelessWidget {
+  const _Retry({
+    Key key,
+    this.onTap,
+  }) : super(key: key);
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Color.fromRGBO(0, 0, 0, 0.86),
+        ),
+        child: GestureDetector(
+          onTap: onTap,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SvgPicture.asset(
+                  Assets.assetsImagesIcRetrySvg,
+                  width: 50,
+                  height: 50,
+                ),
+                const SizedBox(height: 14),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    'CLICK TO RELOAD QR CODE',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Color.fromRGBO(255, 255, 255, 0.9),
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
 }

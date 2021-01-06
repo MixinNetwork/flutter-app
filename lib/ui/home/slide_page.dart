@@ -1,10 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/select_item.dart';
 import 'package:flutter_app/constants/assets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tuple/tuple.dart';
 
 class SlidePage extends StatelessWidget {
   static const categoryList = [
@@ -44,17 +47,28 @@ class SlidePage extends StatelessWidget {
             // TODO user profile callback
             Builder(
               builder: (context) =>
-                  BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-                      converter: (state) =>
-                          state?.type == SlideCategoryType.setting,
-                      builder: (context, selected) => SelectItem(
-                            asset: Assets.assetsImagesAvatarPng,
-                            title: 'Mixin',
-                            selected: selected,
-                            onTap: () =>
-                                BlocProvider.of<SlideCategoryCubit>(context)
-                                    .select(SlideCategoryType.setting),
-                          )),
+                  BlocConverter<AuthCubit, AuthState, Tuple2<String, String>>(
+                converter: (state) =>
+                    Tuple2(state.account.fullName, state.account.avatarUrl),
+                builder: (context, tuple) =>
+                    BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+                  converter: (state) =>
+                      state?.type == SlideCategoryType.setting,
+                  builder: (context, selected) => SelectItem(
+                    icon: ClipOval(
+                      child: CachedNetworkImage(
+                        imageUrl: tuple.item2,
+                        width: 30,
+                        height: 30,
+                      ),
+                    ),
+                    title: tuple.item1,
+                    selected: selected,
+                    onTap: () => BlocProvider.of<SlideCategoryCubit>(context)
+                        .select(SlideCategoryType.setting),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 4),
           ]),
@@ -89,7 +103,15 @@ class _CircleList extends StatelessWidget {
               builder: (BuildContext context, bool selected) {
                 final circle = circleType[index];
                 return SelectItem(
-                  asset: circle['asset'],
+                  icon: Image.asset(
+                    circle['asset'],
+                    width: 24,
+                    height: 24,
+                    color: BrightnessData.dynamicColor(
+                      context,
+                      const Color.fromRGBO(65, 145, 255, 1),
+                    ),
+                  ),
                   title: circle['title'],
                   onTap: () =>
                       BlocProvider.of<SlideCategoryCubit>(context).select(
@@ -97,7 +119,6 @@ class _CircleList extends StatelessWidget {
                     circle['title'],
                   ),
                   selected: selected,
-                  iconColor: const Color.fromRGBO(65, 145, 255, 1),
                   count: 99,
                 );
               },
@@ -125,18 +146,22 @@ class _CategoryList extends StatelessWidget {
                 state?.type == SlideCategoryType.people &&
                 state?.name == item['title'],
             builder: (BuildContext context, bool selected) => SelectItem(
-              asset: item['asset'],
+              icon: Image.asset(
+                item['asset'],
+                width: 24,
+                height: 24,
+                color: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(51, 51, 51, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                ),
+              ),
               title: item['title'],
               onTap: () => BlocProvider.of<SlideCategoryCubit>(context).select(
                 SlideCategoryType.people,
                 item['title'],
               ),
               selected: selected,
-              iconColor: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(51, 51, 51, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-              ),
             ),
           );
         },

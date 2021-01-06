@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
-
 import 'package:flutter_app/ui/home/conversation_page.dart';
-import 'package:flutter_app/ui/route.dart';
-import 'package:flutter_app/ui/setting/bloc/setting_selected_cubit.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/ui/setting/setting_page.dart';
 import 'package:flutter_app/ui/home/slide_page.dart';
 import 'package:flutter_app/widgets/automatic_keep_alive_client_widget.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/empty.dart';
-import 'package:flutter_app/widgets/responsive_navigator.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;
@@ -40,7 +37,6 @@ class HomePage extends StatelessWidget {
             SizePolicyData(
               minWidth: responsiveNavigationMinWidth,
               child: ResponsiveNavigator(
-                key: MixinRouter.instance.chatResponsiveNavigation,
                 switchWidth: responsiveNavigationMinWidth + 260,
                 leftPage: MaterialPage(
                   key: const Key('center'),
@@ -57,7 +53,7 @@ class HomePage extends StatelessWidget {
                   child: BlocConverter<SlideCategoryCubit, SlideCategoryState,
                       String>(
                     converter: (state) => state.name,
-                    buildWhen: (a, b) => b != null,
+                    when: (a, b) => b != null,
                     builder: (context, name) => DecoratedBox(
                       child: Empty(text: 'Select a $name to start messaging'),
                       decoration: BoxDecoration(
@@ -70,7 +66,6 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                 ),
-                pushPage: MixinRouter.instance.route,
               ),
             ),
           ],
@@ -85,28 +80,21 @@ class _CenterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocListener<SlideCategoryCubit, SlideCategoryState>(
-        listenWhen: (a, b) =>
-            (a.type == SlideCategoryType.setting) !=
-            (b.type == SlideCategoryType.setting),
-        listener: (context, state) {
-          final isSetting = state.type == SlideCategoryType.setting;
+      BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+        converter: (state) => state.type == SlideCategoryType.setting,
+        listener: (context, isSetting) {
+          final responsiveNavigatorCubit = ResponsiveNavigatorCubit.of(context);
 
-          MixinRouter.instance.popWhere((page) {
-            try {
-              return (page.key as dynamic)
-                  .value
-                  ?.toString()
-                  ?.startsWith(MixinRouter.settingPrefix);
-            } catch (e) {
-              return false;
-            }
+          responsiveNavigatorCubit.popWhere((page) {
+            if (responsiveNavigatorCubit.state.navigationMode) return true;
+
+            return ResponsiveNavigatorCubit.settingTitlePageMap.values
+                .any((element) => page.name == element);
           });
 
-          if (isSetting && !MixinRouter.instance.navigationMode) {
-            MixinRouter.instance.pushPage(SettingSelectedCubit.titlePageMap[
-                BlocProvider.of<SettingSelectedCubit>(context).state]);
-          }
+          if (isSetting && !responsiveNavigatorCubit.state.navigationMode)
+            responsiveNavigatorCubit.pushPage(
+                ResponsiveNavigatorCubit.settingTitlePageMap.values.first);
         },
         child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
           converter: (state) => state.type == SlideCategoryType.setting,
