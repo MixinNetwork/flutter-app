@@ -12,14 +12,18 @@ import 'blaze_message.dart';
 
 class Blaze {
   IOWebSocketChannel channel;
+  MessagesHistoryDao dao = MessagesHistoryDao(MixinDatabase());
+
   void connect(String token) {
     channel = IOWebSocketChannel.connect(
         'wss://blaze.mixin.one?access_token=$token',
         protocols: ['Mixin-Blaze-1']);
     debugPrint('wss://blaze.mixin.one?access_token=$token');
     channel.stream.listen((message) {
-      MessagesHistoryDao(MixinDatabase())
-          .debugPrint(String.fromCharCodes(GZipDecoder().decodeBytes(message)));
+      dao
+          .insert(MessagesHistoryData(messageId: Uuid().v4()))
+          .then((value) => {debugPrint(value.toString())});
+      debugPrint(String.fromCharCodes(GZipDecoder().decodeBytes(message)));
     }, onError: (error) {
       debugPrint('onError');
     }, onDone: () {

@@ -23,6 +23,7 @@ import 'dao/circles_dao.dart';
 import 'dao/conversations_dao.dart';
 import 'dao/flood_messages_dao.dart';
 import 'dao/offsets_dao.dart';
+import 'dao/participant_session_dao.dart';
 import 'dao/sent_session_sender_keys_dao.dart';
 import 'dao/snapshots_dao.dart';
 import 'dao/sticker_albums_dao.dart';
@@ -47,7 +48,7 @@ part 'mixin_database.g.dart';
   MessagesHistoryDao,
   OffsetsDao,
   ParticipantsDao,
-  ParticipantsDao,
+  ParticipantSessionDao,
   ResendSessionMessagesDao,
   SentSessionSenderKeysDao,
   SnapshotsDao,

@@ -10785,9 +10785,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   ParticipantsDao _participantsDao;
   ParticipantsDao get participantsDao =>
       _participantsDao ??= ParticipantsDao(this as MixinDatabase);
-  ParticipantsDao _participantsDao;
-  ParticipantsDao get participantsDao =>
-      _participantsDao ??= ParticipantsDao(this as MixinDatabase);
+  ParticipantSessionDao _participantSessionDao;
+  ParticipantSessionDao get participantSessionDao =>
+      _participantSessionDao ??= ParticipantSessionDao(this as MixinDatabase);
   ResendSessionMessagesDao _resendSessionMessagesDao;
   ResendSessionMessagesDao get resendSessionMessagesDao =>
       _resendSessionMessagesDao ??=
