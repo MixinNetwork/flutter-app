@@ -10,7 +10,6 @@ import 'package:flutter_app/widgets/automatic_keep_alive_client_widget.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/empty.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;
