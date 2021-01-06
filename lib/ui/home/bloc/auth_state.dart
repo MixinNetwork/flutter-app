@@ -15,7 +15,7 @@ class AuthState extends Equatable {
   static AuthState fromJson(Map<String, dynamic> json) {
     Account account;
     if (json['account'] != null)
-      account = Account.fromJson(json['account'] ?? {});
+      account = Account.fromJson(json['account']);
     return AuthState(
       account: account,
       privateKey: json['privateKey'],

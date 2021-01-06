@@ -17,7 +17,5 @@ class AuthCubit extends HydratedCubit<AuthState> {
 
   static AuthCubit of(BuildContext context) => BlocProvider.of<AuthCubit>(context);
 
-  void signOut() {
-    emit(null);
-  }
+  void signOut() => emit(null);
 }
