@@ -1,4 +1,5 @@
 class BlazeMessage {
+  // ignore: avoid_unused_constructor_parameters
   BlazeMessage(this.id, {this.action, this.status, String messageId});
 
   BlazeMessage.fromJson(Map<String, dynamic> json)

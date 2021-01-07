@@ -1,4 +1,3 @@
-import 'package:flutter_app/db/dao/users_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 

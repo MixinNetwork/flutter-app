@@ -69,7 +69,7 @@ class Blaze {
           BaseWorker().syncConversion(data['conversation_id']);
         }
       } else {
-        print(data.toString);
+        debugPrint(data.toString());
         // updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
       }
     }, onError: (error) {

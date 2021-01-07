@@ -1,3 +1,8 @@
-enum ConversationStatus { START, FAILURE, SUCCESS, QUIT }
+enum ConversationStatus {
+  start,
+  failure,
+  success,
+  quit,
+}
 
-const SystemUser = '00000000-0000-0000-0000-000000000000';
+const systemUser = '00000000-0000-0000-0000-000000000000';

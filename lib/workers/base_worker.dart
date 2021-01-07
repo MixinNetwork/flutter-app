@@ -6,7 +6,7 @@ import 'package:flutter_app/mixin_client.dart';
 class BaseWorker {
   Future<void> syncConversion(String conversationId) async {
     // print(conversationId);
-    if (conversationId == null || conversationId == SystemUser) {
+    if (conversationId == null || conversationId == systemUser) {
       return;
     }
     final result =
@@ -25,7 +25,7 @@ class BaseWorker {
             name: response.data.name,
             announcement: response.data.announcement,
             createdAt: response.data.createdAt,
-            status: ConversationStatus.SUCCESS.index,
+            status: ConversationStatus.success.index,
             muteUntil: response.data.muteUntil));
       }
     }
