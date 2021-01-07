@@ -24,6 +24,8 @@ dependencies:
   #    path: ../mixin_bot_sdk_dart
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   http: ^0.12.2
   qr_flutter: ^3.2.0
   uuid: ^2.2.2
