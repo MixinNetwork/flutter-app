@@ -8,6 +8,7 @@ import 'package:flutter_app/constants/assets.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({Key key}) : super(key: key);
@@ -21,35 +22,41 @@ class SettingPage extends StatelessWidget {
             const SizedBox(height: 24),
             Column(
               children: [
-                const _ItemContainer(
+                _ItemContainer(
                   child: _Item(
                     assetName: Assets.assetsImagesIcProfileSvg,
-                    title: 'Edit Profile',
+                    name: 'Edit Profile',
+                    title: Localization.of(context).editProfile,
                   ),
                 ),
                 const SizedBox(height: 10),
                 _ItemContainer(
                   child: Column(
-                    children: const [
+                    children: [
                       _Item(
                         assetName: Assets.assetsImagesIcNotificationSvg,
-                        title: 'Notification',
+                        name: 'Notification',
+                        title: Localization.of(context).notification,
                       ),
                       _Item(
                         assetName: Assets.assetsImagesIcBackupSvg,
-                        title: 'Chat Backup',
+                        name: 'Chat Backup',
+                        title: Localization.of(context).chatBackup,
                       ),
                       _Item(
                         assetName: Assets.assetsImagesIcStorageUsageSvg,
-                        title: 'Data and Storage Usage',
+                        name: 'Data and Storage Usage',
+                        title: Localization.of(context).dataAndStorageUsage,
                       ),
                       _Item(
                         assetName: Assets.assetsImagesIcAppearanceSvg,
-                        title: 'Appearance',
+                        name: 'Appearance',
+                        title: Localization.of(context).appearance,
                       ),
                       _Item(
                         assetName: Assets.assetsImagesIcAboutSvg,
-                        title: 'About',
+                        name: 'About',
+                        title: Localization.of(context).about,
                       ),
                     ],
                   ),
@@ -60,7 +67,8 @@ class SettingPage extends StatelessWidget {
             _ItemContainer(
               child: _Item(
                 assetName: Assets.assetsImagesIcSignOutSvg,
-                title: 'Sign Out',
+                title: Localization.of(context).signOut,
+                name: 'Sign Out',
                 onTap: () => AuthCubit.of(context).signOut(),
                 color: BrightnessData.dynamicColor(
                   context,
@@ -80,12 +88,14 @@ class _Item extends StatelessWidget {
     Key key,
     @required this.assetName,
     @required this.title,
+    @required this.name,
     this.color,
     this.onTap,
   }) : super(key: key);
 
   final String assetName;
   final String title;
+  final String name;
   final Color color;
   final VoidCallback onTap;
 
@@ -107,7 +117,7 @@ class _Item extends StatelessWidget {
         converter: (state) =>
             !state.navigationMode &&
             state.pages.any((element) =>
-                ResponsiveNavigatorCubit.settingTitlePageMap[title] ==
+                ResponsiveNavigatorCubit.settingTitlePageMap[name] ==
                 element.name),
         builder: (context, selected) {
           var selectedBackgroundColor = backgroundColor;
@@ -129,7 +139,7 @@ class _Item extends StatelessWidget {
             onTap: () {
               if (onTap == null) {
                 ResponsiveNavigatorCubit.of(context).pushPage(
-                    ResponsiveNavigatorCubit.settingTitlePageMap[title]);
+                    ResponsiveNavigatorCubit.settingTitlePageMap[name]);
                 return;
               }
 

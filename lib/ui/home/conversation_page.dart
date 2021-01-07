@@ -12,6 +12,7 @@ import 'package:flutter_app/widgets/search_bar.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 class ConversationPage extends StatelessWidget {
   const ConversationPage({Key key}) : super(key: key);
@@ -60,7 +61,7 @@ class _Empty extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'NOT ${BlocProvider.of<SlideCategoryCubit>(context).state.name.toUpperCase()}',
+          Localization.of(context).noData,
           style: TextStyle(
             color: dynamicColor,
             fontSize: 14,
@@ -102,7 +103,8 @@ class _List extends StatelessWidget {
                 unread: message.unread,
                 onTap: () {
                   BlocProvider.of<ConversationCubit>(context).emit(message);
-                  ResponsiveNavigatorCubit.of(context).pushPage(ResponsiveNavigatorCubit.chatPage);
+                  ResponsiveNavigatorCubit.of(context)
+                      .pushPage(ResponsiveNavigatorCubit.chatPage);
                 },
               ),
             ),

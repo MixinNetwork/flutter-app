@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 class NotificationPage extends StatelessWidget {
   @override
@@ -12,13 +13,8 @@ class NotificationPage extends StatelessWidget {
           darkColor: const Color.fromRGBO(40, 44, 48, 1),
         ),
         appBar: MixinAppBar(
-          title: 'Notification',
-          actions: [
-            TextButton(
-              onPressed: () {},
-              child: const Text('Save'),
-            ),
-          ],
+          title: Localization.of(context).notification,
+          actions: [],
         ),
       );
 }

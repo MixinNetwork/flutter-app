@@ -10,5 +10,19 @@
 	"bots": "Bots",
 	"strangers": "Strangers",
 	"circle": "Circle",
-	"pageRightEmptyMessage": "Select a conversation to start messaging"
+	"pageRightEmptyMessage": "Select a conversation to start messaging",
+	"search": "Search",
+	"editProfile": "Edit Profile",
+	"notification": "Notification",
+	"chatBackup": "Chat Backup",
+	"dataAndStorageUsage": "Data and Storage Usage",
+	"appearance": "Appearance",
+	"about": "About",
+	"signOut": "Sign Out",
+	"noData": "NO DATA",
+	"name": "Name",
+	"introduction": "Introduction",
+	"phoneNumber": "Phone number",
+	"save": "Save",
+	"pageEditProfileJoin": "{date} join"
 }

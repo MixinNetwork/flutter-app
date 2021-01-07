@@ -45,23 +45,25 @@ class ConversationListCubit extends Cubit<List<Conversation>>
   // mock
   void switchConversationList(SlideCategoryState e) {
     switch (e.name) {
-      case 'Strangers':
+      case '陌生人':
         return emit([]);
       default:
         return emit(_generateList(e.name));
     }
   }
 
-  List<Conversation> _generateList(String type) => List.generate(99, (index) => Conversation(
-          name: '$type name $index',
-          avatars: List.generate(
-            (index % 4) + 1,
-            (i) => 'https://i.pravatar.cc/150?u=$type-$index-$i',
-          ),
-          dateTime: DateTime.now().subtract(Duration(hours: index)),
-          messageStatus: '',
-          message: '$type message $index',
-          count: index,
-          unread: index.isEven,
-        ));
+  List<Conversation> _generateList(String type) => List.generate(
+      99,
+      (index) => Conversation(
+            name: '$type name $index',
+            avatars: List.generate(
+              (index % 4) + 1,
+              (i) => 'https://i.pravatar.cc/150?u=$type-$index-$i',
+            ),
+            dateTime: DateTime.now().subtract(Duration(hours: index)),
+            messageStatus: '',
+            message: '$type message $index',
+            count: index,
+            unread: index.isEven,
+          ));
 }

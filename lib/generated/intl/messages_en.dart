@@ -19,19 +19,35 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static m0(date) => "${date} join";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
+    "about" : MessageLookupByLibrary.simpleMessage("About"),
+    "appearance" : MessageLookupByLibrary.simpleMessage("Appearance"),
     "bots" : MessageLookupByLibrary.simpleMessage("Bots"),
+    "chatBackup" : MessageLookupByLibrary.simpleMessage("Chat Backup"),
     "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
     "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
+    "dataAndStorageUsage" : MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
+    "editProfile" : MessageLookupByLibrary.simpleMessage("Edit Profile"),
     "group" : MessageLookupByLibrary.simpleMessage("Group"),
     "initializing" : MessageLookupByLibrary.simpleMessage("Initializing"),
+    "introduction" : MessageLookupByLibrary.simpleMessage("Introduction"),
+    "name" : MessageLookupByLibrary.simpleMessage("Name"),
+    "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
+    "notification" : MessageLookupByLibrary.simpleMessage("Notification"),
+    "pageEditProfileJoin" : m0,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),
     "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("Select a conversation to start messaging"),
+    "phoneNumber" : MessageLookupByLibrary.simpleMessage("Phone number"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("Please wait a moment"),
     "provisioning" : MessageLookupByLibrary.simpleMessage("Provisioning"),
+    "save" : MessageLookupByLibrary.simpleMessage("Save"),
+    "search" : MessageLookupByLibrary.simpleMessage("Search"),
+    "signOut" : MessageLookupByLibrary.simpleMessage("Sign Out"),
     "strangers" : MessageLookupByLibrary.simpleMessage("Strangers")
   };
 }

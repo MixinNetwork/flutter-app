@@ -7,6 +7,7 @@ import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 class EditProfilePage extends StatelessWidget {
   @override
@@ -30,11 +31,11 @@ class EditProfilePage extends StatelessWidget {
           darkColor: const Color.fromRGBO(40, 44, 48, 1),
         ),
         appBar: MixinAppBar(
-          title: 'Edit Profile',
+          title: Localization.of(context).editProfile,
           actions: [
             TextButton(
               onPressed: () {},
-              child: const Text('Save'),
+              child: Text(Localization.of(context).save),
             ),
           ],
         ),
@@ -69,19 +70,19 @@ class EditProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               _Item(
-                title: 'Name',
+                title: Localization.of(context).name,
                 controller: nameTextEditingController,
               ),
               const SizedBox(height: 32),
               _Item(
-                title: 'Introduction',
+                title: Localization.of(context).introduction,
                 controller: bioTextEditingController,
               ),
               const SizedBox(height: 32),
               BlocConverter<AuthCubit, AuthState, String>(
                 converter: (state) => state.account.phone,
                 builder: (context, phone) => _Item(
-                  title: 'Phone number',
+                  title: Localization.of(context).phoneNumber,
                   controller: TextEditingController(text: phone),
                   readOnly: true,
                 ),
@@ -91,7 +92,7 @@ class EditProfilePage extends StatelessWidget {
                 converter: (state) => DateFormat.yMMMd()
                     .format(DateTime.tryParse(state.account.createdAt)),
                 builder: (context, createdAt) => Text(
-                  '$createdAt join',
+                  Localization.of(context).pageEditProfileJoin(createdAt),
                   style: TextStyle(
                     fontSize: 14,
                     color: BrightnessData.dynamicColor(

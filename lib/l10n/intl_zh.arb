@@ -10,5 +10,19 @@
 	"bots": "机器人",
 	"strangers": "陌生人",
 	"circle": "圈子",
-	"pageRightEmptyMessage": "选择一个对话，开始发送信息"
+	"pageRightEmptyMessage": "选择一个对话，开始发送信息",
+	"search": "搜索",
+	"editProfile": "编辑资料",
+	"notification": "通知",
+	"chatBackup": "聊天记录备份",
+	"dataAndStorageUsage": "数据和存储使用情况",
+	"appearance": "显示偏好",
+	"about": "关于",
+	"signOut": "登出",
+	"noData": "没有数据",
+	"name": "名字",
+	"introduction": "介绍",
+	"phoneNumber": "手机号",
+	"save": "保存",
+	"pageEditProfileJoin": "{date}加入"
 }

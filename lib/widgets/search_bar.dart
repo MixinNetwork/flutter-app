@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/assets.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 import 'action_button.dart';
 
@@ -66,7 +67,7 @@ class SearchBar extends StatelessWidget {
                   ),
                 ),
                 contentPadding: const EdgeInsets.only(right: 8),
-                hintText: 'Search',
+                hintText: Localization.of(context).search,
                 hintStyle: TextStyle(
                   color: hintColor,
                   fontSize: 14,
