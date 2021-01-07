@@ -81,7 +81,7 @@ class _QrCode extends StatelessWidget {
                     ),
                     BlocConverter<LandingCubit, LandingState, bool>(
                       converter: (state) =>
-                          state.status == LandingStatus.needRetry,
+                          state.status == LandingStatus.needReload,
                       builder: (context, visible) => Visibility(
                         visible: visible,
                         child: _Retry(

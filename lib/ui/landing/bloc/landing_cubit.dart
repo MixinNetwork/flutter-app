@@ -24,7 +24,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
   final AuthCubit authCubit;
 
   final StreamController<int> periodicStreamController =
-      StreamController<int>.broadcast();
+      StreamController<int>();
   StreamSubscription<int> streamSubscription;
   signal.ECKeyPair keyPair;
   String deviceId;
@@ -52,7 +52,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       addSubscription(streamSubscription);
     } else {
       emit(state.copyWith(
-        status: LandingStatus.needRetry,
+        status: LandingStatus.needReload,
       ));
     }
   }
@@ -63,7 +63,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           if (event < 60) return;
           streamSubscription?.cancel();
           emit(state.copyWith(
-            status: LandingStatus.needRetry,
+            status: LandingStatus.needReload,
           ));
         })
         .asyncMap((event) async {
@@ -87,7 +87,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           if (auth == null) {
             streamSubscription?.cancel();
             emit(state.copyWith(
-              status: LandingStatus.needRetry,
+              status: LandingStatus.needReload,
             ));
           }
         })

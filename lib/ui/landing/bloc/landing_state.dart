@@ -1,7 +1,7 @@
 part of 'landing_cubit.dart';
 
 enum LandingStatus {
-  needRetry,
+  needReload,
   provisioning,
   ready,
   init,
