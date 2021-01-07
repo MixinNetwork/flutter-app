@@ -15,7 +15,7 @@ publish_to: none
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: '>=2.6.0 <3.0.0'
 
 dependencies:
   mixin_bot_sdk_dart:
@@ -72,7 +72,6 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-
     # assets start
 
     # GENERATED CODE - DO NOT MODIFY MANUALLY

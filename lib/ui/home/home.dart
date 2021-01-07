@@ -64,15 +64,16 @@ class HomePage extends StatelessWidget {
                 key: const Key('empty'),
                 name: 'empty',
                 child: DecoratedBox(
-                    child: Empty(text: Localization.of(context).pageRightEmptyMessage),
-                    decoration: BoxDecoration(
-                      color: BrightnessData.dynamicColor(
-                        context,
-                        const Color.fromRGBO(237, 238, 238, 1),
-                        darkColor: const Color.fromRGBO(35, 39, 43, 1),
-                      ),
+                  child: Empty(
+                      text: Localization.of(context).pageRightEmptyMessage),
+                  decoration: BoxDecoration(
+                    color: BrightnessData.dynamicColor(
+                      context,
+                      const Color.fromRGBO(237, 238, 238, 1),
+                      darkColor: const Color.fromRGBO(35, 39, 43, 1),
                     ),
                   ),
+                ),
               ),
             ),
           ),
