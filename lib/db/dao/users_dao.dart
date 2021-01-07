@@ -16,4 +16,9 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   }
 
   Future deleteUser(User user) => delete(db.users).delete(user);
+
+  Future<User> findUserById(userId) {
+    final query = select(db.users)..where((tbl) => tbl.userId.equals(userId));
+    return query.getSingle();
+  }
 }

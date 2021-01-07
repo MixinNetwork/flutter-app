@@ -12,3 +12,12 @@ class ConversationCategory {
 
   static const String group = 'GROUP';
 }
+
+class MessageStatus {
+  static const String sending = 'SENDING';
+  static const String sent = 'SENT';
+  static const String delivered = 'DELIVERED';
+  static const String read = 'READ';
+  static const String failed = 'FAILED';
+  static const String unknown = 'UNKNOWN';
+}

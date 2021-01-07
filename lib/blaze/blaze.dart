@@ -64,7 +64,11 @@ class Blaze {
             // todo delete
             updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
           });
-          BaseWorker(selfId).syncConversion(data['conversation_id']);
+          try {
+            BaseWorker(selfId).syncConversion(data['conversation_id']);
+          } catch (e) {
+            debugPrint(e);
+          }
         }
       } else {
         debugPrint(data.toString());

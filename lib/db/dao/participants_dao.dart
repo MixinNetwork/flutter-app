@@ -25,4 +25,8 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
       batch.insertAllOnConflictUpdate(db.participants, add);
     });
   }
+
+  void deleteAll(Iterable<Participant> remove) {
+    remove.forEach(deleteParticipant);
+  }
 }

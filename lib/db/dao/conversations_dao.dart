@@ -17,9 +17,9 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Stream<List<Conversation>> conversations() =>
       select(db.conversations).watch();
 
-  Future<List<Conversation>> getConversationById(String conversationId) {
+  Future<Conversation> getConversationById(String conversationId) {
     final query = select(db.conversations)
       ..where((tbl) => tbl.conversationId.equals(conversationId));
-    return query.get();
+    return query.getSingle();
   }
 }
