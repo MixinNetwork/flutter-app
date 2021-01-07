@@ -8,27 +8,9 @@ import 'package:flutter_app/widgets/select_item.dart';
 import 'package:flutter_app/constants/assets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tuple/tuple.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 class SlidePage extends StatelessWidget {
-  static const categoryList = [
-    {
-      'asset': Assets.assetsImagesContactsPng,
-      'title': 'Contacts',
-    },
-    {
-      'asset': Assets.assetsImagesGroupPng,
-      'title': 'Group',
-    },
-    {
-      'asset': Assets.assetsImagesBotPng,
-      'title': 'Bots',
-    },
-    {
-      'asset': Assets.assetsImagesStrangersPng,
-      'title': 'Strangers',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) => SizedBox(
         width: 200,
@@ -39,9 +21,23 @@ class SlidePage extends StatelessWidget {
             const SizedBox(height: 64),
             const _Title(data: 'People'),
             const SizedBox(height: 12),
-            const _CategoryList(categoryList: categoryList),
+            _CategoryList(categoryList: [
+              {
+                'asset': Assets.assetsImagesContactsPng,
+                'title': S.of(context).contacts,
+              },
+              {
+                'asset': Assets.assetsImagesGroupPng,
+                'title': S.of(context).group,
+              },
+              {'asset': Assets.assetsImagesBotPng, 'title': S.current.bots},
+              {
+                'asset': Assets.assetsImagesStrangersPng,
+                'title': S.of(context).strangers,
+              },
+            ]),
             const SizedBox(height: 16),
-            const _Title(data: 'Circle'),
+            _Title(data: S.of(context).circle),
             const SizedBox(height: 12),
             const _CircleList(),
             // TODO user profile callback

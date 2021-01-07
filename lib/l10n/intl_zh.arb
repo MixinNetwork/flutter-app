@@ -4,5 +4,11 @@
 	"pleaseWait": "请稍等一下",
 	"pageLandingLoginTitle": "通过 QrCode 登录 Mixin Messenger",
 	"pageLandingLoginMessage": "打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。",
-	"pageLandingClickToReload": "点击重新加载 QrCode"
+	"pageLandingClickToReload": "点击重新加载 QrCode",
+	"contacts": "联系人",
+	"group": "群组",
+	"bots": "机器人",
+	"strangers": "陌生人",
+	"circle": "圈子",
+	"pageRightEmptyMessage": "选择一个对话，开始发送信息"
 }

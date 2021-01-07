@@ -21,11 +21,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
+    "bots" : MessageLookupByLibrary.simpleMessage("机器人"),
+    "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
+    "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),
+    "group" : MessageLookupByLibrary.simpleMessage("群组"),
     "initializing" : MessageLookupByLibrary.simpleMessage("初始化"),
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("通过 QrCode 登录 Mixin Messenger"),
+    "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("请稍等一下"),
-    "provisioning" : MessageLookupByLibrary.simpleMessage("处理中")
+    "provisioning" : MessageLookupByLibrary.simpleMessage("处理中"),
+    "strangers" : MessageLookupByLibrary.simpleMessage("陌生人")
   };
 }

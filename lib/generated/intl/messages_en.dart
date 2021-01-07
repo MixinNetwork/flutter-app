@@ -21,11 +21,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
+    "bots" : MessageLookupByLibrary.simpleMessage("Bots"),
+    "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
+    "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
+    "group" : MessageLookupByLibrary.simpleMessage("Group"),
     "initializing" : MessageLookupByLibrary.simpleMessage("Initializing"),
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),
+    "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("Select a conversation to start messaging"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("Please wait a moment"),
-    "provisioning" : MessageLookupByLibrary.simpleMessage("Provisioning")
+    "provisioning" : MessageLookupByLibrary.simpleMessage("Provisioning"),
+    "strangers" : MessageLookupByLibrary.simpleMessage("Strangers")
   };
 }

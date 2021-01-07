@@ -10,6 +10,7 @@ import 'package:flutter_app/widgets/automatic_keep_alive_client_widget.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/empty.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;
@@ -49,18 +50,13 @@ class HomePage extends StatelessWidget {
                 rightEmptyPage: MaterialPage(
                   key: const Key('empty'),
                   name: 'empty',
-                  child: BlocConverter<SlideCategoryCubit, SlideCategoryState,
-                      String>(
-                    converter: (state) => state.name,
-                    when: (a, b) => b != null,
-                    builder: (context, name) => DecoratedBox(
-                      child: Empty(text: 'Select a $name to start messaging'),
-                      decoration: BoxDecoration(
-                        color: BrightnessData.dynamicColor(
-                          context,
-                          const Color.fromRGBO(237, 238, 238, 1),
-                          darkColor: const Color.fromRGBO(35, 39, 43, 1),
-                        ),
+                  child: DecoratedBox(
+                    child: Empty(text: S.of(context).pageRightEmptyMessage),
+                    decoration: BoxDecoration(
+                      color: BrightnessData.dynamicColor(
+                        context,
+                        const Color.fromRGBO(237, 238, 238, 1),
+                        darkColor: const Color.fromRGBO(35, 39, 43, 1),
                       ),
                     ),
                   ),

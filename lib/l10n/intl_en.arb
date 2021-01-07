@@ -4,5 +4,11 @@
 	"pleaseWait": "Please wait a moment",
 	"pageLandingLoginTitle": "Login to Mixin Messenger by QR Code",
 	"pageLandingLoginMessage": "Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login.",
-	"pageLandingClickToReload": "CLICK TO RELOAD QR CODE"
+	"pageLandingClickToReload": "CLICK TO RELOAD QR CODE",
+	"contacts": "Contacts",
+	"group": "Group",
+	"bots": "Bots",
+	"strangers": "Strangers",
+	"circle": "Circle",
+	"pageRightEmptyMessage": "Select a conversation to start messaging"
 }

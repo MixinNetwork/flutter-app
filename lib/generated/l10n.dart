@@ -94,6 +94,66 @@ class S {
       args: [],
     );
   }
+
+  /// `Contacts`
+  String get contacts {
+    return Intl.message(
+      'Contacts',
+      name: 'contacts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Group`
+  String get group {
+    return Intl.message(
+      'Group',
+      name: 'group',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Bots`
+  String get bots {
+    return Intl.message(
+      'Bots',
+      name: 'bots',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Strangers`
+  String get strangers {
+    return Intl.message(
+      'Strangers',
+      name: 'strangers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Circle`
+  String get circle {
+    return Intl.message(
+      'Circle',
+      name: 'circle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select a conversation to start messaging`
+  String get pageRightEmptyMessage {
+    return Intl.message(
+      'Select a conversation to start messaging',
+      name: 'pageRightEmptyMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
