@@ -43,7 +43,6 @@ class Blaze {
     channel = IOWebSocketChannel.connect(
         'wss://blaze.mixin.one?access_token=$token',
         protocols: ['Mixin-Blaze-1']);
-    debugPrint('wss://blaze.mixin.one?access_token=$token');
     channel.stream.listen((message) {
       final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
       final blazeMessage = jsonDecode(content);
@@ -64,9 +63,8 @@ class Blaze {
               .then((value) {
             // todo delete
             updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
-            debugPrint(value.toString());
           });
-          BaseWorker().syncConversion(data['conversation_id']);
+          BaseWorker(selfId).syncConversion(data['conversation_id']);
         }
       } else {
         debugPrint(data.toString());

@@ -8,9 +8,21 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantsDaoMixin {
   ParticipantsDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(Participant participant) =>
+  void insert(Participant participant) async =>
       into(db.participants).insert(participant);
 
-  Future deleteParticipant(Participant participant) =>
+  void deleteParticipant(Participant participant) async =>
       delete(db.participants).delete(participant);
+
+  Future<List<Participant>> getParticipants(String conversationId) async {
+    final query = select(db.participants)
+      ..where((tbl) => tbl.conversationId.equals(conversationId));
+    return query.get();
+  }
+
+  void insertAll(List<Participant> add) async {
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(db.participants, add);
+    });
+  }
 }

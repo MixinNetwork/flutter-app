@@ -1,5 +1,7 @@
 import 'dao/conversations_dao.dart';
 import 'dao/flood_messages_dao.dart';
+import 'dao/participants_dao.dart';
+import 'dao/users_dao.dart';
 import 'mixin_database.dart';
 
 class Database {
@@ -11,6 +13,8 @@ class Database {
     database = MixinDatabase();
     conversationDao = ConversationsDao(database);
     floodMessagesDao = FloodMessagesDao(database);
+    participantsDao = ParticipantsDao(database);
+    userDao = UserDao(database);
   }
 
   static final Database _singleton = Database._internal();
@@ -20,4 +24,8 @@ class Database {
   ConversationsDao conversationDao;
 
   FloodMessagesDao floodMessagesDao;
+
+  ParticipantsDao participantsDao;
+
+  UserDao userDao;
 }

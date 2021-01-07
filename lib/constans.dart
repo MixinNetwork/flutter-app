@@ -6,3 +6,9 @@ enum ConversationStatus {
 }
 
 const systemUser = '00000000-0000-0000-0000-000000000000';
+
+class ConversationCategory {
+  static const String contact = 'CONTACT';
+
+  static const String group = 'GROUP';
+}

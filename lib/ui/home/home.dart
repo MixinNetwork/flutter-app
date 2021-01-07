@@ -29,9 +29,7 @@ class HomePage extends StatelessWidget {
     Blaze().connect(AuthCubit.of(context));
     MixinClient().init(AuthCubit.of(context));
     Database().conversationDao.conversations().listen((event) {
-      event.forEach((element) {
-        debugPrint('${element.conversationId}');
-      });
+      event.forEach((element) {});
     });
     return Scaffold(
       backgroundColor: BrightnessData.dynamicColor(
