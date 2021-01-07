@@ -3,9 +3,10 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/db/dao/flood_messages_dao.dart';
+import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
+import 'package:flutter_app/workers/base_worker.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -22,7 +23,6 @@ class Blaze {
   static final Blaze _singleton = Blaze._internal();
 
   IOWebSocketChannel channel;
-  FloodMessagesDao dao = FloodMessagesDao(MixinDatabase());
   String selfId;
   void connect(AuthCubit authCubit) {
     final account = authCubit.state.account;
@@ -55,15 +55,22 @@ class Blaze {
         if (data['user_id'] == selfId && data['category'] == '') {
           // makeMessageStatus
         } else {
-          dao
+          Database()
+              .floodMessagesDao
               .insert(FloodMessage(
-                  messageId: data['id'],
+                  messageId: data['message_id'],
                   data: data.toString(),
                   createdAt: data['created_at']))
-              .then((value) => {debugPrint(value.toString())});
+              .then((value) {
+            // todo delete
+            updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
+            debugPrint(value.toString());
+          });
+          BaseWorker().syncConversion(data['conversation_id']);
         }
       } else {
-        updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
+        print(data.toString);
+        // updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
       }
     }, onError: (error) {
       debugPrint('onError');

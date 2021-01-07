@@ -9,7 +9,7 @@ class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
   FloodMessagesDao(MixinDatabase db) : super(db);
 
   Future<int> insert(FloodMessage message) =>
-      into(db.floodMessages).insert(message);
+      into(db.floodMessages).insertOnConflictUpdate(message);
 
   Future deleteFloodMessage(FloodMessage message) =>
       delete(db.floodMessages).delete(message);

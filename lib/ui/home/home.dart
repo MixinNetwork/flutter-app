@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/db/database.dart';
+import 'package:flutter_app/mixin_client.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
@@ -24,6 +26,12 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Blaze().connect(AuthCubit.of(context));
+    MixinClient().init(AuthCubit.of(context));
+    Database().conversationDao.conversations().listen((event) {
+      event.forEach((element) {
+        debugPrint('${element.conversationId}');
+      });
+    });
     return Scaffold(
       backgroundColor: BrightnessData.dynamicColor(
         context,
