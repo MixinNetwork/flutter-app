@@ -9,7 +9,9 @@ import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 ResponsiveNavigatorCubit _responsiveNavigatorCubit;
 
@@ -45,12 +47,22 @@ class App extends StatelessWidget {
       child: MaterialApp(
         title: 'Mixin',
         debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          S.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          ...S.delegate.supportedLocales,
+        ],
         builder: (context, child) => BrightnessObserver(
           child: child,
         ),
         home: BlocConverter<AuthCubit, AuthState, bool>(
           cubit: authCubit,
-          converter: (state) => state?.account != null && state?.privateKey != null,
+          converter: (state) =>
+              state?.account != null && state?.privateKey != null,
           builder: (context, authAvailable) {
             if (authAvailable) return HomePage();
             return const LandingPage();

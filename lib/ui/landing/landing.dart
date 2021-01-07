@@ -7,6 +7,7 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key key}) : super(key: key);
@@ -26,15 +27,15 @@ class LandingPage extends StatelessWidget {
                 converter: (state) => state.status,
                 builder: (context, status) {
                   if (status == LandingStatus.init)
-                    return const _Loading(
-                      title: 'Initializing',
-                      message: 'Please wait a moment',
+                    return _Loading(
+                      title: S.of(context).initializing,
+                      message: S.of(context).pleaseWait,
                     );
 
                   if (status == LandingStatus.provisioning)
-                    return const _Loading(
-                      title: 'Provisioning',
-                      message: 'Please wait a moment',
+                    return _Loading(
+                      title: S.of(context).provisioning,
+                      message: S.current.pleaseWait,
                     );
 
                   return const _QrCode();
@@ -95,7 +96,7 @@ class _QrCode extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Log in to Mixin Messenger by QR Code',
+              S.of(context).pageLandingLoginTitle,
               style: TextStyle(
                 fontSize: 22,
                 color: BrightnessData.dynamicColor(
@@ -107,7 +108,7 @@ class _QrCode extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login.',
+              S.of(context).pageLandingLoginMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -191,6 +192,7 @@ class _Retry extends StatelessWidget {
         ),
         child: GestureDetector(
           onTap: onTap,
+          behavior: HitTestBehavior.opaque,
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -201,12 +203,12 @@ class _Retry extends StatelessWidget {
                   height: 50,
                 ),
                 const SizedBox(height: 14),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    'CLICK TO RELOAD QR CODE',
+                    S.of(context).pageLandingClickToReload,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: Color.fromRGBO(255, 255, 255, 0.9),
                       fontSize: 14,
                     ),
