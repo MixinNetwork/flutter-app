@@ -103,3 +103,5 @@ flutter:
     # see https://flutter.dev/custom-fonts/#from-packages
 flutter_intl:
     enabled: true
+    class_name: Localization
+    use_deferred_loading: true

@@ -48,13 +48,13 @@ class App extends StatelessWidget {
         title: 'Mixin',
         debugShowCheckedModeBanner: false,
         localizationsDelegates: const [
-          S.delegate,
+          Localization.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
         ],
         supportedLocales: [
-          ...S.delegate.supportedLocales,
+          ...Localization.delegate.supportedLocales,
         ],
         builder: (context, child) => BrightnessObserver(
           child: child,

@@ -28,14 +28,14 @@ class LandingPage extends StatelessWidget {
                 builder: (context, status) {
                   if (status == LandingStatus.init)
                     return _Loading(
-                      title: S.of(context).initializing,
-                      message: S.of(context).pleaseWait,
+                      title: Localization.of(context).initializing,
+                      message: Localization.of(context).pleaseWait,
                     );
 
                   if (status == LandingStatus.provisioning)
                     return _Loading(
-                      title: S.of(context).provisioning,
-                      message: S.current.pleaseWait,
+                      title: Localization.of(context).provisioning,
+                      message: Localization.current.pleaseWait,
                     );
 
                   return const _QrCode();
@@ -96,7 +96,7 @@ class _QrCode extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              S.of(context).pageLandingLoginTitle,
+              Localization.of(context).pageLandingLoginTitle,
               style: TextStyle(
                 fontSize: 22,
                 color: BrightnessData.dynamicColor(
@@ -108,7 +108,7 @@ class _QrCode extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              S.of(context).pageLandingLoginMessage,
+              Localization.of(context).pageLandingLoginMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -206,7 +206,7 @@ class _Retry extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    S.of(context).pageLandingClickToReload,
+                    Localization.of(context).pageLandingClickToReload,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Color.fromRGBO(255, 255, 255, 0.9),

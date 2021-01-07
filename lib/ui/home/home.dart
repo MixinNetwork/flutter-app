@@ -51,7 +51,8 @@ class HomePage extends StatelessWidget {
                   key: const Key('empty'),
                   name: 'empty',
                   child: DecoratedBox(
-                    child: Empty(text: S.of(context).pageRightEmptyMessage),
+                    child: Empty(
+                        text: Localization.of(context).pageRightEmptyMessage),
                     decoration: BoxDecoration(
                       color: BrightnessData.dynamicColor(
                         context,

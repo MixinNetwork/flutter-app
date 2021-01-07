@@ -24,20 +24,23 @@ class SlidePage extends StatelessWidget {
             _CategoryList(categoryList: [
               {
                 'asset': Assets.assetsImagesContactsPng,
-                'title': S.of(context).contacts,
+                'title': Localization.of(context).contacts,
               },
               {
                 'asset': Assets.assetsImagesGroupPng,
-                'title': S.of(context).group,
+                'title': Localization.of(context).group,
               },
-              {'asset': Assets.assetsImagesBotPng, 'title': S.current.bots},
+              {
+                'asset': Assets.assetsImagesBotPng,
+                'title': Localization.current.bots
+              },
               {
                 'asset': Assets.assetsImagesStrangersPng,
-                'title': S.of(context).strangers,
+                'title': Localization.of(context).strangers,
               },
             ]),
             const SizedBox(height: 16),
-            _Title(data: S.of(context).circle),
+            _Title(data: Localization.of(context).circle),
             const SizedBox(height: 12),
             const _CircleList(),
             // TODO user profile callback
