@@ -51,18 +51,19 @@ class App extends StatelessWidget {
           final slideCategoryCubit = SlideCategoryCubit();
           final draftCubit = DraftCubit();
           final responsiveNavigatorCubit = ResponsiveNavigatorCubit();
+          final accountServer = AccountServer()
+            ..initServer(
+              authState.account.userId,
+              authState.account.sessionId,
+              authState.account.identityNumber,
+              authState.privateKey,
+            )
+            ..start();
           return Provider<AccountServer>(
             key: ValueKey(authState?.account?.userId),
-            create: (context) => AccountServer()
-              ..initServer(
-                authState.account.userId,
-                authState.account.sessionId,
-                authState.account.identityNumber,
-                authState.privateKey,
-              ),
-            dispose: (BuildContext context, AccountServer value) {
-              // value.dispose();
-            },
+            create: (context) => accountServer,
+            dispose: (BuildContext context, AccountServer value) =>
+                value.stop(),
             child: MultiBlocProvider(
               providers: [
                 BlocProvider(
@@ -75,8 +76,10 @@ class App extends StatelessWidget {
                   create: (BuildContext context) => responsiveNavigatorCubit,
                 ),
                 BlocProvider(
-                  create: (BuildContext context) =>
-                      ConversationListCubit(slideCategoryCubit),
+                  create: (BuildContext context) => ConversationListCubit(
+                    slideCategoryCubit,
+                    accountServer,
+                  ),
                 ),
                 BlocProvider(
                   create: (BuildContext context) =>

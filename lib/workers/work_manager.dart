@@ -35,9 +35,7 @@ class WorkManager {
   }
 
   void _process() {
-    if (_receiveWorker == null) {
-      _receiveWorker.doWork();
-    }
+    _receiveWorker?.doWork();
   }
 
   ReceiveWorker _receiveWorker;
