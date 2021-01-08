@@ -3,7 +3,6 @@ import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:flutter_app/mixin_client.dart';
-import 'package:mixin_bot_sdk_dart/src/vo/participant_request.dart';
 
 class BaseWorker {
   // print(conversationId);
@@ -47,8 +46,7 @@ class BaseWorker {
     }
   }
 
-  void refreshParticipants(
-      String conversationId, List<ParticipantRequest> participants) async {
+  void refreshParticipants(String conversationId, participants) async {
     final local =
         await Database().participantsDao.getParticipants(conversationId);
     final localIds = local.map((e) => e.userId);

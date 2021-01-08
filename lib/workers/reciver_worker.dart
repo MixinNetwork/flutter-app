@@ -40,7 +40,7 @@ class ReceiveWorker extends BaseWorker {
     } else if (category == 'MESSAGE_RECALL') {
       processRecallMessage(data);
     }
-    updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.DELIVERED);
+    updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
   }
 
   void updateRemoteMessageStatus(String messageId, String delivered) {}
@@ -57,7 +57,10 @@ class ReceiveWorker extends BaseWorker {
 
   void processDecryptSuccess(
       Map<String, dynamic> data, String plainText) async {
+    // todo
+    // ignore: unused_local_variable
     final user = await syncUser(data['user_id']);
+    //
     final message = Message(
         // todo
         messageId: data['message_id'],
