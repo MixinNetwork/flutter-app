@@ -17,8 +17,8 @@ class EditProfilePage extends StatelessWidget {
     return BlocConverter<MultiAuthCubit, MultiAuthState,
         Tuple2<String, String>>(
       converter: (state) => Tuple2(
-        state.current.account.fullName,
-        state.current.account.biography,
+        state.current?.account?.fullName,
+        state.current?.account?.biography,
       ),
       immediatelyCallListener: true,
       listener: (context, state) {
@@ -46,7 +46,8 @@ class EditProfilePage extends StatelessWidget {
               const SizedBox(height: 40),
               ClipOval(
                 child: BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-                  converter: (state) => state.current.account.avatarUrl,
+                  converter: (state) => state.current?.account?.avatarUrl,
+                  when: (a, b) => b != null,
                   builder: (context, avatarUrl) => CachedNetworkImage(
                     imageUrl: avatarUrl,
                     width: 100,
@@ -56,7 +57,8 @@ class EditProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
               BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-                converter: (state) => state.current.account.identityNumber,
+                converter: (state) => state.current?.account?.identityNumber,
+                when: (a, b) => b != null,
                 builder: (context, identityNumber) => Text(
                   'Mixin ID: $identityNumber',
                   style: TextStyle(
@@ -81,7 +83,8 @@ class EditProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-                converter: (state) => state.current.account.phone,
+                converter: (state) => state.current?.account?.phone,
+                when: (a, b) => b != null,
                 builder: (context, phone) => _Item(
                   title: Localization.of(context).phoneNumber,
                   controller: TextEditingController(text: phone),
@@ -90,8 +93,13 @@ class EditProfilePage extends StatelessWidget {
               ),
               const SizedBox(height: 70),
               BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-                converter: (state) => DateFormat.yMMMd()
-                    .format(DateTime.tryParse(state.current.account.createdAt)),
+                converter: (state) {
+                  final createdAt = state.current?.account?.createdAt;
+                  if (createdAt == null) return null;
+                  return DateFormat.yMMMd()
+                      .format(DateTime.tryParse(createdAt));
+                },
+                when: (a, b) => b != null,
                 builder: (context, createdAt) => Text(
                   Localization.of(context).pageEditProfileJoin(createdAt),
                   style: TextStyle(

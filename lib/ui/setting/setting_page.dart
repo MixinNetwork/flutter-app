@@ -216,7 +216,8 @@ class _UserProfile extends StatelessWidget {
       children: [
         ClipOval(
           child: BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-            converter: (state) => state.current.account.avatarUrl,
+            converter: (state) => state.current?.account?.avatarUrl,
+            when: (a, b) => b != null,
             builder: (context, avatarUrl) => CachedNetworkImage(
               imageUrl: avatarUrl,
               width: 90,
@@ -226,7 +227,8 @@ class _UserProfile extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-          converter: (state) => state.current.account.fullName,
+          converter: (state) => state.current?.account?.fullName,
+          when: (a, b) => b != null,
           builder: (context, fullName) => Text(
             fullName,
             style: TextStyle(
@@ -242,7 +244,8 @@ class _UserProfile extends StatelessWidget {
         ),
         const SizedBox(height: 4),
         BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-          converter: (state) => state.current.account.identityNumber,
+          converter: (state) => state.current?.account?.identityNumber,
+          when: (a, b) => b != null,
           builder: (context, identityNumber) => Text(
             'Mixin ID: $identityNumber',
             style: TextStyle(

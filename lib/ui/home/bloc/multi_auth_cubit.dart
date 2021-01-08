@@ -12,12 +12,14 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
   MultiAuthCubit() : super(const MultiAuthState());
 
   void signIn(AuthState authState) {
-    state.auths.removeWhere(
-      (element) => element.account.userId == authState.account.userId,
-    );
+    final auths = state.auths.toSet()
+      ..removeWhere(
+        (element) => element.account.userId == authState.account.userId,
+      )
+      ..add(authState);
     emit(
       MultiAuthState(
-        auths: state.auths.toSet()..add(authState),
+        auths: auths,
       ),
     );
   }
@@ -28,12 +30,6 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
         auths: state.auths.toSet()..remove(state.auths.last),
       ),
     );
-  }
-
-  @protected
-  @override
-  void emit(MultiAuthState state) {
-    throw Error();
   }
 
   @override
