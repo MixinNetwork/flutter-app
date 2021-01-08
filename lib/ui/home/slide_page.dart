@@ -43,7 +43,7 @@ class SlidePage extends StatelessWidget {
             _Title(data: Localization.of(context).circle),
             const SizedBox(height: 12),
             const _CircleList(),
-            // TODO user profile callback
+            // todo user profile callback
             Builder(
               builder: (context) => BlocConverter<MultiAuthCubit,
                   MultiAuthState, Tuple2<String, String>>(
@@ -83,7 +83,7 @@ class _CircleList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Expanded(
-        // TODO circle list callback
+        // todo circle list callback
         child: Builder(builder: (context) {
           const circleType = [
             {
