@@ -21,6 +21,7 @@ class AccountServer {
     this.identityNumber = identityNumber;
     this.privateKey = privateKey;
     database = Database(identityNumber);
+    client = Client();
     client.initMixin(userId, sessionId, privateKey, scp);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
     workManager = WorkManager(userId, database, client);
@@ -31,7 +32,7 @@ class AccountServer {
   String identityNumber;
   String privateKey;
 
-  final Client client = Client();
+  Client client;
   Database database;
   Blaze blaze;
   WorkManager workManager;

@@ -20,59 +20,53 @@ final _conversationPageKey = GlobalKey();
 
 class HomePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    // final state = AuthCubit.of(context).state;
-    // todo account server
-    // accountServer.init(state.account.userId, state.account.sessionId,
-    //     state.account.identityNumber, state.privateKey);
-    return Scaffold(
-      backgroundColor: BrightnessData.dynamicColor(
-        context,
-        const Color.fromRGBO(255, 255, 255, 1),
-        darkColor: const Color.fromRGBO(44, 49, 54, 1),
-      ),
-      body: SizePolicyRow(
-        children: [
-          SizePolicyData(
-            child: SlidePage(),
-            minWidth: slidePageMinWidth,
-            maxWidth: slidePageMaxWidth,
-            sizePolicyOrder: 0,
-          ),
-          SizePolicyData(
-            minWidth: responsiveNavigationMinWidth,
-            child: ResponsiveNavigator(
-              switchWidth: responsiveNavigationMinWidth + 260,
-              leftPage: MaterialPage(
-                key: const Key('center'),
-                name: 'center',
-                child: SizedBox(
-                  key: _conversationPageKey,
-                  width: 300,
-                  child: const _CenterPage(),
+  Widget build(BuildContext context) => Scaffold(
+        backgroundColor: BrightnessData.dynamicColor(
+          context,
+          const Color.fromRGBO(255, 255, 255, 1),
+          darkColor: const Color.fromRGBO(44, 49, 54, 1),
+        ),
+        body: SizePolicyRow(
+          children: [
+            SizePolicyData(
+              child: SlidePage(),
+              minWidth: slidePageMinWidth,
+              maxWidth: slidePageMaxWidth,
+              sizePolicyOrder: 0,
+            ),
+            SizePolicyData(
+              minWidth: responsiveNavigationMinWidth,
+              child: ResponsiveNavigator(
+                switchWidth: responsiveNavigationMinWidth + 260,
+                leftPage: MaterialPage(
+                  key: const Key('center'),
+                  name: 'center',
+                  child: SizedBox(
+                    key: _conversationPageKey,
+                    width: 300,
+                    child: const _CenterPage(),
+                  ),
                 ),
-              ),
-              rightEmptyPage: MaterialPage(
-                key: const Key('empty'),
-                name: 'empty',
-                child: DecoratedBox(
-                  child: Empty(
-                      text: Localization.of(context).pageRightEmptyMessage),
-                  decoration: BoxDecoration(
-                    color: BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(237, 238, 238, 1),
-                      darkColor: const Color.fromRGBO(35, 39, 43, 1),
+                rightEmptyPage: MaterialPage(
+                  key: const Key('empty'),
+                  name: 'empty',
+                  child: DecoratedBox(
+                    child: Empty(
+                        text: Localization.of(context).pageRightEmptyMessage),
+                    decoration: BoxDecoration(
+                      color: BrightnessData.dynamicColor(
+                        context,
+                        const Color.fromRGBO(237, 238, 238, 1),
+                        darkColor: const Color.fromRGBO(35, 39, 43, 1),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }
 
 class _CenterPage extends StatelessWidget {

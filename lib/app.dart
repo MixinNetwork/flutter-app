@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
+import 'package:flutter_app/acount/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 
 class App extends StatelessWidget {
   @override
@@ -49,27 +51,40 @@ class App extends StatelessWidget {
           final slideCategoryCubit = SlideCategoryCubit();
           final draftCubit = DraftCubit();
           final responsiveNavigatorCubit = ResponsiveNavigatorCubit();
-          return MultiBlocProvider(
+          return Provider<AccountServer>(
             key: ValueKey(authState?.account?.userId),
-            providers: [
-              BlocProvider(
-                create: (BuildContext context) => slideCategoryCubit,
+            create: (context) => AccountServer()
+              ..initServer(
+                authState.account.userId,
+                authState.account.sessionId,
+                authState.account.identityNumber,
+                authState.privateKey,
               ),
-              BlocProvider(
-                create: (BuildContext context) =>
-                    ConversationListCubit(slideCategoryCubit),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => ConversationCubit(draftCubit),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => draftCubit,
-              ),
-              BlocProvider(
-                create: (BuildContext context) => responsiveNavigatorCubit,
-              ),
-            ],
-            child: app,
+            dispose: (BuildContext context, AccountServer value) {
+              // value.dispose();
+            },
+            child: MultiBlocProvider(
+              providers: [
+                BlocProvider(
+                  create: (BuildContext context) => slideCategoryCubit,
+                ),
+                BlocProvider(
+                  create: (BuildContext context) => draftCubit,
+                ),
+                BlocProvider(
+                  create: (BuildContext context) => responsiveNavigatorCubit,
+                ),
+                BlocProvider(
+                  create: (BuildContext context) =>
+                      ConversationListCubit(slideCategoryCubit),
+                ),
+                BlocProvider(
+                  create: (BuildContext context) =>
+                      ConversationCubit(draftCubit),
+                ),
+              ],
+              child: app,
+            ),
           );
         },
       ),
