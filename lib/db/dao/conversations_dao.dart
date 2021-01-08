@@ -20,7 +20,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return query.getSingle();
   }
 
-  Stream<List<ConversationListResult>> conversationList() {
-    return db.conversationList().watch();
+  Stream<List<ConversationItemsResult>> conversationList() {
+    return db.conversationItems().watch();
   }
 }

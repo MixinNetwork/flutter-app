@@ -10811,7 +10811,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           StickerRelationshipsDao(this as MixinDatabase);
   UserDao _userDao;
   UserDao get userDao => _userDao ??= UserDao(this as MixinDatabase);
-  Selectable<ConversationListResult> conversationList() {
+  Selectable<ConversationItemsResult> conversationItems() {
     return customSelect(
         'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IS NOT NULL \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC',
         variables: [],
@@ -10822,7 +10822,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           snapshots,
           messageMentions
         }).map((QueryRow row) {
-      return ConversationListResult(
+      return ConversationItemsResult(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
         category: row.readString('category'),
@@ -10905,7 +10905,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       );
 }
 
-class ConversationListResult {
+class ConversationItemsResult {
   final String conversationId;
   final String groupIconUrl;
   final String category;
@@ -10935,7 +10935,7 @@ class ConversationListResult {
   final String participantUserId;
   final int mentionCount;
   final String mentions;
-  ConversationListResult({
+  ConversationItemsResult({
     this.conversationId,
     this.groupIconUrl,
     this.category,

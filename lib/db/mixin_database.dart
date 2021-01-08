@@ -57,7 +57,7 @@ part 'mixin_database.g.dart';
   StickerRelationshipsDao,
   UserDao,
 ], queries: {
-  'conversationList':
+  'conversationItems':
       '''SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,

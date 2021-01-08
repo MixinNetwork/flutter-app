@@ -3,7 +3,7 @@ import 'package:moor/moor.dart';
 
 part 'message_mentions_dao.g.dart';
 
-@UseDao(tables: [MessagesHistory])
+@UseDao(tables: [MessageMentions])
 class MessageMentionsDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageMentionsDaoMixin {
   MessageMentionsDao(MixinDatabase db) : super(db);
