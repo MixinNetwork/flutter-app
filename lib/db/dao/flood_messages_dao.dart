@@ -16,8 +16,14 @@ class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<List<FloodMessage>> findFloodMessage() {
     final query = select(db.floodMessages)
-      ..limit(20)
+      ..limit(10)
       ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
     return query.get();
+  }
+
+  Future<int> getFloodMessageCount() {
+    final countExp = db.floodMessages.messageId.count();
+    final query = selectOnly(db.floodMessages)..addColumns([countExp]);
+    return query.map((row) => row.read(countExp)).getSingle();
   }
 }

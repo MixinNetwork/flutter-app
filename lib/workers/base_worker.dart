@@ -18,7 +18,7 @@ class BaseWorker {
     }
     final conversation =
         await database.conversationDao.getConversationById(conversationId);
-    if (conversation != null) {
+    if (conversation == null) {
       final response =
           await client.conversationApi.getConversation(conversationId);
       if (response.data != null) {

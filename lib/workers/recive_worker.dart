@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:uuid/uuid.dart';
 
 import 'base_worker.dart';
 
@@ -62,7 +64,10 @@ class ReceiveWorker extends BaseWorker {
     // todo
     // ignore: unused_local_variable
     final user = await syncUser(data['user_id']);
-    //
+
+    // todo process quote message
+
+    if (data['category'] == 'PLAIN_TEXT') {}
     final message = Message(
         // todo
         messageId: data['message_id'],
@@ -74,5 +79,21 @@ class ReceiveWorker extends BaseWorker {
         createdAt: data['created_at']);
 
     await database.messagesDao.insert(message);
+
+    _updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
+  }
+
+  void _updateRemoteMessageStatus(messageId, status) {
+    if (status != MessageStatus.delivered && status != MessageStatus.read) {
+      return;
+    }
+    final blazeMessage = BlazeMessage(messageId, status: status);
+    database.jobsDao.insert(Job(
+        jobId: Uuid().v4(),
+        action: 'acknowledgeMessageReceipts',
+        priority: 5,
+        blazeMessage: jsonEncode(blazeMessage),
+        createdAt: DateTime.now().toIso8601String(),
+        runCount: 0));
   }
 }

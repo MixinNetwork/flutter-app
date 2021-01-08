@@ -16,6 +16,8 @@ class ConversationCategory {
   static const String group = 'GROUP';
 }
 
+const acknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
+
 class MessageStatus {
   static const String sending = 'SENDING';
   static const String sent = 'SENT';

@@ -39,7 +39,7 @@ class AccountServer {
 
   void start() {
     blaze.connect();
-    workManager.start();
+    // workManager.start();
   }
 
   void sendMessage() {
@@ -51,10 +51,10 @@ class AccountServer {
 
   void stop() {
     blaze.disconnect();
-    workManager.stop();
+    // workManager.stop();
   }
 
   void relase() {
-    // Todo relase resource
+    // todo relase resource
   }
 }

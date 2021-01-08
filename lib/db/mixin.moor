@@ -2,7 +2,7 @@
 
 CREATE TABLE addresses ( address_id TEXT NOT NULL, type TEXT NOT NULL, asset_id TEXT NOT NULL, public_key TEXT, label TEXT, updated_at TEXT NOT NULL, reserve TEXT NOT NULL, fee TEXT NOT NULL, account_name TEXT, account_tag TEXT, dust TEXT, PRIMARY KEY(address_id) );
 
-CREATE TABLE apps ( app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT NOT NULL, redirect_uri TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, description TEXT NOT NULL, capabilites TEXT, creator_id TEXT NOT NULL, PRIMARY KEY(app_id) );
+CREATE TABLE apps ( app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT NOT NULL, redirect_uri TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, description TEXT NOT NULL, "capabilites" TEXT, creator_id TEXT NOT NULL, PRIMARY KEY(app_id) );
 
 CREATE TABLE assets (asset_id TEXT NOT NULL,symbol TEXT NOT NULL,name TEXT NOT NULL,icon_url TEXT NOT NULL,balance TEXT NOT NULL,destination TEXT NOT NULL,tag TEXT,price_btc TEXT NOT NULL,price_usd TEXT NOT NULL,chain_id TEXT NOT NULL,change_usd TEXT NOT NULL,change_btc TEXT NOT NULL,confirmations INTEGER NOT NULL,asset_key TEXT,PRIMARY KEY(asset_id));
 

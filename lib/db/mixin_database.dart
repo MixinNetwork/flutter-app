@@ -71,8 +71,8 @@ part 'mixin_database.g.dart';
             mm.mentions AS mentions 
             FROM conversations c
             INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.id
-            LEFT JOIN message_mentions mm ON mm.message_id = m.id
+            LEFT JOIN messages m ON c.last_message_id = m.message_id
+            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
