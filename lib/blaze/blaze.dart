@@ -88,4 +88,8 @@ class Blaze {
     channel.sink.add(
         GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }
+
+  void disconnect() {
+    // Todo disconnect
+  }
 }

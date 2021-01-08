@@ -22,7 +22,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
   }
 
   final AuthCubit authCubit;
-  final accountServer = AccountServer();
+  final accountServer = AccountServer(); // todo account server
   final StreamController<int> periodicStreamController =
       StreamController<int>();
   StreamSubscription<int> streamSubscription;

@@ -1,6 +1,7 @@
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
+import 'package:flutter_app/workers/work_manager.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class AccountServer {
@@ -22,6 +23,7 @@ class AccountServer {
     database = Database(identityNumber);
     client.initMixin(userId, sessionId, privateKey, scp);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
+    workManager = WorkManager(userId, database, client);
   }
 
   String userId;
@@ -34,9 +36,24 @@ class AccountServer {
   Blaze blaze;
   WorkManager workManager;
 
+  void start() {
+    blaze.connect();
+    workManager.start();
+  }
+
+  void sendMessage() {
+    assert(database != null);
+    assert(blaze != null);
+    assert(workManager != null);
+    // todo insert sending message
+  }
+
+  void stop() {
+    blaze.disconnect();
+    workManager.stop();
+  }
+
   void relase() {
     // Todo relase resource
   }
 }
-
-class WorkManager {}

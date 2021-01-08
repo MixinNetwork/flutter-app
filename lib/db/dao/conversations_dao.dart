@@ -11,9 +11,6 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(Conversation conversation) =>
       into(db.conversations).insertOnConflictUpdate(conversation);
 
-  Future deleteConversation(Conversation conversation) =>
-      delete(db.conversations).delete(conversation);
-
   Stream<List<Conversation>> conversations() =>
       select(db.conversations).watch();
 
@@ -21,5 +18,9 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     final query = select(db.conversations)
       ..where((tbl) => tbl.conversationId.equals(conversationId));
     return query.getSingle();
+  }
+
+  Stream<List<ConversationListResult>> conversationList() {
+    return db.conversationList().watch();
   }
 }
