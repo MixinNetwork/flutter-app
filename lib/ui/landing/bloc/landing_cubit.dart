@@ -6,7 +6,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_app/acount/account_server.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -21,7 +21,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     requestAuthUrl();
   }
 
-  final AuthCubit authCubit;
+  final MultiAuthCubit authCubit;
   final accountServer = AccountServer(); // todo account server
   final StreamController<int> periodicStreamController =
       StreamController<int>();
@@ -94,12 +94,10 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
             auth.item2,
             'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE',
           );
-          authCubit.emit(
-            authCubit.state.copyWith(
-              account: auth.item1,
-              privateKey: auth.item2,
-            ),
-          );
+          authCubit.signIn(AuthState(
+            account: auth.item1,
+            privateKey: auth.item2,
+          ));
         });
     addSubscription(subscription);
   }

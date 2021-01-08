@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
@@ -69,7 +69,7 @@ class SettingPage extends StatelessWidget {
                 assetName: Assets.assetsImagesIcSignOutSvg,
                 title: Localization.of(context).signOut,
                 name: 'Sign Out',
-                onTap: () => AuthCubit.of(context).signOut(),
+                onTap: () => MultiAuthCubit.of(context).signOut(),
                 color: BrightnessData.dynamicColor(
                   context,
                   const Color.fromRGBO(246, 112, 112, 1),
@@ -215,8 +215,8 @@ class _UserProfile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ClipOval(
-          child: BlocConverter<AuthCubit, AuthState, String>(
-            converter: (state) => state.account.avatarUrl,
+          child: BlocConverter<MultiAuthCubit, MultiAuthState, String>(
+            converter: (state) => state.current.account.avatarUrl,
             builder: (context, avatarUrl) => CachedNetworkImage(
               imageUrl: avatarUrl,
               width: 90,
@@ -225,8 +225,8 @@ class _UserProfile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        BlocConverter<AuthCubit, AuthState, String>(
-          converter: (state) => state.account.fullName,
+        BlocConverter<MultiAuthCubit, MultiAuthState, String>(
+          converter: (state) => state.current.account.fullName,
           builder: (context, fullName) => Text(
             fullName,
             style: TextStyle(
@@ -241,8 +241,8 @@ class _UserProfile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        BlocConverter<AuthCubit, AuthState, String>(
-          converter: (state) => state.account.identityNumber,
+        BlocConverter<MultiAuthCubit, MultiAuthState, String>(
+          converter: (state) => state.current.account.identityNumber,
           builder: (context, identityNumber) => Text(
             'Mixin ID: $identityNumber',
             style: TextStyle(

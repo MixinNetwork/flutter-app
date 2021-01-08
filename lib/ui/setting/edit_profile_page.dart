@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:intl/intl.dart';
@@ -14,10 +14,11 @@ class EditProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final nameTextEditingController = TextEditingController();
     final bioTextEditingController = TextEditingController();
-    return BlocConverter<AuthCubit, AuthState, Tuple2<String, String>>(
+    return BlocConverter<MultiAuthCubit, MultiAuthState,
+        Tuple2<String, String>>(
       converter: (state) => Tuple2(
-        state.account.fullName,
-        state.account.biography,
+        state.current.account.fullName,
+        state.current.account.biography,
       ),
       immediatelyCallListener: true,
       listener: (context, state) {
@@ -44,8 +45,8 @@ class EditProfilePage extends StatelessWidget {
             children: [
               const SizedBox(height: 40),
               ClipOval(
-                child: BlocConverter<AuthCubit, AuthState, String>(
-                  converter: (state) => state.account.avatarUrl,
+                child: BlocConverter<MultiAuthCubit, MultiAuthState, String>(
+                  converter: (state) => state.current.account.avatarUrl,
                   builder: (context, avatarUrl) => CachedNetworkImage(
                     imageUrl: avatarUrl,
                     width: 100,
@@ -54,8 +55,8 @@ class EditProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              BlocConverter<AuthCubit, AuthState, String>(
-                converter: (state) => state.account.identityNumber,
+              BlocConverter<MultiAuthCubit, MultiAuthState, String>(
+                converter: (state) => state.current.account.identityNumber,
                 builder: (context, identityNumber) => Text(
                   'Mixin ID: $identityNumber',
                   style: TextStyle(
@@ -79,8 +80,8 @@ class EditProfilePage extends StatelessWidget {
                 controller: bioTextEditingController,
               ),
               const SizedBox(height: 32),
-              BlocConverter<AuthCubit, AuthState, String>(
-                converter: (state) => state.account.phone,
+              BlocConverter<MultiAuthCubit, MultiAuthState, String>(
+                converter: (state) => state.current.account.phone,
                 builder: (context, phone) => _Item(
                   title: Localization.of(context).phoneNumber,
                   controller: TextEditingController(text: phone),
@@ -88,9 +89,9 @@ class EditProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 70),
-              BlocConverter<AuthCubit, AuthState, String>(
+              BlocConverter<MultiAuthCubit, MultiAuthState, String>(
                 converter: (state) => DateFormat.yMMMd()
-                    .format(DateTime.tryParse(state.account.createdAt)),
+                    .format(DateTime.tryParse(state.current.account.createdAt)),
                 builder: (context, createdAt) => Text(
                   Localization.of(context).pageEditProfileJoin(createdAt),
                   style: TextStyle(

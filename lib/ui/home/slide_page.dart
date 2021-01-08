@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/select_item.dart';
@@ -45,10 +45,10 @@ class SlidePage extends StatelessWidget {
             const _CircleList(),
             // TODO user profile callback
             Builder(
-              builder: (context) =>
-                  BlocConverter<AuthCubit, AuthState, Tuple2<String, String>>(
-                converter: (state) =>
-                    Tuple2(state.account.fullName, state.account.avatarUrl),
+              builder: (context) => BlocConverter<MultiAuthCubit,
+                  MultiAuthState, Tuple2<String, String>>(
+                converter: (state) => Tuple2(state.current.account.fullName,
+                    state.current.account.avatarUrl),
                 builder: (context, tuple) =>
                     BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
                   converter: (state) =>

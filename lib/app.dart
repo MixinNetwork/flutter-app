@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
@@ -13,61 +13,65 @@ import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-ResponsiveNavigatorCubit _responsiveNavigatorCubit;
-
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final slideCategoryCubit = SlideCategoryCubit();
-    final draftCubit = DraftCubit();
-    final authCubit = AuthCubit();
-    _responsiveNavigatorCubit ??= ResponsiveNavigatorCubit();
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (BuildContext context) => slideCategoryCubit,
-        ),
-        BlocProvider(
-          create: (BuildContext context) =>
-              ConversationListCubit(slideCategoryCubit),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => ConversationCubit(draftCubit),
-        ),
-        BlocProvider(
-          create: (BuildContext context) => draftCubit,
-        ),
-        BlocProvider(
-          create: (BuildContext context) => authCubit,
-        ),
-        BlocProvider(
-          create: (BuildContext context) => _responsiveNavigatorCubit,
-        ),
-      ],
-      child: MaterialApp(
-        title: 'Mixin',
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          Localization.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: [
-          ...Localization.delegate.supportedLocales,
-        ],
-        builder: (context, child) => BrightnessObserver(
-          child: child,
-        ),
-        home: BlocConverter<AuthCubit, AuthState, bool>(
-          cubit: authCubit,
-          converter: (state) =>
-              state?.account != null && state?.privateKey != null,
-          builder: (context, authAvailable) {
-            if (authAvailable) return HomePage();
-            return const LandingPage();
-          },
-        ),
+    return BlocProvider(
+      create: (context) => MultiAuthCubit(),
+      child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState>(
+        converter: (state) => state.current,
+        builder: (context, authState) {
+          final app = MaterialApp(
+            title: 'Mixin',
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: const [
+              Localization.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: [
+              ...Localization.delegate.supportedLocales,
+            ],
+            builder: (context, child) => BrightnessObserver(
+              child: child,
+            ),
+            home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
+              converter: (state) => state?.current != null,
+              builder: (context, authAvailable) {
+                if (authAvailable) return HomePage();
+                return const LandingPage();
+              },
+            ),
+          );
+          if (authState == null) return app;
+
+          final slideCategoryCubit = SlideCategoryCubit();
+          final draftCubit = DraftCubit();
+          final responsiveNavigatorCubit = ResponsiveNavigatorCubit();
+          return MultiBlocProvider(
+            key: ValueKey(authState?.account?.userId),
+            providers: [
+              BlocProvider(
+                create: (BuildContext context) => slideCategoryCubit,
+              ),
+              BlocProvider(
+                create: (BuildContext context) =>
+                    ConversationListCubit(slideCategoryCubit),
+              ),
+              BlocProvider(
+                create: (BuildContext context) => ConversationCubit(draftCubit),
+              ),
+              BlocProvider(
+                create: (BuildContext context) => draftCubit,
+              ),
+              BlocProvider(
+                create: (BuildContext context) => responsiveNavigatorCubit,
+              ),
+            ],
+            child: app,
+          );
+        },
       ),
     );
   }

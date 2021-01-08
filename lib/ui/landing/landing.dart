@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
-import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/landing/bloc/landing_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +14,7 @@ class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => BlocProvider(
-        create: (context) => LandingCubit(AuthCubit.of(context)),
+        create: (context) => LandingCubit(MultiAuthCubit.of(context)),
         child: Builder(
           builder: (BuildContext context) => Scaffold(
             backgroundColor: BrightnessData.dynamicColor(
