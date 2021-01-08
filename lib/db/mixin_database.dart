@@ -58,16 +58,18 @@ part 'mixin_database.g.dart';
   UserDao,
 ])
 class MixinDatabase extends _$MixinDatabase {
-  MixinDatabase() : super(_openConnection());
+  MixinDatabase(this.identityNumber) : super(_openConnection(identityNumber));
+
+  final String identityNumber;
 
   @override
   int get schemaVersion => 1;
 }
 
-LazyDatabase _openConnection() {
+LazyDatabase _openConnection(String identityNumber) {
   return LazyDatabase(() async {
     final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'mixin.db'));
+    final file = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
     return VmDatabase(file);
   });
 }

@@ -4,8 +4,8 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter_app/acount/account_server.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/mixin_client.dart';
 import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
@@ -22,7 +22,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
   }
 
   final AuthCubit authCubit;
-
+  final accountServer = AccountServer();
   final StreamController<int> periodicStreamController =
       StreamController<int>();
   StreamSubscription<int> streamSubscription;
@@ -31,10 +31,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
 
   Future<void> requestAuthUrl() async {
     await streamSubscription?.cancel();
-
-    final rsp = await MixinClient()
-        .client
-        .provisioningApi
+    final rsp = await accountServer.client.provisioningApi
         .getProvisioningId(Platform.operatingSystem);
     if (rsp.data.deviceId != null) {
       keyPair = signal.Curve.generateKeyPair();
@@ -67,9 +64,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           ));
         })
         .asyncMap((event) async {
-          final rsp = await MixinClient()
-              .client
-              .provisioningApi
+          final rsp = await accountServer.client.provisioningApi
               .getProvisioning(deviceId);
           return rsp?.data?.secret;
         })
@@ -93,12 +88,12 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
         })
         .where((auth) => auth != null)
         .listen((auth) {
-          MixinClient().client.initMixin(
-                auth.item1.userId,
-                auth.item1.sessionId,
-                auth.item2,
-                'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE',
-              );
+          accountServer.client.initMixin(
+            auth.item1.userId,
+            auth.item1.sessionId,
+            auth.item2,
+            'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE',
+          );
           authCubit.emit(
             authCubit.state.copyWith(
               account: auth.item1,
@@ -117,19 +112,19 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     final edKeyPair = ed.generateKey();
     final registrationId = signal.KeyHelper.generateRegistrationId(false);
 
-    final rsp = await MixinClient().client.provisioningApi.verifyProvisioning(
-          ProvisioningRequest(
-            code: msg['provisioning_code'],
-            userId: msg['user_id'],
-            sessionId: msg['session_id'],
-            platform: 'Desktop',
-            purpose: 'SESSION',
-            sessionSecret: base64.encode(edKeyPair.publicKey.bytes),
-            appVersion: '0.0.1',
-            registrationId: registrationId,
-            platformVersion: 'OS X 10.15.6',
-          ),
-        );
+    final rsp = await accountServer.client.provisioningApi.verifyProvisioning(
+      ProvisioningRequest(
+        code: msg['provisioning_code'],
+        userId: msg['user_id'],
+        sessionId: msg['session_id'],
+        platform: 'Desktop',
+        purpose: 'SESSION',
+        sessionSecret: base64.encode(edKeyPair.publicKey.bytes),
+        appVersion: '0.0.1',
+        registrationId: registrationId,
+        platformVersion: 'OS X 10.15.6',
+      ),
+    );
 
     if (rsp.data != null) {
       final privateKey = base64.encode(edKeyPair.privateKey.bytes);

@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/bloc/auth_cubit.dart';
 import 'package:flutter_app/workers/base_worker.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -14,28 +14,19 @@ import 'package:web_socket_channel/io.dart';
 import 'blaze_message.dart';
 
 class Blaze {
-  factory Blaze() {
-    return _singleton;
-  }
-
-  Blaze._internal();
-
-  static final Blaze _singleton = Blaze._internal();
+  Blaze(
+      this.selfId, this.sessionId, this.privateKey, this.database, this.client);
+  final String selfId;
+  final String sessionId;
+  final String privateKey;
+  final Database database;
+  final Client client; // todo delete
 
   IOWebSocketChannel channel;
-  String selfId;
-  void connect(AuthCubit authCubit) {
-    final account = authCubit.state.account;
-    final privateKey = authCubit.state.privateKey;
-    selfId = account.userId;
+
+  void connect() {
     final token = signAuthTokenWithEdDSA(
-        account.userId,
-        account.sessionId,
-        privateKey,
-        'PROFILE:READ PROFILE:WRITE PHONE:READ PHONE:WRITE CONTACTS:READ CONTACTS:WRITE MESSAGES:READ MESSAGES:WRITE ASSETS:READ SNAPSHOTS:READ CIRCLES:READ CIRCLES:WRITE',
-        'GET',
-        '/',
-        '');
+        selfId, sessionId, privateKey, scp, 'GET', '/', '');
     _connect(token);
   }
 
@@ -54,8 +45,7 @@ class Blaze {
         if (data['user_id'] == selfId && data['category'] == '') {
           // makeMessageStatus
         } else {
-          Database()
-              .floodMessagesDao
+          database.floodMessagesDao
               .insert(FloodMessage(
                   messageId: data['message_id'],
                   data: data.toString(),
@@ -65,7 +55,9 @@ class Blaze {
             updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
           });
           try {
-            BaseWorker(selfId).syncConversion(data['conversation_id']);
+            // todo delete
+            BaseWorker(selfId, database, client)
+                .syncConversion(data['conversation_id']);
           } catch (e) {
             debugPrint(e);
           }

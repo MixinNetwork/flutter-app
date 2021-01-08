@@ -4,14 +4,16 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import 'base_worker.dart';
 
 class ReceiveWorker extends BaseWorker {
-  ReceiveWorker(String selfId) : super(selfId);
+  ReceiveWorker(String selfId, Database database, Client client)
+      : super(selfId, database, client);
 
   void doWork() async {
-    final floodMessages = await Database().floodMessagesDao.findFloodMessage();
+    final floodMessages = await database.floodMessagesDao.findFloodMessage();
     floodMessages.forEach((floodMessage) {
       try {
         process(floodMessage);
@@ -71,6 +73,6 @@ class ReceiveWorker extends BaseWorker {
         status: data['status'],
         createdAt: data['created_at']);
 
-    await Database().messagesDao.insert(message);
+    await database.messagesDao.insert(message);
   }
 }

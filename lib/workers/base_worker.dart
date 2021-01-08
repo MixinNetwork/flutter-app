@@ -2,25 +2,25 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
-import 'package:flutter_app/mixin_client.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class BaseWorker {
   // print(conversationId);
-  BaseWorker(this.selfId);
+  BaseWorker(this.selfId, this.database, this.client);
 
   String selfId;
+  Database database;
+  Client client;
 
   void syncConversion(String conversationId) async {
     if (conversationId == null || conversationId == systemUser) {
       return;
     }
     final conversation =
-        await Database().conversationDao.getConversationById(conversationId);
+        await database.conversationDao.getConversationById(conversationId);
     if (conversation != null) {
-      final response = await MixinClient()
-          .client
-          .conversationApi
-          .getConversation(conversationId);
+      final response =
+          await client.conversationApi.getConversation(conversationId);
       if (response.data != null) {
         var ownerId = response.data.creatorId;
         if (response.data.category == ConversationCategory.contact) {
@@ -31,7 +31,7 @@ class BaseWorker {
           });
         }
 
-        await Database().conversationDao.insert(db.Conversation(
+        await database.conversationDao.insert(db.Conversation(
             conversationId: response.data.conversationId,
             ownerId: ownerId,
             category: response.data.category,
@@ -48,7 +48,7 @@ class BaseWorker {
 
   void refreshParticipants(String conversationId, participants) async {
     final local =
-        await Database().participantsDao.getParticipants(conversationId);
+        await database.participantsDao.getParticipants(conversationId);
     final localIds = local.map((e) => e.userId);
     final online = <db.Participant>[];
     participants.forEach((item) => {
@@ -62,18 +62,18 @@ class BaseWorker {
     final remove =
         local.where((item) => !online.any((e) => e.userId == item.userId));
     if (add.isNotEmpty) {
-      Database().participantsDao.insertAll(add.toList());
+      database.participantsDao.insertAll(add.toList());
       fetchUsers(add.map((e) => e.userId).toList());
     }
     if (remove.isNotEmpty) {
-      Database().participantsDao.deleteAll(remove);
+      // database.participantsDao.deleteAll(remove);
     }
   }
 
   void fetchUsers(List<String> ids) async {
-    final response = await MixinClient().client.userApi.getUsers(ids);
+    final response = await client.userApi.getUsers(ids);
     if (response.data != null && response.data.isNotEmpty) {
-      Database().userDao.insertAll(response.data
+      database.userDao.insertAll(response.data
           .map((e) => db.User(
                 userId: e.userId,
                 identityNumber: e.identityNumber,
@@ -95,12 +95,12 @@ class BaseWorker {
   }
 
   Future<db.User> syncUser(userId) async {
-    final user = await Database().userDao.findUserById(userId);
+    final user = await database.userDao.findUserById(userId);
     if (user == null) {
-      final response = await MixinClient().client.userApi.getUserById(userId);
+      final response = await client.userApi.getUserById(userId);
       if (response.data != null) {
         final user = response.data;
-        await Database().userDao.insert(db.User(
+        await database.userDao.insert(db.User(
             userId: user.userId,
             identityNumber: user.identityNumber,
             relationship: user.relationship,
@@ -111,7 +111,7 @@ class BaseWorker {
             createdAt: user.createdAt));
         final app = user.app;
         if (app != null) {
-          await Database().appsDao.insert(db.App(
+          await database.appsDao.insert(db.App(
               appId: app.appId,
               appNumber: app.appNumber,
               homeUri: app.homeUri,

@@ -7,19 +7,13 @@ import 'dao/users_dao.dart';
 import 'mixin_database.dart';
 
 class Database {
-  factory Database() {
-    return _singleton;
-  }
-
-  Database._internal() {
-    database = MixinDatabase();
+  Database(String identityNumber) {
+    database = MixinDatabase(identityNumber);
     conversationDao = ConversationsDao(database);
     floodMessagesDao = FloodMessagesDao(database);
     participantsDao = ParticipantsDao(database);
     userDao = UserDao(database);
   }
-
-  static final Database _singleton = Database._internal();
 
   MixinDatabase database;
 

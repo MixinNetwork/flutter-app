@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/mixin_client.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
@@ -15,8 +12,6 @@ import 'package:flutter_app/widgets/empty.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
-import 'bloc/auth_cubit.dart';
-
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;
 const responsiveNavigationMinWidth = 460.0;
@@ -26,11 +21,10 @@ final _conversationPageKey = GlobalKey();
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Blaze().connect(AuthCubit.of(context));
-    MixinClient().init(AuthCubit.of(context));
-    Database().conversationDao.conversations().listen((event) {
-      event.forEach((element) {});
-    });
+    // final state = AuthCubit.of(context).state;
+    // todo account server
+    // accountServer.init(state.account.userId, state.account.sessionId,
+    //     state.account.identityNumber, state.privateKey);
     return Scaffold(
       backgroundColor: BrightnessData.dynamicColor(
         context,
