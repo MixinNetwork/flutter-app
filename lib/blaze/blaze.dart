@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
@@ -34,10 +35,8 @@ class Blaze {
     channel = IOWebSocketChannel.connect(
         'wss://blaze.mixin.one?access_token=$token',
         protocols: ['Mixin-Blaze-1']);
-    channel.stream.listen((message) {
-      final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
-      final blazeMessage = jsonDecode(content);
-
+    channel.stream.listen((message) async {
+      final blazeMessage = await _parseBlazeMessage(message);
       final data = blazeMessage['data'];
       if (blazeMessage['action'] == 'ACKNOWLEDGE_MESSAGE_RECEIPT') {
         // makeMessageStatus
@@ -45,7 +44,7 @@ class Blaze {
         if (data['user_id'] == selfId && data['category'] == '') {
           // makeMessageStatus
         } else {
-          database.floodMessagesDao
+          await database.floodMessagesDao
               .insert(FloodMessage(
                   messageId: data['message_id'],
                   data: data.toString(),
@@ -73,6 +72,16 @@ class Blaze {
     }, cancelOnError: true);
 
     _sendListPending();
+  }
+
+  Future<Map<String, dynamic>> _parseBlazeMessage(List<int> message) {
+    return compute(_parseBlazeMessageInternal, message);
+  }
+
+  Map<String, dynamic> _parseBlazeMessageInternal(List<int> message) {
+    final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
+    final blazeMessage = jsonDecode(content);
+    return blazeMessage;
   }
 
   void updateRemoteMessageStatus(String messageId, String status) {
