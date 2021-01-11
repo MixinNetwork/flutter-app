@@ -10692,6 +10692,7 @@ class Users extends Table with TableInfo<Users, User> {
 
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
   Addresses _addresses;
   Addresses get addresses => _addresses ??= Addresses(this);
   Apps _apps;

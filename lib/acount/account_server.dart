@@ -15,7 +15,6 @@ class AccountServer {
     assert(sessionId != null);
     assert(identityNumber != null);
     assert(privateKey != null);
-
     this.userId = userId;
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;

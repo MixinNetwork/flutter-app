@@ -9,16 +9,19 @@ import 'mixin_database.dart';
 
 class Database {
   Database(String identityNumber) {
-    database = MixinDatabase(identityNumber);
-    conversationDao = ConversationsDao(database);
-    floodMessagesDao = FloodMessagesDao(database);
-    messagesDao = MessagesDao(database);
-    jobsDao = JobsDao(database);
-    participantsDao = ParticipantsDao(database);
-    userDao = UserDao(database);
+    final _database = MixinDatabase(identityNumber);
+    conversationDao = ConversationsDao(_database);
+    floodMessagesDao = FloodMessagesDao(_database);
+    messagesDao = MessagesDao(_database);
+    jobsDao = JobsDao(_database);
+    participantsDao = ParticipantsDao(_database);
+    userDao = UserDao(_database);
   }
 
-  MixinDatabase database;
+  // static MixinDatabase _database;
+  // static Future init() async {
+  //   _database = await getMixinDatabaseConnection('3910');
+  // }
 
   AppsDao appsDao;
 
