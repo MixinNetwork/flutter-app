@@ -8,6 +8,8 @@ import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/context_menu.dart';
+import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -106,6 +108,25 @@ class _List extends StatelessWidget {
                   ResponsiveNavigatorCubit.of(context)
                       .pushPage(ResponsiveNavigatorCubit.chatPage);
                 },
+                onRightClick: (pointerUpEvent) => ContextMenuRoute.show(
+                  context,
+                  pointerPosition: pointerUpEvent.position,
+                  menus: [
+                    ContextMenu(
+                      title: Localization.of(context).pin,
+                      onTap: () {},
+                    ),
+                    ContextMenu(
+                      title: Localization.of(context).unMute,
+                      onTap: () {},
+                    ),
+                    ContextMenu(
+                      title: Localization.of(context).deleteChat,
+                      isDestructiveAction: true,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -125,6 +146,7 @@ class _Item extends StatelessWidget {
     this.count = 0,
     this.unread = false,
     this.onTap,
+    this.onRightClick,
   }) : super(key: key);
 
   final bool selected;
@@ -136,6 +158,7 @@ class _Item extends StatelessWidget {
   final int count;
   final bool unread;
   final VoidCallback onTap;
+  final ValueChanged<PointerUpEvent> onRightClick;
 
   @override
   Widget build(BuildContext context) {
@@ -144,8 +167,9 @@ class _Item extends StatelessWidget {
       const Color.fromRGBO(184, 189, 199, 1),
       darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
     );
-    return GestureDetector(
+    return InteractableDecoratedBox(
       onTap: onTap,
+      onRightClick: onRightClick,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: DecoratedBox(

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 enum InteracteStatus {
@@ -14,6 +15,7 @@ class InteracterBuilder extends StatefulWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onRightClick,
   }) : super(key: key);
 
   final Function(BuildContext context, InteracteStatus status,
@@ -23,6 +25,7 @@ class InteracterBuilder extends StatefulWidget {
   final VoidCallback onTap;
   final VoidCallback onDoubleTap;
   final VoidCallback onLongPress;
+  final ValueChanged<PointerUpEvent> onRightClick;
 
   @override
   _InteracterBuilderState createState() => _InteracterBuilderState();
@@ -39,6 +42,8 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
     if (hovering) return InteracteStatus.hovering;
     return InteracteStatus.interactable;
   }
+
+  int lastPointerDown;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +71,17 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
         },
         onDoubleTap: widget.onDoubleTap,
         onLongPress: widget.onLongPress,
-        child: child,
+        child: Listener(
+          onPointerUp: (PointerUpEvent event) {
+            if (event.pointer == lastPointerDown)
+              widget.onRightClick?.call(event);
+          },
+          onPointerDown: (PointerDownEvent event) {
+            if (event.buttons == kSecondaryButton)
+              lastPointerDown = event.pointer;
+          },
+          child: child,
+        ),
       ),
     );
   }
@@ -84,6 +99,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onRightClick,
   })  : _decoration = decoration,
         super(key: key);
 
@@ -98,6 +114,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onRightClick,
   })  : _decoration = decoration ?? const BoxDecoration(),
         hoveringDecoration = hoveringColor != null
             ? decoration?.copyWith(color: hoveringColor)
@@ -118,6 +135,7 @@ class InteractableDecoratedBox extends StatelessWidget {
   final VoidCallback onTap;
   final VoidCallback onDoubleTap;
   final VoidCallback onLongPress;
+  final ValueChanged<PointerUpEvent> onRightClick;
 
   @override
   Widget build(BuildContext context) => InteracterBuilder(
@@ -125,18 +143,20 @@ class InteractableDecoratedBox extends StatelessWidget {
         onTap: onTap,
         onDoubleTap: onDoubleTap,
         onLongPress: onLongPress,
+        onRightClick: onRightClick,
         builder: (BuildContext context, InteracteStatus status,
                 InteracteStatus lastStatus, Widget child) =>
             TweenAnimationBuilder<Decoration>(
           tween: DecorationTween(
             end: {
-              InteracteStatus.interactable:
-                  _decoration ?? const BoxDecoration(),
-              InteracteStatus.hovering:
-                  hoveringDecoration ?? tapDowningDecoration ?? _decoration,
-              InteracteStatus.tapDowning:
-                  tapDowningDecoration ?? hoveringDecoration ?? _decoration,
-            }[status],
+                  InteracteStatus.interactable:
+                      _decoration ?? const BoxDecoration(),
+                  InteracteStatus.hovering:
+                      hoveringDecoration ?? tapDowningDecoration ?? _decoration,
+                  InteracteStatus.tapDowning:
+                      tapDowningDecoration ?? hoveringDecoration ?? _decoration,
+                }[status] ??
+                const BoxDecoration(),
           ),
           duration: lastStatus == InteracteStatus.interactable &&
                   status != InteracteStatus.interactable

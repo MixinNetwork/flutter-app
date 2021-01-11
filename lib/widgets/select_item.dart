@@ -11,6 +11,7 @@ class SelectItem extends StatelessWidget {
     this.count = 0,
     this.onTap,
     this.selected = false,
+    this.onRightClick,
   });
 
   final Widget icon;
@@ -18,6 +19,7 @@ class SelectItem extends StatelessWidget {
   final bool selected;
   final int count;
   final VoidCallback onTap;
+  final ValueChanged<PointerUpEvent> onRightClick;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +28,7 @@ class SelectItem extends StatelessWidget {
     );
     return InteractableDecoratedBox.color(
       onTap: onTap,
+      onRightClick: onRightClick,
       decoration: selected == true
           ? boxDecoration.copyWith(
               color: BrightnessData.dynamicColor(

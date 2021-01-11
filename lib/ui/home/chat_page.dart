@@ -9,10 +9,13 @@ import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/chat_bar.dart';
+import 'package:flutter_app/widgets/context_menu.dart';
 import 'package:flutter_app/widgets/input_container.dart';
+import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
@@ -29,8 +32,8 @@ class ChatPage extends StatelessWidget {
         child: BlocConverter<ConversationCubit, Conversation, bool>(
           converter: (state) => state != null,
           builder: (context, selected) => ChatContainer(
-              onPressed: () {},
-            ),
+            onPressed: () {},
+          ),
         ),
       );
 }
@@ -137,41 +140,66 @@ class _Message extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (tuple.item3 != null) _Name(user: tuple.item3),
-                  _MessageBubble(
-                    showNip: tuple.item4,
-                    isCurrentUser: tuple.item1,
-                    child: BlocConverter<MessageBloc, MessageState, Message>(
-                      converter: (state) => state.messages[index],
-                      builder: (context, message) => Wrap(
-                        alignment: WrapAlignment.end,
-                        crossAxisAlignment: WrapCrossAlignment.end,
-                        children: [
-                          Text(
-                            message.message,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: BrightnessData.dynamicColor(
-                                context,
-                                const Color.fromRGBO(51, 51, 51, 1),
-                                darkColor:
-                                    const Color.fromRGBO(255, 255, 255, 0.9),
+                  InteractableDecoratedBox(
+                    onRightClick: (pointerUpEvent) => ContextMenuRoute.show(
+                      context,
+                      pointerPosition: pointerUpEvent.position,
+                      menus: [
+                        ContextMenu(
+                          title: Localization.of(context).reply,
+                          onTap: () {},
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).forward,
+                          onTap: () {},
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).copy,
+                          onTap: () {},
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).delete,
+                          isDestructiveAction: true,
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                    child: _MessageBubble(
+                      showNip: tuple.item4,
+                      isCurrentUser: tuple.item1,
+                      child: BlocConverter<MessageBloc, MessageState, Message>(
+                        converter: (state) => state.messages[index],
+                        builder: (context, message) => Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.end,
+                          children: [
+                            Text(
+                              message.message,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: BrightnessData.dynamicColor(
+                                  context,
+                                  const Color.fromRGBO(51, 51, 51, 1),
+                                  darkColor:
+                                      const Color.fromRGBO(255, 255, 255, 0.9),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            DateFormat.jm().format(message.createdAt),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: BrightnessData.dynamicColor(
-                                context,
-                                const Color.fromRGBO(131, 145, 158, 1),
-                                darkColor:
-                                    const Color.fromRGBO(128, 131, 134, 1),
+                            const SizedBox(width: 6),
+                            Text(
+                              DateFormat.jm().format(message.createdAt),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: BrightnessData.dynamicColor(
+                                  context,
+                                  const Color.fromRGBO(131, 145, 158, 1),
+                                  darkColor:
+                                      const Color.fromRGBO(128, 131, 134, 1),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),

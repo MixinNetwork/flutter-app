@@ -24,5 +24,17 @@
 	"introduction": "介绍",
 	"phoneNumber": "手机号",
 	"save": "保存",
-	"pageEditProfileJoin": "{date}加入"
+	"pageEditProfileJoin": "{date}加入",
+	"editCircleName": "编辑圈子名称",
+	"editConversations": "编辑会话",
+	"deleteCircle": "删除圈子",
+	"reply": "回复",
+	"forward": "转发",
+	"copy": "复制",
+	"delete": "删除",
+	"pin": "置顶",
+	"unPin": "取消置顶",
+	"deleteChat": "删除对话",
+	"mute": "静音",
+	"unMute": "取消静音"
 }

@@ -294,6 +294,126 @@ class Localization {
       args: [date],
     );
   }
+
+  /// `Edit Circle Name`
+  String get editCircleName {
+    return Intl.message(
+      'Edit Circle Name',
+      name: 'editCircleName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit Conversations`
+  String get editConversations {
+    return Intl.message(
+      'Edit Conversations',
+      name: 'editConversations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete Circle`
+  String get deleteCircle {
+    return Intl.message(
+      'Delete Circle',
+      name: 'deleteCircle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reply`
+  String get reply {
+    return Intl.message(
+      'Reply',
+      name: 'reply',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Forward`
+  String get forward {
+    return Intl.message(
+      'Forward',
+      name: 'forward',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy`
+  String get copy {
+    return Intl.message(
+      'Copy',
+      name: 'copy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete`
+  String get delete {
+    return Intl.message(
+      'Delete',
+      name: 'delete',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pin`
+  String get pin {
+    return Intl.message(
+      'Pin',
+      name: 'pin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `UnPin`
+  String get unPin {
+    return Intl.message(
+      'UnPin',
+      name: 'unPin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete Chat`
+  String get deleteChat {
+    return Intl.message(
+      'Delete Chat',
+      name: 'deleteChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mute`
+  String get mute {
+    return Intl.message(
+      'Mute',
+      name: 'mute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `UnMute`
+  String get unMute {
+    return Intl.message(
+      'UnMute',
+      name: 'unMute',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

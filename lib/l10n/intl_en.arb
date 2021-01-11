@@ -24,5 +24,17 @@
 	"introduction": "Introduction",
 	"phoneNumber": "Phone number",
 	"save": "Save",
-	"pageEditProfileJoin": "{date} join"
+	"pageEditProfileJoin": "{date} join",
+	"editCircleName": "Edit Circle Name",
+	"editConversations": "Edit Conversations",
+	"deleteCircle": "Delete Circle",
+	"reply": "Reply",
+	"forward": "Forward",
+	"copy": "Copy",
+	"delete": "Delete",
+	"pin": "Pin",
+	"unPin": "UnPin",
+	"deleteChat": "Delete Chat",
+	"mute": "Mute",
+	"unMute": "UnMute"
 }
