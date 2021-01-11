@@ -5,8 +5,7 @@ import 'package:flutter/widgets.dart';
 class DraftCubit extends Cubit<Map<String, String>> {
   DraftCubit() : super({});
 
-  final BlockTextEditingController textEditingController =
-      BlockTextEditingController();
+  final TextEditingController textEditingController = TextEditingController();
 
   void update(String name) {
     final text = textEditingController.text;
@@ -24,17 +23,5 @@ class DraftCubit extends Cubit<Map<String, String>> {
           offset: text.length,
         ),
       );
-  }
-}
-
-class BlockTextEditingController extends TextEditingController {
-  BlockTextEditingController();
-
-  bool block = false;
-
-  @override
-  set value(TextEditingValue newValue) {
-    if (block) return;
-    super.value = newValue;
   }
 }
