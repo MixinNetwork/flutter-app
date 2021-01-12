@@ -103,13 +103,13 @@ LazyDatabase _openConnection(String identityNumber) {
   });
 }
 
-DatabaseConnection _backGroudOpenConnection() {
+DatabaseConnection _backgroundOpenConnection() {
   final database = _openConnection('identityNumber'); // todo identityNumber
   return DatabaseConnection.fromExecutor(database);
 }
 
 Future<MixinDatabase> getMixinDatabaseConnection(String identityNumber) async {
-  final isolate = await MoorIsolate.spawn(_backGroudOpenConnection);
+  final isolate = await MoorIsolate.spawn(_backgroundOpenConnection);
   final connection = await isolate.connect(isolateDebugLog: false);
   return MixinDatabase.connect(connection);
 }

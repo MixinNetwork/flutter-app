@@ -17,6 +17,7 @@ import 'blaze_message.dart';
 class Blaze {
   Blaze(
       this.selfId, this.sessionId, this.privateKey, this.database, this.client);
+
   final String selfId;
   final String sessionId;
   final String privateKey;
@@ -24,7 +25,7 @@ class Blaze {
   final Client client; // todo delete
 
   IOWebSocketChannel channel;
-  Timer _pingTimer;
+
   void connect() {
     final token = signAuthTokenWithEdDSA(
         selfId, sessionId, privateKey, scp, 'GET', '/', '');
@@ -33,8 +34,12 @@ class Blaze {
 
   void _connect(String token) {
     channel = IOWebSocketChannel.connect(
-        'wss://blaze.mixin.one?access_token=$token',
-        protocols: ['Mixin-Blaze-1']);
+        'wss://blaze.mixin.one',
+        protocols: ['Mixin-Blaze-1'],
+        headers: {
+          'authorization':'Bearer $token'
+        },
+        pingInterval: const Duration(seconds: 15));
     channel.stream.listen((message) async {
       final blazeMessage = await parseBlazeMessage(message);
       final data = blazeMessage['data'];
@@ -67,9 +72,6 @@ class Blaze {
       debugPrint('onDone');
     }, cancelOnError: true);
     _sendListPending();
-    _pingTimer = Timer(const Duration(seconds: 15), (){
-      _sendGZip(BlazeMessage(Uuid().v4(), action: 'PING'));
-    });
   }
 
   void updateRemoteMessageStatus(String messageId, String status) {
@@ -87,7 +89,7 @@ class Blaze {
   }
 
   void disconnect() {
-    // Todo disconnect
+    channel?.sink?.close();
   }
 }
 
