@@ -1,27 +1,13 @@
 import 'dart:convert';
-import 'dart:isolate';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
-import 'package:flutter_app/constans.dart';
+import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class AccountServer {
-  static SendPort sendPort;
   static String sid;
-  static void initIsolate() async {
-    final receivePort = ReceivePort();
-    await Isolate.spawn(_isolate, receivePort.sendPort);
-    sendPort = receivePort.sendPort;
-  }
-
-  static void _isolate(SendPort sendPort) async {
-    final port = ReceivePort();
-    sendPort.send(port.sendPort);
-    // todo
-  }
 
   void initServer(
     String userId,
@@ -94,7 +80,7 @@ class AccountServer {
 
   }
 
-  void relase() {
-    // todo relase resource
+  void release() {
+    // todo release resource
   }
 }
