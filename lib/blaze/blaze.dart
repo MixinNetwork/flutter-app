@@ -40,6 +40,7 @@ class Blaze {
     channel.stream.listen((message) async {
       final blazeMessage = await parseBlazeMessage(message);
       final data = blazeMessage['data'];
+      debugPrint('receive: ${data['message_id']}');
       if (blazeMessage['action'] == 'ACKNOWLEDGE_MESSAGE_RECEIPT') {
         // makeMessageStatus
       } else if (blazeMessage['action'] == 'CREATE_MESSAGE') {
