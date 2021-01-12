@@ -7,7 +7,7 @@ part 'jobs_dao.g.dart';
 class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
   JobsDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(Job job) => into(db.jobs).insert(job);
+  Future<int> insert(Job job) => into(db.jobs).insertOnConflictUpdate(job);
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 

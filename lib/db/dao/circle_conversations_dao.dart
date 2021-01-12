@@ -9,7 +9,7 @@ class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
   CircleConversationDao(MixinDatabase db) : super(db);
 
   Future<int> insert(CircleConversation circleConversation) =>
-      into(db.circleConversations).insert(circleConversation);
+      into(db.circleConversations).insertOnConflictUpdate(circleConversation);
 
   Future deleteCircleConversation(CircleConversation circleConversation) =>
       delete(db.circleConversations).delete(circleConversation);

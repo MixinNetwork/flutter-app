@@ -9,7 +9,7 @@ class MessageMentionsDao extends DatabaseAccessor<MixinDatabase>
   MessageMentionsDao(MixinDatabase db) : super(db);
 
   Future<int> insert(MessageMention messageMention) =>
-      into(db.messageMentions).insert(messageMention);
+      into(db.messageMentions).insertOnConflictUpdate(messageMention);
 
   Future deleteMessageMention(MessageMention messageMention) =>
       delete(db.messageMentions).delete(messageMention);

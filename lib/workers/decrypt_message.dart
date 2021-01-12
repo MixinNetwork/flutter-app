@@ -6,7 +6,6 @@ import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
-
 import 'base_worker.dart';
 
 class DecryptMessage extends BaseWorker {
@@ -24,7 +23,8 @@ class DecryptMessage extends BaseWorker {
       // todo decrypt
       processDecryptSuccess(data, 'Signal Message');
     } else if (category.startsWith('PLAIN_')) {
-      processDecryptSuccess(data, data['data']);
+      final base64Str = utf8.decode(base64.decode(data['data']));
+      processDecryptSuccess(data, base64Str);
     } else if (category.startsWith('SYSTEM_')) {
       processSystemMessage(data);
     } else if (category == 'APP_BUTTON_GROUP' || category == 'APP_CARD') {
@@ -32,11 +32,9 @@ class DecryptMessage extends BaseWorker {
     } else if (category == 'MESSAGE_RECALL') {
       processRecallMessage(data);
     }
-    updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
+    _updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
     database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
-
-  void updateRemoteMessageStatus(String messageId, String delivered) {}
 
   void processSignalMessage(data) {}
 

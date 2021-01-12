@@ -9,7 +9,7 @@ class MessagesHistoryDao extends DatabaseAccessor<MixinDatabase>
   MessagesHistoryDao(MixinDatabase db) : super(db);
 
   Future<int> insert(MessagesHistoryData messagesHistory) =>
-      into(db.messagesHistory).insert(messagesHistory);
+      into(db.messagesHistory).insertOnConflictUpdate(messagesHistory);
 
   Future deleteMessagesHistory(MessagesHistoryData messagesHistory) =>
       delete(db.messagesHistory).delete(messagesHistory);

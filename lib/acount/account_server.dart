@@ -1,6 +1,5 @@
 import 'dart:isolate';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
@@ -55,13 +54,13 @@ class AccountServer {
     // sendPort?.send('start account');
     blaze.connect();
     database.floodMessagesDao.findFloodMessage().listen((list) {
-      debugPrint(list.map((e) => e.messageId).toString());
       if (list?.isNotEmpty == true) {
         for (final message in list) {
           DecryptMessage(userId, database, client).process(message);
         }
       }
     });
+
   }
 
   void sendMessage() {
