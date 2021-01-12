@@ -4,7 +4,7 @@ import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/context_menu.dart';
+import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/select_item.dart';
 import 'package:flutter_app/constants/assets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -121,8 +121,8 @@ class _CircleList extends StatelessWidget {
                   ),
                   selected: selected,
                   count: 99,
-                  onRightClick: (pointerUpEvent) => ContextMenuRoute.show(
-                    context,
+                  onRightClick: (pointerUpEvent) => showContextMenu(
+                    context: context,
                     pointerPosition: pointerUpEvent.position,
                     menus: [
                       ContextMenu(

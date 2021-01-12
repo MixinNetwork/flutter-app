@@ -8,7 +8,7 @@ import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/context_menu.dart';
+import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
@@ -108,8 +108,8 @@ class _List extends StatelessWidget {
                   ResponsiveNavigatorCubit.of(context)
                       .pushPage(ResponsiveNavigatorCubit.chatPage);
                 },
-                onRightClick: (pointerUpEvent) => ContextMenuRoute.show(
-                  context,
+                onRightClick: (pointerUpEvent) => showContextMenu(
+                  context: context,
                   pointerPosition: pointerUpEvent.position,
                   menus: [
                     ContextMenu(

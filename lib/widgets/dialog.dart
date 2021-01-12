@@ -6,58 +6,43 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 
-class ContextMenuRoute extends PopupRoute {
-  ContextMenuRoute({
-    this.menus,
-    this.capturedThemes,
-    this.position,
-  }) : assert(menus?.isNotEmpty == true);
-
-  final CapturedThemes capturedThemes;
-  final Offset position;
-  final List<ContextMenu> menus;
-
-  @override
-  Color get barrierColor => null;
-
-  @override
-  Duration get transitionDuration => Duration.zero;
-
-  @override
-  final String barrierLabel = 'context menu';
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-          Animation<double> secondaryAnimation) =>
-      CustomSingleChildLayout(
-        delegate: _PositionedLayoutDelegate(
-          position: position,
-        ),
-        child: capturedThemes.wrap(
-          _ContextMenuPage(menus: menus),
-        ),
-      );
-
-  @override
-  bool get maintainState => true;
-
-  @override
-  bool get barrierDismissible => true;
-
-  static Future<void> show(
-    BuildContext context, {
-    List<ContextMenu> menus,
-    Offset pointerPosition,
-  }) {
-    final navigator = Navigator.of(context, rootNavigator: true);
-    return navigator.push(ContextMenuRoute(
-      position: pointerPosition,
-      capturedThemes:
-          InheritedTheme.capture(from: context, to: navigator.context),
-      menus: menus,
-    ));
-  }
-}
+Future<void> showContextMenu({
+  BuildContext context,
+  bool barrierDismissible = true,
+  Color barrierColor,
+  bool useSafeArea = true,
+  bool useRootNavigator = true,
+  RouteSettings routeSettings,
+  List<ContextMenu> menus,
+  Offset pointerPosition,
+}) =>
+    showGeneralDialog(
+      context: context,
+      pageBuilder: (BuildContext buildContext, Animation<double> animation,
+          Animation<double> secondaryAnimation) {
+        final Widget pageChild = CustomSingleChildLayout(
+          delegate: _PositionedLayoutDelegate(
+            position: pointerPosition,
+          ),
+          child: _ContextMenuPage(menus: menus),
+        );
+        var dialog = InheritedTheme.capture(
+                from: context,
+                to: Navigator.of(context, rootNavigator: useRootNavigator)
+                    .context)
+            .wrap(pageChild);
+        if (useSafeArea) {
+          dialog = SafeArea(child: dialog);
+        }
+        return dialog;
+      },
+      barrierDismissible: barrierDismissible,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      barrierColor: barrierColor,
+      transitionDuration: const Duration(milliseconds: 100),
+      useRootNavigator: useRootNavigator,
+      routeSettings: routeSettings,
+    );
 
 class _ContextMenuPage extends StatelessWidget {
   const _ContextMenuPage({

@@ -9,7 +9,7 @@ import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/chat_bar.dart';
-import 'package:flutter_app/widgets/context_menu.dart';
+import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/input_container.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -141,8 +141,8 @@ class _Message extends StatelessWidget {
                 children: [
                   if (tuple.item3 != null) _Name(user: tuple.item3),
                   InteractableDecoratedBox(
-                    onRightClick: (pointerUpEvent) => ContextMenuRoute.show(
-                      context,
+                    onRightClick: (pointerUpEvent) => showContextMenu(
+                      context: context,
                       pointerPosition: pointerUpEvent.position,
                       menus: [
                         ContextMenu(
