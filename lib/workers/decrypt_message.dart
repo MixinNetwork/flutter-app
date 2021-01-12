@@ -75,9 +75,10 @@ class DecryptMessage extends BaseWorker {
       return;
     }
     final blazeMessage = BlazeMessage(messageId, status: status);
+    // ignore: avoid_print
     database.jobsDao.insert(Job(
         jobId: Uuid().v4(),
-        action: 'acknowledgeMessageReceipts',
+        action: acknowledgeMessageReceipts,
         priority: 5,
         blazeMessage: jsonEncode(blazeMessage),
         createdAt: DateTime.now().toIso8601String(),

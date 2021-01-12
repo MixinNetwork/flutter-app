@@ -13,7 +13,7 @@ class BlazeMessage {
 
   Map<String, dynamic> toJson() => {
         'id': id,
-        'action': action,
+        action??'action': action,
         'status': status,
       };
 }
