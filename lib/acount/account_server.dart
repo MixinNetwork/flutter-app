@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
@@ -63,6 +65,18 @@ class AccountServer {
         for (final message in list) {
           DecryptMessage(userId, database, client).process(message);
         }
+      }
+    });
+    database.jobsDao.findAckJobs().listen((jobs) {
+      if (jobs?.isNotEmpty == true) {
+        final ack = jobs.map((e) {
+          final map = jsonDecode(e.blazeMessage);
+          return BlazeAckMessage(
+              messageId: map['message_id'], status: map['status']);
+        }).toList();
+        client.messageApi.acknowledgements(ack).then((value) => {
+          database.jobsDao.deleteJobs(jobs)
+        });
       }
     });
 
