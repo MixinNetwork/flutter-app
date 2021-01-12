@@ -9,7 +9,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class AccountServer {
   static SendPort sendPort;
-
+  static String sid;
   static void initIsolate() async {
     final receivePort = ReceivePort();
     await Isolate.spawn(_isolate, receivePort.sendPort);
@@ -53,6 +53,11 @@ class AccountServer {
 
   void start() {
     // sendPort?.send('start account');
+    // todo remove, development only
+    if(sid == sessionId){
+      return;
+    }
+    sid = sessionId;
     blaze.connect();
     database.floodMessagesDao.findFloodMessage().listen((list) {
       if (list?.isNotEmpty == true) {
