@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -23,7 +24,7 @@ class Blaze {
   final Client client; // todo delete
 
   IOWebSocketChannel channel;
-
+  Timer _pingTimer;
   void connect() {
     final token = signAuthTokenWithEdDSA(
         selfId, sessionId, privateKey, scp, 'GET', '/', '');
@@ -65,8 +66,10 @@ class Blaze {
     }, onDone: () {
       debugPrint('onDone');
     }, cancelOnError: true);
-
     _sendListPending();
+    _pingTimer = Timer(const Duration(seconds: 15), (){
+      _sendGZip(BlazeMessage(Uuid().v4(), action: 'PING'));
+    });
   }
 
   void updateRemoteMessageStatus(String messageId, String status) {

@@ -83,7 +83,8 @@ class AccountServer {
 
   void stop() {
     blaze.disconnect();
-    // workManager.stop();
+    // todo dispose stream, https://github.com/simolus3/moor/issues/290
+
   }
 
   void relase() {
