@@ -33,12 +33,9 @@ class Blaze {
   }
 
   void _connect(String token) {
-    channel = IOWebSocketChannel.connect(
-        'wss://blaze.mixin.one',
+    channel = IOWebSocketChannel.connect('wss://blaze.mixin.one',
         protocols: ['Mixin-Blaze-1'],
-        headers: {
-          'authorization':'Bearer $token'
-        },
+        headers: {'Authorization': 'Bearer $token'},
         pingInterval: const Duration(seconds: 15));
     channel.stream.listen((message) async {
       final blazeMessage = await parseBlazeMessage(message);
