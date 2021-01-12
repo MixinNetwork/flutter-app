@@ -1,10 +1,27 @@
+import 'dart:isolate';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/workers/work_manager.dart';
+import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class AccountServer {
+  static SendPort sendPort;
+
+  static void initIsolate() async {
+    final receivePort = ReceivePort();
+    await Isolate.spawn(_isolate, receivePort.sendPort);
+    sendPort = receivePort.sendPort;
+  }
+
+  static void _isolate(SendPort sendPort) async {
+    final port = ReceivePort();
+    sendPort.send(port.sendPort);
+    // todo
+  }
+
   void initServer(
     String userId,
     String sessionId,
@@ -23,7 +40,6 @@ class AccountServer {
     client = Client();
     client.initMixin(userId, sessionId, privateKey, scp);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
-    workManager = WorkManager(userId, database, client);
   }
 
   String userId;
@@ -34,17 +50,23 @@ class AccountServer {
   Client client;
   Database database;
   Blaze blaze;
-  WorkManager workManager;
 
   void start() {
+    // sendPort?.send('start account');
     blaze.connect();
-    // workManager.start();
+    database.floodMessagesDao.findFloodMessage().listen((list) {
+      debugPrint(list.map((e) => e.messageId).toString());
+      if (list?.isNotEmpty == true) {
+        for (final message in list) {
+          DecryptMessage(userId, database, client).process(message);
+        }
+      }
+    });
   }
 
   void sendMessage() {
     assert(database != null);
     assert(blaze != null);
-    assert(workManager != null);
     // todo insert sending message
   }
 

@@ -9,6 +9,8 @@ import 'package:isolate/isolate_runner.dart';
 import 'package:isolate/load_balancer.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'acount/account_server.dart';
+
 LoadBalancer loadBalancer;
 
 Future<R> runLoadBalancer<R, P>(
@@ -33,5 +35,6 @@ void main() async {
   ]);
   loadBalancer = list[0];
   HydratedBloc.storage = list[1];
+  AccountServer.initIsolate();
   runApp(App());
 }

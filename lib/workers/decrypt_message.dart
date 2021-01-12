@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/constans.dart';
 import 'package:flutter_app/db/database.dart';
@@ -10,20 +9,9 @@ import 'package:uuid/uuid.dart';
 
 import 'base_worker.dart';
 
-class ReceiveWorker extends BaseWorker {
-  ReceiveWorker(String selfId, Database database, Client client)
+class DecryptMessage extends BaseWorker {
+  DecryptMessage(String selfId, Database database, Client client)
       : super(selfId, database, client);
-
-  void doWork() async {
-    final floodMessages = await database.floodMessagesDao.findFloodMessage();
-    floodMessages.forEach((floodMessage) {
-      try {
-        process(floodMessage);
-      } catch (e) {
-        debugPrint(e);
-      }
-    });
-  }
 
   void process(FloodMessage floodMessage) {
     final data = jsonDecode(floodMessage.data);
@@ -33,10 +21,10 @@ class ReceiveWorker extends BaseWorker {
     final category = data['category'];
     if (category.startsWith('SIGNAL_')) {
       // processSignalMessage(data);
-      processDecryptSuccess(data, 'SIGNAL_');
+      // todo decrypt
+      processDecryptSuccess(data, 'Signal Message');
     } else if (category.startsWith('PLAIN_')) {
-      // processPlainMessage(data);
-      processDecryptSuccess(data, 'PLAIN_');
+      processDecryptSuccess(data, data['data']);
     } else if (category.startsWith('SYSTEM_')) {
       processSystemMessage(data);
     } else if (category == 'APP_BUTTON_GROUP' || category == 'APP_CARD') {
@@ -45,6 +33,7 @@ class ReceiveWorker extends BaseWorker {
       processRecallMessage(data);
     }
     updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
+    database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
 
   void updateRemoteMessageStatus(String messageId, String delivered) {}
