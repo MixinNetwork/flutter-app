@@ -14,22 +14,23 @@ import 'intl/messages_all.dart';
 
 class Localization {
   Localization();
-  
+
   static Localization current;
-  
-  static const AppLocalizationDelegate delegate =
-    AppLocalizationDelegate();
+
+  static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<Localization> load(Locale locale) {
-    final name = (locale.countryCode?.isEmpty ?? false) ? locale.languageCode : locale.toString();
-    final localeName = Intl.canonicalizedLocale(name); 
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
+    final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
       Localization.current = Localization();
-      
+
       return Localization.current;
     });
-  } 
+  }
 
   static Localization of(BuildContext context) {
     return Localizations.of<Localization>(context, Localization);
@@ -410,6 +411,26 @@ class Localization {
     return Intl.message(
       'UnMute',
       name: 'unMute',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Do you want to delete {name} circle?`
+  String pageDeleteCircle(Object name) {
+    return Intl.message(
+      'Do you want to delete $name circle?',
+      name: 'pageDeleteCircle',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Cancel`
+  String get cancel {
+    return Intl.message(
+      'Cancel',
+      name: 'cancel',
       desc: '',
       args: [],
     );

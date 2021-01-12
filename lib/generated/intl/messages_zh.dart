@@ -19,13 +19,16 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh';
 
-  static m0(date) => "${date}加入";
+  static m0(name) => "确定删除${name}圈子吗？";
+
+  static m1(date) => "${date}加入";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("关于"),
     "appearance" : MessageLookupByLibrary.simpleMessage("显示偏好"),
     "bots" : MessageLookupByLibrary.simpleMessage("机器人"),
+    "cancel" : MessageLookupByLibrary.simpleMessage("取消"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("聊天记录备份"),
     "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
     "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),
@@ -45,7 +48,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),
     "notification" : MessageLookupByLibrary.simpleMessage("通知"),
-    "pageEditProfileJoin" : m0,
+    "pageDeleteCircle" : m0,
+    "pageEditProfileJoin" : m1,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("通过 QrCode 登录 Mixin Messenger"),

@@ -19,13 +19,16 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static m0(date) => "${date} join";
+  static m0(name) => "Do you want to delete ${name} circle?";
+
+  static m1(date) => "${date} join";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("About"),
     "appearance" : MessageLookupByLibrary.simpleMessage("Appearance"),
     "bots" : MessageLookupByLibrary.simpleMessage("Bots"),
+    "cancel" : MessageLookupByLibrary.simpleMessage("Cancel"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("Chat Backup"),
     "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
     "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
@@ -45,7 +48,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
     "notification" : MessageLookupByLibrary.simpleMessage("Notification"),
-    "pageEditProfileJoin" : m0,
+    "pageDeleteCircle" : m0,
+    "pageEditProfileJoin" : m1,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),

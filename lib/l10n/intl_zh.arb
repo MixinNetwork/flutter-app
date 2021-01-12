@@ -36,5 +36,7 @@
 	"unPin": "取消置顶",
 	"deleteChat": "删除对话",
 	"mute": "静音",
-	"unMute": "取消静音"
+	"unMute": "取消静音",
+	"pageDeleteCircle": "确定删除{name}圈子吗？",
+	"cancel": "取消"
 }

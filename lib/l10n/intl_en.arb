@@ -36,5 +36,7 @@
 	"unPin": "UnPin",
 	"deleteChat": "Delete Chat",
 	"mute": "Mute",
-	"unMute": "UnMute"
+	"unMute": "UnMute",
+	"pageDeleteCircle": "Do you want to delete {name} circle?",
+	"cancel": "Cancel"
 }

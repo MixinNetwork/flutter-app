@@ -121,25 +121,45 @@ class _CircleList extends StatelessWidget {
                   ),
                   selected: selected,
                   count: 99,
-                  onRightClick: (pointerUpEvent) => showContextMenu(
-                    context: context,
-                    pointerPosition: pointerUpEvent.position,
-                    menus: [
-                      ContextMenu(
-                        title: Localization.of(context).editCircleName,
-                        onTap: () {},
-                      ),
-                      ContextMenu(
-                        title: Localization.of(context).editConversations,
-                        onTap: () {},
-                      ),
-                      ContextMenu(
-                        title: Localization.of(context).deleteCircle,
-                        isDestructiveAction: true,
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
+                  onRightClick: (pointerUpEvent) async {
+                    final result = await showContextMenu(
+                      context: context,
+                      pointerPosition: pointerUpEvent.position,
+                      menus: [
+                        ContextMenu(
+                          title: Localization.of(context).editCircleName,
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).editConversations,
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).deleteCircle,
+                          isDestructiveAction: true,
+                          value: () {
+                            showMixinDialog(
+                              context: context,
+                              child: AlertDialogLayout(
+                                content: Text(Localization.of(context)
+                                    .pageDeleteCircle(circle['title'])),
+                                actions: [
+                                  MixinButton(
+                                    backgroundTransparent: true,
+                                    child:
+                                        Text(Localization.of(context).cancel),
+                                  ),
+                                  MixinButton(
+                                    child:
+                                        Text(Localization.of(context).delete),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                    result?.call();
+                  },
                 );
               },
             ),

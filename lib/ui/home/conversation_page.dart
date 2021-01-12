@@ -114,16 +114,13 @@ class _List extends StatelessWidget {
                   menus: [
                     ContextMenu(
                       title: Localization.of(context).pin,
-                      onTap: () {},
                     ),
                     ContextMenu(
                       title: Localization.of(context).unMute,
-                      onTap: () {},
                     ),
                     ContextMenu(
                       title: Localization.of(context).deleteChat,
                       isDestructiveAction: true,
-                      onTap: () {},
                     ),
                   ],
                 ),

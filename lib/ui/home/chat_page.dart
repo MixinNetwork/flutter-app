@@ -147,20 +147,16 @@ class _Message extends StatelessWidget {
                       menus: [
                         ContextMenu(
                           title: Localization.of(context).reply,
-                          onTap: () {},
                         ),
                         ContextMenu(
                           title: Localization.of(context).forward,
-                          onTap: () {},
                         ),
                         ContextMenu(
                           title: Localization.of(context).copy,
-                          onTap: () {},
                         ),
                         ContextMenu(
                           title: Localization.of(context).delete,
                           isDestructiveAction: true,
-                          onTap: () {},
                         ),
                       ],
                     ),

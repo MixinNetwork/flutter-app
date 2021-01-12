@@ -5,6 +5,7 @@ import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/dialog.dart';
 import 'package:intl/intl.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
@@ -34,8 +35,9 @@ class EditProfilePage extends StatelessWidget {
         appBar: MixinAppBar(
           title: Localization.of(context).editProfile,
           actions: [
-            TextButton(
-              onPressed: () {},
+            MixinButton(
+              onTap: () {},
+              backgroundTransparent: true,
               child: Text(Localization.of(context).save),
             ),
           ],
