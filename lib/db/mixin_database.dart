@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter_app/db/dao/hyperlinks_dao.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/db/dao/users_dao.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
+
 // These imports are only needed to open the database
 import 'package:moor/ffi.dart';
 import 'package:path_provider/path_provider.dart';
@@ -103,13 +105,28 @@ LazyDatabase _openConnection(String identityNumber) {
   });
 }
 
-DatabaseConnection _backgroundOpenConnection() {
-  final database = _openConnection('identityNumber'); // todo identityNumber
-  return DatabaseConnection.fromExecutor(database);
+Future<MoorIsolate> _createMoorIsolate(String identityNumber) async {
+  final receivePort = ReceivePort();
+
+  await Isolate.spawn(
+    _startBackground,
+    _IsolateStartRequest(receivePort.sendPort, identityNumber),
+  );
+
+  return (await receivePort.first as MoorIsolate);
 }
 
-Future<MixinDatabase> getMixinDatabaseConnection(String identityNumber) async {
-  final isolate = await MoorIsolate.spawn(_backgroundOpenConnection);
-  final connection = await isolate.connect(isolateDebugLog: false);
-  return MixinDatabase.connect(connection);
+void _startBackground(_IsolateStartRequest request) {
+  final executor = _openConnection(request.identityNumber);
+  final moorIsolate = MoorIsolate.inCurrent(
+    () => DatabaseConnection.fromExecutor(executor),
+  );
+  request.sendMoorIsolate.send(moorIsolate);
+}
+
+class _IsolateStartRequest {
+  _IsolateStartRequest(this.sendMoorIsolate, this.identityNumber);
+
+  final SendPort sendMoorIsolate;
+  final String identityNumber;
 }
