@@ -23,8 +23,7 @@ class DecryptMessage extends Injector {
       // todo decrypt
       processDecryptSuccess(data, 'Signal Message');
     } else if (category.startsWith('PLAIN_')) {
-      final base64Str = utf8.decode(base64.decode(data['data']));
-      processDecryptSuccess(data, base64Str);
+      processPlainMessage(data);
     } else if (category.startsWith('SYSTEM_')) {
       processSystemMessage(data);
     } else if (category == 'APP_BUTTON_GROUP' || category == 'APP_CARD') {
@@ -38,7 +37,24 @@ class DecryptMessage extends Injector {
 
   void processSignalMessage(data) {}
 
-  void processPlainMessage(data) {}
+  void processPlainMessage(data) {
+    if (data['category'] == MessageCategory.plainJson) {
+      // todo
+    } else if (data['category'] == MessageCategory.plainText ||
+        data['category'] == MessageCategory.plainImage ||
+        data['category'] == MessageCategory.plainVideo ||
+        data['category'] == MessageCategory.plainData ||
+        data['category'] == MessageCategory.plainAudio ||
+        data['category'] == MessageCategory.plainContact ||
+        data['category'] == MessageCategory.plainLive ||
+        data['category'] == MessageCategory.plainPost ||
+        data['category'] == MessageCategory.plainLocation) {
+      if ((data['representative_id'] as String)?.isNotEmpty == true) {
+        data['user_id'] = data['representative_id'];
+      }
+      processDecryptSuccess(data, data['data']);
+    }
+  }
 
   void processSystemMessage(data) {}
 
@@ -54,18 +70,31 @@ class DecryptMessage extends Injector {
 
     // todo process quote message
 
-    if (data['category'] == 'PLAIN_TEXT') {}
-    final message = Message(
-        // todo
-        messageId: data['message_id'],
-        conversationId: data['conversation_id'],
-        userId: data['user_id'],
-        category: data['category'],
-        content: plainText, // todo
-        status: data['status'],
-        createdAt: data['created_at']);
-
-    await database.messagesDao.insert(message);
+    if ((data['category'] as String).endsWith('_TEXT')) {
+      String plain;
+      if (data['category'] == MessageCategory.signalText) {
+        plain = 'SignalText';
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final message = Message(
+          messageId: data['message_id'],
+          conversationId: data['conversation_id'],
+          userId: data['user_id'],
+          category: data['category'],
+          content: plain,
+          status: data['status'],
+          createdAt: data['created_at']);
+      await database.messagesDao.insert(message);
+    } else if ((data['category'] as String).endsWith('_IMAGE')) {
+    } else if ((data['category'] as String).endsWith('_VIDEO')) {
+    } else if ((data['category'] as String).endsWith('_DATA')) {
+    } else if ((data['category'] as String).endsWith('_AUDIO')) {
+    } else if ((data['category'] as String).endsWith('_STICKER')) {
+    } else if ((data['category'] as String).endsWith('_CONTACT')) {
+    } else if ((data['category'] as String).endsWith('_LIVE')) {
+    } else if ((data['category'] as String).endsWith('_LOCATION')) {
+    } else if ((data['category'] as String).endsWith('_POST')) {}
 
     _updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
   }

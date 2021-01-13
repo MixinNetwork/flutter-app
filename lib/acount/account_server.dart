@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
