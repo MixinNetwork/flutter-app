@@ -60,8 +60,9 @@ class AccountServer {
           return BlazeAckMessage(
               messageId: map['message_id'], status: map['status']);
         }).toList();
+        final jobIds = jobs.map((e) => e.jobId).toList();
         client.messageApi.acknowledgements(ack).then((value) => {
-          database.jobsDao.deleteJobs(jobs)
+          database.jobsDao.deleteJobs(jobIds)
         });
       }
     });

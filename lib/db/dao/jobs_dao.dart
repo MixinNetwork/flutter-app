@@ -11,16 +11,14 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 
-  void deleteJobs(List<Job> jobs) async {
-    // todo batch delete
-    for (final job in jobs) {
-      await deleteJob(job);
-    }
+  void deleteJobs(List<String> jobIds) async {
+    await batch(
+        (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds))});
   }
 
   Stream<List<Job>> findAckJobs() {
     // todo action error
-    return customSelect('SELECT * FROM jobs  ORDER BY created_at ASC LIMIT 100',
+    return customSelect('SELECT * FROM jobs ORDER BY created_at ASC LIMIT 100',
         variables: [], readsFrom: {db.jobs}).map(db.jobs.mapFromRow).watch();
   }
 
