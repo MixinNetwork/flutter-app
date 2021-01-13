@@ -1,3 +1,4 @@
+import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 
@@ -17,9 +18,12 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
   }
 
   Stream<List<Job>> findAckJobs() {
-    // todo action error
-    return customSelect('SELECT * FROM jobs ORDER BY created_at ASC LIMIT 100',
-        variables: [], readsFrom: {db.jobs}).map(db.jobs.mapFromRow).watch();
+    final query = select(db.jobs)
+      ..where((Jobs row) {
+        return row.action.equals(acknowledgeMessageReceipts);
+      })
+      ..limit(100);
+    return query.watch();
   }
 
   Future<List<Job>> findCreateMessageJobs() {

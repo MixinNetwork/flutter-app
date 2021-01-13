@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
@@ -41,7 +42,7 @@ class AccountServer {
   void start() {
     // sendPort?.send('start account');
     // todo remove, development only
-    if(sid == sessionId){
+    if (sid == sessionId) {
       return;
     }
     sid = sessionId;
@@ -78,7 +79,6 @@ class AccountServer {
   void stop() {
     blaze.disconnect();
     // todo dispose stream, https://github.com/simolus3/moor/issues/290
-
   }
 
   void release() {
