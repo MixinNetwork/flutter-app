@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/assets.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Assets;
+import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/back_button.dart';
@@ -66,12 +66,12 @@ class ChatBar extends StatelessWidget {
             ),
           ),
           ActionButton(
-            name: Assets.assetsImagesIcSearchPng,
+            name: Resources.assetsImagesIcSearchPng,
             color: actionColor,
           ),
           const SizedBox(width: 14),
           ActionButton(
-            name: Assets.assetsImagesIcScreenPng,
+            name: Resources.assetsImagesIcScreenPng,
             color: actionColor,
           ),
         ]),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/assets.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Assets;
+import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
@@ -57,7 +57,7 @@ class _Empty extends StatelessWidget {
     return Center(
       child: Column(mainAxisSize: MainAxisSize.min, children: [
         SvgPicture.asset(
-          Assets.assetsImagesConversationEmptySvg,
+          Resources.assetsImagesConversationEmptySvg,
           height: 78,
           width: 58,
           color: dynamicColor,

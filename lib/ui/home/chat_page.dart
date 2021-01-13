@@ -2,9 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/assets.dart';
-import 'package:flutter_app/db/mixin_database.dart'
-    hide Assets, Offset, Message;
+import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
@@ -346,11 +345,11 @@ class _MessageBubble extends StatelessWidget {
             image: AssetImage(
               isCurrentUser
                   ? isDark
-                      ? Assets.assetsImagesDarkSenderNipBubblePng
-                      : Assets.assetsImagesLightSenderNipBubblePng
+                      ? Resources.assetsImagesDarkSenderNipBubblePng
+                      : Resources.assetsImagesLightSenderNipBubblePng
                   : isDark
-                      ? Assets.assetsImagesDarkReceiverNipBubblePng
-                      : Assets.assetsImagesLightReceiverNipBubblePng,
+                      ? Resources.assetsImagesDarkReceiverNipBubblePng
+                      : Resources.assetsImagesLightReceiverNipBubblePng,
             ),
             centerSlice: Rect.fromCenter(
                 center: const Offset(21, 22), width: 1, height: 1),

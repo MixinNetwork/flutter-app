@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 
@@ -17,7 +17,7 @@ class MixinBackButton extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(right: 8.0),
         child: ActionButton(
-          name: Assets.assetsImagesIcBackPng,
+          name: Resources.assetsImagesIcBackPng,
           color: color ??
               BrightnessData.dynamicColor(
                 context,

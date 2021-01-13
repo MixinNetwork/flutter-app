@@ -1,12 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/select_item.dart';
-import 'package:flutter_app/constants/assets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
@@ -24,19 +24,19 @@ class SlidePage extends StatelessWidget {
             const SizedBox(height: 12),
             _CategoryList(categoryList: [
               {
-                'asset': Assets.assetsImagesContactsPng,
+                'asset': Resources.assetsImagesContactsPng,
                 'title': Localization.of(context).contacts,
               },
               {
-                'asset': Assets.assetsImagesGroupPng,
+                'asset': Resources.assetsImagesGroupPng,
                 'title': Localization.of(context).group,
               },
               {
-                'asset': Assets.assetsImagesBotPng,
+                'asset': Resources.assetsImagesBotPng,
                 'title': Localization.current.bots
               },
               {
-                'asset': Assets.assetsImagesStrangersPng,
+                'asset': Resources.assetsImagesStrangersPng,
                 'title': Localization.of(context).strangers,
               },
             ]),
@@ -88,7 +88,7 @@ class _CircleList extends StatelessWidget {
         child: Builder(builder: (context) {
           const circleType = [
             {
-              'asset': Assets.assetsImagesCirclePng,
+              'asset': Resources.assetsImagesCirclePng,
               'title': 'Mixin',
             },
           ];

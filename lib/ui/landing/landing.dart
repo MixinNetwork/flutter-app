@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/landing/bloc/landing_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -73,7 +73,7 @@ class _QrCode extends StatelessWidget {
                         foregroundColor: Colors.black,
                         backgroundColor: Colors.white,
                         embeddedImage:
-                            const AssetImage(Assets.assetsImagesLogoPng),
+                            const AssetImage(Resources.assetsImagesLogoPng),
                         embeddedImageStyle: QrEmbeddedImageStyle(
                           size: const Size(44, 44),
                         ),
@@ -198,7 +198,7 @@ class _Retry extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 SvgPicture.asset(
-                  Assets.assetsImagesIcRetrySvg,
+                  Resources.assetsImagesIcRetrySvg,
                   width: 50,
                   height: 50,
                 ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
@@ -62,7 +62,7 @@ class SearchBar extends StatelessWidget {
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 8),
                   child: Image.asset(
-                    Assets.assetsImagesIcSearchPng,
+                    Resources.assetsImagesIcSearchPng,
                     color: hintColor,
                   ),
                 ),
@@ -78,7 +78,7 @@ class SearchBar extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         ActionButton(
-          name: Assets.assetsImagesIcCreateGroupPng,
+          name: Resources.assetsImagesIcCreateGroupPng,
           onTap: () {
             _showDialog(context);
           },

@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -41,14 +41,14 @@ class InputContainer extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             ActionButton(
-              name: Assets.assetsImagesIcFilePng,
+              name: Resources.assetsImagesIcFilePng,
               color: actionColor,
               onTap: () {},
             ),
             const SizedBox(width: 6),
             HoverOverlay(
               child: ActionButton(
-                name: Assets.assetsImagesIcStickerPng,
+                name: Resources.assetsImagesIcStickerPng,
                 color: actionColor,
               ),
               childAnchor: Alignment.topCenter,
@@ -109,7 +109,7 @@ class InputContainer extends StatelessWidget {
             ),
             const SizedBox(width: 16),
             ActionButton(
-              name: Assets.assetsImagesIcSendPng,
+              name: Resources.assetsImagesIcSendPng,
               color: actionColor,
               onTap: () {},
             ),

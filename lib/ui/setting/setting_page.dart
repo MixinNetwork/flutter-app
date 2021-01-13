@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -24,7 +24,7 @@ class SettingPage extends StatelessWidget {
               children: [
                 _ItemContainer(
                   child: _Item(
-                    assetName: Assets.assetsImagesIcProfileSvg,
+                    assetName: Resources.assetsImagesIcProfileSvg,
                     name: 'Edit Profile',
                     title: Localization.of(context).editProfile,
                   ),
@@ -34,27 +34,27 @@ class SettingPage extends StatelessWidget {
                   child: Column(
                     children: [
                       _Item(
-                        assetName: Assets.assetsImagesIcNotificationSvg,
+                        assetName: Resources.assetsImagesIcNotificationSvg,
                         name: 'Notification',
                         title: Localization.of(context).notification,
                       ),
                       _Item(
-                        assetName: Assets.assetsImagesIcBackupSvg,
+                        assetName: Resources.assetsImagesIcBackupSvg,
                         name: 'Chat Backup',
                         title: Localization.of(context).chatBackup,
                       ),
                       _Item(
-                        assetName: Assets.assetsImagesIcStorageUsageSvg,
+                        assetName: Resources.assetsImagesIcStorageUsageSvg,
                         name: 'Data and Storage Usage',
                         title: Localization.of(context).dataAndStorageUsage,
                       ),
                       _Item(
-                        assetName: Assets.assetsImagesIcAppearanceSvg,
+                        assetName: Resources.assetsImagesIcAppearanceSvg,
                         name: 'Appearance',
                         title: Localization.of(context).appearance,
                       ),
                       _Item(
-                        assetName: Assets.assetsImagesIcAboutSvg,
+                        assetName: Resources.assetsImagesIcAboutSvg,
                         name: 'About',
                         title: Localization.of(context).about,
                       ),
@@ -66,7 +66,7 @@ class SettingPage extends StatelessWidget {
             const SizedBox(height: 10),
             _ItemContainer(
               child: _Item(
-                assetName: Assets.assetsImagesIcSignOutSvg,
+                assetName: Resources.assetsImagesIcSignOutSvg,
                 title: Localization.of(context).signOut,
                 name: 'Sign Out',
                 onTap: () => MultiAuthCubit.of(context).signOut(),
@@ -172,7 +172,7 @@ class _Item extends StatelessWidget {
                   ),
                   const SizedBox(width: 4),
                   SvgPicture.asset(
-                    Assets.assetsImagesIcArrowRightSvg,
+                    Resources.assetsImagesIcArrowRightSvg,
                     width: 30,
                     height: 30,
                   ),
