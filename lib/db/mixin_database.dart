@@ -105,6 +105,8 @@ LazyDatabase _openConnection(String identityNumber) {
   });
 }
 
+// todo
+// ignore: unused_element
 Future<MoorIsolate> _createMoorIsolate(String identityNumber) async {
   final receivePort = ReceivePort();
 

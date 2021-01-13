@@ -53,7 +53,7 @@ class Blaze {
             await database.floodMessagesDao
                 .insert(FloodMessage(
                     messageId: data['message_id'],
-                    data: jsonEncode(data).toString(),
+                    data: jsonEncode(data),
                     createdAt: data['created_at']))
                 .then((value) {
               updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
