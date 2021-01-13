@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_app/blaze/blaze_message.dart';
+import 'package:flutter_app/blaze/blaze_message_data.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -13,11 +14,11 @@ class DecryptMessage extends Injector {
       : super(selfId, database, client);
 
   void process(FloodMessage floodMessage) {
-    final data = jsonDecode(floodMessage.data);
-    if (data['conversation_id'] != null) {
-      syncConversion(data['conversation_id']);
+    final data = BlazeMessageData.fromJson(jsonDecode(floodMessage.data));
+    if (data.conversationId != null) {
+      syncConversion(data.conversationId);
     }
-    final category = data['category'];
+    final category = data.category;
     if (category.startsWith('SIGNAL_')) {
       // processSignalMessage(data);
       // todo decrypt
@@ -37,22 +38,22 @@ class DecryptMessage extends Injector {
 
   void processSignalMessage(data) {}
 
-  void processPlainMessage(data) {
-    if (data['category'] == MessageCategory.plainJson) {
+  void processPlainMessage(BlazeMessageData data) {
+    if (data.category == MessageCategory.plainJson) {
       // todo
-    } else if (data['category'] == MessageCategory.plainText ||
-        data['category'] == MessageCategory.plainImage ||
-        data['category'] == MessageCategory.plainVideo ||
-        data['category'] == MessageCategory.plainData ||
-        data['category'] == MessageCategory.plainAudio ||
-        data['category'] == MessageCategory.plainContact ||
-        data['category'] == MessageCategory.plainLive ||
-        data['category'] == MessageCategory.plainPost ||
-        data['category'] == MessageCategory.plainLocation) {
-      if ((data['representative_id'] as String)?.isNotEmpty == true) {
-        data['user_id'] = data['representative_id'];
+    } else if (data.category == MessageCategory.plainText ||
+        data.category == MessageCategory.plainImage ||
+        data.category == MessageCategory.plainVideo ||
+        data.category == MessageCategory.plainData ||
+        data.category == MessageCategory.plainAudio ||
+        data.category == MessageCategory.plainContact ||
+        data.category == MessageCategory.plainLive ||
+        data.category == MessageCategory.plainPost ||
+        data.category == MessageCategory.plainLocation) {
+      if (data.representativeId?.isNotEmpty == true) {
+        data.userId = data.representativeId;
       }
-      processDecryptSuccess(data, data['data']);
+      processDecryptSuccess(data, data.data);
     }
   }
 
@@ -63,40 +64,40 @@ class DecryptMessage extends Injector {
   void processRecallMessage(data) {}
 
   void processDecryptSuccess(
-      Map<String, dynamic> data, String plainText) async {
+      BlazeMessageData data, String plainText) async {
     // todo
     // ignore: unused_local_variable
-    final user = await syncUser(data['user_id']);
+    final user = await syncUser(data.userId);
 
     // todo process quote message
 
-    if ((data['category'] as String).endsWith('_TEXT')) {
+    if (data.category.endsWith('_TEXT')) {
       String plain;
-      if (data['category'] == MessageCategory.signalText) {
+      if (data.category == MessageCategory.signalText) {
         plain = 'SignalText';
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
       final message = Message(
-          messageId: data['message_id'],
-          conversationId: data['conversation_id'],
-          userId: data['user_id'],
-          category: data['category'],
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
           content: plain,
-          status: data['status'],
-          createdAt: data['created_at']);
+          status: data.status,
+          createdAt: data.createdAt);
       await database.messagesDao.insert(message);
-    } else if ((data['category'] as String).endsWith('_IMAGE')) {
-    } else if ((data['category'] as String).endsWith('_VIDEO')) {
-    } else if ((data['category'] as String).endsWith('_DATA')) {
-    } else if ((data['category'] as String).endsWith('_AUDIO')) {
-    } else if ((data['category'] as String).endsWith('_STICKER')) {
-    } else if ((data['category'] as String).endsWith('_CONTACT')) {
-    } else if ((data['category'] as String).endsWith('_LIVE')) {
-    } else if ((data['category'] as String).endsWith('_LOCATION')) {
-    } else if ((data['category'] as String).endsWith('_POST')) {}
+    } else if (data.category.endsWith('_IMAGE')) {
+    } else if (data.category.endsWith('_VIDEO')) {
+    } else if (data.category.endsWith('_DATA')) {
+    } else if (data.category.endsWith('_AUDIO')) {
+    } else if (data.category.endsWith('_STICKER')) {
+    } else if (data.category.endsWith('_CONTACT')) {
+    } else if (data.category.endsWith('_LIVE')) {
+    } else if (data.category.endsWith('_LOCATION')) {
+    } else if (data.category.endsWith('_POST')) {}
 
-    _updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
+    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
   }
 
   void _updateRemoteMessageStatus(messageId, status) {
