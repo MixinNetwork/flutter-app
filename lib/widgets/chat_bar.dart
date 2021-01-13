@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Assets;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/back_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -87,10 +87,10 @@ class _ID extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConverter<ConversationCubit, Conversation, String>(
-      converter: (state) => state?.name,
-      builder: (context, name) => Text(
-        '19890604',
+    return BlocConverter<ConversationCubit, ConversationItemsResult, String>(
+      converter: (state) => state?.ownerIdentityNumber,
+      builder: (context, id) => Text(
+        id,
         style: TextStyle(
           color: BrightnessData.dynamicColor(
             context,
@@ -111,7 +111,7 @@ class _Name extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, Conversation, String>(
+      BlocConverter<ConversationCubit, ConversationItemsResult, String>(
         converter: (state) => state?.name,
         when: (a, b) => b != null,
         builder: (context, name) => Text(
@@ -135,8 +135,8 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, Conversation, List<String>>(
-        converter: (state) => state?.avatars,
+      BlocConverter<ConversationCubit, ConversationItemsResult, List<String>>(
+        converter: (state) => [state?.avatarUrl],
         when: (a, b) => b?.isNotEmpty == true,
         builder: (context, avatars) => AvatarsWidget(
           size: 50,

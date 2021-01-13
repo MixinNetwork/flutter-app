@@ -3,8 +3,9 @@ import 'dart:math';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/db/mixin_database.dart'
+    hide Assets, Offset, Message;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -29,7 +30,7 @@ class ChatPage extends StatelessWidget {
             darkColor: const Color.fromRGBO(35, 39, 43, 1),
           ),
         ),
-        child: BlocConverter<ConversationCubit, Conversation, bool>(
+        child: BlocConverter<ConversationCubit, ConversationItemsResult, bool>(
           converter: (state) => state != null,
           builder: (context, selected) => ChatContainer(
             onPressed: () {},
@@ -52,7 +53,7 @@ class ChatContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final conversationCubit = BlocProvider.of<ConversationCubit>(context);
     final messageBloc = MessageBloc(conversationCubit.state);
-    return BlocListener<ConversationCubit, Conversation>(
+    return BlocListener<ConversationCubit, ConversationItemsResult>(
       listener: (context, conversation) =>
           messageBloc.setConversation(conversation),
       child: BlocProvider(

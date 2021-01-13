@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/assets.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Assets;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
@@ -31,8 +32,8 @@ class ConversationPage extends StatelessWidget {
         children: [
           const SearchBar(),
           Expanded(
-            child:
-                BlocConverter<ConversationListCubit, List<Conversation>, int>(
+            child: BlocConverter<ConversationListCubit,
+                List<ConversationItemsResult>, int>(
               converter: (state) => state?.length ?? 0,
               builder: (context, itemCount) {
                 if (itemCount == 0) return _Empty();
@@ -89,22 +90,27 @@ class _List extends StatelessWidget {
           key: PageStorageKey(slideCategoryState),
           itemCount: itemCount,
           itemBuilder: (BuildContext context, int index) => BlocConverter<
-              ConversationListCubit, List<Conversation>, Conversation>(
+              ConversationListCubit,
+              List<ConversationItemsResult>,
+              ConversationItemsResult>(
             converter: (state) => state[index],
-            builder: (context, message) =>
-                BlocConverter<ConversationCubit, Conversation, bool>(
-              converter: (state) => message == state,
+            builder: (context, conversation) =>
+                BlocConverter<ConversationCubit, ConversationItemsResult, bool>(
+              converter: (state) =>
+                  conversation?.conversationId == state?.conversationId,
               builder: (context, selected) => _Item(
                 selected: selected,
-                avatars: message.avatars,
-                name: message.name,
-                dateTime: message.dateTime,
-                messageStatus: message.messageStatus,
-                message: message.message,
-                count: message.count,
-                unread: message.unread,
+                avatars: [conversation.avatarUrl],
+                name: conversation.name,
+                // dateTime: conversation.dateTime,
+                dateTime: DateTime.now(),
+                messageStatus: conversation.messageStatus,
+                message: conversation.lastReadMessageId,
+                count: conversation.unseenMessageCount,
+                unread: true,
                 onTap: () {
-                  BlocProvider.of<ConversationCubit>(context).emit(message);
+                  BlocProvider.of<ConversationCubit>(context)
+                      .emit(conversation);
                   ResponsiveNavigatorCubit.of(context)
                       .pushPage(ResponsiveNavigatorCubit.chatPage);
                 },
@@ -231,12 +237,13 @@ class _Item extends StatelessWidget {
                               Expanded(
                                 child: _MessagePreview(
                                   messageColor: messageColor,
-                                  messageStatus: messageStatus,
-                                  message: message,
+                                  messageStatus:
+                                      messageStatus ?? 'messageStatus',
+                                  message: message ?? 'message',
                                 ),
                               ),
                               UnreadText(
-                                count: count,
+                                count: count ?? 0,
                                 backgroundColor: unread
                                     ? BrightnessData.dynamicColor(
                                         context,

@@ -1,7 +1,7 @@
 part of 'message_bloc.dart';
 
 class MessageState extends Equatable {
-  const MessageState( {
+  const MessageState({
     this.messages,
     this.noMoreData = false,
     this.conversation,
@@ -17,7 +17,7 @@ class MessageState extends Equatable {
   MessageState copyWith({
     final List<Message> messages,
     final bool noMoreData,
-    final Conversation conversation,
+    final ConversationItemsResult conversation,
   }) {
     return MessageState(
       messages: messages ?? this.messages,

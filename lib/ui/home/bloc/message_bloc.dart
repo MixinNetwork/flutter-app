@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 
 part 'message_state.dart';
 
@@ -42,7 +42,7 @@ class Message extends Equatable {
   final String message;
   final bool unread;
   final DateTime createdAt;
-  final Conversation conversation;
+  final ConversationItemsResult conversation;
   final MessageStatus status;
 
   @override
@@ -123,14 +123,15 @@ class _LoadMoreMessageCubit extends Cubit<List<Message>> {
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
     with SubscribeMixin {
-  MessageBloc([Conversation conversation]) : super(const MessageState()) {
+  MessageBloc([ConversationItemsResult conversation])
+      : super(const MessageState()) {
     setConversation(conversation);
   }
 
-  Conversation conversation;
+  ConversationItemsResult conversation;
   _LoadMoreMessageCubit loadMoreMessageCubit;
 
-  void setConversation(Conversation conversation) {
+  void setConversation(ConversationItemsResult conversation) {
     this.conversation = conversation;
     setupLoadMore();
     if (conversation != null) firstLoad();

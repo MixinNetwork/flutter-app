@@ -10967,4 +10967,117 @@ class ConversationItemsResult {
     this.mentionCount,
     this.mentions,
   });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      conversationId.hashCode,
+      $mrjc(
+          groupIconUrl.hashCode,
+          $mrjc(
+              category.hashCode,
+              $mrjc(
+                  groupName.hashCode,
+                  $mrjc(
+                      status.hashCode,
+                      $mrjc(
+                          lastReadMessageId.hashCode,
+                          $mrjc(
+                              unseenMessageCount.hashCode,
+                              $mrjc(
+                                  ownerId.hashCode,
+                                  $mrjc(
+                                      pinTime.hashCode,
+                                      $mrjc(
+                                          muteUntil.hashCode,
+                                          $mrjc(
+                                              avatarUrl.hashCode,
+                                              $mrjc(
+                                                  name.hashCode,
+                                                  $mrjc(
+                                                      ownerVerified.hashCode,
+                                                      $mrjc(
+                                                          ownerIdentityNumber
+                                                              .hashCode,
+                                                          $mrjc(
+                                                              ownerMuteUntil
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  appId
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      content
+                                                                          .hashCode,
+                                                                      $mrjc(
+                                                                          contentType
+                                                                              .hashCode,
+                                                                          $mrjc(
+                                                                              createdAt.hashCode,
+                                                                              $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, mentions.hashCode)))))))))))))))))))))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ConversationItemsResult &&
+          other.conversationId == this.conversationId &&
+          other.groupIconUrl == this.groupIconUrl &&
+          other.category == this.category &&
+          other.groupName == this.groupName &&
+          other.status == this.status &&
+          other.lastReadMessageId == this.lastReadMessageId &&
+          other.unseenMessageCount == this.unseenMessageCount &&
+          other.ownerId == this.ownerId &&
+          other.pinTime == this.pinTime &&
+          other.muteUntil == this.muteUntil &&
+          other.avatarUrl == this.avatarUrl &&
+          other.name == this.name &&
+          other.ownerVerified == this.ownerVerified &&
+          other.ownerIdentityNumber == this.ownerIdentityNumber &&
+          other.ownerMuteUntil == this.ownerMuteUntil &&
+          other.appId == this.appId &&
+          other.content == this.content &&
+          other.contentType == this.contentType &&
+          other.createdAt == this.createdAt &&
+          other.mediaUrl == this.mediaUrl &&
+          other.senderId == this.senderId &&
+          other.actionName == this.actionName &&
+          other.messageStatus == this.messageStatus &&
+          other.senderFullName == this.senderFullName &&
+          other.snapshotType == this.snapshotType &&
+          other.participantFullName == this.participantFullName &&
+          other.participantUserId == this.participantUserId &&
+          other.mentionCount == this.mentionCount &&
+          other.mentions == this.mentions);
+  @override
+  String toString() {
+    return (StringBuffer('ConversationItemsResult(')
+          ..write('conversationId: $conversationId, ')
+          ..write('groupIconUrl: $groupIconUrl, ')
+          ..write('category: $category, ')
+          ..write('groupName: $groupName, ')
+          ..write('status: $status, ')
+          ..write('lastReadMessageId: $lastReadMessageId, ')
+          ..write('unseenMessageCount: $unseenMessageCount, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('pinTime: $pinTime, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('name: $name, ')
+          ..write('ownerVerified: $ownerVerified, ')
+          ..write('ownerIdentityNumber: $ownerIdentityNumber, ')
+          ..write('ownerMuteUntil: $ownerMuteUntil, ')
+          ..write('appId: $appId, ')
+          ..write('content: $content, ')
+          ..write('contentType: $contentType, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('senderId: $senderId, ')
+          ..write('actionName: $actionName, ')
+          ..write('messageStatus: $messageStatus, ')
+          ..write('senderFullName: $senderFullName, ')
+          ..write('snapshotType: $snapshotType, ')
+          ..write('participantFullName: $participantFullName, ')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('mentionCount: $mentionCount, ')
+          ..write('mentions: $mentions')
+          ..write(')'))
+        .toString();
+  }
 }
