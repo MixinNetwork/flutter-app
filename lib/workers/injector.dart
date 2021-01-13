@@ -1,12 +1,11 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constans.dart';
+import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-class BaseWorker {
-  // print(conversationId);
-  BaseWorker(this.selfId, this.database, this.client);
+class Injector {
+  Injector(this.selfId, this.database, this.client);
 
   String selfId;
   Database database;

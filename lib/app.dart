@@ -52,14 +52,13 @@ class App extends StatelessWidget {
           final draftCubit = DraftCubit();
           final responsiveNavigatorCubit = ResponsiveNavigatorCubit();
           final accountServer = AccountServer()
-                ..initServer(
-                  authState.account.userId,
-                  authState.account.sessionId,
-                  authState.account.identityNumber,
-                  authState.privateKey,
-                )
-              // ..start()
-              ;
+            ..initServer(
+              authState.account.userId,
+              authState.account.sessionId,
+              authState.account.identityNumber,
+              authState.privateKey,
+            )
+            ..start();
           return Provider<AccountServer>(
             key: ValueKey(authState?.account?.userId),
             create: (context) => accountServer,

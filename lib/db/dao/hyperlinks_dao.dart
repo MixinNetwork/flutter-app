@@ -9,7 +9,7 @@ class HyperlinksDao extends DatabaseAccessor<MixinDatabase>
   HyperlinksDao(MixinDatabase db) : super(db);
 
   Future<int> insert(Hyperlink hyperlink) =>
-      into(db.hyperlinks).insert(hyperlink);
+      into(db.hyperlinks).insertOnConflictUpdate(hyperlink);
 
   Future deleteHyperlink(Hyperlink hyperlink) =>
       delete(db.hyperlinks).delete(hyperlink);

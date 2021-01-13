@@ -9,6 +9,7 @@ import 'package:flutter_app/db/dao/participants_dao.dart';
 import 'package:flutter_app/db/dao/resend_session_messages_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/db/dao/users_dao.dart';
+import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 // These imports are only needed to open the database
 import 'package:moor/ffi.dart';
@@ -86,9 +87,9 @@ part 'mixin_database.g.dart';
             '''
 })
 class MixinDatabase extends _$MixinDatabase {
-  MixinDatabase(this.identityNumber) : super(_openConnection(identityNumber));
+  MixinDatabase(String identityNumber) : super(_openConnection(identityNumber));
 
-  final String identityNumber;
+  MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
   int get schemaVersion => 1;
@@ -100,4 +101,15 @@ LazyDatabase _openConnection(String identityNumber) {
     final file = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
     return VmDatabase(file);
   });
+}
+
+DatabaseConnection _backgroundOpenConnection() {
+  final database = _openConnection('identityNumber'); // todo identityNumber
+  return DatabaseConnection.fromExecutor(database);
+}
+
+Future<MixinDatabase> getMixinDatabaseConnection(String identityNumber) async {
+  final isolate = await MoorIsolate.spawn(_backgroundOpenConnection);
+  final connection = await isolate.connect(isolateDebugLog: false);
+  return MixinDatabase.connect(connection);
 }

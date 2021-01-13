@@ -14,11 +14,15 @@ class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
   Future deleteFloodMessage(FloodMessage message) =>
       delete(db.floodMessages).delete(message);
 
-  Future<List<FloodMessage>> findFloodMessage() {
+  Stream<List<FloodMessage>> findFloodMessage() {
+    final query = select(db.floodMessages);
+    return query.watch();
+  }
+
+  Future<FloodMessage> findFloodMessageById(String messageId){
     final query = select(db.floodMessages)
-      ..limit(10)
-      ..orderBy([(t) => OrderingTerm.asc(t.createdAt)]);
-    return query.get();
+        ..where((tbl) => tbl.messageId.equals(messageId));
+    return query.getSingle();
   }
 
   Future<int> getFloodMessageCount() {

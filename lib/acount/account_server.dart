@@ -1,10 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter_app/blaze/blaze.dart';
-import 'package:flutter_app/constans.dart';
+import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/workers/work_manager.dart';
+import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class AccountServer {
+  static String sid;
+
   void initServer(
     String userId,
     String sessionId,
@@ -15,7 +19,6 @@ class AccountServer {
     assert(sessionId != null);
     assert(identityNumber != null);
     assert(privateKey != null);
-
     this.userId = userId;
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;
@@ -24,7 +27,6 @@ class AccountServer {
     client = Client();
     client.initMixin(userId, sessionId, privateKey, scp);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
-    workManager = WorkManager(userId, database, client);
   }
 
   String userId;
@@ -35,26 +37,50 @@ class AccountServer {
   Client client;
   Database database;
   Blaze blaze;
-  WorkManager workManager;
 
   void start() {
+    // sendPort?.send('start account');
+    // todo remove, development only
+    if(sid == sessionId){
+      return;
+    }
+    sid = sessionId;
     blaze.connect();
-    // workManager.start();
+    database.floodMessagesDao.findFloodMessage().listen((list) {
+      if (list?.isNotEmpty == true) {
+        for (final message in list) {
+          DecryptMessage(userId, database, client).process(message);
+        }
+      }
+    });
+    database.jobsDao.findAckJobs().listen((jobs) {
+      if (jobs?.isNotEmpty == true) {
+        final ack = jobs.map((e) {
+          final map = jsonDecode(e.blazeMessage);
+          return BlazeAckMessage(
+              messageId: map['message_id'], status: map['status']);
+        }).toList();
+        client.messageApi.acknowledgements(ack).then((value) => {
+          database.jobsDao.deleteJobs(jobs)
+        });
+      }
+    });
+
   }
 
   void sendMessage() {
     assert(database != null);
     assert(blaze != null);
-    assert(workManager != null);
     // todo insert sending message
   }
 
   void stop() {
     blaze.disconnect();
-    // workManager.stop();
+    // todo dispose stream, https://github.com/simolus3/moor/issues/290
+
   }
 
-  void relase() {
-    // todo relase resource
+  void release() {
+    // todo release resource
   }
 }

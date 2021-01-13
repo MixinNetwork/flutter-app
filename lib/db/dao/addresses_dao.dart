@@ -12,7 +12,7 @@ class AddressesDao extends DatabaseAccessor<MixinDatabase>
     return select(db.addresses).get();
   }
 
-  Future<int> insert(Addresse address) => into(db.addresses).insert(address);
+  Future<int> insert(Addresse address) => into(db.addresses).insertOnConflictUpdate(address);
 
   Future deleteAddress(Addresse address) =>
       delete(db.addresses).delete(address);

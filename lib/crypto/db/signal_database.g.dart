@@ -1463,6 +1463,7 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
 
 abstract class _$AppDb extends GeneratedDatabase {
   _$AppDb(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$AppDb.connect(DatabaseConnection c) : super.connect(c);
   SenderKeys _senderKeys;
   SenderKeys get senderKeys => _senderKeys ??= SenderKeys(this);
   Identities _identities;

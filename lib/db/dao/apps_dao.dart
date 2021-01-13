@@ -7,7 +7,7 @@ part 'apps_dao.g.dart';
 class AppsDao extends DatabaseAccessor<MixinDatabase> with _$AppsDaoMixin {
   AppsDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(App app) => into(db.apps).insert(app);
+  Future<int> insert(App app) => into(db.apps).insertOnConflictUpdate(app);
 
   Future deleteApp(App app) => delete(db.apps).delete(app);
 }
