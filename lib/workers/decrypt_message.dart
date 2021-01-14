@@ -78,13 +78,14 @@ class DecryptMessage extends Injector {
         plain = utf8.decode(base64.decode(plainText));
       }
       final message = Message(
-          messageId: data.messageId,
-          conversationId: data.conversationId,
-          userId: data.userId,
-          category: data.category,
-          content: plain,
-          status: data.status,
-          createdAt: DateTime.parse(data.createdAt));
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.userId,
+        category: data.category,
+        content: plain,
+        status: data.status,
+        createdAt: data.createdAt,
+      );
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_IMAGE')) {
     } else if (data.category.endsWith('_VIDEO')) {

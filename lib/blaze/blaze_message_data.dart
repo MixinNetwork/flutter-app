@@ -4,10 +4,18 @@ part 'blaze_message_data.g.dart';
 
 @JsonSerializable()
 class BlazeMessageData {
-
-  BlazeMessageData(this.conversationId, this.userId, this.messageId,
-      this.category, this.data, this.status, this.createdAt,
-      this.updatedAt, this.source, this.representativeId, this.quoteMessageId,
+  BlazeMessageData(
+      this.conversationId,
+      this.userId,
+      this.messageId,
+      this.category,
+      this.data,
+      this.status,
+      this.createdAt,
+      this.updatedAt,
+      this.source,
+      this.representativeId,
+      this.quoteMessageId,
       this.sessionId);
 
   factory BlazeMessageData.fromJson(Map<String, dynamic> json) =>
@@ -26,9 +34,9 @@ class BlazeMessageData {
   @JsonKey(name: 'status', nullable: false)
   String status;
   @JsonKey(name: 'created_at', nullable: false)
-  String createdAt;
+  DateTime createdAt;
   @JsonKey(name: 'updated_at', nullable: false)
-  String updatedAt;
+  DateTime updatedAt;
   @JsonKey(name: 'source', nullable: false)
   String source;
   @JsonKey(name: 'representative_id')
@@ -39,5 +47,4 @@ class BlazeMessageData {
   String sessionId;
 
   Map<String, dynamic> toJson() => _$BlazeMessageDataToJson(this);
-
 }
