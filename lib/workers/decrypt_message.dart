@@ -63,8 +63,7 @@ class DecryptMessage extends Injector {
 
   void processRecallMessage(data) {}
 
-  void processDecryptSuccess(
-      BlazeMessageData data, String plainText) async {
+  void processDecryptSuccess(BlazeMessageData data, String plainText) async {
     // todo
     // ignore: unused_local_variable
     final user = await syncUser(data.userId);
@@ -85,7 +84,7 @@ class DecryptMessage extends Injector {
           category: data.category,
           content: plain,
           status: data.status,
-          createdAt: data.createdAt);
+          createdAt: DateTime.parse(data.createdAt));
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_IMAGE')) {
     } else if (data.category.endsWith('_VIDEO')) {
@@ -111,7 +110,7 @@ class DecryptMessage extends Injector {
         action: acknowledgeMessageReceipts,
         priority: 5,
         blazeMessage: jsonEncode(blazeMessage),
-        createdAt: DateTime.now().toIso8601String(),
+        createdAt: DateTime.now(),
         runCount: 0));
   }
 }

@@ -13,7 +13,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
   final String assetId;
   final String publicKey;
   final String label;
-  final String updatedAt;
+  final DateTime updatedAt;
   final String reserve;
   final String fee;
   final String accountName;
@@ -35,6 +35,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Addresse(
       addressId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}address_id']),
@@ -45,7 +46,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           .mapFromDatabaseResponse(data['${effectivePrefix}public_key']),
       label:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}label']),
-      updatedAt: stringType
+      updatedAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
       reserve:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}reserve']),
@@ -76,7 +77,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       map['label'] = Variable<String>(label);
     }
     if (!nullToAbsent || updatedAt != null) {
-      map['updated_at'] = Variable<String>(updatedAt);
+      map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     if (!nullToAbsent || reserve != null) {
       map['reserve'] = Variable<String>(reserve);
@@ -136,7 +137,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       assetId: serializer.fromJson<String>(json['asset_id']),
       publicKey: serializer.fromJson<String>(json['public_key']),
       label: serializer.fromJson<String>(json['label']),
-      updatedAt: serializer.fromJson<String>(json['updated_at']),
+      updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
       reserve: serializer.fromJson<String>(json['reserve']),
       fee: serializer.fromJson<String>(json['fee']),
       accountName: serializer.fromJson<String>(json['account_name']),
@@ -153,7 +154,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       'asset_id': serializer.toJson<String>(assetId),
       'public_key': serializer.toJson<String>(publicKey),
       'label': serializer.toJson<String>(label),
-      'updated_at': serializer.toJson<String>(updatedAt),
+      'updated_at': serializer.toJson<DateTime>(updatedAt),
       'reserve': serializer.toJson<String>(reserve),
       'fee': serializer.toJson<String>(fee),
       'account_name': serializer.toJson<String>(accountName),
@@ -168,7 +169,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           String assetId,
           String publicKey,
           String label,
-          String updatedAt,
+          DateTime updatedAt,
           String reserve,
           String fee,
           String accountName,
@@ -249,7 +250,7 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
   final Value<String> assetId;
   final Value<String> publicKey;
   final Value<String> label;
-  final Value<String> updatedAt;
+  final Value<DateTime> updatedAt;
   final Value<String> reserve;
   final Value<String> fee;
   final Value<String> accountName;
@@ -274,7 +275,7 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
     @required String assetId,
     this.publicKey = const Value.absent(),
     this.label = const Value.absent(),
-    @required String updatedAt,
+    @required DateTime updatedAt,
     @required String reserve,
     @required String fee,
     this.accountName = const Value.absent(),
@@ -292,7 +293,7 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
     Expression<String> assetId,
     Expression<String> publicKey,
     Expression<String> label,
-    Expression<String> updatedAt,
+    Expression<DateTime> updatedAt,
     Expression<String> reserve,
     Expression<String> fee,
     Expression<String> accountName,
@@ -320,7 +321,7 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
       Value<String> assetId,
       Value<String> publicKey,
       Value<String> label,
-      Value<String> updatedAt,
+      Value<DateTime> updatedAt,
       Value<String> reserve,
       Value<String> fee,
       Value<String> accountName,
@@ -360,7 +361,7 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
       map['label'] = Variable<String>(label.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<String>(updatedAt.value);
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (reserve.present) {
       map['reserve'] = Variable<String>(reserve.value);
@@ -444,10 +445,10 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   }
 
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  GeneratedTextColumn _updatedAt;
-  GeneratedTextColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
-  GeneratedTextColumn _constructUpdatedAt() {
-    return GeneratedTextColumn('updated_at', $tableName, false,
+  GeneratedDateTimeColumn _updatedAt;
+  GeneratedDateTimeColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
+  GeneratedDateTimeColumn _constructUpdatedAt() {
+    return GeneratedDateTimeColumn('updated_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -1876,7 +1877,7 @@ class CircleConversation extends DataClass
   final String conversationId;
   final String circleId;
   final String userId;
-  final String createdAt;
+  final DateTime createdAt;
   final String pinTime;
   CircleConversation(
       {@required this.conversationId,
@@ -1889,6 +1890,7 @@ class CircleConversation extends DataClass
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return CircleConversation(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
@@ -1896,7 +1898,7 @@ class CircleConversation extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}circle_id']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       pinTime: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}pin_time']),
@@ -1915,7 +1917,7 @@ class CircleConversation extends DataClass
       map['user_id'] = Variable<String>(userId);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || pinTime != null) {
       map['pin_time'] = Variable<String>(pinTime);
@@ -1949,7 +1951,7 @@ class CircleConversation extends DataClass
       conversationId: serializer.fromJson<String>(json['conversation_id']),
       circleId: serializer.fromJson<String>(json['circle_id']),
       userId: serializer.fromJson<String>(json['user_id']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
       pinTime: serializer.fromJson<String>(json['pin_time']),
     );
   }
@@ -1960,7 +1962,7 @@ class CircleConversation extends DataClass
       'conversation_id': serializer.toJson<String>(conversationId),
       'circle_id': serializer.toJson<String>(circleId),
       'user_id': serializer.toJson<String>(userId),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
       'pin_time': serializer.toJson<String>(pinTime),
     };
   }
@@ -1969,7 +1971,7 @@ class CircleConversation extends DataClass
           {String conversationId,
           String circleId,
           String userId,
-          String createdAt,
+          DateTime createdAt,
           String pinTime}) =>
       CircleConversation(
         conversationId: conversationId ?? this.conversationId,
@@ -2012,7 +2014,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
   final Value<String> conversationId;
   final Value<String> circleId;
   final Value<String> userId;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   final Value<String> pinTime;
   const CircleConversationsCompanion({
     this.conversationId = const Value.absent(),
@@ -2025,7 +2027,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
     @required String conversationId,
     @required String circleId,
     this.userId = const Value.absent(),
-    @required String createdAt,
+    @required DateTime createdAt,
     this.pinTime = const Value.absent(),
   })  : conversationId = Value(conversationId),
         circleId = Value(circleId),
@@ -2034,7 +2036,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
     Expression<String> conversationId,
     Expression<String> circleId,
     Expression<String> userId,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
     Expression<String> pinTime,
   }) {
     return RawValuesInsertable({
@@ -2050,7 +2052,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
       {Value<String> conversationId,
       Value<String> circleId,
       Value<String> userId,
-      Value<String> createdAt,
+      Value<DateTime> createdAt,
       Value<String> pinTime}) {
     return CircleConversationsCompanion(
       conversationId: conversationId ?? this.conversationId,
@@ -2074,7 +2076,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (pinTime.present) {
       map['pin_time'] = Variable<String>(pinTime.value);
@@ -2127,10 +2129,10 @@ class CircleConversations extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -2210,8 +2212,8 @@ class CircleConversations extends Table
 class Circle extends DataClass implements Insertable<Circle> {
   final String circleId;
   final String name;
-  final String createdAt;
-  final String orderedAt;
+  final DateTime createdAt;
+  final DateTime orderedAt;
   Circle(
       {@required this.circleId,
       @required this.name,
@@ -2221,13 +2223,14 @@ class Circle extends DataClass implements Insertable<Circle> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Circle(
       circleId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}circle_id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      orderedAt: stringType
+      orderedAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at']),
     );
   }
@@ -2241,10 +2244,10 @@ class Circle extends DataClass implements Insertable<Circle> {
       map['name'] = Variable<String>(name);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || orderedAt != null) {
-      map['ordered_at'] = Variable<String>(orderedAt);
+      map['ordered_at'] = Variable<DateTime>(orderedAt);
     }
     return map;
   }
@@ -2270,8 +2273,8 @@ class Circle extends DataClass implements Insertable<Circle> {
     return Circle(
       circleId: serializer.fromJson<String>(json['circle_id']),
       name: serializer.fromJson<String>(json['name']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
-      orderedAt: serializer.fromJson<String>(json['ordered_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      orderedAt: serializer.fromJson<DateTime>(json['ordered_at']),
     );
   }
   @override
@@ -2280,13 +2283,16 @@ class Circle extends DataClass implements Insertable<Circle> {
     return <String, dynamic>{
       'circle_id': serializer.toJson<String>(circleId),
       'name': serializer.toJson<String>(name),
-      'created_at': serializer.toJson<String>(createdAt),
-      'ordered_at': serializer.toJson<String>(orderedAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'ordered_at': serializer.toJson<DateTime>(orderedAt),
     };
   }
 
   Circle copyWith(
-          {String circleId, String name, String createdAt, String orderedAt}) =>
+          {String circleId,
+          String name,
+          DateTime createdAt,
+          DateTime orderedAt}) =>
       Circle(
         circleId: circleId ?? this.circleId,
         name: name ?? this.name,
@@ -2320,8 +2326,8 @@ class Circle extends DataClass implements Insertable<Circle> {
 class CirclesCompanion extends UpdateCompanion<Circle> {
   final Value<String> circleId;
   final Value<String> name;
-  final Value<String> createdAt;
-  final Value<String> orderedAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> orderedAt;
   const CirclesCompanion({
     this.circleId = const Value.absent(),
     this.name = const Value.absent(),
@@ -2331,7 +2337,7 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
   CirclesCompanion.insert({
     @required String circleId,
     @required String name,
-    @required String createdAt,
+    @required DateTime createdAt,
     this.orderedAt = const Value.absent(),
   })  : circleId = Value(circleId),
         name = Value(name),
@@ -2339,8 +2345,8 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
   static Insertable<Circle> custom({
     Expression<String> circleId,
     Expression<String> name,
-    Expression<String> createdAt,
-    Expression<String> orderedAt,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> orderedAt,
   }) {
     return RawValuesInsertable({
       if (circleId != null) 'circle_id': circleId,
@@ -2353,8 +2359,8 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
   CirclesCompanion copyWith(
       {Value<String> circleId,
       Value<String> name,
-      Value<String> createdAt,
-      Value<String> orderedAt}) {
+      Value<DateTime> createdAt,
+      Value<DateTime> orderedAt}) {
     return CirclesCompanion(
       circleId: circleId ?? this.circleId,
       name: name ?? this.name,
@@ -2373,10 +2379,10 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
       map['name'] = Variable<String>(name.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (orderedAt.present) {
-      map['ordered_at'] = Variable<String>(orderedAt.value);
+      map['ordered_at'] = Variable<DateTime>(orderedAt.value);
     }
     return map;
   }
@@ -2414,18 +2420,18 @@ class Circles extends Table with TableInfo<Circles, Circle> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _orderedAtMeta = const VerificationMeta('orderedAt');
-  GeneratedTextColumn _orderedAt;
-  GeneratedTextColumn get orderedAt => _orderedAt ??= _constructOrderedAt();
-  GeneratedTextColumn _constructOrderedAt() {
-    return GeneratedTextColumn('ordered_at', $tableName, true,
+  GeneratedDateTimeColumn _orderedAt;
+  GeneratedDateTimeColumn get orderedAt => _orderedAt ??= _constructOrderedAt();
+  GeneratedDateTimeColumn _constructOrderedAt() {
+    return GeneratedDateTimeColumn('ordered_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -2495,7 +2501,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   final String announcement;
   final String codeUrl;
   final String payType;
-  final String createdAt;
+  final DateTime createdAt;
   final String pinTime;
   final String lastMessageId;
   final String lastReadMessageId;
@@ -2524,6 +2530,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final intType = db.typeSystem.forDartType<int>();
     return Conversation(
       conversationId: stringType
@@ -2541,7 +2548,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           .mapFromDatabaseResponse(data['${effectivePrefix}code_url']),
       payType: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}pay_type']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       pinTime: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}pin_time']),
@@ -2586,7 +2593,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['pay_type'] = Variable<String>(payType);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || pinTime != null) {
       map['pin_time'] = Variable<String>(pinTime);
@@ -2673,7 +2680,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       announcement: serializer.fromJson<String>(json['announcement']),
       codeUrl: serializer.fromJson<String>(json['code_url']),
       payType: serializer.fromJson<String>(json['pay_type']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
       pinTime: serializer.fromJson<String>(json['pin_time']),
       lastMessageId: serializer.fromJson<String>(json['last_message_id']),
       lastReadMessageId:
@@ -2697,7 +2704,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       'announcement': serializer.toJson<String>(announcement),
       'code_url': serializer.toJson<String>(codeUrl),
       'pay_type': serializer.toJson<String>(payType),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
       'pin_time': serializer.toJson<String>(pinTime),
       'last_message_id': serializer.toJson<String>(lastMessageId),
       'last_read_message_id': serializer.toJson<String>(lastReadMessageId),
@@ -2717,7 +2724,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           String announcement,
           String codeUrl,
           String payType,
-          String createdAt,
+          DateTime createdAt,
           String pinTime,
           String lastMessageId,
           String lastReadMessageId,
@@ -2831,7 +2838,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   final Value<String> announcement;
   final Value<String> codeUrl;
   final Value<String> payType;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   final Value<String> pinTime;
   final Value<String> lastMessageId;
   final Value<String> lastReadMessageId;
@@ -2866,7 +2873,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     this.announcement = const Value.absent(),
     this.codeUrl = const Value.absent(),
     this.payType = const Value.absent(),
-    @required String createdAt,
+    @required DateTime createdAt,
     this.pinTime = const Value.absent(),
     this.lastMessageId = const Value.absent(),
     this.lastReadMessageId = const Value.absent(),
@@ -2886,7 +2893,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     Expression<String> announcement,
     Expression<String> codeUrl,
     Expression<String> payType,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
     Expression<String> pinTime,
     Expression<String> lastMessageId,
     Expression<String> lastReadMessageId,
@@ -2925,7 +2932,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       Value<String> announcement,
       Value<String> codeUrl,
       Value<String> payType,
-      Value<String> createdAt,
+      Value<DateTime> createdAt,
       Value<String> pinTime,
       Value<String> lastMessageId,
       Value<String> lastReadMessageId,
@@ -2981,7 +2988,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['pay_type'] = Variable<String>(payType.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (pinTime.present) {
       map['pin_time'] = Variable<String>(pinTime.value);
@@ -3104,10 +3111,10 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -3308,7 +3315,7 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
 class FloodMessage extends DataClass implements Insertable<FloodMessage> {
   final String messageId;
   final String data;
-  final String createdAt;
+  final DateTime createdAt;
   FloodMessage(
       {@required this.messageId,
       @required this.data,
@@ -3317,11 +3324,12 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return FloodMessage(
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
       data: stringType.mapFromDatabaseResponse(data['${effectivePrefix}data']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
   }
@@ -3335,7 +3343,7 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
       map['data'] = Variable<String>(data);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     return map;
   }
@@ -3358,7 +3366,7 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
     return FloodMessage(
       messageId: serializer.fromJson<String>(json['message_id']),
       data: serializer.fromJson<String>(json['data']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
@@ -3367,11 +3375,11 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
     return <String, dynamic>{
       'message_id': serializer.toJson<String>(messageId),
       'data': serializer.toJson<String>(data),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  FloodMessage copyWith({String messageId, String data, String createdAt}) =>
+  FloodMessage copyWith({String messageId, String data, DateTime createdAt}) =>
       FloodMessage(
         messageId: messageId ?? this.messageId,
         data: data ?? this.data,
@@ -3402,7 +3410,7 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
 class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
   final Value<String> messageId;
   final Value<String> data;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   const FloodMessagesCompanion({
     this.messageId = const Value.absent(),
     this.data = const Value.absent(),
@@ -3411,14 +3419,14 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
   FloodMessagesCompanion.insert({
     @required String messageId,
     @required String data,
-    @required String createdAt,
+    @required DateTime createdAt,
   })  : messageId = Value(messageId),
         data = Value(data),
         createdAt = Value(createdAt);
   static Insertable<FloodMessage> custom({
     Expression<String> messageId,
     Expression<String> data,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
   }) {
     return RawValuesInsertable({
       if (messageId != null) 'message_id': messageId,
@@ -3428,7 +3436,9 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
   }
 
   FloodMessagesCompanion copyWith(
-      {Value<String> messageId, Value<String> data, Value<String> createdAt}) {
+      {Value<String> messageId,
+      Value<String> data,
+      Value<DateTime> createdAt}) {
     return FloodMessagesCompanion(
       messageId: messageId ?? this.messageId,
       data: data ?? this.data,
@@ -3446,7 +3456,7 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
       map['data'] = Variable<String>(data.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     return map;
   }
@@ -3483,10 +3493,10 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -3879,7 +3889,7 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
 class Job extends DataClass implements Insertable<Job> {
   final String jobId;
   final String action;
-  final String createdAt;
+  final DateTime createdAt;
   final int orderId;
   final int priority;
   final String userId;
@@ -3902,13 +3912,14 @@ class Job extends DataClass implements Insertable<Job> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final intType = db.typeSystem.forDartType<int>();
     return Job(
       jobId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}job_id']),
       action:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}action']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       orderId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}order_id']),
@@ -3936,7 +3947,7 @@ class Job extends DataClass implements Insertable<Job> {
       map['action'] = Variable<String>(action);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || orderId != null) {
       map['order_id'] = Variable<int>(orderId);
@@ -4000,7 +4011,7 @@ class Job extends DataClass implements Insertable<Job> {
     return Job(
       jobId: serializer.fromJson<String>(json['job_id']),
       action: serializer.fromJson<String>(json['action']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
       orderId: serializer.fromJson<int>(json['order_id']),
       priority: serializer.fromJson<int>(json['priority']),
       userId: serializer.fromJson<String>(json['user_id']),
@@ -4016,7 +4027,7 @@ class Job extends DataClass implements Insertable<Job> {
     return <String, dynamic>{
       'job_id': serializer.toJson<String>(jobId),
       'action': serializer.toJson<String>(action),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
       'order_id': serializer.toJson<int>(orderId),
       'priority': serializer.toJson<int>(priority),
       'user_id': serializer.toJson<String>(userId),
@@ -4030,7 +4041,7 @@ class Job extends DataClass implements Insertable<Job> {
   Job copyWith(
           {String jobId,
           String action,
-          String createdAt,
+          DateTime createdAt,
           int orderId,
           int priority,
           String userId,
@@ -4105,7 +4116,7 @@ class Job extends DataClass implements Insertable<Job> {
 class JobsCompanion extends UpdateCompanion<Job> {
   final Value<String> jobId;
   final Value<String> action;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   final Value<int> orderId;
   final Value<int> priority;
   final Value<String> userId;
@@ -4128,7 +4139,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
   JobsCompanion.insert({
     @required String jobId,
     @required String action,
-    @required String createdAt,
+    @required DateTime createdAt,
     this.orderId = const Value.absent(),
     @required int priority,
     this.userId = const Value.absent(),
@@ -4144,7 +4155,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
   static Insertable<Job> custom({
     Expression<String> jobId,
     Expression<String> action,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
     Expression<int> orderId,
     Expression<int> priority,
     Expression<String> userId,
@@ -4170,7 +4181,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
   JobsCompanion copyWith(
       {Value<String> jobId,
       Value<String> action,
-      Value<String> createdAt,
+      Value<DateTime> createdAt,
       Value<int> orderId,
       Value<int> priority,
       Value<String> userId,
@@ -4202,7 +4213,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
       map['action'] = Variable<String>(action.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (orderId.present) {
       map['order_id'] = Variable<int>(orderId.value);
@@ -4267,10 +4278,10 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -4751,7 +4762,7 @@ class Message extends DataClass implements Insertable<Message> {
   final String mediaDigest;
   final String mediaStatus;
   final String status;
-  final String createdAt;
+  final DateTime createdAt;
   final String action;
   final String participantId;
   final String snapshotId;
@@ -4800,6 +4811,7 @@ class Message extends DataClass implements Insertable<Message> {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Message(
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
@@ -4835,7 +4847,7 @@ class Message extends DataClass implements Insertable<Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}media_status']),
       status:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       action:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}action']),
@@ -4917,7 +4929,7 @@ class Message extends DataClass implements Insertable<Message> {
       map['status'] = Variable<String>(status);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || action != null) {
       map['action'] = Variable<String>(action);
@@ -5069,7 +5081,7 @@ class Message extends DataClass implements Insertable<Message> {
       mediaDigest: serializer.fromJson<String>(json['media_digest']),
       mediaStatus: serializer.fromJson<String>(json['media_status']),
       status: serializer.fromJson<String>(json['status']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
       action: serializer.fromJson<String>(json['action']),
       participantId: serializer.fromJson<String>(json['participant_id']),
       snapshotId: serializer.fromJson<String>(json['snapshot_id']),
@@ -5105,7 +5117,7 @@ class Message extends DataClass implements Insertable<Message> {
       'media_digest': serializer.toJson<String>(mediaDigest),
       'media_status': serializer.toJson<String>(mediaStatus),
       'status': serializer.toJson<String>(status),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
       'action': serializer.toJson<String>(action),
       'participant_id': serializer.toJson<String>(participantId),
       'snapshot_id': serializer.toJson<String>(snapshotId),
@@ -5139,7 +5151,7 @@ class Message extends DataClass implements Insertable<Message> {
           String mediaDigest,
           String mediaStatus,
           String status,
-          String createdAt,
+          DateTime createdAt,
           String action,
           String participantId,
           String snapshotId,
@@ -5319,7 +5331,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<String> mediaDigest;
   final Value<String> mediaStatus;
   final Value<String> status;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   final Value<String> action;
   final Value<String> participantId;
   final Value<String> snapshotId;
@@ -5382,7 +5394,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     this.mediaDigest = const Value.absent(),
     this.mediaStatus = const Value.absent(),
     @required String status,
-    @required String createdAt,
+    @required DateTime createdAt,
     this.action = const Value.absent(),
     this.participantId = const Value.absent(),
     this.snapshotId = const Value.absent(),
@@ -5419,7 +5431,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     Expression<String> mediaDigest,
     Expression<String> mediaStatus,
     Expression<String> status,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
     Expression<String> action,
     Expression<String> participantId,
     Expression<String> snapshotId,
@@ -5485,7 +5497,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       Value<String> mediaDigest,
       Value<String> mediaStatus,
       Value<String> status,
-      Value<String> createdAt,
+      Value<DateTime> createdAt,
       Value<String> action,
       Value<String> participantId,
       Value<String> snapshotId,
@@ -5587,7 +5599,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       map['status'] = Variable<String>(status.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (action.present) {
       map['action'] = Variable<String>(action.value);
@@ -5819,10 +5831,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -6520,7 +6532,7 @@ class ParticipantSessionData extends DataClass
   final String userId;
   final String sessionId;
   final int sentToServer;
-  final String createdAt;
+  final DateTime createdAt;
   ParticipantSessionData(
       {@required this.conversationId,
       @required this.userId,
@@ -6533,6 +6545,7 @@ class ParticipantSessionData extends DataClass
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return ParticipantSessionData(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
@@ -6542,7 +6555,7 @@ class ParticipantSessionData extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}session_id']),
       sentToServer: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}sent_to_server']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
   }
@@ -6562,7 +6575,7 @@ class ParticipantSessionData extends DataClass
       map['sent_to_server'] = Variable<int>(sentToServer);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     return map;
   }
@@ -6594,7 +6607,7 @@ class ParticipantSessionData extends DataClass
       userId: serializer.fromJson<String>(json['user_id']),
       sessionId: serializer.fromJson<String>(json['session_id']),
       sentToServer: serializer.fromJson<int>(json['sent_to_server']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
@@ -6605,7 +6618,7 @@ class ParticipantSessionData extends DataClass
       'user_id': serializer.toJson<String>(userId),
       'session_id': serializer.toJson<String>(sessionId),
       'sent_to_server': serializer.toJson<int>(sentToServer),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -6614,7 +6627,7 @@ class ParticipantSessionData extends DataClass
           String userId,
           String sessionId,
           int sentToServer,
-          String createdAt}) =>
+          DateTime createdAt}) =>
       ParticipantSessionData(
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
@@ -6658,7 +6671,7 @@ class ParticipantSessionCompanion
   final Value<String> userId;
   final Value<String> sessionId;
   final Value<int> sentToServer;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   const ParticipantSessionCompanion({
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
@@ -6680,7 +6693,7 @@ class ParticipantSessionCompanion
     Expression<String> userId,
     Expression<String> sessionId,
     Expression<int> sentToServer,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -6696,7 +6709,7 @@ class ParticipantSessionCompanion
       Value<String> userId,
       Value<String> sessionId,
       Value<int> sentToServer,
-      Value<String> createdAt}) {
+      Value<DateTime> createdAt}) {
     return ParticipantSessionCompanion(
       conversationId: conversationId ?? this.conversationId,
       userId: userId ?? this.userId,
@@ -6722,7 +6735,7 @@ class ParticipantSessionCompanion
       map['sent_to_server'] = Variable<int>(sentToServer.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     return map;
   }
@@ -6782,10 +6795,10 @@ class ParticipantSession extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, true,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -6861,7 +6874,7 @@ class Participant extends DataClass implements Insertable<Participant> {
   final String conversationId;
   final String userId;
   final String role;
-  final String createdAt;
+  final DateTime createdAt;
   Participant(
       {@required this.conversationId,
       @required this.userId,
@@ -6871,13 +6884,14 @@ class Participant extends DataClass implements Insertable<Participant> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Participant(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       role: stringType.mapFromDatabaseResponse(data['${effectivePrefix}role']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
   }
@@ -6894,7 +6908,7 @@ class Participant extends DataClass implements Insertable<Participant> {
       map['role'] = Variable<String>(role);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     return map;
   }
@@ -6920,7 +6934,7 @@ class Participant extends DataClass implements Insertable<Participant> {
       conversationId: serializer.fromJson<String>(json['conversation_id']),
       userId: serializer.fromJson<String>(json['user_id']),
       role: serializer.fromJson<String>(json['role']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
@@ -6930,7 +6944,7 @@ class Participant extends DataClass implements Insertable<Participant> {
       'conversation_id': serializer.toJson<String>(conversationId),
       'user_id': serializer.toJson<String>(userId),
       'role': serializer.toJson<String>(role),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -6938,7 +6952,7 @@ class Participant extends DataClass implements Insertable<Participant> {
           {String conversationId,
           String userId,
           String role,
-          String createdAt}) =>
+          DateTime createdAt}) =>
       Participant(
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
@@ -6973,7 +6987,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   final Value<String> conversationId;
   final Value<String> userId;
   final Value<String> role;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   const ParticipantsCompanion({
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
@@ -6984,7 +6998,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     @required String conversationId,
     @required String userId,
     @required String role,
-    @required String createdAt,
+    @required DateTime createdAt,
   })  : conversationId = Value(conversationId),
         userId = Value(userId),
         role = Value(role),
@@ -6993,7 +7007,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     Expression<String> conversationId,
     Expression<String> userId,
     Expression<String> role,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -7007,7 +7021,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       {Value<String> conversationId,
       Value<String> userId,
       Value<String> role,
-      Value<String> createdAt}) {
+      Value<DateTime> createdAt}) {
     return ParticipantsCompanion(
       conversationId: conversationId ?? this.conversationId,
       userId: userId ?? this.userId,
@@ -7029,7 +7043,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       map['role'] = Variable<String>(role.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     return map;
   }
@@ -7077,10 +7091,10 @@ class Participants extends Table with TableInfo<Participants, Participant> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -7155,7 +7169,7 @@ class RatchetSenderKey extends DataClass
   final String senderId;
   final String status;
   final String messageId;
-  final String createdAt;
+  final DateTime createdAt;
   RatchetSenderKey(
       {@required this.groupId,
       @required this.senderId,
@@ -7167,6 +7181,7 @@ class RatchetSenderKey extends DataClass
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return RatchetSenderKey(
       groupId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}group_id']),
@@ -7176,7 +7191,7 @@ class RatchetSenderKey extends DataClass
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
   }
@@ -7196,7 +7211,7 @@ class RatchetSenderKey extends DataClass
       map['message_id'] = Variable<String>(messageId);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     return map;
   }
@@ -7228,7 +7243,7 @@ class RatchetSenderKey extends DataClass
       senderId: serializer.fromJson<String>(json['sender_id']),
       status: serializer.fromJson<String>(json['status']),
       messageId: serializer.fromJson<String>(json['message_id']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
@@ -7239,7 +7254,7 @@ class RatchetSenderKey extends DataClass
       'sender_id': serializer.toJson<String>(senderId),
       'status': serializer.toJson<String>(status),
       'message_id': serializer.toJson<String>(messageId),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -7248,7 +7263,7 @@ class RatchetSenderKey extends DataClass
           String senderId,
           String status,
           String messageId,
-          String createdAt}) =>
+          DateTime createdAt}) =>
       RatchetSenderKey(
         groupId: groupId ?? this.groupId,
         senderId: senderId ?? this.senderId,
@@ -7291,7 +7306,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
   final Value<String> senderId;
   final Value<String> status;
   final Value<String> messageId;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   const RatchetSenderKeysCompanion({
     this.groupId = const Value.absent(),
     this.senderId = const Value.absent(),
@@ -7304,7 +7319,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     @required String senderId,
     @required String status,
     this.messageId = const Value.absent(),
-    @required String createdAt,
+    @required DateTime createdAt,
   })  : groupId = Value(groupId),
         senderId = Value(senderId),
         status = Value(status),
@@ -7314,7 +7329,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     Expression<String> senderId,
     Expression<String> status,
     Expression<String> messageId,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
   }) {
     return RawValuesInsertable({
       if (groupId != null) 'group_id': groupId,
@@ -7330,7 +7345,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
       Value<String> senderId,
       Value<String> status,
       Value<String> messageId,
-      Value<String> createdAt}) {
+      Value<DateTime> createdAt}) {
     return RatchetSenderKeysCompanion(
       groupId: groupId ?? this.groupId,
       senderId: senderId ?? this.senderId,
@@ -7356,7 +7371,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
       map['message_id'] = Variable<String>(messageId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     return map;
   }
@@ -7412,10 +7427,10 @@ class RatchetSenderKeys extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -7490,7 +7505,7 @@ class ResendSessionMessage extends DataClass
   final String userId;
   final String sessionId;
   final int status;
-  final String createdAt;
+  final DateTime createdAt;
   ResendSessionMessage(
       {@required this.messageId,
       @required this.userId,
@@ -7503,6 +7518,7 @@ class ResendSessionMessage extends DataClass
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return ResendSessionMessage(
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
@@ -7511,7 +7527,7 @@ class ResendSessionMessage extends DataClass
       sessionId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}session_id']),
       status: intType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
   }
@@ -7531,7 +7547,7 @@ class ResendSessionMessage extends DataClass
       map['status'] = Variable<int>(status);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     return map;
   }
@@ -7562,7 +7578,7 @@ class ResendSessionMessage extends DataClass
       userId: serializer.fromJson<String>(json['user_id']),
       sessionId: serializer.fromJson<String>(json['session_id']),
       status: serializer.fromJson<int>(json['status']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
@@ -7573,7 +7589,7 @@ class ResendSessionMessage extends DataClass
       'user_id': serializer.toJson<String>(userId),
       'session_id': serializer.toJson<String>(sessionId),
       'status': serializer.toJson<int>(status),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -7582,7 +7598,7 @@ class ResendSessionMessage extends DataClass
           String userId,
           String sessionId,
           int status,
-          String createdAt}) =>
+          DateTime createdAt}) =>
       ResendSessionMessage(
         messageId: messageId ?? this.messageId,
         userId: userId ?? this.userId,
@@ -7626,7 +7642,7 @@ class ResendSessionMessagesCompanion
   final Value<String> userId;
   final Value<String> sessionId;
   final Value<int> status;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   const ResendSessionMessagesCompanion({
     this.messageId = const Value.absent(),
     this.userId = const Value.absent(),
@@ -7639,7 +7655,7 @@ class ResendSessionMessagesCompanion
     @required String userId,
     @required String sessionId,
     @required int status,
-    @required String createdAt,
+    @required DateTime createdAt,
   })  : messageId = Value(messageId),
         userId = Value(userId),
         sessionId = Value(sessionId),
@@ -7650,7 +7666,7 @@ class ResendSessionMessagesCompanion
     Expression<String> userId,
     Expression<String> sessionId,
     Expression<int> status,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
   }) {
     return RawValuesInsertable({
       if (messageId != null) 'message_id': messageId,
@@ -7666,7 +7682,7 @@ class ResendSessionMessagesCompanion
       Value<String> userId,
       Value<String> sessionId,
       Value<int> status,
-      Value<String> createdAt}) {
+      Value<DateTime> createdAt}) {
     return ResendSessionMessagesCompanion(
       messageId: messageId ?? this.messageId,
       userId: userId ?? this.userId,
@@ -7692,7 +7708,7 @@ class ResendSessionMessagesCompanion
       map['status'] = Variable<int>(status.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     return map;
   }
@@ -7748,10 +7764,10 @@ class ResendSessionMessages extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -7830,7 +7846,7 @@ class SentSessionSenderKey extends DataClass
   final String sessionId;
   final int sentToServer;
   final int senderKeyId;
-  final String createdAt;
+  final DateTime createdAt;
   SentSessionSenderKey(
       {@required this.conversationId,
       @required this.userId,
@@ -7844,6 +7860,7 @@ class SentSessionSenderKey extends DataClass
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return SentSessionSenderKey(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
@@ -7855,7 +7872,7 @@ class SentSessionSenderKey extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}sent_to_server']),
       senderKeyId: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}sender_key_id']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
   }
@@ -7878,7 +7895,7 @@ class SentSessionSenderKey extends DataClass
       map['sender_key_id'] = Variable<int>(senderKeyId);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     return map;
   }
@@ -7914,7 +7931,7 @@ class SentSessionSenderKey extends DataClass
       sessionId: serializer.fromJson<String>(json['session_id']),
       sentToServer: serializer.fromJson<int>(json['sent_to_server']),
       senderKeyId: serializer.fromJson<int>(json['sender_key_id']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
@@ -7926,7 +7943,7 @@ class SentSessionSenderKey extends DataClass
       'session_id': serializer.toJson<String>(sessionId),
       'sent_to_server': serializer.toJson<int>(sentToServer),
       'sender_key_id': serializer.toJson<int>(senderKeyId),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -7936,7 +7953,7 @@ class SentSessionSenderKey extends DataClass
           String sessionId,
           int sentToServer,
           int senderKeyId,
-          String createdAt}) =>
+          DateTime createdAt}) =>
       SentSessionSenderKey(
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
@@ -7986,7 +8003,7 @@ class SentSessionSenderKeysCompanion
   final Value<String> sessionId;
   final Value<int> sentToServer;
   final Value<int> senderKeyId;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   const SentSessionSenderKeysCompanion({
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
@@ -8012,7 +8029,7 @@ class SentSessionSenderKeysCompanion
     Expression<String> sessionId,
     Expression<int> sentToServer,
     Expression<int> senderKeyId,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -8030,7 +8047,7 @@ class SentSessionSenderKeysCompanion
       Value<String> sessionId,
       Value<int> sentToServer,
       Value<int> senderKeyId,
-      Value<String> createdAt}) {
+      Value<DateTime> createdAt}) {
     return SentSessionSenderKeysCompanion(
       conversationId: conversationId ?? this.conversationId,
       userId: userId ?? this.userId,
@@ -8060,7 +8077,7 @@ class SentSessionSenderKeysCompanion
       map['sender_key_id'] = Variable<int>(senderKeyId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     return map;
   }
@@ -8131,10 +8148,10 @@ class SentSessionSenderKeys extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, true,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -8219,7 +8236,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   final String type;
   final String assetId;
   final String amount;
-  final String createdAt;
+  final DateTime createdAt;
   final String opponentId;
   final String transactionHash;
   final String sender;
@@ -8242,6 +8259,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final intType = db.typeSystem.forDartType<int>();
     return Snapshot(
       snapshotId: stringType
@@ -8251,7 +8269,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_id']),
       amount:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}amount']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       opponentId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}opponent_id']),
@@ -8282,7 +8300,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       map['amount'] = Variable<String>(amount);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || opponentId != null) {
       map['opponent_id'] = Variable<String>(opponentId);
@@ -8345,7 +8363,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       type: serializer.fromJson<String>(json['type']),
       assetId: serializer.fromJson<String>(json['asset_id']),
       amount: serializer.fromJson<String>(json['amount']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
       opponentId: serializer.fromJson<String>(json['opponent_id']),
       transactionHash: serializer.fromJson<String>(json['transaction_hash']),
       sender: serializer.fromJson<String>(json['sender']),
@@ -8362,7 +8380,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       'type': serializer.toJson<String>(type),
       'asset_id': serializer.toJson<String>(assetId),
       'amount': serializer.toJson<String>(amount),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
       'opponent_id': serializer.toJson<String>(opponentId),
       'transaction_hash': serializer.toJson<String>(transactionHash),
       'sender': serializer.toJson<String>(sender),
@@ -8377,7 +8395,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           String type,
           String assetId,
           String amount,
-          String createdAt,
+          DateTime createdAt,
           String opponentId,
           String transactionHash,
           String sender,
@@ -8458,7 +8476,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
   final Value<String> type;
   final Value<String> assetId;
   final Value<String> amount;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   final Value<String> opponentId;
   final Value<String> transactionHash;
   final Value<String> sender;
@@ -8483,7 +8501,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     @required String type,
     @required String assetId,
     @required String amount,
-    @required String createdAt,
+    @required DateTime createdAt,
     this.opponentId = const Value.absent(),
     this.transactionHash = const Value.absent(),
     this.sender = const Value.absent(),
@@ -8500,7 +8518,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     Expression<String> type,
     Expression<String> assetId,
     Expression<String> amount,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
     Expression<String> opponentId,
     Expression<String> transactionHash,
     Expression<String> sender,
@@ -8528,7 +8546,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       Value<String> type,
       Value<String> assetId,
       Value<String> amount,
-      Value<String> createdAt,
+      Value<DateTime> createdAt,
       Value<String> opponentId,
       Value<String> transactionHash,
       Value<String> sender,
@@ -8566,7 +8584,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       map['amount'] = Variable<String>(amount.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (opponentId.present) {
       map['opponent_id'] = Variable<String>(opponentId.value);
@@ -8645,10 +8663,10 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -8817,8 +8835,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
   final String albumId;
   final String name;
   final String iconUrl;
-  final String createdAt;
-  final String updateAt;
+  final DateTime createdAt;
+  final DateTime updateAt;
   final String userId;
   final String category;
   final String description;
@@ -8835,15 +8853,16 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return StickerAlbum(
       albumId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}album_id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       iconUrl: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      updateAt: stringType
+      updateAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}update_at']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
@@ -8866,10 +8885,10 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       map['icon_url'] = Variable<String>(iconUrl);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || updateAt != null) {
-      map['update_at'] = Variable<String>(updateAt);
+      map['update_at'] = Variable<DateTime>(updateAt);
     }
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
@@ -8916,8 +8935,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       albumId: serializer.fromJson<String>(json['album_id']),
       name: serializer.fromJson<String>(json['name']),
       iconUrl: serializer.fromJson<String>(json['icon_url']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
-      updateAt: serializer.fromJson<String>(json['update_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updateAt: serializer.fromJson<DateTime>(json['update_at']),
       userId: serializer.fromJson<String>(json['user_id']),
       category: serializer.fromJson<String>(json['category']),
       description: serializer.fromJson<String>(json['description']),
@@ -8930,8 +8949,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       'album_id': serializer.toJson<String>(albumId),
       'name': serializer.toJson<String>(name),
       'icon_url': serializer.toJson<String>(iconUrl),
-      'created_at': serializer.toJson<String>(createdAt),
-      'update_at': serializer.toJson<String>(updateAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'update_at': serializer.toJson<DateTime>(updateAt),
       'user_id': serializer.toJson<String>(userId),
       'category': serializer.toJson<String>(category),
       'description': serializer.toJson<String>(description),
@@ -8942,8 +8961,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
           {String albumId,
           String name,
           String iconUrl,
-          String createdAt,
-          String updateAt,
+          DateTime createdAt,
+          DateTime updateAt,
           String userId,
           String category,
           String description}) =>
@@ -9003,8 +9022,8 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
   final Value<String> albumId;
   final Value<String> name;
   final Value<String> iconUrl;
-  final Value<String> createdAt;
-  final Value<String> updateAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updateAt;
   final Value<String> userId;
   final Value<String> category;
   final Value<String> description;
@@ -9022,8 +9041,8 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     @required String albumId,
     @required String name,
     @required String iconUrl,
-    @required String createdAt,
-    @required String updateAt,
+    @required DateTime createdAt,
+    @required DateTime updateAt,
     @required String userId,
     @required String category,
     @required String description,
@@ -9039,8 +9058,8 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     Expression<String> albumId,
     Expression<String> name,
     Expression<String> iconUrl,
-    Expression<String> createdAt,
-    Expression<String> updateAt,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> updateAt,
     Expression<String> userId,
     Expression<String> category,
     Expression<String> description,
@@ -9061,8 +9080,8 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       {Value<String> albumId,
       Value<String> name,
       Value<String> iconUrl,
-      Value<String> createdAt,
-      Value<String> updateAt,
+      Value<DateTime> createdAt,
+      Value<DateTime> updateAt,
       Value<String> userId,
       Value<String> category,
       Value<String> description}) {
@@ -9091,10 +9110,10 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       map['icon_url'] = Variable<String>(iconUrl.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (updateAt.present) {
-      map['update_at'] = Variable<String>(updateAt.value);
+      map['update_at'] = Variable<DateTime>(updateAt.value);
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
@@ -9153,18 +9172,18 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _updateAtMeta = const VerificationMeta('updateAt');
-  GeneratedTextColumn _updateAt;
-  GeneratedTextColumn get updateAt => _updateAt ??= _constructUpdateAt();
-  GeneratedTextColumn _constructUpdateAt() {
-    return GeneratedTextColumn('update_at', $tableName, false,
+  GeneratedDateTimeColumn _updateAt;
+  GeneratedDateTimeColumn get updateAt => _updateAt ??= _constructUpdateAt();
+  GeneratedDateTimeColumn _constructUpdateAt() {
+    return GeneratedDateTimeColumn('update_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -9500,8 +9519,8 @@ class Sticker extends DataClass implements Insertable<Sticker> {
   final String assetType;
   final int assetWidth;
   final int assetHeight;
-  final String createdAt;
-  final String lastUseAt;
+  final DateTime createdAt;
+  final DateTime lastUseAt;
   Sticker(
       {@required this.stickerId,
       this.albumId,
@@ -9517,6 +9536,7 @@ class Sticker extends DataClass implements Insertable<Sticker> {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Sticker(
       stickerId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}sticker_id']),
@@ -9531,9 +9551,9 @@ class Sticker extends DataClass implements Insertable<Sticker> {
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_width']),
       assetHeight: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_height']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      lastUseAt: stringType
+      lastUseAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_use_at']),
     );
   }
@@ -9562,10 +9582,10 @@ class Sticker extends DataClass implements Insertable<Sticker> {
       map['asset_height'] = Variable<int>(assetHeight);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || lastUseAt != null) {
-      map['last_use_at'] = Variable<String>(lastUseAt);
+      map['last_use_at'] = Variable<DateTime>(lastUseAt);
     }
     return map;
   }
@@ -9611,8 +9631,8 @@ class Sticker extends DataClass implements Insertable<Sticker> {
       assetType: serializer.fromJson<String>(json['asset_type']),
       assetWidth: serializer.fromJson<int>(json['asset_width']),
       assetHeight: serializer.fromJson<int>(json['asset_height']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
-      lastUseAt: serializer.fromJson<String>(json['last_use_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      lastUseAt: serializer.fromJson<DateTime>(json['last_use_at']),
     );
   }
   @override
@@ -9626,8 +9646,8 @@ class Sticker extends DataClass implements Insertable<Sticker> {
       'asset_type': serializer.toJson<String>(assetType),
       'asset_width': serializer.toJson<int>(assetWidth),
       'asset_height': serializer.toJson<int>(assetHeight),
-      'created_at': serializer.toJson<String>(createdAt),
-      'last_use_at': serializer.toJson<String>(lastUseAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'last_use_at': serializer.toJson<DateTime>(lastUseAt),
     };
   }
 
@@ -9639,8 +9659,8 @@ class Sticker extends DataClass implements Insertable<Sticker> {
           String assetType,
           int assetWidth,
           int assetHeight,
-          String createdAt,
-          String lastUseAt}) =>
+          DateTime createdAt,
+          DateTime lastUseAt}) =>
       Sticker(
         stickerId: stickerId ?? this.stickerId,
         albumId: albumId ?? this.albumId,
@@ -9708,8 +9728,8 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
   final Value<String> assetType;
   final Value<int> assetWidth;
   final Value<int> assetHeight;
-  final Value<String> createdAt;
-  final Value<String> lastUseAt;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> lastUseAt;
   const StickersCompanion({
     this.stickerId = const Value.absent(),
     this.albumId = const Value.absent(),
@@ -9729,7 +9749,7 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
     @required String assetType,
     @required int assetWidth,
     @required int assetHeight,
-    @required String createdAt,
+    @required DateTime createdAt,
     this.lastUseAt = const Value.absent(),
   })  : stickerId = Value(stickerId),
         name = Value(name),
@@ -9746,8 +9766,8 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
     Expression<String> assetType,
     Expression<int> assetWidth,
     Expression<int> assetHeight,
-    Expression<String> createdAt,
-    Expression<String> lastUseAt,
+    Expression<DateTime> createdAt,
+    Expression<DateTime> lastUseAt,
   }) {
     return RawValuesInsertable({
       if (stickerId != null) 'sticker_id': stickerId,
@@ -9770,8 +9790,8 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
       Value<String> assetType,
       Value<int> assetWidth,
       Value<int> assetHeight,
-      Value<String> createdAt,
-      Value<String> lastUseAt}) {
+      Value<DateTime> createdAt,
+      Value<DateTime> lastUseAt}) {
     return StickersCompanion(
       stickerId: stickerId ?? this.stickerId,
       albumId: albumId ?? this.albumId,
@@ -9810,10 +9830,10 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
       map['asset_height'] = Variable<int>(assetHeight.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (lastUseAt.present) {
-      map['last_use_at'] = Variable<String>(lastUseAt.value);
+      map['last_use_at'] = Variable<DateTime>(lastUseAt.value);
     }
     return map;
   }
@@ -9898,18 +9918,18 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _lastUseAtMeta = const VerificationMeta('lastUseAt');
-  GeneratedTextColumn _lastUseAt;
-  GeneratedTextColumn get lastUseAt => _lastUseAt ??= _constructLastUseAt();
-  GeneratedTextColumn _constructLastUseAt() {
-    return GeneratedTextColumn('last_use_at', $tableName, true,
+  GeneratedDateTimeColumn _lastUseAt;
+  GeneratedDateTimeColumn get lastUseAt => _lastUseAt ??= _constructLastUseAt();
+  GeneratedDateTimeColumn _constructLastUseAt() {
+    return GeneratedDateTimeColumn('last_use_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -10020,7 +10040,7 @@ class User extends DataClass implements Insertable<User> {
   final String avatarUrl;
   final String phone;
   final int isVerified;
-  final String createdAt;
+  final DateTime createdAt;
   final String muteUntil;
   final int hasPin;
   final String appId;
@@ -10045,6 +10065,7 @@ class User extends DataClass implements Insertable<User> {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return User(
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
@@ -10060,7 +10081,7 @@ class User extends DataClass implements Insertable<User> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}phone']),
       isVerified: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
-      createdAt: stringType
+      createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       muteUntil: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}mute_until']),
@@ -10099,7 +10120,7 @@ class User extends DataClass implements Insertable<User> {
       map['is_verified'] = Variable<int>(isVerified);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<String>(createdAt);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || muteUntil != null) {
       map['mute_until'] = Variable<String>(muteUntil);
@@ -10169,7 +10190,7 @@ class User extends DataClass implements Insertable<User> {
       avatarUrl: serializer.fromJson<String>(json['avatar_url']),
       phone: serializer.fromJson<String>(json['phone']),
       isVerified: serializer.fromJson<int>(json['is_verified']),
-      createdAt: serializer.fromJson<String>(json['created_at']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
       muteUntil: serializer.fromJson<String>(json['mute_until']),
       hasPin: serializer.fromJson<int>(json['has_pin']),
       appId: serializer.fromJson<String>(json['app_id']),
@@ -10188,7 +10209,7 @@ class User extends DataClass implements Insertable<User> {
       'avatar_url': serializer.toJson<String>(avatarUrl),
       'phone': serializer.toJson<String>(phone),
       'is_verified': serializer.toJson<int>(isVerified),
-      'created_at': serializer.toJson<String>(createdAt),
+      'created_at': serializer.toJson<DateTime>(createdAt),
       'mute_until': serializer.toJson<String>(muteUntil),
       'has_pin': serializer.toJson<int>(hasPin),
       'app_id': serializer.toJson<String>(appId),
@@ -10205,7 +10226,7 @@ class User extends DataClass implements Insertable<User> {
           String avatarUrl,
           String phone,
           int isVerified,
-          String createdAt,
+          DateTime createdAt,
           String muteUntil,
           int hasPin,
           String appId,
@@ -10298,7 +10319,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> avatarUrl;
   final Value<String> phone;
   final Value<int> isVerified;
-  final Value<String> createdAt;
+  final Value<DateTime> createdAt;
   final Value<String> muteUntil;
   final Value<int> hasPin;
   final Value<String> appId;
@@ -10344,7 +10365,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String> avatarUrl,
     Expression<String> phone,
     Expression<int> isVerified,
-    Expression<String> createdAt,
+    Expression<DateTime> createdAt,
     Expression<String> muteUntil,
     Expression<int> hasPin,
     Expression<String> appId,
@@ -10376,7 +10397,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<String> avatarUrl,
       Value<String> phone,
       Value<int> isVerified,
-      Value<String> createdAt,
+      Value<DateTime> createdAt,
       Value<String> muteUntil,
       Value<int> hasPin,
       Value<String> appId,
@@ -10424,7 +10445,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['is_verified'] = Variable<int>(isVerified.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<String>(createdAt.value);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (muteUntil.present) {
       map['mute_until'] = Variable<String>(muteUntil.value);
@@ -10530,10 +10551,10 @@ class Users extends Table with TableInfo<Users, User> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedTextColumn _createdAt;
-  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, true,
+  GeneratedDateTimeColumn _createdAt;
+  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedDateTimeColumn _constructCreatedAt() {
+    return GeneratedDateTimeColumn('created_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -10812,10 +10833,19 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           StickerRelationshipsDao(this as MixinDatabase);
   UserDao _userDao;
   UserDao get userDao => _userDao ??= UserDao(this as MixinDatabase);
-  Selectable<ConversationItemsResult> conversationItems() {
+  Selectable<ConversationItem> conversationItems(
+      List<String> loadedConversationId, DateTime lastCreatedAt, int limit) {
+    var $arrayStartIndex = 1;
+    final expandedloadedConversationId =
+        $expandVar($arrayStartIndex, loadedConversationId.length);
+    $arrayStartIndex += loadedConversationId.length;
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IS NOT NULL \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC',
-        variables: [],
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN (SELECT *, max(created_at) FROM messages group by conversation_id) as m ON m.conversation_id = c.conversation_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IS NOT NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :lastCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :lastCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        variables: [
+          for (var $ in loadedConversationId) Variable.withString($),
+          Variable.withDateTime(lastCreatedAt),
+          Variable.withInt(limit)
+        ],
         readsFrom: {
           conversations,
           users,
@@ -10823,7 +10853,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           snapshots,
           messageMentions
         }).map((QueryRow row) {
-      return ConversationItemsResult(
+      return ConversationItem(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
         category: row.readString('category'),
@@ -10842,7 +10872,54 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType: row.readString('contentType'),
-        createdAt: row.readString('createdAt'),
+        createdAt: row.readDateTime('createdAt'),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus: row.readString('messageStatus'),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+      );
+    });
+  }
+
+  Selectable<ConversationItem> conversationItem(String id) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN (SELECT *, max(created_at) FROM messages group by conversation_id) as m ON m.conversation_id = c.conversation_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id \n                        ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC',
+        variables: [
+          Variable.withString(id)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category: row.readString('category'),
+        groupName: row.readString('groupName'),
+        status: row.readInt('status'),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: row.readString('pinTime'),
+        muteUntil: row.readString('muteUntil'),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType: row.readString('contentType'),
+        createdAt: row.readDateTime('createdAt'),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -10906,7 +10983,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       );
 }
 
-class ConversationItemsResult {
+class ConversationItem {
   final String conversationId;
   final String groupIconUrl;
   final String category;
@@ -10925,7 +11002,7 @@ class ConversationItemsResult {
   final String appId;
   final String content;
   final String contentType;
-  final String createdAt;
+  final DateTime createdAt;
   final String mediaUrl;
   final String senderId;
   final String actionName;
@@ -10936,7 +11013,7 @@ class ConversationItemsResult {
   final String participantUserId;
   final int mentionCount;
   final String mentions;
-  ConversationItemsResult({
+  ConversationItem({
     this.conversationId,
     this.groupIconUrl,
     this.category,
@@ -11015,7 +11092,7 @@ class ConversationItemsResult {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is ConversationItemsResult &&
+      (other is ConversationItem &&
           other.conversationId == this.conversationId &&
           other.groupIconUrl == this.groupIconUrl &&
           other.category == this.category &&
@@ -11047,7 +11124,7 @@ class ConversationItemsResult {
           other.mentions == this.mentions);
   @override
   String toString() {
-    return (StringBuffer('ConversationItemsResult(')
+    return (StringBuffer('ConversationItem(')
           ..write('conversationId: $conversationId, ')
           ..write('groupIconUrl: $groupIconUrl, ')
           ..write('category: $category, ')

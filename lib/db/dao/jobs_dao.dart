@@ -40,7 +40,7 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
           conversationId: row.readString('jobId'),
           resendMessageId: row.readString('resendMessageId'),
           runCount: row.readInt('runCount'),
-          createdAt: row.readString('createdAt'));
+          createdAt: row.readDateTime('createdAt'));
     }).get();
   }
 }

@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
+import 'package:flutter_app/ui/home/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
@@ -32,9 +35,9 @@ class ConversationPage extends StatelessWidget {
         children: [
           const SearchBar(),
           Expanded(
-            child: BlocConverter<ConversationListCubit,
-                List<ConversationItemsResult>, int>(
-              converter: (state) => state?.length ?? 0,
+            child: BlocConverter<ConversationListBloc,
+                PagingState<ConversationItem>, int>(
+              converter: (state) => state?.list?.length ?? 0,
               builder: (context, itemCount) {
                 if (itemCount == 0) return _Empty();
                 return _List(itemCount: itemCount);
@@ -85,50 +88,64 @@ class _List extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
-        builder: (context, slideCategoryState) => ListView.builder(
-          key: PageStorageKey(slideCategoryState),
-          itemCount: itemCount,
-          itemBuilder: (BuildContext context, int index) => BlocConverter<
-              ConversationListCubit,
-              List<ConversationItemsResult>,
-              ConversationItemsResult>(
-            converter: (state) => state[index],
-            builder: (context, conversation) =>
-                BlocConverter<ConversationCubit, ConversationItemsResult, bool>(
-              converter: (state) =>
-                  conversation?.conversationId == state?.conversationId,
-              builder: (context, selected) => _Item(
-                selected: selected,
-                avatars: [conversation.avatarUrl],
-                name: conversation.name,
-                // dateTime: conversation.dateTime,
-                dateTime: DateTime.now(),
-                messageStatus: conversation.messageStatus,
-                message: conversation.lastReadMessageId,
-                count: conversation.unseenMessageCount,
-                unread: true,
-                onTap: () {
-                  BlocProvider.of<ConversationCubit>(context)
-                      .emit(conversation);
-                  ResponsiveNavigatorCubit.of(context)
-                      .pushPage(ResponsiveNavigatorCubit.chatPage);
-                },
-                onRightClick: (pointerUpEvent) => showContextMenu(
-                  context: context,
-                  pointerPosition: pointerUpEvent.position,
-                  menus: [
-                    ContextMenu(
-                      title: Localization.of(context).pin,
-                    ),
-                    ContextMenu(
-                      title: Localization.of(context).unMute,
-                    ),
-                    ContextMenu(
-                      title: Localization.of(context).deleteChat,
-                      isDestructiveAction: true,
-                    ),
+      NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          final dimension =
+              max(notification.metrics.viewportDimension / 2, 300);
+          final bloc = BlocProvider.of<ConversationListBloc>(context);
+          if (notification.metrics.pixels >
+                  notification.metrics.maxScrollExtent - dimension &&
+              !bloc.state.noMoreData) {
+            bloc.loadMore();
+          }
+          return false;
+        },
+        child: BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
+          builder: (context, slideCategoryState) => ListView.builder(
+            key: PageStorageKey(slideCategoryState),
+            itemCount: itemCount,
+            itemBuilder: (BuildContext context, int index) => BlocConverter<
+                ConversationListBloc,
+                PagingState<ConversationItem>,
+                ConversationItem>(
+              converter: (state) => state.list[index],
+              builder: (context, conversation) =>
+                  BlocConverter<ConversationCubit, ConversationItem, bool>(
+                converter: (state) =>
+                    conversation?.conversationId == state?.conversationId,
+                builder: (context, selected) => _Item(
+                  selected: selected,
+                  avatars: [
+                    conversation.groupIconUrl ?? conversation.avatarUrl ?? ''
                   ],
+                  name: conversation.name,
+                  dateTime: conversation.createdAt,
+                  messageStatus: conversation.messageStatus,
+                  message: conversation.lastReadMessageId,
+                  count: conversation.unseenMessageCount,
+                  unread: true,
+                  onTap: () {
+                    BlocProvider.of<ConversationCubit>(context)
+                        .emit(conversation);
+                    ResponsiveNavigatorCubit.of(context)
+                        .pushPage(ResponsiveNavigatorCubit.chatPage);
+                  },
+                  onRightClick: (pointerUpEvent) => showContextMenu(
+                    context: context,
+                    pointerPosition: pointerUpEvent.position,
+                    menus: [
+                      ContextMenu(
+                        title: Localization.of(context).pin,
+                      ),
+                      ContextMenu(
+                        title: Localization.of(context).unMute,
+                      ),
+                      ContextMenu(
+                        title: Localization.of(context).deleteChat,
+                        isDestructiveAction: true,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -222,7 +239,9 @@ class _Item extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              convertStringTime(dateTime),
+                              dateTime != null
+                                  ? convertStringTime(dateTime)
+                                  : '',
                               style: TextStyle(
                                 color: messageColor,
                                 fontSize: 12,

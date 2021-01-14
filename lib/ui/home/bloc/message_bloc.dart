@@ -42,7 +42,7 @@ class Message extends Equatable {
   final String message;
   final bool unread;
   final DateTime createdAt;
-  final ConversationItemsResult conversation;
+  final ConversationItem conversation;
   final MessageStatus status;
 
   @override
@@ -123,15 +123,14 @@ class _LoadMoreMessageCubit extends Cubit<List<Message>> {
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
     with SubscribeMixin {
-  MessageBloc([ConversationItemsResult conversation])
-      : super(const MessageState()) {
+  MessageBloc([ConversationItem conversation]) : super(const MessageState()) {
     setConversation(conversation);
   }
 
-  ConversationItemsResult conversation;
+  ConversationItem conversation;
   _LoadMoreMessageCubit loadMoreMessageCubit;
 
-  void setConversation(ConversationItemsResult conversation) {
+  void setConversation(ConversationItem conversation) {
     this.conversation = conversation;
     setupLoadMore();
     if (conversation != null) firstLoad();

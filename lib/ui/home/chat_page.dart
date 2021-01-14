@@ -29,7 +29,7 @@ class ChatPage extends StatelessWidget {
             darkColor: const Color.fromRGBO(35, 39, 43, 1),
           ),
         ),
-        child: BlocConverter<ConversationCubit, ConversationItemsResult, bool>(
+        child: BlocConverter<ConversationCubit, ConversationItem, bool>(
           converter: (state) => state != null,
           builder: (context, selected) => ChatContainer(
             onPressed: () {},
@@ -52,7 +52,7 @@ class ChatContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final conversationCubit = BlocProvider.of<ConversationCubit>(context);
     final messageBloc = MessageBloc(conversationCubit.state);
-    return BlocListener<ConversationCubit, ConversationItemsResult>(
+    return BlocListener<ConversationCubit, ConversationItem>(
       listener: (context, conversation) =>
           messageBloc.setConversation(conversation),
       child: BlocProvider(

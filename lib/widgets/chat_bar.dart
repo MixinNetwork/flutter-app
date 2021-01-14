@@ -87,7 +87,7 @@ class _ID extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConverter<ConversationCubit, ConversationItemsResult, String>(
+    return BlocConverter<ConversationCubit, ConversationItem, String>(
       converter: (state) => state?.ownerIdentityNumber,
       builder: (context, id) => Text(
         id,
@@ -111,7 +111,7 @@ class _Name extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationItemsResult, String>(
+      BlocConverter<ConversationCubit, ConversationItem, String>(
         converter: (state) => state?.name,
         when: (a, b) => b != null,
         builder: (context, name) => Text(
@@ -135,7 +135,7 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationItemsResult, List<String>>(
+      BlocConverter<ConversationCubit, ConversationItem, List<String>>(
         converter: (state) => [state?.avatarUrl],
         when: (a, b) => b?.isNotEmpty == true,
         builder: (context, avatars) => AvatarsWidget(

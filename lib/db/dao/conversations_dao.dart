@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter_app/db/insert_or_update_event_server.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 
@@ -8,8 +11,25 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationsDaoMixin {
   ConversationsDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(Conversation conversation) =>
-      into(db.conversations).insertOnConflictUpdate(conversation);
+  InsertOrUpdateEventServer _insertOrUpdateEventServer;
+
+  set insertOrUpdateEventServer(
+      InsertOrUpdateEventServer insertOrUpdateEventServer) {
+    _insertOrUpdateEventServer = insertOrUpdateEventServer;
+    insertOrUpdateEventServer.conversationInsertOrUpdateStream =
+        insertOrUpdateEventServer.conversationInsertOrUpdateController.stream
+            .where((event) => event != null)
+            .asyncMap((id) async => db.conversationItem(id).getSingle())
+            .where((event) => event != null);
+  }
+
+  Future<int> insert(Conversation conversation) async {
+    final result =
+        await into(db.conversations).insertOnConflictUpdate(conversation);
+    _insertOrUpdateEventServer.conversationInsertOrUpdateController
+        .add(conversation.conversationId);
+    return result;
+  }
 
   Stream<List<Conversation>> conversations() =>
       select(db.conversations).watch();
@@ -20,7 +40,10 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return query.getSingle();
   }
 
-  Stream<List<ConversationItemsResult>> conversationList() {
-    return db.conversationItems().watch();
-  }
+  Future<List<ConversationItem>> conversationList(
+    DateTime lastCreatedAt,
+    int limit, [
+    List<String> loadedConversationId = const [],
+  ]) =>
+      db.conversationItems(loadedConversationId, lastCreatedAt, limit).get();
 }

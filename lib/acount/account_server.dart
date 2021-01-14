@@ -61,12 +61,11 @@ class AccountServer {
               messageId: map['message_id'], status: map['status']);
         }).toList();
         final jobIds = jobs.map((e) => e.jobId).toList();
-        client.messageApi.acknowledgements(ack).then((value) => {
-          database.jobsDao.deleteJobs(jobIds)
-        });
+        client.messageApi
+            .acknowledgements(ack)
+            .then((value) => {database.jobsDao.deleteJobs(jobIds)});
       }
     });
-
   }
 
   void sendMessage() {
@@ -77,6 +76,7 @@ class AccountServer {
 
   void stop() {
     blaze.disconnect();
+    database.insertOrUpdateEventServer.dispose();
     // todo dispose stream, https://github.com/simolus3/moor/issues/290
   }
 

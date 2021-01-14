@@ -2,7 +2,7 @@ import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_app/acount/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
@@ -76,9 +76,8 @@ class App extends StatelessWidget {
                   create: (BuildContext context) => responsiveNavigatorCubit,
                 ),
                 BlocProvider(
-                  create: (BuildContext context) => ConversationListCubit(
-                    slideCategoryCubit,
-                    accountServer,
+                  create: (BuildContext context) => ConversationListBloc(
+                    accountServer.database,
                   ),
                 ),
                 BlocProvider(

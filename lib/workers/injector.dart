@@ -36,7 +36,7 @@ class Injector {
             category: response.data.category,
             name: response.data.name,
             announcement: response.data.announcement,
-            createdAt: response.data.createdAt,
+            createdAt: DateTime.parse(response.data.createdAt),
             status: ConversationStatus.success.index,
             muteUntil: response.data.muteUntil));
         refreshParticipants(
@@ -55,7 +55,7 @@ class Injector {
               conversationId: conversationId,
               userId: item.userId,
               role: item.role,
-              createdAt: item.createdAt))
+              createdAt: DateTime.parse(item.createdAt)))
         });
     final add = online.where((item) => !localIds.any((e) => e == item.userId));
     final remove =
@@ -81,7 +81,7 @@ class Injector {
                 avatarUrl: e.avatarUrl,
                 phone: e.phone,
                 isVerified: e.isVerified ? 1 : 0,
-                createdAt: e.createdAt,
+                createdAt: DateTime.parse(e.createdAt),
                 muteUntil: e.muteUntil,
                 appId: e.appId,
                 biography: e.biography,
@@ -107,7 +107,7 @@ class Injector {
             avatarUrl: user.avatarUrl,
             phone: user.phone,
             isVerified: user.isVerified ? 1 : 0,
-            createdAt: user.createdAt));
+            createdAt: DateTime.parse(user.createdAt)));
         final app = user.app;
         if (app != null) {
           await database.appsDao.insert(db.App(

@@ -54,7 +54,7 @@ class Blaze {
                 .insert(FloodMessage(
                     messageId: data['message_id'],
                     data: jsonEncode(data),
-                    createdAt: data['created_at']))
+                    createdAt: DateTime.parse(data['created_at'])))
                 .then((value) {
               updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
             });

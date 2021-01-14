@@ -17,7 +17,7 @@ class MessageState extends Equatable {
   MessageState copyWith({
     final List<Message> messages,
     final bool noMoreData,
-    final ConversationItemsResult conversation,
+    final ConversationItem conversation,
   }) {
     return MessageState(
       messages: messages ?? this.messages,
