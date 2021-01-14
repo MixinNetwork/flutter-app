@@ -62,7 +62,7 @@ class Blaze {
         }
       } else {
         debugPrint(data.toString());
-        // updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
+        updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
       }
     }, onError: (error) {
       debugPrint('onError');
@@ -73,8 +73,14 @@ class Blaze {
   }
 
   void updateRemoteMessageStatus(String messageId, String status) {
-    // todo save jobs table
-    _sendGZip(BlazeMessage(messageId, status: status));
+    final blazeMessage = BlazeMessage(messageId, status: status);
+    database.jobsDao.insert(Job(
+        jobId: Uuid().v4(),
+        action: acknowledgeMessageReceipts,
+        priority: 5,
+        blazeMessage: jsonEncode(blazeMessage),
+        createdAt: DateTime.now(),
+        runCount: 0));
   }
 
   void _sendListPending() {

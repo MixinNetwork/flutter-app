@@ -27,7 +27,15 @@ class MessageStatus {
   static const String unknown = 'UNKNOWN';
 }
 
-class MessageCategory{
+class MediaStatus {
+  static const String pending = 'PENDING';
+  static const String done = 'DONE';
+  static const String canceled = 'CANCELED';
+  static const String expired = 'EXPIRED';
+  static const String read = 'READ';
+}
+
+class MessageCategory {
   static const String signalKey = 'SIGNAL_KEY';
   static const String signalText = 'SIGNAL_TEXT';
   static const String signalImage = 'SIGNAL_IMAGE';

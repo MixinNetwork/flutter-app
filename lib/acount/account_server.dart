@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
@@ -27,6 +28,7 @@ class AccountServer {
     client = Client();
     client.initMixin(userId, sessionId, privateKey, scp);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
+    _decryptMessage = DecryptMessage(userId, database, client);
   }
 
   String userId;
@@ -37,6 +39,7 @@ class AccountServer {
   Client client;
   Database database;
   Blaze blaze;
+  DecryptMessage _decryptMessage;
 
   void start() {
     // sendPort?.send('start account');
@@ -49,7 +52,7 @@ class AccountServer {
     database.floodMessagesDao.findFloodMessage().listen((list) {
       if (list?.isNotEmpty == true) {
         for (final message in list) {
-          DecryptMessage(userId, database, client).process(message);
+          _decryptMessage.process(message);
         }
       }
     });
@@ -61,9 +64,9 @@ class AccountServer {
               messageId: map['message_id'], status: map['status']);
         }).toList();
         final jobIds = jobs.map((e) => e.jobId).toList();
-        client.messageApi
-            .acknowledgements(ack)
-            .then((value) => {database.jobsDao.deleteJobs(jobIds)});
+        client.messageApi.acknowledgements(ack).then(
+            (value) => {database.jobsDao.deleteJobs(jobIds)},
+            onError: (e) => debugPrint(e));
       }
     });
   }

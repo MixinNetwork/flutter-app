@@ -1,7 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_app/blaze/blaze_message.dart';
-import 'package:flutter_app/blaze/blaze_message_data.dart';
+import 'package:flutter_app/blaze/vo/attachment_message.dart';
+import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -88,9 +89,109 @@ class DecryptMessage extends Injector {
       );
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_IMAGE')) {
+      String plain;
+      if (data.category == MessageCategory.signalImage) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        return;
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
+          content: attachment.attachmentId,
+          mediaUrl: null,
+          mediaMimeType: attachment.mimeType,
+          mediaSize: attachment.size,
+          mediaWidth: attachment.width,
+          mediaHeight: attachment.height,
+          thumbImage: attachment.thumbnail,
+          mediaKey: attachment.key,
+          mediaDigest: attachment.digest,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.canceled);
+      await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_VIDEO')) {
+      String plain;
+      if (data.category == MessageCategory.signalVideo) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        return;
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
+          content: attachment.attachmentId,
+          name: attachment.name,
+          mediaMimeType: attachment.mimeType,
+          mediaDuration: attachment.duration.toString(),
+          mediaSize: attachment.size,
+          mediaWidth: attachment.width,
+          mediaHeight: attachment.height,
+          thumbImage: attachment.thumbnail,
+          mediaKey: attachment.key,
+          mediaDigest: attachment.digest,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.canceled);
+      await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_DATA')) {
+      String plain;
+      if (data.category == MessageCategory.signalData) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        return;
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
+          content: attachment.attachmentId,
+          name: attachment.name,
+          mediaMimeType: attachment.mimeType,
+          mediaSize: attachment.size,
+          mediaKey: attachment.key,
+          mediaDigest: attachment.digest,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.canceled);
+      await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_AUDIO')) {
+      String plain;
+      if (data.category == MessageCategory.signalAudio) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        return;
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
+          content: attachment.attachmentId,
+          name: attachment.name,
+          mediaMimeType: attachment.mimeType,
+          mediaSize: attachment.size,
+          mediaKey: attachment.key,
+          mediaDigest: attachment.digest,
+          mediaWaveform: attachment.waveform,
+          status: data.status,
+          createdAt: data.createdAt,
+          mediaStatus: MediaStatus.pending);
+      await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_STICKER')) {
     } else if (data.category.endsWith('_CONTACT')) {
     } else if (data.category.endsWith('_LIVE')) {
@@ -105,7 +206,6 @@ class DecryptMessage extends Injector {
       return;
     }
     final blazeMessage = BlazeMessage(messageId, status: status);
-    // ignore: avoid_print
     database.jobsDao.insert(Job(
         jobId: Uuid().v4(),
         action: acknowledgeMessageReceipts,
