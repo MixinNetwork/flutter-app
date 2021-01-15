@@ -13,6 +13,7 @@ class Database {
   Database(String identityNumber) {
     final _database = MixinDatabase(identityNumber);
     insertOrUpdateEventServer = InsertOrUpdateEventServer();
+    appsDao = AppsDao(_database);
     conversationDao = ConversationsDao(_database);
     floodMessagesDao = FloodMessagesDao(_database);
     messagesDao = MessagesDao(_database);

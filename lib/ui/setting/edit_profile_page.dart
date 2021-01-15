@@ -99,7 +99,7 @@ class EditProfilePage extends StatelessWidget {
                   final createdAt = state.current?.account?.createdAt;
                   if (createdAt == null) return null;
                   return DateFormat.yMMMd()
-                      .format(DateTime.tryParse(createdAt));
+                      .format(createdAt);
                 },
                 when: (a, b) => b != null,
                 builder: (context, createdAt) => Text(

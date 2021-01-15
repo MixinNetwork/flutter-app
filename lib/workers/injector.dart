@@ -36,7 +36,7 @@ class Injector {
             category: response.data.category,
             name: response.data.name,
             announcement: response.data.announcement,
-            createdAt: DateTime.parse(response.data.createdAt),
+            createdAt: response.data.createdAt,
             status: ConversationStatus.success.index,
             muteUntil: response.data.muteUntil));
         refreshParticipants(
@@ -55,7 +55,7 @@ class Injector {
               conversationId: conversationId,
               userId: item.userId,
               role: item.role,
-              createdAt: DateTime.parse(item.createdAt)))
+              createdAt: item.createdAt))
         });
     final add = online.where((item) => !localIds.any((e) => e == item.userId));
     final remove =
@@ -81,7 +81,7 @@ class Injector {
                 avatarUrl: e.avatarUrl,
                 phone: e.phone,
                 isVerified: e.isVerified ? 1 : 0,
-                createdAt: DateTime.parse(e.createdAt),
+                createdAt: e.createdAt,
                 muteUntil: e.muteUntil,
                 appId: e.appId,
                 biography: e.biography,
@@ -94,21 +94,26 @@ class Injector {
   }
 
   Future<db.User> syncUser(userId) async {
-    final user = await database.userDao.findUserById(userId);
+    var user = await database.userDao.findUserById(userId);
     if (user == null) {
       final response = await client.userApi.getUserById(userId);
       if (response.data != null) {
-        final user = response.data;
-        await database.userDao.insert(db.User(
-            userId: user.userId,
-            identityNumber: user.identityNumber,
-            relationship: user.relationship,
-            fullName: user.fullName,
-            avatarUrl: user.avatarUrl,
-            phone: user.phone,
-            isVerified: user.isVerified ? 1 : 0,
-            createdAt: DateTime.parse(user.createdAt)));
-        final app = user.app;
+        final result = response.data;
+        user = db.User(
+            userId: result.userId,
+            identityNumber: result.identityNumber,
+            relationship: result.relationship,
+            fullName: result.fullName,
+            avatarUrl: result.avatarUrl,
+            phone: result.phone,
+            isVerified: result.isVerified ? 1 : 0,
+            appId: result.app?.appId,
+            biography: result.biography,
+            muteUntil: result.muteUntil,
+            isScam: result.isScam ? 1 : 0,
+            createdAt: result.createdAt);
+        await database.userDao.insert(user);
+        final app = result.app;
         if (app != null) {
           await database.appsDao.insert(db.App(
               appId: app.appId,
@@ -117,8 +122,13 @@ class Injector {
               redirectUri: app.redirectUri,
               name: app.name,
               iconUrl: app.iconUrl,
+              category: app.category,
               description: app.description,
-              creatorId: app.creatorId));
+              appSecret: app.category,
+              capabilities: app.capabilites.toString(),
+              creatorId: app.creatorId,
+              resourcePatterns: app.resourcePatterns.toString(),
+              updatedAt: app.updatedAt));
         }
       }
     }

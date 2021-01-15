@@ -608,9 +608,13 @@ class App extends DataClass implements Insertable<App> {
   final String redirectUri;
   final String name;
   final String iconUrl;
+  final String category;
   final String description;
-  final String capabilites;
+  final String appSecret;
+  final String capabilities;
   final String creatorId;
+  final String resourcePatterns;
+  final DateTime updatedAt;
   App(
       {@required this.appId,
       @required this.appNumber,
@@ -618,13 +622,18 @@ class App extends DataClass implements Insertable<App> {
       @required this.redirectUri,
       @required this.name,
       @required this.iconUrl,
+      this.category,
       @required this.description,
-      this.capabilites,
-      @required this.creatorId});
+      @required this.appSecret,
+      this.capabilities,
+      @required this.creatorId,
+      this.resourcePatterns,
+      this.updatedAt});
   factory App.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return App(
       appId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
@@ -637,12 +646,20 @@ class App extends DataClass implements Insertable<App> {
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       iconUrl: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url']),
+      category: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}category']),
       description: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}description']),
-      capabilites: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}capabilites']),
+      appSecret: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}app_secret']),
+      capabilities: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}capabilities']),
       creatorId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}creator_id']),
+      resourcePatterns: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}resource_patterns']),
+      updatedAt: dateTimeType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
     );
   }
   @override
@@ -666,14 +683,26 @@ class App extends DataClass implements Insertable<App> {
     if (!nullToAbsent || iconUrl != null) {
       map['icon_url'] = Variable<String>(iconUrl);
     }
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
     }
-    if (!nullToAbsent || capabilites != null) {
-      map['capabilites'] = Variable<String>(capabilites);
+    if (!nullToAbsent || appSecret != null) {
+      map['app_secret'] = Variable<String>(appSecret);
+    }
+    if (!nullToAbsent || capabilities != null) {
+      map['capabilities'] = Variable<String>(capabilities);
     }
     if (!nullToAbsent || creatorId != null) {
       map['creator_id'] = Variable<String>(creatorId);
+    }
+    if (!nullToAbsent || resourcePatterns != null) {
+      map['resource_patterns'] = Variable<String>(resourcePatterns);
+    }
+    if (!nullToAbsent || updatedAt != null) {
+      map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     return map;
   }
@@ -695,15 +724,27 @@ class App extends DataClass implements Insertable<App> {
       iconUrl: iconUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(iconUrl),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
-      capabilites: capabilites == null && nullToAbsent
+      appSecret: appSecret == null && nullToAbsent
           ? const Value.absent()
-          : Value(capabilites),
+          : Value(appSecret),
+      capabilities: capabilities == null && nullToAbsent
+          ? const Value.absent()
+          : Value(capabilities),
       creatorId: creatorId == null && nullToAbsent
           ? const Value.absent()
           : Value(creatorId),
+      resourcePatterns: resourcePatterns == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resourcePatterns),
+      updatedAt: updatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(updatedAt),
     );
   }
 
@@ -717,9 +758,13 @@ class App extends DataClass implements Insertable<App> {
       redirectUri: serializer.fromJson<String>(json['redirect_uri']),
       name: serializer.fromJson<String>(json['name']),
       iconUrl: serializer.fromJson<String>(json['icon_url']),
+      category: serializer.fromJson<String>(json['category']),
       description: serializer.fromJson<String>(json['description']),
-      capabilites: serializer.fromJson<String>(json['capabilites']),
+      appSecret: serializer.fromJson<String>(json['app_secret']),
+      capabilities: serializer.fromJson<String>(json['capabilities']),
       creatorId: serializer.fromJson<String>(json['creator_id']),
+      resourcePatterns: serializer.fromJson<String>(json['resource_patterns']),
+      updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
     );
   }
   @override
@@ -732,9 +777,13 @@ class App extends DataClass implements Insertable<App> {
       'redirect_uri': serializer.toJson<String>(redirectUri),
       'name': serializer.toJson<String>(name),
       'icon_url': serializer.toJson<String>(iconUrl),
+      'category': serializer.toJson<String>(category),
       'description': serializer.toJson<String>(description),
-      'capabilites': serializer.toJson<String>(capabilites),
+      'app_secret': serializer.toJson<String>(appSecret),
+      'capabilities': serializer.toJson<String>(capabilities),
       'creator_id': serializer.toJson<String>(creatorId),
+      'resource_patterns': serializer.toJson<String>(resourcePatterns),
+      'updated_at': serializer.toJson<DateTime>(updatedAt),
     };
   }
 
@@ -745,9 +794,13 @@ class App extends DataClass implements Insertable<App> {
           String redirectUri,
           String name,
           String iconUrl,
+          String category,
           String description,
-          String capabilites,
-          String creatorId}) =>
+          String appSecret,
+          String capabilities,
+          String creatorId,
+          String resourcePatterns,
+          DateTime updatedAt}) =>
       App(
         appId: appId ?? this.appId,
         appNumber: appNumber ?? this.appNumber,
@@ -755,9 +808,13 @@ class App extends DataClass implements Insertable<App> {
         redirectUri: redirectUri ?? this.redirectUri,
         name: name ?? this.name,
         iconUrl: iconUrl ?? this.iconUrl,
+        category: category ?? this.category,
         description: description ?? this.description,
-        capabilites: capabilites ?? this.capabilites,
+        appSecret: appSecret ?? this.appSecret,
+        capabilities: capabilities ?? this.capabilities,
         creatorId: creatorId ?? this.creatorId,
+        resourcePatterns: resourcePatterns ?? this.resourcePatterns,
+        updatedAt: updatedAt ?? this.updatedAt,
       );
   @override
   String toString() {
@@ -768,9 +825,13 @@ class App extends DataClass implements Insertable<App> {
           ..write('redirectUri: $redirectUri, ')
           ..write('name: $name, ')
           ..write('iconUrl: $iconUrl, ')
+          ..write('category: $category, ')
           ..write('description: $description, ')
-          ..write('capabilites: $capabilites, ')
-          ..write('creatorId: $creatorId')
+          ..write('appSecret: $appSecret, ')
+          ..write('capabilities: $capabilities, ')
+          ..write('creatorId: $creatorId, ')
+          ..write('resourcePatterns: $resourcePatterns, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -789,9 +850,19 @@ class App extends DataClass implements Insertable<App> {
                       $mrjc(
                           iconUrl.hashCode,
                           $mrjc(
-                              description.hashCode,
-                              $mrjc(capabilites.hashCode,
-                                  creatorId.hashCode)))))))));
+                              category.hashCode,
+                              $mrjc(
+                                  description.hashCode,
+                                  $mrjc(
+                                      appSecret.hashCode,
+                                      $mrjc(
+                                          capabilities.hashCode,
+                                          $mrjc(
+                                              creatorId.hashCode,
+                                              $mrjc(
+                                                  resourcePatterns.hashCode,
+                                                  updatedAt
+                                                      .hashCode)))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -802,9 +873,13 @@ class App extends DataClass implements Insertable<App> {
           other.redirectUri == this.redirectUri &&
           other.name == this.name &&
           other.iconUrl == this.iconUrl &&
+          other.category == this.category &&
           other.description == this.description &&
-          other.capabilites == this.capabilites &&
-          other.creatorId == this.creatorId);
+          other.appSecret == this.appSecret &&
+          other.capabilities == this.capabilities &&
+          other.creatorId == this.creatorId &&
+          other.resourcePatterns == this.resourcePatterns &&
+          other.updatedAt == this.updatedAt);
 }
 
 class AppsCompanion extends UpdateCompanion<App> {
@@ -814,9 +889,13 @@ class AppsCompanion extends UpdateCompanion<App> {
   final Value<String> redirectUri;
   final Value<String> name;
   final Value<String> iconUrl;
+  final Value<String> category;
   final Value<String> description;
-  final Value<String> capabilites;
+  final Value<String> appSecret;
+  final Value<String> capabilities;
   final Value<String> creatorId;
+  final Value<String> resourcePatterns;
+  final Value<DateTime> updatedAt;
   const AppsCompanion({
     this.appId = const Value.absent(),
     this.appNumber = const Value.absent(),
@@ -824,9 +903,13 @@ class AppsCompanion extends UpdateCompanion<App> {
     this.redirectUri = const Value.absent(),
     this.name = const Value.absent(),
     this.iconUrl = const Value.absent(),
+    this.category = const Value.absent(),
     this.description = const Value.absent(),
-    this.capabilites = const Value.absent(),
+    this.appSecret = const Value.absent(),
+    this.capabilities = const Value.absent(),
     this.creatorId = const Value.absent(),
+    this.resourcePatterns = const Value.absent(),
+    this.updatedAt = const Value.absent(),
   });
   AppsCompanion.insert({
     @required String appId,
@@ -835,9 +918,13 @@ class AppsCompanion extends UpdateCompanion<App> {
     @required String redirectUri,
     @required String name,
     @required String iconUrl,
+    this.category = const Value.absent(),
     @required String description,
-    this.capabilites = const Value.absent(),
+    @required String appSecret,
+    this.capabilities = const Value.absent(),
     @required String creatorId,
+    this.resourcePatterns = const Value.absent(),
+    this.updatedAt = const Value.absent(),
   })  : appId = Value(appId),
         appNumber = Value(appNumber),
         homeUri = Value(homeUri),
@@ -845,6 +932,7 @@ class AppsCompanion extends UpdateCompanion<App> {
         name = Value(name),
         iconUrl = Value(iconUrl),
         description = Value(description),
+        appSecret = Value(appSecret),
         creatorId = Value(creatorId);
   static Insertable<App> custom({
     Expression<String> appId,
@@ -853,9 +941,13 @@ class AppsCompanion extends UpdateCompanion<App> {
     Expression<String> redirectUri,
     Expression<String> name,
     Expression<String> iconUrl,
+    Expression<String> category,
     Expression<String> description,
-    Expression<String> capabilites,
+    Expression<String> appSecret,
+    Expression<String> capabilities,
     Expression<String> creatorId,
+    Expression<String> resourcePatterns,
+    Expression<String> updatedAt,
   }) {
     return RawValuesInsertable({
       if (appId != null) 'app_id': appId,
@@ -864,9 +956,13 @@ class AppsCompanion extends UpdateCompanion<App> {
       if (redirectUri != null) 'redirect_uri': redirectUri,
       if (name != null) 'name': name,
       if (iconUrl != null) 'icon_url': iconUrl,
+      if (category != null) 'category': category,
       if (description != null) 'description': description,
-      if (capabilites != null) 'capabilites': capabilites,
+      if (appSecret != null) 'app_secret': appSecret,
+      if (capabilities != null) 'capabilities': capabilities,
       if (creatorId != null) 'creator_id': creatorId,
+      if (resourcePatterns != null) 'resource_patterns': resourcePatterns,
+      if (updatedAt != null) 'updated_at': updatedAt,
     });
   }
 
@@ -877,9 +973,13 @@ class AppsCompanion extends UpdateCompanion<App> {
       Value<String> redirectUri,
       Value<String> name,
       Value<String> iconUrl,
+      Value<String> category,
       Value<String> description,
-      Value<String> capabilites,
-      Value<String> creatorId}) {
+      Value<String> appSecret,
+      Value<String> capabilities,
+      Value<String> creatorId,
+      Value<String> resourcePatterns,
+      Value<String> updatedAt}) {
     return AppsCompanion(
       appId: appId ?? this.appId,
       appNumber: appNumber ?? this.appNumber,
@@ -887,9 +987,13 @@ class AppsCompanion extends UpdateCompanion<App> {
       redirectUri: redirectUri ?? this.redirectUri,
       name: name ?? this.name,
       iconUrl: iconUrl ?? this.iconUrl,
+      category: category ?? this.category,
       description: description ?? this.description,
-      capabilites: capabilites ?? this.capabilites,
+      appSecret: appSecret ?? this.appSecret,
+      capabilities: capabilities ?? this.capabilities,
       creatorId: creatorId ?? this.creatorId,
+      resourcePatterns: resourcePatterns ?? this.resourcePatterns,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -914,14 +1018,26 @@ class AppsCompanion extends UpdateCompanion<App> {
     if (iconUrl.present) {
       map['icon_url'] = Variable<String>(iconUrl.value);
     }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
-    if (capabilites.present) {
-      map['capabilites'] = Variable<String>(capabilites.value);
+    if (appSecret.present) {
+      map['app_secret'] = Variable<String>(appSecret.value);
+    }
+    if (capabilities.present) {
+      map['capabilities'] = Variable<String>(capabilities.value);
     }
     if (creatorId.present) {
       map['creator_id'] = Variable<String>(creatorId.value);
+    }
+    if (resourcePatterns.present) {
+      map['resource_patterns'] = Variable<String>(resourcePatterns.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     return map;
   }
@@ -935,9 +1051,13 @@ class AppsCompanion extends UpdateCompanion<App> {
           ..write('redirectUri: $redirectUri, ')
           ..write('name: $name, ')
           ..write('iconUrl: $iconUrl, ')
+          ..write('category: $category, ')
           ..write('description: $description, ')
-          ..write('capabilites: $capabilites, ')
-          ..write('creatorId: $creatorId')
+          ..write('appSecret: $appSecret, ')
+          ..write('capabilities: $capabilities, ')
+          ..write('creatorId: $creatorId, ')
+          ..write('resourcePatterns: $resourcePatterns, ')
+          ..write('updatedAt: $updatedAt')
           ..write(')'))
         .toString();
   }
@@ -997,6 +1117,14 @@ class Apps extends Table with TableInfo<Apps, App> {
         $customConstraints: 'NOT NULL');
   }
 
+  final VerificationMeta _categoryMeta = const VerificationMeta('category');
+  GeneratedTextColumn _category;
+  GeneratedTextColumn get category => _category ??= _constructCategory();
+  GeneratedTextColumn _constructCategory() {
+    return GeneratedTextColumn('category', $tableName, true,
+        $customConstraints: '');
+  }
+
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
   GeneratedTextColumn _description;
@@ -1007,13 +1135,21 @@ class Apps extends Table with TableInfo<Apps, App> {
         $customConstraints: 'NOT NULL');
   }
 
-  final VerificationMeta _capabilitesMeta =
-      const VerificationMeta('capabilites');
-  GeneratedTextColumn _capabilites;
-  GeneratedTextColumn get capabilites =>
-      _capabilites ??= _constructCapabilites();
-  GeneratedTextColumn _constructCapabilites() {
-    return GeneratedTextColumn('capabilites', $tableName, true,
+  final VerificationMeta _appSecretMeta = const VerificationMeta('appSecret');
+  GeneratedTextColumn _appSecret;
+  GeneratedTextColumn get appSecret => _appSecret ??= _constructAppSecret();
+  GeneratedTextColumn _constructAppSecret() {
+    return GeneratedTextColumn('app_secret', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  final VerificationMeta _capabilitiesMeta =
+      const VerificationMeta('capabilities');
+  GeneratedTextColumn _capabilities;
+  GeneratedTextColumn get capabilities =>
+      _capabilities ??= _constructCapabilities();
+  GeneratedTextColumn _constructCapabilities() {
+    return GeneratedTextColumn('capabilities', $tableName, true,
         $customConstraints: '');
   }
 
@@ -1025,6 +1161,24 @@ class Apps extends Table with TableInfo<Apps, App> {
         $customConstraints: 'NOT NULL');
   }
 
+  final VerificationMeta _resourcePatternsMeta =
+      const VerificationMeta('resourcePatterns');
+  GeneratedTextColumn _resourcePatterns;
+  GeneratedTextColumn get resourcePatterns =>
+      _resourcePatterns ??= _constructResourcePatterns();
+  GeneratedTextColumn _constructResourcePatterns() {
+    return GeneratedTextColumn('resource_patterns', $tableName, true,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
+  GeneratedDateTimeColumn _updatedAt;
+  GeneratedDateTimeColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
+  GeneratedDateTimeColumn _constructUpdatedAt() {
+    return GeneratedDateTimeColumn('updated_at', $tableName, true,
+        $customConstraints: '');
+  }
+
   @override
   List<GeneratedColumn> get $columns => [
         appId,
@@ -1033,9 +1187,13 @@ class Apps extends Table with TableInfo<Apps, App> {
         redirectUri,
         name,
         iconUrl,
+        category,
         description,
-        capabilites,
-        creatorId
+        appSecret,
+        capabilities,
+        creatorId,
+        resourcePatterns,
+        updatedAt
       ];
   @override
   Apps get asDslTable => this;
@@ -1086,6 +1244,10 @@ class Apps extends Table with TableInfo<Apps, App> {
     } else if (isInserting) {
       context.missing(_iconUrlMeta);
     }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category'], _categoryMeta));
+    }
     if (data.containsKey('description')) {
       context.handle(
           _descriptionMeta,
@@ -1094,17 +1256,33 @@ class Apps extends Table with TableInfo<Apps, App> {
     } else if (isInserting) {
       context.missing(_descriptionMeta);
     }
-    if (data.containsKey('capabilites')) {
+    if (data.containsKey('app_secret')) {
+      context.handle(_appSecretMeta,
+          appSecret.isAcceptableOrUnknown(data['app_secret'], _appSecretMeta));
+    } else if (isInserting) {
+      context.missing(_appSecretMeta);
+    }
+    if (data.containsKey('capabilities')) {
       context.handle(
-          _capabilitesMeta,
-          capabilites.isAcceptableOrUnknown(
-              data['capabilites'], _capabilitesMeta));
+          _capabilitiesMeta,
+          capabilities.isAcceptableOrUnknown(
+              data['capabilities'], _capabilitiesMeta));
     }
     if (data.containsKey('creator_id')) {
       context.handle(_creatorIdMeta,
           creatorId.isAcceptableOrUnknown(data['creator_id'], _creatorIdMeta));
     } else if (isInserting) {
       context.missing(_creatorIdMeta);
+    }
+    if (data.containsKey('resource_patterns')) {
+      context.handle(
+          _resourcePatternsMeta,
+          resourcePatterns.isAcceptableOrUnknown(
+              data['resource_patterns'], _resourcePatternsMeta));
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
     }
     return context;
   }
