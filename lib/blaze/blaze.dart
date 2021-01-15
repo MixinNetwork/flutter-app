@@ -40,29 +40,23 @@ class Blaze {
     channel.stream.listen((message) async {
       final blazeMessage = await parseBlazeMessage(message);
       final data = blazeMessage['data'];
-      debugPrint('receive: ${data['message_id']}');
-      if (blazeMessage['action'] == 'ACKNOWLEDGE_MESSAGE_RECEIPT') {
+
+      if (blazeMessage['action'] == acknowledgeMessageReceipts) {
         // makeMessageStatus
-      } else if (blazeMessage['action'] == 'CREATE_MESSAGE') {
+        updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
+      } else if (blazeMessage['action'] == createMessage) {
         if (data['user_id'] == selfId && data['category'] == '') {
-          // makeMessageStatus
+          updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
         } else {
-          if (await database.floodMessagesDao
-                  .findFloodMessageById(data['message_id']) ==
-              null) {
-            await database.floodMessagesDao
-                .insert(FloodMessage(
-                    messageId: data['message_id'],
-                    data: jsonEncode(data),
-                    createdAt: DateTime.parse(data['created_at'])))
-                .then((value) {
-              updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
-            });
-          }
+          await database.floodMessagesDao
+              .insert(FloodMessage(
+                  messageId: data['message_id'],
+                  data: jsonEncode(data),
+                  createdAt: DateTime.parse(data['created_at'])))
+              .then((value) {});
         }
-      } else {
-        debugPrint(data.toString());
-        updateRemoteMessageStatus(data['message_id'], 'DELIVERED');
+      } else if (data != null) {
+        updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
       }
     }, onError: (error) {
       debugPrint('onError');

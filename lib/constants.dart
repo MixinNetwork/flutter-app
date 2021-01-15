@@ -17,6 +17,7 @@ class ConversationCategory {
 }
 
 const acknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
+const createMessage = 'CREATE_MESSAGE';
 
 class MessageStatus {
   static const String sending = 'SENDING';
