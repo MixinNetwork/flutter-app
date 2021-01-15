@@ -13,6 +13,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> insert(Message message) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
+    await (update(db.conversations)
+          ..where((tbl) => tbl.conversationId.equals(message.conversationId)))
+        .write(ConversationsCompanion(lastMessageId: Value(message.messageId)));
     insertOrUpdateEventServer.conversationInsertOrUpdateController
         .add(message.conversationId);
     return result;
