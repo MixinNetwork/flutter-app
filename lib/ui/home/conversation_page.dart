@@ -6,7 +6,7 @@ import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
-import 'package:flutter_app/ui/home/bloc/paging/paging_bloc.dart';
+import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
@@ -96,7 +96,7 @@ class _List extends StatelessWidget {
           if (notification.metrics.pixels >
                   notification.metrics.maxScrollExtent - dimension &&
               !bloc.state.noMoreData) {
-            bloc.loadMore();
+            bloc.loadBefore();
           }
           return false;
         },

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_app/db/insert_or_update_event_server.dart';
+import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 
@@ -11,23 +11,16 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationsDaoMixin {
   ConversationsDao(MixinDatabase db) : super(db);
 
-  InsertOrUpdateEventServer _insertOrUpdateEventServer;
-
-  set insertOrUpdateEventServer(
-      InsertOrUpdateEventServer insertOrUpdateEventServer) {
-    _insertOrUpdateEventServer = insertOrUpdateEventServer;
-    insertOrUpdateEventServer.conversationInsertOrUpdateStream =
-        insertOrUpdateEventServer.conversationInsertOrUpdateController.stream
-            .where((event) => event != null)
-            .asyncMap((id) async => db.conversationItem(id).getSingle())
-            .where((event) => event != null);
-  }
+  Stream<ConversationItem> get insertOrMoveStream => db.eventBus
+      .watch<String>(DatabaseEvent.insertOrMoveConversation)
+      .asyncMap((id) async => db.conversationItem(id).getSingle())
+      .where((event) => event != null);
 
   Future<int> insert(Conversation conversation) async {
     final result =
         await into(db.conversations).insertOnConflictUpdate(conversation);
-    _insertOrUpdateEventServer.conversationInsertOrUpdateController
-        .add(conversation.conversationId);
+    db.eventBus.send(
+        DatabaseEvent.insertOrMoveConversation, conversation.conversationId);
     return result;
   }
 
@@ -41,9 +34,14 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<ConversationItem>> conversationList(
-    DateTime lastCreatedAt,
+    DateTime oldestCreatedAt,
     int limit, [
     List<String> loadedConversationId = const [],
   ]) =>
-      db.conversationItems(loadedConversationId, lastCreatedAt, limit).get();
+      db.conversationItems(loadedConversationId, oldestCreatedAt, limit).get();
+
+  Future<int> updateLastMessageId(String conversationId, String messageId) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(lastMessageId: Value(messageId)));
 }

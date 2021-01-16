@@ -60,13 +60,12 @@ class AccountServer {
       if (jobs?.isNotEmpty == true) {
         final ack = jobs.map((e) {
           final map = jsonDecode(e.blazeMessage);
-          return BlazeAckMessage(
-              messageId: map['id'], status: map['status']);
+          return BlazeAckMessage(messageId: map['id'], status: map['status']);
         }).toList();
         final jobIds = jobs.map((e) => e.jobId).toList();
         client.messageApi.acknowledgements(ack).then(
             (value) => {database.jobsDao.deleteJobs(jobIds)},
-            onError: (e) => debugPrint(e));
+            onError: (e) => debugPrint('$e'));
       }
     });
   }
@@ -79,8 +78,7 @@ class AccountServer {
 
   void stop() {
     blaze.disconnect();
-    database.insertOrUpdateEventServer.dispose();
-    // todo dispose stream, https://github.com/simolus3/moor/issues/290
+    database.dispose();
   }
 
   void release() {

@@ -1,5 +1,3 @@
-import 'package:flutter_app/db/insert_or_update_event_server.dart';
-
 import 'dao/apps_dao.dart';
 import 'dao/conversations_dao.dart';
 import 'dao/flood_messages_dao.dart';
@@ -11,8 +9,7 @@ import 'mixin_database.dart';
 
 class Database {
   Database(String identityNumber) {
-    final _database = MixinDatabase(identityNumber);
-    insertOrUpdateEventServer = InsertOrUpdateEventServer();
+    _database = MixinDatabase(identityNumber);
     appsDao = AppsDao(_database);
     conversationDao = ConversationsDao(_database);
     floodMessagesDao = FloodMessagesDao(_database);
@@ -20,8 +17,6 @@ class Database {
     jobsDao = JobsDao(_database);
     participantsDao = ParticipantsDao(_database);
     userDao = UserDao(_database);
-    conversationDao.insertOrUpdateEventServer = insertOrUpdateEventServer;
-    messagesDao.insertOrUpdateEventServer = insertOrUpdateEventServer;
   }
 
   // static MixinDatabase _database;
@@ -29,7 +24,7 @@ class Database {
   //   _database = await getMixinDatabaseConnection('3910');
   // }
 
-  InsertOrUpdateEventServer insertOrUpdateEventServer;
+  MixinDatabase _database;
 
   AppsDao appsDao;
 
@@ -44,4 +39,9 @@ class Database {
   ParticipantsDao participantsDao;
 
   UserDao userDao;
+
+  void dispose() {
+    _database.eventBus.dispose();
+    // dispose stream, https://github.com/simolus3/moor/issues/290
+  }
 }

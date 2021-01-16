@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -10,6 +11,7 @@ import 'package:flutter_app/db/dao/participants_dao.dart';
 import 'package:flutter_app/db/dao/resend_session_messages_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/db/dao/users_dao.dart';
+import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 
@@ -67,6 +69,8 @@ class MixinDatabase extends _$MixinDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  final eventBus = DataBaseEventBus();
 }
 
 LazyDatabase _openConnection(String identityNumber) {

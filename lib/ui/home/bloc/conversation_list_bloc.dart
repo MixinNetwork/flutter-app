@@ -1,18 +1,11 @@
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/bloc/paging/paging_bloc.dart';
+import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 
 class ConversationListBloc
     extends PagingBloc<ConversationItem, PagingState<ConversationItem>> {
   ConversationListBloc(this.database)
-      : super(const PagingState<ConversationItem>()) {
-    addSubscription(
-      database.insertOrUpdateEventServer.conversationInsertOrUpdateStream
-          .listen(
-        (item) => add(InsertOrMovePagingEvent(item)),
-      ),
-    );
-  }
+      : super(const PagingState<ConversationItem>());
 
   final Database database;
 
@@ -26,11 +19,15 @@ class ConversationListBloc
         ),
       ),
     );
+    addSubscription(
+      database.conversationDao.insertOrMoveStream.listen(
+        (item) => add(InsertOrMovePagingEvent(item)),
+      ),
+    );
   }
 
   @override
-  Future<List<ConversationItem>> loadMoreList(
-      List<ConversationItem> list) async {
+  Future<List<ConversationItem>> before(List<ConversationItem> list) async {
     final result = await database.conversationDao.conversationList(
       list.last.createdAt,
       10,

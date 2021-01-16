@@ -28,7 +28,7 @@ abstract class PagingBloc<T, S extends PagingState<T>>
       return;
     }
 
-    if (event is LoadMorePagingEvent<T>) {
+    if (event is BeforePagingEvent<T>) {
       yield state.copyWith(
         list: list + event.list,
         noMoreData: event.list?.isEmpty ?? true,
@@ -74,9 +74,9 @@ abstract class PagingBloc<T, S extends PagingState<T>>
   void firstLoad();
 
   @protected
-  Future<List<T>> loadMoreList(List<T> list);
+  Future<List<T>> before(List<T> list);
 
-  void loadMore() {
+  void loadBefore() {
     if (loadMoreStreamController != null ||
             state.noMoreData ||
             state.list.isEmpty ??
@@ -85,7 +85,7 @@ abstract class PagingBloc<T, S extends PagingState<T>>
     loadMoreStreamController = StreamController<List<T>>(sync: true);
     addSubscription(
       loadMoreStreamController.stream
-          .asyncMap(loadMoreList)
+          .asyncMap(before)
           .handleError((_) => null)
           .listen(
         (list) {
@@ -93,7 +93,7 @@ abstract class PagingBloc<T, S extends PagingState<T>>
           loadMoreStreamController = null;
 
           if (list == null) return;
-          add(LoadMorePagingEvent(list));
+          add(BeforePagingEvent(list));
         },
       ),
     );

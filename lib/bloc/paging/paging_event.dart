@@ -7,8 +7,8 @@ abstract class PagingEvent<T> extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadMorePagingEvent<T> extends PagingEvent<T> {
-  const LoadMorePagingEvent(this.list);
+class BeforePagingEvent<T> extends PagingEvent<T> {
+  const BeforePagingEvent(this.list);
 
   final List<T> list;
 

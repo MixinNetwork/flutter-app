@@ -1,4 +1,4 @@
-import 'package:flutter_app/db/insert_or_update_event_server.dart';
+import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 
@@ -9,15 +9,12 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     with _$MessagesDaoMixin {
   MessagesDao(MixinDatabase db) : super(db);
 
-  InsertOrUpdateEventServer insertOrUpdateEventServer;
-
   Future<int> insert(Message message) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
-    await (update(db.conversations)
-          ..where((tbl) => tbl.conversationId.equals(message.conversationId)))
-        .write(ConversationsCompanion(lastMessageId: Value(message.messageId)));
-    insertOrUpdateEventServer.conversationInsertOrUpdateController
-        .add(message.conversationId);
+    await db.conversationsDao
+        .updateLastMessageId(message.conversationId, message.messageId);
+    db.eventBus
+        .send(DatabaseEvent.insertOrMoveConversation, message.conversationId);
     return result;
   }
 

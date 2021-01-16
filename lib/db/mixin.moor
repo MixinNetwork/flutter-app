@@ -2,7 +2,7 @@
 
 CREATE TABLE addresses ( address_id TEXT NOT NULL, type TEXT NOT NULL, asset_id TEXT NOT NULL, public_key TEXT, label TEXT, updated_at DATETIME NOT NULL, reserve TEXT NOT NULL, fee TEXT NOT NULL, account_name TEXT, account_tag TEXT, dust TEXT, PRIMARY KEY(address_id) );
 
-CREATE TABLE apps (app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT NOT NULL, redirect_uri TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, category TEXT, description TEXT NOT NULL, app_secret TEXT NOT NULL, capabilities TEXT, creator_id TEXT NOT NULL, resource_patterns TEXT, updated_at TEXT, PRIMARY KEY(app_id));
+CREATE TABLE apps (app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT NOT NULL, redirect_uri TEXT NOT NULL, name TEXT NOT NULL, icon_url TEXT NOT NULL, category TEXT, description TEXT NOT NULL, app_secret TEXT NOT NULL, capabilities TEXT, creator_id TEXT NOT NULL, resource_patterns TEXT, updated_at DATETIME, PRIMARY KEY(app_id));
 
 CREATE TABLE assets (asset_id TEXT NOT NULL,symbol TEXT NOT NULL,name TEXT NOT NULL,icon_url TEXT NOT NULL,balance TEXT NOT NULL,destination TEXT NOT NULL,tag TEXT,price_btc TEXT NOT NULL,price_usd TEXT NOT NULL,chain_id TEXT NOT NULL,change_usd TEXT NOT NULL,change_btc TEXT NOT NULL,confirmations INTEGER NOT NULL,asset_key TEXT,PRIMARY KEY(asset_id));
 
@@ -61,16 +61,16 @@ conversationItems AS ConversationItem:
             mm.mentions AS mentions 
             FROM conversations c
             INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN (SELECT *, max(created_at) FROM messages group by conversation_id) as m ON m.conversation_id = c.conversation_id
+            LEFT JOIN messages m ON c.last_message_id = m.message_id
             LEFT JOIN message_mentions mm ON mm.message_id = m.message_id
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
             WHERE c.category IS NOT NULL AND c.conversation_id NOT IN :loadedConversationId
-            AND CASE WHEN :lastCreatedAt is NULL THEN TRUE ELSE CASE 
+            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
               WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
-              END <= :lastCreatedAt
+              END <= :oldestCreatedAt
               END 
             ORDER BY c.pin_time DESC, 
               CASE 
@@ -94,7 +94,7 @@ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.catego
             mm.mentions AS mentions 
             FROM conversations c
             INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN (SELECT *, max(created_at) FROM messages group by conversation_id) as m ON m.conversation_id = c.conversation_id
+            LEFT JOIN messages m ON c.last_message_id = m.message_id
             LEFT JOIN message_mentions mm ON mm.message_id = m.message_id
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
