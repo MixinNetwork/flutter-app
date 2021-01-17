@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter_app/blaze/blaze_message.dart';
+import 'package:flutter_app/blaze/vo/live_message.dart';
 import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
+import 'package:flutter_app/blaze/vo/location_message.dart';
+import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -50,6 +53,7 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.plainData ||
         data.category == MessageCategory.plainAudio ||
         data.category == MessageCategory.plainContact ||
+        data.category == MessageCategory.plainSticker ||
         data.category == MessageCategory.plainLive ||
         data.category == MessageCategory.plainPost ||
         data.category == MessageCategory.plainLocation) {
@@ -195,6 +199,32 @@ class DecryptMessage extends Injector {
           mediaStatus: MediaStatus.pending);
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_STICKER')) {
+      String plain;
+
+      if (data.category == MessageCategory.signalSticker) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        return;
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final stickerMessage = StickerMessage.fromJson(jsonDecode(plain));
+      if (stickerMessage.stickerId == null) {
+        // todo handle album sticker
+      } else {
+        // todo handle sticker
+      }
+      final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
+          content: plainText,
+          name: stickerMessage.name,
+          stickerId: stickerMessage.stickerId,
+          albumId: stickerMessage.albumId,
+          status: data.status,
+          createdAt: data.createdAt);
+      await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_CONTACT')) {
       String plain;
       if (data.category == MessageCategory.signalContact) {
@@ -216,8 +246,63 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt);
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_LIVE')) {
+      String plain;
+      if (data.category == MessageCategory.signalLive) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        return;
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final liveMessage = LiveMessage.fromJson(jsonDecode(plain));
+      final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
+          mediaWidth: liveMessage.width,
+          mediaHeight: liveMessage.height,
+          mediaUrl: liveMessage.url,
+          thumbUrl: liveMessage.thumbUrl,
+          status: data.status,
+          createdAt: data.createdAt);
+      await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_LOCATION')) {
-    } else if (data.category.endsWith('_POST')) {}
+      String plain;
+      if (data.category == MessageCategory.signalLocation) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        return;
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      // ignore: unused_local_variable todo check location
+      final locationMessage = LocationMessage.fromJson(jsonDecode(plain));
+      final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category,
+          content: plain,
+          status: data.status,
+          createdAt: data.createdAt);
+      await database.messagesDao.insert(message);
+    } else if (data.category.endsWith('_POST')) {
+      String plain;
+      if (data.category == MessageCategory.signalPost) {
+        plain = 'SignalPost';
+      } else {
+        plain = utf8.decode(base64.decode(plainText));
+      }
+      final message = Message(
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.userId,
+        category: data.category,
+        content: plain,
+        status: data.status,
+        createdAt: data.createdAt,
+      );
+      await database.messagesDao.insert(message);
+    }
 
     _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
   }
