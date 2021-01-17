@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/vo/live_message.dart';
 import 'package:flutter_app/blaze/vo/attachment_message.dart';
@@ -275,7 +276,18 @@ class DecryptMessage extends Injector {
         plain = utf8.decode(base64.decode(plainText));
       }
       // ignore: unused_local_variable todo check location
-      final locationMessage = LocationMessage.fromJson(jsonDecode(plain));
+      LocationMessage locationMessage;
+      try {
+        locationMessage = LocationMessage.fromJson(jsonDecode(plain));
+      } catch (e) {
+        debugPrint(e);
+      }
+      if (locationMessage == null ||
+          locationMessage.latitude == 0.0 ||
+          locationMessage.longitude == 0.0) {
+        _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+        return;
+      }
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
