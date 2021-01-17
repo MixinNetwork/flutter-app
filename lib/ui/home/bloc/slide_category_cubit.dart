@@ -7,7 +7,7 @@ part 'slide_category_state.dart';
 class SlideCategoryCubit extends Cubit<SlideCategoryState> {
   SlideCategoryCubit()
       : super(const SlideCategoryState(
-            type: SlideCategoryType.people, name: 'Contacts'));
+            type: SlideCategoryType.contacts, name: 'Contacts'));
 
   void select(SlideCategoryType type, [String name]) =>
       emit(SlideCategoryState(type: type, name: name));

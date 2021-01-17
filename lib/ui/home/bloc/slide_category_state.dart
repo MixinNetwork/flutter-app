@@ -1,7 +1,10 @@
 part of 'slide_category_cubit.dart';
 
 enum SlideCategoryType {
-  people,
+  contacts,
+  groups,
+  bots,
+  strangers,
   circle,
   setting,
 }

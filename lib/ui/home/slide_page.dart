@@ -26,18 +26,22 @@ class SlidePage extends StatelessWidget {
               {
                 'asset': Resources.assetsImagesContactsPng,
                 'title': Localization.of(context).contacts,
+                'type': SlideCategoryType.contacts,
               },
               {
                 'asset': Resources.assetsImagesGroupPng,
                 'title': Localization.of(context).group,
+                'type': SlideCategoryType.groups,
               },
               {
                 'asset': Resources.assetsImagesBotPng,
-                'title': Localization.current.bots
+                'title': Localization.current.bots,
+                'type': SlideCategoryType.bots,
               },
               {
                 'asset': Resources.assetsImagesStrangersPng,
                 'title': Localization.of(context).strangers,
+                'type': SlideCategoryType.strangers,
               },
             ]),
             const SizedBox(height: 16),
@@ -99,7 +103,7 @@ class _CircleList extends StatelessWidget {
             itemBuilder: (BuildContext context, int index) =>
                 BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
               converter: (state) =>
-                  state?.type == SlideCategoryType.people &&
+                  state?.type == SlideCategoryType.circle &&
                   state?.name == circleType[index]['title'],
               builder: (BuildContext context, bool selected) {
                 final circle = circleType[index];
@@ -116,7 +120,7 @@ class _CircleList extends StatelessWidget {
                   title: circle['title'],
                   onTap: () =>
                       BlocProvider.of<SlideCategoryCubit>(context).select(
-                    SlideCategoryType.people,
+                    SlideCategoryType.circle,
                     circle['title'],
                   ),
                   selected: selected,
@@ -174,7 +178,7 @@ class _CategoryList extends StatelessWidget {
     @required this.categoryList,
   }) : super(key: key);
 
-  final List<Map<String, String>> categoryList;
+  final List<Map<String, dynamic>> categoryList;
 
   @override
   Widget build(BuildContext context) => ListView.separated(
@@ -182,9 +186,7 @@ class _CategoryList extends StatelessWidget {
         itemBuilder: (BuildContext context, int index) {
           final item = categoryList[index];
           return BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-            converter: (state) =>
-                state?.type == SlideCategoryType.people &&
-                state?.name == item['title'],
+            converter: (state) => state?.type == item['type'],
             builder: (BuildContext context, bool selected) => SelectItem(
               icon: Image.asset(
                 item['asset'],
@@ -198,7 +200,7 @@ class _CategoryList extends StatelessWidget {
               ),
               title: item['title'],
               onTap: () => BlocProvider.of<SlideCategoryCubit>(context).select(
-                SlideCategoryType.people,
+                item['type'],
                 item['title'],
               ),
               selected: selected,

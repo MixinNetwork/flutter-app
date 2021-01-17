@@ -11,10 +11,12 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationsDaoMixin {
   ConversationsDao(MixinDatabase db) : super(db);
 
-  Stream<ConversationItem> get insertOrMoveStream => db.eventBus
-      .watch<String>(DatabaseEvent.insertOrMoveConversation)
-      .asyncMap((id) async => db.conversationItem(id).getSingle())
-      .where((event) => event != null);
+  Stream<ConversationItem> _insertOrMoveStream;
+  Stream<ConversationItem> get insertOrMoveStream =>
+      _insertOrMoveStream ??= db.eventBus
+          .watch<String>(DatabaseEvent.insertOrMoveConversation)
+          .asyncMap((id) async => db.conversationItem(id).getSingle())
+          .where((event) => event != null);
 
   Future<int> insert(Conversation conversation) async {
     final result =
@@ -24,21 +26,46 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Stream<List<Conversation>> conversations() =>
-      select(db.conversations).watch();
-
   Future<Conversation> getConversationById(String conversationId) {
     final query = select(db.conversations)
       ..where((tbl) => tbl.conversationId.equals(conversationId));
     return query.getSingle();
   }
 
-  Future<List<ConversationItem>> conversationList(
+  Selectable<ConversationItem> conversations(
     DateTime oldestCreatedAt,
     int limit, [
     List<String> loadedConversationId = const [],
   ]) =>
-      db.conversationItems(loadedConversationId, oldestCreatedAt, limit).get();
+      db.conversationItems(loadedConversationId, oldestCreatedAt, limit);
+
+  Selectable<ConversationItem> contactConversations(
+    DateTime oldestCreatedAt,
+    int limit, [
+    List<String> loadedConversationId = const [],
+  ]) =>
+      db.contactConversations(loadedConversationId, oldestCreatedAt, limit);
+
+  Selectable<ConversationItem> strangerConversations(
+    DateTime oldestCreatedAt,
+    int limit, [
+    List<String> loadedConversationId = const [],
+  ]) =>
+      db.strangerConversations(loadedConversationId, oldestCreatedAt, limit);
+
+  Selectable<ConversationItem> groupConversations(
+    DateTime oldestCreatedAt,
+    int limit, [
+    List<String> loadedConversationId = const [],
+  ]) =>
+      db.groupConversations(loadedConversationId, oldestCreatedAt, limit);
+
+  Selectable<ConversationItem> botConversations(
+    DateTime oldestCreatedAt,
+    int limit, [
+    List<String> loadedConversationId = const [],
+  ]) =>
+      db.botConversations(loadedConversationId, oldestCreatedAt, limit);
 
   Future<int> updateLastMessageId(String conversationId, String messageId) =>
       (update(db.conversations)

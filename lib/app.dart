@@ -77,6 +77,7 @@ class App extends StatelessWidget {
                 ),
                 BlocProvider(
                   create: (BuildContext context) => ConversationListBloc(
+                    slideCategoryCubit,
                     accountServer.database,
                   ),
                 ),

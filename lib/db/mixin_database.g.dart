@@ -11065,6 +11065,222 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<ConversationItem> contactConversations(
+      List<String> loadedConversationId, DateTime oldestCreatedAt, int limit) {
+    var $arrayStartIndex = 1;
+    final expandedloadedConversationId =
+        $expandVar($arrayStartIndex, loadedConversationId.length);
+    $arrayStartIndex += loadedConversationId.length;
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        variables: [
+          for (var $ in loadedConversationId) Variable.withString($),
+          Variable.withDateTime(oldestCreatedAt),
+          Variable.withInt(limit)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category: row.readString('category'),
+        groupName: row.readString('groupName'),
+        status: row.readInt('status'),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: row.readString('pinTime'),
+        muteUntil: row.readString('muteUntil'),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType: row.readString('contentType'),
+        createdAt: row.readDateTime('createdAt'),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus: row.readString('messageStatus'),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+      );
+    });
+  }
+
+  Selectable<ConversationItem> strangerConversations(
+      List<String> loadedConversationId, DateTime oldestCreatedAt, int limit) {
+    var $arrayStartIndex = 1;
+    final expandedloadedConversationId =
+        $expandVar($arrayStartIndex, loadedConversationId.length);
+    $arrayStartIndex += loadedConversationId.length;
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\' AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        variables: [
+          for (var $ in loadedConversationId) Variable.withString($),
+          Variable.withDateTime(oldestCreatedAt),
+          Variable.withInt(limit)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category: row.readString('category'),
+        groupName: row.readString('groupName'),
+        status: row.readInt('status'),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: row.readString('pinTime'),
+        muteUntil: row.readString('muteUntil'),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType: row.readString('contentType'),
+        createdAt: row.readDateTime('createdAt'),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus: row.readString('messageStatus'),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+      );
+    });
+  }
+
+  Selectable<ConversationItem> groupConversations(
+      List<String> loadedConversationId, DateTime oldestCreatedAt, int limit) {
+    var $arrayStartIndex = 1;
+    final expandedloadedConversationId =
+        $expandVar($arrayStartIndex, loadedConversationId.length);
+    $arrayStartIndex += loadedConversationId.length;
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\' AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        variables: [
+          for (var $ in loadedConversationId) Variable.withString($),
+          Variable.withDateTime(oldestCreatedAt),
+          Variable.withInt(limit)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category: row.readString('category'),
+        groupName: row.readString('groupName'),
+        status: row.readInt('status'),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: row.readString('pinTime'),
+        muteUntil: row.readString('muteUntil'),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType: row.readString('contentType'),
+        createdAt: row.readDateTime('createdAt'),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus: row.readString('messageStatus'),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+      );
+    });
+  }
+
+  Selectable<ConversationItem> botConversations(
+      List<String> loadedConversationId, DateTime oldestCreatedAt, int limit) {
+    var $arrayStartIndex = 1;
+    final expandedloadedConversationId =
+        $expandVar($arrayStartIndex, loadedConversationId.length);
+    $arrayStartIndex += loadedConversationId.length;
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        variables: [
+          for (var $ in loadedConversationId) Variable.withString($),
+          Variable.withDateTime(oldestCreatedAt),
+          Variable.withInt(limit)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category: row.readString('category'),
+        groupName: row.readString('groupName'),
+        status: row.readInt('status'),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: row.readString('pinTime'),
+        muteUntil: row.readString('muteUntil'),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType: row.readString('contentType'),
+        createdAt: row.readDateTime('createdAt'),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus: row.readString('messageStatus'),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+      );
+    });
+  }
+
   Selectable<ConversationItem> conversationItem(String id) {
     return customSelect(
         'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id \n                        ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC',
