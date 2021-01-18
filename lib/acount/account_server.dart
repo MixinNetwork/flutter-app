@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
@@ -68,7 +67,7 @@ class AccountServer {
   Completer _ackCompleter;
 
   void runAckJob(List<Job> jobs) {
-    if (_ackCompleter == null  || _ackCompleter?.isCompleted == true) {
+    if (_ackCompleter == null || _ackCompleter?.isCompleted == true) {
       _ackCompleter = Completer();
       final ack = jobs.map((e) {
         final map = jsonDecode(e.blazeMessage);
@@ -76,15 +75,10 @@ class AccountServer {
       }).toList();
 
       final jobIds = jobs.map((e) => e.jobId).toList();
-      debugPrint('${jobIds.toString()}');
-      client.messageApi.acknowledgements(ack).then(
-              (value) {
-            database.jobsDao.deleteJobs(jobIds);
-            _ackCompleter.complete(true);
-          },
-          onError: (e) =>
-              _ackCompleter.completeError(e)
-      );
+      client.messageApi.acknowledgements(ack).then((value) {
+        database.jobsDao.deleteJobs(jobIds);
+        _ackCompleter.complete(true);
+      }, onError: (e) => _ackCompleter.completeError(e));
     }
   }
 

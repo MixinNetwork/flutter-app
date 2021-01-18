@@ -13,7 +13,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../main.dart';
 import 'blaze_message.dart';
+import 'vo/blaze_message_data.dart';
 
 class Blaze {
   Blaze(
@@ -41,25 +43,25 @@ class Blaze {
     channel.stream
         .asyncMap((message) async => await parseBlazeMessage(message))
         .listen((blazeMessage) async {
-      final data = blazeMessage['data'];
-
-      if (blazeMessage['action'] == acknowledgeMessageReceipts) {
+      final data = blazeMessage.data;
+      if (blazeMessage.action == acknowledgeMessageReceipts) {
         // makeMessageStatus
-        updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
-      } else if (blazeMessage['action'] == createMessage) {
-        if (data['user_id'] == selfId && data['category'] == '') {
+        updateRemoteMessageStatus(data['messageId'], MessageStatus.delivered);
+      } else if (blazeMessage.action == createMessage) {
+        final messageData = BlazeMessageData.fromJson(data);
+        if (messageData.userId == selfId && messageData.category == '') {
           updateRemoteMessageStatus(
-              data['message_id'], MessageStatus.delivered);
+              messageData.messageId, MessageStatus.delivered);
         } else {
           await database.floodMessagesDao
               .insert(FloodMessage(
-                  messageId: data['message_id'],
+                  messageId: messageData.messageId,
                   data: jsonEncode(data),
-                  createdAt: DateTime.parse(data['created_at'])))
+                  createdAt: messageData.createdAt))
               .then((value) {});
         }
       } else if (data != null) {
-        updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
+        updateRemoteMessageStatus(data['messageId'], MessageStatus.delivered);
       }
     }, onError: (error) {
       debugPrint('onError');
@@ -70,7 +72,7 @@ class Blaze {
   }
 
   void updateRemoteMessageStatus(String messageId, String status) {
-    final blazeMessage = BlazeMessage(messageId, status: status);
+    final blazeMessage = BlazeAckMessage(messageId: messageId, status: status);
     database.jobsDao.insert(Job(
         jobId: Uuid().v4(),
         action: acknowledgeMessageReceipts,
@@ -81,7 +83,7 @@ class Blaze {
   }
 
   void _sendListPending() {
-    _sendGZip(BlazeMessage(Uuid().v4(), action: 'LIST_PENDING_MESSAGES'));
+    _sendGZip(BlazeMessage(id: Uuid().v4(), action: 'LIST_PENDING_MESSAGES'));
   }
 
   void _sendGZip(BlazeMessage msg) {
@@ -94,11 +96,11 @@ class Blaze {
   }
 }
 
-Future<Map<String, dynamic>> parseBlazeMessage(List<int> message) =>
+Future<BlazeMessage> parseBlazeMessage(List<int> message) =>
     runLoadBalancer(_parseBlazeMessageInternal, message);
 
-Map<String, dynamic> _parseBlazeMessageInternal(List<int> message) {
+BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
-  final blazeMessage = jsonDecode(content);
+  final blazeMessage = BlazeMessage.fromJson(jsonDecode(content));
   return blazeMessage;
 }

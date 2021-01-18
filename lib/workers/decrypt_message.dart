@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/vo/live_message.dart';
 import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
@@ -323,7 +322,7 @@ class DecryptMessage extends Injector {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
-    final blazeMessage = BlazeMessage(messageId, status: status);
+    final blazeMessage = BlazeAckMessage(messageId: messageId, status: status);
     database.jobsDao.insert(Job(
         jobId: Uuid().v4(),
         action: acknowledgeMessageReceipts,

@@ -1,19 +1,32 @@
+import 'package:json_annotation/json_annotation.dart';
+
+part 'blaze_message.g.dart';
+
+@JsonSerializable()
 class BlazeMessage {
-  // ignore: avoid_unused_constructor_parameters
-  BlazeMessage(this.id, {this.action, this.status, String messageId});
+  BlazeMessage({
+    this.id,
+    this.action,
+    this.data,
+    // this.params,
+    // this.error
+  });
 
-  BlazeMessage.fromJson(Map<String, dynamic> json)
-      : id = json['id'],
-        action = json['action'],
-        status = json['status'];
+  factory BlazeMessage.fromJson(Map<String, dynamic> json) =>
+      _$BlazeMessageFromJson(json);
 
-  final String id;
+  @JsonKey(name: 'id', nullable: false)
+  String id;
+  @JsonKey(name: 'action', nullable: false)
   String action;
-  String status;
 
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'action': action,
-        'status': status,
-      };
+  // @JsonKey(name: 'params')
+  // BlazeMessageParam params;
+  @JsonKey(name: 'data')
+  Map<String, dynamic> data;
+
+  // @JsonKey(name: 'error')
+  // ResponseError error;
+
+  Map<String, dynamic> toJson() => _$BlazeMessageToJson(this);
 }
