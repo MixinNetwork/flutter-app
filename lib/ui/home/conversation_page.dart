@@ -121,7 +121,7 @@ class _List extends StatelessWidget {
                   name: conversation.name,
                   dateTime: conversation.createdAt,
                   messageStatus: conversation.messageStatus,
-                  message: conversation.lastReadMessageId,
+                  message: conversation.content,
                   count: conversation.unseenMessageCount,
                   unread: true,
                   onTap: () {

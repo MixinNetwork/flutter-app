@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 
 part 'message_state.dart';
 
@@ -123,17 +124,21 @@ class _LoadMoreMessageCubit extends Cubit<List<Message>> {
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
     with SubscribeMixin {
-  MessageBloc([ConversationItem conversation]) : super(const MessageState()) {
-    setConversation(conversation);
+  MessageBloc(ConversationCubit conversationCubit)
+      : super(const MessageState()) {
+    _setConversation(conversationCubit.state.conversationId);
+    addSubscription(conversationCubit.listen(
+        (conversation) => _setConversation(conversation.conversationId)));
   }
 
-  ConversationItem conversation;
+  String _conversationId;
   _LoadMoreMessageCubit loadMoreMessageCubit;
 
-  void setConversation(ConversationItem conversation) {
-    this.conversation = conversation;
+  void _setConversation(String conversationId) {
+    if (_conversationId == conversationId) return;
+    _conversationId = conversationId;
     setupLoadMore();
-    if (conversation != null) firstLoad();
+    if (_conversationId != null) firstLoad();
   }
 
   @override
@@ -146,7 +151,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       yield state.copyWith(
         noMoreData: false,
         messages: event.messages,
-        conversation: conversation,
+        conversationId: _conversationId,
       );
     }
     if (event is _LoadMoreMessageEvent) {
@@ -190,7 +195,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           20,
           (index) => Message(
             id: '',
-            user: conversation.name,
+            user: '$_conversationId name',
             isCurrentUser: index < 10,
             conversation: null,
             createdAt: DateTime.now().subtract(Duration(hours: index)),
@@ -208,7 +213,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       _InsertOrReplaceMessageEvent(
         Message(
           id: text,
-          user: conversation.name,
+          user: 'conversation',
           isCurrentUser: true,
           conversation: null,
           createdAt: DateTime.now(),

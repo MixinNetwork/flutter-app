@@ -4,12 +4,12 @@ class MessageState extends Equatable {
   const MessageState({
     this.messages,
     this.noMoreData = false,
-    this.conversation,
+    this.conversationId,
   });
 
   final List<Message> messages;
   final bool noMoreData;
-  final Conversation conversation;
+  final String conversationId;
 
   @override
   List<Object> get props => [messages, noMoreData];
@@ -17,12 +17,12 @@ class MessageState extends Equatable {
   MessageState copyWith({
     final List<Message> messages,
     final bool noMoreData,
-    final ConversationItem conversation,
+    final String conversationId,
   }) {
     return MessageState(
       messages: messages ?? this.messages,
       noMoreData: noMoreData ?? this.noMoreData,
-      conversation: conversation ?? this.conversation,
+      conversationId: conversationId ?? this.conversationId,
     );
   }
 }

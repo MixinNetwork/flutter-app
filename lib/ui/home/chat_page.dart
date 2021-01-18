@@ -51,46 +51,42 @@ class ChatContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final conversationCubit = BlocProvider.of<ConversationCubit>(context);
-    final messageBloc = MessageBloc(conversationCubit.state);
-    return BlocListener<ConversationCubit, ConversationItem>(
-      listener: (context, conversation) =>
-          messageBloc.setConversation(conversation),
-      child: BlocProvider(
-        create: (context) => messageBloc,
-        child: Column(
-          children: [
-            ChatBar(onPressed: onPressed, isSelected: isSelected),
-            Expanded(
-              child: Builder(
-                builder: (context) => NotificationListener<ScrollNotification>(
-                  onNotification: (ScrollNotification notification) {
-                    final dimension =
-                        max(notification.metrics.viewportDimension / 3, 200);
-                    if (notification.metrics.pixels >
-                        notification.metrics.maxScrollExtent - dimension) {
-                      BlocProvider.of<MessageBloc>(context).loadMore();
-                    }
-                    return false;
-                  },
-                  child: BlocConverter<MessageBloc, MessageState,
-                      Tuple2<Conversation, int>>(
-                    converter: (state) =>
-                        Tuple2(state.conversation, state.messages?.length ?? 0),
-                    builder: (context, tuple2) => ListView.builder(
-                      key: ValueKey(tuple2.item1),
-                      controller: ScrollController(keepScrollOffset: false),
-                      reverse: true,
-                      itemCount: tuple2.item2,
-                      itemBuilder: (BuildContext context, int index) =>
-                          _Message(index: index),
-                    ),
+    final messageBloc = MessageBloc(conversationCubit);
+    return BlocProvider(
+      create: (context) => messageBloc,
+      child: Column(
+        children: [
+          ChatBar(onPressed: onPressed, isSelected: isSelected),
+          Expanded(
+            child: Builder(
+              builder: (context) => NotificationListener<ScrollNotification>(
+                onNotification: (ScrollNotification notification) {
+                  final dimension =
+                      max(notification.metrics.viewportDimension / 3, 200);
+                  if (notification.metrics.pixels >
+                      notification.metrics.maxScrollExtent - dimension) {
+                    BlocProvider.of<MessageBloc>(context).loadMore();
+                  }
+                  return false;
+                },
+                child: BlocConverter<MessageBloc, MessageState,
+                    Tuple2<String, int>>(
+                  converter: (state) =>
+                      Tuple2(state.conversationId, state.messages?.length ?? 0),
+                  builder: (context, tuple2) => ListView.builder(
+                    key: ValueKey(tuple2.item1),
+                    controller: ScrollController(keepScrollOffset: false),
+                    reverse: true,
+                    itemCount: tuple2.item2,
+                    itemBuilder: (BuildContext context, int index) =>
+                        _Message(index: index),
                   ),
                 ),
               ),
             ),
-            const InputContainer()
-          ],
-        ),
+          ),
+          const InputContainer()
+        ],
       ),
     );
   }
