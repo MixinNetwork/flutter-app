@@ -34,6 +34,15 @@ class InsertOrReplacePagingEvent<T> extends PagingEvent<T> {
   List<Object> get props => [item];
 }
 
+class RemovePagingEvent<T> extends PagingEvent<T> {
+  const RemovePagingEvent(this.item);
+
+  final T item;
+
+  @override
+  List<Object> get props => [item];
+}
+
 class InsertOrMovePagingEvent<T> extends PagingEvent<T> {
   const InsertOrMovePagingEvent(this.item);
 

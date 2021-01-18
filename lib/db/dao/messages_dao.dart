@@ -1,4 +1,3 @@
-import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 
@@ -13,8 +12,6 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     final result = await into(db.messages).insertOnConflictUpdate(message);
     await db.conversationsDao
         .updateLastMessageId(message.conversationId, message.messageId);
-    db.eventBus
-        .send(DatabaseEvent.insertOrMoveConversation, message.conversationId);
     return result;
   }
 
