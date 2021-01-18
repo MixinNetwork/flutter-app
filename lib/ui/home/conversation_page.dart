@@ -4,16 +4,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
+import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
+import 'package:flutter_app/widgets/message_status_icon.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -115,15 +119,7 @@ class _List extends StatelessWidget {
                     conversation?.conversationId == state?.conversationId,
                 builder: (context, selected) => _Item(
                   selected: selected,
-                  avatars: [
-                    conversation.groupIconUrl ?? conversation.avatarUrl ?? ''
-                  ],
-                  name: conversation.name,
-                  dateTime: conversation.createdAt,
-                  messageStatus: conversation.messageStatus,
-                  message: conversation.content,
-                  count: conversation.unseenMessageCount,
-                  unread: true,
+                  conversation: conversation,
                   onTap: () {
                     BlocProvider.of<ConversationCubit>(context)
                         .emit(conversation);
@@ -158,25 +154,13 @@ class _Item extends StatelessWidget {
   const _Item({
     Key key,
     this.selected = false,
-    @required this.avatars,
-    @required this.name,
-    @required this.dateTime,
-    @required this.messageStatus,
-    @required this.message,
-    this.count = 0,
-    this.unread = false,
+    @required this.conversation,
     this.onTap,
     this.onRightClick,
   }) : super(key: key);
 
   final bool selected;
-  final List<String> avatars;
-  final String name;
-  final DateTime dateTime;
-  final String messageStatus;
-  final String message;
-  final int count;
-  final bool unread;
+  final ConversationItem conversation;
   final VoidCallback onTap;
   final ValueChanged<PointerUpEvent> onRightClick;
 
@@ -211,7 +195,9 @@ class _Item extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   child: AvatarsWidget(
                     size: 50,
-                    avatars: avatars,
+                    avatars: [
+                      conversation.groupIconUrl ?? conversation.avatarUrl
+                    ],
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -225,7 +211,7 @@ class _Item extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                name,
+                                conversation.name,
                                 style: TextStyle(
                                   color: BrightnessData.dynamicColor(
                                     context,
@@ -239,9 +225,9 @@ class _Item extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              dateTime != null
-                                  ? convertStringTime(dateTime)
-                                  : '',
+                              convertStringTime(
+                                  conversation.lastMessageCreatedAt ??
+                                      conversation.createdAt),
                               style: TextStyle(
                                 color: messageColor,
                                 fontSize: 12,
@@ -256,40 +242,13 @@ class _Item extends StatelessWidget {
                               Expanded(
                                 child: _MessagePreview(
                                   messageColor: messageColor,
-                                  messageStatus:
-                                      messageStatus ?? 'messageStatus',
-                                  message: message ?? 'message',
+                                  conversation: conversation,
                                 ),
                               ),
-                              UnreadText(
-                                count: count ?? 0,
-                                backgroundColor: unread
-                                    ? BrightnessData.dynamicColor(
-                                        context,
-                                        const Color.fromRGBO(61, 117, 227, 1),
-                                        darkColor: const Color.fromRGBO(
-                                            65, 145, 255, 1),
-                                      )
-                                    : BrightnessData.dynamicColor(
-                                        context,
-                                        const Color.fromRGBO(184, 189, 199, 1),
-                                        darkColor: const Color.fromRGBO(
-                                            255, 255, 255, 0.4),
-                                      ),
-                                textColor: unread
-                                    ? BrightnessData.dynamicColor(
-                                        context,
-                                        const Color.fromRGBO(255, 255, 255, 1),
-                                        darkColor: const Color.fromRGBO(
-                                            255, 255, 255, 1),
-                                      )
-                                    : BrightnessData.dynamicColor(
-                                        context,
-                                        const Color.fromRGBO(255, 255, 255, 1),
-                                        darkColor:
-                                            const Color.fromRGBO(44, 49, 54, 1),
-                                      ),
-                              ),
+                              if (conversation.unseenMessageCount ?? 0 > 0)
+                                _UnreadText(conversation: conversation),
+                              if (conversation.unseenMessageCount ?? 0 <= 0)
+                                _StatusRow(conversation: conversation),
                             ],
                           ),
                         ),
@@ -306,25 +265,208 @@ class _Item extends StatelessWidget {
   }
 }
 
+class _StatusRow extends StatelessWidget {
+  const _StatusRow({Key key, this.conversation}) : super(key: key);
+  final ConversationItem conversation;
+
+  @override
+  Widget build(BuildContext context) {
+    final dynamicColor = BrightnessData.dynamicColor(
+      context,
+      const Color.fromRGBO(229, 231, 235, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+    );
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: joinList(
+        [
+          if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
+            SvgPicture.asset(
+              Resources.assetsImagesMuteSvg,
+              color: dynamicColor,
+            ),
+          if (conversation.pinTime?.isAfter(DateTime.now()) == true)
+            SvgPicture.asset(
+              Resources.assetsImagesPinSvg,
+              color: dynamicColor,
+            ),
+        ],
+        const SizedBox(width: 4),
+      ),
+    );
+  }
+}
+
+class _UnreadText extends StatelessWidget {
+  const _UnreadText({
+    Key key,
+    @required this.conversation,
+  }) : super(key: key);
+
+  final ConversationItem conversation;
+
+  @override
+  Widget build(BuildContext context) {
+    return UnreadText(
+      count: conversation.unseenMessageCount ?? 0,
+      backgroundColor: conversation.pinTime?.isAfter(DateTime.now()) == true
+          ? BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(61, 117, 227, 1),
+              darkColor: const Color.fromRGBO(65, 145, 255, 1),
+            )
+          : BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(184, 189, 199, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+            ),
+      textColor: conversation.pinTime != null
+          ? BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(255, 255, 255, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 1),
+            )
+          : BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(255, 255, 255, 1),
+              darkColor: const Color.fromRGBO(44, 49, 54, 1),
+            ),
+    );
+  }
+}
+
 class _MessagePreview extends StatelessWidget {
   const _MessagePreview({
     Key key,
     @required this.messageColor,
-    this.messageStatus,
-    this.message,
+    @required this.conversation,
   }) : super(key: key);
 
   final Color messageColor;
-  final String messageStatus;
-  final String message;
+  final ConversationItem conversation;
 
   @override
-  Widget build(BuildContext context) => Text(
-        message,
-        style: TextStyle(
-          color: messageColor,
-          fontSize: 14,
-        ),
-        overflow: TextOverflow.ellipsis,
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _MessageStatusIcon(conversation: conversation),
+          Expanded(
+            child: _MessageContent(conversation: conversation),
+          ),
+        ],
       );
+}
+
+class _MessageContent extends StatelessWidget {
+  const _MessageContent({Key key, this.conversation}) : super(key: key);
+  final ConversationItem conversation;
+
+  @override
+  Widget build(BuildContext context) {
+    final dynamicColor = BrightnessData.dynamicColor(
+      context,
+      const Color.fromRGBO(184, 189, 199, 1),
+      darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+    );
+    String icon;
+    String content;
+
+    if (conversation.messageStatus == 'FAILED') {
+      icon = Resources.assetsImagesSendingSvg;
+      content = Localization.of(context).waitingForThisMessage;
+    } else if (conversation.isText) {
+      // todo markdown and mention
+      content = conversation.content;
+    } else if (conversation.contentType == 'SYSTEM_ACCOUNT_SNAPSHOT') {
+      content = '[${Localization.of(context).transfer}]';
+      icon = Resources.assetsImagesTransferSvg;
+    } else if (conversation.isSticker) {
+      content = '[${Localization.of(context).sticker}]';
+      icon = Resources.assetsImagesStickerSvg;
+    } else if (conversation.isImage) {
+      content = '[${Localization.of(context).image}]';
+      icon = Resources.assetsImagesImageSvg;
+    } else if (conversation.isVideo) {
+      content = '[${Localization.of(context).video}]';
+      icon = Resources.assetsImagesVideoSvg;
+    } else if (conversation.isLive) {
+      content = '[${Localization.of(context).live}]';
+      icon = Resources.assetsImagesLiveSvg;
+    } else if (conversation.isData) {
+      content = '[${Localization.of(context).file}]';
+      icon = Resources.assetsImagesFileSvg;
+    } else if (conversation.isPost) {
+      icon = Resources.assetsImagesFileSvg;
+      // todo
+      content = 'post';
+    } else if (conversation.isLocation) {
+      content = '[${Localization.of(context).location}]';
+      // icon = Resources.assetsImagesLocationSvg;
+    } else if (conversation.isAudio) {
+      content = '[${Localization.of(context).audio}]';
+      icon = Resources.assetsImagesAudioSvg;
+    } else if (conversation.contentType == 'APP_BUTTON_GROUP') {
+      // todo
+      content = 'APP_BUTTON_GROUP';
+      icon = Resources.assetsImagesAppButtonSvg;
+    } else if (conversation.contentType == 'APP_CARD') {
+      content = 'APP_CARD';
+      icon = Resources.assetsImagesAppButtonSvg;
+    } else if (conversation.isContact) {
+      content = '[${Localization.of(context).contact}]';
+      icon = Resources.assetsImagesContactSvg;
+    } else if (conversation.isCallMessage) {
+      content = '[${Localization.of(context).videoCall}]';
+      icon = Resources.assetsImagesVideoCallSvg;
+    } else if (conversation.isRecall) {
+      // todo
+      // content = '[${Localization.of(context).recall}]';
+      icon = Resources.assetsImagesRecallSvg;
+    } else if (conversation.isGroupCall) {
+// todo
+    }
+
+    return Row(
+      children: joinList(
+        [
+          if (icon != null)
+            SvgPicture.asset(
+              icon,
+              color: dynamicColor,
+            ),
+          Expanded(
+            child: Text(
+              content,
+              style: TextStyle(
+                color: dynamicColor,
+                fontSize: 14,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+        const SizedBox(width: 4),
+      ),
+    );
+  }
+}
+
+class _MessageStatusIcon extends StatelessWidget {
+  const _MessageStatusIcon({Key key, this.conversation}) : super(key: key);
+
+  final ConversationItem conversation;
+
+  @override
+  Widget build(BuildContext context) {
+    if (MultiAuthCubit.of(context)?.state?.current?.account?.userId ==
+            conversation.messageStatus &&
+        conversation.contentType != 'SYSTEM_CONVERSATION' &&
+        conversation.contentType != 'SYSTEM_ACCOUNT_SNAPSHOT' &&
+        !conversation.isCallMessage &&
+        !conversation.isRecall &&
+        !conversation.isGroupCall) {
+      return MessageStatusIcon(status: conversation.messageStatus);
+    }
+    return const SizedBox();
+  }
 }

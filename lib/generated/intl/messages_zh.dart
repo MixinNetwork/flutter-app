@@ -27,10 +27,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("关于"),
     "appearance" : MessageLookupByLibrary.simpleMessage("显示偏好"),
+    "audio" : MessageLookupByLibrary.simpleMessage("语音"),
     "bots" : MessageLookupByLibrary.simpleMessage("机器人"),
     "cancel" : MessageLookupByLibrary.simpleMessage("取消"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("聊天记录备份"),
     "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
+    "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
     "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),
     "copy" : MessageLookupByLibrary.simpleMessage("复制"),
     "dataAndStorageUsage" : MessageLookupByLibrary.simpleMessage("数据和存储使用情况"),
@@ -40,10 +42,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "editCircleName" : MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
     "editConversations" : MessageLookupByLibrary.simpleMessage("编辑会话"),
     "editProfile" : MessageLookupByLibrary.simpleMessage("编辑资料"),
+    "file" : MessageLookupByLibrary.simpleMessage("文件"),
     "forward" : MessageLookupByLibrary.simpleMessage("转发"),
     "group" : MessageLookupByLibrary.simpleMessage("群组"),
+    "image" : MessageLookupByLibrary.simpleMessage("照片"),
     "initializing" : MessageLookupByLibrary.simpleMessage("初始化"),
     "introduction" : MessageLookupByLibrary.simpleMessage("介绍"),
+    "live" : MessageLookupByLibrary.simpleMessage("Live"),
+    "location" : MessageLookupByLibrary.simpleMessage("位置"),
     "mute" : MessageLookupByLibrary.simpleMessage("静音"),
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),
@@ -62,8 +68,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "save" : MessageLookupByLibrary.simpleMessage("保存"),
     "search" : MessageLookupByLibrary.simpleMessage("搜索"),
     "signOut" : MessageLookupByLibrary.simpleMessage("登出"),
+    "sticker" : MessageLookupByLibrary.simpleMessage("贴纸"),
     "strangers" : MessageLookupByLibrary.simpleMessage("陌生人"),
+    "transfer" : MessageLookupByLibrary.simpleMessage("转账"),
     "unMute" : MessageLookupByLibrary.simpleMessage("取消静音"),
-    "unPin" : MessageLookupByLibrary.simpleMessage("取消置顶")
+    "unPin" : MessageLookupByLibrary.simpleMessage("取消置顶"),
+    "video" : MessageLookupByLibrary.simpleMessage("视频"),
+    "videoCall" : MessageLookupByLibrary.simpleMessage("语音电话"),
+    "waitingForThisMessage" : MessageLookupByLibrary.simpleMessage("正在等待这个消息。")
   };
 }

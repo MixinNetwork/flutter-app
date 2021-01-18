@@ -2056,7 +2056,7 @@ class CircleConversation extends DataClass
   final String circleId;
   final String userId;
   final DateTime createdAt;
-  final String pinTime;
+  final DateTime pinTime;
   CircleConversation(
       {@required this.conversationId,
       @required this.circleId,
@@ -2078,7 +2078,7 @@ class CircleConversation extends DataClass
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      pinTime: stringType
+      pinTime: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}pin_time']),
     );
   }
@@ -2098,7 +2098,7 @@ class CircleConversation extends DataClass
       map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || pinTime != null) {
-      map['pin_time'] = Variable<String>(pinTime);
+      map['pin_time'] = Variable<DateTime>(pinTime);
     }
     return map;
   }
@@ -2130,7 +2130,7 @@ class CircleConversation extends DataClass
       circleId: serializer.fromJson<String>(json['circle_id']),
       userId: serializer.fromJson<String>(json['user_id']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      pinTime: serializer.fromJson<String>(json['pin_time']),
+      pinTime: serializer.fromJson<DateTime>(json['pin_time']),
     );
   }
   @override
@@ -2141,7 +2141,7 @@ class CircleConversation extends DataClass
       'circle_id': serializer.toJson<String>(circleId),
       'user_id': serializer.toJson<String>(userId),
       'created_at': serializer.toJson<DateTime>(createdAt),
-      'pin_time': serializer.toJson<String>(pinTime),
+      'pin_time': serializer.toJson<DateTime>(pinTime),
     };
   }
 
@@ -2150,7 +2150,7 @@ class CircleConversation extends DataClass
           String circleId,
           String userId,
           DateTime createdAt,
-          String pinTime}) =>
+          DateTime pinTime}) =>
       CircleConversation(
         conversationId: conversationId ?? this.conversationId,
         circleId: circleId ?? this.circleId,
@@ -2193,7 +2193,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
   final Value<String> circleId;
   final Value<String> userId;
   final Value<DateTime> createdAt;
-  final Value<String> pinTime;
+  final Value<DateTime> pinTime;
   const CircleConversationsCompanion({
     this.conversationId = const Value.absent(),
     this.circleId = const Value.absent(),
@@ -2215,7 +2215,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
     Expression<String> circleId,
     Expression<String> userId,
     Expression<DateTime> createdAt,
-    Expression<String> pinTime,
+    Expression<DateTime> pinTime,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -2231,7 +2231,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
       Value<String> circleId,
       Value<String> userId,
       Value<DateTime> createdAt,
-      Value<String> pinTime}) {
+      Value<DateTime> pinTime}) {
     return CircleConversationsCompanion(
       conversationId: conversationId ?? this.conversationId,
       circleId: circleId ?? this.circleId,
@@ -2257,7 +2257,7 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (pinTime.present) {
-      map['pin_time'] = Variable<String>(pinTime.value);
+      map['pin_time'] = Variable<DateTime>(pinTime.value);
     }
     return map;
   }
@@ -2315,10 +2315,10 @@ class CircleConversations extends Table
   }
 
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
-  GeneratedTextColumn _pinTime;
-  GeneratedTextColumn get pinTime => _pinTime ??= _constructPinTime();
-  GeneratedTextColumn _constructPinTime() {
-    return GeneratedTextColumn('pin_time', $tableName, true,
+  GeneratedDateTimeColumn _pinTime;
+  GeneratedDateTimeColumn get pinTime => _pinTime ??= _constructPinTime();
+  GeneratedDateTimeColumn _constructPinTime() {
+    return GeneratedDateTimeColumn('pin_time', $tableName, true,
         $customConstraints: '');
   }
 
@@ -2680,13 +2680,13 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   final String codeUrl;
   final String payType;
   final DateTime createdAt;
-  final String pinTime;
+  final DateTime pinTime;
   final String lastMessageId;
   final String lastReadMessageId;
   final int unseenMessageCount;
   final int status;
   final String draft;
-  final String muteUntil;
+  final DateTime muteUntil;
   Conversation(
       {@required this.conversationId,
       this.ownerId,
@@ -2728,7 +2728,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           .mapFromDatabaseResponse(data['${effectivePrefix}pay_type']),
       createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      pinTime: stringType
+      pinTime: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}pin_time']),
       lastMessageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_message_id']),
@@ -2739,7 +2739,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       status: intType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
       draft:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}draft']),
-      muteUntil: stringType
+      muteUntil: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}mute_until']),
     );
   }
@@ -2774,7 +2774,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || pinTime != null) {
-      map['pin_time'] = Variable<String>(pinTime);
+      map['pin_time'] = Variable<DateTime>(pinTime);
     }
     if (!nullToAbsent || lastMessageId != null) {
       map['last_message_id'] = Variable<String>(lastMessageId);
@@ -2792,7 +2792,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['draft'] = Variable<String>(draft);
     }
     if (!nullToAbsent || muteUntil != null) {
-      map['mute_until'] = Variable<String>(muteUntil);
+      map['mute_until'] = Variable<DateTime>(muteUntil);
     }
     return map;
   }
@@ -2859,7 +2859,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       codeUrl: serializer.fromJson<String>(json['code_url']),
       payType: serializer.fromJson<String>(json['pay_type']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      pinTime: serializer.fromJson<String>(json['pin_time']),
+      pinTime: serializer.fromJson<DateTime>(json['pin_time']),
       lastMessageId: serializer.fromJson<String>(json['last_message_id']),
       lastReadMessageId:
           serializer.fromJson<String>(json['last_read_message_id']),
@@ -2867,7 +2867,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           serializer.fromJson<int>(json['unseen_message_count']),
       status: serializer.fromJson<int>(json['status']),
       draft: serializer.fromJson<String>(json['draft']),
-      muteUntil: serializer.fromJson<String>(json['mute_until']),
+      muteUntil: serializer.fromJson<DateTime>(json['mute_until']),
     );
   }
   @override
@@ -2883,13 +2883,13 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       'code_url': serializer.toJson<String>(codeUrl),
       'pay_type': serializer.toJson<String>(payType),
       'created_at': serializer.toJson<DateTime>(createdAt),
-      'pin_time': serializer.toJson<String>(pinTime),
+      'pin_time': serializer.toJson<DateTime>(pinTime),
       'last_message_id': serializer.toJson<String>(lastMessageId),
       'last_read_message_id': serializer.toJson<String>(lastReadMessageId),
       'unseen_message_count': serializer.toJson<int>(unseenMessageCount),
       'status': serializer.toJson<int>(status),
       'draft': serializer.toJson<String>(draft),
-      'mute_until': serializer.toJson<String>(muteUntil),
+      'mute_until': serializer.toJson<DateTime>(muteUntil),
     };
   }
 
@@ -2903,13 +2903,13 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           String codeUrl,
           String payType,
           DateTime createdAt,
-          String pinTime,
+          DateTime pinTime,
           String lastMessageId,
           String lastReadMessageId,
           int unseenMessageCount,
           int status,
           String draft,
-          String muteUntil}) =>
+          DateTime muteUntil}) =>
       Conversation(
         conversationId: conversationId ?? this.conversationId,
         ownerId: ownerId ?? this.ownerId,
@@ -3017,13 +3017,13 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   final Value<String> codeUrl;
   final Value<String> payType;
   final Value<DateTime> createdAt;
-  final Value<String> pinTime;
+  final Value<DateTime> pinTime;
   final Value<String> lastMessageId;
   final Value<String> lastReadMessageId;
   final Value<int> unseenMessageCount;
   final Value<int> status;
   final Value<String> draft;
-  final Value<String> muteUntil;
+  final Value<DateTime> muteUntil;
   const ConversationsCompanion({
     this.conversationId = const Value.absent(),
     this.ownerId = const Value.absent(),
@@ -3072,13 +3072,13 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     Expression<String> codeUrl,
     Expression<String> payType,
     Expression<DateTime> createdAt,
-    Expression<String> pinTime,
+    Expression<DateTime> pinTime,
     Expression<String> lastMessageId,
     Expression<String> lastReadMessageId,
     Expression<int> unseenMessageCount,
     Expression<int> status,
     Expression<String> draft,
-    Expression<String> muteUntil,
+    Expression<DateTime> muteUntil,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -3111,13 +3111,13 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       Value<String> codeUrl,
       Value<String> payType,
       Value<DateTime> createdAt,
-      Value<String> pinTime,
+      Value<DateTime> pinTime,
       Value<String> lastMessageId,
       Value<String> lastReadMessageId,
       Value<int> unseenMessageCount,
       Value<int> status,
       Value<String> draft,
-      Value<String> muteUntil}) {
+      Value<DateTime> muteUntil}) {
     return ConversationsCompanion(
       conversationId: conversationId ?? this.conversationId,
       ownerId: ownerId ?? this.ownerId,
@@ -3169,7 +3169,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (pinTime.present) {
-      map['pin_time'] = Variable<String>(pinTime.value);
+      map['pin_time'] = Variable<DateTime>(pinTime.value);
     }
     if (lastMessageId.present) {
       map['last_message_id'] = Variable<String>(lastMessageId.value);
@@ -3187,7 +3187,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['draft'] = Variable<String>(draft.value);
     }
     if (muteUntil.present) {
-      map['mute_until'] = Variable<String>(muteUntil.value);
+      map['mute_until'] = Variable<DateTime>(muteUntil.value);
     }
     return map;
   }
@@ -3297,10 +3297,10 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   }
 
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
-  GeneratedTextColumn _pinTime;
-  GeneratedTextColumn get pinTime => _pinTime ??= _constructPinTime();
-  GeneratedTextColumn _constructPinTime() {
-    return GeneratedTextColumn('pin_time', $tableName, true,
+  GeneratedDateTimeColumn _pinTime;
+  GeneratedDateTimeColumn get pinTime => _pinTime ??= _constructPinTime();
+  GeneratedDateTimeColumn _constructPinTime() {
+    return GeneratedDateTimeColumn('pin_time', $tableName, true,
         $customConstraints: '');
   }
 
@@ -3351,10 +3351,10 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   }
 
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  GeneratedTextColumn _muteUntil;
-  GeneratedTextColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
-  GeneratedTextColumn _constructMuteUntil() {
-    return GeneratedTextColumn('mute_until', $tableName, true,
+  GeneratedDateTimeColumn _muteUntil;
+  GeneratedDateTimeColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
+  GeneratedDateTimeColumn _constructMuteUntil() {
+    return GeneratedDateTimeColumn('mute_until', $tableName, true,
         $customConstraints: '');
   }
 
@@ -10219,7 +10219,7 @@ class User extends DataClass implements Insertable<User> {
   final String phone;
   final int isVerified;
   final DateTime createdAt;
-  final String muteUntil;
+  final DateTime muteUntil;
   final int hasPin;
   final String appId;
   final String biography;
@@ -10261,7 +10261,7 @@ class User extends DataClass implements Insertable<User> {
           .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
       createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      muteUntil: stringType
+      muteUntil: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}mute_until']),
       hasPin:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
@@ -10301,7 +10301,7 @@ class User extends DataClass implements Insertable<User> {
       map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || muteUntil != null) {
-      map['mute_until'] = Variable<String>(muteUntil);
+      map['mute_until'] = Variable<DateTime>(muteUntil);
     }
     if (!nullToAbsent || hasPin != null) {
       map['has_pin'] = Variable<int>(hasPin);
@@ -10369,7 +10369,7 @@ class User extends DataClass implements Insertable<User> {
       phone: serializer.fromJson<String>(json['phone']),
       isVerified: serializer.fromJson<int>(json['is_verified']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      muteUntil: serializer.fromJson<String>(json['mute_until']),
+      muteUntil: serializer.fromJson<DateTime>(json['mute_until']),
       hasPin: serializer.fromJson<int>(json['has_pin']),
       appId: serializer.fromJson<String>(json['app_id']),
       biography: serializer.fromJson<String>(json['biography']),
@@ -10388,7 +10388,7 @@ class User extends DataClass implements Insertable<User> {
       'phone': serializer.toJson<String>(phone),
       'is_verified': serializer.toJson<int>(isVerified),
       'created_at': serializer.toJson<DateTime>(createdAt),
-      'mute_until': serializer.toJson<String>(muteUntil),
+      'mute_until': serializer.toJson<DateTime>(muteUntil),
       'has_pin': serializer.toJson<int>(hasPin),
       'app_id': serializer.toJson<String>(appId),
       'biography': serializer.toJson<String>(biography),
@@ -10405,7 +10405,7 @@ class User extends DataClass implements Insertable<User> {
           String phone,
           int isVerified,
           DateTime createdAt,
-          String muteUntil,
+          DateTime muteUntil,
           int hasPin,
           String appId,
           String biography,
@@ -10498,7 +10498,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> phone;
   final Value<int> isVerified;
   final Value<DateTime> createdAt;
-  final Value<String> muteUntil;
+  final Value<DateTime> muteUntil;
   final Value<int> hasPin;
   final Value<String> appId;
   final Value<String> biography;
@@ -10544,7 +10544,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String> phone,
     Expression<int> isVerified,
     Expression<DateTime> createdAt,
-    Expression<String> muteUntil,
+    Expression<DateTime> muteUntil,
     Expression<int> hasPin,
     Expression<String> appId,
     Expression<String> biography,
@@ -10576,7 +10576,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<String> phone,
       Value<int> isVerified,
       Value<DateTime> createdAt,
-      Value<String> muteUntil,
+      Value<DateTime> muteUntil,
       Value<int> hasPin,
       Value<String> appId,
       Value<String> biography,
@@ -10626,7 +10626,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (muteUntil.present) {
-      map['mute_until'] = Variable<String>(muteUntil.value);
+      map['mute_until'] = Variable<DateTime>(muteUntil.value);
     }
     if (hasPin.present) {
       map['has_pin'] = Variable<int>(hasPin.value);
@@ -10737,10 +10737,10 @@ class Users extends Table with TableInfo<Users, User> {
   }
 
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  GeneratedTextColumn _muteUntil;
-  GeneratedTextColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
-  GeneratedTextColumn _constructMuteUntil() {
-    return GeneratedTextColumn('mute_until', $tableName, true,
+  GeneratedDateTimeColumn _muteUntil;
+  GeneratedDateTimeColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
+  GeneratedDateTimeColumn _constructMuteUntil() {
+    return GeneratedDateTimeColumn('mute_until', $tableName, true,
         $customConstraints: '');
   }
 
@@ -11018,7 +11018,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $expandVar($arrayStartIndex, loadedConversationId.length);
     $arrayStartIndex += loadedConversationId.length;
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IS NOT NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IS NOT NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
         variables: [
           for (var $ in loadedConversationId) Variable.withString($),
           Variable.withDateTime(oldestCreatedAt),
@@ -11040,17 +11040,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readString('pinTime'),
-        muteUntil: row.readString('muteUntil'),
+        pinTime: row.readDateTime('pinTime'),
+        muteUntil: row.readDateTime('muteUntil'),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType: row.readString('contentType'),
         createdAt: row.readDateTime('createdAt'),
+        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11072,7 +11073,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $expandVar($arrayStartIndex, loadedConversationId.length);
     $arrayStartIndex += loadedConversationId.length;
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
         variables: [
           for (var $ in loadedConversationId) Variable.withString($),
           Variable.withDateTime(oldestCreatedAt),
@@ -11094,17 +11095,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readString('pinTime'),
-        muteUntil: row.readString('muteUntil'),
+        pinTime: row.readDateTime('pinTime'),
+        muteUntil: row.readDateTime('muteUntil'),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType: row.readString('contentType'),
         createdAt: row.readDateTime('createdAt'),
+        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11126,7 +11128,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $expandVar($arrayStartIndex, loadedConversationId.length);
     $arrayStartIndex += loadedConversationId.length;
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\' AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\' AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
         variables: [
           for (var $ in loadedConversationId) Variable.withString($),
           Variable.withDateTime(oldestCreatedAt),
@@ -11148,17 +11150,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readString('pinTime'),
-        muteUntil: row.readString('muteUntil'),
+        pinTime: row.readDateTime('pinTime'),
+        muteUntil: row.readDateTime('muteUntil'),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType: row.readString('contentType'),
         createdAt: row.readDateTime('createdAt'),
+        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11180,7 +11183,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $expandVar($arrayStartIndex, loadedConversationId.length);
     $arrayStartIndex += loadedConversationId.length;
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\' AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\' AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
         variables: [
           for (var $ in loadedConversationId) Variable.withString($),
           Variable.withDateTime(oldestCreatedAt),
@@ -11202,17 +11205,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readString('pinTime'),
-        muteUntil: row.readString('muteUntil'),
+        pinTime: row.readDateTime('pinTime'),
+        muteUntil: row.readDateTime('muteUntil'),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType: row.readString('contentType'),
         createdAt: row.readDateTime('createdAt'),
+        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11234,7 +11238,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         $expandVar($arrayStartIndex, loadedConversationId.length);
     $arrayStartIndex += loadedConversationId.length;
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL AND c.conversation_id NOT IN ($expandedloadedConversationId)\n            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE \n              WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END <= :oldestCreatedAt\n              END \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit',
         variables: [
           for (var $ in loadedConversationId) Variable.withString($),
           Variable.withDateTime(oldestCreatedAt),
@@ -11256,17 +11260,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readString('pinTime'),
-        muteUntil: row.readString('muteUntil'),
+        pinTime: row.readDateTime('pinTime'),
+        muteUntil: row.readDateTime('muteUntil'),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType: row.readString('contentType'),
         createdAt: row.readDateTime('createdAt'),
+        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11283,7 +11288,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> conversationItem(String id) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id \n                        ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id \n                        ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC',
         variables: [
           Variable.withString(id)
         ],
@@ -11303,17 +11308,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readString('pinTime'),
-        muteUntil: row.readString('muteUntil'),
+        pinTime: row.readDateTime('pinTime'),
+        muteUntil: row.readDateTime('muteUntil'),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readString('ownerMuteUntil'),
+        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType: row.readString('contentType'),
         createdAt: row.readDateTime('createdAt'),
+        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11386,17 +11392,18 @@ class ConversationItem {
   final String lastReadMessageId;
   final int unseenMessageCount;
   final String ownerId;
-  final String pinTime;
-  final String muteUntil;
+  final DateTime pinTime;
+  final DateTime muteUntil;
   final String avatarUrl;
   final String name;
   final int ownerVerified;
   final String ownerIdentityNumber;
-  final String ownerMuteUntil;
+  final DateTime ownerMuteUntil;
   final String appId;
   final String content;
   final String contentType;
   final DateTime createdAt;
+  final DateTime lastMessageCreatedAt;
   final String mediaUrl;
   final String senderId;
   final String actionName;
@@ -11427,6 +11434,7 @@ class ConversationItem {
     this.content,
     this.contentType,
     this.createdAt,
+    this.lastMessageCreatedAt,
     this.mediaUrl,
     this.senderId,
     this.actionName,
@@ -11482,7 +11490,7 @@ class ConversationItem {
                                                                               .hashCode,
                                                                           $mrjc(
                                                                               createdAt.hashCode,
-                                                                              $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, mentions.hashCode)))))))))))))))))))))))))))));
+                                                                              $mrjc(lastMessageCreatedAt.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, mentions.hashCode))))))))))))))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -11506,6 +11514,7 @@ class ConversationItem {
           other.content == this.content &&
           other.contentType == this.contentType &&
           other.createdAt == this.createdAt &&
+          other.lastMessageCreatedAt == this.lastMessageCreatedAt &&
           other.mediaUrl == this.mediaUrl &&
           other.senderId == this.senderId &&
           other.actionName == this.actionName &&
@@ -11538,6 +11547,7 @@ class ConversationItem {
           ..write('content: $content, ')
           ..write('contentType: $contentType, ')
           ..write('createdAt: $createdAt, ')
+          ..write('lastMessageCreatedAt: $lastMessageCreatedAt, ')
           ..write('mediaUrl: $mediaUrl, ')
           ..write('senderId: $senderId, ')
           ..write('actionName: $actionName, ')

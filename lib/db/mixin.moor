@@ -6,11 +6,11 @@ CREATE TABLE apps (app_id TEXT NOT NULL, app_number TEXT NOT NULL, home_uri TEXT
 
 CREATE TABLE assets (asset_id TEXT NOT NULL,symbol TEXT NOT NULL,name TEXT NOT NULL,icon_url TEXT NOT NULL,balance TEXT NOT NULL,destination TEXT NOT NULL,tag TEXT,price_btc TEXT NOT NULL,price_usd TEXT NOT NULL,chain_id TEXT NOT NULL,change_usd TEXT NOT NULL,change_btc TEXT NOT NULL,confirmations INTEGER NOT NULL,asset_key TEXT,PRIMARY KEY(asset_id));
 
-CREATE TABLE circle_conversations ( conversation_id TEXT NOT NULL, circle_id TEXT NOT NULL, user_id TEXT, created_at DATETIME NOT NULL, pin_time TEXT, PRIMARY KEY(conversation_id, circle_id) );
+CREATE TABLE circle_conversations ( conversation_id TEXT NOT NULL, circle_id TEXT NOT NULL, user_id TEXT, created_at DATETIME NOT NULL, pin_time DATETIME, PRIMARY KEY(conversation_id, circle_id) );
 
 CREATE TABLE circles ( circle_id TEXT NOT NULL, name TEXT NOT NULL, created_at DATETIME NOT NULL, ordered_at DATETIME, PRIMARY KEY(circle_id) );
 
-CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at DATETIME NOT NULL, pin_time TEXT, last_message_id TEXT, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL, draft TEXT, mute_until TEXT, PRIMARY KEY(conversation_id) );
+CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at DATETIME NOT NULL, pin_time DATETIME, last_message_id TEXT, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL, draft TEXT, mute_until DATETIME, PRIMARY KEY(conversation_id) );
 
 CREATE TABLE flood_messages ( message_id TEXT NOT NULL, data TEXT NOT NULL, created_at DATETIME NOT NULL, PRIMARY KEY(message_id) );
 
@@ -44,7 +44,7 @@ CREATE TABLE sticker_relationships ( album_id TEXT NOT NULL, sticker_id TEXT NOT
 
 CREATE TABLE stickers ( sticker_id TEXT NOT NULL, album_id TEXT, name TEXT NOT NULL, asset_url TEXT NOT NULL, asset_type TEXT NOT NULL, asset_width INTEGER NOT NULL, asset_height INTEGER NOT NULL, created_at DATETIME NOT NULL, last_use_at DATETIME, PRIMARY KEY(sticker_id) );
 
-CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT NOT NULL, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified INTEGER, created_at DATETIME, mute_until TEXT, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) );
+CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT NOT NULL, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified INTEGER, created_at DATETIME, mute_until DATETIME, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) );
 
 
 conversationItems AS ConversationItem:
@@ -53,7 +53,7 @@ conversationItems AS ConversationItem:
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
             ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,
+            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
             m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
             mu.full_name AS senderFullName, s.type AS SnapshotType,
             pu.full_name AS participantFullName, pu.user_id AS participantUserId,
@@ -86,7 +86,7 @@ contactConversations AS ConversationItem:
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
             ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,
+            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
             m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
             mu.full_name AS senderFullName, s.type AS SnapshotType,
             pu.full_name AS participantFullName, pu.user_id AS participantUserId,
@@ -119,7 +119,7 @@ strangerConversations AS ConversationItem:
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
             ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,
+            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
             m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
             mu.full_name AS senderFullName, s.type AS SnapshotType,
             pu.full_name AS participantFullName, pu.user_id AS participantUserId,
@@ -152,7 +152,7 @@ groupConversations AS ConversationItem:
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
             ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,
+            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
             m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
             mu.full_name AS senderFullName, s.type AS SnapshotType,
             pu.full_name AS participantFullName, pu.user_id AS participantUserId,
@@ -185,7 +185,7 @@ botConversations AS ConversationItem:
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
             ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,
+            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
             m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
             mu.full_name AS senderFullName, s.type AS SnapshotType,
             pu.full_name AS participantFullName, pu.user_id AS participantUserId,
@@ -218,7 +218,7 @@ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.catego
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
             ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, m.created_at AS createdAt, m.media_url AS mediaUrl,
+            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
             m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
             mu.full_name AS senderFullName, s.type AS SnapshotType,
             pu.full_name AS participantFullName, pu.user_id AS participantUserId,

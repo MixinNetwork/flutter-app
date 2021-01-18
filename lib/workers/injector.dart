@@ -30,7 +30,8 @@ class Injector {
           });
         }
 
-        await database.conversationDao.insert(db.Conversation(
+        await database.conversationDao.insert(
+          db.Conversation(
             conversationId: response.data.conversationId,
             ownerId: ownerId,
             category: response.data.category,
@@ -38,7 +39,9 @@ class Injector {
             announcement: response.data.announcement,
             createdAt: response.data.createdAt,
             status: ConversationStatus.success.index,
-            muteUntil: response.data.muteUntil));
+            muteUntil: DateTime.parse(response.data.muteUntil),
+          ),
+        );
         refreshParticipants(
             response.data.conversationId, response.data.participants);
       }
@@ -82,7 +85,7 @@ class Injector {
                 phone: e.phone,
                 isVerified: e.isVerified ? 1 : 0,
                 createdAt: e.createdAt,
-                muteUntil: e.muteUntil,
+                muteUntil: DateTime.tryParse(e.muteUntil),
                 appId: e.appId,
                 biography: e.biography,
                 isScam: e.isScam ? 1 : 0,
@@ -109,7 +112,7 @@ class Injector {
             isVerified: result.isVerified ? 1 : 0,
             appId: result.app?.appId,
             biography: result.biography,
-            muteUntil: result.muteUntil,
+            muteUntil: DateTime.tryParse(result.muteUntil),
             isScam: result.isScam ? 1 : 0,
             createdAt: result.createdAt);
         await database.userDao.insert(user);

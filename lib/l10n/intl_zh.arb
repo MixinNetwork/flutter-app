@@ -38,5 +38,16 @@
 	"mute": "静音",
 	"unMute": "取消静音",
 	"pageDeleteCircle": "确定删除{name}圈子吗？",
-	"cancel": "取消"
+	"cancel": "取消",
+	"waitingForThisMessage": "正在等待这个消息。",
+	"transfer": "转账",
+	"sticker": "贴纸",
+	"image": "照片",
+	"video": "视频",
+	"live": "Live",
+	"file": "文件",
+	"location": "位置",
+	"audio": "语音",
+	"contact": "联系人",
+	"videoCall": "语音电话"
 }

@@ -4,9 +4,15 @@
 // **************************************************************************
 class Resources {
   const Resources._();
+  static const String assetsImagesAppButtonSvg = 'assets/images/app_button.svg';
+
+  static const String assetsImagesAudioSvg = 'assets/images/audio.svg';
+
   static const String assetsImagesBotPng = 'assets/images/bot.png';
 
   static const String assetsImagesCirclePng = 'assets/images/circle.png';
+
+  static const String assetsImagesContactSvg = 'assets/images/contact.svg';
 
   static const String assetsImagesContactsPng = 'assets/images/contacts.png';
 
@@ -18,6 +24,10 @@ class Resources {
 
   static const String assetsImagesDarkSenderNipBubblePng =
       'assets/images/dark_sender_nip_bubble.png';
+
+  static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
+
+  static const String assetsImagesFileSvg = 'assets/images/file.svg';
 
   static const String assetsImagesGroupPng = 'assets/images/group.png';
 
@@ -63,13 +73,37 @@ class Resources {
   static const String assetsImagesIcStorageUsageSvg =
       'assets/images/ic_storage_usage.svg';
 
+  static const String assetsImagesImageSvg = 'assets/images/image.svg';
+
   static const String assetsImagesLightReceiverNipBubblePng =
       'assets/images/light_receiver_nip_bubble.png';
 
   static const String assetsImagesLightSenderNipBubblePng =
       'assets/images/light_sender_nip_bubble.png';
 
+  static const String assetsImagesLiveSvg = 'assets/images/live.svg';
+
   static const String assetsImagesLogoPng = 'assets/images/logo.png';
 
+  static const String assetsImagesMuteSvg = 'assets/images/mute.svg';
+
+  static const String assetsImagesPinSvg = 'assets/images/pin.svg';
+
+  static const String assetsImagesReadSvg = 'assets/images/read.svg';
+
+  static const String assetsImagesRecallSvg = 'assets/images/recall.svg';
+
+  static const String assetsImagesSendingSvg = 'assets/images/sending.svg';
+
+  static const String assetsImagesSentSvg = 'assets/images/sent.svg';
+
+  static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
+
   static const String assetsImagesStrangersPng = 'assets/images/strangers.png';
+
+  static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
+
+  static const String assetsImagesVideoSvg = 'assets/images/video.svg';
+
+  static const String assetsImagesVideoCallSvg = 'assets/images/video_call.svg';
 }

@@ -27,10 +27,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("About"),
     "appearance" : MessageLookupByLibrary.simpleMessage("Appearance"),
+    "audio" : MessageLookupByLibrary.simpleMessage("Audio"),
     "bots" : MessageLookupByLibrary.simpleMessage("Bots"),
     "cancel" : MessageLookupByLibrary.simpleMessage("Cancel"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("Chat Backup"),
     "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
+    "contact" : MessageLookupByLibrary.simpleMessage("Contact"),
     "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
     "copy" : MessageLookupByLibrary.simpleMessage("Copy"),
     "dataAndStorageUsage" : MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
@@ -40,10 +42,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "editCircleName" : MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
     "editConversations" : MessageLookupByLibrary.simpleMessage("Edit Conversations"),
     "editProfile" : MessageLookupByLibrary.simpleMessage("Edit Profile"),
+    "file" : MessageLookupByLibrary.simpleMessage("File"),
     "forward" : MessageLookupByLibrary.simpleMessage("Forward"),
     "group" : MessageLookupByLibrary.simpleMessage("Group"),
+    "image" : MessageLookupByLibrary.simpleMessage("Image"),
     "initializing" : MessageLookupByLibrary.simpleMessage("Initializing"),
     "introduction" : MessageLookupByLibrary.simpleMessage("Introduction"),
+    "live" : MessageLookupByLibrary.simpleMessage("Live"),
+    "location" : MessageLookupByLibrary.simpleMessage("Location"),
     "mute" : MessageLookupByLibrary.simpleMessage("Mute"),
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
@@ -62,8 +68,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "save" : MessageLookupByLibrary.simpleMessage("Save"),
     "search" : MessageLookupByLibrary.simpleMessage("Search"),
     "signOut" : MessageLookupByLibrary.simpleMessage("Sign Out"),
+    "sticker" : MessageLookupByLibrary.simpleMessage("Sticker"),
     "strangers" : MessageLookupByLibrary.simpleMessage("Strangers"),
+    "transfer" : MessageLookupByLibrary.simpleMessage("Transfer"),
     "unMute" : MessageLookupByLibrary.simpleMessage("UnMute"),
-    "unPin" : MessageLookupByLibrary.simpleMessage("UnPin")
+    "unPin" : MessageLookupByLibrary.simpleMessage("UnPin"),
+    "video" : MessageLookupByLibrary.simpleMessage("Video"),
+    "videoCall" : MessageLookupByLibrary.simpleMessage("Video call"),
+    "waitingForThisMessage" : MessageLookupByLibrary.simpleMessage("Waiting for this message.")
   };
 }

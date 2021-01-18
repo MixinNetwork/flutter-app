@@ -38,5 +38,16 @@
 	"mute": "Mute",
 	"unMute": "UnMute",
 	"pageDeleteCircle": "Do you want to delete {name} circle?",
-	"cancel": "Cancel"
+	"cancel": "Cancel",
+	"waitingForThisMessage": "Waiting for this message.",
+	"transfer": "Transfer",
+	"sticker": "Sticker",
+	"image": "Image",
+	"video": "Video",
+	"live": "Live",
+	"file": "File",
+	"location": "Location",
+	"audio": "Audio",
+	"contact": "Contact",
+	"videoCall": "Video call"
 }
