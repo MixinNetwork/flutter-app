@@ -1,11 +1,13 @@
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/acount/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/chat_bar.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_app/widgets/input_container.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
@@ -50,43 +53,54 @@ class ChatContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversationCubit = BlocProvider.of<ConversationCubit>(context);
-    final messageBloc = MessageBloc(conversationCubit);
+    final messagesDao =
+        Provider.of<AccountServer>(context).database.messagesDao;
+    final windowHeight = MediaQuery.of(context).size.height;
     return BlocProvider(
-      create: (context) => messageBloc,
-      child: Column(
-        children: [
-          ChatBar(onPressed: onPressed, isSelected: isSelected),
-          Expanded(
-            child: Builder(
-              builder: (context) => NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification notification) {
-                  final dimension =
-                      max(notification.metrics.viewportDimension / 3, 200);
-                  if (notification.metrics.pixels >
-                      notification.metrics.maxScrollExtent - dimension) {
-                    BlocProvider.of<MessageBloc>(context).loadMore();
-                  }
-                  return false;
-                },
-                child: BlocConverter<MessageBloc, MessageState,
-                    Tuple2<String, int>>(
-                  converter: (state) =>
-                      Tuple2(state.conversationId, state.messages?.length ?? 0),
-                  builder: (context, tuple2) => ListView.builder(
-                    key: ValueKey(tuple2.item1),
-                    controller: ScrollController(keepScrollOffset: false),
-                    reverse: true,
-                    itemCount: tuple2.item2,
-                    itemBuilder: (BuildContext context, int index) =>
-                        _Message(index: index),
+      create: (context) => MessageBloc(
+        messagesDao,
+        BlocProvider.of<ConversationCubit>(context),
+        windowHeight ~/ 20,
+      ),
+      child: Builder(
+        builder: (context) {
+          BlocProvider.of<MessageBloc>(context)?.limit =
+              MediaQuery.of(context).size.height ~/ 20;
+          return Column(
+            children: [
+              ChatBar(onPressed: onPressed, isSelected: isSelected),
+              Expanded(
+                child: Builder(
+                  builder: (context) =>
+                      NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      final dimension =
+                          max(notification.metrics.viewportDimension / 3, 200);
+                      if (notification.metrics.pixels >
+                          notification.metrics.maxScrollExtent - dimension) {
+                        BlocProvider.of<MessageBloc>(context).loadBefore();
+                      }
+                      return false;
+                    },
+                    child: BlocConverter<MessageBloc, MessageState, int>(
+                      converter: (state) => state.list?.length ?? 0,
+                      builder: (context, count) => ListView.builder(
+                        key: ValueKey(BlocProvider.of<MessageBloc>(context)
+                            .conversationId),
+                        controller: ScrollController(keepScrollOffset: false),
+                        reverse: true,
+                        itemCount: count,
+                        itemBuilder: (BuildContext context, int index) =>
+                            _Message(index: index),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-          const InputContainer()
-        ],
+              const InputContainer()
+            ],
+          );
+        },
       ),
     );
   }
@@ -101,106 +115,108 @@ class _Message extends StatelessWidget {
   final int index;
 
   @override
-  Widget build(BuildContext context) => BlocConverter<MessageBloc, MessageState,
-          Tuple4<bool, DateTime, String, bool>>(
-        converter: (state) {
-          final messages = state.messages;
-          final message = messages[index];
-          final prev = index == 0 ? null : messages[index - 1];
-          final next =
-              messages.length == index + 1 ? null : messages[index + 1];
+  Widget build(BuildContext context) {
+    final authId = MultiAuthCubit.of(context).state.current.account.userId;
+    return BlocConverter<MessageBloc, MessageState,
+        Tuple4<bool, DateTime, String, bool>>(
+      converter: (state) {
+        final messages = state.list;
+        final message = messages[index];
+        final prev = index == 0 ? null : messages[index - 1];
+        final next = messages.length == index + 1 ? null : messages[index + 1];
 
-          final isCurrentUser = message.isCurrentUser;
+        final isCurrentUser = message.userId == authId;
 
-          final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
-          final sameUserPrev = prev?.isCurrentUser == isCurrentUser;
-          final sameUserNext = next?.isCurrentUser == isCurrentUser;
+        final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
+        final sameUserPrev = prev?.userId == message.userId;
+        final sameUserNext = next?.userId == message.userId;
 
-          final showNip = !(sameUserPrev && sameDayPrev);
-          final sameDayNext = isSameDay(next?.createdAt, message.createdAt);
-          final datetime = sameDayNext ? null : message.createdAt;
-          final user = !isCurrentUser && (!sameUserNext || !sameDayNext)
-              ? message.user
-              : null;
+        final showNip = !(sameUserPrev && sameDayPrev);
+        final sameDayNext = isSameDay(next?.createdAt, message.createdAt);
+        final datetime = sameDayNext ? null : message.createdAt;
+        final user = !isCurrentUser && (!sameUserNext || !sameDayNext)
+            ? message.userFullName
+            : null;
 
-          return Tuple4(isCurrentUser, datetime, user, showNip);
-        },
-        builder: (context, Tuple4<bool, DateTime, String, bool> tuple) =>
-            Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (tuple.item2 != null) _DayTime(dateTime: tuple.item2),
-            _MessageBubbleMargin(
-              isCurrentUser: tuple.item1,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (tuple.item3 != null) _Name(user: tuple.item3),
-                  InteractableDecoratedBox(
-                    onRightClick: (pointerUpEvent) => showContextMenu(
-                      context: context,
-                      pointerPosition: pointerUpEvent.position,
-                      menus: [
-                        ContextMenu(
-                          title: Localization.of(context).reply,
-                        ),
-                        ContextMenu(
-                          title: Localization.of(context).forward,
-                        ),
-                        ContextMenu(
-                          title: Localization.of(context).copy,
-                        ),
-                        ContextMenu(
-                          title: Localization.of(context).delete,
-                          isDestructiveAction: true,
-                        ),
-                      ],
-                    ),
-                    child: _MessageBubble(
-                      showNip: tuple.item4,
-                      isCurrentUser: tuple.item1,
-                      child: BlocConverter<MessageBloc, MessageState, Message>(
-                        converter: (state) => state.messages[index],
-                        builder: (context, message) => Wrap(
-                          alignment: WrapAlignment.end,
-                          crossAxisAlignment: WrapCrossAlignment.end,
-                          children: [
-                            Text(
-                              message.message,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: BrightnessData.dynamicColor(
-                                  context,
-                                  const Color.fromRGBO(51, 51, 51, 1),
-                                  darkColor:
-                                      const Color.fromRGBO(255, 255, 255, 0.9),
-                                ),
+        return Tuple4(isCurrentUser, datetime, user, showNip);
+      },
+      builder: (context, Tuple4<bool, DateTime, String, bool> tuple) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (tuple.item2 != null) _DayTime(dateTime: tuple.item2),
+          _MessageBubbleMargin(
+            isCurrentUser: tuple.item1,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (tuple.item3 != null) _Name(user: tuple.item3),
+                InteractableDecoratedBox(
+                  onRightClick: (pointerUpEvent) => showContextMenu(
+                    context: context,
+                    pointerPosition: pointerUpEvent.position,
+                    menus: [
+                      ContextMenu(
+                        title: Localization.of(context).reply,
+                      ),
+                      ContextMenu(
+                        title: Localization.of(context).forward,
+                      ),
+                      ContextMenu(
+                        title: Localization.of(context).copy,
+                      ),
+                      ContextMenu(
+                        title: Localization.of(context).delete,
+                        isDestructiveAction: true,
+                      ),
+                    ],
+                  ),
+                  child: _MessageBubble(
+                    showNip: tuple.item4,
+                    isCurrentUser: tuple.item1,
+                    child:
+                        BlocConverter<MessageBloc, MessageState, MessageItem>(
+                      converter: (state) => state.list[index],
+                      builder: (context, message) => Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: [
+                          Text(
+                            message.content,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: BrightnessData.dynamicColor(
+                                context,
+                                const Color.fromRGBO(51, 51, 51, 1),
+                                darkColor:
+                                    const Color.fromRGBO(255, 255, 255, 0.9),
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              DateFormat.jm().format(message.createdAt),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: BrightnessData.dynamicColor(
-                                  context,
-                                  const Color.fromRGBO(131, 145, 158, 1),
-                                  darkColor:
-                                      const Color.fromRGBO(128, 131, 134, 1),
-                                ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            DateFormat.jm().format(message.createdAt),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: BrightnessData.dynamicColor(
+                                context,
+                                const Color.fromRGBO(131, 145, 158, 1),
+                                darkColor:
+                                    const Color.fromRGBO(128, 131, 134, 1),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Name extends StatelessWidget {

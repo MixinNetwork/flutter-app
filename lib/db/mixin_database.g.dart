@@ -11340,6 +11340,86 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<MessageItem> messageByConversationId(String conversationId,
+      List<String> loadedMessageId, DateTime oldestCreatedAt, int limit) {
+    var $arrayStartIndex = 2;
+    final expandedloadedMessageId =
+        $expandVar($arrayStartIndex, loadedMessageId.length);
+    $arrayStartIndex += loadedMessageId.length;
+    return customSelect(
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n                        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n                        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n                        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n                        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n                        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n                        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n                        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n                        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n                        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n                        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead, \n                        c.name AS groupName\n                        FROM messages m\n                        INNER JOIN users u ON m.user_id = u.user_id\n                        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n                        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n                        LEFT JOIN assets a ON s.asset_id = a.asset_id\n                        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n                        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n                        LEFT JOIN users su ON m.shared_user_id = su.user_id\n                        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n                        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n                        WHERE m.conversation_id = :conversationId \n                        AND m.message_id NOT IN ($expandedloadedMessageId) \n                        AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE m.created_at <= :oldestCreatedAt END \n                        ORDER BY m.created_at DESC\n                        LIMIT :limit',
+        variables: [
+          Variable.withString(conversationId),
+          for (var $ in loadedMessageId) Variable.withString($),
+          Variable.withDateTime(oldestCreatedAt),
+          Variable.withInt(limit)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          snapshots,
+          assets,
+          stickers,
+          hyperlinks,
+          messageMentions,
+          conversations
+        }).map((QueryRow row) {
+      return MessageItem(
+        messageId: row.readString('messageId'),
+        conversationId: row.readString('conversationId'),
+        userId: row.readString('userId'),
+        userFullName: row.readString('userFullName'),
+        userIdentityNumber: row.readString('userIdentityNumber'),
+        appId: row.readString('appId'),
+        type: row.readString('type'),
+        content: row.readString('content'),
+        createdAt: row.readDateTime('createdAt'),
+        status: row.readString('status'),
+        mediaStatus: row.readString('mediaStatus'),
+        mediaWaveform: row.readString('mediaWaveform'),
+        mediaName: row.readString('mediaName'),
+        mediaMimeType: row.readString('mediaMimeType'),
+        mediaSize: row.readInt('mediaSize'),
+        mediaWidth: row.readInt('mediaWidth'),
+        mediaHeight: row.readInt('mediaHeight'),
+        thumbImage: row.readString('thumbImage'),
+        thumbUrl: row.readString('thumbUrl'),
+        mediaUrl: row.readString('mediaUrl'),
+        mediaDuration: row.readString('mediaDuration'),
+        quoteId: row.readString('quoteId'),
+        quoteContent: row.readString('quoteContent'),
+        participantFullName: row.readString('participantFullName'),
+        actionName: row.readString('actionName'),
+        participantUserId: row.readString('participantUserId'),
+        snapshotId: row.readString('snapshotId'),
+        snapshotType: row.readString('snapshotType'),
+        snapshotAmount: row.readString('snapshotAmount'),
+        assetSymbol: row.readString('assetSymbol'),
+        assetId: row.readString('assetId'),
+        assetIcon: row.readString('assetIcon'),
+        assetUrl: row.readString('assetUrl'),
+        assetWidth: row.readInt('assetWidth'),
+        assetHeight: row.readInt('assetHeight'),
+        stickerId: row.readString('stickerId'),
+        assetName: row.readString('assetName'),
+        assetType: row.readString('assetType'),
+        siteName: row.readString('siteName'),
+        siteTitle: row.readString('siteTitle'),
+        siteDescription: row.readString('siteDescription'),
+        siteImage: row.readString('siteImage'),
+        sharedUserId: row.readString('sharedUserId'),
+        sharedUserFullName: row.readString('sharedUserFullName'),
+        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
+        sharedUserAppId: row.readString('sharedUserAppId'),
+        mentions: row.readString('mentions'),
+        mentionRead: row.readInt('mentionRead'),
+        groupName: row.readString('groupName'),
+      );
+    });
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -11568,6 +11648,270 @@ class ConversationItem {
           ..write('mentionCount: $mentionCount, ')
           ..write('mentions: $mentions, ')
           ..write('relationship: $relationship')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MessageItem {
+  final String messageId;
+  final String conversationId;
+  final String userId;
+  final String userFullName;
+  final String userIdentityNumber;
+  final String appId;
+  final String type;
+  final String content;
+  final DateTime createdAt;
+  final String status;
+  final String mediaStatus;
+  final String mediaWaveform;
+  final String mediaName;
+  final String mediaMimeType;
+  final int mediaSize;
+  final int mediaWidth;
+  final int mediaHeight;
+  final String thumbImage;
+  final String thumbUrl;
+  final String mediaUrl;
+  final String mediaDuration;
+  final String quoteId;
+  final String quoteContent;
+  final String participantFullName;
+  final String actionName;
+  final String participantUserId;
+  final String snapshotId;
+  final String snapshotType;
+  final String snapshotAmount;
+  final String assetSymbol;
+  final String assetId;
+  final String assetIcon;
+  final String assetUrl;
+  final int assetWidth;
+  final int assetHeight;
+  final String stickerId;
+  final String assetName;
+  final String assetType;
+  final String siteName;
+  final String siteTitle;
+  final String siteDescription;
+  final String siteImage;
+  final String sharedUserId;
+  final String sharedUserFullName;
+  final String sharedUserIdentityNumber;
+  final String sharedUserAvatarUrl;
+  final int sharedUserIsVerified;
+  final String sharedUserAppId;
+  final String mentions;
+  final int mentionRead;
+  final String groupName;
+  MessageItem({
+    this.messageId,
+    this.conversationId,
+    this.userId,
+    this.userFullName,
+    this.userIdentityNumber,
+    this.appId,
+    this.type,
+    this.content,
+    this.createdAt,
+    this.status,
+    this.mediaStatus,
+    this.mediaWaveform,
+    this.mediaName,
+    this.mediaMimeType,
+    this.mediaSize,
+    this.mediaWidth,
+    this.mediaHeight,
+    this.thumbImage,
+    this.thumbUrl,
+    this.mediaUrl,
+    this.mediaDuration,
+    this.quoteId,
+    this.quoteContent,
+    this.participantFullName,
+    this.actionName,
+    this.participantUserId,
+    this.snapshotId,
+    this.snapshotType,
+    this.snapshotAmount,
+    this.assetSymbol,
+    this.assetId,
+    this.assetIcon,
+    this.assetUrl,
+    this.assetWidth,
+    this.assetHeight,
+    this.stickerId,
+    this.assetName,
+    this.assetType,
+    this.siteName,
+    this.siteTitle,
+    this.siteDescription,
+    this.siteImage,
+    this.sharedUserId,
+    this.sharedUserFullName,
+    this.sharedUserIdentityNumber,
+    this.sharedUserAvatarUrl,
+    this.sharedUserIsVerified,
+    this.sharedUserAppId,
+    this.mentions,
+    this.mentionRead,
+    this.groupName,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode,
+      $mrjc(
+          conversationId.hashCode,
+          $mrjc(
+              userId.hashCode,
+              $mrjc(
+                  userFullName.hashCode,
+                  $mrjc(
+                      userIdentityNumber.hashCode,
+                      $mrjc(
+                          appId.hashCode,
+                          $mrjc(
+                              type.hashCode,
+                              $mrjc(
+                                  content.hashCode,
+                                  $mrjc(
+                                      createdAt.hashCode,
+                                      $mrjc(
+                                          status.hashCode,
+                                          $mrjc(
+                                              mediaStatus.hashCode,
+                                              $mrjc(
+                                                  mediaWaveform.hashCode,
+                                                  $mrjc(
+                                                      mediaName.hashCode,
+                                                      $mrjc(
+                                                          mediaMimeType
+                                                              .hashCode,
+                                                          $mrjc(
+                                                              mediaSize
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  mediaWidth
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      mediaHeight
+                                                                          .hashCode,
+                                                                      $mrjc(
+                                                                          thumbImage
+                                                                              .hashCode,
+                                                                          $mrjc(
+                                                                              thumbUrl.hashCode,
+                                                                              $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(participantFullName.hashCode, $mrjc(actionName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetId.hashCode, $mrjc(assetIcon.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(mentions.hashCode, $mrjc(mentionRead.hashCode, groupName.hashCode)))))))))))))))))))))))))))))))))))))))))))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is MessageItem &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.userId == this.userId &&
+          other.userFullName == this.userFullName &&
+          other.userIdentityNumber == this.userIdentityNumber &&
+          other.appId == this.appId &&
+          other.type == this.type &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.status == this.status &&
+          other.mediaStatus == this.mediaStatus &&
+          other.mediaWaveform == this.mediaWaveform &&
+          other.mediaName == this.mediaName &&
+          other.mediaMimeType == this.mediaMimeType &&
+          other.mediaSize == this.mediaSize &&
+          other.mediaWidth == this.mediaWidth &&
+          other.mediaHeight == this.mediaHeight &&
+          other.thumbImage == this.thumbImage &&
+          other.thumbUrl == this.thumbUrl &&
+          other.mediaUrl == this.mediaUrl &&
+          other.mediaDuration == this.mediaDuration &&
+          other.quoteId == this.quoteId &&
+          other.quoteContent == this.quoteContent &&
+          other.participantFullName == this.participantFullName &&
+          other.actionName == this.actionName &&
+          other.participantUserId == this.participantUserId &&
+          other.snapshotId == this.snapshotId &&
+          other.snapshotType == this.snapshotType &&
+          other.snapshotAmount == this.snapshotAmount &&
+          other.assetSymbol == this.assetSymbol &&
+          other.assetId == this.assetId &&
+          other.assetIcon == this.assetIcon &&
+          other.assetUrl == this.assetUrl &&
+          other.assetWidth == this.assetWidth &&
+          other.assetHeight == this.assetHeight &&
+          other.stickerId == this.stickerId &&
+          other.assetName == this.assetName &&
+          other.assetType == this.assetType &&
+          other.siteName == this.siteName &&
+          other.siteTitle == this.siteTitle &&
+          other.siteDescription == this.siteDescription &&
+          other.siteImage == this.siteImage &&
+          other.sharedUserId == this.sharedUserId &&
+          other.sharedUserFullName == this.sharedUserFullName &&
+          other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
+          other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
+          other.sharedUserIsVerified == this.sharedUserIsVerified &&
+          other.sharedUserAppId == this.sharedUserAppId &&
+          other.mentions == this.mentions &&
+          other.mentionRead == this.mentionRead &&
+          other.groupName == this.groupName);
+  @override
+  String toString() {
+    return (StringBuffer('MessageItem(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('userIdentityNumber: $userIdentityNumber, ')
+          ..write('appId: $appId, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('status: $status, ')
+          ..write('mediaStatus: $mediaStatus, ')
+          ..write('mediaWaveform: $mediaWaveform, ')
+          ..write('mediaName: $mediaName, ')
+          ..write('mediaMimeType: $mediaMimeType, ')
+          ..write('mediaSize: $mediaSize, ')
+          ..write('mediaWidth: $mediaWidth, ')
+          ..write('mediaHeight: $mediaHeight, ')
+          ..write('thumbImage: $thumbImage, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('mediaDuration: $mediaDuration, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('quoteContent: $quoteContent, ')
+          ..write('participantFullName: $participantFullName, ')
+          ..write('actionName: $actionName, ')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('snapshotId: $snapshotId, ')
+          ..write('snapshotType: $snapshotType, ')
+          ..write('snapshotAmount: $snapshotAmount, ')
+          ..write('assetSymbol: $assetSymbol, ')
+          ..write('assetId: $assetId, ')
+          ..write('assetIcon: $assetIcon, ')
+          ..write('assetUrl: $assetUrl, ')
+          ..write('assetWidth: $assetWidth, ')
+          ..write('assetHeight: $assetHeight, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('assetName: $assetName, ')
+          ..write('assetType: $assetType, ')
+          ..write('siteName: $siteName, ')
+          ..write('siteTitle: $siteTitle, ')
+          ..write('siteDescription: $siteDescription, ')
+          ..write('siteImage: $siteImage, ')
+          ..write('sharedUserId: $sharedUserId, ')
+          ..write('sharedUserFullName: $sharedUserFullName, ')
+          ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
+          ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
+          ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
+          ..write('sharedUserAppId: $sharedUserAppId, ')
+          ..write('mentions: $mentions, ')
+          ..write('mentionRead: $mentionRead, ')
+          ..write('groupName: $groupName')
           ..write(')'))
         .toString();
   }

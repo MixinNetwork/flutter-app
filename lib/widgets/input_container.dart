@@ -4,7 +4,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/hoer_overlay.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -75,7 +74,8 @@ class InputContainer extends StatelessWidget {
                           textEditingController.value.isComposingRangeValid;
                       if (text?.trim()?.isNotEmpty == true && !valid) {
                         textEditingController.text = '';
-                        BlocProvider.of<MessageBloc>(context).send(text);
+                        // todo
+                        // BlocProvider.of<MessageBloc>(context).send(text);
                       }
 
                       return valid

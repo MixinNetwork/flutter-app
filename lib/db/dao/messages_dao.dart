@@ -18,4 +18,17 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
+
+  Selectable<MessageItem> messageByConversationId(
+    String conversationId,
+    int limit, {
+    DateTime oldestCreatedAt,
+    List<String> loadedMessageId = const [],
+  }) =>
+      db.messageByConversationId(
+        conversationId,
+        loadedMessageId,
+        oldestCreatedAt,
+        limit,
+      );
 }
