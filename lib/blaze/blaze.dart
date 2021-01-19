@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/main.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -37,8 +38,9 @@ class Blaze {
         protocols: ['Mixin-Blaze-1'],
         headers: {'Authorization': 'Bearer $token'},
         pingInterval: const Duration(seconds: 15));
-    channel.stream.listen((message) async {
-      final blazeMessage = await parseBlazeMessage(message);
+    channel.stream
+        .asyncMap((message) async => await parseBlazeMessage(message))
+        .listen((blazeMessage) async {
       final data = blazeMessage['data'];
 
       if (blazeMessage['action'] == acknowledgeMessageReceipts) {
@@ -46,7 +48,8 @@ class Blaze {
         updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
       } else if (blazeMessage['action'] == createMessage) {
         if (data['user_id'] == selfId && data['category'] == '') {
-          updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
+          updateRemoteMessageStatus(
+              data['message_id'], MessageStatus.delivered);
         } else {
           await database.floodMessagesDao
               .insert(FloodMessage(
@@ -91,9 +94,8 @@ class Blaze {
   }
 }
 
-Future<Map<String, dynamic>> parseBlazeMessage(List<int> message) {
-  return compute(_parseBlazeMessageInternal, message);
-}
+Future<Map<String, dynamic>> parseBlazeMessage(List<int> message) =>
+    runLoadBalancer(_parseBlazeMessageInternal, message);
 
 Map<String, dynamic> _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));

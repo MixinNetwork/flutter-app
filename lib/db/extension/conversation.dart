@@ -108,4 +108,11 @@ extension Conversation on ConversationItem {
       contentType == 'PLAIN_POST' ||
       contentType == 'PLAIN_LOCATION' ||
       contentType == 'APP_CARD';
+
+  bool get isContactConversation =>
+      category == 'CONTACT' && relationship == 'FRIEND' && appId == null;
+  bool get isGroupConversation => category == 'GROUP';
+  bool get isBotConversation => category == 'CONTACT' && appId != null;
+  bool get isStrangerConversation =>
+      category == 'CONTACT' && relationship == 'STRANGER' && appId == null;
 }

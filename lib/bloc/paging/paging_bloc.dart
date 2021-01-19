@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
+import 'package:flutter_app/utils/multi_field_compare.dart';
 
 part 'paging_event.dart';
 part 'paging_state.dart';
@@ -15,6 +16,8 @@ abstract class PagingBloc<T, S extends PagingState<T>>
   }
 
   StreamController<List<T>> loadMoreStreamController;
+
+  List<MultiFieldCompareParameter<T>> get parameters;
 
   @override
   Stream<S> mapEventToState(PagingEvent<T> event) async* {
@@ -36,22 +39,14 @@ abstract class PagingBloc<T, S extends PagingState<T>>
       return;
     }
 
-    if (event is InsertOrReplacePagingEvent<T>) {
+    if (event is InsertOrUpdatePagingEvent<T>) {
       final index = list.indexWhere((e) => test(e, event.item));
       if (index >= 0) {
         list[index] = event.item;
       } else {
         list.insert(0, event.item);
       }
-      yield state.copyWith(list: list);
-      return;
-    }
-
-    if (event is InsertOrMovePagingEvent<T>) {
-      final index = list.indexWhere((e) => test(e, event.item));
-      if (index >= 0) list.removeAt(index);
-      list.insert(0, event.item);
-      yield state.copyWith(list: list);
+      yield state.copyWith(list: list..sort(multiFieldCompare(parameters)));
       return;
     }
   }

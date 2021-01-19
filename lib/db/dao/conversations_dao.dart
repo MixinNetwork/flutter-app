@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 
@@ -10,9 +11,19 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationsDaoMixin {
   ConversationsDao(MixinDatabase db) : super(db);
 
+  Stream<ConversationItem> _updateConversionStream;
+  Stream<ConversationItem> get updateConversion =>
+      _updateConversionStream ??= db.eventBus
+          .watch<String>(DatabaseEvent.updateConversion)
+          .asyncMap((e) => db.conversationItem(e).getSingle())
+          .handleError((e) => null)
+          .where((event) => event != null);
+
   Future<int> insert(Conversation conversation) async {
     final result =
         await into(db.conversations).insertOnConflictUpdate(conversation);
+    db.eventBus
+        .send(DatabaseEvent.updateConversion, conversation.conversationId);
     return result;
   }
 

@@ -16,6 +16,15 @@ class BeforePagingEvent<T> extends PagingEvent<T> {
   List<Object> get props => [list];
 }
 
+class AfterPagingEvent<T> extends PagingEvent<T> {
+  const AfterPagingEvent(this.list);
+
+  final List<T> list;
+
+  @override
+  List<Object> get props => [list];
+}
+
 class ReplacePagingEvent<T> extends PagingEvent<T> {
   const ReplacePagingEvent(this.list);
 
@@ -25,8 +34,8 @@ class ReplacePagingEvent<T> extends PagingEvent<T> {
   List<Object> get props => [list];
 }
 
-class InsertOrReplacePagingEvent<T> extends PagingEvent<T> {
-  const InsertOrReplacePagingEvent(this.item);
+class InsertOrUpdatePagingEvent<T> extends PagingEvent<T> {
+  const InsertOrUpdatePagingEvent(this.item);
 
   final T item;
 
@@ -36,15 +45,6 @@ class InsertOrReplacePagingEvent<T> extends PagingEvent<T> {
 
 class RemovePagingEvent<T> extends PagingEvent<T> {
   const RemovePagingEvent(this.item);
-
-  final T item;
-
-  @override
-  List<Object> get props => [item];
-}
-
-class InsertOrMovePagingEvent<T> extends PagingEvent<T> {
-  const InsertOrMovePagingEvent(this.item);
 
   final T item;
 

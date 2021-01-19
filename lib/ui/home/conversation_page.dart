@@ -285,7 +285,7 @@ class _StatusRow extends StatelessWidget {
               Resources.assetsImagesMuteSvg,
               color: dynamicColor,
             ),
-          if (conversation.pinTime?.isAfter(DateTime.now()) == true)
+          if (conversation.pinTime != null)
             SvgPicture.asset(
               Resources.assetsImagesPinSvg,
               color: dynamicColor,
@@ -434,16 +434,17 @@ class _MessageContent extends StatelessWidget {
               icon,
               color: dynamicColor,
             ),
-          Expanded(
-            child: Text(
-              content,
-              style: TextStyle(
-                color: dynamicColor,
-                fontSize: 14,
+          if (content != null)
+            Expanded(
+              child: Text(
+                content,
+                style: TextStyle(
+                  color: dynamicColor,
+                  fontSize: 14,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
         ],
         const SizedBox(width: 4),
       ),
