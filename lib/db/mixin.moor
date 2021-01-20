@@ -1,4 +1,6 @@
 -- this is the tables.moor file
+import 'converter/conversation_category_type_converter.dart';
+import 'converter/conversation_status_type_converter.dart';
 
 CREATE TABLE addresses ( address_id TEXT NOT NULL, type TEXT NOT NULL, asset_id TEXT NOT NULL, public_key TEXT, label TEXT, updated_at DATETIME NOT NULL, reserve TEXT NOT NULL, fee TEXT NOT NULL, account_name TEXT, account_tag TEXT, dust TEXT, PRIMARY KEY(address_id) );
 
@@ -10,7 +12,7 @@ CREATE TABLE circle_conversations ( conversation_id TEXT NOT NULL, circle_id TEX
 
 CREATE TABLE circles ( circle_id TEXT NOT NULL, name TEXT NOT NULL, created_at DATETIME NOT NULL, ordered_at DATETIME, PRIMARY KEY(circle_id) );
 
-CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at DATETIME NOT NULL, pin_time DATETIME, last_message_id TEXT, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL, draft TEXT, mute_until DATETIME, PRIMARY KEY(conversation_id) );
+CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT MAPPED BY `const ConversationCategoryTypeConverter()`, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at DATETIME NOT NULL, pin_time DATETIME, last_message_id TEXT, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL MAPPED BY `const ConversationStatusTypeConverter()`, draft TEXT, mute_until DATETIME, PRIMARY KEY(conversation_id) );
 
 CREATE TABLE flood_messages ( message_id TEXT NOT NULL, data TEXT NOT NULL, created_at DATETIME NOT NULL, PRIMARY KEY(message_id) );
 

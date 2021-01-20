@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
+import 'package:flutter_app/vo/conversation_status.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class Injector {
@@ -22,7 +23,8 @@ class Injector {
           await client.conversationApi.getConversation(conversationId);
       if (response.data != null) {
         var ownerId = response.data.creatorId;
-        if (response.data.category == ConversationCategory.contact) {
+        // Todo
+        if (response.data.category == 'CONTACT') {
           response.data.participants.forEach((item) {
             if (item.userId != selfId) {
               ownerId = item.userId;

@@ -2673,7 +2673,7 @@ class Circles extends Table with TableInfo<Circles, Circle> {
 class Conversation extends DataClass implements Insertable<Conversation> {
   final String conversationId;
   final String ownerId;
-  final String category;
+  final ConversationCategory category;
   final String name;
   final String iconUrl;
   final String announcement;
@@ -2684,7 +2684,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   final String lastMessageId;
   final String lastReadMessageId;
   final int unseenMessageCount;
-  final int status;
+  final ConversationStatus status;
   final String draft;
   final DateTime muteUntil;
   Conversation(
@@ -2715,8 +2715,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
       ownerId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}owner_id']),
-      category: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}category']),
+      category: Conversations.$converter0.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}category'])),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       iconUrl: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url']),
@@ -2736,7 +2736,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           data['${effectivePrefix}last_read_message_id']),
       unseenMessageCount: intType.mapFromDatabaseResponse(
           data['${effectivePrefix}unseen_message_count']),
-      status: intType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
+      status: Conversations.$converter1.mapToDart(
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
       draft:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}draft']),
       muteUntil: dateTimeType
@@ -2753,7 +2754,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['owner_id'] = Variable<String>(ownerId);
     }
     if (!nullToAbsent || category != null) {
-      map['category'] = Variable<String>(category);
+      final converter = Conversations.$converter0;
+      map['category'] = Variable<String>(converter.mapToSql(category));
     }
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
@@ -2786,7 +2788,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['unseen_message_count'] = Variable<int>(unseenMessageCount);
     }
     if (!nullToAbsent || status != null) {
-      map['status'] = Variable<int>(status);
+      final converter = Conversations.$converter1;
+      map['status'] = Variable<int>(converter.mapToSql(status));
     }
     if (!nullToAbsent || draft != null) {
       map['draft'] = Variable<String>(draft);
@@ -2852,7 +2855,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     return Conversation(
       conversationId: serializer.fromJson<String>(json['conversation_id']),
       ownerId: serializer.fromJson<String>(json['owner_id']),
-      category: serializer.fromJson<String>(json['category']),
+      category: serializer.fromJson<ConversationCategory>(json['category']),
       name: serializer.fromJson<String>(json['name']),
       iconUrl: serializer.fromJson<String>(json['icon_url']),
       announcement: serializer.fromJson<String>(json['announcement']),
@@ -2865,7 +2868,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           serializer.fromJson<String>(json['last_read_message_id']),
       unseenMessageCount:
           serializer.fromJson<int>(json['unseen_message_count']),
-      status: serializer.fromJson<int>(json['status']),
+      status: serializer.fromJson<ConversationStatus>(json['status']),
       draft: serializer.fromJson<String>(json['draft']),
       muteUntil: serializer.fromJson<DateTime>(json['mute_until']),
     );
@@ -2876,7 +2879,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
     return <String, dynamic>{
       'conversation_id': serializer.toJson<String>(conversationId),
       'owner_id': serializer.toJson<String>(ownerId),
-      'category': serializer.toJson<String>(category),
+      'category': serializer.toJson<ConversationCategory>(category),
       'name': serializer.toJson<String>(name),
       'icon_url': serializer.toJson<String>(iconUrl),
       'announcement': serializer.toJson<String>(announcement),
@@ -2887,7 +2890,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       'last_message_id': serializer.toJson<String>(lastMessageId),
       'last_read_message_id': serializer.toJson<String>(lastReadMessageId),
       'unseen_message_count': serializer.toJson<int>(unseenMessageCount),
-      'status': serializer.toJson<int>(status),
+      'status': serializer.toJson<ConversationStatus>(status),
       'draft': serializer.toJson<String>(draft),
       'mute_until': serializer.toJson<DateTime>(muteUntil),
     };
@@ -2896,7 +2899,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   Conversation copyWith(
           {String conversationId,
           String ownerId,
-          String category,
+          ConversationCategory category,
           String name,
           String iconUrl,
           String announcement,
@@ -2907,7 +2910,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           String lastMessageId,
           String lastReadMessageId,
           int unseenMessageCount,
-          int status,
+          ConversationStatus status,
           String draft,
           DateTime muteUntil}) =>
       Conversation(
@@ -3010,7 +3013,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
 class ConversationsCompanion extends UpdateCompanion<Conversation> {
   final Value<String> conversationId;
   final Value<String> ownerId;
-  final Value<String> category;
+  final Value<ConversationCategory> category;
   final Value<String> name;
   final Value<String> iconUrl;
   final Value<String> announcement;
@@ -3021,7 +3024,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   final Value<String> lastMessageId;
   final Value<String> lastReadMessageId;
   final Value<int> unseenMessageCount;
-  final Value<int> status;
+  final Value<ConversationStatus> status;
   final Value<String> draft;
   final Value<DateTime> muteUntil;
   const ConversationsCompanion({
@@ -3056,7 +3059,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     this.lastMessageId = const Value.absent(),
     this.lastReadMessageId = const Value.absent(),
     this.unseenMessageCount = const Value.absent(),
-    @required int status,
+    @required ConversationStatus status,
     this.draft = const Value.absent(),
     this.muteUntil = const Value.absent(),
   })  : conversationId = Value(conversationId),
@@ -3104,7 +3107,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   ConversationsCompanion copyWith(
       {Value<String> conversationId,
       Value<String> ownerId,
-      Value<String> category,
+      Value<ConversationCategory> category,
       Value<String> name,
       Value<String> iconUrl,
       Value<String> announcement,
@@ -3115,7 +3118,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       Value<String> lastMessageId,
       Value<String> lastReadMessageId,
       Value<int> unseenMessageCount,
-      Value<int> status,
+      Value<ConversationStatus> status,
       Value<String> draft,
       Value<DateTime> muteUntil}) {
     return ConversationsCompanion(
@@ -3148,7 +3151,8 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['owner_id'] = Variable<String>(ownerId.value);
     }
     if (category.present) {
-      map['category'] = Variable<String>(category.value);
+      final converter = Conversations.$converter0;
+      map['category'] = Variable<String>(converter.mapToSql(category.value));
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -3181,7 +3185,8 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['unseen_message_count'] = Variable<int>(unseenMessageCount.value);
     }
     if (status.present) {
-      map['status'] = Variable<int>(status.value);
+      final converter = Conversations.$converter1;
+      map['status'] = Variable<int>(converter.mapToSql(status.value));
     }
     if (draft.present) {
       map['draft'] = Variable<String>(draft.value);
@@ -3400,10 +3405,7 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
       context.handle(_ownerIdMeta,
           ownerId.isAcceptableOrUnknown(data['owner_id'], _ownerIdMeta));
     }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category'], _categoryMeta));
-    }
+    context.handle(_categoryMeta, const VerificationResult.success());
     if (data.containsKey('name')) {
       context.handle(
           _nameMeta, name.isAcceptableOrUnknown(data['name'], _nameMeta));
@@ -3454,12 +3456,7 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
           unseenMessageCount.isAcceptableOrUnknown(
               data['unseen_message_count'], _unseenMessageCountMeta));
     }
-    if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status'], _statusMeta));
-    } else if (isInserting) {
-      context.missing(_statusMeta);
-    }
+    context.handle(_statusMeta, const VerificationResult.success());
     if (data.containsKey('draft')) {
       context.handle(
           _draftMeta, draft.isAcceptableOrUnknown(data['draft'], _draftMeta));
@@ -3484,6 +3481,10 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
     return Conversations(_db, alias);
   }
 
+  static TypeConverter<ConversationCategory, String> $converter0 =
+      const ConversationCategoryTypeConverter();
+  static TypeConverter<ConversationStatus, int> $converter1 =
+      const ConversationStatusTypeConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(conversation_id)'];
   @override
@@ -11034,9 +11035,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return ConversationItem(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
-        category: row.readString('category'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: row.readInt('status'),
+        status: Conversations.$converter1.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
@@ -11090,9 +11092,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return ConversationItem(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
-        category: row.readString('category'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: row.readInt('status'),
+        status: Conversations.$converter1.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
@@ -11146,9 +11149,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return ConversationItem(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
-        category: row.readString('category'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: row.readInt('status'),
+        status: Conversations.$converter1.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
@@ -11202,9 +11206,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return ConversationItem(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
-        category: row.readString('category'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: row.readInt('status'),
+        status: Conversations.$converter1.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
@@ -11258,9 +11263,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return ConversationItem(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
-        category: row.readString('category'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: row.readInt('status'),
+        status: Conversations.$converter1.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
@@ -11307,9 +11313,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return ConversationItem(
         conversationId: row.readString('conversationId'),
         groupIconUrl: row.readString('groupIconUrl'),
-        category: row.readString('category'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: row.readInt('status'),
+        status: Conversations.$converter1.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
@@ -11472,9 +11479,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 class ConversationItem {
   final String conversationId;
   final String groupIconUrl;
-  final String category;
+  final ConversationCategory category;
   final String groupName;
-  final int status;
+  final ConversationStatus status;
   final String lastReadMessageId;
   final int unseenMessageCount;
   final String ownerId;
