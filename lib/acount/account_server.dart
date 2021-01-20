@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -58,16 +60,32 @@ class AccountServer {
     });
     database.jobsDao.findAckJobs().listen((jobs) {
       if (jobs?.isNotEmpty == true) {
-        final ack = jobs.map((e) {
-          final map = jsonDecode(e.blazeMessage);
-          return BlazeAckMessage(messageId: map['id'], status: map['status']);
-        }).toList();
-        final jobIds = jobs.map((e) => e.jobId).toList();
-        client.messageApi.acknowledgements(ack).then(
-            (value) => {database.jobsDao.deleteJobs(jobIds)},
-            onError: (e) => debugPrint('$e'));
+        runAckJob(jobs);
       }
     });
+  }
+
+  Completer _ackCompleter;
+
+  void runAckJob(List<Job> jobs) {
+    if (_ackCompleter == null  || _ackCompleter?.isCompleted == true) {
+      _ackCompleter = Completer();
+      final ack = jobs.map((e) {
+        final map = jsonDecode(e.blazeMessage);
+        return BlazeAckMessage(messageId: map['id'], status: map['status']);
+      }).toList();
+
+      final jobIds = jobs.map((e) => e.jobId).toList();
+      debugPrint('${jobIds.toString()}');
+      client.messageApi.acknowledgements(ack).then(
+              (value) {
+            database.jobsDao.deleteJobs(jobIds);
+            _ackCompleter.complete(true);
+          },
+          onError: (e) =>
+              _ackCompleter.completeError(e)
+      );
+    }
   }
 
   void sendMessage() {
