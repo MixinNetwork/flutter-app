@@ -23,8 +23,7 @@ class Injector {
           await client.conversationApi.getConversation(conversationId);
       if (response.data != null) {
         var ownerId = response.data.creatorId;
-        // Todo
-        if (response.data.category == 'CONTACT') {
+        if (response.data.category == ConversationCategory.contact) {
           response.data.participants.forEach((item) {
             if (item.userId != selfId) {
               ownerId = item.userId;
