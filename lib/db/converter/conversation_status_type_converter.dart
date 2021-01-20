@@ -3,6 +3,8 @@ import 'package:moor/moor.dart';
 
 class ConversationStatusTypeConverter
     extends TypeConverter<ConversationStatus, int> {
+  const ConversationStatusTypeConverter();
+
   @override
   ConversationStatus mapToDart(int fromDb) {
     return ConversationStatus.values[fromDb];

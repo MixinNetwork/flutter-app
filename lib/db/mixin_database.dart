@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter_app/db/converter/conversation_category_type_converter.dart';
+import 'package:flutter_app/db/converter/conversation_status_type_converter.dart';
 import 'package:flutter_app/db/dao/hyperlinks_dao.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/message_mentions_dao.dart';
@@ -12,6 +14,8 @@ import 'package:flutter_app/db/dao/resend_session_messages_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/db/dao/users_dao.dart';
 import 'package:flutter_app/db/database_event_bus.dart';
+import 'package:flutter_app/vo/conversation_status.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 

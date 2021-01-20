@@ -3,5 +3,6 @@ targets:
     builders:
       moor_generator:
         options:
+          apply_converters_on_variables: true
           generate_connect_constructor: true
           override_hash_and_equals_in_result_sets: true

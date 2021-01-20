@@ -39,7 +39,7 @@ class Injector {
             name: response.data.name,
             announcement: response.data.announcement,
             createdAt: response.data.createdAt,
-            status: ConversationStatus.success.index,
+            status: ConversationStatus.success,
             muteUntil: DateTime.parse(response.data.muteUntil),
           ),
         );

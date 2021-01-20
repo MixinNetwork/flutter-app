@@ -3,6 +3,8 @@ import 'package:moor/moor.dart';
 
 class ConversationCategoryTypeConverter
     extends TypeConverter<ConversationCategory, String> {
+  const ConversationCategoryTypeConverter();
+
   @override
   ConversationCategory mapToDart(String fromDb) {
     switch (fromDb) {

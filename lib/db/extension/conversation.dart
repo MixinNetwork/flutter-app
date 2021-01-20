@@ -1,4 +1,5 @@
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 extension Conversation on ConversationItem {
   bool get isPlain => contentType.startsWith('PLAIN_');
@@ -110,9 +111,14 @@ extension Conversation on ConversationItem {
       contentType == 'APP_CARD';
 
   bool get isContactConversation =>
-      category == 'CONTACT' && relationship == 'FRIEND' && appId == null;
-  bool get isGroupConversation => category == 'GROUP';
-  bool get isBotConversation => category == 'CONTACT' && appId != null;
+      category == ConversationCategory.contact &&
+      relationship == 'FRIEND' &&
+      appId == null;
+  bool get isGroupConversation => category == ConversationCategory.group;
+  bool get isBotConversation =>
+      category == ConversationCategory.contact && appId != null;
   bool get isStrangerConversation =>
-      category == 'CONTACT' && relationship == 'STRANGER' && appId == null;
+      category == ConversationCategory.contact &&
+      relationship == 'STRANGER' &&
+      appId == null;
 }
