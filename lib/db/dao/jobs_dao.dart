@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
+import 'package:uuid/uuid.dart';
 
 part 'jobs_dao.g.dart';
 
@@ -9,6 +12,16 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
   JobsDao(MixinDatabase db) : super(db);
 
   Future<int> insert(Job job) => into(db.jobs).insertOnConflictUpdate(job);
+
+  Future<int> insertSendingJob(String messageId, String conversationId) =>
+      insert(Job(
+          jobId: Uuid().v4(),
+          action: sendingMessage,
+          priority: 5,
+          blazeMessage: messageId,
+          conversationId: conversationId,
+          createdAt: DateTime.now(),
+          runCount: 0));
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 

@@ -31,4 +31,8 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         oldestCreatedAt,
         limit,
       );
+
+  Stream<List<SendingMessage>> sendingMessage(String messageId) {
+    return db.sendingMessage(messageId).watch();
+  }
 }

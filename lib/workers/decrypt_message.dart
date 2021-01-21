@@ -18,6 +18,12 @@ class DecryptMessage extends Injector {
   DecryptMessage(String selfId, Database database, Client client)
       : super(selfId, database, client);
 
+  String _conversationId;
+
+  void setConversationId(String conversationId) {
+    _conversationId = conversationId;
+  }
+
   void process(FloodMessage floodMessage) {
     final data = BlazeMessageData.fromJson(jsonDecode(floodMessage.data));
     if (data.conversationId != null) {
@@ -77,6 +83,11 @@ class DecryptMessage extends Injector {
 
     // todo process quote message
 
+    var messageStatus = MessageStatus.delivered;
+    if (_conversationId != null && data.conversationId == _conversationId) {
+      messageStatus = MessageStatus.read;
+    }
+
     if (data.category.endsWith('_TEXT')) {
       String plain;
       if (data.category == MessageCategory.signalText) {
@@ -90,7 +101,7 @@ class DecryptMessage extends Injector {
         userId: data.userId,
         category: data.category,
         content: plain,
-        status: data.status,
+        status: messageStatus,
         createdAt: data.createdAt,
       );
       await database.messagesDao.insert(message);
@@ -117,7 +128,7 @@ class DecryptMessage extends Injector {
           thumbImage: attachment.thumbnail,
           mediaKey: attachment.key,
           mediaDigest: attachment.digest,
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
       await database.messagesDao.insert(message);
@@ -145,7 +156,7 @@ class DecryptMessage extends Injector {
           thumbImage: attachment.thumbnail,
           mediaKey: attachment.key,
           mediaDigest: attachment.digest,
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
       await database.messagesDao.insert(message);
@@ -169,7 +180,7 @@ class DecryptMessage extends Injector {
           mediaSize: attachment.size,
           mediaKey: attachment.key,
           mediaDigest: attachment.digest,
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
       await database.messagesDao.insert(message);
@@ -194,7 +205,7 @@ class DecryptMessage extends Injector {
           mediaKey: attachment.key,
           mediaDigest: attachment.digest,
           mediaWaveform: attachment.waveform,
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.pending);
       await database.messagesDao.insert(message);
@@ -222,7 +233,7 @@ class DecryptMessage extends Injector {
           name: stickerMessage.name,
           stickerId: stickerMessage.stickerId,
           albumId: stickerMessage.albumId,
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_CONTACT')) {
@@ -242,7 +253,7 @@ class DecryptMessage extends Injector {
           category: data.category,
           content: plainText,
           name: user.fullName ?? '',
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_LIVE')) {
@@ -263,7 +274,7 @@ class DecryptMessage extends Injector {
           mediaHeight: liveMessage.height,
           mediaUrl: liveMessage.url,
           thumbUrl: liveMessage.thumbUrl,
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_LOCATION')) {
@@ -293,7 +304,7 @@ class DecryptMessage extends Injector {
           userId: data.userId,
           category: data.category,
           content: plain,
-          status: data.status,
+          status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_POST')) {
@@ -309,13 +320,13 @@ class DecryptMessage extends Injector {
         userId: data.userId,
         category: data.category,
         content: plain,
-        status: data.status,
+        status: messageStatus,
         createdAt: data.createdAt,
       );
       await database.messagesDao.insert(message);
     }
 
-    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+    _updateRemoteMessageStatus(data.messageId, messageStatus);
   }
 
   void _updateRemoteMessageStatus(messageId, status) {

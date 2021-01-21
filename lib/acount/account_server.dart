@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_app/acount/send_message_helper.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -30,6 +30,8 @@ class AccountServer {
     client.initMixin(userId, sessionId, privateKey, scp);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
     _decryptMessage = DecryptMessage(userId, database, client);
+    _sendMessageHelper =
+        SendMessageHelper(database.messagesDao, database.jobsDao);
   }
 
   String userId;
@@ -41,6 +43,7 @@ class AccountServer {
   Database database;
   Blaze blaze;
   DecryptMessage _decryptMessage;
+  SendMessageHelper _sendMessageHelper;
 
   void start() {
     // sendPort?.send('start account');
@@ -83,10 +86,20 @@ class AccountServer {
     }
   }
 
-  void sendMessage() {
-    assert(database != null);
-    assert(blaze != null);
-    // todo insert sending message
+  void sendTextMessage(
+      String conversationId, String senderId, String content, bool isPlain) {
+    assert(_decryptMessage != null);
+    _sendMessageHelper.sendTextMessage(
+        conversationId, senderId, content, isPlain);
+  }
+
+  void selectConversation(String conversationId) {
+    _decryptMessage.setConversationId(conversationId);
+    _markRead(conversationId);
+  }
+
+  void _markRead(conversationId) {
+    // todo mark read by conversation id
   }
 
   void stop() {

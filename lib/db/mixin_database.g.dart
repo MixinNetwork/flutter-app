@@ -11472,6 +11472,48 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<SendingMessage> sendingMessage(String message_id) {
+    return customSelect(
+        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type,\n      m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key,\n      m.media_digest, m.media_status, m.status, m.created_at, m.action, m.participant_id, m.snapshot_id, m.hyperlink,\n      m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content,\n      rm.status as resend_status, rm.user_id as resend_user_id, rm.session_id as resend_session_id\n      FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id\n      WHERE m.message_id = :message_id AND (m.status = \'SENDING\' OR rm.status = 1) AND m.content IS NOT NULL',
+        variables: [Variable.withString(message_id)],
+        readsFrom: {messages, resendSessionMessages}).map((QueryRow row) {
+      return SendingMessage(
+        messageId: row.readString('message_id'),
+        conversationId: row.readString('conversation_id'),
+        userId: row.readString('user_id'),
+        category: row.readString('category'),
+        content: row.readString('content'),
+        mediaUrl: row.readString('media_url'),
+        mediaMimeType: row.readString('media_mime_type'),
+        mediaSize: row.readInt('media_size'),
+        mediaDuration: row.readString('media_duration'),
+        mediaWidth: row.readInt('media_width'),
+        mediaHeight: row.readInt('media_height'),
+        mediaHash: row.readString('media_hash'),
+        thumbImage: row.readString('thumb_image'),
+        mediaKey: row.readString('media_key'),
+        mediaDigest: row.readString('media_digest'),
+        mediaStatus: row.readString('media_status'),
+        status: row.readString('status'),
+        createdAt: row.readDateTime('created_at'),
+        action: row.readString('action'),
+        participantId: row.readString('participant_id'),
+        snapshotId: row.readString('snapshot_id'),
+        hyperlink: row.readString('hyperlink'),
+        name: row.readString('name'),
+        albumId: row.readString('album_id'),
+        stickerId: row.readString('sticker_id'),
+        sharedUserId: row.readString('shared_user_id'),
+        mediaWaveform: row.readString('media_waveform'),
+        quoteMessageId: row.readString('quote_message_id'),
+        quoteContent: row.readString('quote_content'),
+        resendStatus: row.readInt('resend_status'),
+        resendUserId: row.readString('resend_user_id'),
+        resendSessionId: row.readString('resend_session_id'),
+      );
+    });
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -11974,6 +12016,193 @@ class MessageItem {
           ..write('mentions: $mentions, ')
           ..write('mentionRead: $mentionRead, ')
           ..write('groupName: $groupName')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class SendingMessage {
+  final String messageId;
+  final String conversationId;
+  final String userId;
+  final String category;
+  final String content;
+  final String mediaUrl;
+  final String mediaMimeType;
+  final int mediaSize;
+  final String mediaDuration;
+  final int mediaWidth;
+  final int mediaHeight;
+  final String mediaHash;
+  final String thumbImage;
+  final String mediaKey;
+  final String mediaDigest;
+  final String mediaStatus;
+  final String status;
+  final DateTime createdAt;
+  final String action;
+  final String participantId;
+  final String snapshotId;
+  final String hyperlink;
+  final String name;
+  final String albumId;
+  final String stickerId;
+  final String sharedUserId;
+  final String mediaWaveform;
+  final String quoteMessageId;
+  final String quoteContent;
+  final int resendStatus;
+  final String resendUserId;
+  final String resendSessionId;
+  SendingMessage({
+    this.messageId,
+    this.conversationId,
+    this.userId,
+    this.category,
+    this.content,
+    this.mediaUrl,
+    this.mediaMimeType,
+    this.mediaSize,
+    this.mediaDuration,
+    this.mediaWidth,
+    this.mediaHeight,
+    this.mediaHash,
+    this.thumbImage,
+    this.mediaKey,
+    this.mediaDigest,
+    this.mediaStatus,
+    this.status,
+    this.createdAt,
+    this.action,
+    this.participantId,
+    this.snapshotId,
+    this.hyperlink,
+    this.name,
+    this.albumId,
+    this.stickerId,
+    this.sharedUserId,
+    this.mediaWaveform,
+    this.quoteMessageId,
+    this.quoteContent,
+    this.resendStatus,
+    this.resendUserId,
+    this.resendSessionId,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode,
+      $mrjc(
+          conversationId.hashCode,
+          $mrjc(
+              userId.hashCode,
+              $mrjc(
+                  category.hashCode,
+                  $mrjc(
+                      content.hashCode,
+                      $mrjc(
+                          mediaUrl.hashCode,
+                          $mrjc(
+                              mediaMimeType.hashCode,
+                              $mrjc(
+                                  mediaSize.hashCode,
+                                  $mrjc(
+                                      mediaDuration.hashCode,
+                                      $mrjc(
+                                          mediaWidth.hashCode,
+                                          $mrjc(
+                                              mediaHeight.hashCode,
+                                              $mrjc(
+                                                  mediaHash.hashCode,
+                                                  $mrjc(
+                                                      thumbImage.hashCode,
+                                                      $mrjc(
+                                                          mediaKey.hashCode,
+                                                          $mrjc(
+                                                              mediaDigest
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  mediaStatus
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      status
+                                                                          .hashCode,
+                                                                      $mrjc(
+                                                                          createdAt
+                                                                              .hashCode,
+                                                                          $mrjc(
+                                                                              action.hashCode,
+                                                                              $mrjc(participantId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(hyperlink.hashCode, $mrjc(name.hashCode, $mrjc(albumId.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mediaWaveform.hashCode, $mrjc(quoteMessageId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(resendStatus.hashCode, $mrjc(resendUserId.hashCode, resendSessionId.hashCode))))))))))))))))))))))))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is SendingMessage &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.userId == this.userId &&
+          other.category == this.category &&
+          other.content == this.content &&
+          other.mediaUrl == this.mediaUrl &&
+          other.mediaMimeType == this.mediaMimeType &&
+          other.mediaSize == this.mediaSize &&
+          other.mediaDuration == this.mediaDuration &&
+          other.mediaWidth == this.mediaWidth &&
+          other.mediaHeight == this.mediaHeight &&
+          other.mediaHash == this.mediaHash &&
+          other.thumbImage == this.thumbImage &&
+          other.mediaKey == this.mediaKey &&
+          other.mediaDigest == this.mediaDigest &&
+          other.mediaStatus == this.mediaStatus &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.action == this.action &&
+          other.participantId == this.participantId &&
+          other.snapshotId == this.snapshotId &&
+          other.hyperlink == this.hyperlink &&
+          other.name == this.name &&
+          other.albumId == this.albumId &&
+          other.stickerId == this.stickerId &&
+          other.sharedUserId == this.sharedUserId &&
+          other.mediaWaveform == this.mediaWaveform &&
+          other.quoteMessageId == this.quoteMessageId &&
+          other.quoteContent == this.quoteContent &&
+          other.resendStatus == this.resendStatus &&
+          other.resendUserId == this.resendUserId &&
+          other.resendSessionId == this.resendSessionId);
+  @override
+  String toString() {
+    return (StringBuffer('SendingMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('category: $category, ')
+          ..write('content: $content, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('mediaMimeType: $mediaMimeType, ')
+          ..write('mediaSize: $mediaSize, ')
+          ..write('mediaDuration: $mediaDuration, ')
+          ..write('mediaWidth: $mediaWidth, ')
+          ..write('mediaHeight: $mediaHeight, ')
+          ..write('mediaHash: $mediaHash, ')
+          ..write('thumbImage: $thumbImage, ')
+          ..write('mediaKey: $mediaKey, ')
+          ..write('mediaDigest: $mediaDigest, ')
+          ..write('mediaStatus: $mediaStatus, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('action: $action, ')
+          ..write('participantId: $participantId, ')
+          ..write('snapshotId: $snapshotId, ')
+          ..write('hyperlink: $hyperlink, ')
+          ..write('name: $name, ')
+          ..write('albumId: $albumId, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('sharedUserId: $sharedUserId, ')
+          ..write('mediaWaveform: $mediaWaveform, ')
+          ..write('quoteMessageId: $quoteMessageId, ')
+          ..write('quoteContent: $quoteContent, ')
+          ..write('resendStatus: $resendStatus, ')
+          ..write('resendUserId: $resendUserId, ')
+          ..write('resendSessionId: $resendSessionId')
           ..write(')'))
         .toString();
   }
