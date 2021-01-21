@@ -8,12 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/main.dart';
+import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
-import '../main.dart';
 import 'blaze_message.dart';
 import 'vo/blaze_message_data.dart';
 
@@ -97,7 +96,7 @@ class Blaze {
 }
 
 Future<BlazeMessage> parseBlazeMessage(List<int> message) =>
-    runLoadBalancer(_parseBlazeMessageInternal, message);
+    LoadBalancerUtils.runLoadBalancer(_parseBlazeMessageInternal, message);
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));

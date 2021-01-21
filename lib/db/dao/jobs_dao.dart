@@ -12,8 +12,8 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 
-  void deleteJobs(List<String> jobIds) async {
-    await batch(
+   Future<void> deleteJobs(List<String> jobIds) async {
+    return await batch(
         (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds))});
   }
 

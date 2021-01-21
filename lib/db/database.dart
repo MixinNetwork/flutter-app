@@ -96,7 +96,7 @@ class Database {
                   userId: userId,
                   category: '',
                   status: '',
-                  createdAt: dateTime.subtract(const Duration(seconds: 1)),
+                  createdAt: dateTime.subtract(Duration(seconds: index)),
                   content: Value('message content $index'),
                 ),
               ),

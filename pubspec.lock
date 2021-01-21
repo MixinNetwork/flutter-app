@@ -235,7 +235,7 @@ packages:
     source: hosted
     version: "0.3.0"
   dio:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: dio
       url: "https://pub.dartlang.org"

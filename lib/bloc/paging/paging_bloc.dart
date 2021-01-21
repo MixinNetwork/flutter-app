@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/utils/multi_field_compare.dart';
+import 'package:flutter_app/utils/stream_extension.dart';
 
 part 'paging_event.dart';
 part 'paging_state.dart';
@@ -63,6 +64,17 @@ abstract class PagingBloc<T, S extends PagingState<T>>
   @protected
   @mustCallSuper
   void setup() {
+    loadMoreStreamController?.close();
+    loadMoreStreamController = StreamController<List<T>>();
+    loadMoreStreamController.stream
+        .asyncMapDrop(before)
+        .handleError((_) => null)
+        .listen(
+      (list) {
+        if (list == null) return;
+        add(_BeforePagingEvent(list));
+      },
+    );
     firstLoad();
   }
 
@@ -73,26 +85,7 @@ abstract class PagingBloc<T, S extends PagingState<T>>
   Future<List<T>> before(List<T> list);
 
   void loadBefore() {
-    if (loadMoreStreamController != null ||
-            state.noMoreData ||
-            state.list.isEmpty ??
-        true) return;
-
-    loadMoreStreamController = StreamController<List<T>>(sync: true);
-    addSubscription(
-      loadMoreStreamController.stream
-          .asyncMap(before)
-          .handleError((_) => null)
-          .listen(
-        (list) {
-          loadMoreStreamController?.close();
-          loadMoreStreamController = null;
-
-          if (list == null) return;
-          add(_BeforePagingEvent(list));
-        },
-      ),
-    );
+    if (state.noMoreData || state.list.isEmpty ?? true) return;
     loadMoreStreamController.add(state.list);
   }
 }
