@@ -62,6 +62,7 @@ class AccountServer {
         runAckJob(jobs);
       }
     });
+    database.mock();
   }
 
   Completer _ackCompleter;

@@ -62,7 +62,7 @@ dependencies:
 dev_dependencies:
   hive_generator: ^0.8.2
   moor_generator: ^3.4.1
-  build_runner: ^1.10.13
+  build_runner: ^1.10.11
   json_serializable: ^3.5.1
   flutter_test:
     sdk: flutter

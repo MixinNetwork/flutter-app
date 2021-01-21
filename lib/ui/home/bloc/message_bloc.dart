@@ -25,14 +25,17 @@ class MessageBloc extends PagingBloc<MessageItem, MessageState>
   String conversationId;
 
   @override
-  Future<List<MessageItem>> before(List<MessageItem> list) => messagesDao
-      .messageByConversationId(
-        conversationId,
-        limit,
-        oldestCreatedAt: list.last.createdAt,
-        loadedMessageId: list.map((e) => e.messageId).toList(),
-      )
-      .get();
+  Future<List<MessageItem>> before(List<MessageItem> list) async {
+    final result = await messagesDao
+        .messageByConversationId(
+          conversationId,
+          limit,
+          oldestCreatedAt: list.last.createdAt,
+          loadedMessageId: list.map((e) => e.messageId).toList(),
+        )
+        .get();
+    return result;
+  }
 
   @override
   void firstLoad() async {

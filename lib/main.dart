@@ -33,5 +33,7 @@ void main() async {
   ]);
   loadBalancer = list[0];
   HydratedBloc.storage = list[1];
+
+  debugHighlightDeprecatedWidgets = true;
   runApp(App());
 }

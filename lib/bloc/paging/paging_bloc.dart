@@ -31,11 +31,12 @@ abstract class PagingBloc<T, S extends PagingState<T>>
       return;
     }
 
-    if (event is BeforePagingEvent<T>) {
+    if (event is _BeforePagingEvent<T>) {
       yield state.copyWith(
         list: list + event.list,
         noMoreData: event.list?.isEmpty ?? true,
       );
+
       return;
     }
 
@@ -84,11 +85,11 @@ abstract class PagingBloc<T, S extends PagingState<T>>
           .handleError((_) => null)
           .listen(
         (list) {
-          loadMoreStreamController.close();
+          loadMoreStreamController?.close();
           loadMoreStreamController = null;
 
           if (list == null) return;
-          add(BeforePagingEvent(list));
+          add(_BeforePagingEvent(list));
         },
       ),
     );

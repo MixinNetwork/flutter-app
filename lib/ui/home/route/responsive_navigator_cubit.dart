@@ -14,7 +14,8 @@ part 'responsive_navigator_state.dart';
 class ResponsiveNavigatorCubit extends Cubit<ResponsiveNavigatorState> {
   ResponsiveNavigatorCubit() : super(const ResponsiveNavigatorState());
 
-  static ResponsiveNavigatorCubit of(BuildContext context) => BlocProvider.of<ResponsiveNavigatorCubit>(context);
+  static ResponsiveNavigatorCubit of(BuildContext context) =>
+      BlocProvider.of<ResponsiveNavigatorCubit>(context);
 
   final _chatPageKey = GlobalKey();
 
@@ -75,7 +76,8 @@ class ResponsiveNavigatorCubit extends Cubit<ResponsiveNavigatorState> {
     final page = _route(name, arguments);
     var index = -1;
     index = state.pages
-        .indexWhere((element) => identical(element.child.key, page.child.key));
+        .indexWhere((element) => element.child.key == page.child.key);
+    if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
     if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
     emit(state.copyWith(
       pages: state.pages.toList()..add(page),

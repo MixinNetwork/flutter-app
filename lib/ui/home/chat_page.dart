@@ -1,5 +1,4 @@
-import 'dart:math';
-
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/acount/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
@@ -74,10 +73,12 @@ class ChatContainer extends StatelessWidget {
                   builder: (context) =>
                       NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification notification) {
-                      final dimension =
-                          max(notification.metrics.viewportDimension / 3, 200);
                       if (notification.metrics.pixels >
-                          notification.metrics.maxScrollExtent - dimension) {
+                              notification.metrics.maxScrollExtent -
+                                  notification.metrics.viewportDimension &&
+                          BlocProvider.of<MessageBloc>(context)
+                                  .loadMoreStreamController ==
+                              null) {
                         BlocProvider.of<MessageBloc>(context).loadBefore();
                       }
                       return false;
@@ -118,12 +119,19 @@ class _Message extends StatelessWidget {
   Widget build(BuildContext context) {
     final authId = MultiAuthCubit.of(context).state.current.account.userId;
     return BlocConverter<MessageBloc, MessageState,
-        Tuple4<bool, DateTime, String, bool>>(
+        Tuple3<MessageItem, MessageItem, MessageItem>>(
       converter: (state) {
         final messages = state.list;
         final message = messages[index];
         final prev = index == 0 ? null : messages[index - 1];
         final next = messages.length == index + 1 ? null : messages[index + 1];
+
+        return Tuple3(prev, message, next);
+      },
+      builder: (context, Tuple3<MessageItem, MessageItem, MessageItem> tuple) {
+        final message = tuple.item2;
+        final prev = tuple.item1;
+        final next = tuple.item3;
 
         final isCurrentUser = message.userId == authId;
 
@@ -138,83 +146,82 @@ class _Message extends StatelessWidget {
             ? message.userFullName
             : null;
 
-        return Tuple4(isCurrentUser, datetime, user, showNip);
-      },
-      builder: (context, Tuple4<bool, DateTime, String, bool> tuple) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (tuple.item2 != null) _DayTime(dateTime: tuple.item2),
-          _MessageBubbleMargin(
-            isCurrentUser: tuple.item1,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (tuple.item3 != null) _Name(user: tuple.item3),
-                InteractableDecoratedBox(
-                  onRightClick: (pointerUpEvent) => showContextMenu(
-                    context: context,
-                    pointerPosition: pointerUpEvent.position,
-                    menus: [
-                      ContextMenu(
-                        title: Localization.of(context).reply,
-                      ),
-                      ContextMenu(
-                        title: Localization.of(context).forward,
-                      ),
-                      ContextMenu(
-                        title: Localization.of(context).copy,
-                      ),
-                      ContextMenu(
-                        title: Localization.of(context).delete,
-                        isDestructiveAction: true,
-                      ),
-                    ],
-                  ),
-                  child: _MessageBubble(
-                    showNip: tuple.item4,
-                    isCurrentUser: tuple.item1,
-                    child:
-                        BlocConverter<MessageBloc, MessageState, MessageItem>(
-                      converter: (state) => state.list[index],
-                      builder: (context, message) => Wrap(
-                        alignment: WrapAlignment.end,
-                        crossAxisAlignment: WrapCrossAlignment.end,
-                        children: [
-                          Text(
-                            message.content,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: BrightnessData.dynamicColor(
-                                context,
-                                const Color.fromRGBO(51, 51, 51, 1),
-                                darkColor:
-                                    const Color.fromRGBO(255, 255, 255, 0.9),
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (datetime != null) _DayTime(dateTime: datetime),
+            _MessageBubbleMargin(
+              isCurrentUser: isCurrentUser,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (user != null) _Name(user: user),
+                  InteractableDecoratedBox(
+                    onRightClick: (pointerUpEvent) => showContextMenu(
+                      context: context,
+                      pointerPosition: pointerUpEvent.position,
+                      menus: [
+                        ContextMenu(
+                          title: Localization.of(context).reply,
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).forward,
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).copy,
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).delete,
+                          isDestructiveAction: true,
+                        ),
+                      ],
+                    ),
+                    child: _MessageBubble(
+                      showNip: showNip,
+                      isCurrentUser: isCurrentUser,
+                      child:
+                          BlocConverter<MessageBloc, MessageState, MessageItem>(
+                        converter: (state) => state.list[index],
+                        builder: (context, message) => Wrap(
+                          alignment: WrapAlignment.end,
+                          crossAxisAlignment: WrapCrossAlignment.end,
+                          children: [
+                            Text(
+                              message.content,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: BrightnessData.dynamicColor(
+                                  context,
+                                  const Color.fromRGBO(51, 51, 51, 1),
+                                  darkColor:
+                                      const Color.fromRGBO(255, 255, 255, 0.9),
+                                ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            DateFormat.jm().format(message.createdAt),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: BrightnessData.dynamicColor(
-                                context,
-                                const Color.fromRGBO(131, 145, 158, 1),
-                                darkColor:
-                                    const Color.fromRGBO(128, 131, 134, 1),
+                            const SizedBox(width: 6),
+                            Text(
+                              DateFormat.jm().format(message.createdAt),
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: BrightnessData.dynamicColor(
+                                  context,
+                                  const Color.fromRGBO(131, 145, 158, 1),
+                                  darkColor:
+                                      const Color.fromRGBO(128, 131, 134, 1),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
