@@ -48,17 +48,22 @@ CREATE TABLE stickers ( sticker_id TEXT NOT NULL, album_id TEXT, name TEXT NOT N
 
 CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT NOT NULL, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified INTEGER, created_at DATETIME, mute_until DATETIME, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) );
 
-CREATE INDEX IF NOT EXISTS index_conversation_category ON conversations (category);
-CREATE INDEX IF NOT EXISTS index_conversation_created_at ON conversations (created_at);
-CREATE INDEX IF NOT EXISTS index_conversation_pin_time ON conversations (pin_time);
+CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action");
 
-CREATE INDEX IF NOT EXISTS index_user_relationship on users (relationship);
-CREATE INDEX IF NOT EXISTS index_user_app_id on users (app_id);
+CREATE INDEX IF NOT EXISTS index_conversations_category_status_pin_time_created_at ON conversations (category, status, pin_time, created_at);
 
-CREATE INDEX IF NOT EXISTS index_message_conversation_id on messages (conversation_id);
-CREATE INDEX IF NOT EXISTS index_message_created_at on messages (created_at);
+CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id ON message_mentions (conversation_id);
 
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id ON messages (conversation_id, status, user_id);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_user_id_status_created_at ON messages (conversation_id, user_id, status, created_at);
 
+CREATE INDEX IF NOT EXISTS index_participants_conversation_id ON participants (conversation_id);
+CREATE INDEX IF NOT EXISTS index_participants_created_at ON participants (created_at);
+
+CREATE INDEX IF NOT EXISTS index_snapshots_asset_id ON snapshots (asset_id);
+
+CREATE INDEX IF NOT EXISTS index_users_full_name ON users (full_name);
 
 conversationItems AS ConversationItem:
  SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
