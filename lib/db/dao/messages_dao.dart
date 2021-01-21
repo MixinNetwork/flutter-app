@@ -23,11 +23,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     int limit, {
     DateTime oldestCreatedAt,
-    List<String> loadedMessageId = const [],
+    List<String> excludeId = const [],
   }) =>
       db.messageByConversationId(
         conversationId,
-        loadedMessageId,
+        excludeId,
         oldestCreatedAt,
         limit,
       );

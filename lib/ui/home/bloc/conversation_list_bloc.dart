@@ -82,8 +82,8 @@ class _ConversationListBloc
 
   final ConversationsDao conversationsDao;
   final Selectable<ConversationItem> Function(
-      DateTime oldestCreatedAt, int limit,
-      [List<String> loadedConversationId]) conversationList;
+          DateTime oldestCreatedAt, int limit, [List<String> excludeId])
+      conversationList;
   final bool Function(ConversationItem conversation) filter;
 
   @override

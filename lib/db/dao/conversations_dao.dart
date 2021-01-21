@@ -36,37 +36,37 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationItem> conversations(
     DateTime oldestCreatedAt,
     int limit, [
-    List<String> loadedConversationId = const [],
+    List<String> excludeId = const [],
   ]) =>
-      db.conversationItems(loadedConversationId, oldestCreatedAt, limit);
+      db.conversationItems(excludeId, oldestCreatedAt, limit);
 
   Selectable<ConversationItem> contactConversations(
     DateTime oldestCreatedAt,
     int limit, [
-    List<String> loadedConversationId = const [],
+    List<String> excludeId = const [],
   ]) =>
-      db.contactConversations(loadedConversationId, oldestCreatedAt, limit);
+      db.contactConversations(excludeId, oldestCreatedAt, limit);
 
   Selectable<ConversationItem> strangerConversations(
     DateTime oldestCreatedAt,
     int limit, [
-    List<String> loadedConversationId = const [],
+    List<String> excludeId = const [],
   ]) =>
-      db.strangerConversations(loadedConversationId, oldestCreatedAt, limit);
+      db.strangerConversations(excludeId, oldestCreatedAt, limit);
 
   Selectable<ConversationItem> groupConversations(
     DateTime oldestCreatedAt,
     int limit, [
-    List<String> loadedConversationId = const [],
+    List<String> excludeId = const [],
   ]) =>
-      db.groupConversations(loadedConversationId, oldestCreatedAt, limit);
+      db.groupConversations(excludeId, oldestCreatedAt, limit);
 
   Selectable<ConversationItem> botConversations(
     DateTime oldestCreatedAt,
     int limit, [
-    List<String> loadedConversationId = const [],
+    List<String> excludeId = const [],
   ]) =>
-      db.botConversations(loadedConversationId, oldestCreatedAt, limit);
+      db.botConversations(excludeId, oldestCreatedAt, limit);
 
   Future<int> updateLastMessageId(String conversationId, String messageId) =>
       (update(db.conversations)

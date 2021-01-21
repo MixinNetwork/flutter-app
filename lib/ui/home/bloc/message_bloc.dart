@@ -14,7 +14,10 @@ class MessageBloc extends PagingBloc<MessageItem, MessageState>
   MessageBloc(this.messagesDao, ConversationCubit conversationCubit, this.limit)
       : conversationId = conversationCubit.state.conversationId,
         super(const MessageState()) {
-    addSubscription(conversationCubit.distinct().listen((conversation) {
+    addSubscription(conversationCubit
+        .where((event) => null)
+        .distinct()
+        .listen((conversation) {
       conversationId = conversation.conversationId;
       setup();
     }));
@@ -31,7 +34,7 @@ class MessageBloc extends PagingBloc<MessageItem, MessageState>
           conversationId,
           limit,
           oldestCreatedAt: list.last.createdAt,
-          loadedMessageId: list.map((e) => e.messageId).toList(),
+          excludeId: list.map((e) => e.messageId).toList(),
         )
         .get();
     return result;
