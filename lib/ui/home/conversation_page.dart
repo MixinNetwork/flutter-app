@@ -5,6 +5,7 @@ import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
@@ -372,7 +373,7 @@ class _MessageContent extends StatelessWidget {
     String icon;
     String content;
 
-    if (conversation.messageStatus == 'FAILED') {
+    if (conversation.messageStatus == MessageStatus.failed) {
       icon = Resources.assetsImagesSendingSvg;
       content = Localization.of(context).waitingForThisMessage;
     } else if (conversation.isText) {

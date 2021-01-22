@@ -12,6 +12,6 @@ class MessageStatusTypeConverter extends TypeConverter<MessageStatus, String> {
 
   @override
   String mapToSql(MessageStatus value) {
-    return value ?? EnumToString.convertToString(value);
+    return EnumToString.convertToString(value ?? MessageStatus.failed);
   }
 }

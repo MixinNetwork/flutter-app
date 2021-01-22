@@ -12,6 +12,6 @@ class MediaStatusTypeConverter extends TypeConverter<MediaStatus, String> {
 
   @override
   String mapToSql(MediaStatus value) {
-    return value ?? EnumToString.convertToString(value);
+    return EnumToString.convertToString(value);
   }
 }
