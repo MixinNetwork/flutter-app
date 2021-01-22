@@ -16,6 +16,7 @@ import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
@@ -55,11 +56,21 @@ class ChatContainer extends StatelessWidget {
     final messagesDao =
         Provider.of<AccountServer>(context).database.messagesDao;
     final windowHeight = MediaQuery.of(context).size.height;
+    final itemScrollController = ItemScrollController();
+    final itemPositionsListener = ItemPositionsListener.create();
     return BlocProvider(
       create: (context) => MessageBloc(
-        messagesDao,
-        BlocProvider.of<ConversationCubit>(context),
-        windowHeight ~/ 20,
+        messagesDao: messagesDao,
+        conversationCubit: BlocProvider.of<ConversationCubit>(context),
+        limit: windowHeight ~/ 20,
+        itemPositions: itemPositionsListener.itemPositions,
+        jumpTo: ({index, alignment}) {
+          if (itemScrollController.isAttached)
+            itemScrollController.jumpTo(index: index, alignment: alignment);
+        },
+        offset: 100,
+        index: 120,
+        alignment: 0.5,
       ),
       child: Builder(
         builder: (context) {
@@ -71,26 +82,22 @@ class ChatContainer extends StatelessWidget {
               Expanded(
                 child: Builder(
                   builder: (context) =>
-                      NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification notification) {
-                      if (notification.metrics.pixels >
-                          notification.metrics.maxScrollExtent -
-                              notification.metrics.viewportDimension) {
-                        BlocProvider.of<MessageBloc>(context).loadBefore();
-                      }
-                      return false;
-                    },
-                    child: BlocConverter<MessageBloc, MessageState, int>(
-                      converter: (state) => state.list?.length ?? 0,
-                      builder: (context, count) => ListView.builder(
-                        key: ValueKey(BlocProvider.of<MessageBloc>(context)
-                            .conversationId),
-                        controller: ScrollController(keepScrollOffset: false),
-                        reverse: true,
-                        itemCount: count,
-                        itemBuilder: (BuildContext context, int index) =>
-                            _Message(index: index),
-                      ),
+                      BlocConverter<MessageBloc, MessageState, int>(
+                    // int.MaxValue
+                    converter: (state) => state?.count ?? 9223372036854775807,
+                    builder: (context, count) =>
+                        ScrollablePositionedList.builder(
+                      initialScrollIndex:
+                          BlocProvider.of<MessageBloc>(context).state.index,
+                      initialAlignment:
+                          BlocProvider.of<MessageBloc>(context).state.alignment,
+                      addAutomaticKeepAlives: false,
+                      itemScrollController: itemScrollController,
+                      itemPositionsListener: itemPositionsListener,
+                      reverse: true,
+                      itemCount: count,
+                      itemBuilder: (BuildContext context, int index) =>
+                          _Message(index: index),
                     ),
                   ),
                 ),
@@ -118,10 +125,9 @@ class _Message extends StatelessWidget {
     return BlocConverter<MessageBloc, MessageState,
         Tuple3<MessageItem, MessageItem, MessageItem>>(
       converter: (state) {
-        final messages = state.list;
-        final message = messages[index];
-        final prev = index == 0 ? null : messages[index - 1];
-        final next = messages.length == index + 1 ? null : messages[index + 1];
+        final message = state.map[index];
+        final prev = state.map[index - 1];
+        final next = state.map[index + 1];
 
         return Tuple3(prev, message, next);
       },
@@ -129,6 +135,8 @@ class _Message extends StatelessWidget {
         final message = tuple.item2;
         final prev = tuple.item1;
         final next = tuple.item3;
+
+        if (message == null) return const SizedBox(height: 40);
 
         final isCurrentUser = message.userId == authId;
 
@@ -176,40 +184,36 @@ class _Message extends StatelessWidget {
                     child: _MessageBubble(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
-                      child:
-                          BlocConverter<MessageBloc, MessageState, MessageItem>(
-                        converter: (state) => state.list[index],
-                        builder: (context, message) => Wrap(
-                          alignment: WrapAlignment.end,
-                          crossAxisAlignment: WrapCrossAlignment.end,
-                          children: [
-                            Text(
-                              message.content,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: BrightnessData.dynamicColor(
-                                  context,
-                                  const Color.fromRGBO(51, 51, 51, 1),
-                                  darkColor:
-                                      const Color.fromRGBO(255, 255, 255, 0.9),
-                                ),
+                      child: Wrap(
+                        alignment: WrapAlignment.end,
+                        crossAxisAlignment: WrapCrossAlignment.end,
+                        children: [
+                          Text(
+                            message.content,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: BrightnessData.dynamicColor(
+                                context,
+                                const Color.fromRGBO(51, 51, 51, 1),
+                                darkColor:
+                                    const Color.fromRGBO(255, 255, 255, 0.9),
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              DateFormat.jm().format(message.createdAt),
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: BrightnessData.dynamicColor(
-                                  context,
-                                  const Color.fromRGBO(131, 145, 158, 1),
-                                  darkColor:
-                                      const Color.fromRGBO(128, 131, 134, 1),
-                                ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            DateFormat.jm().format(message.createdAt),
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: BrightnessData.dynamicColor(
+                                context,
+                                const Color.fromRGBO(131, 145, 158, 1),
+                                darkColor:
+                                    const Color.fromRGBO(128, 131, 134, 1),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -330,19 +334,22 @@ class _MessageBubble extends StatelessWidget {
       child: child,
     );
     if (!showNip) {
-      _child = DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: bubbleColor,
-          boxShadow: [
-            const BoxShadow(
-              offset: Offset(0, 1),
-              color: Color.fromRGBO(0, 0, 0, 0.16),
-              blurRadius: 2,
-            ),
-          ],
+      _child = ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 38),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: bubbleColor,
+            boxShadow: [
+              const BoxShadow(
+                offset: Offset(0, 1),
+                color: Color.fromRGBO(0, 0, 0, 0.16),
+                blurRadius: 2,
+              ),
+            ],
+          ),
+          child: _child,
         ),
-        child: _child,
       );
     }
 
@@ -355,23 +362,26 @@ class _MessageBubble extends StatelessWidget {
     );
 
     if (showNip) {
-      _child = DecoratedBox(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(
-              isCurrentUser
-                  ? isDark
-                      ? Resources.assetsImagesDarkSenderNipBubblePng
-                      : Resources.assetsImagesLightSenderNipBubblePng
-                  : isDark
-                      ? Resources.assetsImagesDarkReceiverNipBubblePng
-                      : Resources.assetsImagesLightReceiverNipBubblePng,
+      _child = ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 38),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(
+                isCurrentUser
+                    ? isDark
+                        ? Resources.assetsImagesDarkSenderNipBubblePng
+                        : Resources.assetsImagesLightSenderNipBubblePng
+                    : isDark
+                        ? Resources.assetsImagesDarkReceiverNipBubblePng
+                        : Resources.assetsImagesLightReceiverNipBubblePng,
+              ),
+              centerSlice: Rect.fromCenter(
+                  center: const Offset(21, 22), width: 1, height: 1),
             ),
-            centerSlice: Rect.fromCenter(
-                center: const Offset(21, 22), width: 1, height: 1),
           ),
+          child: _child,
         ),
-        child: _child,
       );
     }
 

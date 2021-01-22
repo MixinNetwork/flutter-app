@@ -56,6 +56,7 @@ CREATE INDEX IF NOT EXISTS index_conversations_category_status_pin_time_created_
 
 CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id ON message_mentions (conversation_id);
 
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id ON messages (conversation_id);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id ON messages (conversation_id, status, user_id);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_user_id_status_created_at ON messages (conversation_id, user_id, status, created_at);
@@ -265,7 +266,7 @@ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.catego
               END 
             DESC;
 
-messageByConversationId AS MessageItem:
+messagesByConversationId AS MessageItem:
 SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,
                         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
                         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
@@ -289,10 +290,8 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
                         LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
                         LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
                         WHERE m.conversation_id = :conversationId 
-                        AND m.message_id NOT IN :excludeId 
-                        AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE m.created_at <= :oldestCreatedAt END 
                         ORDER BY m.created_at DESC
-                        LIMIT :limit;
+                        LIMIT :offset, :limit;
 
 sendingMessage AS SendingMessage:
 SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type,
@@ -302,3 +301,4 @@ SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.medi
       rm.status as resend_status, rm.user_id as resend_user_id, rm.session_id as resend_session_id
       FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id
       WHERE m.message_id = :message_id AND (m.status = 'SENDING' OR rm.status = 1) AND m.content IS NOT NULL;
+

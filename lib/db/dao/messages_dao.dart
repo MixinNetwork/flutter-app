@@ -19,20 +19,26 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
 
-  Selectable<MessageItem> messageByConversationId(
+  Stream<List<SendingMessage>> sendingMessage(String messageId) {
+    return db.sendingMessage(messageId).watch();
+  }
+
+  Selectable<MessageItem> messagesByConversationId(
     String conversationId,
     int limit, {
-    DateTime oldestCreatedAt,
-    List<String> excludeId = const [],
+    int offset = 0,
   }) =>
-      db.messageByConversationId(
+      db.messagesByConversationId(
         conversationId,
-        excludeId,
-        oldestCreatedAt,
+        offset,
         limit,
       );
 
-  Stream<List<SendingMessage>> sendingMessage(String messageId) {
-    return db.sendingMessage(messageId).watch();
+  Selectable<int> messageCountByConversationId(String conversationId) {
+    final countExp = countAll();
+    return (db.selectOnly(db.messages)
+          ..addColumns([countExp])
+          ..where(db.messages.conversationId.equals(conversationId)))
+        .map((row) => row.read(countExp));
   }
 }

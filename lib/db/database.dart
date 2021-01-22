@@ -89,7 +89,7 @@ class Database {
             ..insertAll(
               _database.messages,
               List.generate(
-                100000,
+                10000,
                 (index) => MessagesCompanion.insert(
                   messageId: 'mockMessageId$i-$index',
                   conversationId: conversationId,
