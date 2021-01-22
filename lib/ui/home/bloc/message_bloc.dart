@@ -140,10 +140,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   ) {
     final nonDebounceStream =
         events.where((event) => event is! _MessageItemPositionEvent);
-    final debounceStream = events
-        .where((event) => event is _MessageItemPositionEvent)
-        .distinct()
-        .debounceTime(const Duration(milliseconds: 5));
+    final debounceStream =
+        events.where((event) => event is _MessageItemPositionEvent).distinct();
 
     return super.transformEvents(
         Rx.merge([nonDebounceStream, debounceStream]), transitionFn);
