@@ -87,7 +87,7 @@ conversationItems AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category IS NOT NULL AND c.conversation_id NOT IN :loadedConversationId
+            WHERE c.category IS NOT NULL AND c.conversation_id NOT IN :excludeId
             AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
               WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
@@ -121,7 +121,7 @@ contactConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.relationship = 'FRIEND' AND ou.app_id IS NULL AND c.conversation_id NOT IN :loadedConversationId
+            WHERE c.category = 'CONTACT' AND ou.relationship = 'FRIEND' AND ou.app_id IS NULL AND c.conversation_id NOT IN :excludeId
             AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
               WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
@@ -155,7 +155,7 @@ strangerConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.relationship = 'STRANGER' AND c.conversation_id NOT IN :loadedConversationId
+            WHERE c.category = 'CONTACT' AND ou.relationship = 'STRANGER' AND c.conversation_id NOT IN :excludeId
             AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
               WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
@@ -189,7 +189,7 @@ groupConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'GROUP' AND c.conversation_id NOT IN :loadedConversationId
+            WHERE c.category = 'GROUP' AND c.conversation_id NOT IN :excludeId
             AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
               WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
@@ -223,7 +223,7 @@ botConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.app_id IS NOT NULL AND c.conversation_id NOT IN :loadedConversationId
+            WHERE c.category = 'CONTACT' AND ou.app_id IS NOT NULL AND c.conversation_id NOT IN :excludeId
             AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
               WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
@@ -289,7 +289,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
                         LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
                         LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
                         WHERE m.conversation_id = :conversationId 
-                        AND m.message_id NOT IN :loadedMessageId 
+                        AND m.message_id NOT IN :excludeId 
                         AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE m.created_at <= :oldestCreatedAt END 
                         ORDER BY m.created_at DESC
                         LIMIT :limit;

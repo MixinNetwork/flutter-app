@@ -74,11 +74,8 @@ class ChatContainer extends StatelessWidget {
                       NotificationListener<ScrollNotification>(
                     onNotification: (ScrollNotification notification) {
                       if (notification.metrics.pixels >
-                              notification.metrics.maxScrollExtent -
-                                  notification.metrics.viewportDimension &&
-                          BlocProvider.of<MessageBloc>(context)
-                                  .loadMoreStreamController ==
-                              null) {
+                          notification.metrics.maxScrollExtent -
+                              notification.metrics.viewportDimension) {
                         BlocProvider.of<MessageBloc>(context).loadBefore();
                       }
                       return false;

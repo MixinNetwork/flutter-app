@@ -13,6 +13,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/enum_to_string.dart';
+import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'injector.dart';
@@ -27,8 +28,9 @@ class DecryptMessage extends Injector {
     _conversationId = conversationId;
   }
 
-  void process(FloodMessage floodMessage) {
-    final data = BlazeMessageData.fromJson(jsonDecode(floodMessage.data));
+  void process(FloodMessage floodMessage) async {
+    final data = BlazeMessageData.fromJson(
+        await LoadBalancerUtils.jsonDecode(floodMessage.data));
     if (data.conversationId != null) {
       syncConversion(data.conversationId);
     }
@@ -47,7 +49,7 @@ class DecryptMessage extends Injector {
       processRecallMessage(data);
     }
     _updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
-    database.floodMessagesDao.deleteFloodMessage(floodMessage);
+    await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
 
   void processSignalMessage(data) {}
@@ -116,7 +118,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final attachment =
+          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
@@ -143,7 +146,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final attachment =
+          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
@@ -171,7 +175,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final attachment =
+          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
@@ -195,7 +200,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final attachment = AttachmentMessage.fromJson(jsonDecode(plain));
+      final attachment =
+          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
@@ -221,7 +227,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final stickerMessage = StickerMessage.fromJson(jsonDecode(plain));
+      final stickerMessage =
+          StickerMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       if (stickerMessage.stickerId == null) {
         // todo handle album sticker
       } else {
@@ -247,7 +254,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final contactMessage = ContactMessage.fromJson(jsonDecode(plain));
+      final contactMessage =
+          ContactMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final user = await syncUser(contactMessage.userId);
       final message = Message(
           messageId: data.messageId,
@@ -267,7 +275,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final liveMessage = LiveMessage.fromJson(jsonDecode(plain));
+      final liveMessage =
+          LiveMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
@@ -291,7 +300,8 @@ class DecryptMessage extends Injector {
       // ignore: unused_local_variable todo check location
       LocationMessage locationMessage;
       try {
-        locationMessage = LocationMessage.fromJson(jsonDecode(plain));
+        locationMessage =
+            LocationMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       } catch (e) {
         debugPrint(e);
       }
