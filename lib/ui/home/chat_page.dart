@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/acount/account_server.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;

@@ -46,7 +46,6 @@ dependencies:
   equatable: ^1.2.5
   intl: ^0.17.0-nullsafety.2
   flutter_svg: ^0.19.2+1
-  enum_to_string: ^1.0.14
   tuple: ^1.0.3
   archive: ^2.0.13
   hydrated_bloc: ^6.1.0

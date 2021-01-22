@@ -1702,8 +1702,8 @@ class Message extends DataClass implements Insertable<Message> {
   final String thumbImage;
   final String mediaKey;
   final String mediaDigest;
-  final String mediaStatus;
-  final String status;
+  final MediaStatus mediaStatus;
+  final MessageStatus status;
   final DateTime createdAt;
   final String action;
   final String participantId;
@@ -1785,10 +1785,10 @@ class Message extends DataClass implements Insertable<Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}media_key']),
       mediaDigest: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}media_digest']),
-      mediaStatus: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}media_status']),
-      status:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
+      mediaStatus: Messages.$converter0.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_status'])),
+      status: Messages.$converter1.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
       createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
       action:
@@ -1865,10 +1865,12 @@ class Message extends DataClass implements Insertable<Message> {
       map['media_digest'] = Variable<String>(mediaDigest);
     }
     if (!nullToAbsent || mediaStatus != null) {
-      map['media_status'] = Variable<String>(mediaStatus);
+      final converter = Messages.$converter0;
+      map['media_status'] = Variable<String>(converter.mapToSql(mediaStatus));
     }
     if (!nullToAbsent || status != null) {
-      map['status'] = Variable<String>(status);
+      final converter = Messages.$converter1;
+      map['status'] = Variable<String>(converter.mapToSql(status));
     }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
@@ -2021,8 +2023,8 @@ class Message extends DataClass implements Insertable<Message> {
       thumbImage: serializer.fromJson<String>(json['thumb_image']),
       mediaKey: serializer.fromJson<String>(json['media_key']),
       mediaDigest: serializer.fromJson<String>(json['media_digest']),
-      mediaStatus: serializer.fromJson<String>(json['media_status']),
-      status: serializer.fromJson<String>(json['status']),
+      mediaStatus: serializer.fromJson<MediaStatus>(json['media_status']),
+      status: serializer.fromJson<MessageStatus>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       action: serializer.fromJson<String>(json['action']),
       participantId: serializer.fromJson<String>(json['participant_id']),
@@ -2057,8 +2059,8 @@ class Message extends DataClass implements Insertable<Message> {
       'thumb_image': serializer.toJson<String>(thumbImage),
       'media_key': serializer.toJson<String>(mediaKey),
       'media_digest': serializer.toJson<String>(mediaDigest),
-      'media_status': serializer.toJson<String>(mediaStatus),
-      'status': serializer.toJson<String>(status),
+      'media_status': serializer.toJson<MediaStatus>(mediaStatus),
+      'status': serializer.toJson<MessageStatus>(status),
       'created_at': serializer.toJson<DateTime>(createdAt),
       'action': serializer.toJson<String>(action),
       'participant_id': serializer.toJson<String>(participantId),
@@ -2091,8 +2093,8 @@ class Message extends DataClass implements Insertable<Message> {
           String thumbImage,
           String mediaKey,
           String mediaDigest,
-          String mediaStatus,
-          String status,
+          MediaStatus mediaStatus,
+          MessageStatus status,
           DateTime createdAt,
           String action,
           String participantId,
@@ -2271,8 +2273,8 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<String> thumbImage;
   final Value<String> mediaKey;
   final Value<String> mediaDigest;
-  final Value<String> mediaStatus;
-  final Value<String> status;
+  final Value<MediaStatus> mediaStatus;
+  final Value<MessageStatus> status;
   final Value<DateTime> createdAt;
   final Value<String> action;
   final Value<String> participantId;
@@ -2335,7 +2337,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     this.mediaKey = const Value.absent(),
     this.mediaDigest = const Value.absent(),
     this.mediaStatus = const Value.absent(),
-    @required String status,
+    @required MessageStatus status,
     @required DateTime createdAt,
     this.action = const Value.absent(),
     this.participantId = const Value.absent(),
@@ -2437,8 +2439,8 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       Value<String> thumbImage,
       Value<String> mediaKey,
       Value<String> mediaDigest,
-      Value<String> mediaStatus,
-      Value<String> status,
+      Value<MediaStatus> mediaStatus,
+      Value<MessageStatus> status,
       Value<DateTime> createdAt,
       Value<String> action,
       Value<String> participantId,
@@ -2535,10 +2537,13 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       map['media_digest'] = Variable<String>(mediaDigest.value);
     }
     if (mediaStatus.present) {
-      map['media_status'] = Variable<String>(mediaStatus.value);
+      final converter = Messages.$converter0;
+      map['media_status'] =
+          Variable<String>(converter.mapToSql(mediaStatus.value));
     }
     if (status.present) {
-      map['status'] = Variable<String>(status.value);
+      final converter = Messages.$converter1;
+      map['status'] = Variable<String>(converter.mapToSql(status.value));
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3012,18 +3017,8 @@ class Messages extends Table with TableInfo<Messages, Message> {
           mediaDigest.isAcceptableOrUnknown(
               data['media_digest'], _mediaDigestMeta));
     }
-    if (data.containsKey('media_status')) {
-      context.handle(
-          _mediaStatusMeta,
-          mediaStatus.isAcceptableOrUnknown(
-              data['media_status'], _mediaStatusMeta));
-    }
-    if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status'], _statusMeta));
-    } else if (isInserting) {
-      context.missing(_statusMeta);
-    }
+    context.handle(_mediaStatusMeta, const VerificationResult.success());
+    context.handle(_statusMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
@@ -3106,6 +3101,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
     return Messages(_db, alias);
   }
 
+  static TypeConverter<MediaStatus, String> $converter0 =
+      const MediaStatusTypeConverter();
+  static TypeConverter<MessageStatus, String> $converter1 =
+      const MessageStatusTypeConverter();
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY(message_id)',
@@ -11102,7 +11101,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
-        messageStatus: row.readString('messageStatus'),
+        messageStatus:
+            Messages.$converter1.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
         snapshotType: row.readString('SnapshotType'),
         participantFullName: row.readString('participantFullName'),
@@ -11159,7 +11159,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
-        messageStatus: row.readString('messageStatus'),
+        messageStatus:
+            Messages.$converter1.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
         snapshotType: row.readString('SnapshotType'),
         participantFullName: row.readString('participantFullName'),
@@ -11216,7 +11217,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
-        messageStatus: row.readString('messageStatus'),
+        messageStatus:
+            Messages.$converter1.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
         snapshotType: row.readString('SnapshotType'),
         participantFullName: row.readString('participantFullName'),
@@ -11273,7 +11275,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
-        messageStatus: row.readString('messageStatus'),
+        messageStatus:
+            Messages.$converter1.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
         snapshotType: row.readString('SnapshotType'),
         participantFullName: row.readString('participantFullName'),
@@ -11330,7 +11333,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
-        messageStatus: row.readString('messageStatus'),
+        messageStatus:
+            Messages.$converter1.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
         snapshotType: row.readString('SnapshotType'),
         participantFullName: row.readString('participantFullName'),
@@ -11380,7 +11384,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
-        messageStatus: row.readString('messageStatus'),
+        messageStatus:
+            Messages.$converter1.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
         snapshotType: row.readString('SnapshotType'),
         participantFullName: row.readString('participantFullName'),
@@ -11426,8 +11431,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         type: row.readString('type'),
         content: row.readString('content'),
         createdAt: row.readDateTime('createdAt'),
-        status: row.readString('status'),
-        mediaStatus: row.readString('mediaStatus'),
+        status: Messages.$converter1.mapToDart(row.readString('status')),
+        mediaStatus:
+            Messages.$converter0.mapToDart(row.readString('mediaStatus')),
         mediaWaveform: row.readString('mediaWaveform'),
         mediaName: row.readString('mediaName'),
         mediaMimeType: row.readString('mediaMimeType'),
@@ -11493,8 +11499,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         thumbImage: row.readString('thumb_image'),
         mediaKey: row.readString('media_key'),
         mediaDigest: row.readString('media_digest'),
-        mediaStatus: row.readString('media_status'),
-        status: row.readString('status'),
+        mediaStatus:
+            Messages.$converter0.mapToDart(row.readString('media_status')),
+        status: Messages.$converter1.mapToDart(row.readString('status')),
         createdAt: row.readDateTime('created_at'),
         action: row.readString('action'),
         participantId: row.readString('participant_id'),
@@ -11597,7 +11604,7 @@ class ConversationItem {
   final String mediaUrl;
   final String senderId;
   final String actionName;
-  final String messageStatus;
+  final MessageStatus messageStatus;
   final String senderFullName;
   final String snapshotType;
   final String participantFullName;
@@ -11767,8 +11774,8 @@ class MessageItem {
   final String type;
   final String content;
   final DateTime createdAt;
-  final String status;
-  final String mediaStatus;
+  final MessageStatus status;
+  final MediaStatus mediaStatus;
   final String mediaWaveform;
   final String mediaName;
   final String mediaMimeType;
@@ -12037,8 +12044,8 @@ class SendingMessage {
   final String thumbImage;
   final String mediaKey;
   final String mediaDigest;
-  final String mediaStatus;
-  final String status;
+  final MediaStatus mediaStatus;
+  final MessageStatus status;
   final DateTime createdAt;
   final String action;
   final String participantId;

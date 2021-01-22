@@ -1,4 +1,4 @@
-import 'package:flutter_app/vo/conversation_status.dart';
+import 'package:flutter_app/enum/conversation_status.dart';
 import 'package:moor/moor.dart';
 
 class ConversationStatusTypeConverter

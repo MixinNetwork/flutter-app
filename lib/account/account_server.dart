@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_app/acount/send_message_helper.dart';
+import 'package:flutter_app/account/send_message_helper.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 

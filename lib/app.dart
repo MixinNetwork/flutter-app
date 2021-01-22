@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
-import 'package:flutter_app/acount/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
@@ -14,6 +13,8 @@ import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
+
+import 'account/account_server.dart';
 
 class App extends StatelessWidget {
   @override

@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/main.dart';
+import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -71,8 +73,8 @@ class Blaze {
     _sendListPending();
   }
 
-  void updateRemoteMessageStatus(String messageId, String status) {
-    final blazeMessage = BlazeAckMessage(messageId: messageId, status: status);
+  void updateRemoteMessageStatus(String messageId, MessageStatus status) {
+    final blazeMessage = BlazeAckMessage(messageId: messageId, status: EnumToString.convertToString(status));
     database.jobsDao.insert(Job(
         jobId: Uuid().v4(),
         action: acknowledgeMessageReceipts,

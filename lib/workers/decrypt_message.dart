@@ -10,6 +10,9 @@ import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/media_status.dart';
+import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'injector.dart';
@@ -329,11 +332,12 @@ class DecryptMessage extends Injector {
     _updateRemoteMessageStatus(data.messageId, messageStatus);
   }
 
-  void _updateRemoteMessageStatus(messageId, status) {
+  void _updateRemoteMessageStatus(messageId, MessageStatus status) {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
-    final blazeMessage = BlazeAckMessage(messageId: messageId, status: status);
+    final blazeMessage = BlazeAckMessage(
+        messageId: messageId, status: EnumToString.convertToString(status));
     database.jobsDao.insert(Job(
         jobId: Uuid().v4(),
         action: acknowledgeMessageReceipts,

@@ -2,6 +2,7 @@ import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:uuid/uuid.dart';
 
 class SendMessageHelper {

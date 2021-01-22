@@ -14,7 +14,6 @@ import 'package:flutter_app/db/dao/resend_session_messages_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/db/dao/users_dao.dart';
 import 'package:flutter_app/db/database_event_bus.dart';
-import 'package:flutter_app/vo/conversation_status.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';

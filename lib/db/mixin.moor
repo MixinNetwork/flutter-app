@@ -1,6 +1,8 @@
 -- this is the tables.moor file
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
+import 'converter/media_status_type_converter.dart';
+import 'converter/message_status_type_converter.dart';
 
 CREATE TABLE addresses ( address_id TEXT NOT NULL, type TEXT NOT NULL, asset_id TEXT NOT NULL, public_key TEXT, label TEXT, updated_at DATETIME NOT NULL, reserve TEXT NOT NULL, fee TEXT NOT NULL, account_name TEXT, account_tag TEXT, dust TEXT, PRIMARY KEY(address_id) );
 
@@ -22,7 +24,7 @@ CREATE TABLE jobs ( job_id TEXT NOT NULL, "action" TEXT NOT NULL, created_at DAT
 
 CREATE TABLE message_mentions ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, mentions TEXT NOT NULL, has_read INTEGER, PRIMARY KEY(message_id) );
 
-CREATE TABLE messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, content TEXT, media_url TEXT, media_mime_type TEXT, media_size INTEGER, media_duration TEXT, media_width INTEGER, media_height INTEGER, media_hash TEXT, thumb_image TEXT, media_key TEXT, media_digest TEXT, media_status TEXT, status TEXT NOT NULL, created_at DATETIME NOT NULL, "action" TEXT, participant_id TEXT, snapshot_id TEXT, hyperlink TEXT, name TEXT, album_id TEXT, sticker_id TEXT, shared_user_id TEXT, media_waveform TEXT, quote_message_id TEXT, quote_content TEXT, thumb_url TEXT, PRIMARY KEY(message_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
+CREATE TABLE messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, category TEXT NOT NULL, content TEXT, media_url TEXT, media_mime_type TEXT, media_size INTEGER, media_duration TEXT, media_width INTEGER, media_height INTEGER, media_hash TEXT, thumb_image TEXT, media_key TEXT, media_digest TEXT, media_status TEXT MAPPED BY `const MediaStatusTypeConverter()`, status TEXT NOT NULL MAPPED BY `const MessageStatusTypeConverter()`, created_at DATETIME NOT NULL, "action" TEXT, participant_id TEXT, snapshot_id TEXT, hyperlink TEXT, name TEXT, album_id TEXT, sticker_id TEXT, shared_user_id TEXT, media_waveform TEXT, quote_message_id TEXT, quote_content TEXT, thumb_url TEXT, PRIMARY KEY(message_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
 CREATE TABLE messages_history ( message_id TEXT NOT NULL, PRIMARY KEY(message_id) );
 

@@ -9,23 +9,6 @@ const acknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
 const sendingMessage = 'SENDING_MESSAGE';
 const createMessage = 'CREATE_MESSAGE';
 
-class MessageStatus {
-  static const String sending = 'SENDING';
-  static const String sent = 'SENT';
-  static const String delivered = 'DELIVERED';
-  static const String read = 'READ';
-  static const String failed = 'FAILED';
-  static const String unknown = 'UNKNOWN';
-}
-
-class MediaStatus {
-  static const String pending = 'PENDING';
-  static const String done = 'DONE';
-  static const String canceled = 'CANCELED';
-  static const String expired = 'EXPIRED';
-  static const String read = 'READ';
-}
-
 class MessageCategory {
   static const String signalKey = 'SIGNAL_KEY';
   static const String signalText = 'SIGNAL_TEXT';
