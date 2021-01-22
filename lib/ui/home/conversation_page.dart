@@ -12,6 +12,7 @@ import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
+import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -460,13 +461,14 @@ class _MessageStatusIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (MultiAuthCubit.of(context)?.state?.current?.account?.userId ==
-            conversation.messageStatus &&
+            EnumToString.convertToString(conversation.messageStatus) &&
         conversation.contentType != 'SYSTEM_CONVERSATION' &&
         conversation.contentType != 'SYSTEM_ACCOUNT_SNAPSHOT' &&
         !conversation.isCallMessage &&
         !conversation.isRecall &&
         !conversation.isGroupCall) {
-      return MessageStatusIcon(status: conversation.messageStatus);
+      return MessageStatusIcon(
+          status: EnumToString.convertToString(conversation.messageStatus));
     }
     return const SizedBox();
   }
