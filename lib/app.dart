@@ -37,8 +37,9 @@ class App extends StatelessWidget {
               ...Localization.delegate.supportedLocales,
             ],
             builder: (context, child) {
-              BlocProvider.of<ConversationListBloc>(context)
-                  ?.init(MediaQuery.of(context).size.height ~/ 20);
+              BlocProvider.of<ConversationListBloc>(context)?.limit =
+                  MediaQuery.of(context).size.height ~/ 40;
+              BlocProvider.of<ConversationListBloc>(context)?.init();
               return BrightnessObserver(
                 child: child,
               );

@@ -9,7 +9,6 @@ import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moor/moor.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:tuple/tuple.dart';
 
 class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     with SubscribeMixin {
@@ -28,13 +27,9 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   StreamSubscription streamSubscription;
 
   ItemPositionsListener get itemPositionsListener =>
-      _map[Tuple2(slideCategoryCubit.state.type, slideCategoryCubit.state.id)]
-          .itemPositionsListener;
+      _map[slideCategoryCubit.state].itemPositionsListener;
 
-  void init(int limit) {
-    this.limit = limit;
-    _switchBloc(slideCategoryCubit.state, limit);
-  }
+  void init() => _switchBloc(slideCategoryCubit.state, limit);
 
   void _switchBloc(
     SlideCategoryState state,
