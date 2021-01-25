@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -24,7 +23,6 @@ import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
-import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ConversationPage extends StatelessWidget {
@@ -43,37 +41,9 @@ class ConversationPage extends StatelessWidget {
           const SearchBar(),
           Expanded(
             child: BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
-              builder: (context, slideCategoryState) {
-                return BlocConverter<ConversationListManagerBloc,
-                    Set<SlideCategoryState>, Set<SlideCategoryState>>(
-                  converter: (state) => state.contains(slideCategoryState)
-                      ? state
-                      : {...state, slideCategoryState},
-                  builder: (context, slideCategoryStates) => IndexedStack(
-                    index: slideCategoryStates
-                        .toList()
-                        .indexOf(slideCategoryState),
-                    children: slideCategoryStates.map((e) {
-                      final database =
-                          Provider.of<AccountServer>(context).database;
-                      final limit = MediaQuery.of(context).size.height ~/ 40;
-                      return BlocProvider(
-                        key: PageStorageKey(e),
-                        create: (context) =>
-                            ConversationListManagerBloc.createBloc(
-                          e,
-                          limit,
-                          ItemPositionsListener.create(),
-                          database,
-                        ),
-                        child: Builder(
-                          builder: (context) => const _List(),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                );
-              },
+              builder: (context, state) => _List(
+                key: PageStorageKey(state),
+              ),
             ),
           ),
         ],
@@ -119,55 +89,69 @@ class _List extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationListBloc, PagingState<ConversationItem>, int>(
-        converter: (state) => state.count,
-        builder: (context, count) {
-          if (count == null) return const SizedBox();
-          if (count <= 0) return const _Empty();
-          return ScrollablePositionedList.builder(
-            itemPositionsListener:
-                BlocProvider.of<ConversationListBloc>(context)
-                    .itemPositionsListener,
-            itemCount: count,
-            itemBuilder: (context, index) => BlocConverter<ConversationListBloc,
-                PagingState<ConversationItem>, ConversationItem>(
-              converter: (state) => state.map[index],
-              builder: (context, conversation) {
-                if (conversation == null) return const SizedBox(height: 80);
-                return BlocConverter<ConversationCubit, ConversationItem, bool>(
-                  converter: (state) =>
-                      conversation?.conversationId == state?.conversationId,
-                  builder: (context, selected) => _Item(
-                    selected: selected,
-                    conversation: conversation,
-                    onTap: () {
-                      BlocProvider.of<ConversationCubit>(context)
-                          .emit(conversation);
-                      ResponsiveNavigatorCubit.of(context)
-                          .pushPage(ResponsiveNavigatorCubit.chatPage);
-                    },
-                    onRightClick: (pointerUpEvent) => showContextMenu(
-                      context: context,
-                      pointerPosition: pointerUpEvent.position,
-                      menus: [
-                        ContextMenu(
-                          title: Localization.of(context).pin,
+      BlocConverter<ConversationListBloc, PagingState<ConversationItem>, bool>(
+        converter: (state) => state.initialized,
+        when: (a, b) => b,
+        builder: (context, initialized) => BlocConverter<ConversationListBloc,
+            PagingState<ConversationItem>, int>(
+          converter: (state) => state.count,
+          builder: (context, count) {
+            if (count == null || count <= 0) return const _Empty();
+            return ColoredBox(
+              color: BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(255, 255, 255, 1),
+                darkColor: const Color.fromRGBO(44, 49, 54, 1),
+              ),
+              child: ScrollablePositionedList.builder(
+                itemPositionsListener:
+                    BlocProvider.of<ConversationListBloc>(context)
+                        .itemPositionsListener,
+                itemCount: count,
+                itemBuilder: (context, index) => BlocConverter<
+                    ConversationListBloc,
+                    PagingState<ConversationItem>,
+                    ConversationItem>(
+                  converter: (state) => state.map[index],
+                  builder: (context, conversation) {
+                    if (conversation == null) return const SizedBox(height: 80);
+                    return BlocConverter<ConversationCubit, ConversationItem,
+                        bool>(
+                      converter: (state) =>
+                          conversation?.conversationId == state?.conversationId,
+                      builder: (context, selected) => _Item(
+                        selected: selected,
+                        conversation: conversation,
+                        onTap: () {
+                          BlocProvider.of<ConversationCubit>(context)
+                              .emit(conversation);
+                          ResponsiveNavigatorCubit.of(context)
+                              .pushPage(ResponsiveNavigatorCubit.chatPage);
+                        },
+                        onRightClick: (pointerUpEvent) => showContextMenu(
+                          context: context,
+                          pointerPosition: pointerUpEvent.position,
+                          menus: [
+                            ContextMenu(
+                              title: Localization.of(context).pin,
+                            ),
+                            ContextMenu(
+                              title: Localization.of(context).unMute,
+                            ),
+                            ContextMenu(
+                              title: Localization.of(context).deleteChat,
+                              isDestructiveAction: true,
+                            ),
+                          ],
                         ),
-                        ContextMenu(
-                          title: Localization.of(context).unMute,
-                        ),
-                        ContextMenu(
-                          title: Localization.of(context).deleteChat,
-                          isDestructiveAction: true,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            );
+          },
+        ),
       );
 }
 

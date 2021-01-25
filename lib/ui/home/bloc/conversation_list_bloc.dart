@@ -9,27 +9,42 @@ import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moor/moor.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:tuple/tuple.dart';
 
-class ConversationListManagerBloc extends Cubit<Set<SlideCategoryState>>
+class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     with SubscribeMixin {
-  ConversationListManagerBloc(SlideCategoryCubit slideCategoryCubit)
-      : super(const {}) {
-    addSubscription(slideCategoryCubit.listen((event) {
-      emit({...state, event});
-    }));
+  ConversationListBloc(this.slideCategoryCubit, this.database)
+      : super(const PagingState<ConversationItem>()) {
+    addSubscription(slideCategoryCubit
+        .distinct()
+        .listen((event) => _switchBloc(slideCategoryCubit.state, limit)));
   }
 
-  static ConversationListBloc createBloc(
+  final SlideCategoryCubit slideCategoryCubit;
+  final Database database;
+  final Map<SlideCategoryState, _ConversationListBloc> _map = {};
+
+  int limit;
+  StreamSubscription streamSubscription;
+
+  ItemPositionsListener get itemPositionsListener =>
+      _map[Tuple2(slideCategoryCubit.state.type, slideCategoryCubit.state.id)]
+          .itemPositionsListener;
+
+  void init(int limit) {
+    this.limit = limit;
+    _switchBloc(slideCategoryCubit.state, limit);
+  }
+
+  void _switchBloc(
     SlideCategoryState state,
     int limit,
-    ItemPositionsListener itemPositionsListener,
-    Database database,
   ) {
     switch (state.type) {
       case SlideCategoryType.contacts:
-        return ConversationListBloc(
+        _map[state] ??= _ConversationListBloc(
           limit,
-          itemPositionsListener,
+          ItemPositionsListener.create(),
           () => database.conversationDao.contactConversationCount().getSingle(),
           (limit, offset) => database.conversationDao
               .contactConversations(limit, offset)
@@ -37,52 +52,58 @@ class ConversationListManagerBloc extends Cubit<Set<SlideCategoryState>>
         );
         break;
       case SlideCategoryType.groups:
-        return ConversationListBloc(
+        _map[state] ??= _ConversationListBloc(
           limit,
-          itemPositionsListener,
+          ItemPositionsListener.create(),
           () => database.conversationDao.groupConversationCount().getSingle(),
           (limit, offset) =>
               database.conversationDao.groupConversations(limit, offset).get(),
         );
+        break;
       case SlideCategoryType.bots:
-        return ConversationListBloc(
+        _map[state] ??= _ConversationListBloc(
           limit,
-          itemPositionsListener,
+          ItemPositionsListener.create(),
           () => database.conversationDao.botConversationCount().getSingle(),
           (limit, offset) =>
               database.conversationDao.botConversations(limit, offset).get(),
         );
         break;
       case SlideCategoryType.strangers:
-        return ConversationListBloc(
+        _map[state] ??= _ConversationListBloc(
           limit,
-          itemPositionsListener,
+          ItemPositionsListener.create(),
           () =>
               database.conversationDao.strangerConversationCount().getSingle(),
           (limit, offset) => database.conversationDao
               .strangerConversations(limit, offset)
               .get(),
         );
-
+        break;
       case SlideCategoryType.circle:
-        return ConversationListBloc(
+        _map[state] ??= _ConversationListBloc(
           limit,
-          itemPositionsListener,
+          ItemPositionsListener.create(),
           () =>
               database.conversationDao.strangerConversationCount().getSingle(),
           (limit, offset) => database.conversationDao
               .strangerConversations(limit, offset)
               .get(),
         );
+        break;
       default:
         return null;
         break;
     }
+    final bloc = _map[state];
+    emit(bloc.state);
+    streamSubscription?.cancel();
+    streamSubscription = bloc.listen(emit);
   }
 }
 
-class ConversationListBloc extends PagingBloc<ConversationItem> {
-  ConversationListBloc(
+class _ConversationListBloc extends PagingBloc<ConversationItem> {
+  _ConversationListBloc(
     int limit,
     ItemPositionsListener itemPositionsListener,
     // ignore: invalid_required_positional_param

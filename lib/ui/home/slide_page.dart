@@ -104,7 +104,7 @@ class _CircleList extends StatelessWidget {
                 BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
               converter: (state) =>
                   state?.type == SlideCategoryType.circle &&
-                  state?.name == circleType[index]['title'],
+                  state?.id == circleType[index]['title'],
               builder: (BuildContext context, bool selected) {
                 final circle = circleType[index];
                 return SelectItem(

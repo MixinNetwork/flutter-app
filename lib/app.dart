@@ -36,9 +36,13 @@ class App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            builder: (context, child) => BrightnessObserver(
-              child: child,
-            ),
+            builder: (context, child) {
+              BlocProvider.of<ConversationListBloc>(context)
+                  ?.init(MediaQuery.of(context).size.height ~/ 20);
+              return BrightnessObserver(
+                child: child,
+              );
+            },
             home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
               converter: (state) => state?.current != null,
               builder: (context, authAvailable) {
@@ -77,8 +81,8 @@ class App extends StatelessWidget {
                   create: (BuildContext context) => responsiveNavigatorCubit,
                 ),
                 BlocProvider(
-                  create: (BuildContext context) =>
-                      ConversationListManagerBloc(slideCategoryCubit),
+                  create: (BuildContext context) => ConversationListBloc(
+                      slideCategoryCubit, accountServer.database),
                 ),
                 BlocProvider(
                   create: (BuildContext context) =>
