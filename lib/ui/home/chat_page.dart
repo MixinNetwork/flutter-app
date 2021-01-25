@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
@@ -57,13 +58,11 @@ class ChatContainer extends StatelessWidget {
         Provider.of<AccountServer>(context).database.messagesDao;
     final windowHeight = MediaQuery.of(context).size.height;
     final itemScrollController = ItemScrollController();
-    final itemPositionsListener = ItemPositionsListener.create();
     return BlocProvider(
       create: (context) => MessageBloc(
         messagesDao: messagesDao,
         conversationCubit: BlocProvider.of<ConversationCubit>(context),
         limit: windowHeight ~/ 20,
-        itemPositions: itemPositionsListener.itemPositions,
         jumpTo: ({index, alignment}) {
           if (itemScrollController.isAttached)
             itemScrollController.jumpTo(index: index, alignment: alignment);
@@ -82,7 +81,7 @@ class ChatContainer extends StatelessWidget {
               Expanded(
                 child: Builder(
                   builder: (context) =>
-                      BlocConverter<MessageBloc, MessageState, int>(
+                      BlocConverter<MessageBloc, PagingState<MessageItem>, int>(
                     // int.MaxValue
                     converter: (state) => state?.count ?? 9223372036854775807,
                     builder: (context, count) =>
@@ -93,7 +92,9 @@ class ChatContainer extends StatelessWidget {
                           BlocProvider.of<MessageBloc>(context).state.alignment,
                       addAutomaticKeepAlives: false,
                       itemScrollController: itemScrollController,
-                      itemPositionsListener: itemPositionsListener,
+                      itemPositionsListener:
+                          BlocProvider.of<MessageBloc>(context)
+                              .itemPositionsListener,
                       reverse: true,
                       itemCount: count,
                       itemBuilder: (BuildContext context, int index) =>
@@ -122,7 +123,7 @@ class _Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authId = MultiAuthCubit.of(context).state.current.account.userId;
-    return BlocConverter<MessageBloc, MessageState,
+    return BlocConverter<MessageBloc, PagingState<MessageItem>,
         Tuple3<MessageItem, MessageItem, MessageItem>>(
       converter: (state) {
         final message = state.map[index];
