@@ -8,7 +8,7 @@ class BlazeMessage {
     this.id,
     this.action,
     this.data,
-    // this.params,
+    this.params,
     // this.error
   });
 
@@ -19,14 +19,10 @@ class BlazeMessage {
   String id;
   @JsonKey(name: 'action', nullable: false)
   String action;
-
-  // @JsonKey(name: 'params')
-  // BlazeMessageParam params;
+  @JsonKey(name: 'params')
+  dynamic params;
   @JsonKey(name: 'data')
   Map<String, dynamic> data;
-
-  // @JsonKey(name: 'error')
-  // ResponseError error;
 
   Map<String, dynamic> toJson() => _$BlazeMessageToJson(this);
 }

@@ -92,6 +92,13 @@ class Blaze {
         GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }
 
+  void deliver(SendingMessage message, BlazeMessage blazeMessage) {
+    channel.sink.add(GZipEncoder()
+        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
+    database.messagesDao
+        .updateMessageStatusById(message.messageId, MessageStatus.sent);
+  }
+
   void disconnect() {
     channel?.sink?.close();
   }

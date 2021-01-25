@@ -28,6 +28,11 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
         (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds))});
   }
 
+  Future<void> deleteJobById(String jobId) async {
+    return await batch(
+            (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
+  }
+
   Stream<List<Job>> findAckJobs() {
     final query = select(db.jobs)
       ..where((Jobs row) {
@@ -36,6 +41,16 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
       ..limit(100);
     return query.watch();
   }
+
+  Stream<List<Job>> findSendingJobs() {
+    final query = select(db.jobs)
+      ..where((Jobs row) {
+        return row.action.equals(sendingMessage);
+      })
+      ..limit(100);
+    return query.watch();
+  }
+
 
   Future<List<Job>> findCreateMessageJobs() {
     return customSelect(

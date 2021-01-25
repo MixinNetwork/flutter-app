@@ -1,5 +1,6 @@
 import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:moor/moor.dart';
 
 part 'messages_dao.g.dart';
@@ -19,8 +20,14 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
 
-  Stream<List<SendingMessage>> sendingMessage(String messageId) {
-    return db.sendingMessage(messageId).watch();
+  Future<SendingMessage> sendingMessage(String messageId) {
+    return db.sendingMessage(messageId).getSingle();
+  }
+
+  Future<int> updateMessageStatusById(String messageId, MessageStatus status) {
+    return (db.update(db.messages)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .write(MessagesCompanion(status: Value(status)));
   }
 
   Selectable<MessageItem> messagesByConversationId(

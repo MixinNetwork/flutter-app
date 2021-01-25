@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_app/account/send_message_helper.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_app/blaze/blaze.dart';
+import 'package:flutter_app/blaze/blaze_message.dart';
+import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -10,6 +13,7 @@ import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:flutter_app/utils/stream_extension.dart';
+import 'package:uuid/uuid.dart';
 
 class AccountServer {
   static String sid;
@@ -70,6 +74,13 @@ class AccountServer {
         .where((jobs) => jobs?.isNotEmpty == true)
         .asyncMapDrop(runAckJob)
         .listen((_) {});
+
+    database.jobsDao
+        .findSendingJobs()
+        .where((jobs) => jobs?.isNotEmpty == true)
+        .asyncMapDrop(runSendJob)
+        .listen((_) {});
+
     database.mock();
   }
 
@@ -84,11 +95,48 @@ class AccountServer {
     await database.jobsDao.deleteJobs(jobIds);
   }
 
+  Future<void> runSendJob(List<Job> jobs) async {
+    jobs.forEach((job) async {
+      final message =
+          await database.messagesDao.sendingMessage(job.blazeMessage);
+      if (message == null) {
+        await database.jobsDao.deleteJobById(job.jobId);
+      } else {
+        if (message.category.startsWith('PLAIN_') ||
+            message.category == MessageCategory.appCard) {
+          var content = message.content;
+          if (message.category == MessageCategory.appCard ||
+              message.category == MessageCategory.plainPost ||
+              message.category == MessageCategory.plainText) {
+            content = base64.encode(utf8.encode(content));
+          }
+          final blazeMessage = _createBlazeMessage(message, content);
+          blaze.deliver(message, blazeMessage);
+          await database.jobsDao.deleteJobById(job.jobId);
+        } else {
+          // todo send signal
+        }
+      }
+    });
+  }
+
+  BlazeMessage _createBlazeMessage(SendingMessage message, String data) {
+    final blazeParam = BlazeMessageParam(
+        conversationId: message.conversationId,
+        messageId: message.messageId,
+        category: message.category,
+        data: data,
+        quoteMessageId: message.quoteMessageId);
+
+    return BlazeMessage(
+        id: Uuid().v4(), action: createMessage, params: blazeParam);
+  }
+
   void sendTextMessage(
-      String conversationId, String senderId, String content, bool isPlain) {
+      String conversationId, String content, bool isPlain) {
     assert(_decryptMessage != null);
     _sendMessageHelper.sendTextMessage(
-        conversationId, senderId, content, isPlain);
+        conversationId, userId, content, isPlain);
   }
 
   void selectConversation(String conversationId) {
