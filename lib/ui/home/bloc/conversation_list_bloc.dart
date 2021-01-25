@@ -57,24 +57,11 @@ class ConversationListManagerBloc extends Cubit<Set<SlideCategoryState>>
         return ConversationListBloc(
           limit,
           itemPositionsListener,
-          () async {
-            final count = await database.conversationDao
-                .strangerConversationCount()
-                .getSingle();
-            print('count: $count');
-            return count;
-          },
-          (limit, offset) async {
-            try {
-              final list = await database.conversationDao
-                  .strangerConversations(limit, offset)
-                  .get();
-              print('length: ${list.length}, limit: $limit, offset: $offset');
-              return list;
-            } on Exception catch (e) {
-              print(e);
-            }
-          },
+          () =>
+              database.conversationDao.strangerConversationCount().getSingle(),
+          (limit, offset) => database.conversationDao
+              .strangerConversations(limit, offset)
+              .get(),
         );
 
       case SlideCategoryType.circle:
