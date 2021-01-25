@@ -1,126 +1,128 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/db/dao/conversations_dao.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
-import 'package:flutter_app/utils/multi_field_compare.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:moor/moor.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
+class ConversationListManagerBloc extends Cubit<Set<SlideCategoryState>>
     with SubscribeMixin {
-  ConversationListBloc(this.slideCategoryCubit, this.database)
-      : super(const PagingState<ConversationItem>()) {
-    switchListBLoc(slideCategoryCubit.state);
-    slideCategoryCubit.listen(switchListBLoc);
+  ConversationListManagerBloc(SlideCategoryCubit slideCategoryCubit)
+      : super(const {}) {
+    addSubscription(slideCategoryCubit.listen((event) {
+      emit({...state, event});
+    }));
   }
 
-  final SlideCategoryCubit slideCategoryCubit;
-  final Database database;
-  final Map<SlideCategoryState, _ConversationListBloc> slideListBloc = {};
-  _ConversationListBloc lastListBloc;
-  StreamSubscription lastStreamSubscription;
-
-  void switchListBLoc(SlideCategoryState state) {
-    switch (slideCategoryCubit.state.type) {
+  static ConversationListBloc createBloc(
+    SlideCategoryState state,
+    int limit,
+    ItemPositionsListener itemPositionsListener,
+    Database database,
+  ) {
+    switch (state.type) {
       case SlideCategoryType.contacts:
-        slideListBloc[slideCategoryCubit.state] ??= _ConversationListBloc(
-          database.conversationDao,
-          database.conversationDao.contactConversations,
-          (c) => c.isContactConversation,
+        return ConversationListBloc(
+          limit,
+          itemPositionsListener,
+          () => database.conversationDao.contactConversationCount().getSingle(),
+          (limit, offset) => database.conversationDao
+              .contactConversations(limit, offset)
+              .get(),
         );
         break;
       case SlideCategoryType.groups:
-        slideListBloc[slideCategoryCubit.state] ??= _ConversationListBloc(
-          database.conversationDao,
-          database.conversationDao.groupConversations,
-          (c) => c.isGroupConversation,
+        return ConversationListBloc(
+          limit,
+          itemPositionsListener,
+          () => database.conversationDao.groupConversationCount().getSingle(),
+          (limit, offset) =>
+              database.conversationDao.groupConversations(limit, offset).get(),
         );
-        break;
       case SlideCategoryType.bots:
-        slideListBloc[slideCategoryCubit.state] ??= _ConversationListBloc(
-          database.conversationDao,
-          database.conversationDao.botConversations,
-          (c) => c.isBotConversation,
+        return ConversationListBloc(
+          limit,
+          itemPositionsListener,
+          () => database.conversationDao.botConversationCount().getSingle(),
+          (limit, offset) =>
+              database.conversationDao.botConversations(limit, offset).get(),
         );
         break;
       case SlideCategoryType.strangers:
-        slideListBloc[slideCategoryCubit.state] ??= _ConversationListBloc(
-          database.conversationDao,
-          database.conversationDao.strangerConversations,
-          (c) => c.isStrangerConversation,
+        return ConversationListBloc(
+          limit,
+          itemPositionsListener,
+          () async {
+            final count = await database.conversationDao
+                .strangerConversationCount()
+                .getSingle();
+            print('count: $count');
+            return count;
+          },
+          (limit, offset) async {
+            try {
+              final list = await database.conversationDao
+                  .strangerConversations(limit, offset)
+                  .get();
+              print('length: ${list.length}, limit: $limit, offset: $offset');
+              return list;
+            } on Exception catch (e) {
+              print(e);
+            }
+          },
         );
-        break;
+
       case SlideCategoryType.circle:
-        slideListBloc[slideCategoryCubit.state] ??= _ConversationListBloc(
-          database.conversationDao,
-          database.conversationDao.strangerConversations,
-          (c) => c.isStrangerConversation,
+        return ConversationListBloc(
+          limit,
+          itemPositionsListener,
+          () =>
+              database.conversationDao.strangerConversationCount().getSingle(),
+          (limit, offset) => database.conversationDao
+              .strangerConversations(limit, offset)
+              .get(),
         );
-        break;
       default:
+        return null;
         break;
     }
-    lastListBloc = slideListBloc[slideCategoryCubit.state] ?? lastListBloc;
-    lastStreamSubscription?.cancel();
-    emit(lastListBloc.state);
-    lastStreamSubscription = lastListBloc.listen(emit);
   }
-
-  void loadBefore() => lastListBloc?.loadBefore();
 }
 
-class _ConversationListBloc
-    extends PagingBloc<ConversationItem, PagingState<ConversationItem>> {
-  _ConversationListBloc(
-      this.conversationsDao, this.conversationList, this.filter)
-      : super(const PagingState<ConversationItem>());
+class ConversationListBloc extends PagingBloc<ConversationItem> {
+  ConversationListBloc(
+    int limit,
+    ItemPositionsListener itemPositionsListener,
+    // ignore: invalid_required_positional_param
+    @required Future<int> Function() queryCount,
+    // ignore: invalid_required_positional_param
+    @required
+        Future<List<ConversationItem>> Function(int limit, int offset)
+            queryRange,
+  )   : assert(queryCount != null),
+        assert(queryRange != null),
+        _queryCount = queryCount,
+        _queryRange = queryRange,
+        super(
+          initState: const PagingState<ConversationItem>(),
+          itemPositionsListener: itemPositionsListener,
+          limit: limit,
+        );
 
-  final ConversationsDao conversationsDao;
-  final Selectable<ConversationItem> Function(
-          DateTime oldestCreatedAt, int limit, [List<String> excludeId])
-      conversationList;
-  final bool Function(ConversationItem conversation) filter;
+  final Future<int> Function() _queryCount;
 
-  @override
-  final List<MultiFieldCompareParameter<ConversationItem>> parameters = [
-    MultiFieldCompareParameter((e) => e.pinTime, true),
-    MultiFieldCompareParameter(
-        (e) => e.lastMessageCreatedAt ?? e.createdAt, true),
-  ];
-
-  @override
-  void firstLoad() async {
-    add(
-      ReplacePagingEvent(
-        await conversationList(
-          null,
-          10,
-        ).get(),
-      ),
-    );
-    addSubscription(
-      conversationsDao.updateConversion.where(filter).listen(
-            (item) => add(InsertOrUpdatePagingEvent(item)),
-          ),
-    );
-  }
+  final Future<List<ConversationItem>> Function(int limit, int offset)
+      _queryRange;
 
   @override
-  Future<List<ConversationItem>> before(List<ConversationItem> list) async {
-    final result = await conversationList(
-      list.last.createdAt,
-      10,
-      list.map((e) => e.conversationId).toList(),
-    ).get();
-    return result;
-  }
+  Future<int> queryCount() => _queryCount();
 
   @override
-  bool test(ConversationItem a, ConversationItem b) =>
-      a?.conversationId == b?.conversationId;
+  Future<List<ConversationItem>> queryRange(int limit, int offset) =>
+      _queryRange(limit, offset);
 }

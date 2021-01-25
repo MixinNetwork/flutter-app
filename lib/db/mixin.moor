@@ -68,40 +68,22 @@ CREATE INDEX IF NOT EXISTS index_snapshots_asset_id ON snapshots (asset_id);
 
 CREATE INDEX IF NOT EXISTS index_users_full_name ON users (full_name);
 
-conversationItems AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  
-            mm.mentions AS mentions,
-            ou.relationship AS relationship 
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category IS NOT NULL AND c.conversation_id NOT IN :excludeId
-            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
-              WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at 
-              END <= :oldestCreatedAt
-              END 
-            ORDER BY c.pin_time DESC, 
-              CASE 
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at 
-              END 
-            DESC
-            LIMIT :limit;
-
+contactConversationCount:
+SELECT Count(*)
+FROM   conversations c
+       INNER JOIN users ou
+               ON ou.user_id = c.owner_id
+       LEFT JOIN messages m
+              ON c.last_message_id = m.message_id
+WHERE  c.category = 'CONTACT'
+       AND ou.relationship = 'FRIEND'
+       AND ou.app_id IS NULL
+ORDER  BY c.pin_time DESC,
+          CASE
+            WHEN m.created_at IS NULL THEN c.created_at
+            ELSE m.created_at
+          END DESC; 
+                      
 contactConversations AS ConversationItem:
  SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
@@ -122,19 +104,29 @@ contactConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.relationship = 'FRIEND' AND ou.app_id IS NULL AND c.conversation_id NOT IN :excludeId
-            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
-              WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at 
-              END <= :oldestCreatedAt
-              END 
+            WHERE c.category = 'CONTACT' AND ou.relationship = 'FRIEND' AND ou.app_id IS NULL
             ORDER BY c.pin_time DESC, 
               CASE 
                 WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
               END 
             DESC
-            LIMIT :limit;
+            LIMIT :limit OFFSET :offset;
+
+strangerConversationCount:
+SELECT Count(*)
+FROM   conversations c
+       INNER JOIN users ou
+               ON ou.user_id = c.owner_id
+       LEFT JOIN messages m
+              ON c.last_message_id = m.message_id
+WHERE  c.category = 'CONTACT'
+       AND ou.relationship = 'STRANGER'
+ORDER  BY c.pin_time DESC,
+          CASE
+            WHEN m.created_at IS NULL THEN c.created_at
+            ELSE m.created_at
+          END DESC; 
 
 strangerConversations AS ConversationItem:
  SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
@@ -156,19 +148,26 @@ strangerConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.relationship = 'STRANGER' AND c.conversation_id NOT IN :excludeId
-            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
-              WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at 
-              END <= :oldestCreatedAt
-              END 
+            WHERE c.category = 'CONTACT' AND ou.relationship = 'STRANGER' 
             ORDER BY c.pin_time DESC, 
               CASE 
                 WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
               END 
             DESC
-            LIMIT :limit;
+            LIMIT :limit OFFSET :offset;
+
+groupConversationCount:
+SELECT Count(*)
+FROM   conversations c
+       LEFT JOIN messages m
+              ON c.last_message_id = m.message_id
+WHERE  c.category = 'GROUP'
+ORDER  BY c.pin_time DESC,
+          CASE
+            WHEN m.created_at IS NULL THEN c.created_at
+            ELSE m.created_at
+          END DESC; 
 
 groupConversations AS ConversationItem:
  SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
@@ -190,20 +189,30 @@ groupConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'GROUP' AND c.conversation_id NOT IN :excludeId
-            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
-              WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at 
-              END <= :oldestCreatedAt
-              END 
+            WHERE c.category = 'GROUP' 
             ORDER BY c.pin_time DESC, 
               CASE 
                 WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
               END 
             DESC
-            LIMIT :limit;
+            LIMIT :limit OFFSET :offset;
 
+botConversationCount:
+SELECT Count(*)
+FROM   conversations c
+       INNER JOIN users ou
+               ON ou.user_id = c.owner_id
+       LEFT JOIN messages m
+              ON c.last_message_id = m.message_id
+WHERE  c.category = 'CONTACT'
+       AND ou.app_id IS NOT NULL
+ORDER  BY c.pin_time DESC,
+          CASE
+            WHEN m.created_at IS NULL THEN c.created_at
+            ELSE m.created_at
+          END DESC; 
+          
 botConversations AS ConversationItem:
  SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
@@ -224,19 +233,14 @@ botConversations AS ConversationItem:
             LEFT JOIN users mu ON mu.user_id = m.user_id
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.app_id IS NOT NULL AND c.conversation_id NOT IN :excludeId
-            AND CASE WHEN :oldestCreatedAt is NULL THEN TRUE ELSE CASE 
-              WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at 
-              END <= :oldestCreatedAt
-              END 
+            WHERE c.category = 'CONTACT' AND ou.app_id IS NOT NULL
             ORDER BY c.pin_time DESC, 
               CASE 
                 WHEN m.created_at is NULL THEN c.created_at
                 ELSE m.created_at 
               END 
             DESC
-            LIMIT :limit;
+            LIMIT :limit OFFSET :offset;
 
 conversationItem AS ConversationItem:
 SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,

@@ -19,9 +19,9 @@ class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
     return query.watch();
   }
 
-  Future<FloodMessage> findFloodMessageById(String messageId){
+  Future<FloodMessage> findFloodMessageById(String messageId) {
     final query = select(db.floodMessages)
-        ..where((tbl) => tbl.messageId.equals(messageId));
+      ..where((tbl) => tbl.messageId.equals(messageId));
     return query.getSingle();
   }
 

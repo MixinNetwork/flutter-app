@@ -33,43 +33,40 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return query.getSingle();
   }
 
-  Selectable<ConversationItem> conversations(
-    DateTime oldestCreatedAt,
-    int limit, [
-    List<String> excludeId = const [],
-  ]) =>
-      db.conversationItems(excludeId, oldestCreatedAt, limit);
-
   Selectable<ConversationItem> contactConversations(
-    DateTime oldestCreatedAt,
-    int limit, [
-    List<String> excludeId = const [],
-  ]) =>
-      db.contactConversations(excludeId, oldestCreatedAt, limit);
+    int limit,
+    int offset,
+  ) =>
+      db.contactConversations(limit, offset);
 
   Selectable<ConversationItem> strangerConversations(
-    DateTime oldestCreatedAt,
-    int limit, [
-    List<String> excludeId = const [],
-  ]) =>
-      db.strangerConversations(excludeId, oldestCreatedAt, limit);
+    int limit,
+    int offset,
+  ) =>
+      db.strangerConversations(limit, offset);
 
   Selectable<ConversationItem> groupConversations(
-    DateTime oldestCreatedAt,
-    int limit, [
-    List<String> excludeId = const [],
-  ]) =>
-      db.groupConversations(excludeId, oldestCreatedAt, limit);
+    int limit,
+    int offset,
+  ) =>
+      db.groupConversations(limit, offset);
 
   Selectable<ConversationItem> botConversations(
-    DateTime oldestCreatedAt,
-    int limit, [
-    List<String> excludeId = const [],
-  ]) =>
-      db.botConversations(excludeId, oldestCreatedAt, limit);
+    int limit,
+    int offset,
+  ) =>
+      db.botConversations(limit, offset);
 
   Future<int> updateLastMessageId(String conversationId, String messageId) =>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(ConversationsCompanion(lastMessageId: Value(messageId)));
+
+  Selectable<int> contactConversationCount() => db.contactConversationCount();
+
+  Selectable<int> groupConversationCount() => db.groupConversationCount();
+
+  Selectable<int> botConversationCount() => db.botConversationCount();
+
+  Selectable<int> strangerConversationCount() => db.strangerConversationCount();
 }

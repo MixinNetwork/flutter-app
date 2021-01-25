@@ -1,6 +1,5 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -25,6 +24,8 @@ import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:provider/provider.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ConversationPage extends StatelessWidget {
   const ConversationPage({Key key}) : super(key: key);
@@ -41,12 +42,37 @@ class ConversationPage extends StatelessWidget {
         children: [
           const SearchBar(),
           Expanded(
-            child: BlocConverter<ConversationListBloc,
-                PagingState<ConversationItem>, int>(
-              converter: (state) => state?.list?.length ?? 0,
-              builder: (context, itemCount) {
-                if (itemCount == 0) return _Empty();
-                return _List(itemCount: itemCount);
+            child: BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
+              builder: (context, slideCategoryState) {
+                return BlocConverter<ConversationListManagerBloc,
+                    Set<SlideCategoryState>, Set<SlideCategoryState>>(
+                  converter: (state) => state.contains(slideCategoryState)
+                      ? state
+                      : {...state, slideCategoryState},
+                  builder: (context, slideCategoryStates) => IndexedStack(
+                    index: slideCategoryStates
+                        .toList()
+                        .indexOf(slideCategoryState),
+                    children: slideCategoryStates.map((e) {
+                      final database =
+                          Provider.of<AccountServer>(context).database;
+                      final limit = MediaQuery.of(context).size.height ~/ 40;
+                      return BlocProvider(
+                        key: PageStorageKey(e),
+                        create: (context) =>
+                            ConversationListManagerBloc.createBloc(
+                          e,
+                          limit,
+                          ItemPositionsListener.create(),
+                          database,
+                        ),
+                        child: Builder(
+                          builder: (context) => const _List(),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                );
               },
             ),
           ),
@@ -57,6 +83,8 @@ class ConversationPage extends StatelessWidget {
 }
 
 class _Empty extends StatelessWidget {
+  const _Empty({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final dynamicColor = BrightnessData.dynamicColor(
@@ -87,68 +115,59 @@ class _Empty extends StatelessWidget {
 class _List extends StatelessWidget {
   const _List({
     Key key,
-    this.itemCount,
   }) : super(key: key);
-
-  final int itemCount;
 
   @override
   Widget build(BuildContext context) =>
-      NotificationListener<ScrollNotification>(
-        onNotification: (ScrollNotification notification) {
-          final dimension =
-              max(notification.metrics.viewportDimension / 2, 300);
-          final bloc = BlocProvider.of<ConversationListBloc>(context);
-          if (notification.metrics.pixels >
-                  notification.metrics.maxScrollExtent - dimension &&
-              !bloc.state.noMoreData) {
-            bloc.loadBefore();
-          }
-          return false;
-        },
-        child: BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
-          builder: (context, slideCategoryState) => ListView.builder(
-            key: PageStorageKey(slideCategoryState),
-            itemCount: itemCount,
-            itemBuilder: (BuildContext context, int index) => BlocConverter<
-                ConversationListBloc,
-                PagingState<ConversationItem>,
-                ConversationItem>(
-              converter: (state) => state.list[index],
-              builder: (context, conversation) =>
-                  BlocConverter<ConversationCubit, ConversationItem, bool>(
-                converter: (state) =>
-                    conversation?.conversationId == state?.conversationId,
-                builder: (context, selected) => _Item(
-                  selected: selected,
-                  conversation: conversation,
-                  onTap: () {
-                    BlocProvider.of<ConversationCubit>(context)
-                        .emit(conversation);
-                    ResponsiveNavigatorCubit.of(context)
-                        .pushPage(ResponsiveNavigatorCubit.chatPage);
-                  },
-                  onRightClick: (pointerUpEvent) => showContextMenu(
-                    context: context,
-                    pointerPosition: pointerUpEvent.position,
-                    menus: [
-                      ContextMenu(
-                        title: Localization.of(context).pin,
-                      ),
-                      ContextMenu(
-                        title: Localization.of(context).unMute,
-                      ),
-                      ContextMenu(
-                        title: Localization.of(context).deleteChat,
-                        isDestructiveAction: true,
-                      ),
-                    ],
+      BlocConverter<ConversationListBloc, PagingState<ConversationItem>, int>(
+        converter: (state) => state.count,
+        builder: (context, count) {
+          if (count == null) return const SizedBox();
+          if (count <= 0) return const _Empty();
+          return ScrollablePositionedList.builder(
+            itemPositionsListener:
+                BlocProvider.of<ConversationListBloc>(context)
+                    .itemPositionsListener,
+            itemCount: count,
+            itemBuilder: (context, index) => BlocConverter<ConversationListBloc,
+                PagingState<ConversationItem>, ConversationItem>(
+              converter: (state) => state.map[index],
+              builder: (context, conversation) {
+                if (conversation == null) return const SizedBox(height: 80);
+                return BlocConverter<ConversationCubit, ConversationItem, bool>(
+                  converter: (state) =>
+                      conversation?.conversationId == state?.conversationId,
+                  builder: (context, selected) => _Item(
+                    selected: selected,
+                    conversation: conversation,
+                    onTap: () {
+                      BlocProvider.of<ConversationCubit>(context)
+                          .emit(conversation);
+                      ResponsiveNavigatorCubit.of(context)
+                          .pushPage(ResponsiveNavigatorCubit.chatPage);
+                    },
+                    onRightClick: (pointerUpEvent) => showContextMenu(
+                      context: context,
+                      pointerPosition: pointerUpEvent.position,
+                      menus: [
+                        ContextMenu(
+                          title: Localization.of(context).pin,
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).unMute,
+                        ),
+                        ContextMenu(
+                          title: Localization.of(context).deleteChat,
+                          isDestructiveAction: true,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
-          ),
-        ),
+          );
+        },
       );
 }
 

@@ -77,10 +77,8 @@ class App extends StatelessWidget {
                   create: (BuildContext context) => responsiveNavigatorCubit,
                 ),
                 BlocProvider(
-                  create: (BuildContext context) => ConversationListBloc(
-                    slideCategoryCubit,
-                    accountServer.database,
-                  ),
+                  create: (BuildContext context) =>
+                      ConversationListManagerBloc(slideCategoryCubit),
                 ),
                 BlocProvider(
                   create: (BuildContext context) =>
