@@ -95,6 +95,12 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     streamSubscription?.cancel();
     streamSubscription = bloc.listen(emit);
   }
+
+  @override
+  Future<void> close() async {
+    await Future.wait(_map.values.map((e) => e.close()));
+    await super.close();
+  }
 }
 
 class _ConversationListBloc extends PagingBloc<ConversationItem> {
