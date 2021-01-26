@@ -36,18 +36,19 @@ class App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            builder: (context, child) {
-              BlocProvider.of<ConversationListBloc>(context)?.limit =
-                  MediaQuery.of(context).size.height ~/ 40;
-              BlocProvider.of<ConversationListBloc>(context)?.init();
-              return BrightnessObserver(
-                child: child,
-              );
-            },
+            builder: (context, child) => BrightnessObserver(
+              child: child,
+            ),
             home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
               converter: (state) => state?.current != null,
               builder: (context, authAvailable) {
-                if (authAvailable) return HomePage();
+                if (authAvailable)
+                  return Builder(builder: (context) {
+                    BlocProvider.of<ConversationListBloc>(context, listen: true)
+                      ..limit = MediaQuery.of(context).size.height ~/ 40
+                      ..init();
+                    return HomePage();
+                  });
                 return const LandingPage();
               },
             ),
