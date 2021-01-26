@@ -39,6 +39,10 @@ class MessageBloc extends PagingBloc<MessageItem> {
         alignment: alignment,
       ));
     }));
+
+    addSubscription(
+      messagesDao.updateEvent.listen((state) => add(PagingUpdateEvent())),
+    );
   }
 
   final ConversationCubit conversationCubit;

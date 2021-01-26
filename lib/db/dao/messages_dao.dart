@@ -10,6 +10,17 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     with _$MessagesDaoMixin {
   MessagesDao(MixinDatabase db) : super(db);
 
+  Stream<Null> get updateEvent => db.tableUpdates(TableUpdateQuery.onAllTables([
+        db.messages,
+        db.users,
+        db.snapshots,
+        db.assets,
+        db.stickers,
+        db.hyperlinks,
+        db.messageMentions,
+        db.conversations,
+      ]));
+
   Future<int> insert(Message message) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
     await db.conversationsDao

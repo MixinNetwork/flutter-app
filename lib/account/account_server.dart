@@ -81,13 +81,14 @@ class AccountServer {
         .asyncMapDrop(runSendJob)
         .listen((_) {});
 
-    database.mock();
+    // database.mock();
   }
 
   Future<void> runAckJob(List<Job> jobs) async {
     final ack = await Future.wait(jobs.map((e) async {
       final map = await LoadBalancerUtils.jsonDecode(e.blazeMessage);
-      return BlazeAckMessage(messageId: map['message_id'], status: map['status']);
+      return BlazeAckMessage(
+          messageId: map['message_id'], status: map['status']);
     }));
 
     final jobIds = jobs.map((e) => e.jobId).toList();
@@ -133,7 +134,10 @@ class AccountServer {
   }
 
   void sendTextMessage(
-      String conversationId, String content, bool isPlain) {
+    String conversationId,
+    String content, [
+    bool isPlain = true,
+  ]) {
     assert(_decryptMessage != null);
     _sendMessageHelper.sendTextMessage(
         conversationId, userId, content, isPlain);

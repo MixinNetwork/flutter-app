@@ -19,6 +19,14 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
           .handleError((e) => null)
           .where((event) => event != null);
 
+  Stream<Null> get updateEvent => db.tableUpdates(TableUpdateQuery.onAllTables([
+        db.conversations,
+        db.users,
+        db.messages,
+        db.snapshots,
+        db.messageMentions,
+      ]));
+
   Future<int> insert(Conversation conversation) async {
     final result =
         await into(db.conversations).insertOnConflictUpdate(conversation);

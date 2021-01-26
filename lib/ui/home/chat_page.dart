@@ -67,9 +67,9 @@ class ChatContainer extends StatelessWidget {
           if (itemScrollController.isAttached)
             itemScrollController.jumpTo(index: index, alignment: alignment);
         },
-        offset: 100,
-        index: 120,
-        alignment: 0.5,
+        // offset: 100,
+        // index: 120,
+        // alignment: 0.5,
       ),
       child: Builder(
         builder: (context) {

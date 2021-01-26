@@ -88,7 +88,7 @@ class App extends StatelessWidget {
                 ),
                 BlocProvider(
                   create: (BuildContext context) =>
-                      ConversationCubit(draftCubit),
+                      ConversationCubit(draftCubit, accountServer),
                 ),
               ],
               child: app,

@@ -2,11 +2,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/hoer_overlay.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 import 'action_button.dart';
 
@@ -74,8 +77,13 @@ class InputContainer extends StatelessWidget {
                           textEditingController.value.isComposingRangeValid;
                       if (text?.trim()?.isNotEmpty == true && !valid) {
                         textEditingController.text = '';
-                        // todo
-                        // BlocProvider.of<MessageBloc>(context).send(text);
+                        Provider.of<AccountServer>(context, listen: false)
+                            .sendTextMessage(
+                          BlocProvider.of<ConversationCubit>(context)
+                              .state
+                              .conversationId,
+                          text,
+                        );
                       }
 
                       return valid
