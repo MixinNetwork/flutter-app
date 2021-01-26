@@ -87,7 +87,7 @@ class AccountServer {
   Future<void> runAckJob(List<Job> jobs) async {
     final ack = await Future.wait(jobs.map((e) async {
       final map = await LoadBalancerUtils.jsonDecode(e.blazeMessage);
-      return BlazeAckMessage(messageId: map['id'], status: map['status']);
+      return BlazeAckMessage(messageId: map['message_id'], status: map['status']);
     }));
 
     final jobIds = jobs.map((e) => e.jobId).toList();

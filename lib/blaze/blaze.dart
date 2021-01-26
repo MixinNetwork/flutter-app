@@ -62,7 +62,7 @@ class Blaze {
               .then((value) {});
         }
       } else if (data != null) {
-        updateRemoteMessageStatus(data['messageId'], MessageStatus.delivered);
+        updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
       }
     }, onError: (error) {
       debugPrint('onError');
