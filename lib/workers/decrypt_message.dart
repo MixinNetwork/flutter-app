@@ -230,22 +230,42 @@ class DecryptMessage extends Injector {
       final stickerMessage =
           StickerMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       if (stickerMessage.stickerId == null) {
-        // todo handle album sticker
+        final sticker = await database.stickerDao.getStickerByAlbumIdAndName(
+            stickerMessage.albumId, stickerMessage.name);
+        if (sticker != null) {
+          final message = Message(
+              messageId: data.messageId,
+              conversationId: data.conversationId,
+              userId: data.userId,
+              category: data.category,
+              content: null,
+              name: stickerMessage.name,
+              stickerId: stickerMessage.stickerId,
+              albumId: stickerMessage.albumId,
+              status: messageStatus,
+              createdAt: data.createdAt);
+          await database.messagesDao.insert(message);
+        }
       } else {
-        // todo handle sticker
+        final sticker = await database.stickerDao
+            .getStickerByUnique(stickerMessage.stickerId);
+        if (sticker == null) {
+          print('run ${stickerMessage.stickerId}');
+          refreshSticker(stickerMessage.stickerId);
+        }
+        final message = Message(
+            messageId: data.messageId,
+            conversationId: data.conversationId,
+            userId: data.userId,
+            category: data.category,
+            content: plainText,
+            name: stickerMessage.name,
+            stickerId: stickerMessage.stickerId,
+            albumId: stickerMessage.albumId,
+            status: messageStatus,
+            createdAt: data.createdAt);
+        await database.messagesDao.insert(message);
       }
-      final message = Message(
-          messageId: data.messageId,
-          conversationId: data.conversationId,
-          userId: data.userId,
-          category: data.category,
-          content: plainText,
-          name: stickerMessage.name,
-          stickerId: stickerMessage.stickerId,
-          albumId: stickerMessage.albumId,
-          status: messageStatus,
-          createdAt: data.createdAt);
-      await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_CONTACT')) {
       String plain;
       if (data.category == MessageCategory.signalContact) {
