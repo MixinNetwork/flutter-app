@@ -10,7 +10,9 @@ import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -20,12 +22,10 @@ import 'package:uuid/uuid.dart';
 class AccountServer {
   static String sid;
 
-  Future<void> initServer(
-    String userId,
-    String sessionId,
-    String identityNumber,
-    String privateKey,
-  ) async {
+  Future<void> initServer(String userId,
+      String sessionId,
+      String identityNumber,
+      String privateKey,) async {
     assert(userId != null);
     assert(sessionId != null);
     assert(identityNumber != null);
@@ -110,7 +110,7 @@ class AccountServer {
   Future<void> runSendJob(List<db.Job> jobs) async {
     jobs.forEach((job) async {
       final message =
-          await database.messagesDao.sendingMessage(job.blazeMessage);
+      await database.messagesDao.sendingMessage(job.blazeMessage);
       if (message == null) {
         await database.jobsDao.deleteJobById(job.jobId);
       } else {
@@ -146,11 +146,10 @@ class AccountServer {
         id: Uuid().v4(), action: createMessage, params: blazeParam);
   }
 
-  void sendTextMessage(
-    String conversationId,
-    String content, [
-    bool isPlain = true,
-  ]) {
+  void sendTextMessage(String conversationId,
+      String content, [
+        bool isPlain = true,
+      ]) {
     assert(_decryptMessage != null);
     if (content == null || content.isEmpty) return;
     _sendMessageHelper.sendTextMessage(
@@ -162,8 +161,23 @@ class AccountServer {
     _markRead(conversationId);
   }
 
-  void _markRead(conversationId) {
-    // todo mark read by conversation id
+  void _markRead(conversationId) async {
+    final ids = await database.messagesDao.getUnreadMessageIds(
+        conversationId, userId);
+    final status = EnumToString.convertToString(MessageStatus.read);
+    final now = DateTime.now();
+    final jobs = ids
+        .map((id) => jsonEncode(BlazeAckMessage(messageId: id, status: status)))
+        .map((blazeMessage) => Job(
+            jobId: Uuid().v4(),
+            action: acknowledgeMessageReceipts,
+            priority: 5,
+            blazeMessage: blazeMessage,
+            createdAt: now,
+            runCount: 0))
+        .toList();
+    database.jobsDao.insertAll(jobs);
+
   }
 
   void stop() {

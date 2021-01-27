@@ -23,14 +23,14 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 
-   Future<void> deleteJobs(List<String> jobIds) async {
+  Future<void> deleteJobs(List<String> jobIds) async {
     return await batch(
         (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds))});
   }
 
   Future<void> deleteJobById(String jobId) async {
     return await batch(
-            (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
+        (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
   }
 
   Stream<List<Job>> findAckJobs() {
@@ -51,7 +51,6 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
     return query.watch();
   }
 
-
   Future<List<Job>> findCreateMessageJobs() {
     return customSelect(
         'SELECT * FROM jobs WHERE `action` = \'CREATE_MESSAGE\' ORDER BY created_at ASC LIMIT 100',
@@ -68,5 +67,11 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
           runCount: row.readInt('runCount'),
           createdAt: row.readDateTime('createdAt'));
     }).get();
+  }
+
+  void insertAll(List<Job> jobs) async {
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(db.jobs, jobs);
+    });
   }
 }

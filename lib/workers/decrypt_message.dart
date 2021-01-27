@@ -113,7 +113,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_IMAGE')) {
       String plain;
       if (data.category == MessageCategory.signalImage) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -141,7 +141,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_VIDEO')) {
       String plain;
       if (data.category == MessageCategory.signalVideo) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -170,7 +170,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_DATA')) {
       String plain;
       if (data.category == MessageCategory.signalData) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -195,7 +195,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_AUDIO')) {
       String plain;
       if (data.category == MessageCategory.signalAudio) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -221,7 +221,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_STICKER')) {
       String plain;
       if (data.category == MessageCategory.signalSticker) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -248,7 +248,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_CONTACT')) {
       String plain;
       if (data.category == MessageCategory.signalContact) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -269,7 +269,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_LIVE')) {
       String plain;
       if (data.category == MessageCategory.signalLive) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -291,7 +291,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.endsWith('_LOCATION')) {
       String plain;
       if (data.category == MessageCategory.signalLocation) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+        _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));

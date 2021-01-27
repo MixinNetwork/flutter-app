@@ -70,4 +70,31 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
           ..where(db.messages.conversationId.equals(conversationId)))
         .map((row) => row.read(countExp));
   }
+
+  Future<List<String>> getUnreadMessageIds(
+      String conversationId, String userId) async {
+    return await db.transaction(() async {
+      final list = await db
+          .customSelect(
+              'SELECT message_id FROM messages WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\') ORDER BY created_at ASC',
+              readsFrom: {
+                db.messages
+              },
+              variables: [
+                Variable.withString(conversationId),
+                Variable.withString(userId)
+              ])
+          .map((row) => row.readString('message_id'))
+          .get();
+      await db.customUpdate(
+          'UPDATE messages SET status = \'READ\' WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\')',
+          variables: [
+            Variable.withString(conversationId),
+            Variable.withString(userId)
+          ]);
+      await _takeUnseen(userId, conversationId);
+      db.eventBus.send(DatabaseEvent.updateConversion, conversationId);
+      return list;
+    });
+  }
 }
