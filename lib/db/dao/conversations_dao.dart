@@ -77,4 +77,16 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Selectable<int> botConversationCount() => db.botConversationCount();
 
   Selectable<int> strangerConversationCount() => db.strangerConversationCount();
+
+  Future<int> pin(String conversationId) => (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(
+        ConversationsCompanion(pinTime: Value(DateTime.now())),
+      );
+
+  Future<int> unpin(String conversationId) => (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(
+        const ConversationsCompanion(pinTime: Value(null)),
+      );
 }

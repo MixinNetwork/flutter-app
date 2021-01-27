@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -23,6 +24,7 @@ import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ConversationPage extends StatelessWidget {
@@ -128,22 +130,42 @@ class _List extends StatelessWidget {
                           ResponsiveNavigatorCubit.of(context)
                               .pushPage(ResponsiveNavigatorCubit.chatPage);
                         },
-                        onRightClick: (pointerUpEvent) => showContextMenu(
-                          context: context,
-                          pointerPosition: pointerUpEvent.position,
-                          menus: [
-                            ContextMenu(
-                              title: Localization.of(context).pin,
-                            ),
-                            ContextMenu(
-                              title: Localization.of(context).unMute,
-                            ),
-                            ContextMenu(
-                              title: Localization.of(context).deleteChat,
-                              isDestructiveAction: true,
-                            ),
-                          ],
-                        ),
+                        onRightClick: (pointerUpEvent) async {
+                          final result = await showContextMenu(
+                            context: context,
+                            pointerPosition: pointerUpEvent.position,
+                            menus: [
+                              if (conversation.pinTime != null)
+                                ContextMenu(
+                                  title: Localization.of(context).unPin,
+                                  value: () => Provider.of<AccountServer>(
+                                          context,
+                                          listen: false)
+                                      .database
+                                      .conversationDao
+                                      .unpin(conversation.conversationId),
+                                ),
+                              if (conversation.pinTime == null)
+                                ContextMenu(
+                                  title: Localization.of(context).pin,
+                                  value: () => Provider.of<AccountServer>(
+                                          context,
+                                          listen: false)
+                                      .database
+                                      .conversationDao
+                                      .pin(conversation.conversationId),
+                                ),
+                              ContextMenu(
+                                title: Localization.of(context).unMute,
+                              ),
+                              ContextMenu(
+                                title: Localization.of(context).deleteChat,
+                                isDestructiveAction: true,
+                              ),
+                            ],
+                          );
+                          await result?.call();
+                        },
                       ),
                     );
                   },
