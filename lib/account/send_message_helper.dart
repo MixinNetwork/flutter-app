@@ -25,7 +25,7 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messagesDao.insert(message);
+    await _messagesDao.insert(message, senderId);
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 

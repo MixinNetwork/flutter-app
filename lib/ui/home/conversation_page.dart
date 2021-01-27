@@ -280,9 +280,9 @@ class _Item extends StatelessWidget {
                                   conversation: conversation,
                                 ),
                               ),
-                              if (conversation.unseenMessageCount ?? 0 > 0)
+                              if ((conversation.unseenMessageCount ?? 0) > 0)
                                 _UnreadText(conversation: conversation),
-                              if (conversation.unseenMessageCount ?? 0 <= 0)
+                              if ((conversation.unseenMessageCount ?? 0) <= 0)
                                 _StatusRow(conversation: conversation),
                             ],
                           ),

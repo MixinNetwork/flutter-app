@@ -21,11 +21,12 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         db.conversations,
       ]));
 
-  Future<int> insert(Message message) async {
+  Future<int> insert(Message message, String userId) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
     await db.conversationsDao
         .updateLastMessageId(message.conversationId, message.messageId);
     db.eventBus.send(DatabaseEvent.updateConversion, message.conversationId);
+    _takeUnseen(userId, message.conversationId);
     return result;
   }
 
@@ -39,6 +40,22 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(MessagesCompanion(status: Value(status)));
+  }
+
+  void _takeUnseen(String userId, String conversationId) async {
+    await db.transaction(() async {
+      final countExp = db.messages.messageId.count();
+      final count = await ((db.selectOnly(db.messages)
+            ..addColumns([countExp])
+            ..where(db.messages.conversationId.equals(conversationId) &
+                db.messages.userId.equals(userId).not() &
+                db.messages.status.isIn(['SENT', 'DELIVERED'])))
+          .map((row) => row.read(countExp))
+          .getSingle());
+      await (db.update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(unseenMessageCount: Value(count)));
+    });
   }
 
   Selectable<MessageItem> messagesByConversationId(

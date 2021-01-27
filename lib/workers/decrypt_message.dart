@@ -109,7 +109,7 @@ class DecryptMessage extends Injector {
         status: messageStatus,
         createdAt: data.createdAt,
       );
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_IMAGE')) {
       String plain;
       if (data.category == MessageCategory.signalImage) {
@@ -137,7 +137,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_VIDEO')) {
       String plain;
       if (data.category == MessageCategory.signalVideo) {
@@ -166,7 +166,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_DATA')) {
       String plain;
       if (data.category == MessageCategory.signalData) {
@@ -191,7 +191,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_AUDIO')) {
       String plain;
       if (data.category == MessageCategory.signalAudio) {
@@ -217,7 +217,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.pending);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_STICKER')) {
       String plain;
       if (data.category == MessageCategory.signalSticker) {
@@ -244,7 +244,7 @@ class DecryptMessage extends Injector {
           albumId: stickerMessage.albumId,
           status: messageStatus,
           createdAt: data.createdAt);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_CONTACT')) {
       String plain;
       if (data.category == MessageCategory.signalContact) {
@@ -265,7 +265,7 @@ class DecryptMessage extends Injector {
           name: user.fullName ?? '',
           status: messageStatus,
           createdAt: data.createdAt);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_LIVE')) {
       String plain;
       if (data.category == MessageCategory.signalLive) {
@@ -287,7 +287,7 @@ class DecryptMessage extends Injector {
           thumbUrl: liveMessage.thumbUrl,
           status: messageStatus,
           createdAt: data.createdAt);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_LOCATION')) {
       String plain;
       if (data.category == MessageCategory.signalLocation) {
@@ -318,7 +318,7 @@ class DecryptMessage extends Injector {
           content: plain,
           status: messageStatus,
           createdAt: data.createdAt);
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     } else if (data.category.endsWith('_POST')) {
       String plain;
       if (data.category == MessageCategory.signalPost) {
@@ -335,7 +335,7 @@ class DecryptMessage extends Injector {
         status: messageStatus,
         createdAt: data.createdAt,
       );
-      await database.messagesDao.insert(message);
+      await database.messagesDao.insert(message, selfId);
     }
 
     _updateRemoteMessageStatus(data.messageId, messageStatus);
