@@ -214,7 +214,10 @@ class _Item extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                conversation.name,
+                                conversation?.groupName?.trim()?.isNotEmpty ==
+                                        true
+                                    ? conversation.groupName
+                                    : conversation.name,
                                 style: TextStyle(
                                   color: BrightnessData.dynamicColor(
                                     context,

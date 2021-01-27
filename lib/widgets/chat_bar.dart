@@ -113,7 +113,9 @@ class _Name extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       BlocConverter<ConversationCubit, ConversationItem, String>(
-        converter: (state) => state?.name,
+        converter: (state) => state?.groupName?.trim()?.isNotEmpty == true
+            ? state?.groupName
+            : state?.name,
         when: (a, b) => b != null,
         builder: (context, name) => Text(
           name,

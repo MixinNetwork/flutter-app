@@ -24,13 +24,6 @@ class App extends StatelessWidget {
       child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState>(
         converter: (state) => state.current,
         builder: (context, authState) {
-          final initFuture = AccountServer().initServer(
-            authState.account.userId,
-            authState.account.sessionId,
-            authState.account.identityNumber,
-            authState.privateKey,
-          );
-
           final app = MaterialApp(
             title: 'Mixin',
             debugShowCheckedModeBanner: false,
@@ -49,13 +42,13 @@ class App extends StatelessWidget {
             home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
               converter: (state) => state?.current != null,
               builder: (context, authAvailable) {
-                if (authAvailable)
-                  return Builder(builder: (context) {
-                    BlocProvider.of<ConversationListBloc>(context, listen: true)
-                      ..limit = MediaQuery.of(context).size.height ~/ 40
-                      ..init();
-                    return HomePage();
-                  });
+                if (authAvailable &&
+                    Provider.of<AccountServer>(context) != null) {
+                  BlocProvider.of<ConversationListBloc>(context, listen: true)
+                    ..limit = MediaQuery.of(context).size.height ~/ 40
+                    ..init();
+                  return HomePage();
+                }
                 return const LandingPage();
               },
             ),
@@ -67,45 +60,55 @@ class App extends StatelessWidget {
           final responsiveNavigatorCubit = ResponsiveNavigatorCubit();
 
           return FutureBuilder(
-              future: initFuture,
-              builder: (BuildContext context, AsyncSnapshot<AccountServer> snapshot) {
-                switch (snapshot.connectionState) {
-                  case ConnectionState.done:
-                    return Provider<AccountServer>(
-                      key: ValueKey(authState?.account?.userId),
-                      create: (context) => snapshot.data,
-                      dispose: (BuildContext context, AccountServer value) =>
-                          value.stop(),
-                      child: MultiBlocProvider(
-                        providers: [
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                slideCategoryCubit,
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) => draftCubit,
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                responsiveNavigatorCubit,
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                ConversationListBloc(
-                                    slideCategoryCubit, snapshot.data.database),
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                ConversationCubit(draftCubit, snapshot.data),
-                          ),
-                        ],
-                        child: app,
-                      ),
+            future: () async {
+              final accountServer = AccountServer();
+              await accountServer.initServer(
+                authState.account.userId,
+                authState.account.sessionId,
+                authState.account.identityNumber,
+                authState.privateKey,
+              );
+              return accountServer;
+            }(),
+            builder:
+                (BuildContext context, AsyncSnapshot<AccountServer> snapshot) =>
+                    Provider<AccountServer>(
+              key: ValueKey(snapshot.data?.userId),
+              create: (context) => snapshot.data,
+              dispose: (BuildContext context, AccountServer accountServer) =>
+                  accountServer?.stop(),
+              child: Builder(
+                builder: (context) {
+                  if (snapshot.connectionState == ConnectionState.done)
+                    return MultiBlocProvider(
+                      providers: [
+                        BlocProvider(
+                          create: (BuildContext context) => slideCategoryCubit,
+                        ),
+                        BlocProvider(
+                          create: (BuildContext context) => draftCubit,
+                        ),
+                        BlocProvider(
+                          create: (BuildContext context) =>
+                              responsiveNavigatorCubit,
+                        ),
+                        BlocProvider(
+                          create: (BuildContext context) =>
+                              ConversationListBloc(
+                                  slideCategoryCubit, snapshot.data.database),
+                        ),
+                        BlocProvider(
+                          create: (BuildContext context) =>
+                              ConversationCubit(draftCubit, snapshot.data),
+                        ),
+                      ],
+                      child: app,
                     );
-                  default:
-                    return app;
-                }
-              });
+                  return app;
+                },
+              ),
+            ),
+          );
         },
       ),
     );

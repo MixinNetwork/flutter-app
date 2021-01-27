@@ -18,7 +18,7 @@ import 'package:uuid/uuid.dart';
 class AccountServer {
   static String sid;
 
-  Future<AccountServer> initServer(
+  Future<void> initServer(
     String userId,
     String sessionId,
     String identityNumber,
@@ -40,7 +40,6 @@ class AccountServer {
 
     await _initDatabase();
     start();
-    return this;
   }
 
   Future _initDatabase() async {
@@ -148,7 +147,7 @@ class AccountServer {
     bool isPlain = true,
   ]) {
     assert(_decryptMessage != null);
-    if(content == null || content.isEmpty) return;
+    if (content == null || content.isEmpty) return;
     _sendMessageHelper.sendTextMessage(
         conversationId, userId, content, isPlain);
   }
