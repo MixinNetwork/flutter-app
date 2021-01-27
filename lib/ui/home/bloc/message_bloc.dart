@@ -32,12 +32,13 @@ class MessageBloc extends PagingBloc<MessageItem> {
       alignment: alignment,
     ));
     addSubscription(conversationCubit.listen((state) {
-      conversationId = state.conversationId;
-      add(PagingInitEvent(
-        offset: offset,
-        index: index,
-        alignment: alignment,
-      ));
+      conversationId = state?.conversationId;
+      if (conversationId != null)
+        add(PagingInitEvent(
+          offset: offset,
+          index: index,
+          alignment: alignment,
+        ));
     }));
 
     addSubscription(

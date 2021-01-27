@@ -42,7 +42,9 @@ class ResponsiveNavigatorCubit extends Cubit<ResponsiveNavigatorState> {
         return MaterialPage(
           key: const Key(chatPage),
           name: chatPage,
-          child: ChatPage(key: _chatPageKey),
+          child: ChatPage(
+            key: _chatPageKey,
+          ),
         );
       case editProfilePage:
         return MaterialPage(

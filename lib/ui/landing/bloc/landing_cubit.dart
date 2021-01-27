@@ -15,8 +15,14 @@ import 'package:tuple/tuple.dart';
 part 'landing_state.dart';
 
 class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
-  LandingCubit(this.authCubit) : super(const LandingState()) {
+  LandingCubit(this.authCubit)
+      : super(LandingState(
+          status: authCubit.state.current != null
+              ? LandingStatus.provisioning
+              : LandingStatus.init,
+        )) {
     _initLandingListen();
+    if (authCubit.state.current != null) return;
     requestAuthUrl();
   }
 
