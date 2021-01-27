@@ -138,4 +138,23 @@ class Injector {
     }
     return user;
   }
+
+  void refreshSticker(String stickerId) {
+    client.accountApi
+        .getStickerById(stickerId)
+        .then((value){
+          final sticker = value.data;
+          if(sticker!=null){
+            database.stickerDao.insert(db.Sticker(
+                stickerId: sticker.stickerId,
+                name: sticker.name,
+                assetUrl: sticker.assetUrl,
+              assetType: sticker.assetType,
+              assetWidth: sticker.assetWidth,
+              assetHeight: sticker.assetHeight,
+              createdAt: sticker.createdAt
+            ));
+          }
+    }).catchError((e) => debugPrint(e));
+  }
 }

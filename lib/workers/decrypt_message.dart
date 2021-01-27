@@ -220,7 +220,6 @@ class DecryptMessage extends Injector {
       await database.messagesDao.insert(message);
     } else if (data.category.endsWith('_STICKER')) {
       String plain;
-
       if (data.category == MessageCategory.signalSticker) {
         _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
         return;
@@ -229,10 +228,10 @@ class DecryptMessage extends Injector {
       }
       final stickerMessage =
           StickerMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      if (stickerMessage.stickerId == null) {
-        // todo handle album sticker
-      } else {
-        // todo handle sticker
+      final sticker = await database.stickerDao
+          .getStickerByUnique(stickerMessage.stickerId);
+      if (sticker == null) {
+        refreshSticker(stickerMessage.stickerId);
       }
       final message = Message(
           messageId: data.messageId,

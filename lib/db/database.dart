@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/db/dao/sticker_albums_dao.dart';
+import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/enum/conversation_status.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
@@ -21,6 +23,8 @@ class Database {
     jobsDao = JobsDao(_database);
     participantsDao = ParticipantsDao(_database);
     userDao = UserDao(_database);
+    stickerDao = StickerDao(_database);
+    stickerAlbumsDao = StickerAlbumsDao(_database);
   }
 
   // static MixinDatabase _database;
@@ -43,6 +47,10 @@ class Database {
   ParticipantsDao participantsDao;
 
   UserDao userDao;
+
+  StickerDao stickerDao;
+
+  StickerAlbumsDao stickerAlbumsDao;
 
   void dispose() {
     _database.eventBus.dispose();

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/account/send_message_helper.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_app/blaze/blaze.dart';
@@ -8,7 +9,7 @@ import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
@@ -44,7 +45,7 @@ class AccountServer {
   }
 
   Future _initDatabase() async {
-    final databaseConnection = await createMoorIsolate(identityNumber);
+    final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _sendMessageHelper =
         SendMessageHelper(database.messagesDao, database.jobsDao);
@@ -90,10 +91,11 @@ class AccountServer {
         .asyncMapDrop(runSendJob)
         .listen((_) {});
 
+    _initSticker();
     // database.mock();
   }
 
-  Future<void> runAckJob(List<Job> jobs) async {
+  Future<void> runAckJob(List<db.Job> jobs) async {
     final ack = await Future.wait(jobs.map((e) async {
       final map = await LoadBalancerUtils.jsonDecode(e.blazeMessage);
       return BlazeAckMessage(
@@ -105,7 +107,7 @@ class AccountServer {
     await database.jobsDao.deleteJobs(jobIds);
   }
 
-  Future<void> runSendJob(List<Job> jobs) async {
+  Future<void> runSendJob(List<db.Job> jobs) async {
     jobs.forEach((job) async {
       final message =
           await database.messagesDao.sendingMessage(job.blazeMessage);
@@ -121,7 +123,7 @@ class AccountServer {
             content = base64.encode(utf8.encode(content));
           }
           final blazeMessage = _createBlazeMessage(message, content);
-           blaze.deliver(message, blazeMessage);
+          blaze.deliver(message, blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
@@ -132,7 +134,7 @@ class AccountServer {
     });
   }
 
-  BlazeMessage _createBlazeMessage(SendingMessage message, String data) {
+  BlazeMessage _createBlazeMessage(db.SendingMessage message, String data) {
     final blazeParam = BlazeMessageParam(
         conversationId: message.conversationId,
         messageId: message.messageId,
@@ -171,5 +173,41 @@ class AccountServer {
 
   void release() {
     // todo release resource
+  }
+
+  void _initSticker() {
+    client.accountApi.getStickerAlbums().then((res) {
+      if (res.data != null) {
+        res.data.forEach((item) async {
+          await database.stickerAlbumsDao.insert(db.StickerAlbum(
+              albumId: item.albumId,
+              name: item.name,
+              iconUrl: item.iconUrl,
+              createdAt: item.createdAt,
+              updateAt: item.updateAt,
+              userId: item.userId,
+              category: item.category,
+              description: item.description));
+          _updateStickerAlbums(item.albumId);
+        });
+      }
+    }).catchError((e) => debugPrint(e));
+  }
+
+  void _updateStickerAlbums(String alumId) {
+    client.accountApi.getStickersByAlbumId(alumId).then((res) {
+      if (res.data != null) {
+        res.data.forEach((sticker) {
+          database.stickerDao.insert(db.Sticker(
+              stickerId: sticker.stickerId,
+              name: sticker.name,
+              assetUrl: sticker.assetUrl,
+              assetType: sticker.assetType,
+              assetWidth: sticker.assetWidth,
+              assetHeight: sticker.assetHeight,
+              createdAt: sticker.createdAt));
+        });
+      }
+    }).catchError((e) => debugPrint(e));
   }
 }
