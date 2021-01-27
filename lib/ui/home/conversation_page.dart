@@ -163,6 +163,11 @@ class _List extends StatelessWidget {
                               ContextMenu(
                                 title: Localization.of(context).deleteChat,
                                 isDestructiveAction: true,
+                                value: () => Provider.of<AccountServer>(
+                                  context,
+                                  listen: false,
+                                ).database.conversationDao.deleteConversation(
+                                    conversation.conversationId),
                               ),
                             ],
                           );

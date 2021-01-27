@@ -89,4 +89,8 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
           .write(
         const ConversationsCompanion(pinTime: Value(null)),
       );
+
+  Future<int> deleteConversation(String conversationId) => (delete(db.conversations)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .go();
 }
