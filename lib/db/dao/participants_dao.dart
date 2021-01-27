@@ -29,4 +29,7 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
   void deleteAll(Iterable<Participant> remove) {
     remove.forEach(deleteParticipant);
   }
+
+  Selectable<UserItem> participantsAvatar(String conversationId) =>
+      db.participantsAvatar(conversationId);
 }

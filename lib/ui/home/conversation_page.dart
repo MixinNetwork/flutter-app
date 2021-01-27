@@ -13,7 +13,7 @@ import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/list_utils.dart';
-import 'package:flutter_app/widgets/avatar_view.dart';
+import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
@@ -198,11 +198,9 @@ class _Item extends StatelessWidget {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 15),
-                  child: AvatarsWidget(
+                  child: ConversationAvatarWidget(
+                    conversation: conversation,
                     size: 50,
-                    avatars: [
-                      conversation.groupIconUrl ?? conversation.avatarUrl
-                    ],
                   ),
                 ),
                 const SizedBox(width: 10),

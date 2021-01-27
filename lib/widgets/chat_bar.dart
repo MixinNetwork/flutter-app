@@ -8,7 +8,7 @@ import 'package:flutter_app/widgets/back_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'avatar_view.dart';
+import 'avatar_view/avatar_view.dart';
 
 class ChatBar extends StatelessWidget {
   const ChatBar({
@@ -136,12 +136,11 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationItem, List<String>>(
-        converter: (state) => [state?.avatarUrl],
-        when: (a, b) => b?.every((element) => element != null) == true,
-        builder: (context, avatars) => AvatarsWidget(
+      BlocBuilder<ConversationCubit, ConversationItem>(
+        buildWhen: (a, b) => b != null,
+        builder: (context, conversation) => ConversationAvatarWidget(
           size: 50,
-          avatars: avatars,
+          conversation: conversation,
         ),
       );
 }

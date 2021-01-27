@@ -306,3 +306,17 @@ SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.medi
       FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id
       WHERE m.message_id = :message_id AND (m.status = 'SENDING' OR rm.status = 1) AND m.content IS NOT NULL;
 
+
+participantsAvatar AS UserItem:
+SELECT u.user_id,
+       u.identity_number,
+       u.biography,
+       u.full_name,
+       u.avatar_url,
+       u.relationship
+FROM participants p,
+     users u
+WHERE p.conversation_id = :conversationId
+  AND p.user_id = u.user_id
+ORDER BY p.created_at
+LIMIT 4;

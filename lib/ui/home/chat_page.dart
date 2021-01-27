@@ -5,6 +5,7 @@ import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/input_container.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -202,17 +204,27 @@ class _Message extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            DateFormat.jm().format(message.createdAt),
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: BrightnessData.dynamicColor(
-                                context,
-                                const Color.fromRGBO(131, 145, 158, 1),
-                                darkColor:
-                                    const Color.fromRGBO(128, 131, 134, 1),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                DateFormat.jm().format(message.createdAt),
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  color: BrightnessData.dynamicColor(
+                                    context,
+                                    const Color.fromRGBO(131, 145, 158, 1),
+                                    darkColor:
+                                        const Color.fromRGBO(128, 131, 134, 1),
+                                  ),
+                                ),
                               ),
-                            ),
+                              if (isCurrentUser)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 8.0),
+                                  child: _MessageStatus(status: message.status),
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -224,6 +236,45 @@ class _Message extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _MessageStatus extends StatelessWidget {
+  const _MessageStatus({
+    Key key,
+    @required this.status,
+  }) : super(key: key);
+
+  final MessageStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    var assetName = Resources.assetsImagesSendingSvg;
+    var lightColor = const Color.fromRGBO(184, 189, 199, 1);
+    var darkColor = const Color.fromRGBO(255, 255, 255, 0.4);
+    switch (status) {
+      case MessageStatus.sent:
+        assetName = Resources.assetsImagesSentSvg;
+        break;
+      case MessageStatus.delivered:
+        assetName = Resources.assetsImagesDeliveredSvg;
+        break;
+      case MessageStatus.read:
+        assetName = Resources.assetsImagesReadSvg;
+        lightColor = const Color.fromRGBO(61, 117, 227, 1);
+        darkColor = const Color.fromRGBO(65, 145, 255, 1);
+        break;
+      default:
+        break;
+    }
+    return SvgPicture.asset(
+      assetName,
+      color: BrightnessData.dynamicColor(
+        context,
+        lightColor,
+        darkColor: darkColor,
+      ),
     );
   }
 }

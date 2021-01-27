@@ -11481,6 +11481,22 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<UserItem> participantsAvatar(String conversationId) {
+    return customSelect(
+        'SELECT u.user_id,\n       u.identity_number,\n       u.biography,\n       u.full_name,\n       u.avatar_url,\n       u.relationship\nFROM participants p,\n     users u\nWHERE p.conversation_id = :conversationId\n  AND p.user_id = u.user_id\nORDER BY p.created_at\nLIMIT 4',
+        variables: [Variable.withString(conversationId)],
+        readsFrom: {users, participants}).map((QueryRow row) {
+      return UserItem(
+        userId: row.readString('user_id'),
+        identityNumber: row.readString('identity_number'),
+        biography: row.readString('biography'),
+        fullName: row.readString('full_name'),
+        avatarUrl: row.readString('avatar_url'),
+        relationship: row.readString('relationship'),
+      );
+    });
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -12171,6 +12187,54 @@ class SendingMessage {
           ..write('resendStatus: $resendStatus, ')
           ..write('resendUserId: $resendUserId, ')
           ..write('resendSessionId: $resendSessionId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class UserItem {
+  final String userId;
+  final String identityNumber;
+  final String biography;
+  final String fullName;
+  final String avatarUrl;
+  final String relationship;
+  UserItem({
+    this.userId,
+    this.identityNumber,
+    this.biography,
+    this.fullName,
+    this.avatarUrl,
+    this.relationship,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      userId.hashCode,
+      $mrjc(
+          identityNumber.hashCode,
+          $mrjc(
+              biography.hashCode,
+              $mrjc(fullName.hashCode,
+                  $mrjc(avatarUrl.hashCode, relationship.hashCode))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is UserItem &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.biography == this.biography &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.relationship == this.relationship);
+  @override
+  String toString() {
+    return (StringBuffer('UserItem(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('biography: $biography, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('relationship: $relationship')
           ..write(')'))
         .toString();
   }
