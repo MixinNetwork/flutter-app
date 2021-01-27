@@ -19,6 +19,7 @@ import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/enum/conversation_status.dart';
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/utils/load_balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
@@ -71,7 +72,6 @@ part 'mixin_database.g.dart';
   UserDao,
 ], queries: {})
 class MixinDatabase extends _$MixinDatabase {
-  MixinDatabase(String identityNumber) : super(_openConnection(identityNumber));
 
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
@@ -81,29 +81,33 @@ class MixinDatabase extends _$MixinDatabase {
   final eventBus = DataBaseEventBus();
 }
 
-LazyDatabase _openConnection(String identityNumber) {
+LazyDatabase _openConnection(File dbFile) {
   return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
-    return VmDatabase(file);
+    return VmDatabase(dbFile);
   });
 }
 
-// todo
-// ignore: unused_element
-Future<MoorIsolate> _createMoorIsolate(String identityNumber) async {
-  final receivePort = ReceivePort();
+Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
+  final dbFolder = await getApplicationDocumentsDirectory();
+  final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
+  final moorIsolate =
+      await LoadBalancerUtils.runLoadBalancer(_createMoorIsolate, dbFile);
+  final databaseConnection = await (moorIsolate.connect());
+  return MixinDatabase.connect(databaseConnection);
+}
 
+Future<MoorIsolate> _createMoorIsolate(File dbFile) async {
+  final receivePort = ReceivePort();
   await Isolate.spawn(
     _startBackground,
-    _IsolateStartRequest(receivePort.sendPort, identityNumber),
+    _IsolateStartRequest(receivePort.sendPort, dbFile),
   );
 
   return (await receivePort.first as MoorIsolate);
 }
 
 void _startBackground(_IsolateStartRequest request) {
-  final executor = _openConnection(request.identityNumber);
+  final executor = _openConnection(request.dbFile);
   final moorIsolate = MoorIsolate.inCurrent(
     () => DatabaseConnection.fromExecutor(executor),
   );
@@ -111,8 +115,8 @@ void _startBackground(_IsolateStartRequest request) {
 }
 
 class _IsolateStartRequest {
-  _IsolateStartRequest(this.sendMoorIsolate, this.identityNumber);
+  _IsolateStartRequest(this.sendMoorIsolate, this.dbFile);
 
   final SendPort sendMoorIsolate;
-  final String identityNumber;
+  final File dbFile;
 }

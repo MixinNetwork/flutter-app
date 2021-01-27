@@ -24,6 +24,13 @@ class App extends StatelessWidget {
       child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState>(
         converter: (state) => state.current,
         builder: (context, authState) {
+          final initFuture = AccountServer().initServer(
+            authState.account.userId,
+            authState.account.sessionId,
+            authState.account.identityNumber,
+            authState.privateKey,
+          );
+
           final app = MaterialApp(
             title: 'Mixin',
             debugShowCheckedModeBanner: false,
@@ -58,42 +65,47 @@ class App extends StatelessWidget {
           final slideCategoryCubit = SlideCategoryCubit();
           final draftCubit = DraftCubit();
           final responsiveNavigatorCubit = ResponsiveNavigatorCubit();
-          final accountServer = AccountServer()
-            ..initServer(
-              authState.account.userId,
-              authState.account.sessionId,
-              authState.account.identityNumber,
-              authState.privateKey,
-            )
-            ..start();
-          return Provider<AccountServer>(
-            key: ValueKey(authState?.account?.userId),
-            create: (context) => accountServer,
-            dispose: (BuildContext context, AccountServer value) =>
-                value.stop(),
-            child: MultiBlocProvider(
-              providers: [
-                BlocProvider(
-                  create: (BuildContext context) => slideCategoryCubit,
-                ),
-                BlocProvider(
-                  create: (BuildContext context) => draftCubit,
-                ),
-                BlocProvider(
-                  create: (BuildContext context) => responsiveNavigatorCubit,
-                ),
-                BlocProvider(
-                  create: (BuildContext context) => ConversationListBloc(
-                      slideCategoryCubit, accountServer.database),
-                ),
-                BlocProvider(
-                  create: (BuildContext context) =>
-                      ConversationCubit(draftCubit, accountServer),
-                ),
-              ],
-              child: app,
-            ),
-          );
+
+          return FutureBuilder(
+              future: initFuture,
+              builder: (BuildContext context, AsyncSnapshot<AccountServer> snapshot) {
+                switch (snapshot.connectionState) {
+                  case ConnectionState.done:
+                    return Provider<AccountServer>(
+                      key: ValueKey(authState?.account?.userId),
+                      create: (context) => snapshot.data,
+                      dispose: (BuildContext context, AccountServer value) =>
+                          value.stop(),
+                      child: MultiBlocProvider(
+                        providers: [
+                          BlocProvider(
+                            create: (BuildContext context) =>
+                                slideCategoryCubit,
+                          ),
+                          BlocProvider(
+                            create: (BuildContext context) => draftCubit,
+                          ),
+                          BlocProvider(
+                            create: (BuildContext context) =>
+                                responsiveNavigatorCubit,
+                          ),
+                          BlocProvider(
+                            create: (BuildContext context) =>
+                                ConversationListBloc(
+                                    slideCategoryCubit, snapshot.data.database),
+                          ),
+                          BlocProvider(
+                            create: (BuildContext context) =>
+                                ConversationCubit(draftCubit, snapshot.data),
+                          ),
+                        ],
+                        child: app,
+                      ),
+                    );
+                  default:
+                    return app;
+                }
+              });
         },
       ),
     );

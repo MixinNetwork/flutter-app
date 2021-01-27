@@ -18,12 +18,12 @@ import 'package:uuid/uuid.dart';
 class AccountServer {
   static String sid;
 
-  void initServer(
+  Future<AccountServer> initServer(
     String userId,
     String sessionId,
     String identityNumber,
     String privateKey,
-  ) {
+  ) async {
     assert(userId != null);
     assert(sessionId != null);
     assert(identityNumber != null);
@@ -32,15 +32,24 @@ class AccountServer {
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;
     this.privateKey = privateKey;
-    database = Database(identityNumber);
+
     client = Client();
     (client.dio.transformer as DefaultTransformer).jsonDecodeCallback =
         LoadBalancerUtils.jsonDecode;
     client.initMixin(userId, sessionId, privateKey, scp);
-    blaze = Blaze(userId, sessionId, privateKey, database, client);
-    _decryptMessage = DecryptMessage(userId, database, client);
+
+    await _initDatabase();
+    start();
+    return this;
+  }
+
+  Future _initDatabase() async {
+    final databaseConnection = await createMoorIsolate(identityNumber);
+    database = Database(databaseConnection);
     _sendMessageHelper =
         SendMessageHelper(database.messagesDao, database.jobsDao);
+    blaze = Blaze(userId, sessionId, privateKey, database, client);
+    _decryptMessage = DecryptMessage(userId, database, client);
   }
 
   String userId;
@@ -55,11 +64,11 @@ class AccountServer {
   SendMessageHelper _sendMessageHelper;
 
   void start() {
-    // sendPort?.send('start account');
     // todo remove, development only
     if (sid == sessionId) {
       return;
     }
+
     sid = sessionId;
     blaze.connect();
     database.floodMessagesDao.findFloodMessage().listen((list) {
@@ -139,6 +148,7 @@ class AccountServer {
     bool isPlain = true,
   ]) {
     assert(_decryptMessage != null);
+    if(content == null || content.isEmpty) return;
     _sendMessageHelper.sendTextMessage(
         conversationId, userId, content, isPlain);
   }

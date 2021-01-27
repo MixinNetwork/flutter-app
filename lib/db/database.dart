@@ -13,8 +13,7 @@ import 'dao/users_dao.dart';
 import 'mixin_database.dart';
 
 class Database {
-  Database(String identityNumber) {
-    _database = MixinDatabase(identityNumber);
+  Database(this._database) {
     appsDao = AppsDao(_database);
     conversationDao = ConversationsDao(_database);
     floodMessagesDao = FloodMessagesDao(_database);
@@ -29,7 +28,7 @@ class Database {
   //   _database = await getMixinDatabaseConnection('3910');
   // }
 
-  MixinDatabase _database;
+  final MixinDatabase _database;
 
   AppsDao appsDao;
 
