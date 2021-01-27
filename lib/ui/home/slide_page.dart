@@ -22,33 +22,35 @@ class SlidePage extends StatelessWidget {
             const SizedBox(height: 64),
             const _Title(data: 'People'),
             const SizedBox(height: 12),
-            _CategoryList(categoryList: [
-              {
-                'asset': Resources.assetsImagesContactsPng,
-                'title': Localization.of(context).contacts,
-                'type': SlideCategoryType.contacts,
-              },
-              {
-                'asset': Resources.assetsImagesGroupPng,
-                'title': Localization.of(context).group,
-                'type': SlideCategoryType.groups,
-              },
-              {
-                'asset': Resources.assetsImagesBotPng,
-                'title': Localization.current.bots,
-                'type': SlideCategoryType.bots,
-              },
-              {
-                'asset': Resources.assetsImagesStrangersPng,
-                'title': Localization.of(context).strangers,
-                'type': SlideCategoryType.strangers,
-              },
-            ]),
+            _CategoryList(
+              children: [
+                _Item(
+                  asset: Resources.assetsImagesContactsPng,
+                  title: Localization.of(context).contacts,
+                  type: SlideCategoryType.contacts,
+                ),
+                _Item(
+                  asset: Resources.assetsImagesGroupPng,
+                  title: Localization.of(context).group,
+                  type: SlideCategoryType.groups,
+                ),
+                _Item(
+                  asset: Resources.assetsImagesBotPng,
+                  title: Localization.current.bots,
+                  type: SlideCategoryType.bots,
+                ),
+                _Item(
+                  asset: Resources.assetsImagesStrangersPng,
+                  title: Localization.of(context).strangers,
+                  type: SlideCategoryType.strangers,
+                ),
+              ],
+            ),
             const SizedBox(height: 16),
-            _Title(data: Localization.of(context).circle),
-            const SizedBox(height: 12),
-            const _CircleList(),
-            // todo user profile callback
+            // _Title(data: Localization.of(context).circle),
+            // const SizedBox(height: 12),
+            // const _CircleList(),
+            const Spacer(),
             Builder(
               builder: (context) => BlocConverter<MultiAuthCubit,
                   MultiAuthState, Tuple2<String, String>>(
@@ -89,127 +91,143 @@ class _CircleList extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Expanded(
         // todo circle list callback
-        child: Builder(builder: (context) {
-          const circleType = [
-            {
-              'asset': Resources.assetsImagesCirclePng,
-              'title': 'Mixin',
-            },
-          ];
-          return ListView.separated(
-            itemCount: 1,
-            separatorBuilder: (BuildContext context, int index) =>
-                const SizedBox(height: 8),
-            itemBuilder: (BuildContext context, int index) =>
-                BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-              converter: (state) =>
-                  state?.type == SlideCategoryType.circle &&
-                  state?.id == circleType[index]['title'],
-              builder: (BuildContext context, bool selected) {
-                final circle = circleType[index];
-                return SelectItem(
-                  icon: Image.asset(
-                    circle['asset'],
-                    width: 24,
-                    height: 24,
-                    color: BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(65, 145, 255, 1),
-                    ),
-                  ),
-                  title: circle['title'],
-                  onTap: () =>
-                      BlocProvider.of<SlideCategoryCubit>(context).select(
-                    SlideCategoryType.circle,
-                    circle['title'],
-                  ),
-                  selected: selected,
-                  count: 99,
-                  onRightClick: (pointerUpEvent) async {
-                    final result = await showContextMenu(
-                      context: context,
-                      pointerPosition: pointerUpEvent.position,
-                      menus: [
-                        ContextMenu(
-                          title: Localization.of(context).editCircleName,
-                        ),
-                        ContextMenu(
-                          title: Localization.of(context).editConversations,
-                        ),
-                        ContextMenu(
-                          title: Localization.of(context).deleteCircle,
-                          isDestructiveAction: true,
-                          value: () {
-                            showMixinDialog(
-                              context: context,
-                              child: AlertDialogLayout(
-                                content: Text(Localization.of(context)
-                                    .pageDeleteCircle(circle['title'])),
-                                actions: [
-                                  MixinButton(
-                                    backgroundTransparent: true,
-                                    child:
-                                        Text(Localization.of(context).cancel),
-                                  ),
-                                  MixinButton(
-                                    child:
-                                        Text(Localization.of(context).delete),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    );
-                    result?.call();
-                  },
-                );
+        child: Builder(
+          builder: (context) {
+            const circleType = [
+              {
+                'asset': Resources.assetsImagesCirclePng,
+                'title': 'Mixin',
               },
-            ),
-          );
-        }),
+            ];
+            return ListView.separated(
+              itemCount: 1,
+              separatorBuilder: (BuildContext context, int index) =>
+                  const SizedBox(height: 8),
+              itemBuilder: (BuildContext context, int index) =>
+                  BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+                converter: (state) =>
+                    state?.type == SlideCategoryType.circle &&
+                    state?.id == circleType[index]['title'],
+                builder: (BuildContext context, bool selected) {
+                  final circle = circleType[index];
+                  return SelectItem(
+                    icon: Image.asset(
+                      circle['asset'],
+                      width: 24,
+                      height: 24,
+                      color: BrightnessData.dynamicColor(
+                        context,
+                        const Color.fromRGBO(65, 145, 255, 1),
+                      ),
+                    ),
+                    title: circle['title'],
+                    onTap: () =>
+                        BlocProvider.of<SlideCategoryCubit>(context).select(
+                      SlideCategoryType.circle,
+                      circle['title'],
+                    ),
+                    selected: selected,
+                    count: 99,
+                    onRightClick: (pointerUpEvent) async {
+                      final result = await showContextMenu(
+                        context: context,
+                        pointerPosition: pointerUpEvent.position,
+                        menus: [
+                          ContextMenu(
+                            title: Localization.of(context).editCircleName,
+                          ),
+                          ContextMenu(
+                            title: Localization.of(context).editConversations,
+                          ),
+                          ContextMenu(
+                            title: Localization.of(context).deleteCircle,
+                            isDestructiveAction: true,
+                            value: () {
+                              showMixinDialog(
+                                context: context,
+                                child: AlertDialogLayout(
+                                  content: Text(Localization.of(context)
+                                      .pageDeleteCircle(circle['title'])),
+                                  actions: [
+                                    MixinButton(
+                                      backgroundTransparent: true,
+                                      child:
+                                          Text(Localization.of(context).cancel),
+                                    ),
+                                    MixinButton(
+                                      child:
+                                          Text(Localization.of(context).delete),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                      result?.call();
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        ),
       );
 }
 
 class _CategoryList extends StatelessWidget {
   const _CategoryList({
     Key key,
-    @required this.categoryList,
+    @required this.children,
   }) : super(key: key);
 
-  final List<Map<String, dynamic>> categoryList;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) => ListView.separated(
         shrinkWrap: true,
-        itemBuilder: (BuildContext context, int index) {
-          final item = categoryList[index];
-          return BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-            converter: (state) => state?.type == item['type'],
-            builder: (BuildContext context, bool selected) => SelectItem(
-              icon: Image.asset(
-                item['asset'],
-                width: 24,
-                height: 24,
-                color: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(51, 51, 51, 1),
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                ),
-              ),
-              title: item['title'],
-              onTap: () => BlocProvider.of<SlideCategoryCubit>(context).select(
-                item['type'],
-                item['title'],
-              ),
-              selected: selected,
-            ),
-          );
-        },
+        itemBuilder: (BuildContext context, int index) => children[index],
         separatorBuilder: (BuildContext context, int index) =>
             const SizedBox(height: 8),
-        itemCount: categoryList.length,
+        itemCount: children.length,
+      );
+}
+
+class _Item extends StatelessWidget {
+  const _Item({
+    Key key,
+    @required this.type,
+    @required this.title,
+    @required this.asset,
+  }) : super(key: key);
+
+  final SlideCategoryType type;
+  final String title;
+  final String asset;
+
+  @override
+  Widget build(BuildContext context) =>
+      BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+        converter: (state) => state?.type == type,
+        builder: (BuildContext context, bool selected) => SelectItem(
+          icon: Image.asset(
+            asset,
+            width: 24,
+            height: 24,
+            color: BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(51, 51, 51, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+            ),
+          ),
+          title: title,
+          onTap: () => BlocProvider.of<SlideCategoryCubit>(context).select(
+            type,
+            title,
+          ),
+          selected: selected,
+        ),
       );
 }
 
