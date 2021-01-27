@@ -25,8 +25,8 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     final result = await into(db.messages).insertOnConflictUpdate(message);
     await db.conversationsDao
         .updateLastMessageId(message.conversationId, message.messageId);
+    await _takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.updateConversion, message.conversationId);
-    _takeUnseen(userId, message.conversationId);
     return result;
   }
 
@@ -42,20 +42,14 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         .write(MessagesCompanion(status: Value(status)));
   }
 
-  void _takeUnseen(String userId, String conversationId) async {
-    await db.transaction(() async {
-      final countExp = db.messages.messageId.count();
-      final count = await ((db.selectOnly(db.messages)
-            ..addColumns([countExp])
-            ..where(db.messages.conversationId.equals(conversationId) &
-                db.messages.userId.equals(userId).not() &
-                db.messages.status.isIn(['SENT', 'DELIVERED'])))
-          .map((row) => row.read(countExp))
-          .getSingle());
-      await (db.update(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(ConversationsCompanion(unseenMessageCount: Value(count)));
-    });
+  Future<int> _takeUnseen(String userId, String conversationId) {
+    return db.customUpdate(
+        'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
+        variables: [
+          Variable.withString(conversationId),
+          Variable.withString(userId),
+          Variable.withString(conversationId)
+        ]);
   }
 
   Selectable<MessageItem> messagesByConversationId(
