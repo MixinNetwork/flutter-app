@@ -155,6 +155,6 @@ class Injector {
               createdAt: sticker.createdAt
             ));
           }
-    });
+    }).catchError((e) => debugPrint(e));
   }
 }
