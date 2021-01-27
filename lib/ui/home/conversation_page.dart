@@ -139,8 +139,9 @@ class _List extends StatelessWidget {
                                 ContextMenu(
                                   title: Localization.of(context).unPin,
                                   value: () => Provider.of<AccountServer>(
-                                          context,
-                                          listen: false)
+                                    context,
+                                    listen: false,
+                                  )
                                       .database
                                       .conversationDao
                                       .unpin(conversation.conversationId),
@@ -149,8 +150,9 @@ class _List extends StatelessWidget {
                                 ContextMenu(
                                   title: Localization.of(context).pin,
                                   value: () => Provider.of<AccountServer>(
-                                          context,
-                                          listen: false)
+                                    context,
+                                    listen: false,
+                                  )
                                       .database
                                       .conversationDao
                                       .pin(conversation.conversationId),
