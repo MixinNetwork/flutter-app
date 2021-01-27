@@ -9,6 +9,7 @@ import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -120,7 +121,9 @@ class AccountServer {
             content = base64.encode(utf8.encode(content));
           }
           final blazeMessage = _createBlazeMessage(message, content);
-          blaze.deliver(message, blazeMessage);
+           blaze.deliver(message, blazeMessage);
+          await database.messagesDao
+              .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
         } else {
           // todo send signal

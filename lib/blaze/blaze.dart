@@ -93,10 +93,9 @@ class Blaze {
   }
 
   void deliver(SendingMessage message, BlazeMessage blazeMessage) {
+    // todo check send callback
     channel.sink.add(GZipEncoder()
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
-    database.messagesDao
-        .updateMessageStatusById(message.messageId, MessageStatus.sent);
   }
 
   void disconnect() {
