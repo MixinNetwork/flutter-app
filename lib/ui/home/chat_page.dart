@@ -10,7 +10,9 @@ import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
+import 'package:flutter_app/utils/dp_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_app/widgets/chat_bar.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/input_container.dart';
@@ -22,6 +24,7 @@ import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/db/extension/message.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
@@ -184,51 +187,19 @@ class _Message extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: _MessageBubble(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      child: Wrap(
-                        alignment: WrapAlignment.end,
-                        crossAxisAlignment: WrapCrossAlignment.end,
-                        children: [
-                          Text(
-                            message.content,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: BrightnessData.dynamicColor(
-                                context,
-                                const Color.fromRGBO(51, 51, 51, 1),
-                                darkColor:
-                                    const Color.fromRGBO(255, 255, 255, 0.9),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                DateFormat.jm().format(message.createdAt),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: BrightnessData.dynamicColor(
-                                    context,
-                                    const Color.fromRGBO(131, 145, 158, 1),
-                                    darkColor:
-                                        const Color.fromRGBO(128, 131, 134, 1),
-                                  ),
-                                ),
-                              ),
-                              if (isCurrentUser)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 8.0),
-                                  child: _MessageStatus(status: message.status),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                    child: Builder(builder: (context) {
+                      if (message.isSticker) {
+                        return _StickerMessage(
+                          message: message,
+                          isCurrentUser: isCurrentUser,
+                        );
+                      }
+                      return _TextMessage(
+                        showNip: showNip,
+                        isCurrentUser: isCurrentUser,
+                        message: message,
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -236,6 +207,159 @@ class _Message extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _StickerMessage extends StatelessWidget {
+  const _StickerMessage({
+    Key key,
+    @required this.message,
+    @required this.isCurrentUser,
+  }) : super(key: key);
+
+  final MessageItem message;
+  final bool isCurrentUser;
+  @override
+  Widget build(BuildContext context) {
+    double width;
+    double height;
+    if (message.assetWidth == null || message.assetHeight == null) {
+      height = 120;
+      width = 120;
+    } else if (message.assetWidth * 2 < dpToPx(context, 48) ||
+        message.assetHeight * 2 < dpToPx(context, 48)) {
+      if (message.assetWidth < message.assetHeight) {
+        if (dpToPx(context, 48) * message.assetHeight / message.assetWidth >
+            dpToPx(context, 120)) {
+          height = 120;
+          width = 120 * message.assetWidth / message.assetHeight;
+        } else {
+          width = 48;
+          height = 48 * message.assetHeight / message.assetWidth;
+        }
+      } else {
+        if (dpToPx(context, 48) * message.assetWidth / message.assetHeight >
+            dpToPx(context, 120)) {
+          width = 120;
+          height = 120 * message.assetHeight / message.assetWidth;
+        } else {
+          height = 48;
+          width = 48 * message.assetWidth / message.assetHeight;
+        }
+      }
+    } else if (message.assetWidth * 2 < dpToPx(context, 120) ||
+        message.assetHeight * 2 > dpToPx(context, 120)) {
+      if (message.assetWidth > message.assetHeight) {
+        width = 120;
+        height = 120 * message.assetHeight / message.assetWidth;
+      } else {
+        height = 120;
+        width = 120 * message.assetWidth / message.assetHeight;
+      }
+    } else {
+      width = pxToDp(context, message.assetWidth * 2);
+      height = pxToDp(context, message.assetHeight * 2);
+    }
+    return _MessageBubble(
+      showNip: true,
+      isCurrentUser: isCurrentUser,
+      showBubble: false,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment:
+            isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          if (message.assetUrl == null)
+            SizedBox(
+              height: height,
+              width: width,
+            ),
+          if (message.assetUrl != null)
+            CacheImage(
+              message.assetUrl,
+              height: height,
+              width: width,
+            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _DateTime(dateTime: message.createdAt),
+              _MessageStatus(status: message.status),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TextMessage extends StatelessWidget {
+  const _TextMessage({
+    Key key,
+    @required this.showNip,
+    @required this.isCurrentUser,
+    @required this.message,
+  }) : super(key: key);
+
+  final bool showNip;
+  final bool isCurrentUser;
+  final MessageItem message;
+
+  @override
+  Widget build(BuildContext context) {
+    return _MessageBubble(
+      showNip: showNip,
+      isCurrentUser: isCurrentUser,
+      child: Wrap(
+        alignment: WrapAlignment.end,
+        crossAxisAlignment: WrapCrossAlignment.end,
+        children: [
+          Text(
+            message.content,
+            style: TextStyle(
+              fontSize: 16,
+              color: BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(51, 51, 51, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+              ),
+            ),
+          ),
+          const SizedBox(width: 6),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _DateTime(dateTime: message.createdAt),
+              if (isCurrentUser) _MessageStatus(status: message.status),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateTime extends StatelessWidget {
+  const _DateTime({
+    Key key,
+    @required this.dateTime,
+  }) : super(key: key);
+
+  final DateTime dateTime;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      DateFormat.jm().format(dateTime),
+      style: TextStyle(
+        fontSize: 10,
+        color: BrightnessData.dynamicColor(
+          context,
+          const Color.fromRGBO(131, 145, 158, 1),
+          darkColor: const Color.fromRGBO(128, 131, 134, 1),
+        ),
+      ),
     );
   }
 }
@@ -268,12 +392,15 @@ class _MessageStatus extends StatelessWidget {
       default:
         break;
     }
-    return SvgPicture.asset(
-      assetName,
-      color: BrightnessData.dynamicColor(
-        context,
-        lightColor,
-        darkColor: darkColor,
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0),
+      child: SvgPicture.asset(
+        assetName,
+        color: BrightnessData.dynamicColor(
+          context,
+          lightColor,
+          darkColor: darkColor,
+        ),
       ),
     );
   }
@@ -360,12 +487,18 @@ class _MessageBubbleMargin extends StatelessWidget {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({Key key, this.isCurrentUser, this.child, this.showNip})
-      : super(key: key);
+  const _MessageBubble({
+    Key key,
+    this.isCurrentUser,
+    this.child,
+    this.showNip = true,
+    this.showBubble = true,
+  }) : super(key: key);
 
   final Widget child;
   final bool isCurrentUser;
   final bool showNip;
+  final bool showBubble;
 
   @override
   Widget build(BuildContext context) {
@@ -418,19 +551,24 @@ class _MessageBubble extends StatelessWidget {
         constraints: const BoxConstraints(minHeight: 38),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                isCurrentUser
-                    ? isDark
-                        ? Resources.assetsImagesDarkSenderNipBubblePng
-                        : Resources.assetsImagesLightSenderNipBubblePng
-                    : isDark
-                        ? Resources.assetsImagesDarkReceiverNipBubblePng
-                        : Resources.assetsImagesLightReceiverNipBubblePng,
-              ),
-              centerSlice: Rect.fromCenter(
-                  center: const Offset(21, 22), width: 1, height: 1),
-            ),
+            image: showBubble
+                ? DecorationImage(
+                    image: AssetImage(
+                      isCurrentUser
+                          ? isDark
+                              ? Resources.assetsImagesDarkSenderNipBubblePng
+                              : Resources.assetsImagesLightSenderNipBubblePng
+                          : isDark
+                              ? Resources.assetsImagesDarkReceiverNipBubblePng
+                              : Resources.assetsImagesLightReceiverNipBubblePng,
+                    ),
+                    centerSlice: Rect.fromCenter(
+                      center: const Offset(21, 22),
+                      width: 1,
+                      height: 1,
+                    ),
+                  )
+                : null,
           ),
           child: _child,
         ),

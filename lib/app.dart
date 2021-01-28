@@ -44,9 +44,11 @@ class App extends StatelessWidget {
               builder: (context, authAvailable) {
                 if (authAvailable &&
                     Provider.of<AccountServer>(context) != null) {
-                  BlocProvider.of<ConversationListBloc>(context, listen: true)
-                    ..limit = MediaQuery.of(context).size.height ~/ 40
-                    ..init();
+                  try {
+                    BlocProvider.of<ConversationListBloc>(context)
+                      ..limit = MediaQuery.of(context).size.height ~/ 40
+                      ..init();
+                  } on Exception catch (_) {}
                   return HomePage();
                 }
                 return const LandingPage();

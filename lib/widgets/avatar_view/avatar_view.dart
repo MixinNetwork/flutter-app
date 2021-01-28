@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/widgets/avatar_view/bloc/cubit/avatar_cubit.dart';
+import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
@@ -26,9 +26,10 @@ class ConversationAvatarWidget extends StatelessWidget {
           child: Builder(
             builder: (context) {
               if (conversation.groupIconUrl != null)
-                return _Image(
+                return CacheImage(
                   conversation.groupIconUrl,
-                  size,
+                  width: size,
+                  height: size,
                 );
               return BlocProvider(
                 key: Key(conversation.conversationId),
@@ -121,7 +122,12 @@ class AvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (user.avatarUrl?.isNotEmpty == true) return _Image(user.avatarUrl, size);
+    if (user.avatarUrl?.isNotEmpty == true)
+      return CacheImage(
+        user.avatarUrl,
+        width: size,
+        height: size,
+      );
     return SizedBox.fromSize(
       size: Size.square(size),
       child: DecoratedBox(
@@ -140,25 +146,4 @@ class AvatarWidget extends StatelessWidget {
       ),
     );
   }
-}
-
-class _Image extends StatelessWidget {
-  const _Image(
-    this.src,
-    this.size, {
-    Key key,
-  }) : super(key: key);
-
-  final String src;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) => CachedNetworkImage(
-        imageUrl: src,
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        fadeInDuration: Duration.zero,
-        fadeOutDuration: Duration.zero,
-      );
 }
