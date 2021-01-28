@@ -68,25 +68,7 @@ class InputContainer extends StatelessWidget {
                   onKey: (FocusNode node, RawKeyEvent event) {
                     if (setEquals(RawKeyboard.instance.keysPressed,
                         {LogicalKeyboardKey.enter})) {
-                      final textEditingController =
-                          BlocProvider.of<DraftCubit>(context)
-                              .textEditingController;
-
-                      final text = textEditingController.value.text;
-                      final valid =
-                          textEditingController.value.isComposingRangeValid;
-                      if (text?.trim()?.isNotEmpty == true && !valid) {
-                        textEditingController.text = '';
-                        Provider.of<AccountServer>(context, listen: false)
-                            .sendTextMessage(
-                          BlocProvider.of<ConversationCubit>(context)
-                              .state
-                              .conversationId,
-                          text,
-                        );
-                      }
-
-                      return valid
+                      return _sendMessage(context)
                           ? KeyEventResult.ignored
                           : KeyEventResult.handled;
                     }
@@ -119,12 +101,28 @@ class InputContainer extends StatelessWidget {
             ActionButton(
               name: Resources.assetsImagesIcSendPng,
               color: actionColor,
-              onTap: () {},
+              onTap: () => _sendMessage(context),
             ),
           ],
         ),
       ),
     );
+  }
+
+  bool _sendMessage(BuildContext context) {
+    final textEditingController =
+        BlocProvider.of<DraftCubit>(context).textEditingController;
+
+    final text = textEditingController.value.text;
+    final valid = textEditingController.value.isComposingRangeValid;
+    if (text?.trim()?.isNotEmpty == true && !valid) {
+      textEditingController.text = '';
+      Provider.of<AccountServer>(context, listen: false).sendTextMessage(
+        BlocProvider.of<ConversationCubit>(context).state.conversationId,
+        text,
+      );
+    }
+    return valid;
   }
 }
 
