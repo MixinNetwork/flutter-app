@@ -9,7 +9,7 @@ class RatchetSenderKeysDao extends DatabaseAccessor<MixinDatabase>
   RatchetSenderKeysDao(MixinDatabase db) : super(db);
 
   Future<int> insert(RatchetSenderKey key) =>
-      into(db.ratchetSenderKeys).insert(key);
+      into(db.ratchetSenderKeys).insertOnConflictUpdate(key);
 
   Future deleteRatchetSenderKey(RatchetSenderKey key) =>
       delete(db.ratchetSenderKeys).delete(key);

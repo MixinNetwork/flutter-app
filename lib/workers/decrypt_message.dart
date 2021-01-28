@@ -6,6 +6,7 @@ import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/location_message.dart';
+import 'package:flutter_app/blaze/vo/plain_json_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
@@ -56,7 +57,16 @@ class DecryptMessage extends Injector {
 
   void processPlainMessage(BlazeMessageData data) {
     if (data.category == MessageCategory.plainJson) {
-      // todo
+      final plain = utf8.decode(base64.decode(data.data));
+      final plainJsonMessage = PlainJsonMessage.fromJson(jsonDecode(plain));
+      if (plainJsonMessage.action == acknowledgeMessageReceipts &&
+          plainJsonMessage.ackMessages?.isNotEmpty == true) {
+        _markMessageStatus(plainJsonMessage.ackMessages);
+      } else if (plainJsonMessage.action == resendMessages) {
+        // todo
+      } else if (plainJsonMessage.action == resendKey) {
+        // todo
+      }
       _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
@@ -354,5 +364,22 @@ class DecryptMessage extends Injector {
         blazeMessage: jsonEncode(blazeMessage),
         createdAt: DateTime.now(),
         runCount: 0));
+  }
+
+  void _markMessageStatus(List<BlazeAckMessage> messages) async {
+    final messageIds = <String>[];
+    messages
+        .takeWhile((m) => m.status != 'READ' || m.status != 'MENTION_READ')
+        .forEach((m) {
+      if (m.status == 'MENTION_READ') {
+      } else {
+        messageIds.add(m.messageId);
+      }
+    });
+
+    if (messageIds.isNotEmpty) {
+      database.messagesDao.markMessageRead(messageIds);
+      // todo refresh conversion
+    }
   }
 }

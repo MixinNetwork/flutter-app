@@ -1,0 +1,28 @@
+import 'package:json_annotation/json_annotation.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
+part 'plain_json_message.g.dart';
+
+@JsonSerializable()
+class PlainJsonMessage {
+  PlainJsonMessage(this.action, this.messages, this.userId, this.messageId,
+      this.sessionId, this.ackMessages);
+
+  factory PlainJsonMessage.fromJson(Map<String, dynamic> json) =>
+      _$PlainJsonMessageFromJson(json);
+
+  @JsonKey(name: 'action', nullable: false)
+  String action;
+  @JsonKey(name: 'messages')
+  List<String> messages;
+  @JsonKey(name: 'user_id')
+  String userId;
+  @JsonKey(name: 'message_id')
+  String messageId;
+  @JsonKey(name: 'session_id')
+  String sessionId;
+  @JsonKey(name: 'ack_messages')
+  List<BlazeAckMessage> ackMessages;
+
+  Map<String, dynamic> toJson() => _$PlainJsonMessageToJson(this);
+}

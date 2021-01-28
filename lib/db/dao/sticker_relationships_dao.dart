@@ -9,7 +9,7 @@ class StickerRelationshipsDao extends DatabaseAccessor<MixinDatabase>
   StickerRelationshipsDao(MixinDatabase db) : super(db);
 
   Future<int> insert(StickerRelationship stickerRelationship) =>
-      into(db.stickerRelationships).insert(stickerRelationship);
+      into(db.stickerRelationships).insertOnConflictUpdate(stickerRelationship);
 
   Future deleteStickerRelationship(StickerRelationship stickerRelationship) =>
       delete(db.stickerRelationships).delete(stickerRelationship);

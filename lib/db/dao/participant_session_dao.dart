@@ -9,7 +9,7 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
   ParticipantSessionDao(MixinDatabase db) : super(db);
 
   Future<int> insert(ParticipantSessionData participantSession) =>
-      into(db.participantSession).insert(participantSession);
+      into(db.participantSession).insertOnConflictUpdate(participantSession);
 
   Future deleteParticipantSession(ParticipantSessionData participantSession) =>
       delete(db.participantSession).delete(participantSession);

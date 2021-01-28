@@ -9,7 +9,7 @@ class ResendSessionMessagesDao extends DatabaseAccessor<MixinDatabase>
   ResendSessionMessagesDao(MixinDatabase db) : super(db);
 
   Future<int> insert(ResendSessionMessage resendSessionMessage) =>
-      into(db.resendSessionMessages).insert(resendSessionMessage);
+      into(db.resendSessionMessages).insertOnConflictUpdate(resendSessionMessage);
 
   Future deleteResendSessionMessage(
           ResendSessionMessage resendSessionMessage) =>

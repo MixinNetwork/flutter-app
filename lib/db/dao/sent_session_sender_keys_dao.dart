@@ -9,7 +9,7 @@ class SentSessionSenderKeysDao extends DatabaseAccessor<MixinDatabase>
   SentSessionSenderKeysDao(MixinDatabase db) : super(db);
 
   Future<int> insert(SentSessionSenderKey key) =>
-      into(db.sentSessionSenderKeys).insert(key);
+      into(db.sentSessionSenderKeys).insertOnConflictUpdate(key);
 
   Future deleteSentSessionSenderKey(SentSessionSenderKey key) =>
       delete(db.sentSessionSenderKeys).delete(key);

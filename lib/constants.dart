@@ -7,7 +7,9 @@ const scp =
 
 const acknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
 const sendingMessage = 'SENDING_MESSAGE';
+const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
+const resendKey = 'RESEND_KEY';
 
 class MessageCategory {
   static const String signalKey = 'SIGNAL_KEY';

@@ -52,6 +52,15 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         ]);
   }
 
+  void markMessageRead(List<String> messageIds) async =>
+      await transaction(() async {
+        for (final id in messageIds) {
+          await (update(db.messages)..where((e) => e.messageId.equals(id)))
+              .write(const MessagesCompanion(
+                  status: Value<MessageStatus>(MessageStatus.read)));
+        }
+      });
+
   Selectable<MessageItem> messagesByConversationId(
     String conversationId,
     int limit, {

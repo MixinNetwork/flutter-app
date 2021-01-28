@@ -9,7 +9,7 @@ class StickerAlbumsDao extends DatabaseAccessor<MixinDatabase>
   StickerAlbumsDao(MixinDatabase db) : super(db);
 
   Future<int> insert(StickerAlbum stickerAlbum) =>
-      into(db.stickerAlbums).insert(stickerAlbum);
+      into(db.stickerAlbums).insertOnConflictUpdate(stickerAlbum);
 
   Future deleteStickerAlbum(StickerAlbum stickerAlbum) =>
       delete(db.stickerAlbums).delete(stickerAlbum);

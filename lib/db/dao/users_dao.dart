@@ -7,7 +7,7 @@ part 'users_dao.g.dart';
 class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   UserDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(User user) => into(db.users).insert(user);
+  Future<int> insert(User user) => into(db.users).insertOnConflictUpdate(user);
 
   void insertAll(List<User> users) async {
     await batch((batch) {
