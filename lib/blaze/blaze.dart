@@ -50,7 +50,7 @@ class Blaze {
         updateRemoteMessageStatus(data['messageId'], MessageStatus.delivered);
       } else if (blazeMessage.action == createMessage) {
         final messageData = BlazeMessageData.fromJson(data);
-        if (messageData.userId == selfId && messageData.category == '') {
+        if (messageData.userId == selfId && messageData.category == null) {
           updateRemoteMessageStatus(
               messageData.messageId, MessageStatus.delivered);
         } else {
@@ -73,7 +73,8 @@ class Blaze {
   }
 
   void updateRemoteMessageStatus(String messageId, MessageStatus status) {
-    final blazeMessage = BlazeAckMessage(messageId: messageId, status: EnumToString.convertToString(status));
+    final blazeMessage = BlazeAckMessage(
+        messageId: messageId, status: EnumToString.convertToString(status));
     database.jobsDao.insert(Job(
         jobId: Uuid().v4(),
         action: acknowledgeMessageReceipts,

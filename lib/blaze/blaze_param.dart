@@ -1,5 +1,6 @@
 import 'dart:core';
 
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'blaze_message_param_session.dart';
@@ -8,7 +9,8 @@ part 'blaze_param.g.dart';
 
 @JsonSerializable()
 class BlazeMessageParam {
-  BlazeMessageParam({this.conversationId,
+  BlazeMessageParam({
+    this.conversationId,
     this.recipientId,
     this.messageId,
     this.category,
@@ -24,7 +26,8 @@ class BlazeMessageParam {
     this.jsep,
     this.candidate,
     this.trackId,
-    this.recipientIds});
+    this.recipientIds,
+  });
 
   factory BlazeMessageParam.fromJson(Map<String, dynamic> json) =>
       _$BlazeMessageParamFromJson(json);
@@ -36,7 +39,7 @@ class BlazeMessageParam {
   @JsonKey(name: 'message_id')
   String messageId;
   @JsonKey(name: 'category')
-  String category;
+  MessageCategory category;
   @JsonKey(name: 'data')
   String data;
   @JsonKey(name: 'status')
@@ -67,7 +70,6 @@ class BlazeMessageParam {
   String trackId;
   @JsonKey(name: 'recipient_ids')
   List<String> recipientIds;
-
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamToJson(this);
 }

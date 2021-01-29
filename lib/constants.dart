@@ -11,39 +11,6 @@ const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
 const resendKey = 'RESEND_KEY';
 
-class MessageCategory {
-  static const String signalKey = 'SIGNAL_KEY';
-  static const String signalText = 'SIGNAL_TEXT';
-  static const String signalImage = 'SIGNAL_IMAGE';
-  static const String signalVideo = 'SIGNAL_VIDEO';
-  static const String signalSticker = 'SIGNAL_STICKER';
-  static const String signalData = 'SIGNAL_DATA';
-  static const String signalContact = 'SIGNAL_CONTACT';
-  static const String signalAudio = 'SIGNAL_AUDIO';
-  static const String signalLive = 'SIGNAL_LIVE';
-  static const String signalPost = 'SIGNAL_POST';
-  static const String signalLocation = 'SIGNAL_LOCATION';
-  static const String plainText = 'PLAIN_TEXT';
-  static const String plainImage = 'PLAIN_IMAGE';
-  static const String plainVideo = 'PLAIN_VIDEO';
-  static const String plainData = 'PLAIN_DATA';
-  static const String plainSticker = 'PLAIN_STICKER';
-  static const String plainContact = 'PLAIN_CONTACT';
-  static const String plainAudio = 'PLAIN_AUDIO';
-  static const String plainLive = 'PLAIN_LIVE';
-  static const String plainPost = 'PLAIN_POST';
-  static const String plainJson = 'PLAIN_JSON';
-  static const String plainLocation = 'PLAIN_LOCATION';
-  static const String messageRecall = 'MESSAGE_RECALL';
-  static const String appButtonGroup = 'APP_BUTTON_GROUP';
-  static const String appCard = 'APP_CARD';
-  static const String systemConversation = 'SYSTEM_CONVERSATION';
-  static const String systemUser = 'SYSTEM_USER';
-  static const String systemCircle = 'SYSTEM_CIRCLE';
-  static const String systemSession = 'SYSTEM_SESSION';
-  static const String systemAccountSnapshot = 'SYSTEM_ACCOUNT_SNAPSHOT';
-}
-
 final circleColors = [
   const Color(0xFF8E7BFF),
   const Color(0xFF657CFB),

@@ -1,3 +1,4 @@
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'blaze_message_data.g.dart';
@@ -5,18 +6,19 @@ part 'blaze_message_data.g.dart';
 @JsonSerializable()
 class BlazeMessageData {
   BlazeMessageData(
-      this.conversationId,
-      this.userId,
-      this.messageId,
-      this.category,
-      this.data,
-      this.status,
-      this.createdAt,
-      this.updatedAt,
-      this.source,
-      this.representativeId,
-      this.quoteMessageId,
-      this.sessionId);
+    this.conversationId,
+    this.userId,
+    this.messageId,
+    this.category,
+    this.data,
+    this.status,
+    this.createdAt,
+    this.updatedAt,
+    this.source,
+    this.representativeId,
+    this.quoteMessageId,
+    this.sessionId,
+  );
 
   factory BlazeMessageData.fromJson(Map<String, dynamic> json) =>
       _$BlazeMessageDataFromJson(json);
@@ -28,7 +30,7 @@ class BlazeMessageData {
   @JsonKey(name: 'message_id', nullable: false)
   String messageId;
   @JsonKey(name: 'category', nullable: false)
-  String category;
+  MessageCategory category;
   @JsonKey(name: 'data', nullable: false)
   String data;
   @JsonKey(name: 'status', nullable: false)

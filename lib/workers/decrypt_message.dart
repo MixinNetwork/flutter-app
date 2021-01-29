@@ -1,12 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/blaze/vo/live_message.dart';
 import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
+import 'package:flutter_app/blaze/vo/live_message.dart';
 import 'package:flutter_app/blaze/vo/location_message.dart';
-import 'package:flutter_app/blaze/vo/plain_json_message.dart';
 import 'package:flutter_app/blaze/vo/recall_message.dart';
 import 'package:flutter_app/blaze/vo/snapshot_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
@@ -16,14 +15,17 @@ import 'package:flutter_app/blaze/vo/system_session_message.dart';
 import 'package:flutter_app/blaze/vo/system_user_message.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
+import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/media_status.dart';
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
+
 import 'injector.dart';
 
 class DecryptMessage extends Injector {
@@ -43,15 +45,16 @@ class DecryptMessage extends Injector {
       syncConversion(data.conversationId);
     }
     final category = data.category;
-    if (category.startsWith('SIGNAL_')) {
+    if (category.isSignal) {
       _processSignalMessage(data);
-    } else if (category.startsWith('PLAIN_')) {
-      processPlainMessage(data);
-    } else if (category.startsWith('SYSTEM_')) {
+    } else if (category.isPlain) {
+      _processPlainMessage(data);
+    } else if (category.isSystem) {
       _processSystemMessage(data);
-    } else if (category == 'APP_BUTTON_GROUP' || category == 'APP_CARD') {
+    } else if (category == MessageCategory.appButtonGroup ||
+        category == MessageCategory.appCard) {
       _processApp(data);
-    } else if (category == 'MESSAGE_RECALL') {
+    } else if (category == MessageCategory.messageRecall) {
       _processRecallMessage(data);
     }
     _updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
@@ -63,18 +66,9 @@ class DecryptMessage extends Injector {
     _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
   }
 
-  void processPlainMessage(BlazeMessageData data) {
+  void _processPlainMessage(BlazeMessageData data) {
     if (data.category == MessageCategory.plainJson) {
-      final plain = utf8.decode(base64.decode(data.data));
-      final plainJsonMessage = PlainJsonMessage.fromJson(jsonDecode(plain));
-      if (plainJsonMessage.action == acknowledgeMessageReceipts &&
-          plainJsonMessage.ackMessages?.isNotEmpty == true) {
-        _markMessageStatus(plainJsonMessage.ackMessages);
-      } else if (plainJsonMessage.action == resendMessages) {
-        // todo
-      } else if (plainJsonMessage.action == resendKey) {
-        // todo
-      }
+      // todo
       _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
@@ -142,7 +136,7 @@ class DecryptMessage extends Injector {
       messageStatus = MessageStatus.read;
     }
 
-    if (data.category.endsWith('_TEXT')) {
+    if (data.category.isText) {
       String plain;
       if (data.category == MessageCategory.signalText) {
         plain = 'SignalText';
@@ -159,7 +153,7 @@ class DecryptMessage extends Injector {
         createdAt: data.createdAt,
       );
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_IMAGE')) {
+    } else if (data.category.isImage) {
       String plain;
       if (data.category == MessageCategory.signalImage) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -187,7 +181,7 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_VIDEO')) {
+    } else if (data.category.isVideo) {
       String plain;
       if (data.category == MessageCategory.signalVideo) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -216,7 +210,7 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_DATA')) {
+    } else if (data.category.isData) {
       String plain;
       if (data.category == MessageCategory.signalData) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -241,7 +235,7 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_AUDIO')) {
+    } else if (data.category.isAudio) {
       String plain;
       if (data.category == MessageCategory.signalAudio) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -267,7 +261,7 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.pending);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_STICKER')) {
+    } else if (data.category.isSticker) {
       String plain;
       if (data.category == MessageCategory.signalSticker) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -294,7 +288,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_CONTACT')) {
+    } else if (data.category.isContact) {
       String plain;
       if (data.category == MessageCategory.signalContact) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -315,7 +309,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_LIVE')) {
+    } else if (data.category.isLive) {
       String plain;
       if (data.category == MessageCategory.signalLive) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -337,7 +331,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_LOCATION')) {
+    } else if (data.category.isLocation) {
       String plain;
       if (data.category == MessageCategory.signalLocation) {
         _updateRemoteMessageStatus(data.messageId, messageStatus);
@@ -368,7 +362,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, selfId);
-    } else if (data.category.endsWith('_POST')) {
+    } else if (data.category.isPost) {
       String plain;
       if (data.category == MessageCategory.signalPost) {
         plain = 'SignalPost';
