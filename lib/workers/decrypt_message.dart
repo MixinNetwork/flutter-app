@@ -6,6 +6,7 @@ import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/live_message.dart';
 import 'package:flutter_app/blaze/vo/location_message.dart';
+import 'package:flutter_app/blaze/vo/plain_json_message.dart';
 import 'package:flutter_app/blaze/vo/recall_message.dart';
 import 'package:flutter_app/blaze/vo/snapshot_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
@@ -32,7 +33,8 @@ class DecryptMessage extends Injector {
   DecryptMessage(String selfId, Database database, Client client, this._attachmentUtil) : super(selfId, database, client);
 
   String _conversationId;
-  AttachmentUtil _attachmentUtil;
+  // ignore: unused_field
+  final AttachmentUtil _attachmentUtil;
 
   void setConversationId(String conversationId) {
     _conversationId = conversationId;
@@ -68,7 +70,16 @@ class DecryptMessage extends Injector {
 
   void _processPlainMessage(BlazeMessageData data) {
     if (data.category == MessageCategory.plainJson) {
-      // todo
+      final plain = utf8.decode(base64.decode(data.data));
+      final plainJsonMessage = PlainJsonMessage.fromJson(jsonDecode(plain));
+      if (plainJsonMessage.action == acknowledgeMessageReceipts &&
+          plainJsonMessage.ackMessages?.isNotEmpty == true) {
+        _markMessageStatus(plainJsonMessage.ackMessages);
+      } else if (plainJsonMessage.action == resendMessages) {
+        // todo
+      } else if (plainJsonMessage.action == resendKey) {
+        // todo
+      }
       _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||

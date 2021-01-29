@@ -9,26 +9,26 @@ class AttachmentUtil {
 
   final String mediaPath;
 
-  void downloadAttachment(Message message) {
+  void downloadAttachment(Message message) {}
 
-  }
+  void uploadAttachment(Message message) {}
 
-  void uploadAttachment(Message message) {
-
-  }
-
+  // ignore: unused_element
   String _getImagesPath(String conversationId) {
     return p.join(mediaPath, 'Images', conversationId);
   }
 
+  // ignore: unused_element
   String _getVideosPath(String conversationId) {
     return p.join(mediaPath, 'Videos', conversationId);
   }
 
+  // ignore: unused_element
   String _getAudiosPath(String conversationId) {
     return p.join(mediaPath, 'Audios', conversationId);
   }
 
+  // ignore: unused_element
   String _getFilesPath(String conversationId) {
     return p.join(mediaPath, 'Files', conversationId);
   }

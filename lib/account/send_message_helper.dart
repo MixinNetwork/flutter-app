@@ -11,6 +11,7 @@ class SendMessageHelper {
 
   final MessagesDao _messagesDao;
   final JobsDao _jobsDao;
+  // ignore: unused_field
   final AttachmentUtil _attachmentUtil;
 
   void sendTextMessage(String conversationId, String senderId, String content,
