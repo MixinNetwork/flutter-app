@@ -5,6 +5,7 @@ import 'dart:isolate';
 import 'package:flutter_app/db/converter/conversation_category_type_converter.dart';
 import 'package:flutter_app/db/converter/conversation_status_type_converter.dart';
 import 'package:flutter_app/db/converter/media_status_type_converter.dart';
+import 'package:flutter_app/db/converter/message_category_type_converter.dart';
 import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:flutter_app/db/dao/hyperlinks_dao.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
@@ -18,6 +19,7 @@ import 'package:flutter_app/db/dao/users_dao.dart';
 import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/enum/conversation_status.dart';
 import 'package:flutter_app/enum/media_status.dart';
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/load_balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -72,11 +74,12 @@ part 'mixin_database.g.dart';
   UserDao,
 ], queries: {})
 class MixinDatabase extends _$MixinDatabase {
-
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion {
+    return 1;
+  }
 
   final eventBus = DataBaseEventBus();
 }

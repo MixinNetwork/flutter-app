@@ -3,7 +3,8 @@ import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
+import 'package:flutter_app/db/extension/message_category.dart';
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
@@ -409,55 +410,56 @@ class _MessageContent extends StatelessWidget {
     if (conversation.messageStatus == MessageStatus.failed) {
       icon = Resources.assetsImagesSendingSvg;
       content = Localization.of(context).waitingForThisMessage;
-    } else if (conversation.isText) {
+    } else if (conversation.contentType.isText) {
       // todo markdown and mention
       content = conversation.content;
-    } else if (conversation.contentType == 'SYSTEM_ACCOUNT_SNAPSHOT') {
+    } else if (conversation.contentType ==
+        MessageCategory.systemAccountSnapshot) {
       content = '[${Localization.of(context).transfer}]';
       icon = Resources.assetsImagesTransferSvg;
-    } else if (conversation.isSticker) {
+    } else if (conversation.contentType.isSticker) {
       content = '[${Localization.of(context).sticker}]';
       icon = Resources.assetsImagesStickerSvg;
-    } else if (conversation.isImage) {
+    } else if (conversation.contentType.isImage) {
       content = '[${Localization.of(context).image}]';
       icon = Resources.assetsImagesImageSvg;
-    } else if (conversation.isVideo) {
+    } else if (conversation.contentType.isVideo) {
       content = '[${Localization.of(context).video}]';
       icon = Resources.assetsImagesVideoSvg;
-    } else if (conversation.isLive) {
+    } else if (conversation.contentType.isLive) {
       content = '[${Localization.of(context).live}]';
       icon = Resources.assetsImagesLiveSvg;
-    } else if (conversation.isData) {
+    } else if (conversation.contentType.isData) {
       content = '[${Localization.of(context).file}]';
       icon = Resources.assetsImagesFileSvg;
-    } else if (conversation.isPost) {
+    } else if (conversation.contentType.isPost) {
       icon = Resources.assetsImagesFileSvg;
       // todo
       content = 'post';
-    } else if (conversation.isLocation) {
+    } else if (conversation.contentType.isLocation) {
       content = '[${Localization.of(context).location}]';
       // icon = Resources.assetsImagesLocationSvg;
-    } else if (conversation.isAudio) {
+    } else if (conversation.contentType.isAudio) {
       content = '[${Localization.of(context).audio}]';
       icon = Resources.assetsImagesAudioSvg;
-    } else if (conversation.contentType == 'APP_BUTTON_GROUP') {
+    } else if (conversation.contentType == MessageCategory.appButtonGroup) {
       // todo
       content = 'APP_BUTTON_GROUP';
       icon = Resources.assetsImagesAppButtonSvg;
-    } else if (conversation.contentType == 'APP_CARD') {
+    } else if (conversation.contentType == MessageCategory.appCard) {
       content = 'APP_CARD';
       icon = Resources.assetsImagesAppButtonSvg;
-    } else if (conversation.isContact) {
+    } else if (conversation.contentType.isContact) {
       content = '[${Localization.of(context).contact}]';
       icon = Resources.assetsImagesContactSvg;
-    } else if (conversation.isCallMessage) {
+    } else if (conversation.contentType.isCallMessage) {
       content = '[${Localization.of(context).videoCall}]';
       icon = Resources.assetsImagesVideoCallSvg;
-    } else if (conversation.isRecall) {
+    } else if (conversation.contentType.isRecall) {
       // todo
       // content = '[${Localization.of(context).recall}]';
       icon = Resources.assetsImagesRecallSvg;
-    } else if (conversation.isGroupCall) {
+    } else if (conversation.contentType.isGroupCall) {
 // todo
     }
 
@@ -496,11 +498,11 @@ class _MessageStatusIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     if (MultiAuthCubit.of(context)?.state?.current?.account?.userId ==
             EnumToString.convertToString(conversation.messageStatus) &&
-        conversation.contentType != 'SYSTEM_CONVERSATION' &&
-        conversation.contentType != 'SYSTEM_ACCOUNT_SNAPSHOT' &&
-        !conversation.isCallMessage &&
-        !conversation.isRecall &&
-        !conversation.isGroupCall) {
+        conversation.contentType != MessageCategory.systemConversation &&
+        conversation.contentType != MessageCategory.systemAccountSnapshot &&
+        !conversation.contentType.isCallMessage &&
+        !conversation.contentType.isRecall &&
+        !conversation.contentType.isGroupCall) {
       return MessageStatusIcon(
           status: EnumToString.convertToString(conversation.messageStatus));
     }

@@ -1,7 +1,7 @@
-import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:uuid/uuid.dart';
 
@@ -96,12 +96,12 @@ class SendMessageHelper {
   void sendAppCardMessage(
       String conversationId, String senderId, String content, bool isPlain) {
     // ignore: unused_local_variable
-    final category = MessageCategory.appCard;
+    const category = MessageCategory.appCard;
   }
 
   void sendAppButtonGroup(
       String conversationId, String senderId, String content, bool isPlain) {
     // ignore: unused_local_variable
-    final category = MessageCategory.appButtonGroup;
+    const category = MessageCategory.appButtonGroup;
   }
 }

@@ -24,7 +24,7 @@ import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/db/extension/message.dart';
+import 'package:flutter_app/db/extension/message_category.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
@@ -188,7 +188,7 @@ class _Message extends StatelessWidget {
                       ],
                     ),
                     child: Builder(builder: (context) {
-                      if (message.isSticker) {
+                      if (message.type.isSticker) {
                         return _StickerMessage(
                           message: message,
                           isCurrentUser: isCurrentUser,
