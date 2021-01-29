@@ -19,6 +19,7 @@ import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -26,10 +27,10 @@ import 'package:uuid/uuid.dart';
 import 'injector.dart';
 
 class DecryptMessage extends Injector {
-  DecryptMessage(String selfId, Database database, Client client)
-      : super(selfId, database, client);
+  DecryptMessage(String selfId, Database database, Client client, this._attachmentUtil) : super(selfId, database, client);
 
   String _conversationId;
+  AttachmentUtil _attachmentUtil;
 
   void setConversationId(String conversationId) {
     _conversationId = conversationId;

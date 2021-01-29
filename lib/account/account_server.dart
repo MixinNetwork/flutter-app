@@ -12,6 +12,7 @@ import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
@@ -47,10 +48,11 @@ class AccountServer {
   Future _initDatabase() async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
+    _attachmentUtil = await AttachmentUtil.init(identityNumber);
     _sendMessageHelper =
-        SendMessageHelper(database.messagesDao, database.jobsDao);
+        SendMessageHelper(database.messagesDao, database.jobsDao, _attachmentUtil);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
-    _decryptMessage = DecryptMessage(userId, database, client);
+    _decryptMessage = DecryptMessage(userId, database, client,_attachmentUtil);
   }
 
   String userId;
@@ -63,6 +65,7 @@ class AccountServer {
   Blaze blaze;
   DecryptMessage _decryptMessage;
   SendMessageHelper _sendMessageHelper;
+  AttachmentUtil _attachmentUtil;
 
   void start() {
     // todo remove, development only

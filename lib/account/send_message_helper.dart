@@ -3,13 +3,15 @@ import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:uuid/uuid.dart';
 
 class SendMessageHelper {
-  SendMessageHelper(this._messagesDao, this._jobsDao);
+  SendMessageHelper(this._messagesDao, this._jobsDao, this._attachmentUtil);
 
   final MessagesDao _messagesDao;
   final JobsDao _jobsDao;
+  final AttachmentUtil _attachmentUtil;
 
   void sendTextMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
