@@ -208,10 +208,12 @@ class AccountServer {
     }).catchError((e) => debugPrint(e));
   }
 
-  void _updateStickerAlbums(String alumId) {
-    client.accountApi.getStickersByAlbumId(alumId).then((res) {
+  void _updateStickerAlbums(String albumId) {
+    client.accountApi.getStickersByAlbumId(albumId).then((res) {
       if (res.data != null) {
+        final relationships = <StickerRelationship>[];
         res.data.forEach((sticker) {
+          relationships.add(StickerRelationship(albumId:albumId, stickerId:sticker.stickerId));
           database.stickerDao.insert(db.Sticker(
               stickerId: sticker.stickerId,
               name: sticker.name,
@@ -221,6 +223,8 @@ class AccountServer {
               assetHeight: sticker.assetHeight,
               createdAt: sticker.createdAt));
         });
+
+        database.stickerRelationshipsDao.insertAll(relationships);
       }
     }).catchError((e) => debugPrint(e));
   }

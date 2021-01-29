@@ -13,4 +13,11 @@ class StickerRelationshipsDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteStickerRelationship(StickerRelationship stickerRelationship) =>
       delete(db.stickerRelationships).delete(stickerRelationship);
+
+  void insertAll(List<StickerRelationship> stickerRelationships) async {
+    await batch((batch) {
+      batch.insertAllOnConflictUpdate(db.stickerRelationships, stickerRelationships);
+    });
+  }
+
 }
