@@ -7,7 +7,13 @@ import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/location_message.dart';
 import 'package:flutter_app/blaze/vo/plain_json_message.dart';
+import 'package:flutter_app/blaze/vo/recall_message.dart';
+import 'package:flutter_app/blaze/vo/snapshot_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
+import 'package:flutter_app/blaze/vo/system_circle_message.dart';
+import 'package:flutter_app/blaze/vo/system_conversation_message.dart';
+import 'package:flutter_app/blaze/vo/system_session_message.dart';
+import 'package:flutter_app/blaze/vo/system_user_message.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -37,23 +43,24 @@ class DecryptMessage extends Injector {
     }
     final category = data.category;
     if (category.startsWith('SIGNAL_')) {
-      // processSignalMessage(data);
-      // todo decrypt
-      processDecryptSuccess(data, 'Signal Message');
+      _processSignalMessage(data);
     } else if (category.startsWith('PLAIN_')) {
       processPlainMessage(data);
     } else if (category.startsWith('SYSTEM_')) {
-      processSystemMessage(data);
+      _processSystemMessage(data);
     } else if (category == 'APP_BUTTON_GROUP' || category == 'APP_CARD') {
-      processApp(data);
+      _processApp(data);
     } else if (category == 'MESSAGE_RECALL') {
-      processRecallMessage(data);
+      _processRecallMessage(data);
     }
     _updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
     await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
 
-  void processSignalMessage(data) {}
+  void _processSignalMessage(BlazeMessageData data) {
+    // todo decrypt
+    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+  }
 
   void processPlainMessage(BlazeMessageData data) {
     if (data.category == MessageCategory.plainJson) {
@@ -81,17 +88,48 @@ class DecryptMessage extends Injector {
       if (data.representativeId?.isNotEmpty == true) {
         data.userId = data.representativeId;
       }
-      processDecryptSuccess(data, data.data);
+      _processDecryptSuccess(data, data.data);
     }
   }
 
-  void processSystemMessage(data) {}
+  void _processSystemMessage(BlazeMessageData data) {
+    if (data.category == MessageCategory.systemConversation) {
+      final systemMessage = SystemConversationMessage.fromJson(
+          jsonDecode(utf8.decode(base64.decode(data.data))));
+      _processSystemConversationMessage(data, systemMessage);
+    } else if (data.category == MessageCategory.systemUser) {
+      final systemMessage = SystemUserMessage.fromJson(
+          jsonDecode(utf8.decode(base64.decode(data.data))));
+      _processSystemUserMessage(systemMessage);
+    } else if (data.category == MessageCategory.systemCircle) {
+      final systemMessage = SystemCircleMessage.fromJson(
+          jsonDecode(utf8.decode(base64.decode(data.data))));
+      _processSystemCircleMessage(data, systemMessage);
+    } else if (data.category == MessageCategory.systemAccountSnapshot) {
+      final systemSnapshot = SnapshotMessage.fromJson(
+          jsonDecode(utf8.decode(base64.decode(data.data))));
+      _processSystemSnapshotMessage(data, systemSnapshot);
+    } else if (data.category == MessageCategory.systemSession) {
+      final systemSession = SystemSessionMessage.fromJson(
+          jsonDecode(utf8.decode(base64.decode(data.data))));
+      _processSystemSessionMessage(systemSession);
+    }
+    _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+  }
 
-  void processApp(data) {}
+  void _processApp(BlazeMessageData data) {
+    _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+  }
 
-  void processRecallMessage(data) {}
+  void _processRecallMessage(BlazeMessageData data) {
+    // todo
+    // ignore: unused_local_variable
+    final recallMessage = RecallMessage.fromJson(
+        jsonDecode(utf8.decode(base64.decode(data.data))));
+    _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+  }
 
-  void processDecryptSuccess(BlazeMessageData data, String plainText) async {
+  void _processDecryptSuccess(BlazeMessageData data, String plainText) async {
     // todo
     // ignore: unused_local_variable
     final user = await syncUser(data.userId);
@@ -350,6 +388,16 @@ class DecryptMessage extends Injector {
 
     _updateRemoteMessageStatus(data.messageId, messageStatus);
   }
+
+  void _processSystemConversationMessage(BlazeMessageData data, SystemConversationMessage systemMessage) {}
+
+  void _processSystemUserMessage(SystemUserMessage systemMessage) {}
+
+  void _processSystemCircleMessage(BlazeMessageData data, SystemCircleMessage systemMessage) {}
+
+  void _processSystemSnapshotMessage(BlazeMessageData data, SnapshotMessage systemSnapshot) {}
+
+  void _processSystemSessionMessage(SystemSessionMessage systemSession) {}
 
   void _updateRemoteMessageStatus(messageId, MessageStatus status) {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {

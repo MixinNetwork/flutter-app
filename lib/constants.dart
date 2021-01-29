@@ -34,8 +34,14 @@ class MessageCategory {
   static const String plainPost = 'PLAIN_POST';
   static const String plainJson = 'PLAIN_JSON';
   static const String plainLocation = 'PLAIN_LOCATION';
+  static const String messageRecall = 'MESSAGE_RECALL';
   static const String appButtonGroup = 'APP_BUTTON_GROUP';
   static const String appCard = 'APP_CARD';
+  static const String systemConversation = 'SYSTEM_CONVERSATION';
+  static const String systemUser = 'SYSTEM_USER';
+  static const String systemCircle = 'SYSTEM_CIRCLE';
+  static const String systemSession = 'SYSTEM_SESSION';
+  static const String systemAccountSnapshot = 'SYSTEM_ACCOUNT_SNAPSHOT';
 }
 
 final circleColors = [

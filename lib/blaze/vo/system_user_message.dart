@@ -1,0 +1,19 @@
+import 'package:flutter_app/enum/system_user_action.dart';
+import 'package:json_annotation/json_annotation.dart';
+
+part 'system_user_message.g.dart';
+
+@JsonSerializable()
+class SystemUserMessage {
+  SystemUserMessage(this.action, this.userId);
+
+  factory SystemUserMessage.fromJson(Map<String, dynamic> json) =>
+      _$SystemUserMessageFromJson(json);
+
+  @JsonKey(name: 'action', nullable: false)
+  SystemUserAction action;
+  @JsonKey(name: 'user_id', nullable: false)
+  String userId;
+
+  Map<String, dynamic> toJson() => _$SystemUserMessageToJson(this);
+}
