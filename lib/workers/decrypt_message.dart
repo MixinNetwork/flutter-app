@@ -395,7 +395,9 @@ class DecryptMessage extends Injector {
     _updateRemoteMessageStatus(data.messageId, messageStatus);
   }
 
-  void _processSystemConversationMessage(BlazeMessageData data, SystemConversationMessage systemMessage) {}
+  void _processSystemConversationMessage(BlazeMessageData data, SystemConversationMessage systemMessage) {
+
+  }
 
   void _processSystemUserMessage(SystemUserMessage systemMessage) {}
 
