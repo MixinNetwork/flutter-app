@@ -7920,6 +7920,451 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   bool get dontWriteConstraints => true;
 }
 
+class MessagesFt extends DataClass implements Insertable<MessagesFt> {
+  final String messageId;
+  final String conversationId;
+  final String content;
+  final String createdAt;
+  final String userId;
+  final String reservedInt;
+  final String reservedText;
+  MessagesFt(
+      {@required this.messageId,
+      @required this.conversationId,
+      @required this.content,
+      @required this.createdAt,
+      @required this.userId,
+      @required this.reservedInt,
+      @required this.reservedText});
+  factory MessagesFt.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    return MessagesFt(
+      messageId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
+      conversationId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
+      content:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}content']),
+      createdAt: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      userId:
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      reservedInt: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}reserved_int']),
+      reservedText: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}reserved_text']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || messageId != null) {
+      map['message_id'] = Variable<String>(messageId);
+    }
+    if (!nullToAbsent || conversationId != null) {
+      map['conversation_id'] = Variable<String>(conversationId);
+    }
+    if (!nullToAbsent || content != null) {
+      map['content'] = Variable<String>(content);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      map['created_at'] = Variable<String>(createdAt);
+    }
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
+    if (!nullToAbsent || reservedInt != null) {
+      map['reserved_int'] = Variable<String>(reservedInt);
+    }
+    if (!nullToAbsent || reservedText != null) {
+      map['reserved_text'] = Variable<String>(reservedText);
+    }
+    return map;
+  }
+
+  MessagesFtsCompanion toCompanion(bool nullToAbsent) {
+    return MessagesFtsCompanion(
+      messageId: messageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(messageId),
+      conversationId: conversationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conversationId),
+      content: content == null && nullToAbsent
+          ? const Value.absent()
+          : Value(content),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      reservedInt: reservedInt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reservedInt),
+      reservedText: reservedText == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reservedText),
+    );
+  }
+
+  factory MessagesFt.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return MessagesFt(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      content: serializer.fromJson<String>(json['content']),
+      createdAt: serializer.fromJson<String>(json['created_at']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      reservedInt: serializer.fromJson<String>(json['reserved_int']),
+      reservedText: serializer.fromJson<String>(json['reserved_text']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'content': serializer.toJson<String>(content),
+      'created_at': serializer.toJson<String>(createdAt),
+      'user_id': serializer.toJson<String>(userId),
+      'reserved_int': serializer.toJson<String>(reservedInt),
+      'reserved_text': serializer.toJson<String>(reservedText),
+    };
+  }
+
+  MessagesFt copyWith(
+          {String messageId,
+          String conversationId,
+          String content,
+          String createdAt,
+          String userId,
+          String reservedInt,
+          String reservedText}) =>
+      MessagesFt(
+        messageId: messageId ?? this.messageId,
+        conversationId: conversationId ?? this.conversationId,
+        content: content ?? this.content,
+        createdAt: createdAt ?? this.createdAt,
+        userId: userId ?? this.userId,
+        reservedInt: reservedInt ?? this.reservedInt,
+        reservedText: reservedText ?? this.reservedText,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('MessagesFt(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('userId: $userId, ')
+          ..write('reservedInt: $reservedInt, ')
+          ..write('reservedText: $reservedText')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode,
+      $mrjc(
+          conversationId.hashCode,
+          $mrjc(
+              content.hashCode,
+              $mrjc(
+                  createdAt.hashCode,
+                  $mrjc(userId.hashCode,
+                      $mrjc(reservedInt.hashCode, reservedText.hashCode)))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is MessagesFt &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.userId == this.userId &&
+          other.reservedInt == this.reservedInt &&
+          other.reservedText == this.reservedText);
+}
+
+class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<String> content;
+  final Value<String> createdAt;
+  final Value<String> userId;
+  final Value<String> reservedInt;
+  final Value<String> reservedText;
+  const MessagesFtsCompanion({
+    this.messageId = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.content = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.reservedInt = const Value.absent(),
+    this.reservedText = const Value.absent(),
+  });
+  MessagesFtsCompanion.insert({
+    @required String messageId,
+    @required String conversationId,
+    @required String content,
+    @required String createdAt,
+    @required String userId,
+    @required String reservedInt,
+    @required String reservedText,
+  })  : messageId = Value(messageId),
+        conversationId = Value(conversationId),
+        content = Value(content),
+        createdAt = Value(createdAt),
+        userId = Value(userId),
+        reservedInt = Value(reservedInt),
+        reservedText = Value(reservedText);
+  static Insertable<MessagesFt> custom({
+    Expression<String> messageId,
+    Expression<String> conversationId,
+    Expression<String> content,
+    Expression<String> createdAt,
+    Expression<String> userId,
+    Expression<String> reservedInt,
+    Expression<String> reservedText,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (content != null) 'content': content,
+      if (createdAt != null) 'created_at': createdAt,
+      if (userId != null) 'user_id': userId,
+      if (reservedInt != null) 'reserved_int': reservedInt,
+      if (reservedText != null) 'reserved_text': reservedText,
+    });
+  }
+
+  MessagesFtsCompanion copyWith(
+      {Value<String> messageId,
+      Value<String> conversationId,
+      Value<String> content,
+      Value<String> createdAt,
+      Value<String> userId,
+      Value<String> reservedInt,
+      Value<String> reservedText}) {
+    return MessagesFtsCompanion(
+      messageId: messageId ?? this.messageId,
+      conversationId: conversationId ?? this.conversationId,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      userId: userId ?? this.userId,
+      reservedInt: reservedInt ?? this.reservedInt,
+      reservedText: reservedText ?? this.reservedText,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (reservedInt.present) {
+      map['reserved_int'] = Variable<String>(reservedInt.value);
+    }
+    if (reservedText.present) {
+      map['reserved_text'] = Variable<String>(reservedText.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessagesFtsCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('userId: $userId, ')
+          ..write('reservedInt: $reservedInt, ')
+          ..write('reservedText: $reservedText')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MessagesFts extends Table
+    with
+        TableInfo<MessagesFts, MessagesFt>,
+        VirtualTableInfo<MessagesFts, MessagesFt> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  MessagesFts(this._db, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  GeneratedTextColumn _messageId;
+  GeneratedTextColumn get messageId => _messageId ??= _constructMessageId();
+  GeneratedTextColumn _constructMessageId() {
+    return GeneratedTextColumn('message_id', $tableName, false,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  GeneratedTextColumn _conversationId;
+  GeneratedTextColumn get conversationId =>
+      _conversationId ??= _constructConversationId();
+  GeneratedTextColumn _constructConversationId() {
+    return GeneratedTextColumn('conversation_id', $tableName, false,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _contentMeta = const VerificationMeta('content');
+  GeneratedTextColumn _content;
+  GeneratedTextColumn get content => _content ??= _constructContent();
+  GeneratedTextColumn _constructContent() {
+    return GeneratedTextColumn('content', $tableName, false,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  GeneratedTextColumn _createdAt;
+  GeneratedTextColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedTextColumn _constructCreatedAt() {
+    return GeneratedTextColumn('created_at', $tableName, false,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  GeneratedTextColumn _userId;
+  GeneratedTextColumn get userId => _userId ??= _constructUserId();
+  GeneratedTextColumn _constructUserId() {
+    return GeneratedTextColumn('user_id', $tableName, false,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _reservedIntMeta =
+      const VerificationMeta('reservedInt');
+  GeneratedTextColumn _reservedInt;
+  GeneratedTextColumn get reservedInt =>
+      _reservedInt ??= _constructReservedInt();
+  GeneratedTextColumn _constructReservedInt() {
+    return GeneratedTextColumn('reserved_int', $tableName, false,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _reservedTextMeta =
+      const VerificationMeta('reservedText');
+  GeneratedTextColumn _reservedText;
+  GeneratedTextColumn get reservedText =>
+      _reservedText ??= _constructReservedText();
+  GeneratedTextColumn _constructReservedText() {
+    return GeneratedTextColumn('reserved_text', $tableName, false,
+        $customConstraints: '');
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [
+        messageId,
+        conversationId,
+        content,
+        createdAt,
+        userId,
+        reservedInt,
+        reservedText
+      ];
+  @override
+  MessagesFts get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'messages_fts';
+  @override
+  final String actualTableName = 'messages_fts';
+  @override
+  VerificationContext validateIntegrity(Insertable<MessagesFt> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id'], _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id'], _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content'], _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('reserved_int')) {
+      context.handle(
+          _reservedIntMeta,
+          reservedInt.isAcceptableOrUnknown(
+              data['reserved_int'], _reservedIntMeta));
+    } else if (isInserting) {
+      context.missing(_reservedIntMeta);
+    }
+    if (data.containsKey('reserved_text')) {
+      context.handle(
+          _reservedTextMeta,
+          reservedText.isAcceptableOrUnknown(
+              data['reserved_text'], _reservedTextMeta));
+    } else if (isInserting) {
+      context.missing(_reservedTextMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
+  @override
+  MessagesFt map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return MessagesFt.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  MessagesFts createAlias(String alias) {
+    return MessagesFts(_db, alias);
+  }
+
+  @override
+  bool get dontWriteConstraints => true;
+  @override
+  String get moduleAndArgs =>
+      'FTS5(message_id, conversation_id, content, created_at, user_id, reserved_int, reserved_text, tokenize=\'unicode61\')';
+}
+
 class MessagesHistoryData extends DataClass
     implements Insertable<MessagesHistoryData> {
   final String messageId;
@@ -10968,6 +11413,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   FloodMessages get floodMessages => _floodMessages ??= FloodMessages(this);
   Hyperlinks _hyperlinks;
   Hyperlinks get hyperlinks => _hyperlinks ??= Hyperlinks(this);
+  MessagesFts _messagesFts;
+  MessagesFts get messagesFts => _messagesFts ??= MessagesFts(this);
   MessagesHistory _messagesHistory;
   MessagesHistory get messagesHistory =>
       _messagesHistory ??= MessagesHistory(this);
@@ -11534,6 +11981,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         circles,
         floodMessages,
         hyperlinks,
+        messagesFts,
         messagesHistory,
         offsets,
         participantSession,
