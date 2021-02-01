@@ -83,7 +83,7 @@ class Database {
               UsersCompanion.insert(
                 userId: userId,
                 identityNumber: 'mockUserIdentityNumber$i',
-                relationship: 'STRANGER',
+                relationship: UserRelationship.stranger,
                 fullName: Value('mockUserFullName$i'),
                 avatarUrl: const Value('https://www.google.com/&safe=off'),
               ),

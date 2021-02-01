@@ -4009,7 +4009,7 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
 class User extends DataClass implements Insertable<User> {
   final String userId;
   final String identityNumber;
-  final String relationship;
+  final UserRelationship relationship;
   final String fullName;
   final String avatarUrl;
   final String phone;
@@ -4045,8 +4045,8 @@ class User extends DataClass implements Insertable<User> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       identityNumber: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}identity_number']),
-      relationship: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}relationship']),
+      relationship: Users.$converter0.mapToDart(stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}relationship'])),
       fullName: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
       avatarUrl: stringType
@@ -4079,7 +4079,8 @@ class User extends DataClass implements Insertable<User> {
       map['identity_number'] = Variable<String>(identityNumber);
     }
     if (!nullToAbsent || relationship != null) {
-      map['relationship'] = Variable<String>(relationship);
+      final converter = Users.$converter0;
+      map['relationship'] = Variable<String>(converter.mapToSql(relationship));
     }
     if (!nullToAbsent || fullName != null) {
       map['full_name'] = Variable<String>(fullName);
@@ -4159,7 +4160,7 @@ class User extends DataClass implements Insertable<User> {
     return User(
       userId: serializer.fromJson<String>(json['user_id']),
       identityNumber: serializer.fromJson<String>(json['identity_number']),
-      relationship: serializer.fromJson<String>(json['relationship']),
+      relationship: serializer.fromJson<UserRelationship>(json['relationship']),
       fullName: serializer.fromJson<String>(json['full_name']),
       avatarUrl: serializer.fromJson<String>(json['avatar_url']),
       phone: serializer.fromJson<String>(json['phone']),
@@ -4178,7 +4179,7 @@ class User extends DataClass implements Insertable<User> {
     return <String, dynamic>{
       'user_id': serializer.toJson<String>(userId),
       'identity_number': serializer.toJson<String>(identityNumber),
-      'relationship': serializer.toJson<String>(relationship),
+      'relationship': serializer.toJson<UserRelationship>(relationship),
       'full_name': serializer.toJson<String>(fullName),
       'avatar_url': serializer.toJson<String>(avatarUrl),
       'phone': serializer.toJson<String>(phone),
@@ -4195,7 +4196,7 @@ class User extends DataClass implements Insertable<User> {
   User copyWith(
           {String userId,
           String identityNumber,
-          String relationship,
+          UserRelationship relationship,
           String fullName,
           String avatarUrl,
           String phone,
@@ -4288,7 +4289,7 @@ class User extends DataClass implements Insertable<User> {
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> userId;
   final Value<String> identityNumber;
-  final Value<String> relationship;
+  final Value<UserRelationship> relationship;
   final Value<String> fullName;
   final Value<String> avatarUrl;
   final Value<String> phone;
@@ -4317,7 +4318,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   UsersCompanion.insert({
     @required String userId,
     @required String identityNumber,
-    @required String relationship,
+    @required UserRelationship relationship,
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -4366,7 +4367,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   UsersCompanion copyWith(
       {Value<String> userId,
       Value<String> identityNumber,
-      Value<String> relationship,
+      Value<UserRelationship> relationship,
       Value<String> fullName,
       Value<String> avatarUrl,
       Value<String> phone,
@@ -4404,7 +4405,9 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['identity_number'] = Variable<String>(identityNumber.value);
     }
     if (relationship.present) {
-      map['relationship'] = Variable<String>(relationship.value);
+      final converter = Users.$converter0;
+      map['relationship'] =
+          Variable<String>(converter.mapToSql(relationship.value));
     }
     if (fullName.present) {
       map['full_name'] = Variable<String>(fullName.value);
@@ -4613,14 +4616,7 @@ class Users extends Table with TableInfo<Users, User> {
     } else if (isInserting) {
       context.missing(_identityNumberMeta);
     }
-    if (data.containsKey('relationship')) {
-      context.handle(
-          _relationshipMeta,
-          relationship.isAcceptableOrUnknown(
-              data['relationship'], _relationshipMeta));
-    } else if (isInserting) {
-      context.missing(_relationshipMeta);
-    }
+    context.handle(_relationshipMeta, const VerificationResult.success());
     if (data.containsKey('full_name')) {
       context.handle(_fullNameMeta,
           fullName.isAcceptableOrUnknown(data['full_name'], _fullNameMeta));
@@ -4679,6 +4675,8 @@ class Users extends Table with TableInfo<Users, User> {
     return Users(_db, alias);
   }
 
+  static TypeConverter<UserRelationship, String> $converter0 =
+      const UserRelationshipConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
   @override
@@ -11118,7 +11116,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantUserId: row.readString('participantUserId'),
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
-        relationship: row.readString('relationship'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11182,7 +11181,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantUserId: row.readString('participantUserId'),
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
-        relationship: row.readString('relationship'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11245,7 +11245,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantUserId: row.readString('participantUserId'),
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
-        relationship: row.readString('relationship'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11309,7 +11310,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantUserId: row.readString('participantUserId'),
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
-        relationship: row.readString('relationship'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11361,7 +11363,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantUserId: row.readString('participantUserId'),
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
-        relationship: row.readString('relationship'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11496,7 +11499,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         biography: row.readString('biography'),
         fullName: row.readString('full_name'),
         avatarUrl: row.readString('avatar_url'),
-        relationship: row.readString('relationship'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11592,7 +11596,7 @@ class ConversationItem {
   final String participantUserId;
   final int mentionCount;
   final String mentions;
-  final String relationship;
+  final UserRelationship relationship;
   ConversationItem({
     this.conversationId,
     this.groupIconUrl,
@@ -12202,7 +12206,7 @@ class UserItem {
   final String biography;
   final String fullName;
   final String avatarUrl;
-  final String relationship;
+  final UserRelationship relationship;
   UserItem({
     this.userId,
     this.identityNumber,

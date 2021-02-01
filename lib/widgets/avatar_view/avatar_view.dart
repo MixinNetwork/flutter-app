@@ -42,13 +42,13 @@ class ConversationAvatarWidget extends StatelessWidget {
                 child: Builder(
                   builder: (context) => BlocConverter<AvatarCubit,
                       List<UserItem>, List<UserItem>>(
-                    // todo: relationship enum
-                    converter: (state) => conversation.category ==
-                            ConversationCategory.contact
-                        ? state
-                            .where((element) => element.relationship != 'ME')
-                            .toList()
-                        : state,
+                    converter: (state) =>
+                        conversation.category == ConversationCategory.contact
+                            ? state
+                                .where((element) =>
+                                    element.relationship != UserRelationship.me)
+                                .toList()
+                            : state,
                     builder: (context, state) =>
                         _AvatarPuzzlesWidget(state, size),
                   ),

@@ -4,13 +4,13 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 extension Conversation on ConversationItem {
   bool get isContactConversation =>
       category == ConversationCategory.contact &&
-      relationship == 'FRIEND' &&
+      relationship == UserRelationship.friend &&
       appId == null;
   bool get isGroupConversation => category == ConversationCategory.group;
   bool get isBotConversation =>
       category == ConversationCategory.contact && appId != null;
   bool get isStrangerConversation =>
       category == ConversationCategory.contact &&
-      relationship == 'STRANGER' &&
+      relationship == UserRelationship.stranger &&
       appId == null;
 }
