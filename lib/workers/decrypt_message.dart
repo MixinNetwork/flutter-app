@@ -191,6 +191,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
+      _attachmentUtil.downloadAttachment(message);
       await database.messagesDao.insert(message, selfId);
     } else if (data.category.isVideo) {
       String plain;
@@ -220,6 +221,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
+      _attachmentUtil.downloadAttachment(message);
       await database.messagesDao.insert(message, selfId);
     } else if (data.category.isData) {
       String plain;
@@ -245,6 +247,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.canceled);
+      _attachmentUtil.downloadAttachment(message);
       await database.messagesDao.insert(message, selfId);
     } else if (data.category.isAudio) {
       String plain;
@@ -271,6 +274,7 @@ class DecryptMessage extends Injector {
           status: messageStatus,
           createdAt: data.createdAt,
           mediaStatus: MediaStatus.pending);
+      _attachmentUtil.downloadAttachment(message);
       await database.messagesDao.insert(message, selfId);
     } else if (data.category.isSticker) {
       String plain;

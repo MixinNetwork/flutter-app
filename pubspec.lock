@@ -550,7 +550,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: a43ad7d2d3fcf35603d91f0cbbcef956041003b4
+      resolved-ref: "7d26e0ef234154b5f55a1b3770a09deddc03214e"
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"

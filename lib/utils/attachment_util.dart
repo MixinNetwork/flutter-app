@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
@@ -11,23 +12,29 @@ typedef void OnDownloadProgressCallback(int receivedBytes, int totalBytes);
 typedef void OnUploadProgressCallback(int sentBytes, int totalBytes);
 
 class AttachmentUtil {
-  AttachmentUtil(this.mediaPath) {
-    _client = HttpClient()
+  AttachmentUtil(this._client, this.mediaPath) {
+    _attachmentClient = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10)
       ..badCertificateCallback =
           ((X509Certificate cert, String host, int port) => true);
   }
 
   final String mediaPath;
-  HttpClient _client;
+  final Client _client;
+  HttpClient _attachmentClient;
 
-  void downloadAttachment(Message message) {
-    // todo url
-    _client
-        .getUrl(Uri.parse(''))
-        .then((HttpClientRequest request) => request.close())
-        .then((HttpClientResponse response) =>
-            response.pipe(_getAttachmentFile(message).openWrite()));
+  void downloadAttachment(Message message) async {
+    final response = await _client.attachmentApi.getAttachment(message.content);
+    if (response.data != null) {
+      await _attachmentClient
+          .getUrl(Uri.parse(response.data.viewUrl))
+          .then((HttpClientRequest request) => request.close())
+          .then((HttpClientResponse response) async {
+        final file = _getAttachmentFile(message);
+        await file.create(recursive: true);
+        await response.pipe(file.openWrite());
+      });
+    }
   }
 
   void uploadAttachment(Message message) {}
@@ -51,25 +58,23 @@ class AttachmentUtil {
     return p.join(mediaPath, 'Images', conversationId);
   }
 
-  // ignore: unused_element
   String _getVideosPath(String conversationId) {
     return p.join(mediaPath, 'Videos', conversationId);
   }
 
-  // ignore: unused_element
   String _getAudiosPath(String conversationId) {
     return p.join(mediaPath, 'Audios', conversationId);
   }
 
-  // ignore: unused_element
   String _getFilesPath(String conversationId) {
     return p.join(mediaPath, 'Files', conversationId);
   }
 
-  static Future<AttachmentUtil> init(String identityNumber) async {
+  static Future<AttachmentUtil> init(
+      Client client, String identityNumber) async {
     final documentDirectory = await getApplicationDocumentsDirectory();
     final mediaDirectory =
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
-    return AttachmentUtil(mediaDirectory.path);
+    return AttachmentUtil(client, mediaDirectory.path);
   }
 }
