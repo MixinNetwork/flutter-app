@@ -1,3 +1,4 @@
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -45,7 +46,13 @@ class InputContainer extends StatelessWidget {
             ActionButton(
               name: Resources.assetsImagesIcFilePng,
               color: actionColor,
-              onTap: () {},
+              onTap: () async {
+                final file = await openFile();
+                // todo send file
+                // ignore: avoid_print
+                print(
+                    'path: ${file.path}, name: ${file.name}, mimeType: ${file.mimeType}');
+              },
             ),
             const SizedBox(width: 6),
             HoverOverlay(

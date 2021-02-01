@@ -91,6 +91,8 @@ class ChatContainer extends StatelessWidget {
                     converter: (state) => state?.count ?? 9223372036854775807,
                     builder: (context, count) =>
                         ScrollablePositionedList.builder(
+                      key: Key(
+                          BlocProvider.of<MessageBloc>(context).conversationId),
                       initialScrollIndex:
                           BlocProvider.of<MessageBloc>(context).state.index,
                       initialAlignment:
