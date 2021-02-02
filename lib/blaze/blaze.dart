@@ -5,24 +5,24 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/constants.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/utils/enum_to_string.dart';
-import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../constants.dart';
+import '../db/database.dart';
+import '../db/mixin_database.dart';
+import '../enum/message_status.dart';
+import '../utils/enum_to_string.dart';
+import '../utils/load_Balancer_utils.dart';
 import 'blaze_message.dart';
 import 'vo/blaze_message_data.dart';
 
 class Blaze {
   Blaze(
-      this.selfId, this.sessionId, this.privateKey, this.database, this.client);
+      this.userId, this.sessionId, this.privateKey, this.database, this.client);
 
-  final String selfId;
+  final String userId;
   final String sessionId;
   final String privateKey;
   final Database database;
@@ -32,7 +32,7 @@ class Blaze {
 
   void connect() {
     final token = signAuthTokenWithEdDSA(
-        selfId, sessionId, privateKey, scp, 'GET', '/', '');
+        userId, sessionId, privateKey, scp, 'GET', '/', '');
     _connect(token);
   }
 
@@ -50,7 +50,7 @@ class Blaze {
         updateRemoteMessageStatus(data['messageId'], MessageStatus.delivered);
       } else if (blazeMessage.action == createMessage) {
         final messageData = BlazeMessageData.fromJson(data);
-        if (messageData.userId == selfId && messageData.category == null) {
+        if (messageData.userId == userId && messageData.category == null) {
           updateRemoteMessageStatus(
               messageData.messageId, MessageStatus.delivered);
         } else {
