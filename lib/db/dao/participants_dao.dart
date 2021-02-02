@@ -1,4 +1,5 @@
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
 
 part 'participants_dao.g.dart';
@@ -32,4 +33,14 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<UserItem> participantsAvatar(String conversationId) =>
       db.participantsAvatar(conversationId);
+
+  void updateParticipantRole(String conversationId, String participantId, ParticipantRole role) async{
+    await db.customUpdate('UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
+        variables: [
+          Variable<ParticipantRole>(role),
+          Variable.withString(conversationId),
+          Variable.withString(participantId)
+        ]);
+
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_app/enum/system_conversation_action.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 part 'system_conversation_message.g.dart';
 
@@ -18,7 +19,7 @@ class SystemConversationMessage {
   @JsonKey(name: 'user_id')
   String userId;
   @JsonKey(name: 'role')
-  String role;
+  ParticipantRole role;
 
   Map<String, dynamic> toJson() => _$SystemConversationMessageToJson(this);
 }

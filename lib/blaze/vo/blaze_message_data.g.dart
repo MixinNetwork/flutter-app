@@ -13,7 +13,7 @@ BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
     json['message_id'] as String,
     _$enumDecode(_$MessageCategoryEnumMap, json['category']),
     json['data'] as String,
-    json['status'] as String,
+    _$enumDecode(_$MessageStatusEnumMap, json['status']),
     DateTime.parse(json['created_at'] as String),
     DateTime.parse(json['updated_at'] as String),
     json['source'] as String,
@@ -30,7 +30,7 @@ Map<String, dynamic> _$BlazeMessageDataToJson(BlazeMessageData instance) =>
       'message_id': instance.messageId,
       'category': _$MessageCategoryEnumMap[instance.category],
       'data': instance.data,
-      'status': instance.status,
+      'status': _$MessageStatusEnumMap[instance.status],
       'created_at': instance.createdAt.toIso8601String(),
       'updated_at': instance.updatedAt.toIso8601String(),
       'source': instance.source,
@@ -121,4 +121,13 @@ const _$MessageCategoryEnumMap = {
   MessageCategory.encryptedLive: 'ENCRYPTED_LIVE',
   MessageCategory.encryptedPost: 'ENCRYPTED_POST',
   MessageCategory.encryptedLocation: 'ENCRYPTED_LOCATION',
+};
+
+const _$MessageStatusEnumMap = {
+  MessageStatus.sending: 'sending',
+  MessageStatus.sent: 'sent',
+  MessageStatus.delivered: 'delivered',
+  MessageStatus.read: 'read',
+  MessageStatus.failed: 'failed',
+  MessageStatus.unknown: 'unknown',
 };

@@ -12,7 +12,7 @@ SystemConversationMessage _$SystemConversationMessageFromJson(
     _$enumDecode(_$SystemConversationActionEnumMap, json['action']),
     json['participant_id'] as String,
     json['user_id'] as String,
-    json['role'] as String,
+    _$enumDecodeNullable(_$ParticipantRoleEnumMap, json['role']),
   );
 }
 
@@ -22,7 +22,7 @@ Map<String, dynamic> _$SystemConversationMessageToJson(
       'action': _$SystemConversationActionEnumMap[instance.action],
       'participant_id': instance.participantId,
       'user_id': instance.userId,
-      'role': instance.role,
+      'role': _$ParticipantRoleEnumMap[instance.role],
     };
 
 T _$enumDecode<T>(
@@ -54,4 +54,20 @@ const _$SystemConversationActionEnumMap = {
   SystemConversationAction.create: 'create',
   SystemConversationAction.update: 'update',
   SystemConversationAction.role: 'role',
+};
+
+T _$enumDecodeNullable<T>(
+  Map<T, dynamic> enumValues,
+  dynamic source, {
+  T unknownValue,
+}) {
+  if (source == null) {
+    return null;
+  }
+  return _$enumDecode<T>(enumValues, source, unknownValue: unknownValue);
+}
+
+const _$ParticipantRoleEnumMap = {
+  ParticipantRole.owner: 'owner',
+  ParticipantRole.admin: 'admin',
 };

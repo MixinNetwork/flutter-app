@@ -21,18 +21,25 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/enum/system_circle_action.dart';
+import 'package:flutter_app/enum/system_conversation_action.dart';
+import 'package:flutter_app/enum/system_user_action.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_app/db/mixin_database.dart' as db;
 
 import 'injector.dart';
 
 class DecryptMessage extends Injector {
-  DecryptMessage(String selfId, Database database, Client client, this._attachmentUtil) : super(selfId, database, client);
+  DecryptMessage(
+      String userId, Database database, Client client, this._attachmentUtil)
+      : super(userId, database, client);
 
   String _conversationId;
+
   // ignore: unused_field
   final AttachmentUtil _attachmentUtil;
 
@@ -399,17 +406,86 @@ class DecryptMessage extends Injector {
     _updateRemoteMessageStatus(data.messageId, messageStatus);
   }
 
-  void _processSystemConversationMessage(BlazeMessageData data, SystemConversationMessage systemMessage) {
-
+  void _processSystemConversationMessage(
+      BlazeMessageData data, SystemConversationMessage systemMessage) async {
+    if (systemMessage.action != SystemConversationAction.update) {
+      syncConversion(data.conversationId);
+    }
+    final userId = systemMessage.userId ?? data.userId;
+    if (userId == systemUser &&
+        (await database.userDao.findUserById(userId)) == null) {
+      // todo UserRelationship
+      await database.userDao.insert(db.User(
+          userId: systemUser,
+          identityNumber: '0',
+          relationship: UserRelationship.friend));
+    }
+    final message = db.Message(
+        messageId: data.messageId,
+        userId: userId,
+        conversationId: data.conversationId,
+        category: data.category,
+        content: '',
+        createdAt: data.createdAt,
+        status: data.status,
+        action: EnumToString.convertToString(systemMessage.action),
+        participantId: systemMessage.participantId);
+    if (systemMessage.action == SystemConversationAction.add ||
+        systemMessage.action == SystemConversationAction.join) {
+      // database.participantsDao.insert(db.Participant(conversationId: data.conversationId,userId: systemMessage.participantId, role: '' ,createdAt: data.createdAt));
+      // todo refresh conversation and signal key
+      if(systemMessage.participantId == selfId) {
+        syncConversion(data.conversationId);
+        // } else if (systemMessage.userId != selfId && no signal key) {
+      }else{
+        // syncSession();
+        // syncUser();
+      }
+    } else if (systemMessage.action == SystemConversationAction.remove ||
+        systemMessage.action == SystemConversationAction.exit) {
+      if (systemMessage.participantId == selfId) {
+        database.conversationDao.updateConversationStatusById(
+            data.conversationId, ConversationStatus.quit);
+      }
+      // todo remove signal key
+    } else if (systemMessage.action == SystemConversationAction.update) {
+      if (systemMessage.participantId != null) {
+        await syncUser(systemMessage.userId);
+      } else {
+        syncConversion(data.conversationId);
+      }
+    } else if (systemMessage.action == SystemConversationAction.create) {
+    } else if (systemMessage.action == SystemConversationAction.role) {
+      database.participantsDao.updateParticipantRole(
+          data.conversationId, systemMessage.participantId, systemMessage.role);
+    }
+    await database.messagesDao.insert(message, selfId);
   }
 
-  void _processSystemUserMessage(SystemUserMessage systemMessage) {}
+  void _processSystemUserMessage(SystemUserMessage systemMessage) {
+    if (systemMessage.action == SystemUserAction.update) {
+      syncUser(systemMessage.userId);
+    }
+  }
 
-  void _processSystemCircleMessage(BlazeMessageData data, SystemCircleMessage systemMessage) {}
+  void _processSystemCircleMessage(
+      BlazeMessageData data, SystemCircleMessage systemMessage) {
+    if (systemMessage.action == SystemCircleAction.create ||
+        systemMessage.action == SystemCircleAction.update) {
+      // todo refresh circle
+    } else if (systemMessage.action == SystemCircleAction.add) {
+    } else if (systemMessage.action == SystemCircleAction.remove) {
+    } else if (systemMessage.action == SystemCircleAction.delete) {}
+  }
 
-  void _processSystemSnapshotMessage(BlazeMessageData data, SnapshotMessage systemSnapshot) {}
+  void _processSystemSnapshotMessage(
+      BlazeMessageData data, SnapshotMessage systemSnapshot) {
+    // todo process snapshot message
+  }
 
-  void _processSystemSessionMessage(SystemSessionMessage systemSession) {}
+  void _processSystemSessionMessage(SystemSessionMessage systemSession) {
+    // todo only run mobile client
+  }
 
   void _updateRemoteMessageStatus(messageId, MessageStatus status) {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
@@ -442,4 +518,6 @@ class DecryptMessage extends Injector {
       // todo refresh conversion
     }
   }
+
+  void syncSession() {}
 }

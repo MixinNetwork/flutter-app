@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
-
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' show ConversationStatus;
 part 'conversations_dao.g.dart';
 
 @UseDao(tables: [Conversations])
@@ -93,4 +93,13 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Future<int> deleteConversation(String conversationId) => (delete(db.conversations)
           ..where((tbl) => tbl.conversationId.equals(conversationId)))
         .go();
+
+  void updateConversationStatusById(String conversationId, ConversationStatus status)async {
+    await db.customUpdate(
+        'UPDATE conversations SET status = ? WHERE conversation_id = ?',
+        variables: [
+          Variable.withString(conversationId),
+          Variable<ConversationStatus>(status)
+        ]);
+  }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'blaze_message_data.g.dart';
@@ -34,7 +35,7 @@ class BlazeMessageData {
   @JsonKey(name: 'data', nullable: false)
   String data;
   @JsonKey(name: 'status', nullable: false)
-  String status;
+  MessageStatus status;
   @JsonKey(name: 'created_at', nullable: false)
   DateTime createdAt;
   @JsonKey(name: 'updated_at', nullable: false)

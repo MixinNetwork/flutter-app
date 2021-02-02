@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-enum SystemUserAction {
+enum SystemSessionAction {
   @JsonValue('PROVISION')
   provision,
   @JsonValue('DESTROY')
