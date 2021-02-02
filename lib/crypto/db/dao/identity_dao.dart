@@ -1,5 +1,6 @@
-import '../signal_database.dart';
 import 'package:moor/moor.dart';
+
+import '../signal_database.dart';
 
 part 'identity_dao.g.dart';
 

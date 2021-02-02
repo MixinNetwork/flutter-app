@@ -33,15 +33,14 @@ class Job extends DataClass implements Insertable<Job> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final intType = db.typeSystem.forDartType<int>();
     return Job(
       jobId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}job_id']),
       action:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}action']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: Jobs.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
       orderId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}order_id']),
       priority:
@@ -68,7 +67,8 @@ class Job extends DataClass implements Insertable<Job> {
       map['action'] = Variable<String>(action);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Jobs.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || orderId != null) {
       map['order_id'] = Variable<int>(orderId);
@@ -276,7 +276,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
   static Insertable<Job> custom({
     Expression<String> jobId,
     Expression<String> action,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
     Expression<int> orderId,
     Expression<int> priority,
     Expression<String> userId,
@@ -334,7 +334,8 @@ class JobsCompanion extends UpdateCompanion<Job> {
       map['action'] = Variable<String>(action.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Jobs.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (orderId.present) {
       map['order_id'] = Variable<int>(orderId.value);
@@ -399,10 +400,10 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -504,12 +505,7 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
     } else if (isInserting) {
       context.missing(_actionMeta);
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('order_id')) {
       context.handle(_orderIdMeta,
           orderId.isAcceptableOrUnknown(data['order_id'], _orderIdMeta));
@@ -564,6 +560,7 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
     return Jobs(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(job_id)'];
   @override
@@ -582,6 +579,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   final DateTime createdAt;
   final DateTime pinTime;
   final String lastMessageId;
+  final DateTime lastMessageCreatedAt;
   final String lastReadMessageId;
   final int unseenMessageCount;
   final ConversationStatus status;
@@ -599,6 +597,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       @required this.createdAt,
       this.pinTime,
       this.lastMessageId,
+      this.lastMessageCreatedAt,
       this.lastReadMessageId,
       this.unseenMessageCount,
       @required this.status,
@@ -608,7 +607,6 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final intType = db.typeSystem.forDartType<int>();
     return Conversation(
       conversationId: stringType
@@ -626,22 +624,25 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           .mapFromDatabaseResponse(data['${effectivePrefix}code_url']),
       payType: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}pay_type']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      pinTime: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}pin_time']),
+      createdAt: Conversations.$converter1.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      pinTime: Conversations.$converter2.mapToDart(
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}pin_time'])),
       lastMessageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}last_message_id']),
+      lastMessageCreatedAt: Conversations.$converter3.mapToDart(
+          intType.mapFromDatabaseResponse(
+              data['${effectivePrefix}last_message_created_at'])),
       lastReadMessageId: stringType.mapFromDatabaseResponse(
           data['${effectivePrefix}last_read_message_id']),
       unseenMessageCount: intType.mapFromDatabaseResponse(
           data['${effectivePrefix}unseen_message_count']),
-      status: Conversations.$converter1.mapToDart(
+      status: Conversations.$converter4.mapToDart(
           intType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
       draft:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}draft']),
-      muteUntil: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until']),
+      muteUntil: Conversations.$converter5.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
     );
   }
   @override
@@ -673,13 +674,20 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['pay_type'] = Variable<String>(payType);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Conversations.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || pinTime != null) {
-      map['pin_time'] = Variable<DateTime>(pinTime);
+      final converter = Conversations.$converter2;
+      map['pin_time'] = Variable<int>(converter.mapToSql(pinTime));
     }
     if (!nullToAbsent || lastMessageId != null) {
       map['last_message_id'] = Variable<String>(lastMessageId);
+    }
+    if (!nullToAbsent || lastMessageCreatedAt != null) {
+      final converter = Conversations.$converter3;
+      map['last_message_created_at'] =
+          Variable<int>(converter.mapToSql(lastMessageCreatedAt));
     }
     if (!nullToAbsent || lastReadMessageId != null) {
       map['last_read_message_id'] = Variable<String>(lastReadMessageId);
@@ -688,14 +696,15 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       map['unseen_message_count'] = Variable<int>(unseenMessageCount);
     }
     if (!nullToAbsent || status != null) {
-      final converter = Conversations.$converter1;
+      final converter = Conversations.$converter4;
       map['status'] = Variable<int>(converter.mapToSql(status));
     }
     if (!nullToAbsent || draft != null) {
       map['draft'] = Variable<String>(draft);
     }
     if (!nullToAbsent || muteUntil != null) {
-      map['mute_until'] = Variable<DateTime>(muteUntil);
+      final converter = Conversations.$converter5;
+      map['mute_until'] = Variable<int>(converter.mapToSql(muteUntil));
     }
     return map;
   }
@@ -733,6 +742,9 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       lastMessageId: lastMessageId == null && nullToAbsent
           ? const Value.absent()
           : Value(lastMessageId),
+      lastMessageCreatedAt: lastMessageCreatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastMessageCreatedAt),
       lastReadMessageId: lastReadMessageId == null && nullToAbsent
           ? const Value.absent()
           : Value(lastReadMessageId),
@@ -764,6 +776,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
       pinTime: serializer.fromJson<DateTime>(json['pin_time']),
       lastMessageId: serializer.fromJson<String>(json['last_message_id']),
+      lastMessageCreatedAt:
+          serializer.fromJson<DateTime>(json['last_message_created_at']),
       lastReadMessageId:
           serializer.fromJson<String>(json['last_read_message_id']),
       unseenMessageCount:
@@ -788,6 +802,8 @@ class Conversation extends DataClass implements Insertable<Conversation> {
       'created_at': serializer.toJson<DateTime>(createdAt),
       'pin_time': serializer.toJson<DateTime>(pinTime),
       'last_message_id': serializer.toJson<String>(lastMessageId),
+      'last_message_created_at':
+          serializer.toJson<DateTime>(lastMessageCreatedAt),
       'last_read_message_id': serializer.toJson<String>(lastReadMessageId),
       'unseen_message_count': serializer.toJson<int>(unseenMessageCount),
       'status': serializer.toJson<ConversationStatus>(status),
@@ -808,6 +824,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           DateTime createdAt,
           DateTime pinTime,
           String lastMessageId,
+          DateTime lastMessageCreatedAt,
           String lastReadMessageId,
           int unseenMessageCount,
           ConversationStatus status,
@@ -825,6 +842,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
         createdAt: createdAt ?? this.createdAt,
         pinTime: pinTime ?? this.pinTime,
         lastMessageId: lastMessageId ?? this.lastMessageId,
+        lastMessageCreatedAt: lastMessageCreatedAt ?? this.lastMessageCreatedAt,
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         unseenMessageCount: unseenMessageCount ?? this.unseenMessageCount,
         status: status ?? this.status,
@@ -845,6 +863,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           ..write('createdAt: $createdAt, ')
           ..write('pinTime: $pinTime, ')
           ..write('lastMessageId: $lastMessageId, ')
+          ..write('lastMessageCreatedAt: $lastMessageCreatedAt, ')
           ..write('lastReadMessageId: $lastReadMessageId, ')
           ..write('unseenMessageCount: $unseenMessageCount, ')
           ..write('status: $status, ')
@@ -878,16 +897,20 @@ class Conversation extends DataClass implements Insertable<Conversation> {
                                           $mrjc(
                                               lastMessageId.hashCode,
                                               $mrjc(
-                                                  lastReadMessageId.hashCode,
+                                                  lastMessageCreatedAt.hashCode,
                                                   $mrjc(
-                                                      unseenMessageCount
+                                                      lastReadMessageId
                                                           .hashCode,
                                                       $mrjc(
-                                                          status.hashCode,
+                                                          unseenMessageCount
+                                                              .hashCode,
                                                           $mrjc(
-                                                              draft.hashCode,
-                                                              muteUntil
-                                                                  .hashCode))))))))))))))));
+                                                              status.hashCode,
+                                                              $mrjc(
+                                                                  draft
+                                                                      .hashCode,
+                                                                  muteUntil
+                                                                      .hashCode)))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -903,6 +926,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
           other.createdAt == this.createdAt &&
           other.pinTime == this.pinTime &&
           other.lastMessageId == this.lastMessageId &&
+          other.lastMessageCreatedAt == this.lastMessageCreatedAt &&
           other.lastReadMessageId == this.lastReadMessageId &&
           other.unseenMessageCount == this.unseenMessageCount &&
           other.status == this.status &&
@@ -922,6 +946,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
   final Value<DateTime> createdAt;
   final Value<DateTime> pinTime;
   final Value<String> lastMessageId;
+  final Value<DateTime> lastMessageCreatedAt;
   final Value<String> lastReadMessageId;
   final Value<int> unseenMessageCount;
   final Value<ConversationStatus> status;
@@ -939,6 +964,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     this.createdAt = const Value.absent(),
     this.pinTime = const Value.absent(),
     this.lastMessageId = const Value.absent(),
+    this.lastMessageCreatedAt = const Value.absent(),
     this.lastReadMessageId = const Value.absent(),
     this.unseenMessageCount = const Value.absent(),
     this.status = const Value.absent(),
@@ -957,6 +983,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     @required DateTime createdAt,
     this.pinTime = const Value.absent(),
     this.lastMessageId = const Value.absent(),
+    this.lastMessageCreatedAt = const Value.absent(),
     this.lastReadMessageId = const Value.absent(),
     this.unseenMessageCount = const Value.absent(),
     @required ConversationStatus status,
@@ -974,14 +1001,15 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
     Expression<String> announcement,
     Expression<String> codeUrl,
     Expression<String> payType,
-    Expression<DateTime> createdAt,
-    Expression<DateTime> pinTime,
+    Expression<int> createdAt,
+    Expression<int> pinTime,
     Expression<String> lastMessageId,
+    Expression<int> lastMessageCreatedAt,
     Expression<String> lastReadMessageId,
     Expression<int> unseenMessageCount,
     Expression<int> status,
     Expression<String> draft,
-    Expression<DateTime> muteUntil,
+    Expression<int> muteUntil,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -995,6 +1023,8 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       if (createdAt != null) 'created_at': createdAt,
       if (pinTime != null) 'pin_time': pinTime,
       if (lastMessageId != null) 'last_message_id': lastMessageId,
+      if (lastMessageCreatedAt != null)
+        'last_message_created_at': lastMessageCreatedAt,
       if (lastReadMessageId != null) 'last_read_message_id': lastReadMessageId,
       if (unseenMessageCount != null)
         'unseen_message_count': unseenMessageCount,
@@ -1016,6 +1046,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       Value<DateTime> createdAt,
       Value<DateTime> pinTime,
       Value<String> lastMessageId,
+      Value<DateTime> lastMessageCreatedAt,
       Value<String> lastReadMessageId,
       Value<int> unseenMessageCount,
       Value<ConversationStatus> status,
@@ -1033,6 +1064,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       createdAt: createdAt ?? this.createdAt,
       pinTime: pinTime ?? this.pinTime,
       lastMessageId: lastMessageId ?? this.lastMessageId,
+      lastMessageCreatedAt: lastMessageCreatedAt ?? this.lastMessageCreatedAt,
       lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
       unseenMessageCount: unseenMessageCount ?? this.unseenMessageCount,
       status: status ?? this.status,
@@ -1070,13 +1102,20 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['pay_type'] = Variable<String>(payType.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Conversations.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (pinTime.present) {
-      map['pin_time'] = Variable<DateTime>(pinTime.value);
+      final converter = Conversations.$converter2;
+      map['pin_time'] = Variable<int>(converter.mapToSql(pinTime.value));
     }
     if (lastMessageId.present) {
       map['last_message_id'] = Variable<String>(lastMessageId.value);
+    }
+    if (lastMessageCreatedAt.present) {
+      final converter = Conversations.$converter3;
+      map['last_message_created_at'] =
+          Variable<int>(converter.mapToSql(lastMessageCreatedAt.value));
     }
     if (lastReadMessageId.present) {
       map['last_read_message_id'] = Variable<String>(lastReadMessageId.value);
@@ -1085,14 +1124,15 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
       map['unseen_message_count'] = Variable<int>(unseenMessageCount.value);
     }
     if (status.present) {
-      final converter = Conversations.$converter1;
+      final converter = Conversations.$converter4;
       map['status'] = Variable<int>(converter.mapToSql(status.value));
     }
     if (draft.present) {
       map['draft'] = Variable<String>(draft.value);
     }
     if (muteUntil.present) {
-      map['mute_until'] = Variable<DateTime>(muteUntil.value);
+      final converter = Conversations.$converter5;
+      map['mute_until'] = Variable<int>(converter.mapToSql(muteUntil.value));
     }
     return map;
   }
@@ -1111,6 +1151,7 @@ class ConversationsCompanion extends UpdateCompanion<Conversation> {
           ..write('createdAt: $createdAt, ')
           ..write('pinTime: $pinTime, ')
           ..write('lastMessageId: $lastMessageId, ')
+          ..write('lastMessageCreatedAt: $lastMessageCreatedAt, ')
           ..write('lastReadMessageId: $lastReadMessageId, ')
           ..write('unseenMessageCount: $unseenMessageCount, ')
           ..write('status: $status, ')
@@ -1194,18 +1235,18 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
-  GeneratedDateTimeColumn _pinTime;
-  GeneratedDateTimeColumn get pinTime => _pinTime ??= _constructPinTime();
-  GeneratedDateTimeColumn _constructPinTime() {
-    return GeneratedDateTimeColumn('pin_time', $tableName, true,
+  GeneratedIntColumn _pinTime;
+  GeneratedIntColumn get pinTime => _pinTime ??= _constructPinTime();
+  GeneratedIntColumn _constructPinTime() {
+    return GeneratedIntColumn('pin_time', $tableName, true,
         $customConstraints: '');
   }
 
@@ -1216,6 +1257,16 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
       _lastMessageId ??= _constructLastMessageId();
   GeneratedTextColumn _constructLastMessageId() {
     return GeneratedTextColumn('last_message_id', $tableName, true,
+        $customConstraints: '');
+  }
+
+  final VerificationMeta _lastMessageCreatedAtMeta =
+      const VerificationMeta('lastMessageCreatedAt');
+  GeneratedIntColumn _lastMessageCreatedAt;
+  GeneratedIntColumn get lastMessageCreatedAt =>
+      _lastMessageCreatedAt ??= _constructLastMessageCreatedAt();
+  GeneratedIntColumn _constructLastMessageCreatedAt() {
+    return GeneratedIntColumn('last_message_created_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -1256,10 +1307,10 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   }
 
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  GeneratedDateTimeColumn _muteUntil;
-  GeneratedDateTimeColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
-  GeneratedDateTimeColumn _constructMuteUntil() {
-    return GeneratedDateTimeColumn('mute_until', $tableName, true,
+  GeneratedIntColumn _muteUntil;
+  GeneratedIntColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
+  GeneratedIntColumn _constructMuteUntil() {
+    return GeneratedIntColumn('mute_until', $tableName, true,
         $customConstraints: '');
   }
 
@@ -1276,6 +1327,7 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         createdAt,
         pinTime,
         lastMessageId,
+        lastMessageCreatedAt,
         lastReadMessageId,
         unseenMessageCount,
         status,
@@ -1328,22 +1380,16 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
       context.handle(_payTypeMeta,
           payType.isAcceptableOrUnknown(data['pay_type'], _payTypeMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('pin_time')) {
-      context.handle(_pinTimeMeta,
-          pinTime.isAcceptableOrUnknown(data['pin_time'], _pinTimeMeta));
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_pinTimeMeta, const VerificationResult.success());
     if (data.containsKey('last_message_id')) {
       context.handle(
           _lastMessageIdMeta,
           lastMessageId.isAcceptableOrUnknown(
               data['last_message_id'], _lastMessageIdMeta));
     }
+    context.handle(
+        _lastMessageCreatedAtMeta, const VerificationResult.success());
     if (data.containsKey('last_read_message_id')) {
       context.handle(
           _lastReadMessageIdMeta,
@@ -1361,10 +1407,7 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
       context.handle(
           _draftMeta, draft.isAcceptableOrUnknown(data['draft'], _draftMeta));
     }
-    if (data.containsKey('mute_until')) {
-      context.handle(_muteUntilMeta,
-          muteUntil.isAcceptableOrUnknown(data['mute_until'], _muteUntilMeta));
-    }
+    context.handle(_muteUntilMeta, const VerificationResult.success());
     return context;
   }
 
@@ -1383,8 +1426,12 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
 
   static TypeConverter<ConversationCategory, String> $converter0 =
       const ConversationCategoryTypeConverter();
-  static TypeConverter<ConversationStatus, int> $converter1 =
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter3 = const MillisDateConverter();
+  static TypeConverter<ConversationStatus, int> $converter4 =
       const ConversationStatusTypeConverter();
+  static TypeConverter<DateTime, int> $converter5 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(conversation_id)'];
   @override
@@ -1753,7 +1800,6 @@ class Message extends DataClass implements Insertable<Message> {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Message(
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
@@ -1789,8 +1835,8 @@ class Message extends DataClass implements Insertable<Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}media_status'])),
       status: Messages.$converter2.mapToDart(
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: Messages.$converter3.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
       action:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}action']),
       participantId: stringType
@@ -1874,7 +1920,8 @@ class Message extends DataClass implements Insertable<Message> {
       map['status'] = Variable<String>(converter.mapToSql(status));
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Messages.$converter3;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || action != null) {
       map['action'] = Variable<String>(action);
@@ -2376,7 +2423,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     Expression<String> mediaDigest,
     Expression<String> mediaStatus,
     Expression<String> status,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
     Expression<String> action,
     Expression<String> participantId,
     Expression<String> snapshotId,
@@ -2548,7 +2595,8 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       map['status'] = Variable<String>(converter.mapToSql(status.value));
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Messages.$converter3;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (action.present) {
       map['action'] = Variable<String>(action.value);
@@ -2780,10 +2828,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -3016,12 +3064,7 @@ class Messages extends Table with TableInfo<Messages, Message> {
     }
     context.handle(_mediaStatusMeta, const VerificationResult.success());
     context.handle(_statusMeta, const VerificationResult.success());
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('action')) {
       context.handle(_actionMeta,
           action.isAcceptableOrUnknown(data['action'], _actionMeta));
@@ -3104,6 +3147,7 @@ class Messages extends Table with TableInfo<Messages, Message> {
       const MediaStatusTypeConverter();
   static TypeConverter<MessageStatus, String> $converter2 =
       const MessageStatusTypeConverter();
+  static TypeConverter<DateTime, int> $converter3 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY(message_id)',
@@ -3127,7 +3171,7 @@ class Participant extends DataClass implements Insertable<Participant> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return Participant(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
@@ -3135,8 +3179,8 @@ class Participant extends DataClass implements Insertable<Participant> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       role: Participants.$converter0.mapToDart(
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}role'])),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: Participants.$converter1.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
     );
   }
   @override
@@ -3153,7 +3197,8 @@ class Participant extends DataClass implements Insertable<Participant> {
       map['role'] = Variable<String>(converter.mapToSql(role));
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Participants.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     return map;
   }
@@ -3251,7 +3296,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     Expression<String> conversationId,
     Expression<String> userId,
     Expression<String> role,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -3288,7 +3333,8 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       map['role'] = Variable<String>(converter.mapToSql(role.value));
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Participants.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     return map;
   }
@@ -3336,10 +3382,10 @@ class Participants extends Table with TableInfo<Participants, Participant> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -3372,12 +3418,7 @@ class Participants extends Table with TableInfo<Participants, Participant> {
       context.missing(_userIdMeta);
     }
     context.handle(_roleMeta, const VerificationResult.success());
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -3396,6 +3437,7 @@ class Participants extends Table with TableInfo<Participants, Participant> {
 
   static TypeConverter<ParticipantRole, String> $converter0 =
       const ParticipantRoleConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY(conversation_id,user_id)',
@@ -3433,7 +3475,6 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     final intType = db.typeSystem.forDartType<int>();
     return Snapshot(
       snapshotId: stringType
@@ -3443,8 +3484,8 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_id']),
       amount:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}amount']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: Snapshots.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
       opponentId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}opponent_id']),
       transactionHash: stringType
@@ -3474,7 +3515,8 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
       map['amount'] = Variable<String>(amount);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Snapshots.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || opponentId != null) {
       map['opponent_id'] = Variable<String>(opponentId);
@@ -3692,7 +3734,7 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
     Expression<String> type,
     Expression<String> assetId,
     Expression<String> amount,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
     Expression<String> opponentId,
     Expression<String> transactionHash,
     Expression<String> sender,
@@ -3758,7 +3800,8 @@ class SnapshotsCompanion extends UpdateCompanion<Snapshot> {
       map['amount'] = Variable<String>(amount.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Snapshots.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (opponentId.present) {
       map['opponent_id'] = Variable<String>(opponentId.value);
@@ -3837,10 +3880,10 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -3947,12 +3990,7 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
     } else if (isInserting) {
       context.missing(_amountMeta);
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     if (data.containsKey('opponent_id')) {
       context.handle(
           _opponentIdMeta,
@@ -3999,6 +4037,7 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
     return Snapshots(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(snapshot_id)'];
   @override
@@ -4038,7 +4077,6 @@ class User extends DataClass implements Insertable<User> {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return User(
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
@@ -4054,10 +4092,10 @@ class User extends DataClass implements Insertable<User> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}phone']),
       isVerified: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      muteUntil: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until']),
+      createdAt: Users.$converter1.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      muteUntil: Users.$converter2.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
       hasPin:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
       appId:
@@ -4094,10 +4132,12 @@ class User extends DataClass implements Insertable<User> {
       map['is_verified'] = Variable<int>(isVerified);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Users.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || muteUntil != null) {
-      map['mute_until'] = Variable<DateTime>(muteUntil);
+      final converter = Users.$converter2;
+      map['mute_until'] = Variable<int>(converter.mapToSql(muteUntil));
     }
     if (!nullToAbsent || hasPin != null) {
       map['has_pin'] = Variable<int>(hasPin);
@@ -4339,8 +4379,8 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String> avatarUrl,
     Expression<String> phone,
     Expression<int> isVerified,
-    Expression<DateTime> createdAt,
-    Expression<DateTime> muteUntil,
+    Expression<int> createdAt,
+    Expression<int> muteUntil,
     Expression<int> hasPin,
     Expression<String> appId,
     Expression<String> biography,
@@ -4421,10 +4461,12 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['is_verified'] = Variable<int>(isVerified.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Users.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (muteUntil.present) {
-      map['mute_until'] = Variable<DateTime>(muteUntil.value);
+      final converter = Users.$converter2;
+      map['mute_until'] = Variable<int>(converter.mapToSql(muteUntil.value));
     }
     if (hasPin.present) {
       map['has_pin'] = Variable<int>(hasPin.value);
@@ -4527,18 +4569,18 @@ class Users extends Table with TableInfo<Users, User> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, true,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, true,
         $customConstraints: '');
   }
 
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  GeneratedDateTimeColumn _muteUntil;
-  GeneratedDateTimeColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
-  GeneratedDateTimeColumn _constructMuteUntil() {
-    return GeneratedDateTimeColumn('mute_until', $tableName, true,
+  GeneratedIntColumn _muteUntil;
+  GeneratedIntColumn get muteUntil => _muteUntil ??= _constructMuteUntil();
+  GeneratedIntColumn _constructMuteUntil() {
+    return GeneratedIntColumn('mute_until', $tableName, true,
         $customConstraints: '');
   }
 
@@ -4634,14 +4676,8 @@ class Users extends Table with TableInfo<Users, User> {
           isVerified.isAcceptableOrUnknown(
               data['is_verified'], _isVerifiedMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    }
-    if (data.containsKey('mute_until')) {
-      context.handle(_muteUntilMeta,
-          muteUntil.isAcceptableOrUnknown(data['mute_until'], _muteUntilMeta));
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_muteUntilMeta, const VerificationResult.success());
     if (data.containsKey('has_pin')) {
       context.handle(_hasPinMeta,
           hasPin.isAcceptableOrUnknown(data['has_pin'], _hasPinMeta));
@@ -4676,6 +4712,8 @@ class Users extends Table with TableInfo<Users, User> {
 
   static TypeConverter<UserRelationship, String> $converter0 =
       const UserRelationshipConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
   @override
@@ -4710,7 +4748,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return Addresse(
       addressId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}address_id']),
@@ -4721,8 +4759,8 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           .mapFromDatabaseResponse(data['${effectivePrefix}public_key']),
       label:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}label']),
-      updatedAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
+      updatedAt: Addresses.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])),
       reserve:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}reserve']),
       fee: stringType.mapFromDatabaseResponse(data['${effectivePrefix}fee']),
@@ -4752,7 +4790,8 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       map['label'] = Variable<String>(label);
     }
     if (!nullToAbsent || updatedAt != null) {
-      map['updated_at'] = Variable<DateTime>(updatedAt);
+      final converter = Addresses.$converter0;
+      map['updated_at'] = Variable<int>(converter.mapToSql(updatedAt));
     }
     if (!nullToAbsent || reserve != null) {
       map['reserve'] = Variable<String>(reserve);
@@ -4968,7 +5007,7 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
     Expression<String> assetId,
     Expression<String> publicKey,
     Expression<String> label,
-    Expression<DateTime> updatedAt,
+    Expression<int> updatedAt,
     Expression<String> reserve,
     Expression<String> fee,
     Expression<String> accountName,
@@ -5036,7 +5075,8 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
       map['label'] = Variable<String>(label.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+      final converter = Addresses.$converter0;
+      map['updated_at'] = Variable<int>(converter.mapToSql(updatedAt.value));
     }
     if (reserve.present) {
       map['reserve'] = Variable<String>(reserve.value);
@@ -5120,10 +5160,10 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   }
 
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  GeneratedDateTimeColumn _updatedAt;
-  GeneratedDateTimeColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
-  GeneratedDateTimeColumn _constructUpdatedAt() {
-    return GeneratedDateTimeColumn('updated_at', $tableName, false,
+  GeneratedIntColumn _updatedAt;
+  GeneratedIntColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
+  GeneratedIntColumn _constructUpdatedAt() {
+    return GeneratedIntColumn('updated_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -5220,12 +5260,7 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
       context.handle(
           _labelMeta, label.isAcceptableOrUnknown(data['label'], _labelMeta));
     }
-    if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
-    } else if (isInserting) {
-      context.missing(_updatedAtMeta);
-    }
+    context.handle(_updatedAtMeta, const VerificationResult.success());
     if (data.containsKey('reserve')) {
       context.handle(_reserveMeta,
           reserve.isAcceptableOrUnknown(data['reserve'], _reserveMeta));
@@ -5270,6 +5305,7 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
     return Addresses(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(address_id)'];
   @override
@@ -5308,7 +5344,7 @@ class App extends DataClass implements Insertable<App> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return App(
       appId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
@@ -5333,8 +5369,8 @@ class App extends DataClass implements Insertable<App> {
           .mapFromDatabaseResponse(data['${effectivePrefix}creator_id']),
       resourcePatterns: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}resource_patterns']),
-      updatedAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']),
+      updatedAt: Apps.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])),
     );
   }
   @override
@@ -5377,7 +5413,8 @@ class App extends DataClass implements Insertable<App> {
       map['resource_patterns'] = Variable<String>(resourcePatterns);
     }
     if (!nullToAbsent || updatedAt != null) {
-      map['updated_at'] = Variable<DateTime>(updatedAt);
+      final converter = Apps.$converter0;
+      map['updated_at'] = Variable<int>(converter.mapToSql(updatedAt));
     }
     return map;
   }
@@ -5622,7 +5659,7 @@ class AppsCompanion extends UpdateCompanion<App> {
     Expression<String> capabilities,
     Expression<String> creatorId,
     Expression<String> resourcePatterns,
-    Expression<DateTime> updatedAt,
+    Expression<int> updatedAt,
   }) {
     return RawValuesInsertable({
       if (appId != null) 'app_id': appId,
@@ -5712,7 +5749,8 @@ class AppsCompanion extends UpdateCompanion<App> {
       map['resource_patterns'] = Variable<String>(resourcePatterns.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+      final converter = Apps.$converter0;
+      map['updated_at'] = Variable<int>(converter.mapToSql(updatedAt.value));
     }
     return map;
   }
@@ -5847,10 +5885,10 @@ class Apps extends Table with TableInfo<Apps, App> {
   }
 
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  GeneratedDateTimeColumn _updatedAt;
-  GeneratedDateTimeColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
-  GeneratedDateTimeColumn _constructUpdatedAt() {
-    return GeneratedDateTimeColumn('updated_at', $tableName, true,
+  GeneratedIntColumn _updatedAt;
+  GeneratedIntColumn get updatedAt => _updatedAt ??= _constructUpdatedAt();
+  GeneratedIntColumn _constructUpdatedAt() {
+    return GeneratedIntColumn('updated_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -5955,10 +5993,7 @@ class Apps extends Table with TableInfo<Apps, App> {
           resourcePatterns.isAcceptableOrUnknown(
               data['resource_patterns'], _resourcePatternsMeta));
     }
-    if (data.containsKey('updated_at')) {
-      context.handle(_updatedAtMeta,
-          updatedAt.isAcceptableOrUnknown(data['updated_at'], _updatedAtMeta));
-    }
+    context.handle(_updatedAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -5975,6 +6010,7 @@ class Apps extends Table with TableInfo<Apps, App> {
     return Apps(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(app_id)'];
   @override
@@ -6743,7 +6779,7 @@ class CircleConversation extends DataClass
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return CircleConversation(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
@@ -6751,10 +6787,10 @@ class CircleConversation extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}circle_id']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      pinTime: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}pin_time']),
+      createdAt: CircleConversations.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      pinTime: CircleConversations.$converter1.mapToDart(
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}pin_time'])),
     );
   }
   @override
@@ -6770,10 +6806,12 @@ class CircleConversation extends DataClass
       map['user_id'] = Variable<String>(userId);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = CircleConversations.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || pinTime != null) {
-      map['pin_time'] = Variable<DateTime>(pinTime);
+      final converter = CircleConversations.$converter1;
+      map['pin_time'] = Variable<int>(converter.mapToSql(pinTime));
     }
     return map;
   }
@@ -6889,8 +6927,8 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
     Expression<String> conversationId,
     Expression<String> circleId,
     Expression<String> userId,
-    Expression<DateTime> createdAt,
-    Expression<DateTime> pinTime,
+    Expression<int> createdAt,
+    Expression<int> pinTime,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -6929,10 +6967,12 @@ class CircleConversationsCompanion extends UpdateCompanion<CircleConversation> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = CircleConversations.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (pinTime.present) {
-      map['pin_time'] = Variable<DateTime>(pinTime.value);
+      final converter = CircleConversations.$converter1;
+      map['pin_time'] = Variable<int>(converter.mapToSql(pinTime.value));
     }
     return map;
   }
@@ -6982,18 +7022,18 @@ class CircleConversations extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
-  GeneratedDateTimeColumn _pinTime;
-  GeneratedDateTimeColumn get pinTime => _pinTime ??= _constructPinTime();
-  GeneratedDateTimeColumn _constructPinTime() {
-    return GeneratedDateTimeColumn('pin_time', $tableName, true,
+  GeneratedIntColumn _pinTime;
+  GeneratedIntColumn get pinTime => _pinTime ??= _constructPinTime();
+  GeneratedIntColumn _constructPinTime() {
+    return GeneratedIntColumn('pin_time', $tableName, true,
         $customConstraints: '');
   }
 
@@ -7029,16 +7069,8 @@ class CircleConversations extends Table
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('pin_time')) {
-      context.handle(_pinTimeMeta,
-          pinTime.isAcceptableOrUnknown(data['pin_time'], _pinTimeMeta));
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_pinTimeMeta, const VerificationResult.success());
     return context;
   }
 
@@ -7055,6 +7087,8 @@ class CircleConversations extends Table
     return CircleConversations(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
   @override
   List<String> get customConstraints =>
       const ['PRIMARY KEY(conversation_id, circle_id)'];
@@ -7076,15 +7110,15 @@ class Circle extends DataClass implements Insertable<Circle> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return Circle(
       circleId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}circle_id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      orderedAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at']),
+      createdAt: Circles.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      orderedAt: Circles.$converter1.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at'])),
     );
   }
   @override
@@ -7097,10 +7131,12 @@ class Circle extends DataClass implements Insertable<Circle> {
       map['name'] = Variable<String>(name);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Circles.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || orderedAt != null) {
-      map['ordered_at'] = Variable<DateTime>(orderedAt);
+      final converter = Circles.$converter1;
+      map['ordered_at'] = Variable<int>(converter.mapToSql(orderedAt));
     }
     return map;
   }
@@ -7198,8 +7234,8 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
   static Insertable<Circle> custom({
     Expression<String> circleId,
     Expression<String> name,
-    Expression<DateTime> createdAt,
-    Expression<DateTime> orderedAt,
+    Expression<int> createdAt,
+    Expression<int> orderedAt,
   }) {
     return RawValuesInsertable({
       if (circleId != null) 'circle_id': circleId,
@@ -7232,10 +7268,12 @@ class CirclesCompanion extends UpdateCompanion<Circle> {
       map['name'] = Variable<String>(name.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Circles.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (orderedAt.present) {
-      map['ordered_at'] = Variable<DateTime>(orderedAt.value);
+      final converter = Circles.$converter1;
+      map['ordered_at'] = Variable<int>(converter.mapToSql(orderedAt.value));
     }
     return map;
   }
@@ -7273,18 +7311,18 @@ class Circles extends Table with TableInfo<Circles, Circle> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _orderedAtMeta = const VerificationMeta('orderedAt');
-  GeneratedDateTimeColumn _orderedAt;
-  GeneratedDateTimeColumn get orderedAt => _orderedAt ??= _constructOrderedAt();
-  GeneratedDateTimeColumn _constructOrderedAt() {
-    return GeneratedDateTimeColumn('ordered_at', $tableName, true,
+  GeneratedIntColumn _orderedAt;
+  GeneratedIntColumn get orderedAt => _orderedAt ??= _constructOrderedAt();
+  GeneratedIntColumn _constructOrderedAt() {
+    return GeneratedIntColumn('ordered_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -7313,16 +7351,8 @@ class Circles extends Table with TableInfo<Circles, Circle> {
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('ordered_at')) {
-      context.handle(_orderedAtMeta,
-          orderedAt.isAcceptableOrUnknown(data['ordered_at'], _orderedAtMeta));
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_orderedAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -7339,6 +7369,8 @@ class Circles extends Table with TableInfo<Circles, Circle> {
     return Circles(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(circle_id)'];
   @override
@@ -7357,13 +7389,13 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return FloodMessage(
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
       data: stringType.mapFromDatabaseResponse(data['${effectivePrefix}data']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: FloodMessages.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
     );
   }
   @override
@@ -7376,7 +7408,8 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
       map['data'] = Variable<String>(data);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = FloodMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     return map;
   }
@@ -7459,7 +7492,7 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
   static Insertable<FloodMessage> custom({
     Expression<String> messageId,
     Expression<String> data,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
   }) {
     return RawValuesInsertable({
       if (messageId != null) 'message_id': messageId,
@@ -7489,7 +7522,8 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
       map['data'] = Variable<String>(data.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = FloodMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     return map;
   }
@@ -7526,10 +7560,10 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -7558,12 +7592,7 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
     } else if (isInserting) {
       context.missing(_dataMeta);
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -7580,6 +7609,7 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
     return FloodMessages(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
   @override
@@ -8736,7 +8766,6 @@ class ParticipantSessionData extends DataClass
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return ParticipantSessionData(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
@@ -8746,8 +8775,8 @@ class ParticipantSessionData extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}session_id']),
       sentToServer: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}sent_to_server']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: ParticipantSession.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
     );
   }
   @override
@@ -8766,7 +8795,8 @@ class ParticipantSessionData extends DataClass
       map['sent_to_server'] = Variable<int>(sentToServer);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = ParticipantSession.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     return map;
   }
@@ -8884,7 +8914,7 @@ class ParticipantSessionCompanion
     Expression<String> userId,
     Expression<String> sessionId,
     Expression<int> sentToServer,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -8926,7 +8956,8 @@ class ParticipantSessionCompanion
       map['sent_to_server'] = Variable<int>(sentToServer.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = ParticipantSession.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     return map;
   }
@@ -8986,10 +9017,10 @@ class ParticipantSession extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, true,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -9034,10 +9065,7 @@ class ParticipantSession extends Table
           sentToServer.isAcceptableOrUnknown(
               data['sent_to_server'], _sentToServerMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -9054,6 +9082,7 @@ class ParticipantSession extends Table
     return ParticipantSession(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints =>
       const ['PRIMARY KEY(conversation_id, user_id, session_id)'];
@@ -9079,7 +9108,7 @@ class RatchetSenderKey extends DataClass
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return RatchetSenderKey(
       groupId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}group_id']),
@@ -9089,8 +9118,8 @@ class RatchetSenderKey extends DataClass
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: RatchetSenderKeys.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
     );
   }
   @override
@@ -9109,7 +9138,8 @@ class RatchetSenderKey extends DataClass
       map['message_id'] = Variable<String>(messageId);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = RatchetSenderKeys.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     return map;
   }
@@ -9227,7 +9257,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     Expression<String> senderId,
     Expression<String> status,
     Expression<String> messageId,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
   }) {
     return RawValuesInsertable({
       if (groupId != null) 'group_id': groupId,
@@ -9269,7 +9299,8 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
       map['message_id'] = Variable<String>(messageId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = RatchetSenderKeys.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     return map;
   }
@@ -9325,10 +9356,10 @@ class RatchetSenderKeys extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -9368,12 +9399,7 @@ class RatchetSenderKeys extends Table
       context.handle(_messageIdMeta,
           messageId.isAcceptableOrUnknown(data['message_id'], _messageIdMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -9390,6 +9416,7 @@ class RatchetSenderKeys extends Table
     return RatchetSenderKeys(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints =>
       const ['PRIMARY KEY(group_id, sender_id)'];
@@ -9416,7 +9443,6 @@ class ResendSessionMessage extends DataClass
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return ResendSessionMessage(
       messageId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
@@ -9425,8 +9451,8 @@ class ResendSessionMessage extends DataClass
       sessionId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}session_id']),
       status: intType.mapFromDatabaseResponse(data['${effectivePrefix}status']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: ResendSessionMessages.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
     );
   }
   @override
@@ -9445,7 +9471,8 @@ class ResendSessionMessage extends DataClass
       map['status'] = Variable<int>(status);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = ResendSessionMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     return map;
   }
@@ -9564,7 +9591,7 @@ class ResendSessionMessagesCompanion
     Expression<String> userId,
     Expression<String> sessionId,
     Expression<int> status,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
   }) {
     return RawValuesInsertable({
       if (messageId != null) 'message_id': messageId,
@@ -9606,7 +9633,8 @@ class ResendSessionMessagesCompanion
       map['status'] = Variable<int>(status.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = ResendSessionMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     return map;
   }
@@ -9662,10 +9690,10 @@ class ResendSessionMessages extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -9708,12 +9736,7 @@ class ResendSessionMessages extends Table
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -9730,6 +9753,7 @@ class ResendSessionMessages extends Table
     return ResendSessionMessages(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints =>
       const ['PRIMARY KEY(message_id, user_id, session_id)'];
@@ -9758,7 +9782,6 @@ class SentSessionSenderKey extends DataClass
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return SentSessionSenderKey(
       conversationId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
@@ -9770,8 +9793,8 @@ class SentSessionSenderKey extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}sent_to_server']),
       senderKeyId: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}sender_key_id']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
+      createdAt: SentSessionSenderKeys.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
     );
   }
   @override
@@ -9793,7 +9816,8 @@ class SentSessionSenderKey extends DataClass
       map['sender_key_id'] = Variable<int>(senderKeyId);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = SentSessionSenderKeys.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     return map;
   }
@@ -9927,7 +9951,7 @@ class SentSessionSenderKeysCompanion
     Expression<String> sessionId,
     Expression<int> sentToServer,
     Expression<int> senderKeyId,
-    Expression<DateTime> createdAt,
+    Expression<int> createdAt,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -9975,7 +9999,8 @@ class SentSessionSenderKeysCompanion
       map['sender_key_id'] = Variable<int>(senderKeyId.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = SentSessionSenderKeys.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     return map;
   }
@@ -10046,10 +10071,10 @@ class SentSessionSenderKeys extends Table
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, true,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -10102,10 +10127,7 @@ class SentSessionSenderKeys extends Table
           senderKeyId.isAcceptableOrUnknown(
               data['sender_key_id'], _senderKeyIdMeta));
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -10122,6 +10144,7 @@ class SentSessionSenderKeys extends Table
     return SentSessionSenderKeys(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
   List<String> get customConstraints =>
       const ['PRIMARY KEY(conversation_id,user_id, session_id)'];
@@ -10151,17 +10174,17 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
+    final intType = db.typeSystem.forDartType<int>();
     return StickerAlbum(
       albumId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}album_id']),
       name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
       iconUrl: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      updateAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}update_at']),
+      createdAt: StickerAlbums.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      updateAt: StickerAlbums.$converter1.mapToDart(
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}update_at'])),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
       category: stringType
@@ -10183,10 +10206,12 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
       map['icon_url'] = Variable<String>(iconUrl);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = StickerAlbums.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || updateAt != null) {
-      map['update_at'] = Variable<DateTime>(updateAt);
+      final converter = StickerAlbums.$converter1;
+      map['update_at'] = Variable<int>(converter.mapToSql(updateAt));
     }
     if (!nullToAbsent || userId != null) {
       map['user_id'] = Variable<String>(userId);
@@ -10356,8 +10381,8 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     Expression<String> albumId,
     Expression<String> name,
     Expression<String> iconUrl,
-    Expression<DateTime> createdAt,
-    Expression<DateTime> updateAt,
+    Expression<int> createdAt,
+    Expression<int> updateAt,
     Expression<String> userId,
     Expression<String> category,
     Expression<String> description,
@@ -10408,10 +10433,12 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
       map['icon_url'] = Variable<String>(iconUrl.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = StickerAlbums.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (updateAt.present) {
-      map['update_at'] = Variable<DateTime>(updateAt.value);
+      final converter = StickerAlbums.$converter1;
+      map['update_at'] = Variable<int>(converter.mapToSql(updateAt.value));
     }
     if (userId.present) {
       map['user_id'] = Variable<String>(userId.value);
@@ -10470,18 +10497,18 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _updateAtMeta = const VerificationMeta('updateAt');
-  GeneratedDateTimeColumn _updateAt;
-  GeneratedDateTimeColumn get updateAt => _updateAt ??= _constructUpdateAt();
-  GeneratedDateTimeColumn _constructUpdateAt() {
-    return GeneratedDateTimeColumn('update_at', $tableName, false,
+  GeneratedIntColumn _updateAt;
+  GeneratedIntColumn get updateAt => _updateAt ??= _constructUpdateAt();
+  GeneratedIntColumn _constructUpdateAt() {
+    return GeneratedIntColumn('update_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
@@ -10551,18 +10578,8 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     } else if (isInserting) {
       context.missing(_iconUrlMeta);
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('update_at')) {
-      context.handle(_updateAtMeta,
-          updateAt.isAcceptableOrUnknown(data['update_at'], _updateAtMeta));
-    } else if (isInserting) {
-      context.missing(_updateAtMeta);
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_updateAtMeta, const VerificationResult.success());
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id'], _userIdMeta));
@@ -10599,6 +10616,8 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
     return StickerAlbums(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
   @override
@@ -10834,7 +10853,6 @@ class Sticker extends DataClass implements Insertable<Sticker> {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final intType = db.typeSystem.forDartType<int>();
-    final dateTimeType = db.typeSystem.forDartType<DateTime>();
     return Sticker(
       stickerId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}sticker_id']),
@@ -10849,10 +10867,10 @@ class Sticker extends DataClass implements Insertable<Sticker> {
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_width']),
       assetHeight: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_height']),
-      createdAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
-      lastUseAt: dateTimeType
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_use_at']),
+      createdAt: Stickers.$converter0.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      lastUseAt: Stickers.$converter1.mapToDart(intType
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_use_at'])),
     );
   }
   @override
@@ -10880,10 +10898,12 @@ class Sticker extends DataClass implements Insertable<Sticker> {
       map['asset_height'] = Variable<int>(assetHeight);
     }
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] = Variable<DateTime>(createdAt);
+      final converter = Stickers.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || lastUseAt != null) {
-      map['last_use_at'] = Variable<DateTime>(lastUseAt);
+      final converter = Stickers.$converter1;
+      map['last_use_at'] = Variable<int>(converter.mapToSql(lastUseAt));
     }
     return map;
   }
@@ -11064,8 +11084,8 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
     Expression<String> assetType,
     Expression<int> assetWidth,
     Expression<int> assetHeight,
-    Expression<DateTime> createdAt,
-    Expression<DateTime> lastUseAt,
+    Expression<int> createdAt,
+    Expression<int> lastUseAt,
   }) {
     return RawValuesInsertable({
       if (stickerId != null) 'sticker_id': stickerId,
@@ -11128,10 +11148,12 @@ class StickersCompanion extends UpdateCompanion<Sticker> {
       map['asset_height'] = Variable<int>(assetHeight.value);
     }
     if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+      final converter = Stickers.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (lastUseAt.present) {
-      map['last_use_at'] = Variable<DateTime>(lastUseAt.value);
+      final converter = Stickers.$converter1;
+      map['last_use_at'] = Variable<int>(converter.mapToSql(lastUseAt.value));
     }
     return map;
   }
@@ -11216,18 +11238,18 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  GeneratedDateTimeColumn _createdAt;
-  GeneratedDateTimeColumn get createdAt => _createdAt ??= _constructCreatedAt();
-  GeneratedDateTimeColumn _constructCreatedAt() {
-    return GeneratedDateTimeColumn('created_at', $tableName, false,
+  GeneratedIntColumn _createdAt;
+  GeneratedIntColumn get createdAt => _createdAt ??= _constructCreatedAt();
+  GeneratedIntColumn _constructCreatedAt() {
+    return GeneratedIntColumn('created_at', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _lastUseAtMeta = const VerificationMeta('lastUseAt');
-  GeneratedDateTimeColumn _lastUseAt;
-  GeneratedDateTimeColumn get lastUseAt => _lastUseAt ??= _constructLastUseAt();
-  GeneratedDateTimeColumn _constructLastUseAt() {
-    return GeneratedDateTimeColumn('last_use_at', $tableName, true,
+  GeneratedIntColumn _lastUseAt;
+  GeneratedIntColumn get lastUseAt => _lastUseAt ??= _constructLastUseAt();
+  GeneratedIntColumn _constructLastUseAt() {
+    return GeneratedIntColumn('last_use_at', $tableName, true,
         $customConstraints: '');
   }
 
@@ -11298,16 +11320,8 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
     } else if (isInserting) {
       context.missing(_assetHeightMeta);
     }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
-    }
-    if (data.containsKey('last_use_at')) {
-      context.handle(_lastUseAtMeta,
-          lastUseAt.isAcceptableOrUnknown(data['last_use_at'], _lastUseAtMeta));
-    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_lastUseAtMeta, const VerificationResult.success());
     return context;
   }
 
@@ -11324,6 +11338,8 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
     return Stickers(_db, alias);
   }
 
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(sticker_id)'];
   @override
@@ -11397,6 +11413,16 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Index get indexUsersFullName => _indexUsersFullName ??= Index(
       'index_users_full_name',
       'CREATE INDEX IF NOT EXISTS index_users_full_name ON users (full_name);');
+  Trigger _conversationLastMessageUpdate;
+  Trigger get conversationLastMessageUpdate =>
+      _conversationLastMessageUpdate ??= Trigger(
+          'CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at  WHERE conversation_id = new.conversation_id; END;',
+          'conversation_last_message_update');
+  Trigger _conversationLastMessageDelete;
+  Trigger get conversationLastMessageDelete =>
+      _conversationLastMessageDelete ??= Trigger(
+          'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;',
+          'conversation_last_message_delete');
   Addresses _addresses;
   Addresses get addresses => _addresses ??= Addresses(this);
   Apps _apps;
@@ -11505,18 +11531,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   UserDao get userDao => _userDao ??= UserDao(this as MixinDatabase);
   Selectable<int> contactConversationCount() {
     return customSelect(
-        'SELECT Count(*)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'FRIEND\'\n       AND ou.app_id IS NULL\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
+        'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'FRIEND\'\n       AND ou.app_id IS NULL\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',
         variables: [],
         readsFrom: {
           conversations,
           users,
           messages
-        }).map((QueryRow row) => row.readInt('Count(*)'));
+        }).map((QueryRow row) => row.readInt('Count(1)'));
   }
 
   Selectable<ConversationItem> contactConversations(int limit, int offset) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions,\n            ou.relationship AS relationship \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL\n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions,\n            ou.relationship AS relationship \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC \n            LIMIT :limit OFFSET :offset',
         variables: [
           Variable.withInt(limit),
           Variable.withInt(offset)
@@ -11534,23 +11560,27 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         category:
             Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: Conversations.$converter1.mapToDart(row.readInt('status')),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readDateTime('pinTime'),
-        muteUntil: row.readDateTime('muteUntil'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType:
             Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt: row.readDateTime('createdAt'),
-        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11599,23 +11629,27 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         category:
             Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: Conversations.$converter1.mapToDart(row.readInt('status')),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readDateTime('pinTime'),
-        muteUntil: row.readDateTime('muteUntil'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType:
             Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt: row.readDateTime('createdAt'),
-        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11663,23 +11697,27 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         category:
             Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: Conversations.$converter1.mapToDart(row.readInt('status')),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readDateTime('pinTime'),
-        muteUntil: row.readDateTime('muteUntil'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType:
             Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt: row.readDateTime('createdAt'),
-        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11728,23 +11766,27 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         category:
             Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: Conversations.$converter1.mapToDart(row.readInt('status')),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readDateTime('pinTime'),
-        muteUntil: row.readDateTime('muteUntil'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType:
             Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt: row.readDateTime('createdAt'),
-        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11781,23 +11823,27 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         category:
             Conversations.$converter0.mapToDart(row.readString('category')),
         groupName: row.readString('groupName'),
-        status: Conversations.$converter1.mapToDart(row.readInt('status')),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
         lastReadMessageId: row.readString('lastReadMessageId'),
         unseenMessageCount: row.readInt('unseenMessageCount'),
         ownerId: row.readString('ownerId'),
-        pinTime: row.readDateTime('pinTime'),
-        muteUntil: row.readDateTime('muteUntil'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
         avatarUrl: row.readString('avatarUrl'),
         name: row.readString('name'),
         ownerVerified: row.readInt('ownerVerified'),
         ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil: row.readDateTime('ownerMuteUntil'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
         appId: row.readString('appId'),
         content: row.readString('content'),
         contentType:
             Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt: row.readDateTime('createdAt'),
-        lastMessageCreatedAt: row.readDateTime('lastMessageCreatedAt'),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
         actionName: row.readString('actionName'),
@@ -11843,7 +11889,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         appId: row.readString('appId'),
         type: Messages.$converter0.mapToDart(row.readString('type')),
         content: row.readString('content'),
-        createdAt: row.readDateTime('createdAt'),
+        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt')),
         status: Messages.$converter2.mapToDart(row.readString('status')),
         mediaStatus:
             Messages.$converter1.mapToDart(row.readString('mediaStatus')),
@@ -11915,7 +11961,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaStatus:
             Messages.$converter1.mapToDart(row.readString('media_status')),
         status: Messages.$converter2.mapToDart(row.readString('status')),
-        createdAt: row.readDateTime('created_at'),
+        createdAt: Messages.$converter3.mapToDart(row.readInt('created_at')),
         action: row.readString('action'),
         participantId: row.readString('participant_id'),
         snapshotId: row.readString('snapshot_id'),
@@ -11973,6 +12019,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexSnapshotsAssetId,
         users,
         indexUsersFullName,
+        conversationLastMessageUpdate,
+        conversationLastMessageDelete,
         addresses,
         apps,
         assets,
@@ -12006,6 +12054,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('participants', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.insert),
+            result: [
+              TableUpdate('conversations', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('conversations', kind: UpdateKind.update),
             ],
           ),
         ],

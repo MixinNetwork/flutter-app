@@ -1474,6 +1474,9 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   Sessions get sessions => _sessions ??= Sessions(this);
   SenderKeys _senderKeys;
   SenderKeys get senderKeys => _senderKeys ??= SenderKeys(this);
+  IdentityDao _identityDao;
+  IdentityDao get identityDao =>
+      _identityDao ??= IdentityDao(this as SignalDatabase);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
