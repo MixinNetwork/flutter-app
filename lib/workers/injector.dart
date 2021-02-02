@@ -2,7 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
-import 'package:flutter_app/enum/conversation_status.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class Injector {

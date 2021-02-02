@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_app/db/dao/sticker_albums_dao.dart';
 import 'package:flutter_app/db/dao/sticker_relationships_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
-import 'package:flutter_app/enum/conversation_status.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';

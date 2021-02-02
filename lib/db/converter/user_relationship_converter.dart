@@ -1,6 +1,4 @@
-import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:recase/recase.dart';
 import 'package:moor/moor.dart';
 
 class UserRelationshipConverter
@@ -8,12 +6,10 @@ class UserRelationshipConverter
   const UserRelationshipConverter();
 
   @override
-  UserRelationship mapToDart(String fromDb) => EnumToString.fromString(
-        UserRelationship.values,
-        fromDb?.camelCase,
-      );
+  UserRelationship mapToDart(String fromDb) =>
+      const UserRelationshipJsonConverter().fromJson(fromDb);
 
   @override
   String mapToSql(UserRelationship value) =>
-      EnumToString.convertToString(value)?.constantCase;
+      const UserRelationshipJsonConverter().toJson(value);
 }

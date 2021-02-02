@@ -255,6 +255,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.0.4"
+  enum_to_string:
+    dependency: transitive
+    description:
+      name: enum_to_string
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.14"
   equatable:
     dependency: "direct main"
     description:
@@ -550,7 +557,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "929f29424550ca4491ceb85149c81c15b68a6b5a"
+      resolved-ref: ffcda6fcc39bb400465603c823559f59bbecf8c0
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"

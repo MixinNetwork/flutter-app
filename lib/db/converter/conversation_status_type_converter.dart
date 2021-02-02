@@ -1,4 +1,4 @@
-import 'package:flutter_app/enum/conversation_status.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
 
 class ConversationStatusTypeConverter
@@ -6,13 +6,10 @@ class ConversationStatusTypeConverter
   const ConversationStatusTypeConverter();
 
   @override
-  ConversationStatus mapToDart(int fromDb) {
-    return ConversationStatus.values[fromDb];
-  }
+  ConversationStatus mapToDart(int fromDb) =>
+      const ConversationStatusJsonConverter().fromJson(fromDb);
 
   @override
-  int mapToSql(ConversationStatus value) {
-    if (value == null) return ConversationStatus.failure.index;
-    return value.index;
-  }
+  int mapToSql(ConversationStatus value) =>
+      const ConversationStatusJsonConverter().toJson(value);
 }

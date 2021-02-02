@@ -3121,7 +3121,7 @@ class Participant extends DataClass implements Insertable<Participant> {
   Participant(
       {@required this.conversationId,
       @required this.userId,
-      @required this.role,
+      this.role,
       @required this.createdAt});
   factory Participant.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
@@ -3242,11 +3242,10 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   ParticipantsCompanion.insert({
     @required String conversationId,
     @required String userId,
-    @required ParticipantRole role,
+    this.role = const Value.absent(),
     @required DateTime createdAt,
   })  : conversationId = Value(conversationId),
         userId = Value(userId),
-        role = Value(role),
         createdAt = Value(createdAt);
   static Insertable<Participant> custom({
     Expression<String> conversationId,
@@ -3332,8 +3331,8 @@ class Participants extends Table with TableInfo<Participants, Participant> {
   GeneratedTextColumn _role;
   GeneratedTextColumn get role => _role ??= _constructRole();
   GeneratedTextColumn _constructRole() {
-    return GeneratedTextColumn('role', $tableName, false,
-        $customConstraints: 'NOT NULL');
+    return GeneratedTextColumn('role', $tableName, true,
+        $customConstraints: '');
   }
 
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');

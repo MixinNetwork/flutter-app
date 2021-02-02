@@ -19,7 +19,6 @@ import 'package:flutter_app/db/dao/resend_session_messages_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/db/dao/users_dao.dart';
 import 'package:flutter_app/db/database_event_bus.dart';
-import 'package:flutter_app/enum/conversation_status.dart';
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
