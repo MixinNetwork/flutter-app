@@ -1461,9 +1461,9 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   bool get dontWriteConstraints => true;
 }
 
-abstract class _$AppDb extends GeneratedDatabase {
-  _$AppDb(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
-  _$AppDb.connect(DatabaseConnection c) : super.connect(c);
+abstract class _$SignalDb extends GeneratedDatabase {
+  _$SignalDb(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$SignalDb.connect(DatabaseConnection c) : super.connect(c);
   SenderKeys _senderKeys;
   SenderKeys get senderKeys => _senderKeys ??= SenderKeys(this);
   Identities _identities;

@@ -121,3 +121,7 @@ flutter_intl:
   enabled: true
   class_name: Localization
   use_deferred_loading: true
+
+analyzer:
+  plugins:
+    - moor
