@@ -20,7 +20,7 @@ CREATE TABLE circle_conversations ( conversation_id TEXT NOT NULL, circle_id TEX
 
 CREATE TABLE circles ( circle_id TEXT NOT NULL, name TEXT NOT NULL, created_at DATETIME NOT NULL, ordered_at DATETIME, PRIMARY KEY(circle_id) );
 
-CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT MAPPED BY `const ConversationCategoryTypeConverter()`, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at DATETIME NOT NULL, pin_time DATETIME, last_message_id TEXT, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL MAPPED BY `const ConversationStatusTypeConverter()`, draft TEXT, mute_until DATETIME, PRIMARY KEY(conversation_id) );
+CREATE TABLE conversations ( conversation_id TEXT NOT NULL, owner_id TEXT, category TEXT MAPPED BY `const ConversationCategoryTypeConverter()`, name TEXT, icon_url TEXT, announcement TEXT, code_url TEXT, pay_type TEXT, created_at DATETIME NOT NULL, pin_time DATETIME, last_message_id TEXT, last_message_created_at DATETIME, last_read_message_id TEXT, unseen_message_count INTEGER, status INTEGER NOT NULL MAPPED BY `const ConversationStatusTypeConverter()`, draft TEXT, mute_until DATETIME, PRIMARY KEY(conversation_id) );
 
 CREATE TABLE flood_messages ( message_id TEXT NOT NULL, data TEXT NOT NULL, created_at DATETIME NOT NULL, PRIMARY KEY(message_id) );
 
@@ -76,8 +76,11 @@ CREATE INDEX IF NOT EXISTS index_snapshots_asset_id ON snapshots (asset_id);
 
 CREATE INDEX IF NOT EXISTS index_users_full_name ON users (full_name);
 
+CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.id, last_message_created_at = new.created_at  WHERE conversation_id = new.conversation_id; END;
+CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;
+
 contactConversationCount:
-SELECT Count(*)
+SELECT Count(1)
 FROM   conversations c
        INNER JOIN users ou
                ON ou.user_id = c.owner_id
@@ -86,14 +89,10 @@ FROM   conversations c
 WHERE  c.category = 'CONTACT'
        AND ou.relationship = 'FRIEND'
        AND ou.app_id IS NULL
-ORDER  BY c.pin_time DESC,
-          CASE
-            WHEN m.created_at IS NULL THEN c.created_at
-            ELSE m.created_at
-          END DESC; 
+ORDER  BY c.pin_time DESC, c.last_message_created_at DESC;
                       
 contactConversations AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -113,12 +112,7 @@ contactConversations AS ConversationItem:
             LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
             LEFT JOIN users pu ON pu.user_id = m.participant_id
             WHERE c.category = 'CONTACT' AND ou.relationship = 'FRIEND' AND ou.app_id IS NULL
-            ORDER BY c.pin_time DESC, 
-              CASE 
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at 
-              END 
-            DESC
+            ORDER BY c.pin_time DESC, c.last_message_created_at DESC 
             LIMIT :limit OFFSET :offset;
 
 strangerConversationCount:

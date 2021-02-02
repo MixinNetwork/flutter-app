@@ -7,248 +7,6 @@ part of 'signal_database.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
-class SenderKey extends DataClass implements Insertable<SenderKey> {
-  final String groupId;
-  final String senderId;
-  final Uint8List record;
-  SenderKey(
-      {@required this.groupId, @required this.senderId, @required this.record});
-  factory SenderKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String prefix}) {
-    final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
-    return SenderKey(
-      groupId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}group_id']),
-      senderId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}sender_id']),
-      record: uint8ListType
-          .mapFromDatabaseResponse(data['${effectivePrefix}record']),
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (!nullToAbsent || groupId != null) {
-      map['group_id'] = Variable<String>(groupId);
-    }
-    if (!nullToAbsent || senderId != null) {
-      map['sender_id'] = Variable<String>(senderId);
-    }
-    if (!nullToAbsent || record != null) {
-      map['record'] = Variable<Uint8List>(record);
-    }
-    return map;
-  }
-
-  SenderKeysCompanion toCompanion(bool nullToAbsent) {
-    return SenderKeysCompanion(
-      groupId: groupId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(groupId),
-      senderId: senderId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(senderId),
-      record:
-          record == null && nullToAbsent ? const Value.absent() : Value(record),
-    );
-  }
-
-  factory SenderKey.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return SenderKey(
-      groupId: serializer.fromJson<String>(json['group_id']),
-      senderId: serializer.fromJson<String>(json['sender_id']),
-      record: serializer.fromJson<Uint8List>(json['record']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'group_id': serializer.toJson<String>(groupId),
-      'sender_id': serializer.toJson<String>(senderId),
-      'record': serializer.toJson<Uint8List>(record),
-    };
-  }
-
-  SenderKey copyWith({String groupId, String senderId, Uint8List record}) =>
-      SenderKey(
-        groupId: groupId ?? this.groupId,
-        senderId: senderId ?? this.senderId,
-        record: record ?? this.record,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('SenderKey(')
-          ..write('groupId: $groupId, ')
-          ..write('senderId: $senderId, ')
-          ..write('record: $record')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      $mrjf($mrjc(groupId.hashCode, $mrjc(senderId.hashCode, record.hashCode)));
-  @override
-  bool operator ==(dynamic other) =>
-      identical(this, other) ||
-      (other is SenderKey &&
-          other.groupId == this.groupId &&
-          other.senderId == this.senderId &&
-          other.record == this.record);
-}
-
-class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
-  final Value<String> groupId;
-  final Value<String> senderId;
-  final Value<Uint8List> record;
-  const SenderKeysCompanion({
-    this.groupId = const Value.absent(),
-    this.senderId = const Value.absent(),
-    this.record = const Value.absent(),
-  });
-  SenderKeysCompanion.insert({
-    @required String groupId,
-    @required String senderId,
-    @required Uint8List record,
-  })  : groupId = Value(groupId),
-        senderId = Value(senderId),
-        record = Value(record);
-  static Insertable<SenderKey> custom({
-    Expression<String> groupId,
-    Expression<String> senderId,
-    Expression<Uint8List> record,
-  }) {
-    return RawValuesInsertable({
-      if (groupId != null) 'group_id': groupId,
-      if (senderId != null) 'sender_id': senderId,
-      if (record != null) 'record': record,
-    });
-  }
-
-  SenderKeysCompanion copyWith(
-      {Value<String> groupId,
-      Value<String> senderId,
-      Value<Uint8List> record}) {
-    return SenderKeysCompanion(
-      groupId: groupId ?? this.groupId,
-      senderId: senderId ?? this.senderId,
-      record: record ?? this.record,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (groupId.present) {
-      map['group_id'] = Variable<String>(groupId.value);
-    }
-    if (senderId.present) {
-      map['sender_id'] = Variable<String>(senderId.value);
-    }
-    if (record.present) {
-      map['record'] = Variable<Uint8List>(record.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SenderKeysCompanion(')
-          ..write('groupId: $groupId, ')
-          ..write('senderId: $senderId, ')
-          ..write('record: $record')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
-  final GeneratedDatabase _db;
-  final String _alias;
-  SenderKeys(this._db, [this._alias]);
-  final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
-  GeneratedTextColumn _groupId;
-  GeneratedTextColumn get groupId => _groupId ??= _constructGroupId();
-  GeneratedTextColumn _constructGroupId() {
-    return GeneratedTextColumn('group_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
-  final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
-  GeneratedTextColumn _senderId;
-  GeneratedTextColumn get senderId => _senderId ??= _constructSenderId();
-  GeneratedTextColumn _constructSenderId() {
-    return GeneratedTextColumn('sender_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
-  final VerificationMeta _recordMeta = const VerificationMeta('record');
-  GeneratedBlobColumn _record;
-  GeneratedBlobColumn get record => _record ??= _constructRecord();
-  GeneratedBlobColumn _constructRecord() {
-    return GeneratedBlobColumn('record', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
-  @override
-  List<GeneratedColumn> get $columns => [groupId, senderId, record];
-  @override
-  SenderKeys get asDslTable => this;
-  @override
-  String get $tableName => _alias ?? 'sender_keys';
-  @override
-  final String actualTableName = 'sender_keys';
-  @override
-  VerificationContext validateIntegrity(Insertable<SenderKey> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('group_id')) {
-      context.handle(_groupIdMeta,
-          groupId.isAcceptableOrUnknown(data['group_id'], _groupIdMeta));
-    } else if (isInserting) {
-      context.missing(_groupIdMeta);
-    }
-    if (data.containsKey('sender_id')) {
-      context.handle(_senderIdMeta,
-          senderId.isAcceptableOrUnknown(data['sender_id'], _senderIdMeta));
-    } else if (isInserting) {
-      context.missing(_senderIdMeta);
-    }
-    if (data.containsKey('record')) {
-      context.handle(_recordMeta,
-          record.isAcceptableOrUnknown(data['record'], _recordMeta));
-    } else if (isInserting) {
-      context.missing(_recordMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
-  @override
-  SenderKey map(Map<String, dynamic> data, {String tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return SenderKey.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  SenderKeys createAlias(String alias) {
-    return SenderKeys(_db, alias);
-  }
-
-  @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(group_id, sender_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class Identitie extends DataClass implements Insertable<Identitie> {
   final int id;
   final String address;
@@ -1461,11 +1219,251 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   bool get dontWriteConstraints => true;
 }
 
-abstract class _$SignalDb extends GeneratedDatabase {
-  _$SignalDb(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
-  _$SignalDb.connect(DatabaseConnection c) : super.connect(c);
-  SenderKeys _senderKeys;
-  SenderKeys get senderKeys => _senderKeys ??= SenderKeys(this);
+class SenderKey extends DataClass implements Insertable<SenderKey> {
+  final String groupId;
+  final String senderId;
+  final Uint8List record;
+  SenderKey(
+      {@required this.groupId, @required this.senderId, @required this.record});
+  factory SenderKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String prefix}) {
+    final effectivePrefix = prefix ?? '';
+    final stringType = db.typeSystem.forDartType<String>();
+    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
+    return SenderKey(
+      groupId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}group_id']),
+      senderId: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}sender_id']),
+      record: uint8ListType
+          .mapFromDatabaseResponse(data['${effectivePrefix}record']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (!nullToAbsent || groupId != null) {
+      map['group_id'] = Variable<String>(groupId);
+    }
+    if (!nullToAbsent || senderId != null) {
+      map['sender_id'] = Variable<String>(senderId);
+    }
+    if (!nullToAbsent || record != null) {
+      map['record'] = Variable<Uint8List>(record);
+    }
+    return map;
+  }
+
+  SenderKeysCompanion toCompanion(bool nullToAbsent) {
+    return SenderKeysCompanion(
+      groupId: groupId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupId),
+      senderId: senderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(senderId),
+      record:
+          record == null && nullToAbsent ? const Value.absent() : Value(record),
+    );
+  }
+
+  factory SenderKey.fromJson(Map<String, dynamic> json,
+      {ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return SenderKey(
+      groupId: serializer.fromJson<String>(json['group_id']),
+      senderId: serializer.fromJson<String>(json['sender_id']),
+      record: serializer.fromJson<Uint8List>(json['record']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'group_id': serializer.toJson<String>(groupId),
+      'sender_id': serializer.toJson<String>(senderId),
+      'record': serializer.toJson<Uint8List>(record),
+    };
+  }
+
+  SenderKey copyWith({String groupId, String senderId, Uint8List record}) =>
+      SenderKey(
+        groupId: groupId ?? this.groupId,
+        senderId: senderId ?? this.senderId,
+        record: record ?? this.record,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('SenderKey(')
+          ..write('groupId: $groupId, ')
+          ..write('senderId: $senderId, ')
+          ..write('record: $record')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      $mrjf($mrjc(groupId.hashCode, $mrjc(senderId.hashCode, record.hashCode)));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is SenderKey &&
+          other.groupId == this.groupId &&
+          other.senderId == this.senderId &&
+          other.record == this.record);
+}
+
+class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
+  final Value<String> groupId;
+  final Value<String> senderId;
+  final Value<Uint8List> record;
+  const SenderKeysCompanion({
+    this.groupId = const Value.absent(),
+    this.senderId = const Value.absent(),
+    this.record = const Value.absent(),
+  });
+  SenderKeysCompanion.insert({
+    @required String groupId,
+    @required String senderId,
+    @required Uint8List record,
+  })  : groupId = Value(groupId),
+        senderId = Value(senderId),
+        record = Value(record);
+  static Insertable<SenderKey> custom({
+    Expression<String> groupId,
+    Expression<String> senderId,
+    Expression<Uint8List> record,
+  }) {
+    return RawValuesInsertable({
+      if (groupId != null) 'group_id': groupId,
+      if (senderId != null) 'sender_id': senderId,
+      if (record != null) 'record': record,
+    });
+  }
+
+  SenderKeysCompanion copyWith(
+      {Value<String> groupId,
+      Value<String> senderId,
+      Value<Uint8List> record}) {
+    return SenderKeysCompanion(
+      groupId: groupId ?? this.groupId,
+      senderId: senderId ?? this.senderId,
+      record: record ?? this.record,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (groupId.present) {
+      map['group_id'] = Variable<String>(groupId.value);
+    }
+    if (senderId.present) {
+      map['sender_id'] = Variable<String>(senderId.value);
+    }
+    if (record.present) {
+      map['record'] = Variable<Uint8List>(record.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SenderKeysCompanion(')
+          ..write('groupId: $groupId, ')
+          ..write('senderId: $senderId, ')
+          ..write('record: $record')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
+  final GeneratedDatabase _db;
+  final String _alias;
+  SenderKeys(this._db, [this._alias]);
+  final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
+  GeneratedTextColumn _groupId;
+  GeneratedTextColumn get groupId => _groupId ??= _constructGroupId();
+  GeneratedTextColumn _constructGroupId() {
+    return GeneratedTextColumn('group_id', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
+  GeneratedTextColumn _senderId;
+  GeneratedTextColumn get senderId => _senderId ??= _constructSenderId();
+  GeneratedTextColumn _constructSenderId() {
+    return GeneratedTextColumn('sender_id', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  final VerificationMeta _recordMeta = const VerificationMeta('record');
+  GeneratedBlobColumn _record;
+  GeneratedBlobColumn get record => _record ??= _constructRecord();
+  GeneratedBlobColumn _constructRecord() {
+    return GeneratedBlobColumn('record', $tableName, false,
+        $customConstraints: 'NOT NULL');
+  }
+
+  @override
+  List<GeneratedColumn> get $columns => [groupId, senderId, record];
+  @override
+  SenderKeys get asDslTable => this;
+  @override
+  String get $tableName => _alias ?? 'sender_keys';
+  @override
+  final String actualTableName = 'sender_keys';
+  @override
+  VerificationContext validateIntegrity(Insertable<SenderKey> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('group_id')) {
+      context.handle(_groupIdMeta,
+          groupId.isAcceptableOrUnknown(data['group_id'], _groupIdMeta));
+    } else if (isInserting) {
+      context.missing(_groupIdMeta);
+    }
+    if (data.containsKey('sender_id')) {
+      context.handle(_senderIdMeta,
+          senderId.isAcceptableOrUnknown(data['sender_id'], _senderIdMeta));
+    } else if (isInserting) {
+      context.missing(_senderIdMeta);
+    }
+    if (data.containsKey('record')) {
+      context.handle(_recordMeta,
+          record.isAcceptableOrUnknown(data['record'], _recordMeta));
+    } else if (isInserting) {
+      context.missing(_recordMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
+  @override
+  SenderKey map(Map<String, dynamic> data, {String tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
+    return SenderKey.fromData(data, _db, prefix: effectivePrefix);
+  }
+
+  @override
+  SenderKeys createAlias(String alias) {
+    return SenderKeys(_db, alias);
+  }
+
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(group_id, sender_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+abstract class _$SignalDatabase extends GeneratedDatabase {
+  _$SignalDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
+  _$SignalDatabase.connect(DatabaseConnection c) : super.connect(c);
   Identities _identities;
   Identities get identities => _identities ??= Identities(this);
   Prekeys _prekeys;
@@ -1474,9 +1472,11 @@ abstract class _$SignalDb extends GeneratedDatabase {
   SignedPrekeys get signedPrekeys => _signedPrekeys ??= SignedPrekeys(this);
   Sessions _sessions;
   Sessions get sessions => _sessions ??= Sessions(this);
+  SenderKeys _senderKeys;
+  SenderKeys get senderKeys => _senderKeys ??= SenderKeys(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [senderKeys, identities, prekeys, signedPrekeys, sessions];
+      [identities, prekeys, signedPrekeys, sessions, senderKeys];
 }

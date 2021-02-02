@@ -1,5 +1,6 @@
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
+
+import '../mixin_database.dart';
 
 part 'addresses_dao.g.dart';
 
@@ -12,7 +13,8 @@ class AddressesDao extends DatabaseAccessor<MixinDatabase>
     return select(db.addresses).get();
   }
 
-  Future<int> insert(Addresse address) => into(db.addresses).insertOnConflictUpdate(address);
+  Future<int> insert(Addresse address) =>
+      into(db.addresses).insertOnConflictUpdate(address);
 
   Future deleteAddress(Addresse address) =>
       delete(db.addresses).delete(address);
