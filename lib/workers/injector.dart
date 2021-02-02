@@ -49,7 +49,8 @@ class Injector {
     }
   }
 
-  void refreshParticipants(String conversationId, participants) async {
+  void refreshParticipants(
+      String conversationId, List<ParticipantRequest> participants) async {
     final local =
         await database.participantsDao.getParticipants(conversationId);
     final localIds = local.map((e) => e.userId);
@@ -140,21 +141,19 @@ class Injector {
   }
 
   void refreshSticker(String stickerId) {
-    client.accountApi
-        .getStickerById(stickerId)
-        .then((value){
-          final sticker = value.data;
-          if(sticker!=null){
-            database.stickerDao.insert(db.Sticker(
-                stickerId: sticker.stickerId,
-                name: sticker.name,
-                assetUrl: sticker.assetUrl,
-              assetType: sticker.assetType,
-              assetWidth: sticker.assetWidth,
-              assetHeight: sticker.assetHeight,
-              createdAt: sticker.createdAt
-            ));
-          }
+    client.accountApi.getStickerById(stickerId).then((value) {
+      final sticker = value.data;
+      if (sticker != null) {
+        database.stickerDao.insert(db.Sticker(
+          stickerId: sticker.stickerId,
+          name: sticker.name,
+          assetUrl: sticker.assetUrl,
+          assetType: sticker.assetType,
+          assetWidth: sticker.assetWidth,
+          assetHeight: sticker.assetHeight,
+          createdAt: sticker.createdAt,
+        ));
+      }
     }).catchError((e) => debugPrint(e));
   }
 }

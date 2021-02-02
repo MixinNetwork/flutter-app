@@ -5,6 +5,7 @@ import 'converter/media_status_type_converter.dart';
 import 'converter/message_status_type_converter.dart';
 import 'converter/message_category_type_converter.dart';
 import 'converter/user_relationship_converter.dart';
+import 'converter/participant_role_converter.dart';
 import '../enum/conversation_status.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
@@ -40,7 +41,7 @@ CREATE TABLE offsets ( "key" TEXT NOT NULL, timestamp TEXT NOT NULL, PRIMARY KEY
 
 CREATE TABLE participant_session ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER, created_at DATETIME, PRIMARY KEY(conversation_id, user_id, session_id) );
 
-CREATE TABLE participants ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL, created_at DATETIME NOT NULL, PRIMARY KEY(conversation_id,user_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
+CREATE TABLE participants ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT NOT NULL MAPPED By `const ParticipantRoleConverter()`, created_at DATETIME NOT NULL, PRIMARY KEY(conversation_id,user_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
 CREATE TABLE ratchet_sender_keys ( group_id TEXT NOT NULL, sender_id TEXT NOT NULL, status TEXT NOT NULL, message_id TEXT, created_at DATETIME NOT NULL, PRIMARY KEY(group_id, sender_id) );
 

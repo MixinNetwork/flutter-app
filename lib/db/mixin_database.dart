@@ -8,6 +8,7 @@ import 'package:flutter_app/db/converter/media_status_type_converter.dart';
 import 'package:flutter_app/db/converter/message_category_type_converter.dart';
 import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:flutter_app/db/converter/user_relationship_converter.dart';
+import 'package:flutter_app/db/converter/participant_role_converter.dart';
 import 'package:flutter_app/db/dao/hyperlinks_dao.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/message_mentions_dao.dart';

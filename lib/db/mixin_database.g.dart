@@ -3116,7 +3116,7 @@ class Messages extends Table with TableInfo<Messages, Message> {
 class Participant extends DataClass implements Insertable<Participant> {
   final String conversationId;
   final String userId;
-  final String role;
+  final ParticipantRole role;
   final DateTime createdAt;
   Participant(
       {@required this.conversationId,
@@ -3133,7 +3133,8 @@ class Participant extends DataClass implements Insertable<Participant> {
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
       userId:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      role: stringType.mapFromDatabaseResponse(data['${effectivePrefix}role']),
+      role: Participants.$converter0.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}role'])),
       createdAt: dateTimeType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']),
     );
@@ -3148,7 +3149,8 @@ class Participant extends DataClass implements Insertable<Participant> {
       map['user_id'] = Variable<String>(userId);
     }
     if (!nullToAbsent || role != null) {
-      map['role'] = Variable<String>(role);
+      final converter = Participants.$converter0;
+      map['role'] = Variable<String>(converter.mapToSql(role));
     }
     if (!nullToAbsent || createdAt != null) {
       map['created_at'] = Variable<DateTime>(createdAt);
@@ -3176,7 +3178,7 @@ class Participant extends DataClass implements Insertable<Participant> {
     return Participant(
       conversationId: serializer.fromJson<String>(json['conversation_id']),
       userId: serializer.fromJson<String>(json['user_id']),
-      role: serializer.fromJson<String>(json['role']),
+      role: serializer.fromJson<ParticipantRole>(json['role']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
@@ -3186,7 +3188,7 @@ class Participant extends DataClass implements Insertable<Participant> {
     return <String, dynamic>{
       'conversation_id': serializer.toJson<String>(conversationId),
       'user_id': serializer.toJson<String>(userId),
-      'role': serializer.toJson<String>(role),
+      'role': serializer.toJson<ParticipantRole>(role),
       'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
@@ -3194,7 +3196,7 @@ class Participant extends DataClass implements Insertable<Participant> {
   Participant copyWith(
           {String conversationId,
           String userId,
-          String role,
+          ParticipantRole role,
           DateTime createdAt}) =>
       Participant(
         conversationId: conversationId ?? this.conversationId,
@@ -3229,7 +3231,7 @@ class Participant extends DataClass implements Insertable<Participant> {
 class ParticipantsCompanion extends UpdateCompanion<Participant> {
   final Value<String> conversationId;
   final Value<String> userId;
-  final Value<String> role;
+  final Value<ParticipantRole> role;
   final Value<DateTime> createdAt;
   const ParticipantsCompanion({
     this.conversationId = const Value.absent(),
@@ -3240,7 +3242,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   ParticipantsCompanion.insert({
     @required String conversationId,
     @required String userId,
-    @required String role,
+    @required ParticipantRole role,
     @required DateTime createdAt,
   })  : conversationId = Value(conversationId),
         userId = Value(userId),
@@ -3263,7 +3265,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
   ParticipantsCompanion copyWith(
       {Value<String> conversationId,
       Value<String> userId,
-      Value<String> role,
+      Value<ParticipantRole> role,
       Value<DateTime> createdAt}) {
     return ParticipantsCompanion(
       conversationId: conversationId ?? this.conversationId,
@@ -3283,7 +3285,8 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
       map['user_id'] = Variable<String>(userId.value);
     }
     if (role.present) {
-      map['role'] = Variable<String>(role.value);
+      final converter = Participants.$converter0;
+      map['role'] = Variable<String>(converter.mapToSql(role.value));
     }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
@@ -3369,12 +3372,7 @@ class Participants extends Table with TableInfo<Participants, Participant> {
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    if (data.containsKey('role')) {
-      context.handle(
-          _roleMeta, role.isAcceptableOrUnknown(data['role'], _roleMeta));
-    } else if (isInserting) {
-      context.missing(_roleMeta);
-    }
+    context.handle(_roleMeta, const VerificationResult.success());
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at'], _createdAtMeta));
@@ -3397,6 +3395,8 @@ class Participants extends Table with TableInfo<Participants, Participant> {
     return Participants(_db, alias);
   }
 
+  static TypeConverter<ParticipantRole, String> $converter0 =
+      const ParticipantRoleConverter();
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY(conversation_id,user_id)',
