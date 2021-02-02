@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/account/send_message_helper.dart';
@@ -162,6 +163,56 @@ class AccountServer {
     if (content == null || content.isEmpty) return;
     _sendMessageHelper.sendTextMessage(
         conversationId, userId, content, isPlain);
+  }
+
+  void sendImageMessage(
+    String conversationId,
+    File image, [
+    bool isPlain = true,
+  ]) {
+    _sendAttachmentMessage(conversationId, image,
+        isPlain ? MessageCategory.plainImage : MessageCategory.signalImage);
+  }
+
+  void sendVideoMessage(
+    String conversationId,
+    File video, [
+    bool isPlain = true,
+  ]) {
+    _sendAttachmentMessage(conversationId, video,
+        isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo);
+  }
+
+  void sendAudioMessage(
+    String conversationId,
+    File audio, [
+    bool isPlain = true,
+  ]) {
+    _sendAttachmentMessage(conversationId, audio,
+        isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio);
+  }
+
+  void sendDataMessage(
+    String conversationId,
+    File file, [
+    bool isPlain = true,
+  ]) {
+    _sendAttachmentMessage(conversationId, file,
+        isPlain ? MessageCategory.plainData : MessageCategory.signalData);
+  }
+
+  void _sendAttachmentMessage(String conversationId,
+      File file,
+      MessageCategory category) {
+    if (category.isImage) {
+      // todo get width height
+    } else if (category.isVideo) {
+      // todo get width height
+    } else if (category.isAudio) {
+      // todo get width height
+    } else {
+      // todo get mime type
+    }
   }
 
   void selectConversation(String conversationId) {
