@@ -52,11 +52,11 @@ class AccountServer {
   Future _initDatabase() async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
-    _attachmentUtil = await AttachmentUtil.init(client ,identityNumber);
-    _sendMessageHelper =
-        SendMessageHelper(database.messagesDao, database.jobsDao, _attachmentUtil);
+    _attachmentUtil = await AttachmentUtil.init(client, identityNumber);
+    _sendMessageHelper = SendMessageHelper(
+        database.messagesDao, database.jobsDao, _attachmentUtil);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
-    _decryptMessage = DecryptMessage(userId, database, client,_attachmentUtil);
+    _decryptMessage = DecryptMessage(userId, database, client, _attachmentUtil);
   }
 
   String userId;
@@ -220,15 +220,18 @@ class AccountServer {
       if (res.data != null) {
         final relationships = <StickerRelationship>[];
         res.data.forEach((sticker) {
-          relationships.add(StickerRelationship(albumId:albumId, stickerId:sticker.stickerId));
+          relationships.add(StickerRelationship(
+              albumId: albumId, stickerId: sticker.stickerId));
           database.stickerDao.insert(db.Sticker(
-              stickerId: sticker.stickerId,
-              name: sticker.name,
-              assetUrl: sticker.assetUrl,
-              assetType: sticker.assetType,
-              assetWidth: sticker.assetWidth,
-              assetHeight: sticker.assetHeight,
-              createdAt: sticker.createdAt));
+            stickerId: sticker.stickerId,
+            albumId: albumId,
+            name: sticker.name,
+            assetUrl: sticker.assetUrl,
+            assetType: sticker.assetType,
+            assetWidth: sticker.assetWidth,
+            assetHeight: sticker.assetHeight,
+            createdAt: sticker.createdAt,
+          ));
         });
 
         database.stickerRelationshipsDao.insertAll(relationships);

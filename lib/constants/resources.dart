@@ -29,6 +29,9 @@ class Resources {
 
   static const String assetsImagesFileSvg = 'assets/images/file.svg';
 
+  static const String assetsImagesGifStickerSvg =
+      'assets/images/gif_sticker.svg';
+
   static const String assetsImagesGroupPng = 'assets/images/group.png';
 
   static const String assetsImagesIcAboutSvg = 'assets/images/ic_about.svg';
@@ -87,11 +90,17 @@ class Resources {
 
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';
 
+  static const String assetsImagesPersonalStickerSvg =
+      'assets/images/personal_sticker.svg';
+
   static const String assetsImagesPinSvg = 'assets/images/pin.svg';
 
   static const String assetsImagesReadSvg = 'assets/images/read.svg';
 
   static const String assetsImagesRecallSvg = 'assets/images/recall.svg';
+
+  static const String assetsImagesRecentStickerSvg =
+      'assets/images/recent_sticker.svg';
 
   static const String assetsImagesSendingSvg = 'assets/images/sending.svg';
 

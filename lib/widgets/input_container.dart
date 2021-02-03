@@ -9,6 +9,7 @@ import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/hoer_overlay.dart';
+import 'package:flutter_app/widgets/sticker_page/sticker_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
@@ -63,7 +64,7 @@ class InputContainer extends StatelessWidget {
               childAnchor: Alignment.topCenter,
               overlayAnchor: Alignment.bottomCenter,
               offset: const Offset(0, -17),
-              overlayBuilder: (BuildContext context) => const _StickerPage(),
+              overlayBuilder: (BuildContext context) => const StickerPage(),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -130,44 +131,5 @@ class InputContainer extends StatelessWidget {
       );
     }
     return valid;
-  }
-}
-
-class _StickerPage extends StatelessWidget {
-  const _StickerPage({
-    Key key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 464,
-      height: 407,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(11),
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(255, 255, 255, 1),
-          darkColor: const Color.fromRGBO(62, 65, 72, 1),
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(11),
-        child: Column(
-          children: [
-            const Expanded(child: SizedBox()),
-            Container(
-              width: double.infinity,
-              height: 60,
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(0, 0, 0, 0.05),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }

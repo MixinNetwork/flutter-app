@@ -11,6 +11,8 @@ class StickerAlbumsDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(StickerAlbum stickerAlbum) =>
       into(db.stickerAlbums).insertOnConflictUpdate(stickerAlbum);
 
-  Future deleteStickerAlbum(StickerAlbum stickerAlbum) =>
+  Future<int> deleteStickerAlbum(StickerAlbum stickerAlbum) =>
       delete(db.stickerAlbums).delete(stickerAlbum);
+
+  Selectable<StickerAlbum> systemAlbums() => db.systemAlbums();
 }

@@ -11997,6 +11997,38 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<Sticker> recentUsedStickers() {
+    return customSelect(
+        'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
+        variables: [],
+        readsFrom: {stickers}).map(stickers.mapFromRow);
+  }
+
+  Selectable<StickerAlbum> systemAlbums() {
+    return customSelect(
+        'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
+        variables: [],
+        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
+  }
+
+  Selectable<StickerAlbum> personalAlbums() {
+    return customSelect(
+        'SELECT * FROM sticker_albums WHERE category = \'PERSONAL\' ORDER BY created_at ASC LIMIT 1',
+        variables: [],
+        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
+  }
+
+  Selectable<Sticker> personalStickers() {
+    return customSelect(
+        'SELECT s.*\nFROM   sticker_albums sa\n       INNER JOIN sticker_relationships sr\n               ON sr.album_id = sa.album_id\n       INNER JOIN stickers s\n               ON sr.sticker_id = s.sticker_id\nWHERE  sa.category = \'PERSONAL\'\nORDER  BY s.created_at',
+        variables: [],
+        readsFrom: {
+          stickerAlbums,
+          stickerRelationships,
+          stickers
+        }).map(stickers.mapFromRow);
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

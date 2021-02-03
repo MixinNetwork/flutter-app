@@ -323,3 +323,23 @@ WHERE p.conversation_id = :conversationId
   AND p.user_id = u.user_id
 ORDER BY p.created_at
 LIMIT 4;
+
+
+recentUsedStickers:
+SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20;
+
+systemAlbums:
+SELECT * FROM sticker_albums WHERE category = 'SYSTEM' ORDER BY created_at DESC;
+
+personalAlbums:
+SELECT * FROM sticker_albums WHERE category = 'PERSONAL' ORDER BY created_at ASC LIMIT 1;
+
+personalStickers:
+SELECT s.*
+FROM   sticker_albums sa
+       INNER JOIN sticker_relationships sr
+               ON sr.album_id = sa.album_id
+       INNER JOIN stickers s
+               ON sr.sticker_id = s.sticker_id
+WHERE  sa.category = 'PERSONAL'
+ORDER  BY s.created_at;
