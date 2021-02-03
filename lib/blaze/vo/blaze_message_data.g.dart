@@ -124,10 +124,10 @@ const _$MessageCategoryEnumMap = {
 };
 
 const _$MessageStatusEnumMap = {
-  MessageStatus.sending: 'sending',
-  MessageStatus.sent: 'sent',
-  MessageStatus.delivered: 'delivered',
-  MessageStatus.read: 'read',
-  MessageStatus.failed: 'failed',
-  MessageStatus.unknown: 'unknown',
+  MessageStatus.sending: 'SENDING',
+  MessageStatus.sent: 'SENT',
+  MessageStatus.delivered: 'DELIVERED',
+  MessageStatus.read: 'READ',
+  MessageStatus.failed: 'FAILED',
+  MessageStatus.unknown: 'UNKNOWN',
 };

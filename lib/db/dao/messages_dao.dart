@@ -106,4 +106,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       return list;
     });
   }
+
+  Future<QuoteMessageItem> findMessageItemById(
+      String conversationId, String messageId) {
+    return db.findMessageItemById(conversationId, messageId).getSingle();
+  }
 }

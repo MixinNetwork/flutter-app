@@ -5,9 +5,9 @@ import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 class Injector {
-  Injector(this.selfId, this.database, this.client);
+  Injector(this.accountId, this.database, this.client);
 
-  String selfId;
+  String accountId;
   Database database;
   Client client;
 
@@ -24,7 +24,7 @@ class Injector {
         var ownerId = response.data.creatorId;
         if (response.data.category == ConversationCategory.contact) {
           response.data.participants.forEach((item) {
-            if (item.userId != selfId) {
+            if (item.userId != accountId) {
               ownerId = item.userId;
             }
           });

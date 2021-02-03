@@ -4,6 +4,7 @@ import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' show ConversationStatus;
+
 part 'conversations_dao.g.dart';
 
 @UseDao(tables: [Conversations])
