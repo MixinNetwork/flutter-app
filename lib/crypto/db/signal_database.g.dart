@@ -7,7 +7,7 @@ part of 'signal_database.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
-class Identitie extends DataClass implements Insertable<Identitie> {
+class Identity extends DataClass implements Insertable<Identity> {
   final int id;
   final String address;
   final int registrationId;
@@ -15,7 +15,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   final Uint8List privateKey;
   final int nextPrekeyId;
   final int timestamp;
-  Identitie(
+  Identity(
       {@required this.id,
       @required this.address,
       this.registrationId,
@@ -23,13 +23,13 @@ class Identitie extends DataClass implements Insertable<Identitie> {
       this.privateKey,
       this.nextPrekeyId,
       @required this.timestamp});
-  factory Identitie.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+  factory Identity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
-    return Identitie(
+    return Identity(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id']),
       address:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}address']),
@@ -96,10 +96,10 @@ class Identitie extends DataClass implements Insertable<Identitie> {
     );
   }
 
-  factory Identitie.fromJson(Map<String, dynamic> json,
+  factory Identity.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return Identitie(
+    return Identity(
       id: serializer.fromJson<int>(json['_id']),
       address: serializer.fromJson<String>(json['address']),
       registrationId: serializer.fromJson<int>(json['registration_id']),
@@ -123,7 +123,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
     };
   }
 
-  Identitie copyWith(
+  Identity copyWith(
           {int id,
           String address,
           int registrationId,
@@ -131,7 +131,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
           Uint8List privateKey,
           int nextPrekeyId,
           int timestamp}) =>
-      Identitie(
+      Identity(
         id: id ?? this.id,
         address: address ?? this.address,
         registrationId: registrationId ?? this.registrationId,
@@ -142,7 +142,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
       );
   @override
   String toString() {
-    return (StringBuffer('Identitie(')
+    return (StringBuffer('Identity(')
           ..write('id: $id, ')
           ..write('address: $address, ')
           ..write('registrationId: $registrationId, ')
@@ -168,7 +168,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is Identitie &&
+      (other is Identity &&
           other.id == this.id &&
           other.address == this.address &&
           other.registrationId == this.registrationId &&
@@ -178,7 +178,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
           other.timestamp == this.timestamp);
 }
 
-class IdentitiesCompanion extends UpdateCompanion<Identitie> {
+class IdentitiesCompanion extends UpdateCompanion<Identity> {
   final Value<int> id;
   final Value<String> address;
   final Value<int> registrationId;
@@ -206,7 +206,7 @@ class IdentitiesCompanion extends UpdateCompanion<Identitie> {
   })  : address = Value(address),
         publicKey = Value(publicKey),
         timestamp = Value(timestamp);
-  static Insertable<Identitie> custom({
+  static Insertable<Identity> custom({
     Expression<int> id,
     Expression<String> address,
     Expression<int> registrationId,
@@ -287,7 +287,7 @@ class IdentitiesCompanion extends UpdateCompanion<Identitie> {
   }
 }
 
-class Identities extends Table with TableInfo<Identities, Identitie> {
+class Identities extends Table with TableInfo<Identities, Identity> {
   final GeneratedDatabase _db;
   final String _alias;
   Identities(this._db, [this._alias]);
@@ -370,7 +370,7 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   @override
   final String actualTableName = 'identities';
   @override
-  VerificationContext validateIntegrity(Insertable<Identitie> instance,
+  VerificationContext validateIntegrity(Insertable<Identity> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -419,9 +419,9 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Identitie map(Map<String, dynamic> data, {String tablePrefix}) {
+  Identity map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Identitie.fromData(data, _db, prefix: effectivePrefix);
+    return Identity.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
@@ -433,17 +433,17 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   bool get dontWriteConstraints => true;
 }
 
-class Prekey extends DataClass implements Insertable<Prekey> {
+class PreKey extends DataClass implements Insertable<PreKey> {
   final int id;
   final int prekeyId;
   final Uint8List record;
-  Prekey({@required this.id, @required this.prekeyId, @required this.record});
-  factory Prekey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+  PreKey({@required this.id, @required this.prekeyId, @required this.record});
+  factory PreKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
-    return Prekey(
+    return PreKey(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id']),
       prekeyId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id']),
@@ -477,10 +477,10 @@ class Prekey extends DataClass implements Insertable<Prekey> {
     );
   }
 
-  factory Prekey.fromJson(Map<String, dynamic> json,
+  factory PreKey.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return Prekey(
+    return PreKey(
       id: serializer.fromJson<int>(json['_id']),
       prekeyId: serializer.fromJson<int>(json['prekey_id']),
       record: serializer.fromJson<Uint8List>(json['record']),
@@ -496,14 +496,14 @@ class Prekey extends DataClass implements Insertable<Prekey> {
     };
   }
 
-  Prekey copyWith({int id, int prekeyId, Uint8List record}) => Prekey(
+  PreKey copyWith({int id, int prekeyId, Uint8List record}) => PreKey(
         id: id ?? this.id,
         prekeyId: prekeyId ?? this.prekeyId,
         record: record ?? this.record,
       );
   @override
   String toString() {
-    return (StringBuffer('Prekey(')
+    return (StringBuffer('PreKey(')
           ..write('id: $id, ')
           ..write('prekeyId: $prekeyId, ')
           ..write('record: $record')
@@ -517,13 +517,13 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is Prekey &&
+      (other is PreKey &&
           other.id == this.id &&
           other.prekeyId == this.prekeyId &&
           other.record == this.record);
 }
 
-class PrekeysCompanion extends UpdateCompanion<Prekey> {
+class PrekeysCompanion extends UpdateCompanion<PreKey> {
   final Value<int> id;
   final Value<int> prekeyId;
   final Value<Uint8List> record;
@@ -538,7 +538,7 @@ class PrekeysCompanion extends UpdateCompanion<Prekey> {
     @required Uint8List record,
   })  : prekeyId = Value(prekeyId),
         record = Value(record);
-  static Insertable<Prekey> custom({
+  static Insertable<PreKey> custom({
     Expression<int> id,
     Expression<int> prekeyId,
     Expression<Uint8List> record,
@@ -585,7 +585,7 @@ class PrekeysCompanion extends UpdateCompanion<Prekey> {
   }
 }
 
-class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
+class Prekeys extends Table with TableInfo<Prekeys, PreKey> {
   final GeneratedDatabase _db;
   final String _alias;
   Prekeys(this._db, [this._alias]);
@@ -624,7 +624,7 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   @override
   final String actualTableName = 'prekeys';
   @override
-  VerificationContext validateIntegrity(Insertable<Prekey> instance,
+  VerificationContext validateIntegrity(Insertable<PreKey> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -649,9 +649,9 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Prekey map(Map<String, dynamic> data, {String tablePrefix}) {
+  PreKey map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Prekey.fromData(data, _db, prefix: effectivePrefix);
+    return PreKey.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
@@ -663,22 +663,22 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   bool get dontWriteConstraints => true;
 }
 
-class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
+class SignedPreKey extends DataClass implements Insertable<SignedPreKey> {
   final int id;
   final int prekeyId;
   final Uint8List record;
   final int timestamp;
-  SignedPrekey(
+  SignedPreKey(
       {@required this.id,
       @required this.prekeyId,
       @required this.record,
       @required this.timestamp});
-  factory SignedPrekey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+  factory SignedPreKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
-    return SignedPrekey(
+    return SignedPreKey(
       id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id']),
       prekeyId:
           intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id']),
@@ -720,10 +720,10 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
     );
   }
 
-  factory SignedPrekey.fromJson(Map<String, dynamic> json,
+  factory SignedPreKey.fromJson(Map<String, dynamic> json,
       {ValueSerializer serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return SignedPrekey(
+    return SignedPreKey(
       id: serializer.fromJson<int>(json['_id']),
       prekeyId: serializer.fromJson<int>(json['prekey_id']),
       record: serializer.fromJson<Uint8List>(json['record']),
@@ -741,9 +741,9 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
     };
   }
 
-  SignedPrekey copyWith(
+  SignedPreKey copyWith(
           {int id, int prekeyId, Uint8List record, int timestamp}) =>
-      SignedPrekey(
+      SignedPreKey(
         id: id ?? this.id,
         prekeyId: prekeyId ?? this.prekeyId,
         record: record ?? this.record,
@@ -751,7 +751,7 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
       );
   @override
   String toString() {
-    return (StringBuffer('SignedPrekey(')
+    return (StringBuffer('SignedPreKey(')
           ..write('id: $id, ')
           ..write('prekeyId: $prekeyId, ')
           ..write('record: $record, ')
@@ -766,14 +766,14 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is SignedPrekey &&
+      (other is SignedPreKey &&
           other.id == this.id &&
           other.prekeyId == this.prekeyId &&
           other.record == this.record &&
           other.timestamp == this.timestamp);
 }
 
-class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
+class SignedPrekeysCompanion extends UpdateCompanion<SignedPreKey> {
   final Value<int> id;
   final Value<int> prekeyId;
   final Value<Uint8List> record;
@@ -792,7 +792,7 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
   })  : prekeyId = Value(prekeyId),
         record = Value(record),
         timestamp = Value(timestamp);
-  static Insertable<SignedPrekey> custom({
+  static Insertable<SignedPreKey> custom({
     Expression<int> id,
     Expression<int> prekeyId,
     Expression<Uint8List> record,
@@ -849,7 +849,7 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
   }
 }
 
-class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
+class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPreKey> {
   final GeneratedDatabase _db;
   final String _alias;
   SignedPrekeys(this._db, [this._alias]);
@@ -896,7 +896,7 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   @override
   final String actualTableName = 'signed_prekeys';
   @override
-  VerificationContext validateIntegrity(Insertable<SignedPrekey> instance,
+  VerificationContext validateIntegrity(Insertable<SignedPreKey> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -927,9 +927,9 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SignedPrekey map(Map<String, dynamic> data, {String tablePrefix}) {
+  SignedPreKey map(Map<String, dynamic> data, {String tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return SignedPrekey.fromData(data, _db, prefix: effectivePrefix);
+    return SignedPreKey.fromData(data, _db, prefix: effectivePrefix);
   }
 
   @override
