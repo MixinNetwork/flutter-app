@@ -144,7 +144,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
       );
       yield state.copyWith(
         map: await queryMap(
-          min(state.map.length, limit),
+          max(state.map.length, limit),
           state.map.isNotEmpty ? state.map.keys.reduce(min) : 0,
         ),
       );

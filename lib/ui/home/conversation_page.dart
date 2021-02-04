@@ -92,21 +92,13 @@ class _List extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationListBloc, PagingState<ConversationItem>, bool>(
-        converter: (state) => state.initialized,
-        when: (a, b) => b,
-        builder: (context, initialized) => BlocConverter<ConversationListBloc,
-            PagingState<ConversationItem>, int>(
-          converter: (state) => state.count,
-          builder: (context, count) {
-            if (count == null || count <= 0) return const _Empty();
-            return ColoredBox(
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(255, 255, 255, 1),
-                darkColor: const Color.fromRGBO(44, 49, 54, 1),
-              ),
-              child: ScrollablePositionedList.builder(
+      BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
+        builder: (context, slideCategoryState) => BlocConverter<ConversationListBloc, PagingState<ConversationItem>, int>(
+            converter: (state) => state.count,
+            builder: (context, count) {
+              if (count == null || count <= 0) return const _Empty();
+              return ScrollablePositionedList.builder(
+                key: PageStorageKey(slideCategoryState),
                 itemPositionsListener:
                     BlocProvider.of<ConversationListBloc>(context)
                         .itemPositionsListener,
@@ -178,10 +170,9 @@ class _List extends StatelessWidget {
                     );
                   },
                 ),
-              ),
-            );
-          },
-        ),
+              );
+            },
+          )
       );
 }
 
