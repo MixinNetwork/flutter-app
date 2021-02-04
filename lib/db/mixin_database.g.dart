@@ -11529,332 +11529,49 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           StickerRelationshipsDao(this as MixinDatabase);
   UserDao _userDao;
   UserDao get userDao => _userDao ??= UserDao(this as MixinDatabase);
-  Selectable<int> contactConversationCount() {
+  Selectable<StickerAlbum> systemAlbums() {
     return customSelect(
-        'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'FRIEND\'\n       AND ou.app_id IS NULL\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',
+        'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
+        variables: [],
+        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
+  }
+
+  Selectable<StickerAlbum> personalAlbums() {
+    return customSelect(
+        'SELECT * FROM sticker_albums WHERE category = \'PERSONAL\' ORDER BY created_at ASC LIMIT 1',
+        variables: [],
+        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
+  }
+
+  Selectable<Sticker> recentUsedStickers() {
+    return customSelect(
+        'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
+        variables: [],
+        readsFrom: {stickers}).map(stickers.mapFromRow);
+  }
+
+  Selectable<Sticker> personalStickers() {
+    return customSelect(
+        'SELECT s.*\nFROM   sticker_albums sa\n       INNER JOIN sticker_relationships sr\n               ON sr.album_id = sa.album_id\n       INNER JOIN stickers s\n               ON sr.sticker_id = s.sticker_id\nWHERE  sa.category = \'PERSONAL\'\nORDER  BY s.created_at',
         variables: [],
         readsFrom: {
-          conversations,
-          users,
-          messages
-        }).map((QueryRow row) => row.readInt('Count(1)'));
+          stickerAlbums,
+          stickerRelationships,
+          stickers
+        }).map(stickers.mapFromRow);
   }
 
-  Selectable<ConversationItem> contactConversations(int limit, int offset) {
+  Selectable<UserItem> participantsAvatar(String conversationId) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions,\n            ou.relationship AS relationship \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC \n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable.withInt(limit),
-          Variable.withInt(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status')),
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
-        contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
-        messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
-        relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
-      );
-    });
-  }
-
-  Selectable<int> strangerConversationCount() {
-    return customSelect(
-        'SELECT Count(*)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'STRANGER\'\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
-        variables: [],
-        readsFrom: {
-          conversations,
-          users,
-          messages
-        }).map((QueryRow row) => row.readInt('Count(*)'));
-  }
-
-  Selectable<ConversationItem> strangerConversations(int limit, int offset) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\' \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable.withInt(limit),
-          Variable.withInt(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status')),
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
-        contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
-        messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
-        relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
-      );
-    });
-  }
-
-  Selectable<int> groupConversationCount() {
-    return customSelect(
-        'SELECT Count(*)\nFROM   conversations c\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'GROUP\'\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
-        variables: [],
-        readsFrom: {
-          conversations,
-          messages
-        }).map((QueryRow row) => row.readInt('Count(*)'));
-  }
-
-  Selectable<ConversationItem> groupConversations(int limit, int offset) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions,\n            ou.relationship AS relationship \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\' \n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable.withInt(limit),
-          Variable.withInt(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status')),
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
-        contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
-        messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
-        relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
-      );
-    });
-  }
-
-  Selectable<int> botConversationCount() {
-    return customSelect(
-        'SELECT Count(*)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.app_id IS NOT NULL\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
-        variables: [],
-        readsFrom: {
-          conversations,
-          users,
-          messages
-        }).map((QueryRow row) => row.readInt('Count(*)'));
-  }
-
-  Selectable<ConversationItem> botConversations(int limit, int offset) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions,\n            ou.relationship AS relationship \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL\n            ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC\n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable.withInt(limit),
-          Variable.withInt(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status')),
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
-        contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
-        messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
-        relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
-      );
-    });
-  }
-
-  Selectable<ConversationItem> conversationItem(String id) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,  \n            mm.mentions AS mentions,\n            ou.relationship AS relationship \n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id \n                        ORDER BY c.pin_time DESC, \n              CASE \n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at \n              END \n            DESC',
-        variables: [
-          Variable.withString(id)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status')),
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
-        contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
-        messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+        'SELECT u.user_id,\n       u.identity_number,\n       u.biography,\n       u.full_name,\n       u.avatar_url,\n       u.relationship\nFROM participants p,\n     users u\nWHERE p.conversation_id = :conversationId\n  AND p.user_id = u.user_id\nORDER BY p.created_at\nLIMIT 4',
+        variables: [Variable.withString(conversationId)],
+        readsFrom: {users, participants}).map((QueryRow row) {
+      return UserItem(
+        userId: row.readString('user_id'),
+        identityNumber: row.readString('identity_number'),
+        biography: row.readString('biography'),
+        fullName: row.readString('full_name'),
+        avatarUrl: row.readString('avatar_url'),
         relationship:
             Users.$converter0.mapToDart(row.readString('relationship')),
       );
@@ -11864,7 +11581,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n                        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n                        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n                        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n                        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n                        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n                        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n                        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n                        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n                        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n                        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead, \n                        c.name AS groupName\n                        FROM messages m\n                        INNER JOIN users u ON m.user_id = u.user_id\n                        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n                        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n                        LEFT JOIN assets a ON s.asset_id = a.asset_id\n                        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n                        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n                        LEFT JOIN users su ON m.shared_user_id = su.user_id\n                        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n                        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n                        WHERE m.conversation_id = :conversationId \n                        ORDER BY m.created_at DESC\n                        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n                        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n                        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n                        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n                        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n                        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n                        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n                        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n                        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n                        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n                        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n                        c.name AS groupName\n                        FROM messages m\n                        INNER JOIN users u ON m.user_id = u.user_id\n                        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n                        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n                        LEFT JOIN assets a ON s.asset_id = a.asset_id\n                        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n                        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n                        LEFT JOIN users su ON m.shared_user_id = su.user_id\n                        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n                        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n                        WHERE m.conversation_id = :conversationId\n                        ORDER BY m.created_at DESC\n                        LIMIT :offset, :limit',
         variables: [
           Variable.withString(conversationId),
           Variable.withInt(offset),
@@ -11983,7 +11700,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<QuoteMessageItem> findMessageItemById(
       String conversationId, String messageId) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, \n      u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, \n      m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, \n      m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, \n      m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, \n      m.quote_message_id as quoteId, m.quote_content as quoteContent, \n      st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, \n      st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, \n      su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions \n      FROM messages m \n      INNER JOIN users u ON m.user_id = u.user_id \n      LEFT JOIN stickers st ON st.sticker_id = m.sticker_id \n      LEFT JOIN users su ON m.shared_user_id = su.user_id \n      LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n      WHERE m.conversation_id = :conversationId AND m.message_id = :messageId AND m.status != \'FAILED\'',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n      u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n      m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n      m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n      m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration,\n      m.quote_message_id as quoteId, m.quote_content as quoteContent,\n      st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n      st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n      su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions\n      FROM messages m\n      INNER JOIN users u ON m.user_id = u.user_id\n      LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n      LEFT JOIN users su ON m.shared_user_id = su.user_id\n      LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n      WHERE m.conversation_id = :conversationId AND m.message_id = :messageId AND m.status != \'FAILED\'',
         variables: [
           Variable.withString(conversationId),
           Variable.withString(messageId)
@@ -12036,53 +11753,336 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<UserItem> participantsAvatar(String conversationId) {
+  Selectable<int> contactConversationCount() {
     return customSelect(
-        'SELECT u.user_id,\n       u.identity_number,\n       u.biography,\n       u.full_name,\n       u.avatar_url,\n       u.relationship\nFROM participants p,\n     users u\nWHERE p.conversation_id = :conversationId\n  AND p.user_id = u.user_id\nORDER BY p.created_at\nLIMIT 4',
-        variables: [Variable.withString(conversationId)],
-        readsFrom: {users, participants}).map((QueryRow row) {
-      return UserItem(
-        userId: row.readString('user_id'),
-        identityNumber: row.readString('identity_number'),
-        biography: row.readString('biography'),
-        fullName: row.readString('full_name'),
-        avatarUrl: row.readString('avatar_url'),
+        'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'FRIEND\'\n       AND ou.app_id IS NULL\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',
+        variables: [],
+        readsFrom: {
+          conversations,
+          users,
+          messages
+        }).map((QueryRow row) => row.readInt('Count(1)'));
+  }
+
+  Selectable<ConversationItem> contactConversations(int limit, int offset) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
+        variables: [
+          Variable.withInt(limit),
+          Variable.withInt(offset)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
         relationship:
             Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
 
-  Selectable<Sticker> recentUsedStickers() {
+  Selectable<int> strangerConversationCount() {
     return customSelect(
-        'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
-        variables: [],
-        readsFrom: {stickers}).map(stickers.mapFromRow);
-  }
-
-  Selectable<StickerAlbum> systemAlbums() {
-    return customSelect(
-        'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
-        variables: [],
-        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
-  }
-
-  Selectable<StickerAlbum> personalAlbums() {
-    return customSelect(
-        'SELECT * FROM sticker_albums WHERE category = \'PERSONAL\' ORDER BY created_at ASC LIMIT 1',
-        variables: [],
-        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
-  }
-
-  Selectable<Sticker> personalStickers() {
-    return customSelect(
-        'SELECT s.*\nFROM   sticker_albums sa\n       INNER JOIN sticker_relationships sr\n               ON sr.album_id = sa.album_id\n       INNER JOIN stickers s\n               ON sr.sticker_id = s.sticker_id\nWHERE  sa.category = \'PERSONAL\'\nORDER  BY s.created_at',
+        'SELECT Count(*)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'STRANGER\'\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
         variables: [],
         readsFrom: {
-          stickerAlbums,
-          stickerRelationships,
-          stickers
-        }).map(stickers.mapFromRow);
+          conversations,
+          users,
+          messages
+        }).map((QueryRow row) => row.readInt('Count(*)'));
+  }
+
+  Selectable<ConversationItem> strangerConversations(int limit, int offset) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        variables: [
+          Variable.withInt(limit),
+          Variable.withInt(offset)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
+  }
+
+  Selectable<int> groupConversationCount() {
+    return customSelect(
+        'SELECT Count(*)\nFROM   conversations c\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'GROUP\'\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
+        variables: [],
+        readsFrom: {
+          conversations,
+          messages
+        }).map((QueryRow row) => row.readInt('Count(*)'));
+  }
+
+  Selectable<ConversationItem> groupConversations(int limit, int offset) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        variables: [
+          Variable.withInt(limit),
+          Variable.withInt(offset)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
+  }
+
+  Selectable<int> botConversationCount() {
+    return customSelect(
+        'SELECT Count(*)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.app_id IS NOT NULL\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
+        variables: [],
+        readsFrom: {
+          conversations,
+          users,
+          messages
+        }).map((QueryRow row) => row.readInt('Count(*)'));
+  }
+
+  Selectable<ConversationItem> botConversations(int limit, int offset) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        variables: [
+          Variable.withInt(limit),
+          Variable.withInt(offset)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
+  }
+
+  Selectable<ConversationItem> conversationItem(String id) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
+        variables: [
+          Variable.withString(id)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status')),
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt')),
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName: row.readString('actionName'),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
   }
 
   @override
@@ -12162,184 +12162,48 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       );
 }
 
-class ConversationItem {
-  final String conversationId;
-  final String groupIconUrl;
-  final ConversationCategory category;
-  final String groupName;
-  final ConversationStatus status;
-  final String lastReadMessageId;
-  final int unseenMessageCount;
-  final String ownerId;
-  final DateTime pinTime;
-  final DateTime muteUntil;
+class UserItem {
+  final String userId;
+  final String identityNumber;
+  final String biography;
+  final String fullName;
   final String avatarUrl;
-  final String name;
-  final int ownerVerified;
-  final String ownerIdentityNumber;
-  final DateTime ownerMuteUntil;
-  final String appId;
-  final String content;
-  final MessageCategory contentType;
-  final DateTime createdAt;
-  final DateTime lastMessageCreatedAt;
-  final String mediaUrl;
-  final String senderId;
-  final String actionName;
-  final MessageStatus messageStatus;
-  final String senderFullName;
-  final String snapshotType;
-  final String participantFullName;
-  final String participantUserId;
-  final int mentionCount;
-  final String mentions;
   final UserRelationship relationship;
-  ConversationItem({
-    this.conversationId,
-    this.groupIconUrl,
-    this.category,
-    this.groupName,
-    this.status,
-    this.lastReadMessageId,
-    this.unseenMessageCount,
-    this.ownerId,
-    this.pinTime,
-    this.muteUntil,
+  UserItem({
+    this.userId,
+    this.identityNumber,
+    this.biography,
+    this.fullName,
     this.avatarUrl,
-    this.name,
-    this.ownerVerified,
-    this.ownerIdentityNumber,
-    this.ownerMuteUntil,
-    this.appId,
-    this.content,
-    this.contentType,
-    this.createdAt,
-    this.lastMessageCreatedAt,
-    this.mediaUrl,
-    this.senderId,
-    this.actionName,
-    this.messageStatus,
-    this.senderFullName,
-    this.snapshotType,
-    this.participantFullName,
-    this.participantUserId,
-    this.mentionCount,
-    this.mentions,
     this.relationship,
   });
   @override
   int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
+      userId.hashCode,
       $mrjc(
-          groupIconUrl.hashCode,
+          identityNumber.hashCode,
           $mrjc(
-              category.hashCode,
-              $mrjc(
-                  groupName.hashCode,
-                  $mrjc(
-                      status.hashCode,
-                      $mrjc(
-                          lastReadMessageId.hashCode,
-                          $mrjc(
-                              unseenMessageCount.hashCode,
-                              $mrjc(
-                                  ownerId.hashCode,
-                                  $mrjc(
-                                      pinTime.hashCode,
-                                      $mrjc(
-                                          muteUntil.hashCode,
-                                          $mrjc(
-                                              avatarUrl.hashCode,
-                                              $mrjc(
-                                                  name.hashCode,
-                                                  $mrjc(
-                                                      ownerVerified.hashCode,
-                                                      $mrjc(
-                                                          ownerIdentityNumber
-                                                              .hashCode,
-                                                          $mrjc(
-                                                              ownerMuteUntil
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  appId
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      content
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          contentType
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              createdAt.hashCode,
-                                                                              $mrjc(lastMessageCreatedAt.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, $mrjc(mentions.hashCode, relationship.hashCode)))))))))))))))))))))))))))))));
+              biography.hashCode,
+              $mrjc(fullName.hashCode,
+                  $mrjc(avatarUrl.hashCode, relationship.hashCode))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is ConversationItem &&
-          other.conversationId == this.conversationId &&
-          other.groupIconUrl == this.groupIconUrl &&
-          other.category == this.category &&
-          other.groupName == this.groupName &&
-          other.status == this.status &&
-          other.lastReadMessageId == this.lastReadMessageId &&
-          other.unseenMessageCount == this.unseenMessageCount &&
-          other.ownerId == this.ownerId &&
-          other.pinTime == this.pinTime &&
-          other.muteUntil == this.muteUntil &&
+      (other is UserItem &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.biography == this.biography &&
+          other.fullName == this.fullName &&
           other.avatarUrl == this.avatarUrl &&
-          other.name == this.name &&
-          other.ownerVerified == this.ownerVerified &&
-          other.ownerIdentityNumber == this.ownerIdentityNumber &&
-          other.ownerMuteUntil == this.ownerMuteUntil &&
-          other.appId == this.appId &&
-          other.content == this.content &&
-          other.contentType == this.contentType &&
-          other.createdAt == this.createdAt &&
-          other.lastMessageCreatedAt == this.lastMessageCreatedAt &&
-          other.mediaUrl == this.mediaUrl &&
-          other.senderId == this.senderId &&
-          other.actionName == this.actionName &&
-          other.messageStatus == this.messageStatus &&
-          other.senderFullName == this.senderFullName &&
-          other.snapshotType == this.snapshotType &&
-          other.participantFullName == this.participantFullName &&
-          other.participantUserId == this.participantUserId &&
-          other.mentionCount == this.mentionCount &&
-          other.mentions == this.mentions &&
           other.relationship == this.relationship);
   @override
   String toString() {
-    return (StringBuffer('ConversationItem(')
-          ..write('conversationId: $conversationId, ')
-          ..write('groupIconUrl: $groupIconUrl, ')
-          ..write('category: $category, ')
-          ..write('groupName: $groupName, ')
-          ..write('status: $status, ')
-          ..write('lastReadMessageId: $lastReadMessageId, ')
-          ..write('unseenMessageCount: $unseenMessageCount, ')
-          ..write('ownerId: $ownerId, ')
-          ..write('pinTime: $pinTime, ')
-          ..write('muteUntil: $muteUntil, ')
+    return (StringBuffer('UserItem(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('biography: $biography, ')
+          ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
-          ..write('name: $name, ')
-          ..write('ownerVerified: $ownerVerified, ')
-          ..write('ownerIdentityNumber: $ownerIdentityNumber, ')
-          ..write('ownerMuteUntil: $ownerMuteUntil, ')
-          ..write('appId: $appId, ')
-          ..write('content: $content, ')
-          ..write('contentType: $contentType, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('lastMessageCreatedAt: $lastMessageCreatedAt, ')
-          ..write('mediaUrl: $mediaUrl, ')
-          ..write('senderId: $senderId, ')
-          ..write('actionName: $actionName, ')
-          ..write('messageStatus: $messageStatus, ')
-          ..write('senderFullName: $senderFullName, ')
-          ..write('snapshotType: $snapshotType, ')
-          ..write('participantFullName: $participantFullName, ')
-          ..write('participantUserId: $participantUserId, ')
-          ..write('mentionCount: $mentionCount, ')
-          ..write('mentions: $mentions, ')
           ..write('relationship: $relationship')
           ..write(')'))
         .toString();
@@ -13001,48 +12865,184 @@ class QuoteMessageItem {
   }
 }
 
-class UserItem {
-  final String userId;
-  final String identityNumber;
-  final String biography;
-  final String fullName;
+class ConversationItem {
+  final String conversationId;
+  final String groupIconUrl;
+  final ConversationCategory category;
+  final String groupName;
+  final ConversationStatus status;
+  final String lastReadMessageId;
+  final int unseenMessageCount;
+  final String ownerId;
+  final DateTime pinTime;
+  final DateTime muteUntil;
   final String avatarUrl;
+  final String name;
+  final int ownerVerified;
+  final String ownerIdentityNumber;
+  final DateTime ownerMuteUntil;
+  final String appId;
+  final String content;
+  final MessageCategory contentType;
+  final DateTime createdAt;
+  final DateTime lastMessageCreatedAt;
+  final String mediaUrl;
+  final String senderId;
+  final String actionName;
+  final MessageStatus messageStatus;
+  final String senderFullName;
+  final String snapshotType;
+  final String participantFullName;
+  final String participantUserId;
+  final int mentionCount;
+  final String mentions;
   final UserRelationship relationship;
-  UserItem({
-    this.userId,
-    this.identityNumber,
-    this.biography,
-    this.fullName,
+  ConversationItem({
+    this.conversationId,
+    this.groupIconUrl,
+    this.category,
+    this.groupName,
+    this.status,
+    this.lastReadMessageId,
+    this.unseenMessageCount,
+    this.ownerId,
+    this.pinTime,
+    this.muteUntil,
     this.avatarUrl,
+    this.name,
+    this.ownerVerified,
+    this.ownerIdentityNumber,
+    this.ownerMuteUntil,
+    this.appId,
+    this.content,
+    this.contentType,
+    this.createdAt,
+    this.lastMessageCreatedAt,
+    this.mediaUrl,
+    this.senderId,
+    this.actionName,
+    this.messageStatus,
+    this.senderFullName,
+    this.snapshotType,
+    this.participantFullName,
+    this.participantUserId,
+    this.mentionCount,
+    this.mentions,
     this.relationship,
   });
   @override
   int get hashCode => $mrjf($mrjc(
-      userId.hashCode,
+      conversationId.hashCode,
       $mrjc(
-          identityNumber.hashCode,
+          groupIconUrl.hashCode,
           $mrjc(
-              biography.hashCode,
-              $mrjc(fullName.hashCode,
-                  $mrjc(avatarUrl.hashCode, relationship.hashCode))))));
+              category.hashCode,
+              $mrjc(
+                  groupName.hashCode,
+                  $mrjc(
+                      status.hashCode,
+                      $mrjc(
+                          lastReadMessageId.hashCode,
+                          $mrjc(
+                              unseenMessageCount.hashCode,
+                              $mrjc(
+                                  ownerId.hashCode,
+                                  $mrjc(
+                                      pinTime.hashCode,
+                                      $mrjc(
+                                          muteUntil.hashCode,
+                                          $mrjc(
+                                              avatarUrl.hashCode,
+                                              $mrjc(
+                                                  name.hashCode,
+                                                  $mrjc(
+                                                      ownerVerified.hashCode,
+                                                      $mrjc(
+                                                          ownerIdentityNumber
+                                                              .hashCode,
+                                                          $mrjc(
+                                                              ownerMuteUntil
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  appId
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      content
+                                                                          .hashCode,
+                                                                      $mrjc(
+                                                                          contentType
+                                                                              .hashCode,
+                                                                          $mrjc(
+                                                                              createdAt.hashCode,
+                                                                              $mrjc(lastMessageCreatedAt.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, $mrjc(mentions.hashCode, relationship.hashCode)))))))))))))))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
-      (other is UserItem &&
-          other.userId == this.userId &&
-          other.identityNumber == this.identityNumber &&
-          other.biography == this.biography &&
-          other.fullName == this.fullName &&
+      (other is ConversationItem &&
+          other.conversationId == this.conversationId &&
+          other.groupIconUrl == this.groupIconUrl &&
+          other.category == this.category &&
+          other.groupName == this.groupName &&
+          other.status == this.status &&
+          other.lastReadMessageId == this.lastReadMessageId &&
+          other.unseenMessageCount == this.unseenMessageCount &&
+          other.ownerId == this.ownerId &&
+          other.pinTime == this.pinTime &&
+          other.muteUntil == this.muteUntil &&
           other.avatarUrl == this.avatarUrl &&
+          other.name == this.name &&
+          other.ownerVerified == this.ownerVerified &&
+          other.ownerIdentityNumber == this.ownerIdentityNumber &&
+          other.ownerMuteUntil == this.ownerMuteUntil &&
+          other.appId == this.appId &&
+          other.content == this.content &&
+          other.contentType == this.contentType &&
+          other.createdAt == this.createdAt &&
+          other.lastMessageCreatedAt == this.lastMessageCreatedAt &&
+          other.mediaUrl == this.mediaUrl &&
+          other.senderId == this.senderId &&
+          other.actionName == this.actionName &&
+          other.messageStatus == this.messageStatus &&
+          other.senderFullName == this.senderFullName &&
+          other.snapshotType == this.snapshotType &&
+          other.participantFullName == this.participantFullName &&
+          other.participantUserId == this.participantUserId &&
+          other.mentionCount == this.mentionCount &&
+          other.mentions == this.mentions &&
           other.relationship == this.relationship);
   @override
   String toString() {
-    return (StringBuffer('UserItem(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('biography: $biography, ')
-          ..write('fullName: $fullName, ')
+    return (StringBuffer('ConversationItem(')
+          ..write('conversationId: $conversationId, ')
+          ..write('groupIconUrl: $groupIconUrl, ')
+          ..write('category: $category, ')
+          ..write('groupName: $groupName, ')
+          ..write('status: $status, ')
+          ..write('lastReadMessageId: $lastReadMessageId, ')
+          ..write('unseenMessageCount: $unseenMessageCount, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('pinTime: $pinTime, ')
+          ..write('muteUntil: $muteUntil, ')
           ..write('avatarUrl: $avatarUrl, ')
+          ..write('name: $name, ')
+          ..write('ownerVerified: $ownerVerified, ')
+          ..write('ownerIdentityNumber: $ownerIdentityNumber, ')
+          ..write('ownerMuteUntil: $ownerMuteUntil, ')
+          ..write('appId: $appId, ')
+          ..write('content: $content, ')
+          ..write('contentType: $contentType, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastMessageCreatedAt: $lastMessageCreatedAt, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('senderId: $senderId, ')
+          ..write('actionName: $actionName, ')
+          ..write('messageStatus: $messageStatus, ')
+          ..write('senderFullName: $senderFullName, ')
+          ..write('snapshotType: $snapshotType, ')
+          ..write('participantFullName: $participantFullName, ')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('mentionCount: $mentionCount, ')
+          ..write('mentions: $mentions, ')
           ..write('relationship: $relationship')
           ..write(')'))
         .toString();

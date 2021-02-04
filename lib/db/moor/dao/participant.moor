@@ -1,0 +1,16 @@
+import '../mixin.moor';
+
+participantsAvatar AS UserItem:
+SELECT u.user_id,
+       u.identity_number,
+       u.biography,
+       u.full_name,
+       u.avatar_url,
+       u.relationship
+FROM participants p,
+     users u
+WHERE p.conversation_id = :conversationId
+  AND p.user_id = u.user_id
+ORDER BY p.created_at
+LIMIT 4;
+

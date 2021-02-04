@@ -49,32 +49,41 @@ import 'dao/sticker_relationships_dao.dart';
 
 part 'mixin_database.g.dart';
 
-@UseMoor(include: {
-  'mixin.moor'
-}, daos: [
-  AddressesDao,
-  AppsDao,
-  AssetsDao,
-  CircleConversationDao,
-  CirclesDao,
-  ConversationsDao,
-  FloodMessagesDao,
-  HyperlinksDao,
-  JobsDao,
-  MessageMentionsDao,
-  MessagesDao,
-  MessagesHistoryDao,
-  OffsetsDao,
-  ParticipantsDao,
-  ParticipantSessionDao,
-  ResendSessionMessagesDao,
-  SentSessionSenderKeysDao,
-  SnapshotsDao,
-  StickerDao,
-  StickerAlbumsDao,
-  StickerRelationshipsDao,
-  UserDao,
-], queries: {})
+@UseMoor(
+  include: {
+    'moor/mixin.moor',
+    'moor/dao/conversation.moor',
+    'moor/dao/message.moor',
+    'moor/dao/participant.moor',
+    'moor/dao/sticker.moor',
+    'moor/dao/sticker_album.moor',
+  },
+  daos: [
+    AddressesDao,
+    AppsDao,
+    AssetsDao,
+    CircleConversationDao,
+    CirclesDao,
+    ConversationsDao,
+    FloodMessagesDao,
+    HyperlinksDao,
+    JobsDao,
+    MessageMentionsDao,
+    MessagesDao,
+    MessagesHistoryDao,
+    OffsetsDao,
+    ParticipantsDao,
+    ParticipantSessionDao,
+    ResendSessionMessagesDao,
+    SentSessionSenderKeysDao,
+    SnapshotsDao,
+    StickerDao,
+    StickerAlbumsDao,
+    StickerRelationshipsDao,
+    UserDao,
+  ],
+  queries: {},
+)
 class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
