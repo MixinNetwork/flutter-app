@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
@@ -77,28 +78,41 @@ class SendMessageHelper {
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-        isPlain ? MessageCategory.plainText : MessageCategory.signalText;
+        isPlain ? MessageCategory.plainData : MessageCategory.signalData;
   }
 
   void sendContactMessage(String conversationId, String senderId,
-      String content, bool isPlain) async {
-    // ignore: unused_local_variable
+      ContactMessage contactMessage, String shareUserFullName, bool isPlain) async {
     final category =
-        isPlain ? MessageCategory.plainText : MessageCategory.signalText;
+        isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
+    final encoded = base64.encode(utf8.encode(jsonEncode(contactMessage)));
+    final message = Message(
+      messageId: Uuid().v4(),
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: encoded,
+      sharedUserId: contactMessage.userId,
+      name: shareUserFullName,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+    );
+    await _messagesDao.insert(message, senderId);
+    await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
   void sendAudioMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-        isPlain ? MessageCategory.plainText : MessageCategory.signalText;
+        isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio;
   }
 
   void sendLiveMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-        isPlain ? MessageCategory.plainText : MessageCategory.signalText;
+        isPlain ? MessageCategory.plainLive : MessageCategory.signalLive;
   }
 
   void sendPostMessage(String conversationId, String senderId, String content,

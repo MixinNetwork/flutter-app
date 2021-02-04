@@ -8,6 +8,7 @@ import 'package:flutter_app/account/send_message_helper.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/blaze_param.dart';
+import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants.dart';
 import 'package:flutter_app/db/database.dart';
@@ -202,9 +203,8 @@ class AccountServer {
         isPlain ? MessageCategory.plainData : MessageCategory.signalData);
   }
 
-  void _sendAttachmentMessage(String conversationId,
-      File file,
-      MessageCategory category) {
+  void _sendAttachmentMessage(
+      String conversationId, File file, MessageCategory category) {
     if (category.isImage) {
       // todo get width height
     } else if (category.isVideo) {
@@ -216,12 +216,20 @@ class AccountServer {
     }
   }
 
-  void sendStickerMessage( String conversationId,
-      String stickerId , [
-        bool isPlain = true,
-      ]){
+  void sendStickerMessage(
+    String conversationId,
+    String stickerId, [
+    bool isPlain = true,
+  ]) {
     _sendMessageHelper.sendStickerMessage(
         conversationId, userId, StickerMessage(stickerId, null, null), isPlain);
+  }
+
+  void sendContactMessage(
+      String conversationId, String shareUserId, String shareUserFullName,
+      [bool isPlain = true]) {
+    _sendMessageHelper.sendContactMessage(conversationId, userId,
+        ContactMessage(shareUserId), shareUserFullName, isPlain);
   }
 
   void selectConversation(String conversationId) {

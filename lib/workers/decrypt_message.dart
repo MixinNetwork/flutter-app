@@ -364,6 +364,7 @@ class DecryptMessage extends Injector {
             category: data.category,
             content: plainText,
             name: user.fullName ?? '',
+            sharedUserId: contactMessage.userId,
             status: messageStatus,
             createdAt: data.createdAt);
       });
