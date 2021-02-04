@@ -4,8 +4,7 @@ part 'sticker_message.g.dart';
 
 @JsonSerializable()
 class StickerMessage {
-  StickerMessage(
-      this.stickerId, this.albumId, this.name);
+  StickerMessage(this.stickerId, this.albumId, this.name);
 
   factory StickerMessage.fromJson(Map<String, dynamic> json) =>
       _$StickerMessageFromJson(json);

@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -47,10 +50,27 @@ class SendMessageHelper {
   }
 
   void sendStickerMessage(String conversationId, String senderId,
-      String content, bool isPlain) async {
-    // ignore: unused_local_variable
+      StickerMessage stickerMessage, bool isPlain) async {
+
     final category =
         isPlain ? MessageCategory.plainSticker : MessageCategory.signalSticker;
+
+    final encoded = base64.encode(utf8.encode(jsonEncode(stickerMessage)));
+    final message = Message(
+      messageId: Uuid().v4(),
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: encoded,
+      stickerId:  stickerMessage.stickerId,
+      albumId: stickerMessage.albumId,
+      name: stickerMessage.name,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+    );
+
+    await _messagesDao.insert(message, senderId);
+    await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
   void sendDataMessage(String conversationId, String senderId, String content,
