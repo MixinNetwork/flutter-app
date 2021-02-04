@@ -111,4 +111,13 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       String conversationId, String messageId) {
     return db.findMessageItemById(conversationId, messageId).getSingle();
   }
+
+  void updateMessageContent(String messageId, String encoded) async {
+    await db.customUpdate(
+        'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
+        variables: [
+          Variable.withString(encoded),
+          Variable.withString(messageId)
+        ]);
+  }
 }

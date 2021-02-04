@@ -1,6 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 
 enum MessageStatus {
+  @JsonValue('PENDING')
+  pending,
   @JsonValue('SENDING')
   sending,
   @JsonValue('SENT')
