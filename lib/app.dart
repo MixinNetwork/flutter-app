@@ -36,19 +36,24 @@ class App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
-            builder: (context, child) => BrightnessObserver(
-              child: child,
-            ),
+            builder: (context, child) {
+              Provider.of<AccountServer>(context)?.language =
+                  Localizations.localeOf(context)?.languageCode;
+              return BrightnessObserver(
+                child: child,
+              );
+            },
             home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
               converter: (state) => state?.current != null,
               builder: (context, authAvailable) {
-                if (authAvailable &&
-                    Provider.of<AccountServer>(context) != null) {
+                final accountServer = Provider.of<AccountServer>(context);
+                if (authAvailable && accountServer != null) {
                   try {
                     BlocProvider.of<ConversationListBloc>(context)
                       ..limit = MediaQuery.of(context).size.height ~/ 40
                       ..init();
                   } on Exception catch (_) {}
+                  accountServer.initSticker();
                   return HomePage();
                 }
                 return const LandingPage();

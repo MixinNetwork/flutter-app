@@ -29,6 +29,9 @@ import 'package:uuid/uuid.dart';
 class AccountServer {
   static String sid;
 
+  set language(String language) =>
+      client.dio.options.headers['Accept-Language'] = language;
+
   Future<void> initServer(
     String userId,
     String sessionId,
@@ -102,7 +105,6 @@ class AccountServer {
         .asyncMapDrop(runSendJob)
         .listen((_) {});
 
-    _initSticker();
     // database.mock();
   }
 
@@ -273,7 +275,7 @@ class AccountServer {
     // todo release resource
   }
 
-  void _initSticker() {
+  void initSticker() {
     client.accountApi.getStickerAlbums().then((res) {
       if (res.data != null) {
         res.data.forEach((item) async {

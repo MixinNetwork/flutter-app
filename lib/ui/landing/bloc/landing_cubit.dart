@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
@@ -15,21 +17,28 @@ import 'package:tuple/tuple.dart';
 part 'landing_state.dart';
 
 class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
-  LandingCubit(this.authCubit)
+  LandingCubit(this.authCubit, Locale locale)
       : super(LandingState(
           status: authCubit.state.current != null
               ? LandingStatus.provisioning
               : LandingStatus.init,
         )) {
+    client = Client(
+      dioOptions: BaseOptions(
+          headers: {
+            'Accept-Language': locale?.languageCode,
+          },
+      ),
+    );
     _initLandingListen();
     if (authCubit.state.current != null) return;
     requestAuthUrl();
   }
 
   final MultiAuthCubit authCubit;
-  final client = Client();
   final StreamController<int> periodicStreamController =
       StreamController<int>();
+  Client client;
   StreamSubscription<int> streamSubscription;
   signal.ECKeyPair keyPair;
   String deviceId;

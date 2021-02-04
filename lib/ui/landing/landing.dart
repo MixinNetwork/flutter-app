@@ -13,8 +13,13 @@ class LandingPage extends StatelessWidget {
   const LandingPage({Key key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-        create: (context) => LandingCubit(MultiAuthCubit.of(context)),
+  Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    return BlocProvider(
+        create: (context) => LandingCubit(
+          MultiAuthCubit.of(context),
+          locale,
+        ),
         child: Builder(
           builder: (BuildContext context) => Scaffold(
             backgroundColor: BrightnessData.dynamicColor(
@@ -45,6 +50,7 @@ class LandingPage extends StatelessWidget {
           ),
         ),
       );
+  }
 }
 
 class _QrCode extends StatelessWidget {
