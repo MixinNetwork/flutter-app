@@ -2,11 +2,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
 
 class AttachmentUtil {
   AttachmentUtil(this._client, this.mediaPath) {
@@ -58,7 +59,7 @@ class AttachmentUtil {
     }
   }
 
-  void uploadAttachment(File file, String messageId) async {
+   Future<String> uploadAttachment(File file, String messageId) async {
     final response = await _client.attachmentApi.postAttachment();
     if (response.data != null && response.data.uploadUrl != null) {
       final fileStream = file.openRead();
@@ -93,28 +94,33 @@ class AttachmentUtil {
 
       final httpResponse = await request.close();
       if (httpResponse.statusCode == 200) {
-        // todo
         debugPrint('upload done!');
+        return response.data.attachmentId;
       } else {
-        // todo
+        return null;
       }
+    }else{
+      return null;
     }
   }
 
-  File _getAttachmentFile(Message message) {
-    assert(message.category.isAttachment);
+  File getAttachmentFile(MessageCategory category,String conversationId,String messageId){
+    assert(category.isAttachment);
     String path;
-    if (message.category.isImage) {
-      path = _getImagesPath(message.conversationId);
-    } else if (message.category.isVideo) {
-      path = _getVideosPath(message.conversationId);
-    } else if (message.category.isAudio) {
-      path = _getAudiosPath(message.conversationId);
-    } else if (message.category.isData) {
-      path = _getFilesPath(message.conversationId);
+    if (category.isImage) {
+      path = _getImagesPath(conversationId);
+    } else if (category.isVideo) {
+      path = _getVideosPath(conversationId);
+    } else if (category.isAudio) {
+      path = _getAudiosPath(conversationId);
+    } else if (category.isData) {
+      path = _getFilesPath(conversationId);
     }
-    return File(p.join(path, message.messageId));
+    return File(p.join(path, messageId));
   }
+
+  File _getAttachmentFile(Message message) => getAttachmentFile(
+      message.category, message.conversationId, message.messageId);
 
   String _getImagesPath(String conversationId) {
     return p.join(mediaPath, 'Images', conversationId);

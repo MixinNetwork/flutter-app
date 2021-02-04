@@ -1,10 +1,13 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
@@ -74,11 +77,29 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void sendDataMessage(String conversationId, String senderId, String content,
+  void sendDataMessage(String conversationId,String messageId, String senderId, AttachmentMessage attachmentMessage,
+      File attachment,
       bool isPlain) async {
-    // ignore: unused_local_variable
     final category =
         isPlain ? MessageCategory.plainData : MessageCategory.signalData;
+    final encoded = base64.encode(utf8.encode(jsonEncode(attachmentMessage)));
+    final message = Message(
+      messageId: Uuid().v4(),
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: encoded,
+      mediaUrl: attachment.path,
+      mediaMimeType: attachmentMessage.mimeType,
+      mediaSize: await attachment.length(),
+      name: attachmentMessage.name,
+      mediaStatus: MediaStatus.done,
+      status: MessageStatus.sending,
+
+      createdAt: DateTime.now(),
+    );
+    await _messagesDao.insert(message, senderId);
+    await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
   void sendContactMessage(String conversationId, String senderId,

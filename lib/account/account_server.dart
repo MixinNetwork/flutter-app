@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/account/send_message_helper.dart';
 import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/blaze_param.dart';
+import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants.dart';
@@ -22,6 +24,7 @@ import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/utils/stream_extension.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
+import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -201,6 +204,23 @@ class AccountServer {
   ]) {
     _sendAttachmentMessage(conversationId, file,
         isPlain ? MessageCategory.plainData : MessageCategory.signalData);
+  }
+
+  void sendAttachment(String conversationId, XFile file,
+      [bool isPlain = true]) async {
+    final messageId = Uuid().v4();
+    final mimeType = file.mimeType ?? lookupMimeType(file.path);
+    final attachment = _attachmentUtil.getAttachmentFile(
+        MessageCategory.plainData, conversationId, messageId);
+    // ignore: cascade_invocations
+    attachment.createSync(recursive: true);
+    File(file.path).copySync(attachment.path);
+
+    final attachmentId =
+        await _attachmentUtil.uploadAttachment(attachment, messageId);
+    final attachmentMessage = AttachmentMessage(null, null, attachmentId, mimeType, await file.length(), file.name, null, null, null, null, null, null);
+    _sendMessageHelper.sendDataMessage(
+        conversationId, messageId, userId, attachmentMessage, attachment, isPlain);
   }
 
   void _sendAttachmentMessage(

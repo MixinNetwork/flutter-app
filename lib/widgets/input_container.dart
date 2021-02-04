@@ -51,8 +51,10 @@ class InputContainer extends StatelessWidget {
                 final file = await openFile();
                 // todo send file
                 // ignore: avoid_print
-                print(
-                    'path: ${file.path}, name: ${file.name}, mimeType: ${file.mimeType}');
+                Provider.of<AccountServer>(context, listen: false).sendAttachment(
+                  BlocProvider.of<ConversationCubit>(context).state.conversationId,
+                    file
+                );
               },
             ),
             const SizedBox(width: 6),
