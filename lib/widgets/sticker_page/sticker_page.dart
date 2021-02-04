@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -36,7 +37,7 @@ class StickerPage extends StatelessWidget {
         child: Builder(
           builder: (context) =>
               BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-            converter: (state) => (state?.length ?? 0) + 3,
+            converter: (state) => (state?.length ?? 0) + 2,
             builder: (context, tabLength) => DefaultTabController(
               length: tabLength,
               child: Container(
@@ -89,9 +90,8 @@ class _StickerAlbumPage extends StatelessWidget {
     if (index == 1) {
       // todo can add or delete
     }
-    if (index == 2) {
-      // todo
-    }
+    final updateUsedAt = index != 0;
+    final rightClickDelete = index == 1;
     return BlocProvider(
       create: (context) {
         Stream<List<Sticker>> stream;
@@ -102,13 +102,10 @@ class _StickerAlbumPage extends StatelessWidget {
           case 1:
             stream = stickerDao.personalStickers().watch();
             break;
-          case 2:
-            stream = stickerDao.personalStickers().watch();
-            break;
           default:
             stream = stickerDao
                 .stickerByAlbumId(BlocProvider.of<StickerAlbumsCubit>(context)
-                    .state[index - 3]
+                    .state[index - 2]
                     .albumId)
                 .watch();
         }
@@ -126,7 +123,11 @@ class _StickerAlbumPage extends StatelessWidget {
             ),
             itemCount: itemCount,
             itemBuilder: (BuildContext context, int index) =>
-                _StickerAlbumPageItem(index: index),
+                _StickerAlbumPageItem(
+              index: index,
+              updateUsedAt: updateUsedAt,
+              rightClickDelete: rightClickDelete,
+            ),
           ),
         ),
       ),
@@ -138,9 +139,13 @@ class _StickerAlbumPageItem extends StatelessWidget {
   const _StickerAlbumPageItem({
     Key key,
     this.index,
+    this.updateUsedAt,
+    this.rightClickDelete,
   }) : super(key: key);
 
   final int index;
+  final bool updateUsedAt;
+  final bool rightClickDelete;
 
   @override
   Widget build(BuildContext context) =>
@@ -149,8 +154,24 @@ class _StickerAlbumPageItem extends StatelessWidget {
         builder: (BuildContext context, Sticker sticker) =>
             InteractableDecoratedBox(
           child: CacheImage(sticker.assetUrl),
-          onTap: () {
-            // todo send sticker
+          onTap: () async {
+            final accountServer =
+                Provider.of<AccountServer>(context, listen: false);
+            await Future.wait([
+              if (updateUsedAt)
+                accountServer.database.stickerDao
+                    .updateUsedAt(sticker.stickerId, DateTime.now()),
+              accountServer.sendStickerMessage(
+                BlocProvider.of<ConversationCubit>(context)
+                    .state
+                    .conversationId,
+                sticker.stickerId,
+              ),
+            ]);
+          },
+          onRightClick: (pointerUpEvent) async {
+            if (!rightClickDelete) return;
+            // todo use native context menu.
           },
         ),
       );
@@ -208,12 +229,13 @@ class _StickerAlbumBarItem extends StatelessWidget {
           child: Center(
             child: Builder(
               builder: (context) {
-                if (index < 3) {
+                if (index < 2) {
                   return SvgPicture.asset(
                     {
                       0: Resources.assetsImagesRecentStickerSvg,
                       1: Resources.assetsImagesPersonalStickerSvg,
-                      2: Resources.assetsImagesGifStickerSvg
+                      // todo
+                      // 2: Resources.assetsImagesGifStickerSvg
                     }[index],
                     width: 24,
                     height: 24,
@@ -222,7 +244,7 @@ class _StickerAlbumBarItem extends StatelessWidget {
 
                 return BlocConverter<StickerAlbumsCubit, List<StickerAlbum>,
                     String>(
-                  converter: (state) => state[index - 3].iconUrl,
+                  converter: (state) => state[index - 2].iconUrl,
                   builder: (context, iconUrl) => CacheImage(
                     iconUrl,
                     width: 28,

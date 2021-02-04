@@ -206,8 +206,7 @@ class AccountServer {
 
   void sendAttachment(String conversationId, XFile file,
       [bool isPlain = true]) async {
-    _sendMessageHelper.sendDataMessage(
-        conversationId, userId, file, isPlain);
+    _sendMessageHelper.sendDataMessage(conversationId, userId, file, isPlain);
   }
 
   void _sendAttachmentMessage(
@@ -223,14 +222,17 @@ class AccountServer {
     }
   }
 
-  void sendStickerMessage(
+  Future<void> sendStickerMessage(
     String conversationId,
-    String stickerId, [
+    String stickerId, {
     bool isPlain = true,
-  ]) {
-    _sendMessageHelper.sendStickerMessage(
-        conversationId, userId, StickerMessage(stickerId, null, null), isPlain);
-  }
+  }) =>
+      _sendMessageHelper.sendStickerMessage(
+        conversationId,
+        userId,
+        StickerMessage(stickerId, null, null),
+        isPlain: isPlain,
+      );
 
   void sendContactMessage(
       String conversationId, String shareUserId, String shareUserFullName,

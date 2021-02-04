@@ -43,6 +43,14 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<Sticker> personalStickers() => db.personalStickers();
 
+  Future<int> updateUsedAt(String stickerId, DateTime dateTime) =>
+      (update(db.stickers)..where((tbl) => tbl.stickerId.equals(stickerId)))
+          .write(
+        StickersCompanion(
+          lastUseAt: Value(dateTime),
+        ),
+      );
+
   Future<Sticker> getStickerByAlbumIdAndName(String stickerId, String name) {
     return customSelect(
             'SELECT s.* FROM sticker_relationships sr, stickers s WHERE sr.sticker_id = s.sticker_id AND sr.album_id = :id AND s.name = :name;',

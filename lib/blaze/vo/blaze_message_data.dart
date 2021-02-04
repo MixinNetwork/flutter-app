@@ -5,6 +5,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'blaze_message_data.g.dart';
 
 @JsonSerializable()
+@MessageCategoryJsonConverter()
 class BlazeMessageData {
   BlazeMessageData(
     this.conversationId,

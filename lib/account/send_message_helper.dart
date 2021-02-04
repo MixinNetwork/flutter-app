@@ -27,7 +27,7 @@ class SendMessageHelper {
   void sendTextMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
     final category =
-    isPlain ? MessageCategory.plainText : MessageCategory.signalText;
+        isPlain ? MessageCategory.plainText : MessageCategory.signalText;
     final message = Message(
       messageId: Uuid().v4(),
       conversationId: conversationId,
@@ -46,20 +46,24 @@ class SendMessageHelper {
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-    isPlain ? MessageCategory.plainImage : MessageCategory.signalImage;
+        isPlain ? MessageCategory.plainImage : MessageCategory.signalImage;
   }
 
   void sendVideoMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-    isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
+        isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
   }
 
-  void sendStickerMessage(String conversationId, String senderId,
-      StickerMessage stickerMessage, bool isPlain) async {
+  Future<void> sendStickerMessage(
+    String conversationId,
+    String senderId,
+    StickerMessage stickerMessage, {
+    bool isPlain = true,
+  }) async {
     final category =
-    isPlain ? MessageCategory.plainSticker : MessageCategory.signalSticker;
+        isPlain ? MessageCategory.plainSticker : MessageCategory.signalSticker;
 
     final encoded = base64.encode(utf8.encode(jsonEncode(stickerMessage)));
     final message = Message(
@@ -79,10 +83,11 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void sendDataMessage(String conversationId, String senderId, XFile file,
-      bool isPlain) async {
+  void sendDataMessage(
+      String conversationId, String senderId, XFile file, bool isPlain) async {
     final messageId = Uuid().v4();
-    final mimeType = file.mimeType ?? lookupMimeType(file.path) ??
+    final mimeType = file.mimeType ??
+        lookupMimeType(file.path) ??
         'application/octet-stream';
     final attachment = _attachmentUtil.getAttachmentFile(
         MessageCategory.plainData, conversationId, messageId);
@@ -91,7 +96,7 @@ class SendMessageHelper {
     File(file.path).copySync(attachment.path);
     final attachmentSize = await attachment.length();
     final category =
-    isPlain ? MessageCategory.plainData : MessageCategory.signalData;
+        isPlain ? MessageCategory.plainData : MessageCategory.signalData;
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -110,7 +115,19 @@ class SendMessageHelper {
     await _attachmentUtil
         .uploadAttachment(attachment, messageId)
         .then((attachmentId) async {
-      final attachmentMessage = AttachmentMessage(null, null, attachmentId, mimeType, attachmentSize, file.name, null, null, null, null, null, null);
+      final attachmentMessage = AttachmentMessage(
+          null,
+          null,
+          attachmentId,
+          mimeType,
+          attachmentSize,
+          file.name,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null);
 
       final encoded = base64.encode(utf8.encode(jsonEncode(attachmentMessage)));
       _messagesDao.updateMessageContent(messageId, encoded);
@@ -118,11 +135,14 @@ class SendMessageHelper {
     });
   }
 
-  void sendContactMessage(String conversationId, String senderId,
-      ContactMessage contactMessage, String shareUserFullName,
+  void sendContactMessage(
+      String conversationId,
+      String senderId,
+      ContactMessage contactMessage,
+      String shareUserFullName,
       bool isPlain) async {
     final category =
-    isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
+        isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
     final encoded = base64.encode(utf8.encode(jsonEncode(contactMessage)));
     final message = Message(
       messageId: Uuid().v4(),
@@ -143,21 +163,21 @@ class SendMessageHelper {
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-    isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio;
+        isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio;
   }
 
   void sendLiveMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-    isPlain ? MessageCategory.plainLive : MessageCategory.signalLive;
+        isPlain ? MessageCategory.plainLive : MessageCategory.signalLive;
   }
 
   void sendPostMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
     // ignore: unused_local_variable
     final category =
-    isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
+        isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
   }
 
   void sendLocationMessage(String conversationId, String senderId,
@@ -168,14 +188,14 @@ class SendMessageHelper {
         : MessageCategory.signalLocation;
   }
 
-  void sendAppCardMessage(String conversationId, String senderId,
-      String content, bool isPlain) {
+  void sendAppCardMessage(
+      String conversationId, String senderId, String content, bool isPlain) {
     // ignore: unused_local_variable
     const category = MessageCategory.appCard;
   }
 
-  void sendAppButtonGroup(String conversationId, String senderId,
-      String content, bool isPlain) {
+  void sendAppButtonGroup(
+      String conversationId, String senderId, String content, bool isPlain) {
     // ignore: unused_local_variable
     const category = MessageCategory.appButtonGroup;
   }

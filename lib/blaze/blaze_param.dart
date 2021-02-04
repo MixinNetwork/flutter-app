@@ -8,6 +8,7 @@ import 'blaze_message_param_session.dart';
 part 'blaze_param.g.dart';
 
 @JsonSerializable()
+@MessageCategoryJsonConverter()
 class BlazeMessageParam {
   BlazeMessageParam({
     this.conversationId,
