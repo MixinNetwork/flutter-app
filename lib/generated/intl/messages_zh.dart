@@ -63,6 +63,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("手机号"),
     "pin" : MessageLookupByLibrary.simpleMessage("置顶"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("请稍等一下"),
+    "preview" : MessageLookupByLibrary.simpleMessage("预览"),
     "provisioning" : MessageLookupByLibrary.simpleMessage("处理中"),
     "reply" : MessageLookupByLibrary.simpleMessage("回复"),
     "save" : MessageLookupByLibrary.simpleMessage("保存"),

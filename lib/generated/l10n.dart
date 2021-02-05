@@ -544,6 +544,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Preview`
+  String get preview {
+    return Intl.message(
+      'Preview',
+      name: 'preview',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

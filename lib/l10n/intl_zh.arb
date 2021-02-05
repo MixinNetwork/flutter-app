@@ -49,5 +49,6 @@
 	"location": "位置",
 	"audio": "语音",
 	"contact": "联系人",
-	"videoCall": "语音电话"
+	"videoCall": "语音电话",
+	"preview": "预览"
 }

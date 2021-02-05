@@ -37,8 +37,10 @@ class App extends StatelessWidget {
               ...Localization.delegate.supportedLocales,
             ],
             builder: (context, child) {
-              Provider.of<AccountServer>(context)?.language =
-                  Localizations.localeOf(context)?.languageCode;
+              try {
+                Provider.of<AccountServer>(context)?.language =
+                    Localizations.localeOf(context)?.languageCode;
+              } catch (_) {}
               return BrightnessObserver(
                 child: child,
               );
@@ -46,13 +48,14 @@ class App extends StatelessWidget {
             home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
               converter: (state) => state?.current != null,
               builder: (context, authAvailable) {
-                final accountServer = Provider.of<AccountServer>(context);
+                AccountServer accountServer;
+                try {
+                  accountServer = Provider.of<AccountServer>(context);
+                } catch (_) {}
                 if (authAvailable && accountServer != null) {
-                  try {
-                    BlocProvider.of<ConversationListBloc>(context)
-                      ..limit = MediaQuery.of(context).size.height ~/ 40
-                      ..init();
-                  } on Exception catch (_) {}
+                  BlocProvider.of<ConversationListBloc>(context)
+                    ..limit = MediaQuery.of(context).size.height ~/ 40
+                    ..init();
                   accountServer.initSticker();
                   return HomePage();
                 }

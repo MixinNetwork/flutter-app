@@ -84,33 +84,51 @@ class ChatContainer extends StatelessWidget {
             children: [
               ChatBar(onPressed: onPressed, isSelected: isSelected),
               Expanded(
-                child: Builder(
-                  builder: (context) =>
-                      BlocConverter<MessageBloc, PagingState<MessageItem>, int>(
-                    // int.MaxValue
-                    converter: (state) => state?.count ?? 9223372036854775807,
-                    builder: (context, count) =>
-                        ScrollablePositionedList.builder(
-                      key: Key(
-                          BlocProvider.of<MessageBloc>(context).conversationId),
-                      initialScrollIndex:
-                          BlocProvider.of<MessageBloc>(context).state.index,
-                      initialAlignment:
-                          BlocProvider.of<MessageBloc>(context).state.alignment,
-                      addAutomaticKeepAlives: false,
-                      itemScrollController: itemScrollController,
-                      itemPositionsListener:
-                          BlocProvider.of<MessageBloc>(context)
-                              .itemPositionsListener,
-                      reverse: true,
-                      itemCount: count,
-                      itemBuilder: (BuildContext context, int index) =>
-                          _Message(index: index),
+                child: Navigator(
+                  pages: [
+                    MaterialPage(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: Builder(
+                              builder: (context) => BlocConverter<MessageBloc,
+                                  PagingState<MessageItem>, int>(
+                                // int.MaxValue
+                                converter: (state) =>
+                                    state?.count ?? 9223372036854775807,
+                                builder: (context, count) =>
+                                    ScrollablePositionedList.builder(
+                                  key: Key(BlocProvider.of<MessageBloc>(context)
+                                      .conversationId),
+                                  initialScrollIndex:
+                                      BlocProvider.of<MessageBloc>(context)
+                                          .state
+                                          .index,
+                                  initialAlignment:
+                                      BlocProvider.of<MessageBloc>(context)
+                                          .state
+                                          .alignment,
+                                  addAutomaticKeepAlives: false,
+                                  itemScrollController: itemScrollController,
+                                  itemPositionsListener:
+                                      BlocProvider.of<MessageBloc>(context)
+                                          .itemPositionsListener,
+                                  reverse: true,
+                                  itemCount: count,
+                                  itemBuilder:
+                                      (BuildContext context, int index) =>
+                                          _Message(index: index),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const InputContainer()
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-              const InputContainer()
             ],
           );
         },
@@ -222,6 +240,7 @@ class _StickerMessage extends StatelessWidget {
 
   final MessageItem message;
   final bool isCurrentUser;
+
   @override
   Widget build(BuildContext context) {
     double width;

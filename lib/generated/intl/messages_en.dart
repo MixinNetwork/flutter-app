@@ -63,6 +63,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("Phone number"),
     "pin" : MessageLookupByLibrary.simpleMessage("Pin"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("Please wait a moment"),
+    "preview" : MessageLookupByLibrary.simpleMessage("Preview"),
     "provisioning" : MessageLookupByLibrary.simpleMessage("Provisioning"),
     "reply" : MessageLookupByLibrary.simpleMessage("Reply"),
     "save" : MessageLookupByLibrary.simpleMessage("Save"),

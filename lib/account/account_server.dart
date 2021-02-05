@@ -211,10 +211,13 @@ class AccountServer {
     _sendMessageHelper.sendDataMessage(conversationId, userId, file, isPlain);
   }
 
-  void _sendAttachmentMessage(
-      String conversationId, File file, MessageCategory category) {
+  Future<void> _sendAttachmentMessage(
+      String conversationId, File file, MessageCategory category) async {
     if (category.isImage) {
-      // todo get width height
+      // todo
+      // final imageInfo = await getImageInfo(Image.file(file).image);
+      // final width = imageInfo.image.width;
+      // final height = imageInfo.image.height;
     } else if (category.isVideo) {
       // todo get width height
     } else if (category.isAudio) {

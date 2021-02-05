@@ -49,5 +49,6 @@
 	"location": "Location",
 	"audio": "Audio",
 	"contact": "Contact",
-	"videoCall": "Video call"
+	"videoCall": "Video call",
+	"preview": "Preview"
 }
