@@ -20,10 +20,7 @@ class MessageDayTime extends StatelessWidget {
       width: 90,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(213, 211, 243, 1),
-        ),
+        color: BrightnessData.themeOf(context).dateTime,
       ),
       alignment: Alignment.center,
       child: Text(

@@ -13,8 +13,7 @@ class MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var lightColor = const Color.fromRGBO(184, 189, 199, 1);
-    var darkColor = const Color.fromRGBO(255, 255, 255, 0.4);
+    var color = BrightnessData.themeOf(context).secondaryText;
     String icon;
     switch (status) {
       case 'SENT':
@@ -25,8 +24,7 @@ class MessageStatusIcon extends StatelessWidget {
         break;
       case 'READ':
         icon = Resources.assetsImagesReadSvg;
-        lightColor = const Color.fromRGBO(0, 122, 255, 1);
-        darkColor = const Color.fromRGBO(65, 145, 255, 1);
+        color = BrightnessData.themeOf(context).accent;
         break;
       case 'SENDING':
       default:
@@ -35,11 +33,7 @@ class MessageStatusIcon extends StatelessWidget {
     }
     return SvgPicture.asset(
       icon,
-      color: BrightnessData.dynamicColor(
-        context,
-        lightColor,
-        darkColor: darkColor,
-      ),
+      color: color,
     );
   }
 }

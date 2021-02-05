@@ -105,11 +105,7 @@ class _QrCode extends StatelessWidget {
               Localization.of(context).pageLandingLoginTitle,
               style: TextStyle(
                 fontSize: 22,
-                color: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(51, 51, 51, 1),
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                ),
+                color: BrightnessData.themeOf(context).text,
               ),
             ),
             const SizedBox(height: 10),
@@ -142,11 +138,7 @@ class _Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(51, 51, 51, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-    );
+    final primaryColor = BrightnessData.themeOf(context).text;
     return SizedBox(
       width: 375,
       child: Column(

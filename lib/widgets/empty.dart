@@ -11,11 +11,7 @@ class Empty extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(184, 189, 199, 1),
-              darkColor: const Color.fromRGBO(184, 189, 199, 1),
-            ),
+            color: BrightnessData.themeOf(context).secondaryText,
           ),
         ),
       );

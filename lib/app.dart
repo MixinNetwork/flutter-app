@@ -15,6 +15,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'account/account_server.dart';
+import 'constants/brightness_theme_data.dart';
 
 class App extends StatelessWidget {
   @override
@@ -43,6 +44,8 @@ class App extends StatelessWidget {
               } catch (_) {}
               return BrightnessObserver(
                 child: child,
+                lightThemeData: lightBrightnessThemeData,
+                darkThemeData: darkBrightnessThemeData,
               );
             },
             home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(

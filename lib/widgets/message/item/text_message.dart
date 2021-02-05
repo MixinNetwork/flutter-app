@@ -31,11 +31,7 @@ class TextMessage extends StatelessWidget {
             message.content,
             style: TextStyle(
               fontSize: 16,
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(51, 51, 51, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-              ),
+              color: BrightnessData.themeOf(context).text,
             ),
           ),
           const SizedBox(width: 6),

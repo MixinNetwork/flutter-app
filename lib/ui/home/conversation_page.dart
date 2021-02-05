@@ -34,11 +34,7 @@ class ConversationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: BrightnessData.dynamicColor(
-        context,
-        const Color.fromRGBO(255, 255, 255, 1),
-        darkColor: const Color.fromRGBO(44, 49, 54, 1),
-      ),
+      color: BrightnessData.themeOf(context).primary,
       child: Column(
         children: [
           const SearchBar(),
@@ -192,11 +188,7 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final messageColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(184, 189, 199, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-    );
+    final messageColor = BrightnessData.themeOf(context).secondaryText;
     return InteractableDecoratedBox(
       onTap: onTap,
       onRightClick: onRightClick,
@@ -206,11 +198,7 @@ class _Item extends StatelessWidget {
           decoration: selected
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(246, 247, 250, 1),
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                  ),
+                  color: BrightnessData.themeOf(context).listSelected,
                 )
               : const BoxDecoration(),
           child: Padding(
@@ -240,12 +228,7 @@ class _Item extends StatelessWidget {
                                     ? conversation.groupName
                                     : conversation.name,
                                 style: TextStyle(
-                                  color: BrightnessData.dynamicColor(
-                                    context,
-                                    const Color.fromRGBO(51, 51, 51, 1),
-                                    darkColor: const Color.fromRGBO(
-                                        255, 255, 255, 0.9),
-                                  ),
+                                  color: BrightnessData.themeOf(context).text,
                                   fontSize: 16,
                                 ),
                                 overflow: TextOverflow.ellipsis,
@@ -337,27 +320,15 @@ class _UnreadText extends StatelessWidget {
     return UnreadText(
       count: conversation.unseenMessageCount ?? 0,
       backgroundColor: conversation.pinTime?.isAfter(DateTime.now()) == true
-          ? BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(61, 117, 227, 1),
-              darkColor: const Color.fromRGBO(65, 145, 255, 1),
-            )
-          : BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(184, 189, 199, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-            ),
+          ? BrightnessData.themeOf(context).accent
+          : BrightnessData.themeOf(context).secondaryText,
       textColor: conversation.pinTime != null
           ? BrightnessData.dynamicColor(
               context,
               const Color.fromRGBO(255, 255, 255, 1),
               darkColor: const Color.fromRGBO(255, 255, 255, 1),
             )
-          : BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(255, 255, 255, 1),
-              darkColor: const Color.fromRGBO(44, 49, 54, 1),
-            ),
+          : BrightnessData.themeOf(context).primary,
     );
   }
 }
@@ -390,11 +361,7 @@ class _MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dynamicColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(184, 189, 199, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-    );
+    final dynamicColor = BrightnessData.themeOf(context).secondaryText;
     String icon;
     String content;
 

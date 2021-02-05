@@ -21,10 +21,7 @@ class MessageName extends StatelessWidget {
       userName,
       style: TextStyle(
         fontSize: 15,
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(0, 122, 255, 1),
-        ),
+        color: BrightnessData.themeOf(context).accent,
       ),
     ),
   );

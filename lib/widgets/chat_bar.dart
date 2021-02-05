@@ -22,18 +22,10 @@ class ChatBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actionColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(47, 48, 50, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-    );
+    final actionColor = BrightnessData.themeOf(context).icon;
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(255, 255, 255, 1),
-          darkColor: const Color.fromRGBO(44, 49, 54, 1),
-        ),
+        color: BrightnessData.themeOf(context).primary,
       ),
       child: Padding(
         padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
@@ -93,11 +85,7 @@ class _ID extends StatelessWidget {
       builder: (context, id) => Text(
         id,
         style: TextStyle(
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(184, 189, 199, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-          ),
+          color: BrightnessData.themeOf(context).secondaryText,
           fontSize: 14,
         ),
       ),

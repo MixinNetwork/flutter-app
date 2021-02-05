@@ -29,21 +29,13 @@ class InputContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actionColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(47, 48, 50, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-    );
+    final actionColor = BrightnessData.themeOf(context).icon;
 
     return SizedBox(
       height: 56,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(255, 255, 255, 1),
-            darkColor: const Color.fromRGBO(44, 49, 54, 1),
-          ),
+          color: BrightnessData.themeOf(context).primary,
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
@@ -112,11 +104,7 @@ class InputContainer extends StatelessWidget {
                       controller: BlocProvider.of<DraftCubit>(context)
                           .textEditingController,
                       style: TextStyle(
-                        color: BrightnessData.dynamicColor(
-                          context,
-                          const Color.fromRGBO(51, 51, 51, 1),
-                          darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                        ),
+                        color: BrightnessData.themeOf(context).text,
                         fontSize: 14,
                       ),
                       decoration: const InputDecoration(
@@ -176,11 +164,7 @@ class _PreviewImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(255, 255, 255, 1),
-            darkColor: const Color.fromRGBO(44, 49, 54, 1),
-          ),
+          color: BrightnessData.themeOf(context).primary,
         ),
         child: Column(
           children: [
@@ -190,21 +174,13 @@ class _PreviewImage extends StatelessWidget {
                 children: [
                   ActionButton(
                     name: Resources.assetsImagesIcClosePng,
-                    color: BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(47, 48, 50, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                    ),
+                    color: BrightnessData.themeOf(context).icon,
                     onTap: () => Navigator.pop(context, false),
                   ),
                   Text(
                     Localization.of(context).preview,
                     style: TextStyle(
-                      color: BrightnessData.dynamicColor(
-                        context,
-                        const Color.fromRGBO(51, 51, 51, 1),
-                        darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                      ),
+                      color: BrightnessData.themeOf(context).text,
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -222,11 +198,7 @@ class _PreviewImage extends StatelessWidget {
                 ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(246, 247, 250, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-                    ),
+                    color: BrightnessData.themeOf(context).listSelected,
                     borderRadius: BorderRadius.circular(8),
                     border: DashPathBorder.all(
                       borderSide: BorderSide(
@@ -247,11 +219,7 @@ class _PreviewImage extends StatelessWidget {
               child: InteractableDecoratedBox.color(
                 onTap: () => Navigator.pop(context, true),
                 decoration: BoxDecoration(
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(61, 117, 227, 1),
-                    darkColor: const Color.fromRGBO(65, 145, 255, 1),
-                  ),
+                  color: BrightnessData.themeOf(context).accent,
                 ),
                 child: SizedBox.fromSize(
                   size: const Size.square(50),

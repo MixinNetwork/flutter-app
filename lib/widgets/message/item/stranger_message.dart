@@ -30,11 +30,7 @@ class StrangerMessage extends StatelessWidget {
               : Localization.of(context).strangerFromMessage,
           style: TextStyle(
             fontSize: 14,
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(51, 51, 51, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-            ),
+            color: BrightnessData.themeOf(context).text,
           ),
         ),
         const SizedBox(height: 10),
@@ -87,11 +83,7 @@ class _StrangerButton extends StatelessWidget {
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
     onTap: onTap,
     decoration: BoxDecoration(
-      color: BrightnessData.dynamicColor(
-        context,
-        const Color.fromRGBO(255, 255, 255, 1),
-        darkColor: const Color.fromRGBO(52, 59, 67, 1),
-      ),
+      color: BrightnessData.themeOf(context).primary,
       borderRadius: BorderRadius.circular(8),
     ),
     child: ConstrainedBox(
@@ -110,11 +102,7 @@ class _StrangerButton extends StatelessWidget {
             text,
             style: TextStyle(
               fontSize: 14,
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(0, 122, 255, 1),
-                darkColor: const Color.fromRGBO(0, 122, 255, 1),
-              ),
+              color: BrightnessData.themeOf(context).accent,
             ),
           ),
         ),

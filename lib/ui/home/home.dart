@@ -21,11 +21,7 @@ final _conversationPageKey = GlobalKey();
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(255, 255, 255, 1),
-          darkColor: const Color.fromRGBO(44, 49, 54, 1),
-        ),
+        backgroundColor: BrightnessData.themeOf(context).primary,
         body: SizePolicyRow(
           children: [
             SizePolicyData(
@@ -54,11 +50,7 @@ class HomePage extends StatelessWidget {
                     child: Empty(
                         text: Localization.of(context).pageRightEmptyMessage),
                     decoration: BoxDecoration(
-                      color: BrightnessData.dynamicColor(
-                        context,
-                        const Color.fromRGBO(237, 238, 238, 1),
-                        darkColor: const Color.fromRGBO(35, 39, 43, 1),
-                      ),
+                      color: BrightnessData.themeOf(context).chatBackground,
                     ),
                   ),
                 ),

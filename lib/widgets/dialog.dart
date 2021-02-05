@@ -87,11 +87,7 @@ class AlertDialogLayout extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(51, 51, 51, 1),
-                    darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                  ),
+                  color: BrightnessData.themeOf(context).text,
                 ),
                 child: content,
               ),
@@ -250,18 +246,10 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
         ? const BoxDecoration()
         : BoxDecoration(
             borderRadius: BorderRadius.circular(5),
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(61, 117, 227, 1),
-              darkColor: const Color.fromRGBO(65, 145, 255, 1),
-            ),
+            color: BrightnessData.themeOf(context).accent,
           );
     final textColor = backgroundTransparent
-        ? BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(61, 117, 227, 1),
-            darkColor: const Color.fromRGBO(65, 145, 255, 1),
-          )
+        ? BrightnessData.themeOf(context).accent
         : BrightnessData.dynamicColor(
             context,
             const Color.fromRGBO(255, 255, 255, 1),
@@ -317,11 +305,7 @@ class ContextMenu<T> extends DialogInteracterEntry<T> {
           color: backgroundColor,
         ),
         tapDowningColor: Color.alphaBlend(
-          BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(246, 247, 250, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-          ),
+          BrightnessData.themeOf(context).listSelected,
           backgroundColor,
         ),
         onTap: () => handleTap(context),
@@ -332,11 +316,7 @@ class ContextMenu<T> extends DialogInteracterEntry<T> {
             style: TextStyle(
               fontSize: 16,
               color: isDestructiveAction
-                  ? BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(246, 112, 112, 1),
-                      darkColor: const Color.fromRGBO(246, 112, 112, 1),
-                    )
+                  ? BrightnessData.themeOf(context).red
                   : BrightnessData.dynamicColor(
                       context,
                       const Color.fromRGBO(0, 0, 0, 1),

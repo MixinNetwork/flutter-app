@@ -117,10 +117,7 @@ class _CircleList extends StatelessWidget {
                       circle['asset'],
                       width: 24,
                       height: 24,
-                      color: BrightnessData.dynamicColor(
-                        context,
-                        const Color.fromRGBO(65, 145, 255, 1),
-                      ),
+                      color: BrightnessData.themeOf(context).accent,
                     ),
                     title: circle['title'],
                     onTap: () =>
@@ -217,11 +214,7 @@ class _Item extends StatelessWidget {
             asset,
             width: 24,
             height: 24,
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(51, 51, 51, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-            ),
+            color: BrightnessData.themeOf(context).text,
           ),
           title: title,
           onTap: () => BlocProvider.of<SlideCategoryCubit>(context).select(
@@ -247,11 +240,7 @@ class _Title extends StatelessWidget {
         child: Text(
           data,
           style: TextStyle(
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(51, 51, 51, 0.3),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.3),
-            ),
+            color: BrightnessData.themeOf(context).secondaryText,
           ),
         ),
       );

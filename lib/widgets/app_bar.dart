@@ -18,11 +18,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
     final actionTextStyle = TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w500,
-      color: BrightnessData.dynamicColor(
-        context,
-        const Color.fromRGBO(61, 117, 227, 1),
-        darkColor: const Color.fromRGBO(65, 145, 255, 1),
-      ),
+      color: BrightnessData.themeOf(context).accent,
     );
     return AppBar(
       toolbarHeight: 64,
@@ -30,11 +26,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         style: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(51, 51, 51, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-          ),
+          color: BrightnessData.themeOf(context).text,
         ),
         child: title is Widget
             ? title
@@ -47,11 +39,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
           ?.toList(),
       elevation: 0,
       centerTitle: true,
-      backgroundColor: BrightnessData.dynamicColor(
-        context,
-        const Color.fromRGBO(255, 255, 255, 1),
-        darkColor: const Color.fromRGBO(44, 49, 54, 1),
-      ),
+      backgroundColor: BrightnessData.themeOf(context).primary,
       leading: Builder(
         builder: (context) => ModalRoute.of(context)?.canPop ?? false
             ? const MixinBackButton()

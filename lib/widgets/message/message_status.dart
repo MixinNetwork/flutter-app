@@ -16,8 +16,7 @@ class MessageStatusWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var assetName = Resources.assetsImagesSendingSvg;
-    var lightColor = const Color.fromRGBO(184, 189, 199, 1);
-    var darkColor = const Color.fromRGBO(255, 255, 255, 0.4);
+    var color = BrightnessData.themeOf(context).secondaryText;
     switch (status) {
       case MessageStatus.sent:
         assetName = Resources.assetsImagesSentSvg;
@@ -27,8 +26,7 @@ class MessageStatusWidget extends StatelessWidget {
         break;
       case MessageStatus.read:
         assetName = Resources.assetsImagesReadSvg;
-        lightColor = const Color.fromRGBO(61, 117, 227, 1);
-        darkColor = const Color.fromRGBO(65, 145, 255, 1);
+        color = BrightnessData.themeOf(context).accent;
         break;
       default:
         break;
@@ -37,11 +35,7 @@ class MessageStatusWidget extends StatelessWidget {
       padding: const EdgeInsets.only(left: 8.0),
       child: SvgPicture.asset(
         assetName,
-        color: BrightnessData.dynamicColor(
-          context,
-          lightColor,
-          darkColor: darkColor,
-        ),
+        color: color,
       ),
     );
   }

@@ -26,11 +26,7 @@ class SearchBar extends StatelessWidget {
       const Color.fromRGBO(245, 247, 250, 1),
       darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
     );
-    final hintColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(184, 189, 199, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.3),
-    );
+    final hintColor = BrightnessData.themeOf(context).secondaryText;
     return Row(
       children: [
         const SizedBox(width: 20),
@@ -40,11 +36,7 @@ class SearchBar extends StatelessWidget {
             child: TextField(
               onChanged: (string) => {},
               style: TextStyle(
-                color: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(51, 51, 51, 1),
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                ),
+                color: BrightnessData.themeOf(context).text,
                 fontSize: 14,
               ),
               scrollPadding: EdgeInsets.zero,
@@ -84,11 +76,7 @@ class SearchBar extends StatelessWidget {
           },
           padding: const EdgeInsets.all(8),
           size: 24,
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(47, 48, 50, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-          ),
+          color: BrightnessData.themeOf(context).icon,
         ),
         const SizedBox(width: 12),
       ],

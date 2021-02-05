@@ -27,11 +27,7 @@ class EditProfilePage extends StatelessWidget {
         bioTextEditingController.text = state?.item2;
       },
       child: Scaffold(
-        backgroundColor: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(246, 247, 250, 0.9),
-          darkColor: const Color.fromRGBO(40, 44, 48, 1),
-        ),
+        backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
           title: Localization.of(context).editProfile,
           actions: [
@@ -106,11 +102,7 @@ class EditProfilePage extends StatelessWidget {
                   Localization.of(context).pageEditProfileJoin(createdAt),
                   style: TextStyle(
                     fontSize: 14,
-                    color: BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(184, 189, 199, 1),
-                      darkColor: const Color.fromRGBO(184, 189, 199, 1),
-                    ),
+                    color: BrightnessData.themeOf(context).secondaryText,
                   ),
                 ),
               ),
@@ -170,11 +162,7 @@ class _Item extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(184, 189, 199, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-              ),
+              color: BrightnessData.themeOf(context).secondaryText,
             ),
           ),
           const SizedBox(height: 16),
@@ -184,16 +172,8 @@ class _Item extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               color: readOnly
-                  ? BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(184, 189, 199, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.1),
-                    )
-                  : BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(51, 51, 51, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                    ),
+                  ? BrightnessData.themeOf(context).secondaryText
+                  : BrightnessData.themeOf(context).text,
             ),
             decoration: InputDecoration(
               isDense: true,

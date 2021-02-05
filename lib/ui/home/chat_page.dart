@@ -20,11 +20,7 @@ class ChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(237, 238, 238, 1),
-            darkColor: const Color.fromRGBO(35, 39, 43, 1),
-          ),
+          color: BrightnessData.themeOf(context).chatBackground,
         ),
         child: BlocConverter<ConversationCubit, ConversationItem, bool>(
           converter: (state) => state != null,

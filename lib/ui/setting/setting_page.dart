@@ -70,11 +70,7 @@ class SettingPage extends StatelessWidget {
                 title: Localization.of(context).signOut,
                 name: 'Sign Out',
                 onTap: () => MultiAuthCubit.of(context).signOut(),
-                color: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(246, 112, 112, 1),
-                  darkColor: const Color.fromRGBO(246, 112, 112, 1),
-                ),
+                color: BrightnessData.themeOf(context).red,
               ),
             ),
             const SizedBox(height: 50),
@@ -101,17 +97,8 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dynamicColor = color ??
-        BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(51, 51, 51, 1),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-        );
-    final backgroundColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(246, 247, 250, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-    );
+    final dynamicColor = color ?? BrightnessData.themeOf(context).text;
+    final backgroundColor = BrightnessData.themeOf(context).listSelected;
     return BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState,
             bool>(
         converter: (state) =>
@@ -234,11 +221,7 @@ class _UserProfile extends StatelessWidget {
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 18,
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(51, 51, 51, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-              ),
+              color: BrightnessData.themeOf(context).text,
             ),
           ),
         ),

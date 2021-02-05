@@ -18,12 +18,7 @@ class MixinBackButton extends StatelessWidget {
         padding: const EdgeInsets.only(right: 8.0),
         child: ActionButton(
           name: Resources.assetsImagesIcBackPng,
-          color: color ??
-              BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(47, 48, 50, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-              ),
+          color: color ?? BrightnessData.themeOf(context).icon,
           onTap: () {
             if (onTap != null) return onTap?.call();
             Navigator.pop(context);

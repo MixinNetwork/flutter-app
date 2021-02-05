@@ -7,11 +7,7 @@ import 'package:flutter_app/generated/l10n.dart';
 class NotificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(246, 247, 250, 0.9),
-          darkColor: const Color.fromRGBO(40, 44, 48, 1),
-        ),
+        backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
           title: Localization.of(context).notification,
           actions: [],
