@@ -26,8 +26,13 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("关于"),
+    "addContact" : MessageLookupByLibrary.simpleMessage("添加联系人"),
     "appearance" : MessageLookupByLibrary.simpleMessage("显示偏好"),
     "audio" : MessageLookupByLibrary.simpleMessage("语音"),
+    "block" : MessageLookupByLibrary.simpleMessage("屏蔽"),
+    "botInteractHi" : MessageLookupByLibrary.simpleMessage("打招呼"),
+    "botInteractInfo" : MessageLookupByLibrary.simpleMessage("点击下列按钮与机器人互动"),
+    "botInteractOpen" : MessageLookupByLibrary.simpleMessage("打开主页"),
     "bots" : MessageLookupByLibrary.simpleMessage("机器人"),
     "cancel" : MessageLookupByLibrary.simpleMessage("取消"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("聊天记录备份"),
@@ -70,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "search" : MessageLookupByLibrary.simpleMessage("搜索"),
     "signOut" : MessageLookupByLibrary.simpleMessage("登出"),
     "sticker" : MessageLookupByLibrary.simpleMessage("贴纸"),
+    "strangerFromMessage" : MessageLookupByLibrary.simpleMessage("他/她不是你的联系人"),
     "strangers" : MessageLookupByLibrary.simpleMessage("陌生人"),
     "transfer" : MessageLookupByLibrary.simpleMessage("转账"),
     "unMute" : MessageLookupByLibrary.simpleMessage("取消静音"),

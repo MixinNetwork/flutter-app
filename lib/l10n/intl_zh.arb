@@ -50,5 +50,11 @@
 	"audio": "语音",
 	"contact": "联系人",
 	"videoCall": "语音电话",
-	"preview": "预览"
+	"preview": "预览",
+	"strangerFromMessage": "他/她不是你的联系人",
+	"block": "屏蔽",
+	"addContact": "添加联系人",
+	"botInteractInfo":"点击下列按钮与机器人互动",
+	"botInteractOpen": "打开主页",
+	"botInteractHi": "打招呼"
 }

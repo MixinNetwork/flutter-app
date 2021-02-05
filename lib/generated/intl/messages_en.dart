@@ -26,8 +26,13 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("About"),
+    "addContact" : MessageLookupByLibrary.simpleMessage("Add contact"),
     "appearance" : MessageLookupByLibrary.simpleMessage("Appearance"),
     "audio" : MessageLookupByLibrary.simpleMessage("Audio"),
+    "block" : MessageLookupByLibrary.simpleMessage("Block"),
+    "botInteractHi" : MessageLookupByLibrary.simpleMessage("Say hi"),
+    "botInteractInfo" : MessageLookupByLibrary.simpleMessage("Click the button to interact with the bot"),
+    "botInteractOpen" : MessageLookupByLibrary.simpleMessage("Open Home page"),
     "bots" : MessageLookupByLibrary.simpleMessage("Bots"),
     "cancel" : MessageLookupByLibrary.simpleMessage("Cancel"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("Chat Backup"),
@@ -70,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "search" : MessageLookupByLibrary.simpleMessage("Search"),
     "signOut" : MessageLookupByLibrary.simpleMessage("Sign Out"),
     "sticker" : MessageLookupByLibrary.simpleMessage("Sticker"),
+    "strangerFromMessage" : MessageLookupByLibrary.simpleMessage("This sender is not in your contacts"),
     "strangers" : MessageLookupByLibrary.simpleMessage("Strangers"),
     "transfer" : MessageLookupByLibrary.simpleMessage("Transfer"),
     "unMute" : MessageLookupByLibrary.simpleMessage("UnMute"),

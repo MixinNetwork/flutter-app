@@ -50,5 +50,11 @@
 	"audio": "Audio",
 	"contact": "Contact",
 	"videoCall": "Video call",
-	"preview": "Preview"
+	"preview": "Preview",
+	"strangerFromMessage": "This sender is not in your contacts",
+	"block": "Block",
+	"addContact": "Add contact",
+	"botInteractInfo":"Click the button to interact with the bot",
+	"botInteractOpen": "Open Home page",
+	"botInteractHi": "Say hi"
 }

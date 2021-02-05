@@ -5,6 +5,7 @@ import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
+import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
@@ -25,6 +26,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
@@ -208,12 +210,17 @@ class _Message extends StatelessWidget {
                       ],
                     ),
                     child: Builder(builder: (context) {
-                      if (message.type.isSticker) {
+                      if (message.type == MessageCategory.stranger)
+                        return _StrangerMessage(
+                          message: message,
+                        );
+
+                      if (message.type.isSticker)
                         return _StickerMessage(
                           message: message,
                           isCurrentUser: isCurrentUser,
                         );
-                      }
+
                       return _TextMessage(
                         showNip: showNip,
                         isCurrentUser: isCurrentUser,
@@ -229,6 +236,116 @@ class _Message extends StatelessWidget {
       },
     );
   }
+}
+
+class _StrangerMessage extends StatelessWidget {
+  const _StrangerMessage({Key key, this.message}) : super(key: key);
+
+  final MessageItem message;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBotConversation =
+        BlocProvider.of<ConversationCubit>(context).state?.isBotConversation;
+    return Column(
+      children: [
+        Text(
+          isBotConversation
+              ? Localization.of(context).botInteractInfo
+              : Localization.of(context).strangerFromMessage,
+          style: TextStyle(
+            fontSize: 14,
+            color: BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(51, 51, 51, 1),
+              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            _StrangerButton(
+              isBotConversation
+                  ? Localization.of(context).botInteractOpen
+                  : Localization.of(context).block,
+              onTap: () {
+                // isBotConversation
+                //     ? todo open home page
+                //     : todo block
+              },
+            ),
+            const SizedBox(width: 16),
+            _StrangerButton(
+              isBotConversation
+                  ? Localization.of(context).botInteractHi
+                  : Localization.of(context).addContact,
+              onTap: () {
+                // isBotConversation
+                //     ? todo open home page
+                //     : todo block
+                Provider.of<AccountServer>(context, listen: false).sendTextMessage(
+                  BlocProvider.of<ConversationCubit>(context).state.conversationId,
+                  'Hi',
+                );
+              },
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StrangerButton extends StatelessWidget {
+  const _StrangerButton(
+    this.text, {
+    Key key,
+    this.onTap,
+  }) : super(key: key);
+
+  final String text;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => InteractableDecoratedBox.color(
+        onTap: onTap,
+        decoration: BoxDecoration(
+          color: BrightnessData.dynamicColor(
+            context,
+            const Color.fromRGBO(255, 255, 255, 1),
+            darkColor: const Color.fromRGBO(52, 59, 67, 1),
+          ),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 162,
+            minHeight: 36,
+            maxHeight: 36,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            child: Center(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(0, 122, 255, 1),
+                    darkColor: const Color.fromRGBO(0, 122, 255, 1),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _StickerMessage extends StatelessWidget {

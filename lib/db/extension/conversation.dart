@@ -6,9 +6,12 @@ extension Conversation on ConversationItem {
       category == ConversationCategory.contact &&
       relationship == UserRelationship.friend &&
       appId == null;
+
   bool get isGroupConversation => category == ConversationCategory.group;
+
   bool get isBotConversation =>
       category == ConversationCategory.contact && appId != null;
+
   bool get isStrangerConversation =>
       category == ConversationCategory.contact &&
       relationship == UserRelationship.stranger &&

@@ -554,6 +554,66 @@ class Localization {
       args: [],
     );
   }
+
+  /// `This sender is not in your contacts`
+  String get strangerFromMessage {
+    return Intl.message(
+      'This sender is not in your contacts',
+      name: 'strangerFromMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Block`
+  String get block {
+    return Intl.message(
+      'Block',
+      name: 'block',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add contact`
+  String get addContact {
+    return Intl.message(
+      'Add contact',
+      name: 'addContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Click the button to interact with the bot`
+  String get botInteractInfo {
+    return Intl.message(
+      'Click the button to interact with the bot',
+      name: 'botInteractInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Home page`
+  String get botInteractOpen {
+    return Intl.message(
+      'Open Home page',
+      name: 'botInteractOpen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Say hi`
+  String get botInteractHi {
+    return Intl.message(
+      'Say hi',
+      name: 'botInteractHi',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
