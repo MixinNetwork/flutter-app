@@ -59,7 +59,8 @@ class InputContainer extends StatelessWidget {
                 onTap: () async {
                   final file = await selectFile();
 
-                  if (file.isImage && await _PreviewImage.push(context, file)) {
+                  if (file.isImage) {
+                    if (!await _PreviewImage.push(context, file)) return;
                     return Provider.of<AccountServer>(context, listen: false)
                         .sendImageMessage(
                       BlocProvider.of<ConversationCubit>(context)
