@@ -56,5 +56,7 @@
 	"addContact": "添加联系人",
 	"botInteractInfo":"点击下列按钮与机器人互动",
 	"botInteractOpen": "打开主页",
-	"botInteractHi": "打招呼"
+	"botInteractHi": "打招呼",
+	"chatNotSupport": "不支持此类型消息。请升级 Mixin 查看。",
+	"chatLearn": "了解更多"
 }

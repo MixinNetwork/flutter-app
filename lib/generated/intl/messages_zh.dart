@@ -36,6 +36,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "bots" : MessageLookupByLibrary.simpleMessage("机器人"),
     "cancel" : MessageLookupByLibrary.simpleMessage("取消"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("聊天记录备份"),
+    "chatLearn" : MessageLookupByLibrary.simpleMessage("了解更多"),
+    "chatNotSupport" : MessageLookupByLibrary.simpleMessage("不支持此类型消息。请升级 Mixin 查看。"),
     "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
     "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
     "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),

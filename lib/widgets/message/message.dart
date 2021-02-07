@@ -4,6 +4,7 @@ import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
@@ -18,6 +19,8 @@ import 'package:flutter_app/widgets/message/message_name.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
+
+import 'item/unknown_message.dart';
 
 class MessageItemWidget extends StatelessWidget {
   const MessageItemWidget({
@@ -74,6 +77,12 @@ class MessageItemWidget extends StatelessWidget {
                   userName: user,
                   isCurrentUser: isCurrentUser,
                   builder: (BuildContext context) {
+                    if (message.status == MessageStatus.unknown)
+                      return UnknownMessage(
+                        showNip: showNip,
+                        isCurrentUser: isCurrentUser,
+                        message: message,
+                      );
                     if (message.type.isSticker)
                       return StickerMessageWidget(
                         message: message,

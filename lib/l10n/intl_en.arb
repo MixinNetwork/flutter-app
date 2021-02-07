@@ -56,5 +56,8 @@
 	"addContact": "Add contact",
 	"botInteractInfo":"Click the button to interact with the bot",
 	"botInteractOpen": "Open Home page",
-	"botInteractHi": "Say hi"
+	"botInteractHi": "Say hi",
+	"chatNotSupport": "This type of message is not supported, please upgrade Mixin to the latest version.",
+	"chatLearn": "Learn more",
+	"chatNotSupportUrl": "https://mixinmessenger.zendesk.com/hc/articles/360043776071"
 }

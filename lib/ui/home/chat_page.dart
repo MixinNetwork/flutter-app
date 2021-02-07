@@ -69,6 +69,8 @@ class ChatContainer extends StatelessWidget {
               ChatBar(onPressed: onPressed, isSelected: isSelected),
               Expanded(
                 child: Navigator(
+                  onPopPage: (Route<dynamic> route, dynamic result) =>
+                      route.didPop(result),
                   pages: [
                     MaterialPage(
                       child: Column(

@@ -614,6 +614,36 @@ class Localization {
       args: [],
     );
   }
+
+  /// `This type of message is not supported, please upgrade Mixin to the latest version.`
+  String get chatNotSupport {
+    return Intl.message(
+      'This type of message is not supported, please upgrade Mixin to the latest version.',
+      name: 'chatNotSupport',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Learn more`
+  String get chatLearn {
+    return Intl.message(
+      'Learn more',
+      name: 'chatLearn',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `https://mixinmessenger.zendesk.com/hc/articles/360043776071`
+  String get chatNotSupportUrl {
+    return Intl.message(
+      'https://mixinmessenger.zendesk.com/hc/articles/360043776071',
+      name: 'chatNotSupportUrl',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
