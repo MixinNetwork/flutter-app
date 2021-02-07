@@ -20,6 +20,7 @@ import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 
+import 'item/secret_message.dart';
 import 'item/unknown_message.dart';
 
 class MessageItemWidget extends StatelessWidget {
@@ -68,6 +69,9 @@ class MessageItemWidget extends StatelessWidget {
             if (datetime != null) MessageDayTime(dateTime: datetime),
             Builder(
               builder: (context) {
+                if (message.type == MessageCategory.secret)
+                  return SecretMessage();
+
                 if (message.type == MessageCategory.stranger)
                   return StrangerMessage(
                     message: message,

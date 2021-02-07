@@ -59,5 +59,7 @@
 	"botInteractHi": "Say hi",
 	"chatNotSupport": "This type of message is not supported, please upgrade Mixin to the latest version.",
 	"chatLearn": "Learn more",
-	"chatNotSupportUrl": "https://mixinmessenger.zendesk.com/hc/articles/360043776071"
+	"chatNotSupportUrl": "https://mixinmessenger.zendesk.com/hc/articles/360043776071",
+	"aboutEncryptedInfo": "Messages to this conversation are encrypted end-to-end, tap for more info.",
+	"aboutEncryptedInfoUrl": "https://mixin.one/pages/1000007"
 }

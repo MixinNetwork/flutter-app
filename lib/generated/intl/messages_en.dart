@@ -26,6 +26,8 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("About"),
+    "aboutEncryptedInfo" : MessageLookupByLibrary.simpleMessage("Messages to this conversation are encrypted end-to-end, tap for more info."),
+    "aboutEncryptedInfoUrl" : MessageLookupByLibrary.simpleMessage("https://mixin.one/pages/1000007"),
     "addContact" : MessageLookupByLibrary.simpleMessage("Add contact"),
     "appearance" : MessageLookupByLibrary.simpleMessage("Appearance"),
     "audio" : MessageLookupByLibrary.simpleMessage("Audio"),

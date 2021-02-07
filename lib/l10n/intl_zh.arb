@@ -58,5 +58,6 @@
 	"botInteractOpen": "打开主页",
 	"botInteractHi": "打招呼",
 	"chatNotSupport": "不支持此类型消息。请升级 Mixin 查看。",
-	"chatLearn": "了解更多"
+	"chatLearn": "了解更多",
+	"aboutEncryptedInfo": "此对话中的消息使用端对端加密。点击了解更多。"
 }

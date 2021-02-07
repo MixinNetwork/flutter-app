@@ -644,6 +644,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Messages to this conversation are encrypted end-to-end, tap for more info.`
+  String get aboutEncryptedInfo {
+    return Intl.message(
+      'Messages to this conversation are encrypted end-to-end, tap for more info.',
+      name: 'aboutEncryptedInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `https://mixin.one/pages/1000007`
+  String get aboutEncryptedInfoUrl {
+    return Intl.message(
+      'https://mixin.one/pages/1000007',
+      name: 'aboutEncryptedInfoUrl',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
