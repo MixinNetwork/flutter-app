@@ -19,9 +19,11 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh';
 
-  static m0(name) => "确定删除${name}圈子吗？";
+  static m0(name) => "等待${name}上线后建立加密会话。";
 
-  static m1(date) => "${date}加入";
+  static m1(name) => "确定删除${name}圈子吗？";
+
+  static m2(date) => "${date}加入";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -39,6 +41,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatBackup" : MessageLookupByLibrary.simpleMessage("聊天记录备份"),
     "chatLearn" : MessageLookupByLibrary.simpleMessage("了解更多"),
     "chatNotSupport" : MessageLookupByLibrary.simpleMessage("不支持此类型消息。请升级 Mixin 查看。"),
+    "chatWaiting" : m0,
+    "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("桌面端"),
     "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
     "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
     "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),
@@ -62,8 +66,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),
     "notification" : MessageLookupByLibrary.simpleMessage("通知"),
-    "pageDeleteCircle" : m0,
-    "pageEditProfileJoin" : m1,
+    "pageDeleteCircle" : m1,
+    "pageEditProfileJoin" : m2,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("通过 QrCode 登录 Mixin Messenger"),

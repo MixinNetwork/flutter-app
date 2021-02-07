@@ -6,7 +6,6 @@ import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
@@ -16,12 +15,14 @@ import 'package:flutter_app/widgets/message/item/text_message.dart';
 import 'package:flutter_app/widgets/message/message_bubble_margin.dart';
 import 'package:flutter_app/widgets/message/message_day_time.dart';
 import 'package:flutter_app/widgets/message/message_name.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 
 import 'item/secret_message.dart';
 import 'item/unknown_message.dart';
+import 'item/waiting_message.dart';
 
 class MessageItemWidget extends StatelessWidget {
   const MessageItemWidget({
@@ -33,7 +34,6 @@ class MessageItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final authId = MultiAuthCubit.of(context).state.current.account.userId;
     return BlocConverter<MessageBloc, PagingState<MessageItem>,
         Tuple3<MessageItem, MessageItem, MessageItem>>(
       converter: (state) {
@@ -50,7 +50,7 @@ class MessageItemWidget extends StatelessWidget {
 
         if (message == null) return const SizedBox(height: 40);
 
-        final isCurrentUser = message.userId == authId;
+        final isCurrentUser = message.relationship == UserRelationship.me;
 
         final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
         final sameUserPrev = prev?.userId == message.userId;
@@ -81,6 +81,12 @@ class MessageItemWidget extends StatelessWidget {
                   userName: user,
                   isCurrentUser: isCurrentUser,
                   builder: (BuildContext context) {
+                    if (message.status == MessageStatus.failed)
+                      return WaitingMessage(
+                        showNip: showNip,
+                        isCurrentUser: isCurrentUser,
+                        message: message,
+                      );
                     if (message.status == MessageStatus.unknown)
                       return UnknownMessage(
                         showNip: showNip,

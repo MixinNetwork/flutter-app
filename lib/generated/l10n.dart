@@ -664,6 +664,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Waiting for {name} to get online and establish an encrypted session.`
+  String chatWaiting(Object name) {
+    return Intl.message(
+      'Waiting for $name to get online and establish an encrypted session.',
+      name: 'chatWaiting',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `desktop`
+  String get chatWaitingDesktop {
+    return Intl.message(
+      'desktop',
+      name: 'chatWaitingDesktop',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

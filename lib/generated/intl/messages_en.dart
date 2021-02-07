@@ -19,9 +19,11 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static m0(name) => "Do you want to delete ${name} circle?";
+  static m0(name) => "Waiting for ${name} to get online and establish an encrypted session.";
 
-  static m1(date) => "${date} join";
+  static m1(name) => "Do you want to delete ${name} circle?";
+
+  static m2(date) => "${date} join";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -41,6 +43,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatLearn" : MessageLookupByLibrary.simpleMessage("Learn more"),
     "chatNotSupport" : MessageLookupByLibrary.simpleMessage("This type of message is not supported, please upgrade Mixin to the latest version."),
     "chatNotSupportUrl" : MessageLookupByLibrary.simpleMessage("https://mixinmessenger.zendesk.com/hc/articles/360043776071"),
+    "chatWaiting" : m0,
+    "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("desktop"),
     "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
     "contact" : MessageLookupByLibrary.simpleMessage("Contact"),
     "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
@@ -64,8 +68,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
     "notification" : MessageLookupByLibrary.simpleMessage("Notification"),
-    "pageDeleteCircle" : m0,
-    "pageEditProfileJoin" : m1,
+    "pageDeleteCircle" : m1,
+    "pageEditProfileJoin" : m2,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),
