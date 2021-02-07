@@ -27,7 +27,7 @@ class TextMessage extends StatelessWidget {
         alignment: WrapAlignment.end,
         crossAxisAlignment: WrapCrossAlignment.end,
         children: [
-          Text(
+          SelectableText(
             message.content,
             style: TextStyle(
               fontSize: 16,
