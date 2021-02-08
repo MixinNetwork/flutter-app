@@ -20,6 +20,7 @@ import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 
+import 'item/file_message.dart';
 import 'item/secret_message.dart';
 import 'item/unknown_message.dart';
 import 'item/waiting_message.dart';
@@ -81,6 +82,12 @@ class MessageItemWidget extends StatelessWidget {
                   userName: user,
                   isCurrentUser: isCurrentUser,
                   builder: (BuildContext context) {
+                    if (message.type.isData)
+                      return FileMessage(
+                        showNip: showNip,
+                        isCurrentUser: isCurrentUser,
+                        message: message,
+                      );
                     if (message.status == MessageStatus.failed)
                       return WaitingMessage(
                         showNip: showNip,
