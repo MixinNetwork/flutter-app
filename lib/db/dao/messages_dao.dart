@@ -3,6 +3,9 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:moor/moor.dart';
 
+import '../../utils/string_extension.dart';
+import '../extension/message_category.dart';
+
 part 'messages_dao.g.dart';
 
 @UseDao(tables: [Messages])
@@ -23,11 +26,22 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> insert(Message message, String userId) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
+    if (message.category.isText) {
+      final content = message.content.fts5ContentFilter();
+      insertFts(message.messageId, message.conversationId, content,
+          message.createdAt, message.userId);
+    }
     await db.conversationsDao
         .updateLastMessageId(message.conversationId, message.messageId);
     await _takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.updateConversion, message.conversationId);
     return result;
+  }
+
+  void insertFts(String messageId, String conversationId, String content,
+      DateTime createdAt, String userId) async {
+    await db.customInsert(
+        'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'$content\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')');
   }
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
