@@ -87,8 +87,8 @@ class MessageItemWidget extends StatelessWidget {
                         isCurrentUser: isCurrentUser,
                         message: message,
                       );
-                    if (message.status == MessageStatus.unknown)
-                      return UnknownMessage(
+                    if (message.type.isText)
+                      return TextMessage(
                         showNip: showNip,
                         isCurrentUser: isCurrentUser,
                         message: message,
@@ -98,7 +98,7 @@ class MessageItemWidget extends StatelessWidget {
                         message: message,
                         isCurrentUser: isCurrentUser,
                       );
-                    return TextMessage(
+                    return UnknownMessage(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
