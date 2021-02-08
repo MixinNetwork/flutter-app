@@ -19,11 +19,21 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh';
 
-  static m0(name) => "等待${name}上线后建立加密会话。";
+  static m0(name, addedName) => "${name}添加了${addedName}";
 
-  static m1(name) => "确定删除${name}圈子吗？";
+  static m1(name, groupName) => "${name}创建了群组${groupName}";
 
-  static m2(date) => "${date}加入";
+  static m2(name) => "${name}离开了群组";
+
+  static m3(name) => "${name}通过邀请链接加入群组";
+
+  static m4(name, removedName) => "${name}移除了${removedName}";
+
+  static m5(name) => "等待${name}上线后建立加密会话。";
+
+  static m6(name) => "确定删除${name}圈子吗？";
+
+  static m7(date) => "${date}加入";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -39,9 +49,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "bots" : MessageLookupByLibrary.simpleMessage("机器人"),
     "cancel" : MessageLookupByLibrary.simpleMessage("取消"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("聊天记录备份"),
+    "chatGroupAdd" : m0,
+    "chatGroupCreate" : m1,
+    "chatGroupExit" : m2,
+    "chatGroupJoin" : m3,
+    "chatGroupRemove" : m4,
+    "chatGroupRole" : MessageLookupByLibrary.simpleMessage("你现在成为管理员"),
     "chatLearn" : MessageLookupByLibrary.simpleMessage("了解更多"),
     "chatNotSupport" : MessageLookupByLibrary.simpleMessage("不支持此类型消息。请升级 Mixin 查看。"),
-    "chatWaiting" : m0,
+    "chatWaiting" : m5,
     "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("桌面端"),
     "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
     "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
@@ -66,8 +82,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),
     "notification" : MessageLookupByLibrary.simpleMessage("通知"),
-    "pageDeleteCircle" : m1,
-    "pageEditProfileJoin" : m2,
+    "pageDeleteCircle" : m6,
+    "pageEditProfileJoin" : m7,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("通过 QrCode 登录 Mixin Messenger"),
@@ -89,6 +105,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unPin" : MessageLookupByLibrary.simpleMessage("取消置顶"),
     "video" : MessageLookupByLibrary.simpleMessage("视频"),
     "videoCall" : MessageLookupByLibrary.simpleMessage("语音电话"),
-    "waitingForThisMessage" : MessageLookupByLibrary.simpleMessage("正在等待这个消息。")
+    "waitingForThisMessage" : MessageLookupByLibrary.simpleMessage("正在等待这个消息。"),
+    "you" : MessageLookupByLibrary.simpleMessage("您")
   };
 }

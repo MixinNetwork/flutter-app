@@ -22,6 +22,7 @@ import 'package:flutter_app/db/extension/message_category.dart';
 
 import 'item/file_message.dart';
 import 'item/secret_message.dart';
+import 'item/system_message.dart';
 import 'item/unknown_message.dart';
 import 'item/waiting_message.dart';
 
@@ -70,6 +71,11 @@ class MessageItemWidget extends StatelessWidget {
             if (datetime != null) MessageDayTime(dateTime: datetime),
             Builder(
               builder: (context) {
+                if (message.type == MessageCategory.systemConversation)
+                  return SystemMessage(
+                    message: message,
+                  );
+
                 if (message.type == MessageCategory.secret)
                   return SecretMessage();
 

@@ -20,10 +20,10 @@ import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:flutter_app/enum/media_status.dart';
+import 'package:flutter_app/enum/message_action.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/enum/system_circle_action.dart';
-import 'package:flutter_app/enum/system_conversation_action.dart';
 import 'package:flutter_app/enum/system_user_action.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/enum_to_string.dart';
@@ -446,7 +446,7 @@ class DecryptMessage extends Injector {
 
   void _processSystemConversationMessage(
       BlazeMessageData data, SystemConversationMessage systemMessage) async {
-    if (systemMessage.action != SystemConversationAction.update) {
+    if (systemMessage.action != MessageAction.update) {
       syncConversion(data.conversationId);
     }
     final userId = systemMessage.userId ?? data.userId;
@@ -466,10 +466,10 @@ class DecryptMessage extends Injector {
         content: '',
         createdAt: data.createdAt,
         status: data.status,
-        action: EnumToString.convertToString(systemMessage.action),
+        action: systemMessage.action,
         participantId: systemMessage.participantId);
-    if (systemMessage.action == SystemConversationAction.add ||
-        systemMessage.action == SystemConversationAction.join) {
+    if (systemMessage.action == MessageAction.add ||
+        systemMessage.action == MessageAction.join) {
       // database.participantsDao.insert(db.Participant(conversationId: data.conversationId,userId: systemMessage.participantId, role: '' ,createdAt: data.createdAt));
       // todo refresh conversation and signal key
       if (systemMessage.participantId == accountId) {
@@ -479,21 +479,21 @@ class DecryptMessage extends Injector {
         // syncSession();
         // syncUser();
       }
-    } else if (systemMessage.action == SystemConversationAction.remove ||
-        systemMessage.action == SystemConversationAction.exit) {
+    } else if (systemMessage.action == MessageAction.remove ||
+        systemMessage.action == MessageAction.exit) {
       if (systemMessage.participantId == accountId) {
         database.conversationDao.updateConversationStatusById(
             data.conversationId, ConversationStatus.quit);
       }
       // todo remove signal key
-    } else if (systemMessage.action == SystemConversationAction.update) {
+    } else if (systemMessage.action == MessageAction.update) {
       if (systemMessage.participantId != null) {
         await syncUser(systemMessage.userId);
       } else {
         syncConversion(data.conversationId);
       }
-    } else if (systemMessage.action == SystemConversationAction.create) {
-    } else if (systemMessage.action == SystemConversationAction.role) {
+    } else if (systemMessage.action == MessageAction.create) {
+    } else if (systemMessage.action == MessageAction.role) {
       database.participantsDao.updateParticipantRole(
           data.conversationId, systemMessage.participantId, systemMessage.role);
     }

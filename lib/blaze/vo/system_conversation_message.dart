@@ -1,10 +1,11 @@
-import 'package:flutter_app/enum/system_conversation_action.dart';
+import 'package:flutter_app/enum/message_action.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 part 'system_conversation_message.g.dart';
 
 @JsonSerializable()
+@MessageActionJsonConverter()
 class SystemConversationMessage {
   SystemConversationMessage(
       this.action, this.participantId, this.userId, this.role);
@@ -12,8 +13,8 @@ class SystemConversationMessage {
   factory SystemConversationMessage.fromJson(Map<String, dynamic> json) =>
       _$SystemConversationMessageFromJson(json);
 
-  @JsonKey(name: 'action', nullable: false)
-  SystemConversationAction action;
+  @JsonKey(name: 'action')
+  MessageAction action;
   @JsonKey(name: 'participant_id')
   String participantId;
   @JsonKey(name: 'user_id')

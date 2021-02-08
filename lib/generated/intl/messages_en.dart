@@ -19,11 +19,21 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static m0(name) => "Waiting for ${name} to get online and establish an encrypted session.";
+  static m0(name, addedName) => "${name} added ${addedName}";
 
-  static m1(name) => "Do you want to delete ${name} circle?";
+  static m1(name, groupName) => "${name} created group ${groupName}";
 
-  static m2(date) => "${date} join";
+  static m2(name) => "${name} left";
+
+  static m3(name) => "${name} joined the group via invite link";
+
+  static m4(name, removedName) => "${name} removed ${removedName}";
+
+  static m5(name) => "Waiting for ${name} to get online and establish an encrypted session.";
+
+  static m6(name) => "Do you want to delete ${name} circle?";
+
+  static m7(date) => "${date} join";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -40,10 +50,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "bots" : MessageLookupByLibrary.simpleMessage("Bots"),
     "cancel" : MessageLookupByLibrary.simpleMessage("Cancel"),
     "chatBackup" : MessageLookupByLibrary.simpleMessage("Chat Backup"),
+    "chatGroupAdd" : m0,
+    "chatGroupCreate" : m1,
+    "chatGroupExit" : m2,
+    "chatGroupJoin" : m3,
+    "chatGroupRemove" : m4,
+    "chatGroupRole" : MessageLookupByLibrary.simpleMessage("You\'re now an admin"),
     "chatLearn" : MessageLookupByLibrary.simpleMessage("Learn more"),
     "chatNotSupport" : MessageLookupByLibrary.simpleMessage("This type of message is not supported, please upgrade Mixin to the latest version."),
     "chatNotSupportUrl" : MessageLookupByLibrary.simpleMessage("https://mixinmessenger.zendesk.com/hc/articles/360043776071"),
-    "chatWaiting" : m0,
+    "chatWaiting" : m5,
     "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("desktop"),
     "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
     "contact" : MessageLookupByLibrary.simpleMessage("Contact"),
@@ -68,8 +84,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
     "notification" : MessageLookupByLibrary.simpleMessage("Notification"),
-    "pageDeleteCircle" : m1,
-    "pageEditProfileJoin" : m2,
+    "pageDeleteCircle" : m6,
+    "pageEditProfileJoin" : m7,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),
@@ -91,6 +107,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "unPin" : MessageLookupByLibrary.simpleMessage("UnPin"),
     "video" : MessageLookupByLibrary.simpleMessage("Video"),
     "videoCall" : MessageLookupByLibrary.simpleMessage("Video call"),
-    "waitingForThisMessage" : MessageLookupByLibrary.simpleMessage("Waiting for this message.")
+    "waitingForThisMessage" : MessageLookupByLibrary.simpleMessage("Waiting for this message."),
+    "you" : MessageLookupByLibrary.simpleMessage("You")
   };
 }

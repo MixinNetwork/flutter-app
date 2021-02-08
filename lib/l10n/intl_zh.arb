@@ -61,5 +61,12 @@
 	"chatLearn": "了解更多",
 	"aboutEncryptedInfo": "此对话中的消息使用端对端加密。点击了解更多。",
 	"chatWaiting":"等待{name}上线后建立加密会话。",
-	"chatWaitingDesktop": "桌面端"
+	"chatWaitingDesktop": "桌面端",
+	"chatGroupJoin": "{name}通过邀请链接加入群组",
+	"you": "您",
+	"chatGroupExit":"{name}离开了群组",
+	"chatGroupAdd": "{name}添加了{addedName}",
+	"chatGroupRemove": "{name}移除了{removedName}",
+	"chatGroupCreate": "{name}创建了群组{groupName}",
+	"chatGroupRole": "你现在成为管理员"
 }

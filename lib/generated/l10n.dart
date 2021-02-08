@@ -684,6 +684,76 @@ class Localization {
       args: [],
     );
   }
+
+  /// `{name} joined the group via invite link`
+  String chatGroupJoin(Object name) {
+    return Intl.message(
+      '$name joined the group via invite link',
+      name: 'chatGroupJoin',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `You`
+  String get you {
+    return Intl.message(
+      'You',
+      name: 'you',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{name} left`
+  String chatGroupExit(Object name) {
+    return Intl.message(
+      '$name left',
+      name: 'chatGroupExit',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{name} added {addedName}`
+  String chatGroupAdd(Object name, Object addedName) {
+    return Intl.message(
+      '$name added $addedName',
+      name: 'chatGroupAdd',
+      desc: '',
+      args: [name, addedName],
+    );
+  }
+
+  /// `{name} removed {removedName}`
+  String chatGroupRemove(Object name, Object removedName) {
+    return Intl.message(
+      '$name removed $removedName',
+      name: 'chatGroupRemove',
+      desc: '',
+      args: [name, removedName],
+    );
+  }
+
+  /// `{name} created group {groupName}`
+  String chatGroupCreate(Object name, Object groupName) {
+    return Intl.message(
+      '$name created group $groupName',
+      name: 'chatGroupCreate',
+      desc: '',
+      args: [name, groupName],
+    );
+  }
+
+  /// `You're now an admin`
+  String get chatGroupRole {
+    return Intl.message(
+      'You\'re now an admin',
+      name: 'chatGroupRole',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

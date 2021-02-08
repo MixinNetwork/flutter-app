@@ -9,7 +9,7 @@ part of 'system_conversation_message.dart';
 SystemConversationMessage _$SystemConversationMessageFromJson(
     Map<String, dynamic> json) {
   return SystemConversationMessage(
-    _$enumDecode(_$SystemConversationActionEnumMap, json['action']),
+    const MessageActionJsonConverter().fromJson(json['action'] as String),
     json['participant_id'] as String,
     json['user_id'] as String,
     _$enumDecodeNullable(_$ParticipantRoleEnumMap, json['role']),
@@ -19,7 +19,7 @@ SystemConversationMessage _$SystemConversationMessageFromJson(
 Map<String, dynamic> _$SystemConversationMessageToJson(
         SystemConversationMessage instance) =>
     <String, dynamic>{
-      'action': _$SystemConversationActionEnumMap[instance.action],
+      'action': const MessageActionJsonConverter().toJson(instance.action),
       'participant_id': instance.participantId,
       'user_id': instance.userId,
       'role': _$ParticipantRoleEnumMap[instance.role],
@@ -45,16 +45,6 @@ T _$enumDecode<T>(
   }
   return value ?? unknownValue;
 }
-
-const _$SystemConversationActionEnumMap = {
-  SystemConversationAction.join: 'JOIN',
-  SystemConversationAction.exit: 'EXIT',
-  SystemConversationAction.add: 'ADD',
-  SystemConversationAction.remove: 'REMOVE',
-  SystemConversationAction.create: 'create',
-  SystemConversationAction.update: 'update',
-  SystemConversationAction.role: 'role',
-};
 
 T _$enumDecodeNullable<T>(
   Map<T, dynamic> enumValues,

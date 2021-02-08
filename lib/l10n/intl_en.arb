@@ -63,5 +63,12 @@
 	"aboutEncryptedInfo": "Messages to this conversation are encrypted end-to-end, tap for more info.",
 	"aboutEncryptedInfoUrl": "https://mixin.one/pages/1000007",
 	"chatWaiting":"Waiting for {name} to get online and establish an encrypted session.",
-	"chatWaitingDesktop": "desktop"
+	"chatWaitingDesktop": "desktop",
+	"chatGroupJoin": "{name} joined the group via invite link",
+	"you": "You",
+	"chatGroupExit":"{name} left",
+	"chatGroupAdd": "{name} added {addedName}",
+	"chatGroupRemove": "{name} removed {removedName}",
+	"chatGroupCreate": "{name} created group {groupName}",
+	"chatGroupRole": "You're now an admin"
 }

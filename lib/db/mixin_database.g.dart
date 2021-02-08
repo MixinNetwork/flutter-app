@@ -1752,7 +1752,7 @@ class Message extends DataClass implements Insertable<Message> {
   final MediaStatus mediaStatus;
   final MessageStatus status;
   final DateTime createdAt;
-  final String action;
+  final MessageAction action;
   final String participantId;
   final String snapshotId;
   final String hyperlink;
@@ -1837,8 +1837,8 @@ class Message extends DataClass implements Insertable<Message> {
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}status'])),
       createdAt: Messages.$converter3.mapToDart(intType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
-      action:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}action']),
+      action: Messages.$converter4.mapToDart(
+          stringType.mapFromDatabaseResponse(data['${effectivePrefix}action'])),
       participantId: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}participant_id']),
       snapshotId: stringType
@@ -1924,7 +1924,8 @@ class Message extends DataClass implements Insertable<Message> {
       map['created_at'] = Variable<int>(converter.mapToSql(createdAt));
     }
     if (!nullToAbsent || action != null) {
-      map['action'] = Variable<String>(action);
+      final converter = Messages.$converter4;
+      map['action'] = Variable<String>(converter.mapToSql(action));
     }
     if (!nullToAbsent || participantId != null) {
       map['participant_id'] = Variable<String>(participantId);
@@ -2074,7 +2075,7 @@ class Message extends DataClass implements Insertable<Message> {
       mediaStatus: serializer.fromJson<MediaStatus>(json['media_status']),
       status: serializer.fromJson<MessageStatus>(json['status']),
       createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      action: serializer.fromJson<String>(json['action']),
+      action: serializer.fromJson<MessageAction>(json['action']),
       participantId: serializer.fromJson<String>(json['participant_id']),
       snapshotId: serializer.fromJson<String>(json['snapshot_id']),
       hyperlink: serializer.fromJson<String>(json['hyperlink']),
@@ -2110,7 +2111,7 @@ class Message extends DataClass implements Insertable<Message> {
       'media_status': serializer.toJson<MediaStatus>(mediaStatus),
       'status': serializer.toJson<MessageStatus>(status),
       'created_at': serializer.toJson<DateTime>(createdAt),
-      'action': serializer.toJson<String>(action),
+      'action': serializer.toJson<MessageAction>(action),
       'participant_id': serializer.toJson<String>(participantId),
       'snapshot_id': serializer.toJson<String>(snapshotId),
       'hyperlink': serializer.toJson<String>(hyperlink),
@@ -2144,7 +2145,7 @@ class Message extends DataClass implements Insertable<Message> {
           MediaStatus mediaStatus,
           MessageStatus status,
           DateTime createdAt,
-          String action,
+          MessageAction action,
           String participantId,
           String snapshotId,
           String hyperlink,
@@ -2324,7 +2325,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<MediaStatus> mediaStatus;
   final Value<MessageStatus> status;
   final Value<DateTime> createdAt;
-  final Value<String> action;
+  final Value<MessageAction> action;
   final Value<String> participantId;
   final Value<String> snapshotId;
   final Value<String> hyperlink;
@@ -2490,7 +2491,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       Value<MediaStatus> mediaStatus,
       Value<MessageStatus> status,
       Value<DateTime> createdAt,
-      Value<String> action,
+      Value<MessageAction> action,
       Value<String> participantId,
       Value<String> snapshotId,
       Value<String> hyperlink,
@@ -2599,7 +2600,8 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value));
     }
     if (action.present) {
-      map['action'] = Variable<String>(action.value);
+      final converter = Messages.$converter4;
+      map['action'] = Variable<String>(converter.mapToSql(action.value));
     }
     if (participantId.present) {
       map['participant_id'] = Variable<String>(participantId.value);
@@ -3065,10 +3067,7 @@ class Messages extends Table with TableInfo<Messages, Message> {
     context.handle(_mediaStatusMeta, const VerificationResult.success());
     context.handle(_statusMeta, const VerificationResult.success());
     context.handle(_createdAtMeta, const VerificationResult.success());
-    if (data.containsKey('action')) {
-      context.handle(_actionMeta,
-          action.isAcceptableOrUnknown(data['action'], _actionMeta));
-    }
+    context.handle(_actionMeta, const VerificationResult.success());
     if (data.containsKey('participant_id')) {
       context.handle(
           _participantIdMeta,
@@ -3148,6 +3147,8 @@ class Messages extends Table with TableInfo<Messages, Message> {
   static TypeConverter<MessageStatus, String> $converter2 =
       const MessageStatusTypeConverter();
   static TypeConverter<DateTime, int> $converter3 = const MillisDateConverter();
+  static TypeConverter<MessageAction, String> $converter4 =
+      const MessageActionConverter();
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY(message_id)',
@@ -11581,7 +11582,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n                        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n                        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n                        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n                        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n                        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n                        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n                        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n                        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n                        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n                        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n                        c.name AS groupName, u.relationship AS relationship\n                        FROM messages m\n                        INNER JOIN users u ON m.user_id = u.user_id\n                        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n                        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n                        LEFT JOIN assets a ON s.asset_id = a.asset_id\n                        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n                        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n                        LEFT JOIN users su ON m.shared_user_id = su.user_id\n                        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n                        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n                        WHERE m.conversation_id = :conversationId\n                        ORDER BY m.created_at DESC\n                        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n                        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n                        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n                        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n                        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n                        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n                        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n                        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n                        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n                        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n                        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n                        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship\n                        FROM messages m\n                        INNER JOIN users u ON m.user_id = u.user_id\n                        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n                        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n                        LEFT JOIN assets a ON s.asset_id = a.asset_id\n                        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n                        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n                        LEFT JOIN users su ON m.shared_user_id = su.user_id\n                        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n                        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n                        WHERE m.conversation_id = :conversationId\n                        ORDER BY m.created_at DESC\n                        LIMIT :offset, :limit',
         variables: [
           Variable.withString(conversationId),
           Variable.withInt(offset),
@@ -11623,7 +11624,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         quoteId: row.readString('quoteId'),
         quoteContent: row.readString('quoteContent'),
         participantFullName: row.readString('participantFullName'),
-        actionName: row.readString('actionName'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
         participantUserId: row.readString('participantUserId'),
         snapshotId: row.readString('snapshotId'),
         snapshotType: row.readString('snapshotType'),
@@ -11652,6 +11654,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupName: row.readString('groupName'),
         relationship:
             Users.$converter0.mapToDart(row.readString('relationship')),
+        participantRelationship: Users.$converter0
+            .mapToDart(row.readString('participantRelationship')),
       );
     });
   }
@@ -11681,7 +11685,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter1.mapToDart(row.readString('media_status')),
         status: Messages.$converter2.mapToDart(row.readString('status')),
         createdAt: Messages.$converter3.mapToDart(row.readInt('created_at')),
-        action: row.readString('action'),
+        action: Messages.$converter4.mapToDart(row.readString('action')),
         participantId: row.readString('participant_id'),
         snapshotId: row.readString('snapshot_id'),
         hyperlink: row.readString('hyperlink'),
@@ -11809,7 +11813,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
         messageStatus:
             Messages.$converter2.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
@@ -11878,7 +11883,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
         messageStatus:
             Messages.$converter2.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
@@ -11946,7 +11952,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
         messageStatus:
             Messages.$converter2.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
@@ -12015,7 +12022,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
         messageStatus:
             Messages.$converter2.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
@@ -12072,7 +12080,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
         mediaUrl: row.readString('mediaUrl'),
         senderId: row.readString('senderId'),
-        actionName: row.readString('actionName'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
         messageStatus:
             Messages.$converter2.mapToDart(row.readString('messageStatus')),
         senderFullName: row.readString('senderFullName'),
@@ -12237,7 +12246,7 @@ class MessageItem {
   final String quoteId;
   final String quoteContent;
   final String participantFullName;
-  final String actionName;
+  final MessageAction actionName;
   final String participantUserId;
   final String snapshotId;
   final String snapshotType;
@@ -12265,6 +12274,7 @@ class MessageItem {
   final int mentionRead;
   final String groupName;
   final UserRelationship relationship;
+  final UserRelationship participantRelationship;
   MessageItem({
     this.messageId,
     this.conversationId,
@@ -12318,6 +12328,7 @@ class MessageItem {
     this.mentionRead,
     this.groupName,
     this.relationship,
+    this.participantRelationship,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -12363,7 +12374,7 @@ class MessageItem {
                                                                               .hashCode,
                                                                           $mrjc(
                                                                               thumbUrl.hashCode,
-                                                                              $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(participantFullName.hashCode, $mrjc(actionName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetId.hashCode, $mrjc(assetIcon.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(mentions.hashCode, $mrjc(mentionRead.hashCode, $mrjc(groupName.hashCode, relationship.hashCode))))))))))))))))))))))))))))))))))))))))))))))))))));
+                                                                              $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(participantFullName.hashCode, $mrjc(actionName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetId.hashCode, $mrjc(assetIcon.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(mentions.hashCode, $mrjc(mentionRead.hashCode, $mrjc(groupName.hashCode, $mrjc(relationship.hashCode, participantRelationship.hashCode)))))))))))))))))))))))))))))))))))))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -12419,7 +12430,8 @@ class MessageItem {
           other.mentions == this.mentions &&
           other.mentionRead == this.mentionRead &&
           other.groupName == this.groupName &&
-          other.relationship == this.relationship);
+          other.relationship == this.relationship &&
+          other.participantRelationship == this.participantRelationship);
   @override
   String toString() {
     return (StringBuffer('MessageItem(')
@@ -12474,7 +12486,8 @@ class MessageItem {
           ..write('mentions: $mentions, ')
           ..write('mentionRead: $mentionRead, ')
           ..write('groupName: $groupName, ')
-          ..write('relationship: $relationship')
+          ..write('relationship: $relationship, ')
+          ..write('participantRelationship: $participantRelationship')
           ..write(')'))
         .toString();
   }
@@ -12499,7 +12512,7 @@ class SendingMessage {
   final MediaStatus mediaStatus;
   final MessageStatus status;
   final DateTime createdAt;
-  final String action;
+  final MessageAction action;
   final String participantId;
   final String snapshotId;
   final String hyperlink;
@@ -12894,7 +12907,7 @@ class ConversationItem {
   final DateTime lastMessageCreatedAt;
   final String mediaUrl;
   final String senderId;
-  final String actionName;
+  final MessageAction actionName;
   final MessageStatus messageStatus;
   final String senderFullName;
   final String snapshotType;
