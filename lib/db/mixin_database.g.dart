@@ -11582,7 +11582,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n                        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n                        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n                        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n                        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n                        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n                        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n                        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n                        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n                        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n                        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n                        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship\n                        FROM messages m\n                        INNER JOIN users u ON m.user_id = u.user_id\n                        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n                        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n                        LEFT JOIN assets a ON s.asset_id = a.asset_id\n                        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n                        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n                        LEFT JOIN users su ON m.shared_user_id = su.user_id\n                        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n                        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n                        WHERE m.conversation_id = :conversationId\n                        ORDER BY m.created_at DESC\n                        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
         variables: [
           Variable.withString(conversationId),
           Variable.withInt(offset),
@@ -11755,6 +11755,59 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
         sharedUserAppId: row.readString('sharedUserAppId'),
         mentions: row.readString('mentions'),
+      );
+    });
+  }
+
+  Selectable<SearchMessageItem> fuzzySearchMessage(String query, int limit) {
+    return customSelect(
+        'SELECT m.conversation_id AS conversationId, c.icon_url AS conversationAvatarUrl,\n    c.name AS conversationName, c.category AS conversationCategory, count(m.message_id) as messageCount,\n    u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n    INNER JOIN users u ON c.owner_id = u.user_id\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    WHERE m.message_id = messages_fts.message_id\n    GROUP BY m.conversation_id\n    ORDER BY max(m.created_at) DESC\n    LIMIT :limit',
+        variables: [
+          Variable.withString(query),
+          Variable.withInt(limit)
+        ],
+        readsFrom: {
+          messages,
+          conversations,
+          users,
+          messagesFts
+        }).map((QueryRow row) {
+      return SearchMessageItem(
+        conversationId: row.readString('conversationId'),
+        conversationAvatarUrl: row.readString('conversationAvatarUrl'),
+        conversationName: row.readString('conversationName'),
+        conversationCategory: Conversations.$converter0
+            .mapToDart(row.readString('conversationCategory')),
+        messageCount: row.readInt('messageCount'),
+        userId: row.readString('userId'),
+        userAvatarUrl: row.readString('userAvatarUrl'),
+        userFullName: row.readString('userFullName'),
+      );
+    });
+  }
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
+      String query, String conversationId) {
+    return customSelect(
+        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName \n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query AND conversation_id = :conversationId) fts\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.message_id = fts.message_id\n    ORDER BY m.created_at DESC',
+        variables: [
+          Variable.withString(query),
+          Variable.withString(conversationId)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          messagesFts
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.readString('messageId'),
+        userId: row.readString('userId'),
+        userAvatarUrl: row.readString('userAvatarUrl'),
+        userFullName: row.readString('userFullName'),
+        type: Messages.$converter0.mapToDart(row.readString('type')),
+        content: row.readString('content'),
+        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt')),
+        mediaName: row.readString('mediaName'),
       );
     });
   }
@@ -12879,6 +12932,128 @@ class QuoteMessageItem {
           ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
           ..write('sharedUserAppId: $sharedUserAppId, ')
           ..write('mentions: $mentions')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class SearchMessageItem {
+  final String conversationId;
+  final String conversationAvatarUrl;
+  final String conversationName;
+  final ConversationCategory conversationCategory;
+  final int messageCount;
+  final String userId;
+  final String userAvatarUrl;
+  final String userFullName;
+  SearchMessageItem({
+    this.conversationId,
+    this.conversationAvatarUrl,
+    this.conversationName,
+    this.conversationCategory,
+    this.messageCount,
+    this.userId,
+    this.userAvatarUrl,
+    this.userFullName,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      conversationId.hashCode,
+      $mrjc(
+          conversationAvatarUrl.hashCode,
+          $mrjc(
+              conversationName.hashCode,
+              $mrjc(
+                  conversationCategory.hashCode,
+                  $mrjc(
+                      messageCount.hashCode,
+                      $mrjc(
+                          userId.hashCode,
+                          $mrjc(userAvatarUrl.hashCode,
+                              userFullName.hashCode))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is SearchMessageItem &&
+          other.conversationId == this.conversationId &&
+          other.conversationAvatarUrl == this.conversationAvatarUrl &&
+          other.conversationName == this.conversationName &&
+          other.conversationCategory == this.conversationCategory &&
+          other.messageCount == this.messageCount &&
+          other.userId == this.userId &&
+          other.userAvatarUrl == this.userAvatarUrl &&
+          other.userFullName == this.userFullName);
+  @override
+  String toString() {
+    return (StringBuffer('SearchMessageItem(')
+          ..write('conversationId: $conversationId, ')
+          ..write('conversationAvatarUrl: $conversationAvatarUrl, ')
+          ..write('conversationName: $conversationName, ')
+          ..write('conversationCategory: $conversationCategory, ')
+          ..write('messageCount: $messageCount, ')
+          ..write('userId: $userId, ')
+          ..write('userAvatarUrl: $userAvatarUrl, ')
+          ..write('userFullName: $userFullName')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class SearchMessageDetailItem {
+  final String messageId;
+  final String userId;
+  final String userAvatarUrl;
+  final String userFullName;
+  final MessageCategory type;
+  final String content;
+  final DateTime createdAt;
+  final String mediaName;
+  SearchMessageDetailItem({
+    this.messageId,
+    this.userId,
+    this.userAvatarUrl,
+    this.userFullName,
+    this.type,
+    this.content,
+    this.createdAt,
+    this.mediaName,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode,
+      $mrjc(
+          userId.hashCode,
+          $mrjc(
+              userAvatarUrl.hashCode,
+              $mrjc(
+                  userFullName.hashCode,
+                  $mrjc(
+                      type.hashCode,
+                      $mrjc(content.hashCode,
+                          $mrjc(createdAt.hashCode, mediaName.hashCode))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is SearchMessageDetailItem &&
+          other.messageId == this.messageId &&
+          other.userId == this.userId &&
+          other.userAvatarUrl == this.userAvatarUrl &&
+          other.userFullName == this.userFullName &&
+          other.type == this.type &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.mediaName == this.mediaName);
+  @override
+  String toString() {
+    return (StringBuffer('SearchMessageDetailItem(')
+          ..write('messageId: $messageId, ')
+          ..write('userId: $userId, ')
+          ..write('userAvatarUrl: $userAvatarUrl, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('mediaName: $mediaName')
           ..write(')'))
         .toString();
   }
