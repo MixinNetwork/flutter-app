@@ -11,4 +11,9 @@ class AppsDao extends DatabaseAccessor<MixinDatabase> with _$AppsDaoMixin {
   Future<int> insert(App app) => into(db.apps).insertOnConflictUpdate(app);
 
   Future deleteApp(App app) => delete(db.apps).delete(app);
+
+  Future<App> findUserById(String appId) {
+    final query = select(db.apps)..where((tbl) => tbl.appId.equals(appId));
+    return query.getSingle();
+  }
 }

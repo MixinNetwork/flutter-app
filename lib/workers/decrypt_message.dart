@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/blaze/vo/app_button.dart';
+import 'package:flutter_app/blaze/vo/app_card.dart';
 import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
@@ -131,7 +133,55 @@ class DecryptMessage extends Injector {
   }
 
   void _processApp(BlazeMessageData data) {
-    _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+    if (data.category == MessageCategory.appButtonGroup) {
+      _processAppButton(data);
+    } else if (data.category == MessageCategory.appCard) {
+      _processAppCard(data);
+    } else {
+      _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+    }
+  }
+
+  void _processAppButton(BlazeMessageData data) {
+    final content = utf8.decode(base64.decode(data.data));
+    // ignore: unused_local_variable
+    final apps = (jsonDecode(content) as List)
+        ?.map((e) =>
+            e == null ? null : AppButton.fromJson(e as Map<String, dynamic>))
+        ?.toList();
+    // todo check
+    final message = Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.userId,
+      category: data.category,
+      content: content,
+      status: MessageStatus.delivered,
+      createdAt: data.createdAt,
+    );
+    database.messagesDao.insert(message, accountId);
+    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+  }
+
+  void _processAppCard(BlazeMessageData data) {
+    final content = utf8.decode(base64.decode(data.data));
+    final appCard = AppCard.fromJson(jsonDecode(content));
+    final message = Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.representativeId ?? data.userId,
+      category: data.category,
+      content: content,
+      status: MessageStatus.delivered,
+      createdAt: data.createdAt,
+    );
+    database.appsDao.findUserById(appCard.appId).then((app) {
+      if (app == null || app.updatedAt != appCard.updatedAt) {
+        syncUser(appCard.appId);
+      }
+    });
+    database.messagesDao.insert(message, accountId);
+    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
   }
 
   void _processRecallMessage(BlazeMessageData data) {
