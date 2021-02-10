@@ -1,0 +1,10 @@
+import '../signal.moor';
+
+getLocalIdentity:
+SELECT * FROM identities WHERE address = '-1';
+
+getIdentity:
+SELECT * FROM identities WHERE address = :address;
+
+deleteIdentity:
+DELETE FROM identities WHERE address = :address;

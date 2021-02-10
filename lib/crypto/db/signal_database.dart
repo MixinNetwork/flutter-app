@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:flutter_app/crypto/db/dao/identity_dao.dart';
 import 'package:moor/moor.dart';
-// These imports are only needed to open the database
 import 'package:moor/ffi.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
+import 'dao/identity_dao.dart';
+
 part 'signal_database.g.dart';
 
-@UseMoor(include: {'signal.moor'}, daos: [IdentityDao])
+@UseMoor(include: {'signal.moor', './dao/identity.moor'}, daos: [IdentityDao])
 class SignalDatabase extends _$SignalDatabase {
   SignalDatabase() : super(_openConnection());
 

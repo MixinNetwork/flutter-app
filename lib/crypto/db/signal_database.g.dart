@@ -1477,6 +1477,26 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   IdentityDao _identityDao;
   IdentityDao get identityDao =>
       _identityDao ??= IdentityDao(this as SignalDatabase);
+  Selectable<Identity> getLocalIdentity() {
+    return customSelect('SELECT * FROM identities WHERE address = \'-1\'',
+        variables: [], readsFrom: {identities}).map(identities.mapFromRow);
+  }
+
+  Selectable<Identity> getIdentity(String address) {
+    return customSelect('SELECT * FROM identities WHERE address = :address',
+        variables: [Variable.withString(address)],
+        readsFrom: {identities}).map(identities.mapFromRow);
+  }
+
+  Future<int> deleteIdentity(String address) {
+    return customUpdate(
+      'DELETE FROM identities WHERE address = :address',
+      variables: [Variable.withString(address)],
+      updates: {identities},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

@@ -33,7 +33,7 @@ dependencies:
   web_socket_channel: ^1.1.0
   moor: ^3.4.0
   sqlite3_flutter_libs: ^0.3.0
-  libsignal_protocol_dart: ^0.2.0
+  libsignal_protocol_dart: ^0.2.1
   path_provider: ^1.6.27
   path: ^1.7.0
   hive: ^1.4.4+1
