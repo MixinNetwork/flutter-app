@@ -20,6 +20,7 @@ import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 
+import 'item/action/action_message.dart';
 import 'item/file_message.dart';
 import 'item/secret_message.dart';
 import 'item/system_message.dart';
@@ -71,6 +72,13 @@ class MessageItemWidget extends StatelessWidget {
             if (datetime != null) MessageDayTime(dateTime: datetime),
             Builder(
               builder: (context) {
+                if (message.type == MessageCategory.appButtonGroup)
+                  return ActionMessage(
+                    message: MessageItem(
+                      content: message.content,
+                    ),
+                  );
+
                 if (message.type == MessageCategory.systemConversation)
                   return SystemMessage(
                     message: message,
