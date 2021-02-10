@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
@@ -19,6 +21,7 @@ import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
+import 'package:flutter_app/widgets/message/item/action/action_data.dart';
 import 'package:flutter_app/widgets/message_status_icon.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
@@ -401,8 +404,9 @@ class _MessageContent extends StatelessWidget {
       content = '[${Localization.of(context).audio}]';
       icon = Resources.assetsImagesAudioSvg;
     } else if (conversation.contentType == MessageCategory.appButtonGroup) {
-      // todo
-      content = 'APP_BUTTON_GROUP';
+      final List<dynamic> json = jsonDecode(conversation.content);
+      final list = json.map((e) => ActionData.fromJson(e));
+      content = list.map((e) => '[$e]').join();
       icon = Resources.assetsImagesAppButtonSvg;
     } else if (conversation.contentType == MessageCategory.appCard) {
       content = 'APP_CARD';
