@@ -26,35 +26,32 @@ class ActionMessage extends StatelessWidget {
             horizontal: 8,
           ),
           child: Builder(
-            builder: (context) {
-              final List<dynamic> json = jsonDecode(message.content);
-              final list = json.map((e) => ActionData.fromJson(e));
-              return Wrap(
-                spacing: 10,
-                runSpacing: 8,
-                children: list
-                    .map(
-                      (e) => InteractableDecoratedBox.color(
-                        onTap: () => launch(e.action),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: BrightnessData.themeOf(context).primary,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            e.label,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: colorHex(e.color) ?? Colors.black,
-                            ),
+            builder: (context) => Wrap(
+              spacing: 10,
+              runSpacing: 8,
+              children: jsonDecode(message.content)
+                  .map((e) => ActionData.fromJson(e))
+                  .map(
+                    (e) => InteractableDecoratedBox.color(
+                      onTap: () => launch(e.action),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: BrightnessData.themeOf(context).primary,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
+                          e.label,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: colorHex(e.color) ?? Colors.black,
                           ),
                         ),
                       ),
-                    )
-                    .toList(),
-              );
-            },
+                    ),
+                  )
+                  .toList(),
+            ),
           ),
         ),
       );

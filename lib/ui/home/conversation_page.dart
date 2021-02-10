@@ -90,9 +90,10 @@ class _List extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
-        builder: (context, slideCategoryState) => BlocConverter<ConversationListBloc, PagingState<ConversationItem>, int>(
+  Widget build(BuildContext context) => BlocBuilder<SlideCategoryCubit,
+          SlideCategoryState>(
+      builder: (context, slideCategoryState) => BlocConverter<
+              ConversationListBloc, PagingState<ConversationItem>, int>(
             converter: (state) => state.count,
             builder: (context, count) {
               if (count == null || count <= 0) return const _Empty();
@@ -171,8 +172,7 @@ class _List extends StatelessWidget {
                 ),
               );
             },
-          )
-      );
+          ));
 }
 
 class _Item extends StatelessWidget {
@@ -404,9 +404,10 @@ class _MessageContent extends StatelessWidget {
       content = '[${Localization.of(context).audio}]';
       icon = Resources.assetsImagesAudioSvg;
     } else if (conversation.contentType == MessageCategory.appButtonGroup) {
-      final List<dynamic> json = jsonDecode(conversation.content);
-      final list = json.map((e) => ActionData.fromJson(e));
-      content = list.map((e) => '[$e]').join();
+      content = jsonDecode(conversation.content)
+          .map((e) => ActionData.fromJson(e))
+          .map((e) => '[${e.label}]')
+          .join();
       icon = Resources.assetsImagesAppButtonSvg;
     } else if (conversation.contentType == MessageCategory.appCard) {
       content = 'APP_CARD';
