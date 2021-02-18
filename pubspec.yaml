@@ -19,14 +19,16 @@ environment:
 
 dependencies:
   mixin_bot_sdk_dart:
-    git: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
+    git:
+      url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
+      ref: 43d24d4d283f9705fda122a72cb7c8536e58916b
     # local path
   #    path: ../mixin_bot_sdk_dart
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  http: ^0.12.2
+  http: ^0.13.0
   qr_flutter: ^3.2.0
   uuid: ^2.2.2
   cryptography: ^1.4.1
@@ -35,7 +37,7 @@ dependencies:
   sqlite3_flutter_libs: ^0.4.0+1
   libsignal_protocol_dart: ^0.2.1
   path_provider: ^1.6.27
-  path: ^1.7.0
+  path: ^1.8.0
   hive: ^1.4.4+1
   hive_flutter: ^0.3.1
   cached_network_image: ^2.5.0
@@ -44,10 +46,10 @@ dependencies:
   bloc: ^6.1.1
   flutter_bloc: ^6.1.2
   equatable: ^1.2.6
-  intl: ^0.17.0-nullsafety.2
-  flutter_svg: ^0.19.2+1
+  intl: ^0.17.0
+  flutter_svg: ^0.20.0-nullsafety.3
   tuple: ^1.0.3
-  archive: ^2.0.13
+  archive: ^3.0.0
   hydrated_bloc: ^6.1.0
   rxdart: ^0.25.0
   json_annotation: ^3.1.1
@@ -68,11 +70,22 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+dependency_overrides:
+  crypto: ^3.0.0
+  http_parser: ^4.0.0
+  http: ^0.13.0
+  archive: ^3.0.0
+  analyzer: ^1.0.0
+  cli_util: ^0.3.0
+  args: ^2.0.0
+  convert: ^3.0.0
+  pub_semver: ^2.0.0
+  xml: ^5.0.0-nullsafety.0
 
 dev_dependencies:
   hive_generator: ^0.8.2
   moor_generator: ^3.4.1
-  build_runner: ^1.10.11
+  build_runner: ^1.11.3
   json_serializable: ^3.5.1
   flutter_test:
     sdk: flutter

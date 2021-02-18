@@ -31,7 +31,7 @@ class BlazeMessageData {
   String userId;
   @JsonKey(name: 'message_id', nullable: false)
   String messageId;
-  @JsonKey(name: 'category', nullable: false)
+  @JsonKey(name: 'category')
   MessageCategory category;
   @JsonKey(name: 'data', nullable: false)
   String data;
