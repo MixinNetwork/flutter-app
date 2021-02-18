@@ -30,9 +30,9 @@ dependencies:
   qr_flutter: ^3.2.0
   uuid: ^2.2.2
   cryptography: ^1.4.1
-  web_socket_channel: ^1.1.0
+  web_socket_channel: ^1.2.0
   moor: ^3.4.0
-  sqlite3_flutter_libs: ^0.3.0
+  sqlite3_flutter_libs: ^0.4.0+1
   libsignal_protocol_dart: ^0.2.1
   path_provider: ^1.6.27
   path: ^1.7.0
@@ -42,8 +42,8 @@ dependencies:
   very_good_analysis: ^1.0.4
   desktop_window: ^0.3.0
   bloc: ^6.1.1
-  flutter_bloc: ^6.1.1
-  equatable: ^1.2.5
+  flutter_bloc: ^6.1.2
+  equatable: ^1.2.6
   intl: ^0.17.0-nullsafety.2
   flutter_svg: ^0.19.2+1
   tuple: ^1.0.3
@@ -58,10 +58,10 @@ dependencies:
   recase: ^3.0.1
   file_selector: ^0.7.0+2
   # file_selector_platform_interface: ^1.0.3+1
-  file_selector_macos: ^0.0.1
-  file_selector_windows: ^0.0.1
-  file_selector_linux: ^0.0.1
-  mime: ^0.9.7
+  file_selector_macos: ^0.0.3
+  file_selector_windows: ^0.0.2
+  file_selector_linux: ^0.0.2
+  mime: ^1.0.0
   url_launcher: ^5.7.10
   filesize: ^1.0.4
 
