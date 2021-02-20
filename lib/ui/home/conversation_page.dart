@@ -291,21 +291,18 @@ class _StatusRow extends StatelessWidget {
     );
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: joinList(
-        [
-          if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
-            SvgPicture.asset(
-              Resources.assetsImagesMuteSvg,
-              color: dynamicColor,
-            ),
-          if (conversation.pinTime != null)
-            SvgPicture.asset(
-              Resources.assetsImagesPinSvg,
-              color: dynamicColor,
-            ),
-        ],
-        const SizedBox(width: 4),
-      ),
+      children: <Widget>[
+        if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
+          SvgPicture.asset(
+            Resources.assetsImagesMuteSvg,
+            color: dynamicColor,
+          ),
+        if (conversation.pinTime != null)
+          SvgPicture.asset(
+            Resources.assetsImagesPinSvg,
+            color: dynamicColor,
+          ),
+      ].joinList(const SizedBox(width: 4)),
     );
   }
 }
@@ -427,27 +424,24 @@ class _MessageContent extends StatelessWidget {
     }
 
     return Row(
-      children: joinList(
-        [
-          if (icon != null)
-            SvgPicture.asset(
-              icon,
-              color: dynamicColor,
-            ),
-          if (content != null)
-            Expanded(
-              child: Text(
-                content,
-                style: TextStyle(
-                  color: dynamicColor,
-                  fontSize: 14,
-                ),
-                overflow: TextOverflow.ellipsis,
+      children: [
+        if (icon != null)
+          SvgPicture.asset(
+            icon,
+            color: dynamicColor,
+          ),
+        if (content != null)
+          Expanded(
+            child: Text(
+              content,
+              style: TextStyle(
+                color: dynamicColor,
+                fontSize: 14,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
-        ],
-        const SizedBox(width: 4),
-      ),
+          ),
+      ].joinList(const SizedBox(width: 4)),
     );
   }
 }

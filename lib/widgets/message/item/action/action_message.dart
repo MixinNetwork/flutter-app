@@ -29,28 +29,29 @@ class ActionMessage extends StatelessWidget {
             builder: (context) => Wrap(
               spacing: 10,
               runSpacing: 8,
-              children: jsonDecode(message.content)
-                  .map((e) => ActionData.fromJson(e))
-                  .map(
-                    (e) => InteractableDecoratedBox.color(
-                      onTap: () => launch(e.action),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: BrightnessData.themeOf(context).primary,
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Text(
-                          e.label,
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: colorHex(e.color) ?? Colors.black,
+              children: List<Widget>.from(
+                jsonDecode(message.content)
+                    .map((e) => ActionData.fromJson(e))
+                    .map(
+                      (e) => InteractableDecoratedBox.color(
+                        onTap: () => launch(e.action),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: BrightnessData.themeOf(context).primary,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            e.label,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: colorHex(e.color) ?? Colors.black,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  )
-                  .toList(),
+              ),
             ),
           ),
         ),

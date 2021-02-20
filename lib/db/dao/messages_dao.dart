@@ -134,4 +134,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
           Variable.withString(messageId)
         ]);
   }
+
+  Selectable<int> messageRowIdByConversationId(String lastReadMessageId) =>
+      db.messageRowIdByConversationId(lastReadMessageId);
 }

@@ -2,17 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
+import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/chat_bar.dart';
+import 'package:flutter_app/widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import 'package:flutter_app/widgets/input_container.dart';
 import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:tuple/tuple.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
@@ -46,19 +47,11 @@ class ChatContainer extends StatelessWidget {
     final messagesDao =
         Provider.of<AccountServer>(context).database.messagesDao;
     final windowHeight = MediaQuery.of(context).size.height;
-    final itemScrollController = ItemScrollController();
     return BlocProvider(
       create: (context) => MessageBloc(
         messagesDao: messagesDao,
         conversationCubit: BlocProvider.of<ConversationCubit>(context),
         limit: windowHeight ~/ 20,
-        jumpTo: ({index, alignment}) {
-          if (itemScrollController.isAttached)
-            itemScrollController.jumpTo(index: index, alignment: alignment);
-        },
-        // offset: 100,
-        // index: 120,
-        // alignment: 0.5,
       ),
       child: Builder(
         builder: (context) {
@@ -77,34 +70,74 @@ class ChatContainer extends StatelessWidget {
                         children: [
                           Expanded(
                             child: Builder(
-                              builder: (context) => BlocConverter<MessageBloc,
-                                  PagingState<MessageItem>, int>(
-                                // int.MaxValue
-                                converter: (state) =>
-                                    state?.count ?? 9223372036854775807,
-                                builder: (context, count) =>
-                                    ScrollablePositionedList.builder(
-                                  key: Key(BlocProvider.of<MessageBloc>(context)
-                                      .conversationId),
-                                  initialScrollIndex:
-                                      BlocProvider.of<MessageBloc>(context)
-                                          .state
-                                          .index,
-                                  initialAlignment:
-                                      BlocProvider.of<MessageBloc>(context)
-                                          .state
-                                          .alignment,
-                                  addAutomaticKeepAlives: false,
-                                  itemScrollController: itemScrollController,
-                                  itemPositionsListener:
-                                      BlocProvider.of<MessageBloc>(context)
-                                          .itemPositionsListener,
-                                  reverse: true,
-                                  itemCount: count,
-                                  itemBuilder:
-                                      (BuildContext context, int index) =>
-                                          MessageItemWidget(index: index),
-                                ),
+                              builder: (context) =>
+                                  BlocBuilder<MessageBloc, MessageState>(
+                                buildWhen: (a, b) => b.conversationId != null,
+                                builder: (context, state) {
+                                  final key = ValueKey(
+                                    Tuple2(
+                                      state.conversationId,
+                                      state.center?.messageId,
+                                    ),
+                                  );
+                                  final top = state.top;
+                                  final center = state.center;
+                                  final bottom = state.bottom;
+
+                                  return ClampingCustomScrollView(
+                                    key: key,
+                                    center: key,
+                                    anchor: 0.3,
+                                    slivers: [
+                                      SliverList(
+                                        delegate: SliverChildBuilderDelegate(
+                                          (BuildContext context, int index) {
+                                            final actualIndex =
+                                                top.length - index - 1;
+                                            return MessageItemWidget(
+                                              prev: top
+                                                  .getOrNull(actualIndex - 1),
+                                              message: top[actualIndex],
+                                              next: top.getOrNull(
+                                                      actualIndex + 1) ??
+                                                  center ??
+                                                  bottom.lastOrNull,
+                                            );
+                                          },
+                                          childCount: top.length,
+                                        ),
+                                      ),
+                                      SliverToBoxAdapter(
+                                        key: key,
+                                        child: Builder(builder: (context) {
+                                          if (center == null)
+                                            return const SizedBox();
+                                          return ColoredBox(
+                                            color: Colors.red,
+                                            child: MessageItemWidget(
+                                              prev: top.lastOrNull,
+                                              message: center,
+                                              next: bottom.firstOrNull,
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                      SliverList(
+                                        delegate: SliverChildBuilderDelegate(
+                                          (BuildContext context, int index) =>
+                                              MessageItemWidget(
+                                            prev: bottom.getOrNull(index - 1) ??
+                                                center ??
+                                                top.lastOrNull,
+                                            message: bottom[index],
+                                            next: bottom.getOrNull(index + 1),
+                                          ),
+                                          childCount: bottom.length,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
                           ),

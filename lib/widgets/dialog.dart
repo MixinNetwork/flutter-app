@@ -94,7 +94,7 @@ class AlertDialogLayout extends StatelessWidget {
               const SizedBox(height: 30),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: joinList(actions, const SizedBox(width: 4)),
+                children: actions.joinList(const SizedBox(width: 4)),
               ),
             ],
           ),

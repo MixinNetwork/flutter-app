@@ -11660,6 +11660,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<int> messageRowIdByConversationId(String conversationId) {
+    return customSelect(
+        'SELECT rowid FROM messages WHERE conversation_id = :conversationId ORDER BY created_at DESC',
+        variables: [Variable.withString(conversationId)],
+        readsFrom: {messages}).map((QueryRow row) => row.readInt('rowid'));
+  }
+
   Selectable<SendingMessage> sendingMessage(String message_id) {
     return customSelect(
         'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type,\n      m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key,\n      m.media_digest, m.media_status, m.status, m.created_at, m.action, m.participant_id, m.snapshot_id, m.hyperlink,\n      m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content,\n      rm.status as resend_status, rm.user_id as resend_user_id, rm.session_id as resend_session_id\n      FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id\n      WHERE m.message_id = :message_id AND (m.status = \'SENDING\' OR rm.status = 1) AND m.content IS NOT NULL',
@@ -11789,7 +11796,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
       String query, String conversationId) {
     return customSelect(
-        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName \n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query AND conversation_id = :conversationId) fts\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.message_id = fts.message_id\n    ORDER BY m.created_at DESC',
+        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query AND conversation_id = :conversationId) fts\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.message_id = fts.message_id\n    ORDER BY m.created_at DESC',
         variables: [
           Variable.withString(query),
           Variable.withString(conversationId)
