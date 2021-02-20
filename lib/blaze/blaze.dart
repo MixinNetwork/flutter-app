@@ -99,8 +99,8 @@ class Blaze {
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
   }
 
-  void disconnect() {
-    channel?.sink?.close();
+  Future<void> disconnect() async {
+    await channel?.sink?.close();
   }
 }
 

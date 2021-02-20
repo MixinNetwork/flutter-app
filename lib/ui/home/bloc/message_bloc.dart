@@ -178,15 +178,15 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   Future<MessageState> _resetMessageList(
     String conversationId,
-    int finalLimit, [
+    int limit, [
     int centerOffset,
   ]) async {
     final _centerOffset =
-        centerOffset ?? conversationCubit.state.unseenMessageCount - 1;
+        centerOffset ?? (conversationCubit.state.unseenMessageCount ?? 0) - 1;
 
     final state = await _messagesByConversationId(
       conversationId,
-      finalLimit,
+      limit,
       centerOffset: _centerOffset,
     );
 
@@ -228,7 +228,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final topOffset = list.length + bottomOffset;
 
     MessageItem centerMessage;
-    if (centerOffset >= 0) centerMessage = list.getOrNull(centerOffset % limit);
+    if (centerOffset >= 0)
+      centerMessage = list.getOrNull(max(centerOffset - bottomOffset, 0));
 
     MessageItem center;
     final top = <MessageItem>[];

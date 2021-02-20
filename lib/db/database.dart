@@ -56,8 +56,9 @@ class Database {
 
   StickerRelationshipsDao stickerRelationshipsDao;
 
-  void dispose() {
-    _database.eventBus.dispose();
+  Future<void> dispose() async {
+    await _database.eventBus.dispose();
+    await _database.close();
     // dispose stream, https://github.com/simolus3/moor/issues/290
   }
 

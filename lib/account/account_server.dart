@@ -269,9 +269,11 @@ class AccountServer {
     database.jobsDao.insertAll(jobs);
   }
 
-  void stop() {
-    blaze.disconnect();
-    database.dispose();
+  Future<void> stop() async {
+    await Future.wait([
+      blaze.disconnect(),
+      database.dispose(),
+    ]);
   }
 
   void release() {
