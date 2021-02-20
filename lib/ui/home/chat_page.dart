@@ -71,73 +71,37 @@ class ChatContainer extends StatelessWidget {
                           Expanded(
                             child: Builder(
                               builder: (context) =>
-                                  BlocBuilder<MessageBloc, MessageState>(
-                                buildWhen: (a, b) => b.conversationId != null,
-                                builder: (context, state) {
-                                  final key = ValueKey(
-                                    Tuple2(
-                                      state.conversationId,
-                                      state.center?.messageId,
-                                    ),
-                                  );
-                                  final top = state.top;
-                                  final center = state.center;
-                                  final bottom = state.bottom;
+                                  NotificationListener<ScrollNotification>(
+                                onNotification:
+                                    (ScrollNotification notification) {
+                                  final dimension =
+                                      notification.metrics.viewportDimension /
+                                          3;
 
-                                  return ClampingCustomScrollView(
-                                    key: key,
-                                    center: key,
-                                    anchor: 0.3,
-                                    slivers: [
-                                      SliverList(
-                                        delegate: SliverChildBuilderDelegate(
-                                          (BuildContext context, int index) {
-                                            final actualIndex =
-                                                top.length - index - 1;
-                                            return MessageItemWidget(
-                                              prev: top
-                                                  .getOrNull(actualIndex - 1),
-                                              message: top[actualIndex],
-                                              next: top.getOrNull(
-                                                      actualIndex + 1) ??
-                                                  center ??
-                                                  bottom.lastOrNull,
-                                            );
-                                          },
-                                          childCount: top.length,
-                                        ),
-                                      ),
-                                      SliverToBoxAdapter(
-                                        key: key,
-                                        child: Builder(builder: (context) {
-                                          if (center == null)
-                                            return const SizedBox();
-                                          return ColoredBox(
-                                            color: Colors.red,
-                                            child: MessageItemWidget(
-                                              prev: top.lastOrNull,
-                                              message: center,
-                                              next: bottom.firstOrNull,
-                                            ),
-                                          );
-                                        }),
-                                      ),
-                                      SliverList(
-                                        delegate: SliverChildBuilderDelegate(
-                                          (BuildContext context, int index) =>
-                                              MessageItemWidget(
-                                            prev: bottom.getOrNull(index - 1) ??
-                                                center ??
-                                                top.lastOrNull,
-                                            message: bottom[index],
-                                            next: bottom.getOrNull(index + 1),
-                                          ),
-                                          childCount: bottom.length,
-                                        ),
-                                      ),
-                                    ],
-                                  );
+                                  if (notification
+                                      is ScrollUpdateNotification) {
+                                    if (notification.scrollDelta > 0) {
+                                      // down
+                                      if (notification.metrics.maxScrollExtent -
+                                              notification.metrics.pixels <
+                                          dimension) {
+                                        BlocProvider.of<MessageBloc>(context).after();
+                                      }
+                                    } else if (notification.scrollDelta < 0) {
+                                      // up
+                                      if ((notification
+                                                      .metrics.minScrollExtent -
+                                                  notification.metrics.pixels)
+                                              .abs() <
+                                          dimension) {
+                                        BlocProvider.of<MessageBloc>(context).before();
+                                      }
+                                    }
+                                  }
+
+                                  return false;
                                 },
+                                child: const _List(),
                               ),
                             ),
                           ),
@@ -152,6 +116,77 @@ class ChatContainer extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _List extends StatelessWidget {
+  const _List({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MessageBloc, MessageState>(
+      buildWhen: (a, b) => b.conversationId != null,
+      builder: (context, state) {
+        final key = ValueKey(
+          Tuple2(
+            state.conversationId,
+            state.center?.messageId,
+          ),
+        );
+        final top = state.top;
+        final center = state.center;
+        final bottom = state.bottom;
+
+        return ClampingCustomScrollView(
+          key: key,
+          center: key,
+          anchor: 0.3,
+          slivers: [
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) {
+                  final actualIndex = top.length - index - 1;
+                  return MessageItemWidget(
+                    prev: top.getOrNull(actualIndex - 1),
+                    message: top[actualIndex],
+                    next: top.getOrNull(actualIndex + 1) ??
+                        center ??
+                        bottom.lastOrNull,
+                  );
+                },
+                childCount: top.length,
+              ),
+            ),
+            SliverToBoxAdapter(
+              key: key,
+              child: Builder(builder: (context) {
+                if (center == null) return const SizedBox();
+                return ColoredBox(
+                  color: Colors.red,
+                  child: MessageItemWidget(
+                    prev: top.lastOrNull,
+                    message: center,
+                    next: bottom.firstOrNull,
+                  ),
+                );
+              }),
+            ),
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (BuildContext context, int index) => MessageItemWidget(
+                  prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+                  message: bottom[index],
+                  next: bottom.getOrNull(index + 1),
+                ),
+                childCount: bottom.length,
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -77,9 +77,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<MessageItem> messagesByConversationId(
     String conversationId,
-    int limit, {
+    int limit, [
     int offset = 0,
-  }) =>
+  ]) =>
       db.messagesByConversationId(
         conversationId,
         offset,
