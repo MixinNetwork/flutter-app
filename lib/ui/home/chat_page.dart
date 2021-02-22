@@ -143,6 +143,7 @@ class _List extends StatelessWidget {
         return ClampingCustomScrollView(
           key: key,
           center: key,
+          controller: BlocProvider.of<MessageBloc>(context).scrollController,
           anchor: 0.3,
           slivers: [
             SliverList(

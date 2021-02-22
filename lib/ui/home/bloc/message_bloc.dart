@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/list_utils.dart';
@@ -16,7 +17,14 @@ abstract class _MessageEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class _MessageInitEvent extends _MessageEvent {}
+class _MessageInitEvent extends _MessageEvent {
+  _MessageInitEvent({this.centerOffset});
+
+  final int centerOffset;
+
+  @override
+  List<Object> get props => [centerOffset];
+}
 
 class _MessageLoadMoreEvent extends _MessageEvent {}
 
@@ -109,6 +117,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
+  final ScrollController scrollController = ScrollController();
   final ConversationCubit conversationCubit;
   final MessagesDao messagesDao;
   int limit;
@@ -125,7 +134,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       return;
 
     if (event is _MessageInitEvent)
-      yield await _resetMessageList(conversationId, finalLimit);
+      yield await _resetMessageList(
+          conversationId, finalLimit, event.centerOffset);
     else if (event is _MessageLoadMoreEvent) {
       if (event is _MessageLoadAfterEvent) {
         if (state.bottomOffset == 0) return;
@@ -275,6 +285,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     var bottom = state.bottom;
 
     final bottomMessage = state.bottomMessage;
+    var newBottomMessage = false;
     for (final item in list) {
       if (item.conversationId != conversationId) continue;
 
@@ -302,16 +313,36 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
       if (state.bottomOffset == 0) {
         bottom = [...bottom, item];
+        newBottomMessage = true;
       } else {
         if (item.relationship == UserRelationship.me &&
             item.status == MessageStatus.sent) {
-          // TODO Maybe need set init center offset, because conversation.unseenMessageCount not updated yet.
-          add(_MessageInitEvent());
+          add(_MessageInitEvent(centerOffset: 0));
           return null;
         }
       }
     }
 
+    if (scrollController.hasClients && newBottomMessage) {
+      final position = scrollController.position;
+      final oldMaxScrollExtent = position.maxScrollExtent;
+      final oldPixels = position.pixels;
+      if (oldPixels == oldMaxScrollExtent) {
+        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+          if (!scrollController.hasClients) return;
+          final newMaxScrollExtent = position.maxScrollExtent;
+          final newPixels = position.pixels;
+          if (newMaxScrollExtent != oldMaxScrollExtent &&
+              newMaxScrollExtent != newPixels) {
+            scrollController.animateTo(
+              newMaxScrollExtent,
+              duration: const Duration(milliseconds: 100),
+              curve: Curves.easeOut,
+            );
+          }
+        });
+      }
+    }
     return state.copyWith(
       top: top,
       center: center,
