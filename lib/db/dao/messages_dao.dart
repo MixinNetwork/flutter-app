@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_status.dart';
@@ -24,6 +26,13 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         db.conversations,
       ]));
 
+  Stream<List<MessageItem>> get insertOrReplaceMessageStream => db.eventBus
+      .watch(DatabaseEvent.insertOrReplaceMessage)
+      .distinct()
+      .asyncMap(
+        (event) => db.messagesByMessageIds(event).get(),
+      );
+
   Future<int> insert(Message message, String userId) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
     if (message.category.isText) {
@@ -34,7 +43,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     await db.conversationsDao
         .updateLastMessageId(message.conversationId, message.messageId);
     await _takeUnseen(userId, message.conversationId);
-    db.eventBus.send(DatabaseEvent.updateConversion, message.conversationId);
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
     return result;
   }
 
@@ -116,7 +125,6 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
             Variable.withString(userId)
           ]);
       await _takeUnseen(userId, conversationId);
-      db.eventBus.send(DatabaseEvent.updateConversion, conversationId);
       return list;
     });
   }

@@ -25,7 +25,6 @@ import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/enum/message_action.dart';
-import 'package:flutter_app/utils/load_balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
@@ -106,8 +105,7 @@ LazyDatabase _openConnection(File dbFile) {
 Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
   final dbFolder = await getApplicationDocumentsDirectory();
   final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
-  final moorIsolate =
-      await LoadBalancerUtils.runLoadBalancer(_createMoorIsolate, dbFile);
+  final moorIsolate = await _createMoorIsolate(dbFile);
   final databaseConnection = await (moorIsolate.connect());
   return MixinDatabase.connect(databaseConnection);
 }

@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:tuple/tuple.dart';
 
 enum DatabaseEvent {
-  updateConversion,
+  insertOrReplaceMessage,
 }
 
 class DataBaseEventBus {

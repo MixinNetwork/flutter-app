@@ -4,10 +4,12 @@ import 'dart:math';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 abstract class _MessageEvent extends Equatable {
   @override
@@ -21,6 +23,15 @@ class _MessageLoadMoreEvent extends _MessageEvent {}
 class _MessageLoadAfterEvent extends _MessageLoadMoreEvent {}
 
 class _MessageLoadBeforeEvent extends _MessageLoadMoreEvent {}
+
+class _MessageInsertOrReplaceEvent extends _MessageEvent {
+  _MessageInsertOrReplaceEvent(this.data);
+
+  final List<MessageItem> data;
+
+  @override
+  List<Object> get props => [data];
+}
 
 class MessageState extends Equatable {
   const MessageState({
@@ -92,9 +103,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       ),
     );
 
-    // addSubscription(
-    //   messagesDao.updateEvent.listen((state) => add(PagingUpdateEvent())),
-    // );
+    addSubscription(
+      messagesDao.insertOrReplaceMessageStream
+          .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
+    );
   }
 
   final ConversationCubit conversationCubit;
@@ -121,8 +133,15 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       } else if (event is _MessageLoadBeforeEvent) {
         yield await _before(conversationId);
       }
+    } else if (event is _MessageInsertOrReplaceEvent) {
+      final result = _insertOrReplace(conversationId, event.data);
+      if (result != null) yield result;
     }
   }
+
+  void after() => add(_MessageLoadAfterEvent());
+
+  void before() => add(_MessageLoadBeforeEvent());
 
   Future<MessageState> _before(String conversationId) async {
     final iterator = (await messagesDao
@@ -199,12 +218,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     return result;
   }
 
-  Future<int> getCenterMessageOffset(String lastReadMessageId) async {
+  Future<int> _centerMessageOffset(String messageId) async {
     var offset = 0;
-    if (lastReadMessageId != null)
-      offset = (await messagesDao
-              .messageRowIdByConversationId(lastReadMessageId)
-              .get())
+    if (messageId != null)
+      offset = (await messagesDao.messageRowIdByConversationId(messageId).get())
           .firstWhere(
         (element) => element > 0,
         orElse: () => 0,
@@ -252,7 +269,53 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
-  void after() => add(_MessageLoadAfterEvent());
+  MessageState _insertOrReplace(String conversationId, List<MessageItem> list) {
+    final top = state.top;
+    var center = state.center;
+    var bottom = state.bottom;
 
-  void before() => add(_MessageLoadBeforeEvent());
+    final bottomMessage = state.bottomMessage;
+    for (final item in list) {
+      if (item.conversationId != conversationId) continue;
+
+      if (item.messageId == center?.messageId) {
+        center = item;
+        continue;
+      }
+
+      final topIndex =
+          top.indexWhere((element) => element.messageId == item.messageId);
+      if (topIndex > -1) {
+        top[topIndex] = item;
+        continue;
+      }
+
+      final bottomIndex =
+          bottom.indexWhere((element) => element.messageId == item.messageId);
+      if (bottomIndex > -1) {
+        bottom[bottomIndex] = item;
+        continue;
+      }
+
+      // New message must be after last bottom message.
+      if (bottomMessage.createdAt.isAfter(item.createdAt)) continue;
+
+      if (state.bottomOffset == 0) {
+        bottom = [...bottom, item];
+      } else {
+        if (item.relationship == UserRelationship.me &&
+            item.status == MessageStatus.sent) {
+          // TODO Maybe need set init center offset, because conversation.unseenMessageCount not updated yet.
+          add(_MessageInitEvent());
+          return null;
+        }
+      }
+    }
+
+    return state.copyWith(
+      top: top,
+      center: center,
+      bottom: bottom,
+    );
+  }
 }

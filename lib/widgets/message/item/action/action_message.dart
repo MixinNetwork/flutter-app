@@ -19,41 +19,39 @@ class ActionMessage extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
-          ),
-          child: Builder(
-            builder: (context) => Wrap(
-              spacing: 10,
-              runSpacing: 8,
-              children: List<Widget>.from(
-                jsonDecode(message.content)
-                    .map((e) => ActionData.fromJson(e))
-                    .map(
-                      (e) => InteractableDecoratedBox.color(
-                        onTap: () => launch(e.action),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          color: BrightnessData.themeOf(context).primary,
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            e.label,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: colorHex(e.color) ?? Colors.black,
-                            ),
-                          ),
-                        ),
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(
+      vertical: 4,
+      horizontal: 25,
+    ),
+    child: Builder(
+      builder: (context) => Wrap(
+        spacing: 10,
+        runSpacing: 8,
+        children: List<Widget>.from(
+          jsonDecode(message.content)
+              .map((e) => ActionData.fromJson(e))
+              .map(
+                (e) => InteractableDecoratedBox.color(
+                  onTap: () => launch(e.action),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: BrightnessData.themeOf(context).primary,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                      e.label,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: colorHex(e.color) ?? Colors.black,
                       ),
                     ),
+                  ),
+                ),
               ),
-            ),
-          ),
         ),
-      );
+      ),
+    ),
+  );
 }

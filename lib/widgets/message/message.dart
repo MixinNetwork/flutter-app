@@ -55,6 +55,7 @@ class MessageItemWidget extends StatelessWidget {
 
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (datetime != null) MessageDayTime(dateTime: datetime),
         Builder(
