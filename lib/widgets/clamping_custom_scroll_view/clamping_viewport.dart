@@ -89,6 +89,7 @@ class ClampingRenderViewport extends RenderViewport {
 
   // *** Difference from [RenderViewport].
   double correctedOffset = 0.0;
+  bool isLessMainAxisExtent = false;
   // *** End of difference from [RenderViewport].
 
   @override
@@ -180,6 +181,13 @@ class ClampingRenderViewport extends RenderViewport {
         offset.correctBy(correction);
       } else {
         // *** Difference from [RenderViewport].
+        final scrollExtent = _maxScrollExtent - _minScrollExtent;
+        if (!isLessMainAxisExtent && scrollExtent < mainAxisExtent) {
+          isLessMainAxisExtent = true;
+          correctedOffset = (mainAxisExtent * anchor) + _minScrollExtent;
+          continue;
+        }
+
         final top =
             _minScrollExtent + mainAxisExtent * anchor - correctedOffset;
         final bottom = _maxScrollExtent -
@@ -194,7 +202,9 @@ class ClampingRenderViewport extends RenderViewport {
           math.min(minScrollOffset, maxScrollOffset),
           math.max(minScrollOffset, maxScrollOffset),
         );
-        if (clampScrollExtent != centerScrollExtent && count < 1) {
+        if (!isLessMainAxisExtent &&
+            clampScrollExtent != centerScrollExtent &&
+            count < 1) {
           correctedOffset = clampScrollExtent;
           count += 1;
           continue;
