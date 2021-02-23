@@ -4,6 +4,7 @@ import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
@@ -118,7 +119,28 @@ class App extends StatelessWidget {
                                   ConversationCubit(draftCubit, snapshot.data),
                             ),
                           ],
-                          child: app,
+                          child: Builder(
+                            builder: (context) {
+                              final accountServer =
+                                  Provider.of<AccountServer>(context);
+                              return MultiBlocProvider(
+                                key: ValueKey(accountServer.userId),
+                                providers: [
+                                  BlocProvider(
+                                    create: (BuildContext context) =>
+                                        ParticipantsCubit(
+                                      userDao: accountServer.database.userDao,
+                                      conversationCubit:
+                                          BlocProvider.of<ConversationCubit>(
+                                              context),
+                                      userId: accountServer.userId,
+                                    ),
+                                  ),
+                                ],
+                                child: app,
+                              );
+                            },
+                          ),
                         );
                       return app;
                     },

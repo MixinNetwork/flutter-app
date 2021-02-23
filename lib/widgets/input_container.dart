@@ -9,7 +9,9 @@ import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/mention_bloc.dart';
+import 'package:flutter_app/ui/home/bloc/mention_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
 import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -31,97 +33,106 @@ class InputContainer extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final actionColor = BrightnessData.themeOf(context).icon;
-    final textEditingController = TextEditingController();
-
-    return LayoutBuilder(
-        builder: (context, BoxConstraints constraints) => SizedBox(
-              height: 56,
-              child: MentionPanelPortalEntry(
-                constraints: constraints,
-                textEditingController: textEditingController,
-                child: Builder(
-                  builder: (context) => DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: BrightnessData.themeOf(context).primary,
+  Widget build(BuildContext context) => BlocProvider(
+        create: (context) => MentionCubit(
+          userDao: context.read<AccountServer>().database.userDao,
+          multiAuthCubit: BlocProvider.of<MultiAuthCubit>(context),
+          participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
+        ),
+        child: Builder(
+          builder: (context) => ListenableProvider<TextEditingController>(
+            create: (BuildContext _) {
+              final textEditingController = HighlightTextEditingController(
+                highlightTextStyle: TextStyle(
+                  color: BrightnessData.themeOf(context).accent,
+                ),
+                participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
+              );
+              textEditingController.addListener(() {
+                final mention = mentionRegExp
+                    .stringMatch(textEditingController.text)
+                    ?.replaceFirst('@', '');
+                BlocProvider.of<MentionCubit>(context).add(mention);
+              });
+              return textEditingController;
+            },
+            dispose: (BuildContext context,
+                    TextEditingController textEditingController) =>
+                textEditingController?.dispose(),
+            child: LayoutBuilder(
+              builder: (context, BoxConstraints constraints) => SizedBox(
+                height: 56,
+                child: MentionPanelPortalEntry(
+                  constraints: constraints,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: BrightnessData.themeOf(context).primary,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            _FileButton(actionColor: actionColor),
-                            const SizedBox(width: 6),
-                            HoverOverlay(
-                              child: ActionButton(
-                                name: Resources.assetsImagesIcStickerPng,
-                                color: actionColor,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _FileButton(
+                              actionColor:
+                                  BrightnessData.themeOf(context).icon),
+                          const SizedBox(width: 6),
+                          const _StickerButton(),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minHeight: 32,
                               ),
-                              childAnchor: Alignment.topCenter,
-                              overlayAnchor: Alignment.bottomCenter,
-                              offset: const Offset(0, -17),
-                              overlayBuilder: (BuildContext context) =>
-                                  const StickerPage(),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: 32,
-                                ),
-                                child: Focus(
-                                  onKey: (FocusNode node, RawKeyEvent event) {
-                                    if (setEquals(RawKeyboard.instance.keysPressed,
-                                        {LogicalKeyboardKey.enter})) {
-                                      return _sendMessage(context)
-                                          ? KeyEventResult.ignored
-                                          : KeyEventResult.handled;
-                                    }
+                              child: Focus(
+                                onKey: (FocusNode node, RawKeyEvent event) {
+                                  if (setEquals(
+                                      RawKeyboard.instance.keysPressed,
+                                      {LogicalKeyboardKey.enter})) {
+                                    return _sendMessage(context)
+                                        ? KeyEventResult.ignored
+                                        : KeyEventResult.handled;
+                                  }
 
-                                    return KeyEventResult.ignored;
-                                  },
-                                  child: TextField(
-                                    maxLines: 5,
-                                    minLines: 1,
-                                    controller: textEditingController,
-                                    style: TextStyle(
-                                      color: BrightnessData.themeOf(context).text,
-                                      fontSize: 14,
-                                    ),
-                                    decoration: const InputDecoration(
-                                      isDense: true,
-                                      enabledBorder: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                    ),
-                                    onChanged: (String text) {
-                                      final mention = mentionRegExp
-                                          .stringMatch(text)
-                                          ?.replaceFirst('@', '');
-                                      BlocProvider.of<MentionCubit>(context)
-                                          .add(mention);
-                                    },
+                                  return KeyEventResult.ignored;
+                                },
+                                child: TextField(
+                                  maxLines: 5,
+                                  minLines: 1,
+                                  controller:
+                                      context.read<TextEditingController>(),
+                                  style: TextStyle(
+                                    color: BrightnessData.themeOf(context).text,
+                                    fontSize: 14,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    enabledBorder: InputBorder.none,
+                                    focusedBorder: InputBorder.none,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
-                            ActionButton(
-                              name: Resources.assetsImagesIcSendPng,
-                              color: actionColor,
-                              onTap: () => _sendMessage(context),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 16),
+                          ActionButton(
+                            name: Resources.assetsImagesIcSendPng,
+                            color: BrightnessData.themeOf(context).icon,
+                            onTap: () => _sendMessage(context),
+                          ),
+                        ],
                       ),
-                    )
+                    ),
+                  ),
                 ),
               ),
-            ));
-  }
+            ),
+          ),
+        ),
+      );
 
   bool _sendMessage(BuildContext context) {
     final textEditingController =
@@ -137,6 +148,26 @@ class InputContainer extends StatelessWidget {
       );
     }
     return valid;
+  }
+}
+
+class _StickerButton extends StatelessWidget {
+  const _StickerButton({
+    Key key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return HoverOverlay(
+      child: ActionButton(
+        name: Resources.assetsImagesIcStickerPng,
+        color: BrightnessData.themeOf(context).icon,
+      ),
+      childAnchor: Alignment.topCenter,
+      overlayAnchor: Alignment.bottomCenter,
+      offset: const Offset(0, -17),
+      overlayBuilder: (BuildContext context) => const StickerPage(),
+    );
   }
 }
 
@@ -267,4 +298,60 @@ class _PreviewImage extends StatelessWidget {
           ],
         ),
       );
+}
+
+class HighlightTextEditingController extends TextEditingController {
+  HighlightTextEditingController({
+    this.highlightTextStyle,
+    this.participantsCubit,
+  });
+
+  final TextStyle highlightTextStyle;
+  final ParticipantsCubit participantsCubit;
+
+  @override
+  set text(String newText) {
+    super.text = newText;
+  }
+
+  @override
+  TextSpan buildTextSpan({
+    @required BuildContext context,
+    TextStyle style,
+    @required bool withComposing,
+  }) {
+    if (!value.isComposingRangeValid || !withComposing)
+      return _buildTextSpan(text, style);
+
+    return TextSpan(style: style, children: <TextSpan>[
+      _buildTextSpan(value.composing.textBefore(value.text), style),
+      _buildTextSpan(
+        value.composing.textInside(value.text),
+        style.merge(
+          const TextStyle(decoration: TextDecoration.underline),
+        ),
+      ),
+      _buildTextSpan(value.composing.textAfter(value.text), style),
+    ]);
+  }
+
+  TextSpan _buildTextSpan(String text, TextStyle style) {
+    final children = <InlineSpan>[];
+    text.splitMapJoin(mentionNumberRegExp, onMatch: (match) {
+      final text = match[0];
+      final index = participantsCubit.state
+          .indexWhere((user) => '@${user.identityNumber} ' == text);
+      children.add(TextSpan(
+          text: text,
+          style: index > -1 ? style?.merge(highlightTextStyle) : style));
+      return text;
+    }, onNonMatch: (text) {
+      children.add(TextSpan(text: text, style: style));
+      return text;
+    });
+    return TextSpan(
+      style: style,
+      children: children,
+    );
+  }
 }
