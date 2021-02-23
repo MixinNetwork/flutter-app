@@ -6,7 +6,7 @@ import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/widgets/avatar_view/bloc/cubit/avatar_cubit.dart';
 import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
 
 class ConversationAvatarWidget extends StatelessWidget {
@@ -40,8 +40,8 @@ class ConversationAvatarWidget extends StatelessWidget {
                   conversation,
                 ),
                 child: Builder(
-                  builder: (context) => BlocConverter<AvatarCubit,
-                      List<UserItem>, List<UserItem>>(
+                  builder: (context) =>
+                      BlocConverter<AvatarCubit, List<User>, List<User>>(
                     converter: (state) =>
                         conversation.category == ConversationCategory.contact
                             ? state
@@ -64,7 +64,7 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
   const _AvatarPuzzlesWidget(this.users, this.size, {Key key})
       : super(key: key);
 
-  final List<UserItem> users;
+  final List<User> users;
   final double size;
 
   @override
@@ -73,7 +73,11 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
       return SizedBox.fromSize(size: Size.square(size));
     switch (users.length) {
       case 1:
-        return AvatarWidget(user: users.single, size: size);
+        return AvatarWidget(
+          user: users.single,
+          size: size,
+          clipOval: false,
+        );
       case 2:
         return Row(
           children: users.map(_buildAvatarImage).toList(),
@@ -81,7 +85,12 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
       case 3:
         return Row(
           children: [
-            Expanded(child: AvatarWidget(user: users[0], size: size)),
+            Expanded(
+                child: AvatarWidget(
+              user: users[0],
+              size: size,
+              clipOval: false,
+            )),
             Expanded(
               child: Column(
                 children: users.sublist(1).map(_buildAvatarImage).toList(),
@@ -105,8 +114,12 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
     }
   }
 
-  Widget _buildAvatarImage(UserItem user) => Expanded(
-        child: AvatarWidget(user: user, size: size),
+  Widget _buildAvatarImage(User user) => Expanded(
+        child: AvatarWidget(
+          user: user,
+          size: size,
+          clipOval: false,
+        ),
       );
 }
 
@@ -115,35 +128,42 @@ class AvatarWidget extends StatelessWidget {
     Key key,
     @required this.user,
     @required this.size,
+    this.clipOval = true,
   }) : super(key: key);
 
-  final UserItem user;
+  final User user;
   final double size;
+  final bool clipOval;
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
     if (user.avatarUrl?.isNotEmpty == true)
-      return CacheImage(
+      child = CacheImage(
         user.avatarUrl,
         width: size,
         height: size,
       );
-    return SizedBox.fromSize(
-      size: Size.square(size),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: getAvatarColorById(user.userId),
-        ),
-        child: Center(
-          child: Text(
-            user.fullName[0],
-            style: TextStyle(
-              color: getNameColorById(user.userId),
-              fontWeight: FontWeight.w600,
+    else
+      child = SizedBox.fromSize(
+        size: Size.square(size),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: getAvatarColorById(user.userId),
+          ),
+          child: Center(
+            child: Text(
+              user.fullName[0],
+              style: TextStyle(
+                color: getNameColorById(user.userId),
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+
+    if (clipOval) return ClipOval(child: child);
+    return child;
   }
 }

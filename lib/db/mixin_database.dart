@@ -58,6 +58,7 @@ part 'mixin_database.g.dart';
     'moor/dao/participant.moor',
     'moor/dao/sticker.moor',
     'moor/dao/sticker_album.moor',
+    'moor/dao/user.moor',
   },
   daos: [
     AddressesDao,

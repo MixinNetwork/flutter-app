@@ -15,6 +15,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import 'bloc/mention_bloc.dart';
+import 'bloc/multi_auth_cubit.dart';
+
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
 
@@ -44,15 +47,28 @@ class ChatContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final messagesDao =
-        Provider.of<AccountServer>(context).database.messagesDao;
+    final database = Provider.of<AccountServer>(context).database;
+    final messagesDao = database.messagesDao;
+    final userDao = database.userDao;
     final windowHeight = MediaQuery.of(context).size.height;
-    return BlocProvider(
-      create: (context) => MessageBloc(
-        messagesDao: messagesDao,
-        conversationCubit: BlocProvider.of<ConversationCubit>(context),
-        limit: windowHeight ~/ 20,
-      ),
+    final multiAuthCubit = BlocProvider.of<MultiAuthCubit>(context);
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => MessageBloc(
+            messagesDao: messagesDao,
+            conversationCubit: BlocProvider.of<ConversationCubit>(context),
+            limit: windowHeight ~/ 20,
+          ),
+        ),
+        BlocProvider(
+          create: (context) => MentionCubit(
+            userDao: userDao,
+            conversationCubit: BlocProvider.of<ConversationCubit>(context),
+            multiAuthCubit: multiAuthCubit,
+          ),
+        ),
+      ],
       child: Builder(
         builder: (context) {
           BlocProvider.of<MessageBloc>(context)?.limit =
@@ -85,7 +101,8 @@ class ChatContainer extends StatelessWidget {
                                       if (notification.metrics.maxScrollExtent -
                                               notification.metrics.pixels <
                                           dimension) {
-                                        BlocProvider.of<MessageBloc>(context).after();
+                                        BlocProvider.of<MessageBloc>(context)
+                                            .after();
                                       }
                                     } else if (notification.scrollDelta < 0) {
                                       // up
@@ -94,7 +111,8 @@ class ChatContainer extends StatelessWidget {
                                                   notification.metrics.pixels)
                                               .abs() <
                                           dimension) {
-                                        BlocProvider.of<MessageBloc>(context).before();
+                                        BlocProvider.of<MessageBloc>(context)
+                                            .before();
                                       }
                                     }
                                   }

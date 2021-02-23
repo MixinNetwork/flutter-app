@@ -1,5 +1,5 @@
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:moor/moor.dart';
 
 part 'participants_dao.g.dart';
@@ -31,7 +31,7 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
     remove.forEach(deleteParticipant);
   }
 
-  Selectable<UserItem> participantsAvatar(String conversationId) =>
+   Selectable<User> participantsAvatar(String conversationId) =>
       db.participantsAvatar(conversationId);
 
   void updateParticipantRole(String conversationId, String participantId, ParticipantRole role) async{

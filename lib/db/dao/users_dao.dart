@@ -21,4 +21,26 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     final query = select(db.users)..where((tbl) => tbl.userId.equals(userId));
     return query.getSingle();
   }
+
+  Selectable<User> fuzzySearchGroupUser({
+    String id,
+    String conversationId,
+    String username,
+    String identityNumber,
+  }) =>
+      db.fuzzySearchGroupUser(
+        id,
+        conversationId,
+        username,
+        identityNumber,
+      );
+
+  Selectable<User> groupParticipants({
+    String conversationId,
+    String id,
+  }) =>
+      db.groupParticipants(
+        conversationId,
+        id,
+      );
 }

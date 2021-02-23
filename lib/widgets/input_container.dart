@@ -7,13 +7,17 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/mention_bloc.dart';
 import 'package:flutter_app/utils/file.dart';
+import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/hoer_overlay.dart';
 import 'package:flutter_app/widgets/sticker_page/sticker_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/generated/l10n.dart';
@@ -21,6 +25,7 @@ import 'package:flutter_app/generated/l10n.dart';
 import 'action_button.dart';
 import 'dash_path_border.dart';
 import 'interacter_decorated_box.dart';
+import 'mention_panel.dart';
 
 class InputContainer extends StatelessWidget {
   const InputContainer({
@@ -30,103 +35,103 @@ class InputContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actionColor = BrightnessData.themeOf(context).icon;
+    final textEditingController = TextEditingController();
 
-    return SizedBox(
-      height: 56,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).primary,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 8,
-          ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              ActionButton(
-                name: Resources.assetsImagesIcFilePng,
-                color: actionColor,
-                onTap: () async {
-                  final file = await selectFile();
-
-                  if (file.isImage) {
-                    if (!await _PreviewImage.push(context, file)) return;
-                    return Provider.of<AccountServer>(context, listen: false)
-                        .sendImageMessage(
-                      BlocProvider.of<ConversationCubit>(context)
-                          .state
-                          .conversationId,
-                      File(file.path),
-                    );
-                  }
-                  Provider.of<AccountServer>(context, listen: false)
-                      .sendAttachment(
-                    BlocProvider.of<ConversationCubit>(context)
-                        .state
-                        .conversationId,
-                    file,
-                  );
-                },
-              ),
-              const SizedBox(width: 6),
-              HoverOverlay(
-                child: ActionButton(
-                  name: Resources.assetsImagesIcStickerPng,
-                  color: actionColor,
-                ),
+    final mentionCubit = BlocProvider.of<MentionCubit>(context);
+    return LayoutBuilder(
+        builder: (context, constraints) => SizedBox(
+              height: 56,
+              child: PortalEntry(
                 childAnchor: Alignment.topCenter,
-                overlayAnchor: Alignment.bottomCenter,
-                offset: const Offset(0, -17),
-                overlayBuilder: (BuildContext context) => const StickerPage(),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minHeight: 32,
+                portalAnchor: Alignment.bottomCenter,
+                portal: MentionPanel(
+                  mentionCubit: mentionCubit,
+                  width: constraints.maxWidth,
+                  onSelect: (User user) {
+                    textEditingController
+                      ..text = textEditingController.text.replaceFirst(
+                          mentionRegExp, '@${user.identityNumber} ')
+                      ..selection = TextSelection.fromPosition(TextPosition(
+                          offset: textEditingController.text.length));
+                  },
+                ),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: BrightnessData.themeOf(context).primary,
                   ),
-                  child: Focus(
-                    onKey: (FocusNode node, RawKeyEvent event) {
-                      if (setEquals(RawKeyboard.instance.keysPressed,
-                          {LogicalKeyboardKey.enter})) {
-                        return _sendMessage(context)
-                            ? KeyEventResult.ignored
-                            : KeyEventResult.handled;
-                      }
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        _FileButton(actionColor: actionColor),
+                        const SizedBox(width: 6),
+                        HoverOverlay(
+                          child: ActionButton(
+                            name: Resources.assetsImagesIcStickerPng,
+                            color: actionColor,
+                          ),
+                          childAnchor: Alignment.topCenter,
+                          overlayAnchor: Alignment.bottomCenter,
+                          offset: const Offset(0, -17),
+                          overlayBuilder: (BuildContext context) =>
+                              const StickerPage(),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              minHeight: 32,
+                            ),
+                            child: Focus(
+                              onKey: (FocusNode node, RawKeyEvent event) {
+                                if (setEquals(RawKeyboard.instance.keysPressed,
+                                    {LogicalKeyboardKey.enter})) {
+                                  return _sendMessage(context)
+                                      ? KeyEventResult.ignored
+                                      : KeyEventResult.handled;
+                                }
 
-                      return KeyEventResult.ignored;
-                    },
-                    child: TextField(
-                      maxLines: 5,
-                      minLines: 1,
-                      controller: BlocProvider.of<DraftCubit>(context)
-                          .textEditingController,
-                      style: TextStyle(
-                        color: BrightnessData.themeOf(context).text,
-                        fontSize: 14,
-                      ),
-                      decoration: const InputDecoration(
-                        isDense: true,
-                        enabledBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                      ),
+                                return KeyEventResult.ignored;
+                              },
+                              child: TextField(
+                                maxLines: 5,
+                                minLines: 1,
+                                controller: textEditingController,
+                                style: TextStyle(
+                                  color: BrightnessData.themeOf(context).text,
+                                  fontSize: 14,
+                                ),
+                                decoration: const InputDecoration(
+                                  isDense: true,
+                                  enabledBorder: InputBorder.none,
+                                  focusedBorder: InputBorder.none,
+                                ),
+                                onChanged: (String text) {
+                                  final mention = mentionRegExp
+                                      .stringMatch(text)
+                                      ?.replaceFirst('@', '');
+                                  mentionCubit.add(mention);
+                                },
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        ActionButton(
+                          name: Resources.assetsImagesIcSendPng,
+                          color: actionColor,
+                          onTap: () => _sendMessage(context),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
-              ActionButton(
-                name: Resources.assetsImagesIcSendPng,
-                color: actionColor,
-                onTap: () => _sendMessage(context),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ));
   }
 
   bool _sendMessage(BuildContext context) {
@@ -143,6 +148,39 @@ class InputContainer extends StatelessWidget {
       );
     }
     return valid;
+  }
+}
+
+class _FileButton extends StatelessWidget {
+  const _FileButton({
+    Key key,
+    @required this.actionColor,
+  }) : super(key: key);
+
+  final Color actionColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return ActionButton(
+      name: Resources.assetsImagesIcFilePng,
+      color: actionColor,
+      onTap: () async {
+        final file = await selectFile();
+
+        if (file.isImage) {
+          if (!await _PreviewImage.push(context, file)) return;
+          return Provider.of<AccountServer>(context, listen: false)
+              .sendImageMessage(
+            BlocProvider.of<ConversationCubit>(context).state.conversationId,
+            File(file.path),
+          );
+        }
+        Provider.of<AccountServer>(context, listen: false).sendAttachment(
+          BlocProvider.of<ConversationCubit>(context).state.conversationId,
+          file,
+        );
+      },
+    );
   }
 }
 

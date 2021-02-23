@@ -370,6 +370,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_portal:
+    dependency: "direct main"
+    description:
+      name: flutter_portal
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.0"
   flutter_svg:
     dependency: "direct main"
     description:
