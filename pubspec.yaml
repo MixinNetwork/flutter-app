@@ -21,7 +21,7 @@ dependencies:
   mixin_bot_sdk_dart:
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: 43d24d4d283f9705fda122a72cb7c8536e58916b
+      ref: ea5cdd2a40b9475f32a10d2de44f0ad7167f4b39
     # local path
   #    path: ../mixin_bot_sdk_dart
   flutter:
