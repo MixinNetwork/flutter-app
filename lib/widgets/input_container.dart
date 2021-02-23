@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/mention_bloc.dart';
@@ -17,7 +16,6 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/hoer_overlay.dart';
 import 'package:flutter_app/widgets/sticker_page/sticker_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_portal/flutter_portal.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/generated/l10n.dart';
@@ -37,98 +35,89 @@ class InputContainer extends StatelessWidget {
     final actionColor = BrightnessData.themeOf(context).icon;
     final textEditingController = TextEditingController();
 
-    final mentionCubit = BlocProvider.of<MentionCubit>(context);
     return LayoutBuilder(
-        builder: (context, constraints) => SizedBox(
+        builder: (context, BoxConstraints constraints) => SizedBox(
               height: 56,
-              child: PortalEntry(
-                childAnchor: Alignment.topCenter,
-                portalAnchor: Alignment.bottomCenter,
-                portal: MentionPanel(
-                  mentionCubit: mentionCubit,
-                  width: constraints.maxWidth,
-                  onSelect: (User user) {
-                    textEditingController
-                      ..text = textEditingController.text.replaceFirst(
-                          mentionRegExp, '@${user.identityNumber} ')
-                      ..selection = TextSelection.fromPosition(TextPosition(
-                          offset: textEditingController.text.length));
-                  },
-                ),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: BrightnessData.themeOf(context).primary,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        _FileButton(actionColor: actionColor),
-                        const SizedBox(width: 6),
-                        HoverOverlay(
-                          child: ActionButton(
-                            name: Resources.assetsImagesIcStickerPng,
-                            color: actionColor,
-                          ),
-                          childAnchor: Alignment.topCenter,
-                          overlayAnchor: Alignment.bottomCenter,
-                          offset: const Offset(0, -17),
-                          overlayBuilder: (BuildContext context) =>
-                              const StickerPage(),
+              child: MentionPanelPortalEntry(
+                constraints: constraints,
+                textEditingController: textEditingController,
+                child: Builder(
+                  builder: (context) => DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: BrightnessData.themeOf(context).primary,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(
-                              minHeight: 32,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _FileButton(actionColor: actionColor),
+                            const SizedBox(width: 6),
+                            HoverOverlay(
+                              child: ActionButton(
+                                name: Resources.assetsImagesIcStickerPng,
+                                color: actionColor,
+                              ),
+                              childAnchor: Alignment.topCenter,
+                              overlayAnchor: Alignment.bottomCenter,
+                              offset: const Offset(0, -17),
+                              overlayBuilder: (BuildContext context) =>
+                                  const StickerPage(),
                             ),
-                            child: Focus(
-                              onKey: (FocusNode node, RawKeyEvent event) {
-                                if (setEquals(RawKeyboard.instance.keysPressed,
-                                    {LogicalKeyboardKey.enter})) {
-                                  return _sendMessage(context)
-                                      ? KeyEventResult.ignored
-                                      : KeyEventResult.handled;
-                                }
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: 32,
+                                ),
+                                child: Focus(
+                                  onKey: (FocusNode node, RawKeyEvent event) {
+                                    if (setEquals(RawKeyboard.instance.keysPressed,
+                                        {LogicalKeyboardKey.enter})) {
+                                      return _sendMessage(context)
+                                          ? KeyEventResult.ignored
+                                          : KeyEventResult.handled;
+                                    }
 
-                                return KeyEventResult.ignored;
-                              },
-                              child: TextField(
-                                maxLines: 5,
-                                minLines: 1,
-                                controller: textEditingController,
-                                style: TextStyle(
-                                  color: BrightnessData.themeOf(context).text,
-                                  fontSize: 14,
+                                    return KeyEventResult.ignored;
+                                  },
+                                  child: TextField(
+                                    maxLines: 5,
+                                    minLines: 1,
+                                    controller: textEditingController,
+                                    style: TextStyle(
+                                      color: BrightnessData.themeOf(context).text,
+                                      fontSize: 14,
+                                    ),
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                    ),
+                                    onChanged: (String text) {
+                                      final mention = mentionRegExp
+                                          .stringMatch(text)
+                                          ?.replaceFirst('@', '');
+                                      BlocProvider.of<MentionCubit>(context)
+                                          .add(mention);
+                                    },
+                                  ),
                                 ),
-                                decoration: const InputDecoration(
-                                  isDense: true,
-                                  enabledBorder: InputBorder.none,
-                                  focusedBorder: InputBorder.none,
-                                ),
-                                onChanged: (String text) {
-                                  final mention = mentionRegExp
-                                      .stringMatch(text)
-                                      ?.replaceFirst('@', '');
-                                  mentionCubit.add(mention);
-                                },
                               ),
                             ),
-                          ),
+                            const SizedBox(width: 16),
+                            ActionButton(
+                              name: Resources.assetsImagesIcSendPng,
+                              color: actionColor,
+                              onTap: () => _sendMessage(context),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 16),
-                        ActionButton(
-                          name: Resources.assetsImagesIcSendPng,
-                          color: actionColor,
-                          onTap: () => _sendMessage(context),
-                        ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    )
                 ),
               ),
             ));

@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Offset;
+import 'package:flutter_app/db/extension/conversation.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/mention_bloc.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
+import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_portal/flutter_portal.dart';
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import 'avatar_view/avatar_view.dart';
@@ -10,53 +18,114 @@ import 'brightness_observer.dart';
 import 'high_light_text.dart';
 import 'interacter_decorated_box.dart';
 
-class MentionPanel extends StatelessWidget {
-  const MentionPanel({
+class MentionPanelPortalEntry extends StatelessWidget {
+  const MentionPanelPortalEntry({
+    Key key,
+    @required this.constraints,
+    @required this.child,
+    @required this.textEditingController,
+  }) : super(key: key);
+
+  final BoxConstraints constraints;
+  final Widget child;
+  final TextEditingController textEditingController;
+
+  @override
+  Widget build(BuildContext context) {
+    final userDao = Provider.of<AccountServer>(context).database.userDao;
+    return BlocProvider(
+      create: (context) => MentionCubit(
+        userDao: userDao,
+        conversationCubit: BlocProvider.of<ConversationCubit>(context),
+        multiAuthCubit: BlocProvider.of<MultiAuthCubit>(context),
+      ),
+      child: Builder(
+        builder: (context) =>
+            BlocConverter<MentionCubit, Tuple2<String, List<User>>, bool>(
+          converter: (state) => state.item2.isNotEmpty,
+          builder: (context, visible) => PortalEntry(
+            visible: visible && BlocProvider.of<ConversationCubit>(context).state?.isGroupConversation == true,
+            childAnchor: Alignment.topCenter,
+            portalAnchor: Alignment.bottomCenter,
+            closeDuration: const Duration(milliseconds: 150),
+            portal: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: 168,
+                minWidth: constraints.maxWidth,
+                maxWidth: constraints.maxWidth,
+              ),
+              child: ClipRRect(
+                child: TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeOut,
+                  tween: Tween(begin: 0, end: visible ? 1 : 0),
+                  builder: (context, progress, child) => FractionalTranslation(
+                      translation: Offset(0, 1 - progress),
+                      child: child,
+                    ),
+                  child: _MentionPanel(
+                    mentionCubit: BlocProvider.of<MentionCubit>(context),
+                    onSelect: (User user) {
+                      textEditingController
+                        ..text = textEditingController.text.replaceFirst(
+                            mentionRegExp, '@${user.identityNumber} ')
+                        ..selection = TextSelection.fromPosition(
+                          TextPosition(
+                            offset: textEditingController.text.length,
+                          ),
+                        );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MentionPanel extends StatelessWidget {
+  const _MentionPanel({
     Key key,
     @required this.mentionCubit,
-    this.width,
     @required this.onSelect,
   }) : super(key: key);
 
   final MentionCubit mentionCubit;
-  final double width;
   final Function(User user) onSelect;
 
   @override
   Widget build(BuildContext context) {
     final scrollController = ScrollController();
 
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        maxHeight: 168,
-        minWidth: width,
-        maxWidth: width,
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrightnessData.themeOf(context).popUp,
       ),
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).popUp,
-        ),
-        child: BlocConsumer(
-          cubit: mentionCubit,
-          builder: (context, Tuple2<String, List<User>> tuple) =>
-              ListView.builder(
-            controller: scrollController,
-            itemCount: tuple.item2.length,
-            shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) => _MentionItem(
-              user: tuple.item2[index],
-              keyword: tuple.item1,
-              onSelect: (user) {
-                onSelect?.call(user);
-                mentionCubit.clear();
-              },
-            ),
+      child: BlocConsumer(
+        buildWhen: (a, b) => b.item2?.isNotEmpty == true,
+        cubit: mentionCubit,
+        builder: (context, Tuple2<String, List<User>> tuple) =>
+            ListView.builder(
+          controller: scrollController,
+          itemCount: tuple.item2.length,
+          shrinkWrap: true,
+          itemBuilder: (BuildContext context, int index) => _MentionItem(
+            user: tuple.item2[index],
+            keyword: tuple.item1,
+            onSelect: (user) {
+              onSelect?.call(user);
+              mentionCubit.clear();
+            },
           ),
-          listener: (BuildContext context, Tuple2<String, List<User>> state) {
-            if (!scrollController.hasClients) return;
-            scrollController.jumpTo(0);
-          },
         ),
+        listener: (BuildContext context, Tuple2<String, List<User>> state) {
+          if (!scrollController.hasClients) return;
+          scrollController.jumpTo(0);
+        },
       ),
     );
   }

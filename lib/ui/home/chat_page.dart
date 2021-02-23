@@ -15,8 +15,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import 'bloc/mention_bloc.dart';
-import 'bloc/multi_auth_cubit.dart';
 
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
@@ -49,9 +47,7 @@ class ChatContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final database = Provider.of<AccountServer>(context).database;
     final messagesDao = database.messagesDao;
-    final userDao = database.userDao;
     final windowHeight = MediaQuery.of(context).size.height;
-    final multiAuthCubit = BlocProvider.of<MultiAuthCubit>(context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -59,13 +55,6 @@ class ChatContainer extends StatelessWidget {
             messagesDao: messagesDao,
             conversationCubit: BlocProvider.of<ConversationCubit>(context),
             limit: windowHeight ~/ 20,
-          ),
-        ),
-        BlocProvider(
-          create: (context) => MentionCubit(
-            userDao: userDao,
-            conversationCubit: BlocProvider.of<ConversationCubit>(context),
-            multiAuthCubit: multiAuthCubit,
           ),
         ),
       ],
