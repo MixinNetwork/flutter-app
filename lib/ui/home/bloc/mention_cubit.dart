@@ -35,9 +35,7 @@ class MentionCubit extends Cubit<Tuple2<String, List<User>>>
                   .toList()
               : [],
         ),
-      ).listen(emit, onError: (e, s) {
-        print('fuck $e, $s');
-      }),
+      ).listen(emit),
     );
   }
 
