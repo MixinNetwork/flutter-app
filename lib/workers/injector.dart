@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';

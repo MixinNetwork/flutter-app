@@ -1,4 +1,4 @@
-import 'package:flutter_app/constants.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';

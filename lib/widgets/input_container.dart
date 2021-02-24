@@ -8,7 +8,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/mention_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
@@ -135,8 +134,7 @@ class InputContainer extends StatelessWidget {
       );
 
   bool _sendMessage(BuildContext context) {
-    final textEditingController =
-        BlocProvider.of<DraftCubit>(context).textEditingController;
+    final textEditingController = context.read<TextEditingController>();
 
     final text = textEditingController.value.text;
     final valid = textEditingController.value.isComposingRangeValid;
@@ -337,18 +335,22 @@ class HighlightTextEditingController extends TextEditingController {
 
   TextSpan _buildTextSpan(String text, TextStyle style) {
     final children = <InlineSpan>[];
-    text.splitMapJoin(mentionNumberRegExp, onMatch: (match) {
-      final text = match[0];
-      final index = participantsCubit.state
-          .indexWhere((user) => '@${user.identityNumber} ' == text);
-      children.add(TextSpan(
-          text: text,
-          style: index > -1 ? style?.merge(highlightTextStyle) : style));
-      return text;
-    }, onNonMatch: (text) {
-      children.add(TextSpan(text: text, style: style));
-      return text;
-    });
+    text.splitMapJoin(
+      mentionNumberRegExp,
+      onMatch: (match) {
+        final text = match[0];
+        final index = participantsCubit.state.indexWhere(
+            (user) => '@${user.identityNumber}' == text.trimRight());
+        children.add(TextSpan(
+            text: text,
+            style: index > -1 ? style?.merge(highlightTextStyle) : style));
+        return text;
+      },
+      onNonMatch: (text) {
+        children.add(TextSpan(text: text, style: style));
+        return text;
+      },
+    );
     return TextSpan(
       style: style,
       children: children,

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/color_utils.dart';
+import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/message/item/action/action_data.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../brightness_observer.dart';
 import '../../../interacter_decorated_box.dart';
@@ -33,7 +33,7 @@ class ActionMessage extends StatelessWidget {
               .map((e) => ActionData.fromJson(e))
               .map(
                 (e) => InteractableDecoratedBox.color(
-                  onTap: () => launch(e.action),
+                  onTap: () => openUri(e.action),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     color: BrightnessData.themeOf(context).primary,

@@ -9,7 +9,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
-import '../constants.dart';
+import '../constants/constants.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';

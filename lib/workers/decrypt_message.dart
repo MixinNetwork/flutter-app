@@ -16,7 +16,7 @@ import 'package:flutter_app/blaze/vo/system_circle_message.dart';
 import 'package:flutter_app/blaze/vo/system_conversation_message.dart';
 import 'package:flutter_app/blaze/vo/system_session_message.dart';
 import 'package:flutter_app/blaze/vo/system_user_message.dart';
-import 'package:flutter_app/constants.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart';

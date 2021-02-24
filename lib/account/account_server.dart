@@ -11,7 +11,7 @@ import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
-import 'package:flutter_app/constants.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;

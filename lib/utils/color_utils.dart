@@ -1,7 +1,8 @@
 import 'dart:ui';
 
-import 'package:flutter_app/constants.dart';
+import 'package:flutter_app/constants/brightness_theme_data.dart';
 import 'package:uuid/uuid.dart';
+
 
 Color getNameColorById(String userId) {
   final hashCode = Uuid().parse(userId).hashCode;
