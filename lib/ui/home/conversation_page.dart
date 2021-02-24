@@ -19,8 +19,8 @@ import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
+import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/message/item/action/action_data.dart';
 import 'package:flutter_app/widgets/message_status_icon.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
@@ -114,58 +114,53 @@ class _List extends StatelessWidget {
                         bool>(
                       converter: (state) =>
                           conversation?.conversationId == state?.conversationId,
-                      builder: (context, selected) => _Item(
-                        selected: selected,
-                        conversation: conversation,
-                        onTap: () {
-                          BlocProvider.of<ConversationCubit>(context)
-                              .emit(conversation);
-                          ResponsiveNavigatorCubit.of(context)
-                              .pushPage(ResponsiveNavigatorCubit.chatPage);
-                        },
-                        onRightClick: (pointerUpEvent) async {
-                          final result = await showContextMenu(
-                            context: context,
-                            pointerPosition: pointerUpEvent.position,
-                            menus: [
-                              if (conversation.pinTime != null)
-                                ContextMenu(
-                                  title: Localization.of(context).unPin,
-                                  value: () => Provider.of<AccountServer>(
-                                    context,
-                                    listen: false,
-                                  )
-                                      .database
-                                      .conversationDao
-                                      .unpin(conversation.conversationId),
-                                ),
-                              if (conversation.pinTime == null)
-                                ContextMenu(
-                                  title: Localization.of(context).pin,
-                                  value: () => Provider.of<AccountServer>(
-                                    context,
-                                    listen: false,
-                                  )
-                                      .database
-                                      .conversationDao
-                                      .pin(conversation.conversationId),
-                                ),
-                              ContextMenu(
-                                title: Localization.of(context).unMute,
-                              ),
-                              ContextMenu(
-                                title: Localization.of(context).deleteChat,
-                                isDestructiveAction: true,
-                                value: () => Provider.of<AccountServer>(
-                                  context,
-                                  listen: false,
-                                ).database.conversationDao.deleteConversation(
-                                    conversation.conversationId),
-                              ),
-                            ],
-                          );
-                          await result?.call();
-                        },
+                      builder: (context, selected) => ContextMenuPortalEntry(
+                        child: _Item(
+                          selected: selected,
+                          conversation: conversation,
+                          onTap: () {
+                            BlocProvider.of<ConversationCubit>(context)
+                                .emit(conversation);
+                            ResponsiveNavigatorCubit.of(context)
+                                .pushPage(ResponsiveNavigatorCubit.chatPage);
+                          },
+                        ),
+                        menus: [
+                          if (conversation.pinTime != null)
+                            ContextMenu(
+                              title: Localization.of(context).unPin,
+                              onTap: () => Provider.of<AccountServer>(
+                                context,
+                                listen: false,
+                              )
+                                  .database
+                                  .conversationDao
+                                  .unpin(conversation.conversationId),
+                            ),
+                          if (conversation.pinTime == null)
+                            ContextMenu(
+                              title: Localization.of(context).pin,
+                              onTap: () => Provider.of<AccountServer>(
+                                context,
+                                listen: false,
+                              )
+                                  .database
+                                  .conversationDao
+                                  .pin(conversation.conversationId),
+                            ),
+                          ContextMenu(
+                            title: Localization.of(context).unMute,
+                          ),
+                          ContextMenu(
+                            title: Localization.of(context).deleteChat,
+                            isDestructiveAction: true,
+                            onTap: () => Provider.of<AccountServer>(
+                              context,
+                              listen: false,
+                            ).database.conversationDao.deleteConversation(
+                                conversation.conversationId),
+                          ),
+                        ],
                       ),
                     );
                   },
@@ -181,20 +176,17 @@ class _Item extends StatelessWidget {
     this.selected = false,
     @required this.conversation,
     this.onTap,
-    this.onRightClick,
   }) : super(key: key);
 
   final bool selected;
   final ConversationItem conversation;
   final VoidCallback onTap;
-  final ValueChanged<PointerUpEvent> onRightClick;
 
   @override
   Widget build(BuildContext context) {
     final messageColor = BrightnessData.themeOf(context).secondaryText;
     return InteractableDecoratedBox(
       onTap: onTap,
-      onRightClick: onRightClick,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8),
         child: DecoratedBox(

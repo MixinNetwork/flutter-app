@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
-import 'package:flutter_app/widgets/dialog.dart';
-import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_app/widgets/message/item/sticker_message.dart';
 import 'package:flutter_app/widgets/message/item/stranger_message.dart';
 import 'package:flutter_app/widgets/message/item/text_message.dart';
@@ -16,6 +15,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 
+import '../menu.dart';
 import 'item/action/action_message.dart';
 import 'item/file_message.dart';
 import 'item/secret_message.dart';
@@ -82,6 +82,23 @@ class MessageItemWidget extends StatelessWidget {
             return _MessageBubbleMargin(
               userName: user,
               isCurrentUser: isCurrentUser,
+              menus: [
+                ContextMenu(
+                  title: Localization.of(context).reply,
+                ),
+                ContextMenu(
+                  title: Localization.of(context).forward,
+                ),
+                ContextMenu(
+                  title: Localization.of(context).copy,
+                  onTap: () =>
+                      Clipboard.setData(ClipboardData(text: message.content)),
+                ),
+                ContextMenu(
+                  title: Localization.of(context).delete,
+                  isDestructiveAction: true,
+                ),
+              ],
               builder: (BuildContext context) {
                 if (message.type.isData)
                   return FileMessage(
@@ -126,44 +143,26 @@ class _MessageBubbleMargin extends StatelessWidget {
     @required this.isCurrentUser,
     @required this.userName,
     @required this.builder,
+    @required this.menus,
   }) : super(key: key);
 
   final bool isCurrentUser;
   final String userName;
   final WidgetBuilder builder;
+  final List<ContextMenu> menus;
 
   @override
-  Widget build(BuildContext context) {
-    return MessageBubbleMargin(
-      isCurrentUser: isCurrentUser,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (userName != null) MessageName(userName: userName),
-          InteractableDecoratedBox(
-            onRightClick: (pointerUpEvent) => showContextMenu(
-              context: context,
-              pointerPosition: pointerUpEvent.position,
-              menus: [
-                ContextMenu(
-                  title: Localization.of(context).reply,
-                ),
-                ContextMenu(
-                  title: Localization.of(context).forward,
-                ),
-                ContextMenu(
-                  title: Localization.of(context).copy,
-                ),
-                ContextMenu(
-                  title: Localization.of(context).delete,
-                  isDestructiveAction: true,
-                ),
-              ],
+  Widget build(BuildContext context) => MessageBubbleMargin(
+        isCurrentUser: isCurrentUser,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (userName != null) MessageName(userName: userName),
+            ContextMenuPortalEntry(
+              menus: menus,
+              child: Builder(builder: builder),
             ),
-            child: Builder(builder: builder),
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+      );
 }

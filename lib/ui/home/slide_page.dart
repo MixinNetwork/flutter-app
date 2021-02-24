@@ -6,6 +6,7 @@ import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
+import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/select_item.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tuple/tuple.dart';
@@ -112,60 +113,53 @@ class _CircleList extends StatelessWidget {
                     state?.id == circleType[index]['title'],
                 builder: (BuildContext context, bool selected) {
                   final circle = circleType[index];
-                  return SelectItem(
-                    icon: Image.asset(
-                      circle['asset'],
-                      width: 24,
-                      height: 24,
-                      color: BrightnessData.themeOf(context).accent,
+                  return ContextMenuPortalEntry(
+                    child: SelectItem(
+                      icon: Image.asset(
+                        circle['asset'],
+                        width: 24,
+                        height: 24,
+                        color: BrightnessData.themeOf(context).accent,
+                      ),
+                      title: circle['title'],
+                      onTap: () =>
+                          BlocProvider.of<SlideCategoryCubit>(context).select(
+                        SlideCategoryType.circle,
+                        circle['title'],
+                      ),
+                      selected: selected,
+                      count: 99,
                     ),
-                    title: circle['title'],
-                    onTap: () =>
-                        BlocProvider.of<SlideCategoryCubit>(context).select(
-                      SlideCategoryType.circle,
-                      circle['title'],
-                    ),
-                    selected: selected,
-                    count: 99,
-                    onRightClick: (pointerUpEvent) async {
-                      final result = await showContextMenu(
-                        context: context,
-                        pointerPosition: pointerUpEvent.position,
-                        menus: [
-                          ContextMenu(
-                            title: Localization.of(context).editCircleName,
-                          ),
-                          ContextMenu(
-                            title: Localization.of(context).editConversations,
-                          ),
-                          ContextMenu(
-                            title: Localization.of(context).deleteCircle,
-                            isDestructiveAction: true,
-                            value: () {
-                              showMixinDialog(
-                                context: context,
-                                child: AlertDialogLayout(
-                                  content: Text(Localization.of(context)
-                                      .pageDeleteCircle(circle['title'])),
-                                  actions: [
-                                    MixinButton(
-                                      backgroundTransparent: true,
-                                      child:
-                                          Text(Localization.of(context).cancel),
-                                    ),
-                                    MixinButton(
-                                      child:
-                                          Text(Localization.of(context).delete),
-                                    ),
-                                  ],
+                    menus: [
+                      ContextMenu(
+                        title: Localization.of(context).editCircleName,
+                      ),
+                      ContextMenu(
+                        title: Localization.of(context).editConversations,
+                      ),
+                      ContextMenu(
+                        title: Localization.of(context).deleteCircle,
+                        isDestructiveAction: true,
+                        onTap: () {
+                          showMixinDialog(
+                            context: context,
+                            child: AlertDialogLayout(
+                              content: Text(Localization.of(context)
+                                  .pageDeleteCircle(circle['title'])),
+                              actions: [
+                                MixinButton(
+                                  backgroundTransparent: true,
+                                  child: Text(Localization.of(context).cancel),
                                 ),
-                              );
-                            },
-                          ),
-                        ],
-                      );
-                      result?.call();
-                    },
+                                MixinButton(
+                                  child: Text(Localization.of(context).delete),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   );
                 },
               ),
