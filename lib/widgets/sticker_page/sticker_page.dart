@@ -18,62 +18,54 @@ import 'bloc/cubit/sticker_cubit.dart';
 class StickerPage extends StatelessWidget {
   const StickerPage({
     Key key,
+    this.tabController,
+    this.stickerAlbumsCubit,
   }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    final stickerAlbumsDao =
-        Provider.of<AccountServer>(context).database.stickerAlbumsDao;
+  final TabController tabController;
+  final StickerAlbumsCubit stickerAlbumsCubit;
 
-    return Material(
-      color: Colors.transparent,
-      child: MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) =>
-                StickerAlbumsCubit(stickerAlbumsDao.systemAlbums().watch()),
-          ),
-        ],
+  @override
+  Widget build(BuildContext context) => Material(
+        color: Colors.transparent,
         child: Builder(
-          builder: (context) =>
-              BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-            converter: (state) => (state?.length ?? 0) + 2,
-            builder: (context, tabLength) => DefaultTabController(
-              length: tabLength,
-              child: Container(
-                width: 464,
-                height: 407,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(11),
-                  color: BrightnessData.dynamicColor(
-                    context,
-                    const Color.fromRGBO(255, 255, 255, 1),
-                    darkColor: const Color.fromRGBO(62, 65, 72, 1),
-                  ),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(11),
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: TabBarView(
-                          children: List.generate(
-                            tabLength,
-                            (index) => _StickerAlbumPage(index: index),
-                          ),
+          builder: (context) => Container(
+            width: 464,
+            height: 407,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(11),
+              color: BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(255, 255, 255, 1),
+                darkColor: const Color.fromRGBO(62, 65, 72, 1),
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(11),
+              child: BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
+                converter: (state) => (state?.length ?? 0) + 2,
+                builder: (context, tabLength) => Column(
+                  children: [
+                    Expanded(
+                      child: TabBarView(
+                        controller: tabController,
+                        children: List.generate(
+                          tabLength,
+                          (index) => _StickerAlbumPage(index: index),
                         ),
                       ),
-                      _StickerAlbumBar(tabLength: tabLength),
-                    ],
-                  ),
+                    ),
+                    _StickerAlbumBar(
+                      tabLength: tabLength,
+                      tabController: tabController,
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _StickerAlbumPage extends StatelessWidget {
@@ -181,9 +173,11 @@ class _StickerAlbumBar extends StatelessWidget {
   const _StickerAlbumBar({
     Key key,
     this.tabLength,
+    this.tabController,
   }) : super(key: key);
 
   final int tabLength;
+  final TabController tabController;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -195,6 +189,7 @@ class _StickerAlbumBar extends StatelessWidget {
           darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
         ),
         child: TabBar(
+          controller: tabController,
           isScrollable: true,
           indicator: BoxDecoration(
             color: BrightnessData.dynamicColor(

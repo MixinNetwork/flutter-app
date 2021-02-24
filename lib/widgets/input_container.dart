@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/mention_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
@@ -15,6 +17,7 @@ import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/hoer_overlay.dart';
+import 'package:flutter_app/widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import 'package:flutter_app/widgets/sticker_page/sticker_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -155,18 +158,52 @@ class _StickerButton extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return HoverOverlay(
-      child: ActionButton(
-        name: Resources.assetsImagesIcStickerPng,
-        color: BrightnessData.themeOf(context).icon,
-      ),
-      childAnchor: Alignment.topCenter,
-      overlayAnchor: Alignment.bottomCenter,
-      offset: const Offset(0, -17),
-      overlayBuilder: (BuildContext context) => const StickerPage(),
-    );
-  }
+  Widget build(BuildContext context) => BlocProvider(
+        create: (context) => StickerAlbumsCubit(context
+            .read<AccountServer>()
+            .database
+            .stickerAlbumsDao
+            .systemAlbums()
+            .watch()),
+        child: Builder(
+          builder: (context) =>
+              BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
+            converter: (state) => (state?.length ?? 0) + 2,
+            builder: (context, tabLength) => DefaultTabController(
+              length: tabLength,
+              child: Builder(
+                builder: (context) => HoverOverlay(
+                  duration: const Duration(milliseconds: 200),
+                  closeDuration: const Duration(milliseconds: 200),
+                  closeWaitDuration: const Duration(milliseconds: 300),
+                  inCurve: Curves.easeOut,
+                  outCurve: Curves.easeOut,
+                  portalBuilder: (context, progress, child) => Opacity(
+                    opacity: progress,
+                    child: child,
+                  ),
+                  child: InteractableDecoratedBox(
+                    child: ActionButton(
+                      name: Resources.assetsImagesIcStickerPng,
+                      color: BrightnessData.themeOf(context).icon,
+                    ),
+                  ),
+                  childAnchor: Alignment.topCenter,
+                  portalAnchor: Alignment.bottomCenter,
+                  portal: Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: StickerPage(
+                      stickerAlbumsCubit:
+                          BlocProvider.of<StickerAlbumsCubit>(context),
+                      tabController: DefaultTabController.of(context),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _FileButton extends StatelessWidget {
