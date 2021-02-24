@@ -59,7 +59,7 @@ class AccountServer {
   Future _initDatabase() async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
-    _attachmentUtil = await AttachmentUtil.init(client, identityNumber);
+    _attachmentUtil = await AttachmentUtil.init(client, database.messagesDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
         database.messagesDao, database.jobsDao, _attachmentUtil);
     blaze = Blaze(userId, sessionId, privateKey, database, client);

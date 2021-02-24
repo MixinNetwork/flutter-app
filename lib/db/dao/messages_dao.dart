@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_app/db/database_event_bus.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:moor/moor.dart';
 
@@ -63,6 +64,24 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(MessagesCompanion(status: Value(status)));
+  }
+
+  Future<int> updateMediaMessageUrl(String path, String messageId) {
+    return (db.update(db.messages)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .write(MessagesCompanion(mediaUrl: Value(path)));
+  }
+
+  Future<int> updateMediaSize(int length, String messageId) {
+    return (db.update(db.messages)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .write(MessagesCompanion(mediaSize: Value(length)));
+  }
+
+  Future<int> updateMediaStatus(MediaStatus status, String messageId) {
+    return (db.update(db.messages)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .write(MessagesCompanion(mediaStatus: Value(status)));
   }
 
   Future<int> _takeUnseen(String userId, String conversationId) {
