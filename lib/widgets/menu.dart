@@ -39,11 +39,14 @@ class ContextMenuPortalEntry extends StatelessWidget {
                     opacity: progress,
                     child: child,
                   ),
-                  child: CustomSingleChildLayout(
-                    delegate: PositionedLayoutDelegate(
-                      position: offset,
+                  child: BlocBuilder<OffsetCubit, Offset>(
+                    buildWhen: (a, b) => b != null,
+                    builder: (context, offset) => CustomSingleChildLayout(
+                      delegate: PositionedLayoutDelegate(
+                        position: offset,
+                      ),
+                      child: ContextMenuPage(menus: menus),
                     ),
-                    child: ContextMenuPage(menus: menus),
                   ),
                 ),
                 child: InteractableDecoratedBox(
@@ -79,7 +82,8 @@ class Barrier extends StatelessWidget {
         visible: visible,
         closeDuration: duration,
         portal: GestureDetector(
-          behavior: HitTestBehavior.opaque,
+          behavior:
+              visible ? HitTestBehavior.opaque : HitTestBehavior.deferToChild,
           onTap: onClose,
         ),
         child: child,
