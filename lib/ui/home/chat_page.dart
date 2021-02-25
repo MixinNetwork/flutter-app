@@ -15,7 +15,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-
 class ChatPage extends StatelessWidget {
   const ChatPage({Key key}) : super(key: key);
 
@@ -133,68 +132,67 @@ class _List extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<MessageBloc, MessageState>(
-      buildWhen: (a, b) => b.conversationId != null,
-      builder: (context, state) {
-        final key = ValueKey(
-          Tuple2(
-            state.conversationId,
-            state.center?.messageId,
-          ),
-        );
-        final top = state.top;
-        final center = state.center;
-        final bottom = state.bottom;
+  Widget build(BuildContext context) => BlocBuilder<MessageBloc, MessageState>(
+        buildWhen: (a, b) => b.conversationId != null,
+        builder: (context, state) {
+          final key = ValueKey(
+            Tuple2(
+              state.conversationId,
+              state.center?.messageId,
+            ),
+          );
+          final top = state.top;
+          final center = state.center;
+          final bottom = state.bottom;
 
-        return ClampingCustomScrollView(
-          key: key,
-          center: key,
-          controller: BlocProvider.of<MessageBloc>(context).scrollController,
-          anchor: 0.3,
-          slivers: [
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  final actualIndex = top.length - index - 1;
-                  return MessageItemWidget(
-                    prev: top.getOrNull(actualIndex - 1),
-                    message: top[actualIndex],
-                    next: top.getOrNull(actualIndex + 1) ??
-                        center ??
-                        bottom.lastOrNull,
-                  );
-                },
-                childCount: top.length,
-              ),
-            ),
-            SliverToBoxAdapter(
-              key: key,
-              child: Builder(builder: (context) {
-                if (center == null) return const SizedBox();
-                return ColoredBox(
-                  color: Colors.red,
-                  child: MessageItemWidget(
-                    prev: top.lastOrNull,
-                    message: center,
-                    next: bottom.firstOrNull,
-                  ),
-                );
-              }),
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) => MessageItemWidget(
-                  prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
-                  message: bottom[index],
-                  next: bottom.getOrNull(index + 1),
+          return ClampingCustomScrollView(
+            key: key,
+            center: key,
+            controller: BlocProvider.of<MessageBloc>(context).scrollController,
+            anchor: 0.3,
+            slivers: [
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) {
+                    final actualIndex = top.length - index - 1;
+                    return MessageItemWidget(
+                      prev: top.getOrNull(actualIndex - 1),
+                      message: top[actualIndex],
+                      next: top.getOrNull(actualIndex + 1) ??
+                          center ??
+                          bottom.lastOrNull,
+                    );
+                  },
+                  childCount: top.length,
                 ),
-                childCount: bottom.length,
               ),
-            ),
-          ],
-        );
-      },
-    );
-  }
+              SliverToBoxAdapter(
+                key: key,
+                child: Builder(builder: (context) {
+                  if (center == null) return const SizedBox();
+                  return ColoredBox(
+                    color: Colors.red,
+                    child: MessageItemWidget(
+                      prev: top.lastOrNull,
+                      message: center,
+                      next: bottom.firstOrNull,
+                    ),
+                  );
+                }),
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (BuildContext context, int index) => MessageItemWidget(
+                    prev:
+                        bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+                    message: bottom[index],
+                    next: bottom.getOrNull(index + 1),
+                  ),
+                  childCount: bottom.length,
+                ),
+              ),
+            ],
+          );
+        },
+      );
 }

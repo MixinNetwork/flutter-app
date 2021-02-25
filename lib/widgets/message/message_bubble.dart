@@ -10,12 +10,14 @@ class MessageBubble extends StatelessWidget {
     this.child,
     this.showNip = true,
     this.showBubble = true,
+    this.padding = const EdgeInsets.all(10),
   }) : super(key: key);
 
   final Widget child;
   final bool isCurrentUser;
   final bool showNip;
   final bool showBubble;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +34,7 @@ class MessageBubble extends StatelessWidget {
     );
     final isDark = BrightnessData.of(context) == 1;
     Widget _child = Padding(
-      padding: const EdgeInsets.all(10.0),
+      padding: padding,
       child: child,
     );
     if (!showNip) {

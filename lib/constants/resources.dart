@@ -27,6 +27,8 @@ class Resources {
 
   static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
 
+  static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
+
   static const String assetsImagesFileSvg = 'assets/images/file.svg';
 
   static const String assetsImagesGifStickerSvg =
@@ -112,7 +114,11 @@ class Resources {
 
   static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
 
+  static const String assetsImagesUploadSvg = 'assets/images/upload.svg';
+
   static const String assetsImagesVideoSvg = 'assets/images/video.svg';
 
   static const String assetsImagesVideoCallSvg = 'assets/images/video_call.svg';
+
+  static const String assetsImagesWarningSvg = 'assets/images/warning.svg';
 }

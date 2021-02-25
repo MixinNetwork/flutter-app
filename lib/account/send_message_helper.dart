@@ -92,8 +92,8 @@ class SendMessageHelper {
     final attachment = _attachmentUtil.getAttachmentFile(
         MessageCategory.plainData, conversationId, messageId);
     // ignore: cascade_invocations
-    attachment.createSync(recursive: true);
-    File(file.path).copySync(attachment.path);
+    await attachment.create(recursive: true);
+    await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
     final category =
         isPlain ? MessageCategory.plainData : MessageCategory.signalData;

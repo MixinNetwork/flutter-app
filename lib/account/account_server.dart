@@ -59,7 +59,8 @@ class AccountServer {
   Future _initDatabase() async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
-    _attachmentUtil = await AttachmentUtil.init(client, database.messagesDao, identityNumber);
+    _attachmentUtil =
+        await AttachmentUtil.init(client, database.messagesDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
         database.messagesDao, database.jobsDao, _attachmentUtil);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
@@ -322,4 +323,18 @@ class AccountServer {
       }
     }).catchError((e) => debugPrint(e));
   }
+
+  void downloadAttachment(db.MessageItem message) =>
+      _attachmentUtil.downloadAttachment(
+        content: message.content,
+        messageId: message.messageId,
+        conversationId: message.conversationId,
+        category: message.type,
+      );
+
+  // maybe rename reuploadAttachment
+  void uploadAttachment(db.MessageItem message) {
+    // TODO
+  }
+
 }

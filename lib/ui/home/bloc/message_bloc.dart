@@ -60,9 +60,12 @@ class MessageState extends Equatable {
 
   @override
   List<Object> get props => [
+        conversationId,
         top,
         center,
         bottom,
+        bottomOffset,
+        topOffset,
       ];
 
   MessageItem get bottomMessage =>
@@ -280,9 +283,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   }
 
   MessageState _insertOrReplace(String conversationId, List<MessageItem> list) {
-    final top = state.top;
+    final top = state.top.toList();
     var center = state.center;
-    var bottom = state.bottom;
+    var bottom = state.bottom.toList();
 
     final bottomMessage = state.bottomMessage;
     var newBottomMessage = false;

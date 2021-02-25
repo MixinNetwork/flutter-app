@@ -94,6 +94,7 @@ class BrightnessThemeData {
     @required this.dateTime,
     @required this.encrypt,
     @required this.popUp,
+    @required this.statusBackground,
   });
 
   final Color primary;
@@ -112,6 +113,7 @@ class BrightnessThemeData {
   final Color dateTime;
   final Color encrypt;
   final Color popUp;
+  final Color statusBackground;
 
   static BrightnessThemeData lerp(
           BrightnessThemeData begin, BrightnessThemeData end, double t) =>
@@ -133,6 +135,7 @@ class BrightnessThemeData {
         dateTime: Color.lerp(begin.dateTime, end.dateTime, t),
         encrypt: Color.lerp(begin.encrypt, end.encrypt, t),
         popUp: Color.lerp(begin.popUp, end.popUp, t),
+        statusBackground: Color.lerp(begin.statusBackground, end.statusBackground, t),
       );
 }
 

@@ -28,11 +28,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       ]));
 
   Stream<List<MessageItem>> get insertOrReplaceMessageStream => db.eventBus
-      .watch(DatabaseEvent.insertOrReplaceMessage)
-      .distinct()
+      .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
       .asyncMap(
         (event) => db.messagesByMessageIds(event).get(),
-      );
+      )
+      .distinct();
 
   Future<int> insert(Message message, String userId) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
@@ -60,28 +60,37 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return db.sendingMessage(messageId).getSingle();
   }
 
-  Future<int> updateMessageStatusById(String messageId, MessageStatus status) {
-    return (db.update(db.messages)
+  Future<int> updateMessageStatusById(
+      String messageId, MessageStatus status) async {
+    final result = await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(MessagesCompanion(status: Value(status)));
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
+    return result;
   }
 
-  Future<int> updateMediaMessageUrl(String path, String messageId) {
-    return (db.update(db.messages)
+  Future<int> updateMediaMessageUrl(String path, String messageId) async {
+    final result = await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(MessagesCompanion(mediaUrl: Value(path)));
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
+    return result;
   }
 
-  Future<int> updateMediaSize(int length, String messageId) {
-    return (db.update(db.messages)
+  Future<int> updateMediaSize(int length, String messageId) async {
+    final result = await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(MessagesCompanion(mediaSize: Value(length)));
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
+    return result;
   }
 
-  Future<int> updateMediaStatus(MediaStatus status, String messageId) {
-    return (db.update(db.messages)
+  Future<int> updateMediaStatus(MediaStatus status, String messageId) async {
+    final result = await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(MessagesCompanion(mediaStatus: Value(status)));
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
+    return result;
   }
 
   Future<int> _takeUnseen(String userId, String conversationId) {

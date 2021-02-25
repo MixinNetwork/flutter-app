@@ -18,6 +18,7 @@ import 'package:flutter_app/db/extension/message_category.dart';
 import '../menu.dart';
 import 'item/action/action_message.dart';
 import 'item/file_message.dart';
+import 'item/image_message.dart';
 import 'item/secret_message.dart';
 import 'item/system_message.dart';
 import 'item/unknown_message.dart';
@@ -89,11 +90,12 @@ class MessageItemWidget extends StatelessWidget {
                 ContextMenu(
                   title: Localization.of(context).forward,
                 ),
-                ContextMenu(
-                  title: Localization.of(context).copy,
-                  onTap: () =>
-                      Clipboard.setData(ClipboardData(text: message.content)),
-                ),
+                if (message.type.isText)
+                  ContextMenu(
+                    title: Localization.of(context).copy,
+                    onTap: () =>
+                        Clipboard.setData(ClipboardData(text: message.content)),
+                  ),
                 ContextMenu(
                   title: Localization.of(context).delete,
                   isDestructiveAction: true,
@@ -120,6 +122,11 @@ class MessageItemWidget extends StatelessWidget {
                   );
                 if (message.type.isSticker)
                   return StickerMessageWidget(
+                    message: message,
+                    isCurrentUser: isCurrentUser,
+                  );
+                if (message.type.isImage)
+                  return ImageMessageWidget(
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );

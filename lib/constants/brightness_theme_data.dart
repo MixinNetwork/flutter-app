@@ -18,6 +18,7 @@ const lightBrightnessThemeData = BrightnessThemeData(
   highlight: Color.fromRGBO(167, 242, 89, 1),
   dateTime: Color.fromRGBO(213, 211, 243, 1),
   encrypt: Color.fromRGBO(255, 247, 173, 1),
+  statusBackground: Color.fromRGBO(255, 255, 255, 0.72),
 );
 
 const darkBrightnessThemeData = BrightnessThemeData(
@@ -30,13 +31,14 @@ const darkBrightnessThemeData = BrightnessThemeData(
   listSelected: Color.fromRGBO(255, 255, 255, 0.06),
   chatBackground: Color.fromRGBO(35, 39, 43, 1),
   background: Color.fromRGBO(40, 44, 48, 1),
-  popUp: Color.fromRGBO(62,65,72,1),
+  popUp: Color.fromRGBO(62, 65, 72, 1),
   red: Color.fromRGBO(246, 112, 112, 1),
   green: Color.fromRGBO(96, 209, 108, 1),
   warning: Color.fromRGBO(243, 177, 64, 1),
   highlight: Color.fromRGBO(134, 184, 82, 1),
   dateTime: Color.fromRGBO(213, 211, 243, 1),
   encrypt: Color.fromRGBO(255, 247, 173, 1),
+  statusBackground: Color.fromRGBO(33, 33, 33, 0.7),
 );
 
 final circleColors = [

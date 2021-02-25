@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -24,45 +23,49 @@ class AttachmentUtil {
   final Client _client;
   HttpClient _attachmentClient;
 
-  void downloadAttachment(Message message) async {
-    final response = await _client.attachmentApi.getAttachment(message.content);
-    if (response.data != null && response.data.viewUrl != null) {
-      final request =
-          await _attachmentClient.getUrl(Uri.parse(response.data.viewUrl));
+  Future<void> downloadAttachment({
+    @required String messageId,
+    @required String content,
+    @required String conversationId,
+    @required MessageCategory category,
+  }) async {
+    await _messagesDao.updateMediaStatus(MediaStatus.pending, messageId);
 
-      request.headers
-          .add(HttpHeaders.contentTypeHeader, 'application/octet-stream');
-
-      final httpResponse = await request.close();
-
-      var byteCount = 0;
-      final totalBytes = httpResponse.contentLength;
-
-      final file = _getAttachmentFile(message);
-      await file.create(recursive: true);
-      final raf = file.openSync(mode: FileMode.write);
-
+    try {
+      final response = await _client.attachmentApi.getAttachment(content);
       debugPrint('download ${Uri.parse(response.data.viewUrl)}');
-      httpResponse.listen(
-        (data) {
-          byteCount += data.length;
-          raf.writeFromSync(data);
-          // download progress
-          debugPrint('$byteCount / $totalBytes');
-        },
-        onDone: () async {
-          raf.closeSync();
-          await _messagesDao.updateMediaMessageUrl(file.path, message.messageId);
-          await _messagesDao.updateMediaSize(file.lengthSync(), message.messageId);
-          await _messagesDao.updateMediaStatus(MediaStatus.done, message.messageId);
-        },
-        onError: (e) async {
-          raf.closeSync();
-          file.deleteSync();
-          await _messagesDao.updateMediaStatus(MediaStatus.canceled, message.messageId);
-        },
-        cancelOnError: true,
-      );
+
+      if (response.data != null && response.data.viewUrl != null) {
+        final request =
+            await _attachmentClient.getUrl(Uri.parse(response.data.viewUrl));
+
+        request.headers
+            .add(HttpHeaders.contentTypeHeader, 'application/octet-stream');
+
+        final httpResponse = await request.close();
+
+        final file = _getAttachmentFile(
+          conversationId: conversationId,
+          messageId: messageId,
+          category: category,
+        );
+        await file.create(recursive: true);
+        final out = file.openWrite();
+
+        try {
+          await httpResponse.pipe(out);
+
+          await _messagesDao.updateMediaMessageUrl(file.path, messageId);
+          await _messagesDao.updateMediaSize(await file.length(), messageId);
+          await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
+        } catch (e) {
+          await out.close();
+          await file.delete();
+          await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
+        }
+      }
+    } catch (e) {
+      await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
     }
   }
 
@@ -71,7 +74,7 @@ class AttachmentUtil {
     if (response.data != null && response.data.uploadUrl != null) {
       final fileStream = file.openRead();
 
-      final totalBytes = file.lengthSync();
+      final totalBytes = await file.length();
 
       final request =
           await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl));
@@ -129,8 +132,12 @@ class AttachmentUtil {
     return File(p.join(path, messageId));
   }
 
-  File _getAttachmentFile(Message message) => getAttachmentFile(
-      message.category, message.conversationId, message.messageId);
+  File _getAttachmentFile({
+    @required String messageId,
+    @required String conversationId,
+    @required MessageCategory category,
+  }) =>
+      getAttachmentFile(category, conversationId, messageId);
 
   String _getImagesPath(String conversationId) {
     return p.join(_mediaPath, 'Images', conversationId);

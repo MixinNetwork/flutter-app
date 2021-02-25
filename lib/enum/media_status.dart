@@ -1,1 +1,7 @@
-enum MediaStatus { pending, done, canceled, expired, read }
+enum MediaStatus {
+  pending,
+  done,
+  canceled,
+  expired,
+  read,
+}
