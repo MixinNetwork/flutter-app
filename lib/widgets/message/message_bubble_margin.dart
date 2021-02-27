@@ -2,9 +2,9 @@ import 'package:flutter/widgets.dart';
 
 class MessageBubbleMargin extends StatelessWidget {
   const MessageBubbleMargin({
-    Key key,
-    this.child,
-    this.isCurrentUser,
+    Key? key,
+    required this.child,
+    required this.isCurrentUser,
   }) : super(key: key);
 
   final Widget child;

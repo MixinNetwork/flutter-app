@@ -5,10 +5,10 @@ class ParticipantRoleConverter extends TypeConverter<ParticipantRole, String> {
   const ParticipantRoleConverter();
 
   @override
-  ParticipantRole mapToDart(String fromDb) =>
+  ParticipantRole? mapToDart(String? fromDb) =>
       const ParticipantRoleJsonConverter().fromJson(fromDb);
 
   @override
-  String mapToSql(ParticipantRole value) =>
+  String? mapToSql(ParticipantRole? value) =>
       const ParticipantRoleJsonConverter().toJson(value);
 }

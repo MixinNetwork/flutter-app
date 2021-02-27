@@ -4,7 +4,11 @@ part 'sticker_message.g.dart';
 
 @JsonSerializable()
 class StickerMessage {
-  StickerMessage(this.stickerId, this.albumId, this.name);
+  StickerMessage(
+    this.stickerId,
+    this.albumId,
+    this.name,
+  );
 
   factory StickerMessage.fromJson(Map<String, dynamic> json) =>
       _$StickerMessageFromJson(json);
@@ -12,9 +16,9 @@ class StickerMessage {
   @JsonKey(name: 'sticker_id')
   String stickerId;
   @JsonKey(name: 'album_id')
-  String albumId;
+  String? albumId;
   @JsonKey(name: 'name')
-  String name;
+  String? name;
 
   Map<String, dynamic> toJson() => _$StickerMessageToJson(this);
 }

@@ -40,12 +40,12 @@ class DecryptMessage extends Injector {
       String userId, Database database, Client client, this._attachmentUtil)
       : super(userId, database, client);
 
-  String _conversationId;
+  String? _conversationId;
 
   // ignore: unused_field
   final AttachmentUtil _attachmentUtil;
 
-  void setConversationId(String conversationId) {
+  void setConversationId(String? conversationId) {
     _conversationId = conversationId;
   }
 
@@ -82,7 +82,7 @@ class DecryptMessage extends Injector {
       final plain = utf8.decode(base64.decode(data.data));
       final plainJsonMessage = PlainJsonMessage.fromJson(jsonDecode(plain));
       if (plainJsonMessage.action == acknowledgeMessageReceipts &&
-          plainJsonMessage.ackMessages?.isNotEmpty == true) {
+          plainJsonMessage.ackMessages.isNotEmpty == true) {
         _markMessageStatus(plainJsonMessage.ackMessages);
       } else if (plainJsonMessage.action == resendMessages) {
         // todo
@@ -100,7 +100,7 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.plainLive ||
         data.category == MessageCategory.plainPost ||
         data.category == MessageCategory.plainLocation) {
-      if (data.representativeId?.isNotEmpty == true) {
+      if (data.representativeId.isNotEmpty == true) {
         data.userId = data.representativeId;
       }
       _processDecryptSuccess(data, data.data);
@@ -146,9 +146,9 @@ class DecryptMessage extends Injector {
     final content = utf8.decode(base64.decode(data.data));
     // ignore: unused_local_variable
     final apps = (jsonDecode(content) as List)
-        ?.map((e) =>
+        .map((e) =>
             e == null ? null : AppButton.fromJson(e as Map<String, dynamic>))
-        ?.toList();
+        .toList();
     // todo check
     final message = Message(
       messageId: data.messageId,
@@ -169,7 +169,7 @@ class DecryptMessage extends Injector {
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
-      userId: data.representativeId ?? data.userId,
+      userId: data.representativeId,
       category: data.category,
       content: content,
       status: MessageStatus.delivered,
@@ -224,7 +224,7 @@ class DecryptMessage extends Injector {
       } else {
         plain = utf8.decode(base64.decode(plainText));
       }
-      final message = await _generateMessage(data, (String quoteContent) {
+      final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
             conversationId: data.conversationId,
@@ -247,7 +247,7 @@ class DecryptMessage extends Injector {
       }
       final attachment =
           AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String quoteContent) {
+      final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
             conversationId: data.conversationId,
@@ -273,7 +273,7 @@ class DecryptMessage extends Injector {
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.category,
-        content: message.content,
+        content: message.content!,
       );
     } else if (data.category.isVideo) {
       String plain;
@@ -285,7 +285,7 @@ class DecryptMessage extends Injector {
       }
       final attachment =
           AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String quoteContent) {
+      final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
             conversationId: data.conversationId,
@@ -312,7 +312,7 @@ class DecryptMessage extends Injector {
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.category,
-        content: message.content,
+        content: message.content!,
       );
     } else if (data.category.isData) {
       String plain;
@@ -324,7 +324,7 @@ class DecryptMessage extends Injector {
       }
       final attachment =
           AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String quoteContent) {
+      final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
             conversationId: data.conversationId,
@@ -347,7 +347,7 @@ class DecryptMessage extends Injector {
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.category,
-        content: message.content,
+        content: message.content!,
       );
     } else if (data.category.isAudio) {
       String plain;
@@ -359,7 +359,7 @@ class DecryptMessage extends Injector {
       }
       final attachment =
           AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String quoteContent) {
+      final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
             conversationId: data.conversationId,
@@ -383,7 +383,7 @@ class DecryptMessage extends Injector {
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.category,
-        content: message.content,
+        content: message.content!,
       );
     } else if (data.category.isSticker) {
       String plain;
@@ -423,7 +423,7 @@ class DecryptMessage extends Injector {
       final contactMessage =
           ContactMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final user = await syncUser(contactMessage.userId);
-      final message = await _generateMessage(data, (String quoteContent) {
+      final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
             conversationId: data.conversationId,
@@ -469,12 +469,12 @@ class DecryptMessage extends Injector {
         plain = utf8.decode(base64.decode(plainText));
       }
       // ignore: unused_local_variable todo check location
-      LocationMessage locationMessage;
+      LocationMessage? locationMessage;
       try {
         locationMessage =
             LocationMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       } catch (e) {
-        debugPrint(e);
+        debugPrint(e.toString());
       }
       if (locationMessage == null ||
           locationMessage.latitude == 0.0 ||
@@ -518,7 +518,7 @@ class DecryptMessage extends Injector {
     if (systemMessage.action != MessageAction.update) {
       syncConversion(data.conversationId);
     }
-    final userId = systemMessage.userId ?? data.userId;
+    final userId = systemMessage.userId;
     if (userId == systemUser &&
         (await database.userDao.findUserById(userId)) == null) {
       // todo UserRelationship
@@ -629,4 +629,4 @@ class DecryptMessage extends Injector {
   void syncSession() {}
 }
 
-typedef MessageGenerator = Message Function(String quoteContent);
+typedef MessageGenerator = Message Function(String? quoteContent);

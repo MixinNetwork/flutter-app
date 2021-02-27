@@ -16,14 +16,14 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 class ChatPage extends StatelessWidget {
-  const ChatPage({Key key}) : super(key: key);
+  const ChatPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
           color: BrightnessData.themeOf(context).chatBackground,
         ),
-        child: BlocConverter<ConversationCubit, ConversationItem, bool>(
+        child: BlocConverter<ConversationCubit, ConversationItem?, bool>(
           converter: (state) => state != null,
           builder: (context, selected) => ChatContainer(
             onPressed: () {},
@@ -34,13 +34,11 @@ class ChatPage extends StatelessWidget {
 
 class ChatContainer extends StatelessWidget {
   const ChatContainer({
-    Key key,
-    this.onPressed,
-    this.isSelected,
+    Key? key,
+    required this.onPressed,
   }) : super(key: key);
 
   final Function onPressed;
-  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -59,11 +57,11 @@ class ChatContainer extends StatelessWidget {
       ],
       child: Builder(
         builder: (context) {
-          BlocProvider.of<MessageBloc>(context)?.limit =
+          BlocProvider.of<MessageBloc>(context).limit =
               MediaQuery.of(context).size.height ~/ 20;
           return Column(
             children: [
-              ChatBar(onPressed: onPressed, isSelected: isSelected),
+              ChatBar(onPressed: onPressed),
               Expanded(
                 child: Navigator(
                   onPopPage: (Route<dynamic> route, dynamic result) =>
@@ -84,7 +82,9 @@ class ChatContainer extends StatelessWidget {
 
                                   if (notification
                                       is ScrollUpdateNotification) {
-                                    if (notification.scrollDelta > 0) {
+                                    if(notification.scrollDelta == null) return false;
+
+                                    if (notification.scrollDelta! > 0) {
                                       // down
                                       if (notification.metrics.maxScrollExtent -
                                               notification.metrics.pixels <
@@ -92,7 +92,7 @@ class ChatContainer extends StatelessWidget {
                                         BlocProvider.of<MessageBloc>(context)
                                             .after();
                                       }
-                                    } else if (notification.scrollDelta < 0) {
+                                    } else if (notification.scrollDelta! < 0) {
                                       // up
                                       if ((notification
                                                       .metrics.minScrollExtent -
@@ -128,7 +128,7 @@ class ChatContainer extends StatelessWidget {
 
 class _List extends StatelessWidget {
   const _List({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

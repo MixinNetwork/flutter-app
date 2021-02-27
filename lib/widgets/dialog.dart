@@ -7,13 +7,13 @@ import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 
-Future<T> _showDialog<T>({
-  @required BuildContext context,
+Future<T?> _showDialog<T>({
+  required BuildContext context,
   bool barrierDismissible = true,
-  Color barrierColor,
+  Color barrierColor = const Color(0x80000000),
   bool useRootNavigator = true,
-  RouteSettings routeSettings,
-  @required RoutePageBuilder pageBuilder,
+  RouteSettings? routeSettings,
+  required RoutePageBuilder pageBuilder,
 }) =>
     showGeneralDialog(
       context: context,
@@ -37,10 +37,10 @@ Future<T> _showDialog<T>({
       routeSettings: routeSettings,
     );
 
-Future<T> showMixinDialog<T>({
-  @required BuildContext context,
-  RouteSettings routeSettings,
-  @required Widget child,
+Future<T?> showMixinDialog<T>({
+  required BuildContext context,
+  RouteSettings? routeSettings,
+  required Widget child,
 }) =>
     _showDialog(
       context: context,
@@ -56,9 +56,9 @@ Future<T> showMixinDialog<T>({
 
 class AlertDialogLayout extends StatelessWidget {
   const AlertDialogLayout({
-    Key key,
-    @required this.content,
-    this.actions,
+    Key? key,
+    required this.content,
+    this.actions = const [],
     this.minWidth = 400,
     this.minHeight = 210,
   }) : super(key: key);
@@ -106,8 +106,8 @@ class AlertDialogLayout extends StatelessWidget {
 
 class _DialogPage extends StatelessWidget {
   const _DialogPage({
-    Key key,
-    @required this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -128,7 +128,7 @@ class _DialogPage extends StatelessWidget {
             BoxShadow(
               color: const Color.fromRGBO(0, 0, 0, 0.07),
               offset: const Offset(0, 4),
-              blurRadius: lerpDouble(16, 6, BrightnessData.of(context)),
+              blurRadius: lerpDouble(16, 6, BrightnessData.of(context))!,
             ),
           ],
           color: BrightnessData.dynamicColor(
@@ -147,8 +147,8 @@ class _DialogPage extends StatelessWidget {
 /// default onTap is Navigator.pop
 abstract class DialogInteracterEntry<T> extends StatelessWidget {
   const DialogInteracterEntry({
-    Key key,
-    this.value,
+    Key? key,
+    required this.value,
   }) : super(key: key);
 
   final T value;
@@ -159,10 +159,10 @@ abstract class DialogInteracterEntry<T> extends StatelessWidget {
 /// default onTap is Navigator.pop
 class MixinButton<T> extends DialogInteracterEntry<T> {
   const MixinButton({
-    Key key,
-    T value,
+    Key? key,
+    required T value,
     this.backgroundTransparent = false,
-    @required this.child,
+    required this.child,
     this.onTap,
   }) : super(
           key: key,
@@ -171,7 +171,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
 
   final bool backgroundTransparent;
   final Widget child;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

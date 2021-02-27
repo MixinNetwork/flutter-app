@@ -27,7 +27,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
 class AccountServer {
-  static String sid;
+  static late String sid;
 
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
@@ -38,10 +38,6 @@ class AccountServer {
     String identityNumber,
     String privateKey,
   ) async {
-    assert(userId != null);
-    assert(sessionId != null);
-    assert(identityNumber != null);
-    assert(privateKey != null);
     this.userId = userId;
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;
@@ -67,17 +63,17 @@ class AccountServer {
     _decryptMessage = DecryptMessage(userId, database, client, _attachmentUtil);
   }
 
-  String userId;
-  String sessionId;
-  String identityNumber;
-  String privateKey;
+  late String userId;
+  late String sessionId;
+  late String identityNumber;
+  late String privateKey;
 
-  Client client;
-  Database database;
-  Blaze blaze;
-  DecryptMessage _decryptMessage;
-  SendMessageHelper _sendMessageHelper;
-  AttachmentUtil _attachmentUtil;
+  late Client client;
+  late Database database;
+  late Blaze blaze;
+  late DecryptMessage _decryptMessage;
+  late SendMessageHelper _sendMessageHelper;
+  late AttachmentUtil _attachmentUtil;
 
   void start() {
     // todo remove, development only
@@ -88,7 +84,7 @@ class AccountServer {
     sid = sessionId;
     blaze.connect();
     database.floodMessagesDao.findFloodMessage().listen((list) {
-      if (list?.isNotEmpty == true) {
+      if (list.isNotEmpty == true) {
         for (final message in list) {
           _decryptMessage.process(message);
         }
@@ -96,13 +92,13 @@ class AccountServer {
     });
     database.jobsDao
         .findAckJobs()
-        .where((jobs) => jobs?.isNotEmpty == true)
+        .where((jobs) => jobs.isNotEmpty == true)
         .asyncMapDrop(runAckJob)
         .listen((_) {});
 
     database.jobsDao
         .findSendingJobs()
-        .where((jobs) => jobs?.isNotEmpty == true)
+        .where((jobs) => jobs.isNotEmpty == true)
         .asyncMapDrop(runSendJob)
         .listen((_) {});
 
@@ -110,11 +106,15 @@ class AccountServer {
   }
 
   Future<void> runAckJob(List<db.Job> jobs) async {
-    final ack = await Future.wait(jobs.map((e) async {
-      final map = await LoadBalancerUtils.jsonDecode(e.blazeMessage);
-      return BlazeAckMessage(
-          messageId: map['message_id'], status: map['status']);
-    }));
+    final ack = await Future.wait(
+      jobs.where((element) => element.blazeMessage != null).map(
+        (e) async {
+          final map = await LoadBalancerUtils.jsonDecode(e.blazeMessage!);
+          return BlazeAckMessage(
+              messageId: map['message_id'], status: map['status']);
+        },
+      ),
+    );
 
     final jobIds = jobs.map((e) => e.jobId).toList();
     await client.messageApi.acknowledgements(ack);
@@ -122,9 +122,9 @@ class AccountServer {
   }
 
   Future<void> runSendJob(List<db.Job> jobs) async {
-    jobs.forEach((job) async {
+    jobs.where((element) => element.blazeMessage != null).forEach((job) async {
       final message =
-          await database.messagesDao.sendingMessage(job.blazeMessage);
+          await database.messagesDao.sendingMessage(job.blazeMessage!);
       if (message == null) {
         await database.jobsDao.deleteJobById(job.jobId);
       } else {
@@ -134,9 +134,9 @@ class AccountServer {
           if (message.category == MessageCategory.appCard ||
               message.category == MessageCategory.plainPost ||
               message.category == MessageCategory.plainText) {
-            content = base64.encode(utf8.encode(content));
+            content = base64.encode(utf8.encode(content!));
           }
-          final blazeMessage = _createBlazeMessage(message, content);
+          final blazeMessage = _createBlazeMessage(message, content!);
           blaze.deliver(message, blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
@@ -165,8 +165,7 @@ class AccountServer {
     String content, [
     bool isPlain = true,
   ]) {
-    assert(_decryptMessage != null);
-    if (content == null || content.isEmpty) return;
+    if (content.isEmpty) return;
     _sendMessageHelper.sendTextMessage(
         conversationId, userId, content, isPlain);
   }
@@ -247,7 +246,7 @@ class AccountServer {
         ContactMessage(shareUserId), shareUserFullName, isPlain);
   }
 
-  void selectConversation(String conversationId) {
+  void selectConversation(String? conversationId) {
     _decryptMessage.setConversationId(conversationId);
     _markRead(conversationId);
   }
@@ -297,7 +296,9 @@ class AccountServer {
           _updateStickerAlbums(item.albumId);
         });
       }
-    }).catchError((e) => debugPrint(e));
+    }).catchError((e) {
+      debugPrint(e);
+    });
   }
 
   void _updateStickerAlbums(String albumId) {
@@ -321,12 +322,14 @@ class AccountServer {
 
         database.stickerRelationshipsDao.insertAll(relationships);
       }
-    }).catchError((e) => debugPrint(e));
+    }).catchError((e) {
+      debugPrint(e);
+    });
   }
 
   void downloadAttachment(db.MessageItem message) =>
       _attachmentUtil.downloadAttachment(
-        content: message.content,
+        content: message.content!,
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.type,

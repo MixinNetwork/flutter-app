@@ -1,6 +1,6 @@
 import 'package:flutter_app/enum/message_category.dart';
 
-extension MessageCategoryExtension on MessageCategory {
+extension MessageCategoryExtension on MessageCategory? {
   bool get isPlain => {
         MessageCategory.plainText,
         MessageCategory.plainImage,

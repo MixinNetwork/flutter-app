@@ -3,7 +3,7 @@ import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 
-class ConversationCubit extends SimpleCubit<ConversationItem> {
+class ConversationCubit extends SimpleCubit<ConversationItem?> {
   ConversationCubit(
     this.draftCubit,
     this.accountServer,
@@ -12,7 +12,7 @@ class ConversationCubit extends SimpleCubit<ConversationItem> {
   final AccountServer accountServer;
 
   @override
-  void emit(ConversationItem state) {
+  void emit(ConversationItem? state) {
     accountServer.selectConversation(state?.conversationId);
     draftCubit.update(this.state?.name);
     super.emit(state);

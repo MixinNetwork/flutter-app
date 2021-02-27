@@ -6,10 +6,10 @@ class MessageStatusTypeConverter extends TypeConverter<MessageStatus, String> {
   const MessageStatusTypeConverter();
 
   @override
-  MessageStatus mapToDart(String fromDb) =>
+  MessageStatus? mapToDart(String? fromDb) =>
       EnumToString.fromString(MessageStatus.values, fromDb);
 
   @override
-  String mapToSql(MessageStatus value) =>
+  String? mapToSql(MessageStatus? value) =>
       EnumToString.convertToString(value ?? MessageStatus.failed);
 }

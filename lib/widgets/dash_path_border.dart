@@ -13,8 +13,8 @@ import 'package:flutter/painting.dart';
 /// Passing a `source` that is an empty path will return an empty path.
 Path dashPath(
     Path source, {
-      @required CircularIntervalList<double> dashArray,
-      DashOffset dashOffset,
+      required CircularIntervalList<double> dashArray,
+      DashOffset? dashOffset,
     }) {
   assert(dashArray != null); // ignore: unnecessary_null_comparison
 
@@ -94,7 +94,7 @@ class CircularIntervalList<T> {
 
 class DashPathBorder extends Border {
   const DashPathBorder({
-    @required this.dashArray,
+    required this.dashArray,
     BorderSide top = BorderSide.none,
     BorderSide left = BorderSide.none,
     BorderSide right = BorderSide.none,
@@ -108,7 +108,7 @@ class DashPathBorder extends Border {
 
   factory DashPathBorder.all({
     BorderSide borderSide = const BorderSide(),
-    @required CircularIntervalList<double> dashArray,
+    required CircularIntervalList<double> dashArray,
   }) {
     return DashPathBorder(
       dashArray: dashArray,
@@ -124,9 +124,9 @@ class DashPathBorder extends Border {
   void paint(
       Canvas canvas,
       Rect rect, {
-        TextDirection textDirection,
+        TextDirection? textDirection,
         BoxShape shape = BoxShape.rectangle,
-        BorderRadius borderRadius,
+        BorderRadius? borderRadius,
       }) {
     if (isUniform) {
       switch (top.style) {

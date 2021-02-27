@@ -7,6 +7,7 @@ part of 'system_circle_message.dart';
 // **************************************************************************
 
 SystemCircleMessage _$SystemCircleMessageFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, disallowNullValues: const ['action', 'circle_id']);
   return SystemCircleMessage(
     _$enumDecode(_$SystemCircleActionEnumMap, json['action']),
     json['circle_id'] as String,
@@ -24,25 +25,30 @@ Map<String, dynamic> _$SystemCircleMessageToJson(
       'user_id': instance.userId,
     };
 
-T _$enumDecode<T>(
-  Map<T, dynamic> enumValues,
-  dynamic source, {
-  T unknownValue,
+K _$enumDecode<K, V>(
+  Map<K, V> enumValues,
+  Object? source, {
+  K? unknownValue,
 }) {
   if (source == null) {
-    throw ArgumentError('A value must be provided. Supported values: '
-        '${enumValues.values.join(', ')}');
+    throw ArgumentError(
+      'A value must be provided. Supported values: '
+      '${enumValues.values.join(', ')}',
+    );
   }
 
-  final value = enumValues.entries
-      .singleWhere((e) => e.value == source, orElse: () => null)
-      ?.key;
-
-  if (value == null && unknownValue == null) {
-    throw ArgumentError('`$source` is not one of the supported values: '
-        '${enumValues.values.join(', ')}');
-  }
-  return value ?? unknownValue;
+  return enumValues.entries.singleWhere(
+    (e) => e.value == source,
+    orElse: () {
+      if (unknownValue == null) {
+        throw ArgumentError(
+          '`$source` is not one of the supported values: '
+          '${enumValues.values.join(', ')}',
+        );
+      }
+      return MapEntry(unknownValue, enumValues.values.first);
+    },
+  ).key;
 }
 
 const _$SystemCircleActionEnumMap = {

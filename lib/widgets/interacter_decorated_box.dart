@@ -10,8 +10,8 @@ enum InteracteStatus {
 
 class InteracterBuilder extends StatefulWidget {
   const InteracterBuilder({
-    Key key,
-    @required this.builder,
+    Key? key,
+    required this.builder,
     this.child,
     this.onTap,
     this.onDoubleTap,
@@ -23,16 +23,16 @@ class InteracterBuilder extends StatefulWidget {
   }) : super(key: key);
 
   final Function(BuildContext context, InteracteStatus status,
-      InteracteStatus lastStatus, Widget child) builder;
+      InteracteStatus lastStatus, Widget? child) builder;
 
-  final Widget child;
-  final VoidCallback onTap;
-  final VoidCallback onDoubleTap;
-  final VoidCallback onLongPress;
-  final ValueChanged<PointerUpEvent> onRightClick;
-  final PointerEnterEventListener onEnter;
-  final PointerExitEventListener onExit;
-  final PointerHoverEventListener onHover;
+  final Widget? child;
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
+  final ValueChanged<PointerUpEvent>? onRightClick;
+  final PointerEnterEventListener? onEnter;
+  final PointerExitEventListener? onExit;
+  final PointerHoverEventListener? onHover;
 
   @override
   _InteracterBuilderState createState() => _InteracterBuilderState();
@@ -50,7 +50,7 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
     return InteracteStatus.interactable;
   }
 
-  int lastPointerDown;
+  int? lastPointerDown;
 
   @override
   Widget build(BuildContext context) {
@@ -108,13 +108,13 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
 
 class InteractableDecoratedBox extends StatelessWidget {
   const InteractableDecoratedBox({
-    Key key,
-    Decoration decoration,
+    Key? key,
+    Decoration? decoration,
     this.hoveringDecoration,
     this.tapDowningDecoration,
     this.inDuration = const Duration(milliseconds: 120),
     this.outDuration = const Duration(milliseconds: 60),
-    this.child,
+    required this.child,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -126,13 +126,13 @@ class InteractableDecoratedBox extends StatelessWidget {
         super(key: key);
 
   InteractableDecoratedBox.color({
-    Key key,
-    BoxDecoration decoration,
-    Color hoveringColor,
-    Color tapDowningColor,
+    Key? key,
+    BoxDecoration? decoration,
+    Color? hoveringColor,
+    Color? tapDowningColor,
     this.inDuration = const Duration(milliseconds: 120),
     this.outDuration = const Duration(milliseconds: 60),
-    this.child,
+    required this.child,
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
@@ -149,21 +149,21 @@ class InteractableDecoratedBox extends StatelessWidget {
             : null,
         super(key: key);
 
-  final Decoration _decoration;
-  final Decoration hoveringDecoration;
-  final Decoration tapDowningDecoration;
+  final Decoration? _decoration;
+  final Decoration? hoveringDecoration;
+  final Decoration? tapDowningDecoration;
 
-  final Duration inDuration;
-  final Duration outDuration;
+  final Duration? inDuration;
+  final Duration? outDuration;
 
   final Widget child;
-  final VoidCallback onTap;
-  final VoidCallback onDoubleTap;
-  final VoidCallback onLongPress;
-  final ValueChanged<PointerUpEvent> onRightClick;
-  final PointerEnterEventListener onEnter;
-  final PointerExitEventListener onExit;
-  final PointerHoverEventListener onHover;
+  final VoidCallback? onTap;
+  final VoidCallback? onDoubleTap;
+  final VoidCallback? onLongPress;
+  final ValueChanged<PointerUpEvent>? onRightClick;
+  final PointerEnterEventListener? onEnter;
+  final PointerExitEventListener? onExit;
+  final PointerHoverEventListener? onHover;
 
   @override
   Widget build(BuildContext context) => InteracterBuilder(
@@ -176,7 +176,7 @@ class InteractableDecoratedBox extends StatelessWidget {
         onExit: onExit,
         onHover: onHover,
         builder: (BuildContext context, InteracteStatus status,
-                InteracteStatus lastStatus, Widget child) =>
+                InteracteStatus lastStatus, Widget? child) =>
             TweenAnimationBuilder<Decoration>(
           tween: DecorationTween(
             end: {
@@ -189,13 +189,14 @@ class InteractableDecoratedBox extends StatelessWidget {
                 }[status] ??
                 const BoxDecoration(),
           ),
-          duration: lastStatus == InteracteStatus.interactable &&
-                  status != InteracteStatus.interactable
-              ? inDuration
-              : outDuration,
+          duration: (lastStatus == InteracteStatus.interactable &&
+                      status != InteracteStatus.interactable
+                  ? inDuration
+                  : outDuration) ??
+              Duration.zero,
           curve: Curves.decelerate,
           child: child,
-          builder: (BuildContext context, Decoration value, Widget child) =>
+          builder: (BuildContext context, Decoration value, Widget? child) =>
               DecoratedBox(
             decoration: value,
             child: child,

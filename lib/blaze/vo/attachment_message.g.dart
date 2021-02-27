@@ -7,6 +7,8 @@ part of 'attachment_message.dart';
 // **************************************************************************
 
 AttachmentMessage _$AttachmentMessageFromJson(Map<String, dynamic> json) {
+  $checkKeys(json,
+      disallowNullValues: const ['attachment_id', 'mime_type', 'size']);
   return AttachmentMessage(
     json['key'],
     json['digest'],
@@ -14,12 +16,12 @@ AttachmentMessage _$AttachmentMessageFromJson(Map<String, dynamic> json) {
     json['mime_type'] as String,
     json['size'] as int,
     json['name'] as String,
-    json['width'] as int,
-    json['height'] as int,
-    json['thumbnail'] as String,
-    json['duration'] as int,
+    json['width'] as int?,
+    json['height'] as int?,
+    json['thumbnail'] as String?,
+    json['duration'] as int?,
     json['waveform'],
-    json['caption'] as String,
+    json['caption'] as String?,
   );
 }
 

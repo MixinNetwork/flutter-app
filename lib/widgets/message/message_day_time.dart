@@ -5,8 +5,8 @@ import '../brightness_observer.dart';
 
 class MessageDayTime extends StatelessWidget {
   const MessageDayTime({
-    Key key,
-    this.dateTime,
+    Key? key,
+    required this.dateTime,
   }) : super(key: key);
 
   final DateTime dateTime;

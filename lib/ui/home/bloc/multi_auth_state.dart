@@ -6,8 +6,6 @@ class MultiAuthState extends Equatable {
   });
 
   factory MultiAuthState.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return MultiAuthState(
       auths:
           Set<AuthState>.from(map['auths']?.map((x) => AuthState.fromMap(x))),
@@ -19,7 +17,7 @@ class MultiAuthState extends Equatable {
 
   final Set<AuthState> auths;
 
-  AuthState get current => auths?.isNotEmpty == true ? auths.last : null;
+  AuthState? get current => auths.isNotEmpty ? auths.last : null;
 
   @override
   List<Object> get props => [
@@ -28,7 +26,7 @@ class MultiAuthState extends Equatable {
 
   Map<String, dynamic> toMap() {
     return {
-      'auths': auths?.map((x) => x?.toMap())?.toList(),
+      'auths': auths.map((x) => x.toMap()).toList(),
     };
   }
 
@@ -37,13 +35,11 @@ class MultiAuthState extends Equatable {
 
 class AuthState extends Equatable {
   const AuthState({
-    this.account,
-    this.privateKey,
+    required this.account,
+    required this.privateKey,
   });
 
   factory AuthState.fromMap(Map<String, dynamic> map) {
-    if (map == null) return null;
-
     return AuthState(
       account: Account.fromJson(map['account']),
       privateKey: map['privateKey'],
@@ -59,8 +55,8 @@ class AuthState extends Equatable {
   List<Object> get props => [account, privateKey];
 
   AuthState copyWith({
-    Account account,
-    String privateKey,
+    Account? account,
+    String? privateKey,
   }) {
     return AuthState(
       account: account ?? this.account,
@@ -70,7 +66,7 @@ class AuthState extends Equatable {
 
   Map<String, dynamic> toMap() {
     return {
-      'account': account?.toJson(),
+      'account': account.toJson(),
       'privateKey': privateKey,
     };
   }

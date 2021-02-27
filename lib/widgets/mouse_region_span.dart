@@ -3,8 +3,8 @@ import 'package:flutter/widgets.dart';
 
 class MouseRegionSpan extends WidgetSpan {
   MouseRegionSpan({
-    @required MouseCursor mouseCursor,
-    @required Widget child,
+    required MouseCursor mouseCursor,
+    required Widget child,
   }) : super(
     child: MouseRegion(
       cursor: mouseCursor,

@@ -18,9 +18,9 @@ import '../message_status.dart';
 
 class ImageMessageWidget extends StatelessWidget {
   const ImageMessageWidget({
-    Key key,
-    @required this.message,
-    @required this.isCurrentUser,
+    Key? key,
+    required this.message,
+    required this.isCurrentUser,
   }) : super(key: key);
 
   final MessageItem message;
@@ -30,8 +30,8 @@ class ImageMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, boxConstraints) {
           final maxWidth = min(boxConstraints.maxWidth * 0.6, 200);
-          final width = min(message.mediaWidth, maxWidth).toDouble();
-          final scale = message.mediaWidth / message.mediaHeight;
+          final width = min(message.mediaWidth!, maxWidth).toDouble();
+          final scale = message.mediaWidth! / message.mediaHeight!;
           final height = width / scale;
 
           return InteractableDecoratedBox(
@@ -61,12 +61,12 @@ class ImageMessageWidget extends StatelessWidget {
                       if (message.thumbImage != null &&
                           message.mediaUrl == null)
                         Image.memory(
-                          base64Decode(message.thumbImage),
+                          base64Decode(message.thumbImage!),
                           fit: BoxFit.cover,
                         ),
                       if (message.mediaUrl != null)
                         Image.file(
-                          File(message.mediaUrl),
+                          File(message.mediaUrl!),
                           fit: BoxFit.cover,
                         ),
                       Center(

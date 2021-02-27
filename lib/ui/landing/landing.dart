@@ -10,7 +10,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
 class LandingPage extends StatelessWidget {
-  const LandingPage({Key key}) : super(key: key);
+  const LandingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class LandingPage extends StatelessWidget {
 
 class _QrCode extends StatelessWidget {
   const _QrCode({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -72,7 +72,7 @@ class _QrCode extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     BlocConverter<LandingCubit, LandingState, String>(
-                      converter: (state) => state.authUrl,
+                      converter: (state) => state.authUrl!,
                       builder: (context, url) => QrImage(
                         data: url,
                         version: QrVersions.auto,
@@ -128,9 +128,9 @@ class _QrCode extends StatelessWidget {
 
 class _Loading extends StatelessWidget {
   const _Loading({
-    Key key,
-    this.title,
-    this.message,
+    Key? key,
+    required this.title,
+    required this.message,
   }) : super(key: key);
 
   final String title;
@@ -177,8 +177,8 @@ class _Loading extends StatelessWidget {
 
 class _Retry extends StatelessWidget {
   const _Retry({
-    Key key,
-    this.onTap,
+    Key? key,
+    required this.onTap,
   }) : super(key: key);
 
   final VoidCallback onTap;

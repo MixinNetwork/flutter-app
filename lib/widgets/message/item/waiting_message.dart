@@ -14,10 +14,10 @@ import '../message_status.dart';
 
 class WaitingMessage extends StatelessWidget {
   const WaitingMessage({
-    Key key,
-    @required this.showNip,
-    @required this.isCurrentUser,
-    @required this.message,
+    Key? key,
+    required this.showNip,
+    required this.isCurrentUser,
+    required this.message,
   }) : super(key: key);
 
   final bool showNip;
@@ -37,7 +37,7 @@ class WaitingMessage extends StatelessWidget {
                 text: Localization.of(context).chatWaiting(
                   message.relationship == UserRelationship.me
                       ? Localization.of(context).chatWaitingDesktop
-                      : message.userFullName,
+                      : message.userFullName!,
                 ),
                 style: TextStyle(
                   fontSize: 16,

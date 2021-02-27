@@ -8,29 +8,30 @@ part of 'blaze_param.dart';
 
 BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) {
   return BlazeMessageParam(
-    conversationId: json['conversation_id'] as String,
-    recipientId: json['recipient_id'] as String,
-    messageId: json['message_id'] as String,
+    conversationId: json['conversation_id'] as String?,
+    recipientId: json['recipient_id'] as String?,
+    messageId: json['message_id'] as String?,
     category: const MessageCategoryJsonConverter()
         .fromJson(json['category'] as String),
-    data: json['data'] as String,
-    status: json['status'] as String,
-    recipients: (json['recipients'] as List)
-        ?.map((e) => e == null
-            ? null
-            : BlazeMessageParamSession.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
-    messages: json['messages'] as List,
-    quoteMessageId: json['quoteMessage_id'] as String,
-    sessionId: json['session_id'] as String,
-    representativeId: json['representative_id'] as String,
-    conversationChecksum: json['conversation_checksum'] as String,
-    mentions: (json['mentions'] as List)?.map((e) => e as String)?.toList(),
-    jsep: json['jsep'] as String,
-    candidate: json['candidate'] as String,
-    trackId: json['track_id'] as String,
-    recipientIds:
-        (json['recipient_ids'] as List)?.map((e) => e as String)?.toList(),
+    data: json['data'] as String?,
+    status: json['status'] as String?,
+    recipients: (json['recipients'] as List<dynamic>?)
+        ?.map(
+            (e) => BlazeMessageParamSession.fromJson(e as Map<String, dynamic>))
+        .toList(),
+    messages: json['messages'] as List<dynamic>?,
+    quoteMessageId: json['quoteMessage_id'] as String?,
+    sessionId: json['session_id'] as String?,
+    representativeId: json['representative_id'] as String?,
+    conversationChecksum: json['conversation_checksum'] as String?,
+    mentions:
+        (json['mentions'] as List<dynamic>?)?.map((e) => e as String).toList(),
+    jsep: json['jsep'] as String?,
+    candidate: json['candidate'] as String?,
+    trackId: json['track_id'] as String?,
+    recipientIds: (json['recipient_ids'] as List<dynamic>?)
+        ?.map((e) => e as String)
+        .toList(),
   );
 }
 

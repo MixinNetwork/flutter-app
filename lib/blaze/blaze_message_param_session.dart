@@ -4,7 +4,10 @@ part 'blaze_message_param_session.g.dart';
 
 @JsonSerializable()
 class BlazeMessageParamSession {
-  BlazeMessageParamSession({this.userId, this.sessionId});
+  BlazeMessageParamSession({
+    required this.userId,
+    required this.sessionId,
+  });
 
   factory BlazeMessageParamSession.fromJson(Map<String, dynamic> json) =>
       _$BlazeMessageParamSessionFromJson(json);
@@ -16,4 +19,3 @@ class BlazeMessageParamSession {
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamSessionToJson(this);
 }
-

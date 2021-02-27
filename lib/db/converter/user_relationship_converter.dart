@@ -6,10 +6,10 @@ class UserRelationshipConverter
   const UserRelationshipConverter();
 
   @override
-  UserRelationship mapToDart(String fromDb) =>
+  UserRelationship? mapToDart(String? fromDb) =>
       const UserRelationshipJsonConverter().fromJson(fromDb);
 
   @override
-  String mapToSql(UserRelationship value) =>
+  String? mapToSql(UserRelationship? value) =>
       const UserRelationshipJsonConverter().toJson(value);
 }

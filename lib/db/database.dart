@@ -3,6 +3,7 @@ import 'package:flutter_app/db/dao/sticker_albums_dao.dart';
 import 'package:flutter_app/db/dao/sticker_relationships_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
 import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
 
@@ -36,25 +37,25 @@ class Database {
 
   final MixinDatabase _database;
 
-  AppsDao appsDao;
+  late final AppsDao appsDao;
 
-  MessagesDao messagesDao;
+  late final MessagesDao messagesDao;
 
-  ConversationsDao conversationDao;
+  late final ConversationsDao conversationDao;
 
-  FloodMessagesDao floodMessagesDao;
+  late final FloodMessagesDao floodMessagesDao;
 
-  JobsDao jobsDao;
+  late final JobsDao jobsDao;
 
-  ParticipantsDao participantsDao;
+  late final ParticipantsDao participantsDao;
 
-  UserDao userDao;
+  late final UserDao userDao;
 
-  StickerDao stickerDao;
+  late final StickerDao stickerDao;
 
-  StickerAlbumsDao stickerAlbumsDao;
+  late final StickerAlbumsDao stickerAlbumsDao;
 
-  StickerRelationshipsDao stickerRelationshipsDao;
+  late final StickerRelationshipsDao stickerRelationshipsDao;
 
   Future<void> dispose() async {
     await _database.eventBus.dispose();
@@ -107,7 +108,7 @@ class Database {
                   conversationId: conversationId,
                   userId: userId,
                   category: MessageCategory.plainText,
-                  status: null,
+                  status: MessageStatus.failed,
                   createdAt: dateTime.subtract(Duration(seconds: index)),
                   content: Value('message content $index'),
                 ),

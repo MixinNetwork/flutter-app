@@ -21,13 +21,13 @@ class AttachmentUtil {
   final String _mediaPath;
   final MessagesDao _messagesDao;
   final Client _client;
-  HttpClient _attachmentClient;
+  late final HttpClient _attachmentClient;
 
   Future<void> downloadAttachment({
-    @required String messageId,
-    @required String content,
-    @required String conversationId,
-    @required MessageCategory category,
+    required String messageId,
+    required String content,
+    required String conversationId,
+    required MessageCategory category,
   }) async {
     await _messagesDao.updateMediaStatus(MediaStatus.pending, messageId);
 
@@ -69,7 +69,7 @@ class AttachmentUtil {
     }
   }
 
-  Future<String> uploadAttachment(File file, String messageId) async {
+  Future<String?> uploadAttachment(File file, String messageId) async {
     final response = await _client.attachmentApi.postAttachment();
     if (response.data != null && response.data.uploadUrl != null) {
       final fileStream = file.openRead();
@@ -119,23 +119,25 @@ class AttachmentUtil {
   File getAttachmentFile(
       MessageCategory category, String conversationId, String messageId) {
     assert(category.isAttachment);
-    String path;
+    String? path;
     if (category.isImage) {
       path = _getImagesPath(conversationId);
     } else if (category.isVideo) {
       path = _getVideosPath(conversationId);
     } else if (category.isAudio) {
       path = _getAudiosPath(conversationId);
-    } else if (category.isData) {
+    } else
+    // if (category.isData)
+    {
       path = _getFilesPath(conversationId);
     }
     return File(p.join(path, messageId));
   }
 
   File _getAttachmentFile({
-    @required String messageId,
-    @required String conversationId,
-    @required MessageCategory category,
+    required String messageId,
+    required String conversationId,
+    required MessageCategory category,
   }) =>
       getAttachmentFile(category, conversationId, messageId);
 

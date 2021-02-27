@@ -34,17 +34,17 @@ class AttachmentMessage {
   @JsonKey(name: 'name')
   String name;
   @JsonKey(name: 'width')
-  int width;
+  int? width;
   @JsonKey(name: 'height')
-  int height;
+  int? height;
   @JsonKey(name: 'thumbnail')
-  String thumbnail;
+  String? thumbnail;
   @JsonKey(name: 'duration')
-  int duration;
+  int? duration;
   @JsonKey(name: 'waveform')
-  dynamic waveform;
+  dynamic? waveform;
   @JsonKey(name: 'caption')
-  String caption;
+  String? caption;
 
   Map<String, dynamic> toJson() => _$AttachmentMessageToJson(this);
 }

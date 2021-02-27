@@ -19,7 +19,7 @@ Color getCircleColorById(String circleId) {
   return circleColors[hashCode % circleColors.length];
 }
 
-Color colorHex(String hexString) {
+Color? colorHex(String hexString) {
   try {
     final buffer = StringBuffer();
     if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');

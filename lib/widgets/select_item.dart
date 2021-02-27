@@ -6,10 +6,10 @@ import 'interacter_decorated_box.dart';
 
 class SelectItem extends StatelessWidget {
   const SelectItem({
-    this.title,
-    this.icon,
+    required this.title,
+    required this.icon,
     this.count = 0,
-    this.onTap,
+    required this.onTap,
     this.selected = false,
   });
 

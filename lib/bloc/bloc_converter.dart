@@ -6,26 +6,25 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 class BlocConverter<C extends Cubit<S>, S, T> extends StatefulWidget {
   const BlocConverter({
-    Key key,
+    Key? key,
     this.cubit,
     this.when,
-    @required this.converter,
+    required this.converter,
     this.builder,
     this.child,
     this.listener,
     this.immediatelyCallListener = false,
-  })  : assert(converter != null),
-        assert(builder != null || child != null),
+  })  : assert(builder != null || child != null),
         assert(!(builder != null && child != null)),
         super(key: key);
 
-  final C cubit;
-  final BlocBuilderCondition<T> when;
+  final C? cubit;
+  final BlocBuilderCondition<T?>? when;
   final BlocConverterCondition<S, T> converter;
 
-  final Widget child;
-  final BlocWidgetBuilder<T> builder;
-  final BlocWidgetListener<T> listener;
+  final Widget? child;
+  final BlocWidgetBuilder<T>? builder;
+  final BlocWidgetListener<T>? listener;
 
   final bool immediatelyCallListener;
 
@@ -37,24 +36,18 @@ typedef BlocConverterCondition<S, T> = T Function(S state);
 
 class _BlocConverterState<C extends Cubit<S>, S, T>
     extends State<BlocConverter<C, S, T>> {
-  StreamSubscription<T> _subscription;
-  T _previousState;
-  T _state;
-  C _cubit;
+  StreamSubscription<T?>? _subscription;
+  late T _previousState;
+  late T _state;
+  late C _cubit;
 
-  T _converter(S state) {
-    try {
-      return widget.converter(state);
-    } catch (e) {
-      return null;
-    }
-  }
+  T _converter(S state) => widget.converter(state);
 
   @override
   void initState() {
     super.initState();
     _cubit = widget.cubit ?? context.read<C>();
-    _previousState = _converter(_cubit?.state);
+    _previousState = _converter(_cubit.state);
     _state = _previousState;
     if (widget.immediatelyCallListener) widget.listener?.call(context, _state);
     _subscribe();
@@ -69,12 +62,12 @@ class _BlocConverterState<C extends Cubit<S>, S, T>
       if (_subscription != null) {
         _unsubscribe();
         _cubit = widget.cubit ?? context.read<C>();
-        _previousState = _converter(_cubit?.state);
+        _previousState = _converter(_cubit.state);
         _state = _previousState;
       }
       _subscribe();
     } else {
-      final state = _converter(_cubit?.state);
+      final state = _converter(_cubit.state);
       if (_previousState != state) {
         _previousState = _state;
         _state = state;
@@ -84,7 +77,7 @@ class _BlocConverterState<C extends Cubit<S>, S, T>
 
   @override
   Widget build(BuildContext context) =>
-      widget.builder?.call(context, _state) ?? widget.child;
+      widget.builder?.call(context, _state) ?? widget.child!;
 
   @override
   void dispose() {
@@ -93,24 +86,22 @@ class _BlocConverterState<C extends Cubit<S>, S, T>
   }
 
   void _subscribe() {
-    if (_cubit != null) {
-      _subscription = _cubit.map(_converter).listen((state) {
-        if (_previousState == state) return;
+    _subscription = _cubit.map(_converter).listen((state) {
+      if (_previousState == state) return;
 
-        if (widget.when?.call(_previousState, state) ?? true) {
-          widget.listener?.call(context, state);
-          _state = state;
+      if (widget.when?.call(_previousState, state) ?? true) {
+        widget.listener?.call(context, state);
+        _state = state;
 
-          if (widget.builder != null) setState(() {});
-        }
-        _previousState = state;
-      });
-    }
+        if (widget.builder != null) setState(() {});
+      }
+      _previousState = state;
+    });
   }
 
   void _unsubscribe() {
     if (_subscription != null) {
-      _subscription.cancel();
+      _subscription?.cancel();
       _subscription = null;
     }
   }

@@ -10,13 +10,13 @@ import 'package:meta/meta.dart';
 
 class ClampingViewport extends Viewport {
   ClampingViewport({
-    Key key,
+    Key? key,
     AxisDirection axisDirection = AxisDirection.down,
-    AxisDirection crossAxisDirection,
+    AxisDirection? crossAxisDirection,
     double anchor = 0.0,
-    @required ViewportOffset offset,
-    Key center,
-    double cacheExtent,
+    required ViewportOffset offset,
+    Key? center,
+    double? cacheExtent,
     List<Widget> slivers = const <Widget>[],
   })  : _anchor = anchor,
         super(
@@ -53,12 +53,12 @@ class ClampingRenderViewport extends RenderViewport {
   /// Creates a viewport for [RenderSliver] objects.
   ClampingRenderViewport({
     AxisDirection axisDirection = AxisDirection.down,
-    @required AxisDirection crossAxisDirection,
-    @required ViewportOffset offset,
+    required AxisDirection crossAxisDirection,
+    required ViewportOffset offset,
     double anchor = 0.0,
-    List<RenderSliver> children,
-    RenderSliver center,
-    double cacheExtent,
+    List<RenderSliver>? children,
+    RenderSliver? center,
+    double? cacheExtent,
   })  : _anchor = anchor,
         super(
             axisDirection: axisDirection,
@@ -73,8 +73,8 @@ class ClampingRenderViewport extends RenderViewport {
   double _anchor;
 
   // Out-of-band data computed during layout.
-  double _minScrollExtent;
-  double _maxScrollExtent;
+  late double _minScrollExtent;
+  late double _maxScrollExtent;
   bool _hasVisualOverflow = false;
 
   /// This value is set during layout based on the [CacheExtentStyle].
@@ -82,7 +82,7 @@ class ClampingRenderViewport extends RenderViewport {
   /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
   /// of the viewport multiplied by the requested cache extent, which is still
   /// expressed in pixels.
-  double _calculatedCacheExtent;
+  double? _calculatedCacheExtent;
 
   @override
   double get anchor => _anchor;
@@ -128,15 +128,15 @@ class ClampingRenderViewport extends RenderViewport {
       case Axis.vertical:
         return Rect.fromLTRB(
           semanticBounds.left,
-          semanticBounds.top - _calculatedCacheExtent,
+          semanticBounds.top - _calculatedCacheExtent!,
           semanticBounds.right,
-          semanticBounds.bottom + _calculatedCacheExtent,
+          semanticBounds.bottom + _calculatedCacheExtent!,
         );
       default:
         return Rect.fromLTRB(
-          semanticBounds.left - _calculatedCacheExtent,
+          semanticBounds.left - _calculatedCacheExtent!,
           semanticBounds.top,
-          semanticBounds.right + _calculatedCacheExtent,
+          semanticBounds.right + _calculatedCacheExtent!,
           semanticBounds.bottom,
         );
     }
@@ -152,7 +152,7 @@ class ClampingRenderViewport extends RenderViewport {
       offset.applyContentDimensions(0.0, 0.0);
       return;
     }
-    assert(center.parent == this);
+    assert(center!.parent == this);
 
     double mainAxisExtent;
     double crossAxisExtent;
@@ -167,12 +167,11 @@ class ClampingRenderViewport extends RenderViewport {
         break;
     }
 
-    final centerOffsetAdjustment = center.centerOffsetAdjustment;
+    final centerOffsetAdjustment = center!.centerOffsetAdjustment;
 
     double correction;
     var count = 0;
     do {
-      assert(offset.pixels != null);
       // *** Difference from [RenderViewport].
       correction = _attemptLayout(mainAxisExtent, crossAxisExtent,
           offset.pixels + centerOffsetAdjustment + correctedOffset);
@@ -196,7 +195,7 @@ class ClampingRenderViewport extends RenderViewport {
         final maxScrollOffset = math.max(math.min(0.0, top), bottom);
         final minScrollOffset = math.min(top, maxScrollOffset);
 
-        final centerScrollExtent = center.geometry.scrollExtent *
+        final centerScrollExtent = center!.geometry!.scrollExtent *
             (correctedOffset.isNegative ? -1 : 1);
         final clampScrollExtent = centerScrollExtent.clamp(
           math.min(minScrollOffset, maxScrollOffset),
@@ -205,7 +204,7 @@ class ClampingRenderViewport extends RenderViewport {
         if (!isLessMainAxisExtent &&
             clampScrollExtent != centerScrollExtent &&
             count < 1) {
-          correctedOffset = clampScrollExtent;
+          correctedOffset = clampScrollExtent.toDouble();
           count += 1;
           continue;
         }
@@ -255,9 +254,9 @@ class ClampingRenderViewport extends RenderViewport {
     // to the zero scroll offset (the line between the forward slivers and the
     // reverse slivers).
     final centerOffset = mainAxisExtent * anchor - correctedOffset;
-    final double reverseDirectionRemainingPaintExtent =
+    final reverseDirectionRemainingPaintExtent =
         centerOffset.clamp(0.0, mainAxisExtent);
-    final double forwardDirectionRemainingPaintExtent =
+    final forwardDirectionRemainingPaintExtent =
         (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
 
     switch (cacheExtentStyle) {
@@ -265,18 +264,18 @@ class ClampingRenderViewport extends RenderViewport {
         _calculatedCacheExtent = cacheExtent;
         break;
       case CacheExtentStyle.viewport:
-        _calculatedCacheExtent = mainAxisExtent * cacheExtent;
+        _calculatedCacheExtent = mainAxisExtent * cacheExtent!;
         break;
     }
 
-    final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent;
-    final centerCacheOffset = centerOffset + _calculatedCacheExtent;
-    final double reverseDirectionRemainingCacheExtent =
+    final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
+    final centerCacheOffset = centerOffset + _calculatedCacheExtent!;
+    final reverseDirectionRemainingCacheExtent =
         centerCacheOffset.clamp(0.0, fullCacheExtent);
-    final double forwardDirectionRemainingCacheExtent =
+    final forwardDirectionRemainingCacheExtent =
         (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
-    final leadingNegativeChild = childBefore(center);
+    final leadingNegativeChild = childBefore(center!);
 
     if (leadingNegativeChild != null) {
       // negative scroll offsets
@@ -292,7 +291,7 @@ class ClampingRenderViewport extends RenderViewport {
         advance: childBefore,
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
         cacheOrigin:
-            (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent, 0.0),
+            (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent!, 0.0),
       );
       if (result != 0.0) return -result;
     }
@@ -312,7 +311,7 @@ class ClampingRenderViewport extends RenderViewport {
       growthDirection: GrowthDirection.forward,
       advance: childAfter,
       remainingCacheExtent: forwardDirectionRemainingCacheExtent,
-      cacheOrigin: centerOffset.clamp(-_calculatedCacheExtent, 0.0),
+      cacheOrigin: centerOffset.clamp(-_calculatedCacheExtent!, 0.0),
     );
   }
 

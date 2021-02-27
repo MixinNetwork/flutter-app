@@ -12,13 +12,11 @@ import 'avatar_view/avatar_view.dart';
 
 class ChatBar extends StatelessWidget {
   const ChatBar({
-    Key key,
-    @required this.onPressed,
-    this.isSelected,
+    Key? key,
+    required this.onPressed,
   }) : super(key: key);
 
   final Function onPressed;
-  final bool isSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -74,16 +72,16 @@ class ChatBar extends StatelessWidget {
 
 class _ID extends StatelessWidget {
   const _ID({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocConverter<ConversationCubit, ConversationItem, String>(
+    return BlocConverter<ConversationCubit, ConversationItem?, String?>(
       converter: (state) => state?.ownerIdentityNumber,
       when: (a, b) => b != null,
       builder: (context, id) => Text(
-        id,
+        id!,
         style: TextStyle(
           color: BrightnessData.themeOf(context).secondaryText,
           fontSize: 14,
@@ -95,18 +93,18 @@ class _ID extends StatelessWidget {
 
 class _Name extends StatelessWidget {
   const _Name({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationItem, String>(
-        converter: (state) => state?.groupName?.trim()?.isNotEmpty == true
+      BlocConverter<ConversationCubit, ConversationItem?, String?>(
+        converter: (state) => state?.groupName?.trim().isNotEmpty == true
             ? state?.groupName
             : state?.name,
         when: (a, b) => b != null,
         builder: (context, name) => Text(
-          name,
+          name!,
           style: TextStyle(
             color: BrightnessData.dynamicColor(
               context,
@@ -121,16 +119,16 @@ class _Name extends StatelessWidget {
 
 class _Avatar extends StatelessWidget {
   const _Avatar({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) =>
-      BlocBuilder<ConversationCubit, ConversationItem>(
+      BlocBuilder<ConversationCubit, ConversationItem?>(
         buildWhen: (a, b) => b != null,
         builder: (context, conversation) => ConversationAvatarWidget(
           size: 50,
-          conversation: conversation,
+          conversation: conversation!,
         ),
       );
 }

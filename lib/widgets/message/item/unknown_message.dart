@@ -13,10 +13,10 @@ import '../message_status.dart';
 
 class UnknownMessage extends StatelessWidget {
   const UnknownMessage({
-    Key key,
-    @required this.showNip,
-    @required this.isCurrentUser,
-    @required this.message,
+    Key? key,
+    required this.showNip,
+    required this.isCurrentUser,
+    required this.message,
   }) : super(key: key);
 
   final bool showNip;

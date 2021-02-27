@@ -55,13 +55,13 @@ class SlidePage extends StatelessWidget {
             Builder(
               builder: (context) => BlocConverter<MultiAuthCubit,
                   MultiAuthState, Tuple2<String, String>>(
-                converter: (state) => Tuple2(state.current?.account?.fullName,
-                    state.current?.account?.avatarUrl),
-                when: (a, b) => b.item1 != null && b.item2 != null,
+                converter: (state) => Tuple2(state.current!.account.fullName,
+                    state.current!.account.avatarUrl),
+                when: (a, b) => b?.item1 != null && b?.item2 != null,
                 builder: (context, tuple) =>
                     BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
                   converter: (state) =>
-                      state?.type == SlideCategoryType.setting,
+                      state.type == SlideCategoryType.setting,
                   builder: (context, selected) => SelectItem(
                     icon: ClipOval(
                       child: CachedNetworkImage(
@@ -88,7 +88,7 @@ class SlidePage extends StatelessWidget {
 // ignore: unused_element
 class _CircleList extends StatelessWidget {
   const _CircleList({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -109,19 +109,19 @@ class _CircleList extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) =>
                   BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
                 converter: (state) =>
-                    state?.type == SlideCategoryType.circle &&
-                    state?.id == circleType[index]['title'],
+                    state.type == SlideCategoryType.circle &&
+                    state.id == circleType[index]['title'],
                 builder: (BuildContext context, bool selected) {
                   final circle = circleType[index];
                   return ContextMenuPortalEntry(
                     child: SelectItem(
                       icon: Image.asset(
-                        circle['asset'],
+                        circle['asset']!,
                         width: 24,
                         height: 24,
                         color: BrightnessData.themeOf(context).accent,
                       ),
-                      title: circle['title'],
+                      title: circle['title']!,
                       onTap: () =>
                           BlocProvider.of<SlideCategoryCubit>(context).select(
                         SlideCategoryType.circle,
@@ -145,14 +145,16 @@ class _CircleList extends StatelessWidget {
                             context: context,
                             child: AlertDialogLayout(
                               content: Text(Localization.of(context)
-                                  .pageDeleteCircle(circle['title'])),
+                                  .pageDeleteCircle(circle['title']!)),
                               actions: [
                                 MixinButton(
                                   backgroundTransparent: true,
                                   child: Text(Localization.of(context).cancel),
+                                  value: 'TODO',
                                 ),
                                 MixinButton(
                                   child: Text(Localization.of(context).delete),
+                                  value: 'TODO',
                                 ),
                               ],
                             ),
@@ -171,8 +173,8 @@ class _CircleList extends StatelessWidget {
 
 class _CategoryList extends StatelessWidget {
   const _CategoryList({
-    Key key,
-    @required this.children,
+    Key? key,
+    required this.children,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -189,10 +191,10 @@ class _CategoryList extends StatelessWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key key,
-    @required this.type,
-    @required this.title,
-    @required this.asset,
+    Key? key,
+    required this.type,
+    required this.title,
+    required this.asset,
   }) : super(key: key);
 
   final SlideCategoryType type;
@@ -202,7 +204,7 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-        converter: (state) => state?.type == type,
+        converter: (state) => state.type == type,
         builder: (BuildContext context, bool selected) => SelectItem(
           icon: Image.asset(
             asset,
@@ -222,8 +224,8 @@ class _Item extends StatelessWidget {
 
 class _Title extends StatelessWidget {
   const _Title({
-    Key key,
-    this.data,
+    Key? key,
+    required this.data,
   }) : super(key: key);
 
   final String data;

@@ -11,7 +11,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
 class SettingPage extends StatelessWidget {
-  const SettingPage({Key key}) : super(key: key);
+  const SettingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
@@ -81,10 +81,10 @@ class SettingPage extends StatelessWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key key,
-    @required this.assetName,
-    @required this.title,
-    @required this.name,
+    Key? key,
+    required this.assetName,
+    required this.title,
+    required this.name,
     this.color,
     this.onTap,
   }) : super(key: key);
@@ -92,8 +92,8 @@ class _Item extends StatelessWidget {
   final String assetName;
   final String title;
   final String name;
-  final Color color;
-  final VoidCallback onTap;
+  final Color? color;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +126,7 @@ class _Item extends StatelessWidget {
             onTap: () {
               if (onTap == null) {
                 ResponsiveNavigatorCubit.of(context).pushPage(
-                    ResponsiveNavigatorCubit.settingTitlePageMap[name]);
+                    ResponsiveNavigatorCubit.settingTitlePageMap[name]!);
                 return;
               }
 
@@ -173,9 +173,9 @@ class _Item extends StatelessWidget {
 
 class _ItemContainer extends StatelessWidget {
   const _ItemContainer({
-    Key key,
+    Key? key,
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
-    this.child,
+    required this.child,
   }) : super(key: key);
 
   final BorderRadius borderRadius;
@@ -193,7 +193,7 @@ class _ItemContainer extends StatelessWidget {
 
 class _UserProfile extends StatelessWidget {
   const _UserProfile({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -202,8 +202,8 @@ class _UserProfile extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ClipOval(
-          child: BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-            converter: (state) => state.current?.account?.avatarUrl,
+          child: BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+            converter: (state) => state.current?.account.avatarUrl,
             when: (a, b) => b != null,
             builder: (context, avatarUrl) => CachedNetworkImage(
               imageUrl: avatarUrl,
@@ -213,11 +213,11 @@ class _UserProfile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-          converter: (state) => state.current?.account?.fullName,
+        BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+          converter: (state) => state.current?.account.fullName,
           when: (a, b) => b != null,
           builder: (context, fullName) => Text(
-            fullName,
+            fullName ?? '',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               fontSize: 18,
@@ -226,8 +226,8 @@ class _UserProfile extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-          converter: (state) => state.current?.account?.identityNumber,
+        BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+          converter: (state) => state.current?.account.identityNumber,
           when: (a, b) => b != null,
           builder: (context, identityNumber) => Text(
             'Mixin ID: $identityNumber',

@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 
 class Empty extends StatelessWidget {
-  const Empty({Key key, @required this.text}) : super(key: key);
+  const Empty({Key? key, required this.text}) : super(key: key);
 
   final String text;
 

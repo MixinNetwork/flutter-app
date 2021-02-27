@@ -6,10 +6,10 @@ class ConversationStatusTypeConverter
   const ConversationStatusTypeConverter();
 
   @override
-  ConversationStatus mapToDart(int fromDb) =>
+  ConversationStatus? mapToDart(int? fromDb) =>
       const ConversationStatusJsonConverter().fromJson(fromDb);
 
   @override
-  int mapToSql(ConversationStatus value) =>
+  int? mapToSql(ConversationStatus? value) =>
       const ConversationStatusJsonConverter().toJson(value);
 }

@@ -34,43 +34,43 @@ class BlazeMessageParam {
       _$BlazeMessageParamFromJson(json);
 
   @JsonKey(name: 'conversation_id')
-  String conversationId;
+  String? conversationId;
   @JsonKey(name: 'recipient_id')
-  String recipientId;
+  String? recipientId;
   @JsonKey(name: 'message_id')
-  String messageId;
+  String? messageId;
   @JsonKey(name: 'category')
-  MessageCategory category;
+  MessageCategory? category;
   @JsonKey(name: 'data')
-  String data;
+  String? data;
   @JsonKey(name: 'status')
-  String status;
+  String? status;
   @JsonKey(name: 'recipients')
-  List<BlazeMessageParamSession> recipients;
+  List<BlazeMessageParamSession>? recipients;
 
   // todo
   // @JsonKey(name: 'conversation_id')
   // SignalKeyRequest keys;
   @JsonKey(name: 'messages')
-  List<dynamic> messages;
+  List<dynamic>? messages;
   @JsonKey(name: 'quoteMessage_id')
-  String quoteMessageId;
+  String? quoteMessageId;
   @JsonKey(name: 'session_id')
-  String sessionId;
+  String? sessionId;
   @JsonKey(name: 'representative_id')
-  String representativeId;
+  String? representativeId;
   @JsonKey(name: 'conversation_checksum')
-  String conversationChecksum;
+  String? conversationChecksum;
   @JsonKey(name: 'mentions')
-  List<String> mentions;
+  List<String>? mentions;
   @JsonKey(name: 'jsep')
-  String jsep;
+  String? jsep;
   @JsonKey(name: 'candidate')
-  String candidate;
+  String? candidate;
   @JsonKey(name: 'track_id')
-  String trackId;
+  String? trackId;
   @JsonKey(name: 'recipient_ids')
-  List<String> recipientIds;
+  List<String>? recipientIds;
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamToJson(this);
 }

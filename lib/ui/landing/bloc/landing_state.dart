@@ -13,15 +13,15 @@ class LandingState extends Equatable {
     this.status = LandingStatus.init,
   });
 
-  final String authUrl;
+  final String? authUrl;
   final LandingStatus status;
 
   @override
-  List<Object> get props => [authUrl, status];
+  List<Object?> get props => [authUrl, status];
 
   LandingState copyWith({
-    final String authUrl,
-    final LandingStatus status,
+    final String? authUrl,
+    final LandingStatus? status,
   }) {
     return LandingState(
       authUrl: authUrl ?? this.authUrl,

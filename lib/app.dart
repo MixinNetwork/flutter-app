@@ -23,7 +23,7 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
         create: (context) => MultiAuthCubit(),
-        child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState>(
+        child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
           converter: (state) => state.current,
           builder: (context, authState) {
             Widget app = MaterialApp(
@@ -40,19 +40,19 @@ class App extends StatelessWidget {
               ],
               builder: (context, child) {
                 try {
-                  Provider.of<AccountServer>(context)?.language =
-                      Localizations.localeOf(context)?.languageCode;
+                  Provider.of<AccountServer>(context).language =
+                      Localizations.localeOf(context).languageCode;
                 } catch (_) {}
                 return BrightnessObserver(
-                  child: child,
+                  child: child!,
                   lightThemeData: lightBrightnessThemeData,
                   darkThemeData: darkBrightnessThemeData,
                 );
               },
               home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
-                converter: (state) => state?.current != null,
+                converter: (state) => state.current != null,
                 builder: (context, authAvailable) {
-                  AccountServer accountServer;
+                  AccountServer? accountServer;
                   try {
                     accountServer = Provider.of<AccountServer>(context);
                   } catch (_) {}
@@ -87,10 +87,10 @@ class App extends StatelessWidget {
               }(),
               builder: (BuildContext context,
                       AsyncSnapshot<AccountServer> snapshot) =>
-                  Provider<AccountServer>(
+                  Provider<AccountServer?>(
                 key: ValueKey(snapshot.data?.userId),
                 create: (context) => snapshot.data,
-                dispose: (BuildContext context, AccountServer accountServer) =>
+                dispose: (BuildContext context, AccountServer? accountServer) =>
                     accountServer?.stop(),
                 child: Builder(
                   builder: (context) {
@@ -111,11 +111,11 @@ class App extends StatelessWidget {
                           BlocProvider(
                             create: (BuildContext context) =>
                                 ConversationListBloc(
-                                    slideCategoryCubit, snapshot.data.database),
+                                    slideCategoryCubit, snapshot.data!.database),
                           ),
                           BlocProvider(
                             create: (BuildContext context) =>
-                                ConversationCubit(draftCubit, snapshot.data),
+                                ConversationCubit(draftCubit, snapshot.data!),
                           ),
                         ],
                         child: Builder(

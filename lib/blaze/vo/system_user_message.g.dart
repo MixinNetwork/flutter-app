@@ -7,6 +7,7 @@ part of 'system_user_message.dart';
 // **************************************************************************
 
 SystemUserMessage _$SystemUserMessageFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, disallowNullValues: const ['action', 'user_id']);
   return SystemUserMessage(
     _$enumDecode(_$SystemUserActionEnumMap, json['action']),
     json['user_id'] as String,
@@ -19,25 +20,30 @@ Map<String, dynamic> _$SystemUserMessageToJson(SystemUserMessage instance) =>
       'user_id': instance.userId,
     };
 
-T _$enumDecode<T>(
-  Map<T, dynamic> enumValues,
-  dynamic source, {
-  T unknownValue,
+K _$enumDecode<K, V>(
+  Map<K, V> enumValues,
+  Object? source, {
+  K? unknownValue,
 }) {
   if (source == null) {
-    throw ArgumentError('A value must be provided. Supported values: '
-        '${enumValues.values.join(', ')}');
+    throw ArgumentError(
+      'A value must be provided. Supported values: '
+      '${enumValues.values.join(', ')}',
+    );
   }
 
-  final value = enumValues.entries
-      .singleWhere((e) => e.value == source, orElse: () => null)
-      ?.key;
-
-  if (value == null && unknownValue == null) {
-    throw ArgumentError('`$source` is not one of the supported values: '
-        '${enumValues.values.join(', ')}');
-  }
-  return value ?? unknownValue;
+  return enumValues.entries.singleWhere(
+    (e) => e.value == source,
+    orElse: () {
+      if (unknownValue == null) {
+        throw ArgumentError(
+          '`$source` is not one of the supported values: '
+          '${enumValues.values.join(', ')}',
+        );
+      }
+      return MapEntry(unknownValue, enumValues.values.first);
+    },
+  ).key;
 }
 
 const _$SystemUserActionEnumMap = {

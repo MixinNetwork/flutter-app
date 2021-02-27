@@ -18,9 +18,9 @@ import 'interacter_decorated_box.dart';
 
 class MentionPanelPortalEntry extends StatelessWidget {
   const MentionPanelPortalEntry({
-    Key key,
-    @required this.constraints,
-    @required this.child,
+    Key? key,
+    required this.constraints,
+    required this.child,
   }) : super(key: key);
 
   final BoxConstraints constraints;
@@ -28,7 +28,7 @@ class MentionPanelPortalEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<MentionCubit, Tuple2<String, List<User>>, bool>(
+      BlocConverter<MentionCubit, Tuple2<String?, List<User>>, bool>(
         converter: (state) => state.item2.isNotEmpty,
         builder: (context, visible) => PortalEntry(
           visible: visible &&
@@ -79,9 +79,9 @@ class MentionPanelPortalEntry extends StatelessWidget {
 
 class _MentionPanel extends StatelessWidget {
   const _MentionPanel({
-    Key key,
-    @required this.mentionCubit,
-    @required this.onSelect,
+    Key? key,
+    required this.mentionCubit,
+    required this.onSelect,
   }) : super(key: key);
 
   final MentionCubit mentionCubit;
@@ -95,10 +95,10 @@ class _MentionPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: BrightnessData.themeOf(context).popUp,
       ),
-      child: BlocConsumer(
-        buildWhen: (a, b) => b.item2?.isNotEmpty == true,
+      child: BlocConsumer<MentionCubit, Tuple2<String?, List<User>>>(
+        buildWhen: (a, b) => b.item2.isNotEmpty == true,
         bloc: mentionCubit,
-        builder: (context, Tuple2<String, List<User>> tuple) =>
+        builder: (context, Tuple2<String?, List<User>> tuple) =>
             ListView.builder(
           controller: scrollController,
           itemCount: tuple.item2.length,
@@ -109,7 +109,7 @@ class _MentionPanel extends StatelessWidget {
             onSelect: onSelect,
           ),
         ),
-        listener: (BuildContext context, Tuple2<String, List<User>> state) {
+        listener: (BuildContext context, Tuple2<String?, List<User>> state) {
           if (!scrollController.hasClients) return;
           scrollController.jumpTo(0);
         },
@@ -120,17 +120,17 @@ class _MentionPanel extends StatelessWidget {
 
 class _MentionItem extends StatelessWidget {
   const _MentionItem({
-    Key key,
-    @required this.user,
-    @required this.keyword,
+    Key? key,
+    required this.user,
+    this.keyword,
     this.selected = false,
     this.onSelect,
   }) : super(key: key);
 
   final User user;
-  final String keyword;
+  final String? keyword;
   final bool selected;
-  final Function(User user) onSelect;
+  final Function(User user)? onSelect;
 
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
@@ -155,14 +155,14 @@ class _MentionItem extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   HighlightText(
-                    user.fullName,
+                    user.fullName ?? '',
                     style: TextStyle(
                       fontSize: 14,
                       color: BrightnessData.themeOf(context).text,
                     ),
                     highlightTextSpans: [
                       HighlightTextSpan(
-                        keyword,
+                        keyword ?? '',
                         style: TextStyle(
                           color: BrightnessData.themeOf(context).accent,
                         ),
@@ -178,7 +178,7 @@ class _MentionItem extends StatelessWidget {
                     ),
                     highlightTextSpans: [
                       HighlightTextSpan(
-                        keyword,
+                        keyword??'',
                         style: TextStyle(
                           color: BrightnessData.themeOf(context).accent,
                         ),

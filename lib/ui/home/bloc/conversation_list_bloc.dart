@@ -21,11 +21,12 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   final Database database;
   final Map<SlideCategoryState, _ConversationListBloc> _map = {};
 
-  int limit;
-  StreamSubscription streamSubscription;
+  late int limit;
+  StreamSubscription? streamSubscription;
 
-  ItemPositionsListener get itemPositionsListener =>
-      _map[slideCategoryCubit.state].itemPositionsListener;
+  ItemPositionsListener get itemPositionsListener {
+    return _map[slideCategoryCubit.state]!.itemPositionsListener;
+  }
 
   void init() => _switchBloc(slideCategoryCubit.state, limit);
 
@@ -89,7 +90,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
         break;
     }
     final bloc = _map[state];
-    emit(bloc.state);
+    emit(bloc!.state);
     streamSubscription?.cancel();
     streamSubscription = bloc.listen(emit);
   }

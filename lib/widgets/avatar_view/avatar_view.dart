@@ -11,9 +11,9 @@ import 'package:provider/provider.dart';
 
 class ConversationAvatarWidget extends StatelessWidget {
   const ConversationAvatarWidget({
-    Key key,
-    @required this.conversation,
-    @required this.size,
+    Key? key,
+    required this.conversation,
+    required this.size,
   }) : super(key: key);
 
   final ConversationItem conversation;
@@ -27,7 +27,7 @@ class ConversationAvatarWidget extends StatelessWidget {
             builder: (context) {
               if (conversation.groupIconUrl != null)
                 return CacheImage(
-                  conversation.groupIconUrl,
+                  conversation.groupIconUrl!,
                   width: size,
                   height: size,
                 );
@@ -61,7 +61,7 @@ class ConversationAvatarWidget extends StatelessWidget {
 }
 
 class _AvatarPuzzlesWidget extends StatelessWidget {
-  const _AvatarPuzzlesWidget(this.users, this.size, {Key key})
+  const _AvatarPuzzlesWidget(this.users, this.size, {Key? key})
       : super(key: key);
 
   final List<User> users;
@@ -69,7 +69,7 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (users?.isEmpty ?? true)
+    if (users.isEmpty)
       return SizedBox.fromSize(size: Size.square(size));
     switch (users.length) {
       case 1:
@@ -125,9 +125,9 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
 
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
-    Key key,
-    @required this.user,
-    @required this.size,
+    Key? key,
+    required this.user,
+    required this.size,
     this.clipOval = true,
   }) : super(key: key);
 
@@ -140,7 +140,7 @@ class AvatarWidget extends StatelessWidget {
     Widget child;
     if (user.avatarUrl?.isNotEmpty == true)
       child = CacheImage(
-        user.avatarUrl,
+        user.avatarUrl!,
         width: size,
         height: size,
       );
@@ -153,7 +153,7 @@ class AvatarWidget extends StatelessWidget {
           ),
           child: Center(
             child: Text(
-              user.fullName[0],
+              user.fullName![0],
               style: TextStyle(
                 color: getNameColorById(user.userId),
                 fontWeight: FontWeight.w600,

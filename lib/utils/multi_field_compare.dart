@@ -15,13 +15,13 @@ int Function(T a, T b) multiFieldCompare<T>(
         int result;
 
         if (tempA == null && tempB == null)
-          result ??= 0;
+          result = 0;
         else if (tempA != null && tempB != null)
-          result ??= tempA.compareTo(tempB);
+          result = tempA.compareTo(tempB);
         else if (a == null)
-          result ??= -1;
+          result = -1;
         else
-          result ??= 1;
+          result = 1;
 
         if (result != 0) return result * (p.desc ? -1 : 1);
       }

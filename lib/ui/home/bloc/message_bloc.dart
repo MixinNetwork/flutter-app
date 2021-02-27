@@ -14,16 +14,16 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 abstract class _MessageEvent extends Equatable {
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class _MessageInitEvent extends _MessageEvent {
   _MessageInitEvent({this.centerOffset});
 
-  final int centerOffset;
+  final int? centerOffset;
 
   @override
-  List<Object> get props => [centerOffset];
+  List<Object?> get props => [centerOffset];
 }
 
 class _MessageLoadMoreEvent extends _MessageEvent {}
@@ -47,19 +47,19 @@ class MessageState extends Equatable {
     this.center,
     this.bottom = const [],
     this.conversationId,
-    this.bottomOffset,
-    this.topOffset,
+    this.bottomOffset = 0,
+    this.topOffset = 0,
   });
 
-  final String conversationId;
+  final String? conversationId;
   final List<MessageItem> top;
-  final MessageItem center;
+  final MessageItem? center;
   final List<MessageItem> bottom;
   final int bottomOffset;
   final int topOffset;
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         conversationId,
         top,
         center,
@@ -68,18 +68,18 @@ class MessageState extends Equatable {
         topOffset,
       ];
 
-  MessageItem get bottomMessage =>
+  MessageItem? get bottomMessage =>
       bottom.lastOrNull ?? center ?? top.lastOrNull;
 
-  MessageItem get topMessage => top.firstOrNull ?? center ?? bottom.firstOrNull;
+  MessageItem? get topMessage => top.firstOrNull ?? center ?? bottom.firstOrNull;
 
   MessageState copyWith({
-    final String conversationId,
-    final List<MessageItem> top,
-    final MessageItem center,
-    final List<MessageItem> bottom,
-    final int bottomOffset,
-    final int topOffset,
+    final String? conversationId,
+    final List<MessageItem>? top,
+    final MessageItem? center,
+    final List<MessageItem>? bottom,
+    final int? bottomOffset,
+    final int? topOffset,
   }) {
     return MessageState(
       conversationId: conversationId ?? this.conversationId,
@@ -95,11 +95,11 @@ class MessageState extends Equatable {
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
     with SubscribeMixin {
   MessageBloc({
-    this.conversationCubit,
-    this.messagesDao,
-    this.limit,
+    required this.conversationCubit,
+    required this.messagesDao,
+    required this.limit,
   }) : super(const MessageState()) {
-    var conversationId = conversationCubit.state.conversationId;
+    var conversationId = conversationCubit.state?.conversationId;
 
     add(_MessageInitEvent());
     addSubscription(
@@ -211,10 +211,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _resetMessageList(
     String conversationId,
     int limit, [
-    int centerOffset,
+    int? centerOffset,
   ]) async {
     final _centerOffset =
-        centerOffset ?? (conversationCubit.state.unseenMessageCount ?? 0) - 1;
+        centerOffset ?? (conversationCubit.state?.unseenMessageCount ?? 0) - 1;
 
     final state = await _messagesByConversationId(
       conversationId,
@@ -245,7 +245,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _messagesByConversationId(
     String conversationId,
     int limit, {
-    int centerOffset,
+    int centerOffset = 0,
   }) async {
     final bottomOffset = max(centerOffset - limit ~/ 2, 0);
     final list = await messagesDao
@@ -257,11 +257,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         .get();
     final topOffset = list.length + bottomOffset;
 
-    MessageItem centerMessage;
+    MessageItem? centerMessage;
     if (centerOffset >= 0)
       centerMessage = list.getOrNull(max(centerOffset - bottomOffset, 0));
 
-    MessageItem center;
+    MessageItem? center;
     final top = <MessageItem>[];
     final bottom = <MessageItem>[];
     for (final item in list.reversed) {
@@ -282,7 +282,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
-  MessageState _insertOrReplace(String conversationId, List<MessageItem> list) {
+  MessageState? _insertOrReplace(String conversationId, List<MessageItem> list) {
     final top = state.top.toList();
     var center = state.center;
     var bottom = state.bottom.toList();
@@ -312,7 +312,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       }
 
       // New message must be after last bottom message.
-      if (bottomMessage.createdAt.isAfter(item.createdAt)) continue;
+      if (bottomMessage != null && bottomMessage.createdAt.isAfter(item.createdAt)) continue;
 
       if (state.bottomOffset == 0) {
         bottom = [...bottom, item];
@@ -331,7 +331,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       final oldMaxScrollExtent = position.maxScrollExtent;
       final oldPixels = position.pixels;
       if (oldPixels == oldMaxScrollExtent) {
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
           if (!scrollController.hasClients) return;
           final newMaxScrollExtent = position.maxScrollExtent;
           final newPixels = position.pixels;

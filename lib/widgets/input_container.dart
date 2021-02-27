@@ -31,7 +31,7 @@ import 'mention_panel.dart';
 
 class InputContainer extends StatelessWidget {
   const InputContainer({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -60,7 +60,7 @@ class InputContainer extends StatelessWidget {
             },
             dispose: (BuildContext context,
                     TextEditingController textEditingController) =>
-                textEditingController?.dispose(),
+                textEditingController.dispose(),
             child: LayoutBuilder(
               builder: (context, BoxConstraints constraints) => SizedBox(
                 height: 56,
@@ -141,12 +141,15 @@ class InputContainer extends StatelessWidget {
 
     final text = textEditingController.value.text;
     final valid = textEditingController.value.isComposingRangeValid;
-    if (text?.trim()?.isNotEmpty == true && !valid) {
+    if (text.trim().isNotEmpty == true && !valid) {
       textEditingController.text = '';
-      Provider.of<AccountServer>(context, listen: false).sendTextMessage(
-        BlocProvider.of<ConversationCubit>(context).state.conversationId,
-        text,
-      );
+      final conversationItem =
+          BlocProvider.of<ConversationCubit>(context).state;
+      if (conversationItem != null)
+        Provider.of<AccountServer>(context, listen: false).sendTextMessage(
+          conversationItem.conversationId,
+          text,
+        );
     }
     return valid;
   }
@@ -154,7 +157,7 @@ class InputContainer extends StatelessWidget {
 
 class _StickerButton extends StatelessWidget {
   const _StickerButton({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -168,7 +171,7 @@ class _StickerButton extends StatelessWidget {
         child: Builder(
           builder: (context) =>
               BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-            converter: (state) => (state?.length ?? 0) + 2,
+            converter: (state) => (state.length) + 2,
             builder: (context, tabLength) => DefaultTabController(
               length: tabLength,
               child: Builder(
@@ -208,8 +211,8 @@ class _StickerButton extends StatelessWidget {
 
 class _FileButton extends StatelessWidget {
   const _FileButton({
-    Key key,
-    @required this.actionColor,
+    Key? key,
+    required this.actionColor,
   }) : super(key: key);
 
   final Color actionColor;
@@ -221,17 +224,22 @@ class _FileButton extends StatelessWidget {
       color: actionColor,
       onTap: () async {
         final file = await selectFile();
+        if (file == null) return;
+
+        final conversationItem =
+            BlocProvider.of<ConversationCubit>(context).state;
+        if (conversationItem == null) return;
 
         if (file.isImage) {
-          if (!await _PreviewImage.push(context, file)) return;
+          if ((await _PreviewImage.push(context, file)) ?? false) return;
           return Provider.of<AccountServer>(context, listen: false)
               .sendImageMessage(
-            BlocProvider.of<ConversationCubit>(context).state.conversationId,
+            conversationItem.conversationId,
             File(file.path),
           );
         }
         Provider.of<AccountServer>(context, listen: false).sendAttachment(
-          BlocProvider.of<ConversationCubit>(context).state.conversationId,
+          conversationItem.conversationId,
           file,
         );
       },
@@ -240,11 +248,14 @@ class _FileButton extends StatelessWidget {
 }
 
 class _PreviewImage extends StatelessWidget {
-  const _PreviewImage({Key key, this.xFile}) : super(key: key);
+  const _PreviewImage({
+    Key? key,
+    required this.xFile,
+  }) : super(key: key);
 
   final XFile xFile;
 
-  static Future<bool> push(BuildContext context, XFile xFile) {
+  static Future<bool?> push(BuildContext context, XFile xFile) {
     return Navigator.push<bool>(
       context,
       MaterialPageRoute(
@@ -337,8 +348,8 @@ class _PreviewImage extends StatelessWidget {
 
 class HighlightTextEditingController extends TextEditingController {
   HighlightTextEditingController({
-    this.highlightTextStyle,
-    this.participantsCubit,
+    required this.highlightTextStyle,
+    required this.participantsCubit,
   });
 
   final TextStyle highlightTextStyle;
@@ -351,9 +362,9 @@ class HighlightTextEditingController extends TextEditingController {
 
   @override
   TextSpan buildTextSpan({
-    @required BuildContext context,
-    TextStyle style,
-    @required bool withComposing,
+    required BuildContext context,
+    TextStyle? style,
+    required bool withComposing,
   }) {
     if (!value.isComposingRangeValid || !withComposing)
       return _buildTextSpan(text, style);
@@ -362,7 +373,7 @@ class HighlightTextEditingController extends TextEditingController {
       _buildTextSpan(value.composing.textBefore(value.text), style),
       _buildTextSpan(
         value.composing.textInside(value.text),
-        style.merge(
+        style?.merge(
           const TextStyle(decoration: TextDecoration.underline),
         ),
       ),
@@ -370,18 +381,18 @@ class HighlightTextEditingController extends TextEditingController {
     ]);
   }
 
-  TextSpan _buildTextSpan(String text, TextStyle style) {
+  TextSpan _buildTextSpan(String text, TextStyle? style) {
     final children = <InlineSpan>[];
     text.splitMapJoin(
       mentionNumberRegExp,
       onMatch: (match) {
         final text = match[0];
         final index = participantsCubit.state.indexWhere(
-            (user) => '@${user.identityNumber}' == text.trimRight());
+            (user) => '@${user.identityNumber}' == text?.trimRight());
         children.add(TextSpan(
             text: text,
             style: index > -1 ? style?.merge(highlightTextStyle) : style));
-        return text;
+        return text ?? '';
       },
       onNonMatch: (text) {
         children.add(TextSpan(text: text, style: style));

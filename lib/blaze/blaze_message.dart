@@ -5,8 +5,8 @@ part 'blaze_message.g.dart';
 @JsonSerializable()
 class BlazeMessage {
   BlazeMessage({
-    this.id,
-    this.action,
+    required this.id,
+    required this.action,
     this.data,
     this.params,
     // this.error
@@ -22,7 +22,7 @@ class BlazeMessage {
   @JsonKey(name: 'params')
   dynamic params;
   @JsonKey(name: 'data')
-  Map<String, dynamic> data;
+  Map<String, dynamic>? data;
 
   Map<String, dynamic> toJson() => _$BlazeMessageToJson(this);
 }

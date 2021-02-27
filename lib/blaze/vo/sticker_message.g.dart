@@ -9,8 +9,8 @@ part of 'sticker_message.dart';
 StickerMessage _$StickerMessageFromJson(Map<String, dynamic> json) {
   return StickerMessage(
     json['sticker_id'] as String,
-    json['album_id'] as String,
-    json['name'] as String,
+    json['album_id'] as String?,
+    json['name'] as String?,
   );
 }
 

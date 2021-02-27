@@ -8,10 +8,10 @@ class MessageCategoryTypeConverter
   const MessageCategoryTypeConverter();
 
   @override
-  MessageCategory mapToDart(String fromDb) =>
+  MessageCategory? mapToDart(String? fromDb) =>
       EnumToString.fromString(MessageCategory.values, fromDb?.camelCase);
 
   @override
-  String mapToSql(MessageCategory value) =>
-      EnumToString.convertToString(value)?.constantCase;
+  String? mapToSql(MessageCategory? value) =>
+      EnumToString.convertToString(value).constantCase;
 }

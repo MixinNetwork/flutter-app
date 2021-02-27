@@ -12,10 +12,10 @@ import '../message_status.dart';
 // todo status
 class FileMessage extends StatelessWidget {
   const FileMessage({
-    Key key,
-    @required this.showNip,
-    @required this.isCurrentUser,
-    @required this.message,
+    Key? key,
+    required this.showNip,
+    required this.isCurrentUser,
+    required this.message,
   }) : super(key: key);
 
   final bool showNip;
@@ -41,16 +41,24 @@ class FileMessage extends StatelessWidget {
                     child: SizedBox.fromSize(
                       size: const Size.square(38),
                       child: Center(
-                        child: Text(
-                          extensionFromMime(lookupMimeType(message.mediaName))
-                                  ?.toUpperCase() ??
-                              'FILE',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color:
-                                BrightnessData.themeOf(context).secondaryText,
-                          ),
-                        ),
+                        child: Builder(builder: (context) {
+                          var extension = 'FILE';
+                          if (message.mediaName != null) {
+                            final _lookupMimeType =
+                                lookupMimeType(message.mediaName!);
+                            if (_lookupMimeType != null)
+                              extension = extensionFromMime(_lookupMimeType)
+                                  .toUpperCase();
+                          }
+                          return Text(
+                            extension,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  BrightnessData.themeOf(context).secondaryText,
+                            ),
+                          );
+                        }),
                       ),
                     ),
                   ),
@@ -61,7 +69,7 @@ class FileMessage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      message.mediaName,
+                      message.mediaName ?? '',
                       style: TextStyle(
                         fontSize: 15,
                         color: BrightnessData.themeOf(context).text,

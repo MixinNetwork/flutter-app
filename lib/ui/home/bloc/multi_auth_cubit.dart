@@ -42,5 +42,5 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
   static MultiAuthCubit of(BuildContext context) =>
       BlocProvider.of<MultiAuthCubit>(context);
 
-  String get currentUserId => state?.current?.account?.userId;
+  String? get currentUserId => state.current?.account.userId;
 }

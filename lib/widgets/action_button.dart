@@ -5,7 +5,7 @@ import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 
 class ActionButton extends StatelessWidget {
   const ActionButton({
-    this.name,
+    required this.name,
     this.onTap,
     this.padding = const EdgeInsets.all(8),
     this.size = 24,
@@ -16,13 +16,13 @@ class ActionButton extends StatelessWidget {
   });
 
   final String name;
-  final Function onTap;
+  final VoidCallback? onTap;
   final EdgeInsets padding;
   final double size;
-  final Color color;
-  final PointerEnterEventListener onEnter;
-  final PointerExitEventListener onExit;
-  final PointerHoverEventListener onHover;
+  final Color? color;
+  final PointerEnterEventListener? onEnter;
+  final PointerExitEventListener? onExit;
+  final PointerHoverEventListener? onHover;
 
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(

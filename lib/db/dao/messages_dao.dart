@@ -30,14 +30,14 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Stream<List<MessageItem>> get insertOrReplaceMessageStream => db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
       .asyncMap(
-        (event) => db.messagesByMessageIds(event).get(),
+        (event) => db.messagesByMessageIds(event.toList()).get(),
       )
       .distinct();
 
   Future<int> insert(Message message, String userId) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
     if (message.category.isText) {
-      final content = message.content.fts5ContentFilter();
+      final content = message.content!.fts5ContentFilter();
       insertFts(message.messageId, message.conversationId, content,
           message.createdAt, message.userId);
     }
@@ -56,8 +56,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
 
-  Future<SendingMessage> sendingMessage(String messageId) {
-    return db.sendingMessage(messageId).getSingle();
+  Future<SendingMessage?> sendingMessage(String messageId) async {
+    final sendingMessage = await db.sendingMessage(messageId).get();
+    return sendingMessage.isNotEmpty ? sendingMessage.single : null;
   }
 
   Future<int> updateMessageStatusById(

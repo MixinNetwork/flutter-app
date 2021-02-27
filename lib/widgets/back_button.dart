@@ -5,13 +5,13 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 
 class MixinBackButton extends StatelessWidget {
   const MixinBackButton({
-    Key key,
+    Key? key,
     this.color,
     this.onTap,
   }) : super(key: key);
 
-  final Color color;
-  final VoidCallback onTap;
+  final Color? color;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => Padding(

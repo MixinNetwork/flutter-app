@@ -7,7 +7,7 @@ import 'brightness_observer.dart';
 
 class StatusPending extends StatelessWidget {
   const StatusPending({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -27,8 +27,8 @@ class StatusPending extends StatelessWidget {
             ),
             CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(
-                  BrightnessData.themeOf(context).text),
+              valueColor:
+                  AlwaysStoppedAnimation(BrightnessData.themeOf(context).text),
             ),
           ],
         ),
@@ -36,7 +36,9 @@ class StatusPending extends StatelessWidget {
 }
 
 class StatusWarning extends StatelessWidget {
-  const StatusWarning({Key key}) : super(key: key);
+  const StatusWarning({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -50,7 +52,9 @@ class StatusWarning extends StatelessWidget {
 }
 
 class StatusDownload extends StatelessWidget {
-  const StatusDownload({Key key}) : super(key: key);
+  const StatusDownload({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -64,24 +68,25 @@ class StatusDownload extends StatelessWidget {
 }
 
 class StatusUpload extends StatelessWidget {
-  const StatusUpload({Key key}) : super(key: key);
+  const StatusUpload({
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
-    child: Center(
-      child: SvgPicture.asset(
-        Resources.assetsImagesUploadSvg,
-        color: BrightnessData.themeOf(context).text,
-      ),
-    ),
-  );
+        child: Center(
+          child: SvgPicture.asset(
+            Resources.assetsImagesUploadSvg,
+            color: BrightnessData.themeOf(context).text,
+          ),
+        ),
+      );
 }
-
 
 class _StatusLayout extends StatelessWidget {
   const _StatusLayout({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;

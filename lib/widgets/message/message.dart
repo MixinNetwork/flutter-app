@@ -26,15 +26,15 @@ import 'item/waiting_message.dart';
 
 class MessageItemWidget extends StatelessWidget {
   const MessageItemWidget({
-    Key key,
-    this.message,
+    Key? key,
+    required this.message,
     this.prev,
     this.next,
   }) : super(key: key);
 
   final MessageItem message;
-  final MessageItem prev;
-  final MessageItem next;
+  final MessageItem? prev;
+  final MessageItem? next;
 
   @override
   Widget build(BuildContext context) {
@@ -63,9 +63,7 @@ class MessageItemWidget extends StatelessWidget {
           builder: (context) {
             if (message.type == MessageCategory.appButtonGroup)
               return ActionMessage(
-                message: MessageItem(
-                  content: message.content,
-                ),
+                message: message,
               );
 
             if (message.type == MessageCategory.systemConversation)
@@ -146,15 +144,15 @@ class MessageItemWidget extends StatelessWidget {
 
 class _MessageBubbleMargin extends StatelessWidget {
   const _MessageBubbleMargin({
-    Key key,
-    @required this.isCurrentUser,
-    @required this.userName,
-    @required this.builder,
-    @required this.menus,
+    Key? key,
+    required this.isCurrentUser,
+    required this.userName,
+    required this.builder,
+    required this.menus,
   }) : super(key: key);
 
   final bool isCurrentUser;
-  final String userName;
+  final String? userName;
   final WidgetBuilder builder;
   final List<ContextMenu> menus;
 
@@ -164,7 +162,7 @@ class _MessageBubbleMargin extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (userName != null) MessageName(userName: userName),
+            if (userName != null) MessageName(userName: userName!),
             ContextMenuPortalEntry(
               menus: menus,
               child: Builder(builder: builder),

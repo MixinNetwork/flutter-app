@@ -12,10 +12,10 @@ import '../message_status.dart';
 
 class TextMessage extends StatelessWidget {
   const TextMessage({
-    Key key,
-    @required this.showNip,
-    @required this.isCurrentUser,
-    @required this.message,
+    Key? key,
+    required this.showNip,
+    required this.isCurrentUser,
+    required this.message,
   }) : super(key: key);
 
   final bool showNip;
@@ -30,12 +30,11 @@ class TextMessage extends StatelessWidget {
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
           children: [
-            Builder(builder: (context) {
-              return HighlightText(
-                message.content,
+            Builder(builder: (context) => HighlightText(
+                message.content!,
                 highlightTextSpans: [
                   ...mentionNumberRegExp
-                      .allMatches(message.content)
+                      .allMatches(message.content!)
                       .where((element) {
                     // TODO: Check identityNumber validity.
                     return true;
@@ -44,20 +43,20 @@ class TextMessage extends StatelessWidget {
                     return e;
                   }).map(
                     (RegExpMatch e) => HighlightTextSpan(
-                      e[0],
+                      e[0]!,
                       style: TextStyle(
                         color: BrightnessData.themeOf(context).accent,
                       ),
                       onTap: () {},
                     ),
                   ),
-                  ...uriRegExp.allMatches(message.content).map(
+                  ...uriRegExp.allMatches(message.content!).map(
                         (e) => HighlightTextSpan(
-                          e[0],
+                          e[0]!,
                           style: TextStyle(
                             color: BrightnessData.themeOf(context).accent,
                           ),
-                          onTap: () => openUri(e[0]),
+                          onTap: () => openUri(e[0]!),
                         ),
                       ),
                 ],
@@ -65,8 +64,7 @@ class TextMessage extends StatelessWidget {
                   fontSize: 16,
                   color: BrightnessData.themeOf(context).text,
                 ),
-              );
-            }),
+              )),
             const SizedBox(width: 6),
             Row(
               mainAxisSize: MainAxisSize.min,

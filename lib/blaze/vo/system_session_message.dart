@@ -15,7 +15,7 @@ class SystemSessionMessage {
   @JsonKey(name: 'user_id', disallowNullValue: true)
   String userId;
   @JsonKey(name: 'session_id', disallowNullValue: true)
-  String sessionId;
+  String? sessionId;
 
   Map<String, dynamic> toJson() => _$SystemSessionMessageToJson(this);
 }

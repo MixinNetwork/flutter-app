@@ -18,21 +18,21 @@ class _HoverOverlayCubit extends Cubit<Tuple2<bool, bool>> {
 
 class HoverOverlay extends StatelessWidget {
   const HoverOverlay({
-    Key key,
-    @required this.closeDuration,
-    @required this.child,
+    Key? key,
+    required this.closeDuration,
+    required this.child,
     this.childAnchor,
     this.portalAnchor,
-    @required this.portal,
-    @required this.duration,
+    required this.portal,
+    required this.duration,
     this.closeWaitDuration = Duration.zero,
     this.inCurve = Curves.linear,
     this.outCurve = Curves.linear,
     this.portalBuilder,
   }) : super(key: key);
 
-  final Alignment portalAnchor;
-  final Alignment childAnchor;
+  final Alignment? portalAnchor;
+  final Alignment? childAnchor;
   final Widget portal;
   final Widget child;
   final Duration closeDuration;
@@ -40,7 +40,7 @@ class HoverOverlay extends StatelessWidget {
   final Duration closeWaitDuration;
   final Curve inCurve;
   final Curve outCurve;
-  final ValueWidgetBuilder portalBuilder;
+  final ValueWidgetBuilder? portalBuilder;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
@@ -67,7 +67,7 @@ class HoverOverlay extends StatelessWidget {
                   duration:
                       visible ? duration : Duration(microseconds: totalClose),
                   builder: (context, progress, child) =>
-                      portalBuilder?.call(context, progress, child) ?? child,
+                      portalBuilder?.call(context, progress, child) ?? child!,
                   child: MouseRegion(
                     onEnter: (_) => BlocProvider.of<_HoverOverlayCubit>(context)
                         .portalHovering(),

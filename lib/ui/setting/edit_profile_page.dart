@@ -16,15 +16,15 @@ class EditProfilePage extends StatelessWidget {
     final nameTextEditingController = TextEditingController();
     final bioTextEditingController = TextEditingController();
     return BlocConverter<MultiAuthCubit, MultiAuthState,
-        Tuple2<String, String>>(
+        Tuple2<String?, String?>>(
       converter: (state) => Tuple2(
-        state.current?.account?.fullName,
-        state.current?.account?.biography,
+        state.current?.account.fullName,
+        state.current?.account.biography,
       ),
       immediatelyCallListener: true,
       listener: (context, state) {
-        nameTextEditingController.text = state?.item1;
-        bioTextEditingController.text = state?.item2;
+        nameTextEditingController.text = state.item1!;
+        bioTextEditingController.text = state.item2!;
       },
       child: Scaffold(
         backgroundColor: BrightnessData.themeOf(context).background,
@@ -35,6 +35,7 @@ class EditProfilePage extends StatelessWidget {
               onTap: () {},
               backgroundTransparent: true,
               child: Text(Localization.of(context).save),
+              value: 'TODO',
             ),
           ],
         ),
@@ -43,8 +44,8 @@ class EditProfilePage extends StatelessWidget {
             children: [
               const SizedBox(height: 40),
               ClipOval(
-                child: BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-                  converter: (state) => state.current?.account?.avatarUrl,
+                child: BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+                  converter: (state) => state.current?.account.avatarUrl,
                   when: (a, b) => b != null,
                   builder: (context, avatarUrl) => CachedNetworkImage(
                     imageUrl: avatarUrl,
@@ -54,8 +55,8 @@ class EditProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-                converter: (state) => state.current?.account?.identityNumber,
+              BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+                converter: (state) => state.current?.account.identityNumber,
                 when: (a, b) => b != null,
                 builder: (context, identityNumber) => Text(
                   'Mixin ID: $identityNumber',
@@ -80,8 +81,8 @@ class EditProfilePage extends StatelessWidget {
                 controller: bioTextEditingController,
               ),
               const SizedBox(height: 32),
-              BlocConverter<MultiAuthCubit, MultiAuthState, String>(
-                converter: (state) => state.current?.account?.phone,
+              BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+                converter: (state) => state.current?.account.phone,
                 when: (a, b) => b != null,
                 builder: (context, phone) => _Item(
                   title: Localization.of(context).phoneNumber,
@@ -90,16 +91,17 @@ class EditProfilePage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 70),
-              BlocConverter<MultiAuthCubit, MultiAuthState, String>(
+              BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
                 converter: (state) {
-                  final createdAt = state.current?.account?.createdAt;
+                  final createdAt = state.current?.account.createdAt;
                   if (createdAt == null) return null;
-                  return DateFormat.yMMMd()
-                      .format(createdAt);
+                  return DateFormat.yMMMd().format(createdAt);
                 },
                 when: (a, b) => b != null,
                 builder: (context, createdAt) => Text(
-                  Localization.of(context).pageEditProfileJoin(createdAt),
+                  createdAt != null
+                      ? Localization.of(context).pageEditProfileJoin(createdAt)
+                      : '',
                   style: TextStyle(
                     fontSize: 14,
                     color: BrightnessData.themeOf(context).secondaryText,
@@ -117,9 +119,9 @@ class EditProfilePage extends StatelessWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key key,
-    this.title,
-    this.controller,
+    Key? key,
+    required this.title,
+    required this.controller,
     this.readOnly = false,
   }) : super(key: key);
 

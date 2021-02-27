@@ -12,15 +12,15 @@ import 'package:tuple/tuple.dart';
 
 import 'multi_auth_cubit.dart';
 
-class MentionCubit extends Cubit<Tuple2<String, List<User>>>
+class MentionCubit extends Cubit<Tuple2<String?, List<User>>>
     with SubscribeMixin {
   MentionCubit({
-    @required this.userDao,
-    @required this.multiAuthCubit,
-    @required this.participantsCubit,
+    required this.userDao,
+    required this.multiAuthCubit,
+    required this.participantsCubit,
   }) : super(const Tuple2(null, [])) {
     addSubscription(
-      Rx.combineLatest2<String, List<User>, Tuple2<String, List<User>>>(
+      Rx.combineLatest2<String?, List<User>, Tuple2<String?, List<User>>>(
         streamController.stream,
         participantsCubit,
         (a, b) => Tuple2(
@@ -29,7 +29,7 @@ class MentionCubit extends Cubit<Tuple2<String, List<User>>>
               ? participantsCubit.state
                   .where(
                     (user) =>
-                        user.fullName.contains(a) ||
+                        (user.fullName?.contains(a) ?? false) ||
                         user.identityNumber.contains(a),
                   )
                   .toList()
@@ -42,7 +42,7 @@ class MentionCubit extends Cubit<Tuple2<String, List<User>>>
   final UserDao userDao;
   final MultiAuthCubit multiAuthCubit;
   final ParticipantsCubit participantsCubit;
-  final StreamController streamController = StreamController<String>();
+  final streamController = StreamController<String?>();
 
   @override
   Future<void> close() async {
@@ -50,5 +50,5 @@ class MentionCubit extends Cubit<Tuple2<String, List<User>>>
     await super.close();
   }
 
-  void send(String keyword) => streamController.add(keyword);
+  void send(String? keyword) => streamController.add(keyword);
 }

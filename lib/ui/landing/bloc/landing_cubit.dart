@@ -25,9 +25,9 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
         )) {
     client = Client(
       dioOptions: BaseOptions(
-          headers: {
-            'Accept-Language': locale?.languageCode,
-          },
+        headers: {
+          'Accept-Language': locale.languageCode,
+        },
       ),
     );
     _initLandingListen();
@@ -38,10 +38,10 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
   final MultiAuthCubit authCubit;
   final StreamController<int> periodicStreamController =
       StreamController<int>();
-  Client client;
-  StreamSubscription<int> streamSubscription;
-  signal.ECKeyPair keyPair;
-  String deviceId;
+  late Client client;
+  StreamSubscription<int>? streamSubscription;
+  late signal.ECKeyPair keyPair;
+  String? deviceId;
 
   Future<void> requestAuthUrl() async {
     await streamSubscription?.cancel();
@@ -79,7 +79,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
         })
         .asyncMap((event) async {
           final rsp = await client.provisioningApi.getProvisioning(deviceId);
-          return rsp?.data?.secret;
+          return rsp.data?.secret;
         })
         .handleError((_) => null)
         .where((secret) => secret?.isNotEmpty == true)
@@ -100,6 +100,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           }
         })
         .where((auth) => auth != null)
+        .cast<Tuple2<Account, String>>()
         .listen((auth) => authCubit.signIn(
               AuthState(
                 account: auth.item1,
@@ -109,7 +110,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     addSubscription(subscription);
   }
 
-  FutureOr<Tuple2<Account, String>> _verify(secret) async {
+  FutureOr<Tuple2<Account, String>?> _verify(secret) async {
     final result =
         signal.decrypt(base64.encode(keyPair.privateKey.serialize()), secret);
     final msg = json.decode(String.fromCharCodes(result));

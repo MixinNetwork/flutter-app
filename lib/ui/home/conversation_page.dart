@@ -32,7 +32,7 @@ import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
 class ConversationPage extends StatelessWidget {
-  const ConversationPage({Key key}) : super(key: key);
+  const ConversationPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class ConversationPage extends StatelessWidget {
 }
 
 class _Empty extends StatelessWidget {
-  const _Empty({Key key}) : super(key: key);
+  const _Empty({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +86,7 @@ class _Empty extends StatelessWidget {
 
 class _List extends StatelessWidget {
   const _List({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -96,7 +96,7 @@ class _List extends StatelessWidget {
               ConversationListBloc, PagingState<ConversationItem>, int>(
             converter: (state) => state.count,
             builder: (context, count) {
-              if (count == null || count <= 0) return const _Empty();
+              if (count <= 0) return const _Empty();
               return ScrollablePositionedList.builder(
                 key: PageStorageKey(slideCategoryState),
                 itemPositionsListener:
@@ -106,14 +106,14 @@ class _List extends StatelessWidget {
                 itemBuilder: (context, index) => BlocConverter<
                     ConversationListBloc,
                     PagingState<ConversationItem>,
-                    ConversationItem>(
+                    ConversationItem?>(
                   converter: (state) => state.map[index],
                   builder: (context, conversation) {
                     if (conversation == null) return const SizedBox(height: 80);
-                    return BlocConverter<ConversationCubit, ConversationItem,
+                    return BlocConverter<ConversationCubit, ConversationItem?,
                         bool>(
                       converter: (state) =>
-                          conversation?.conversationId == state?.conversationId,
+                          conversation.conversationId == state?.conversationId,
                       builder: (context, selected) => ContextMenuPortalEntry(
                         child: _Item(
                           selected: selected,
@@ -172,10 +172,10 @@ class _List extends StatelessWidget {
 
 class _Item extends StatelessWidget {
   const _Item({
-    Key key,
+    Key? key,
     this.selected = false,
-    @required this.conversation,
-    this.onTap,
+    required this.conversation,
+    required this.onTap,
   }) : super(key: key);
 
   final bool selected;
@@ -218,10 +218,11 @@ class _Item extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                conversation?.groupName?.trim()?.isNotEmpty ==
-                                        true
-                                    ? conversation.groupName
-                                    : conversation.name,
+                                (conversation.groupName?.trim().isNotEmpty ==
+                                            true
+                                        ? conversation.groupName
+                                        : conversation.name) ??
+                                    '',
                                 style: TextStyle(
                                   color: BrightnessData.themeOf(context).text,
                                   fontSize: 16,
@@ -271,7 +272,10 @@ class _Item extends StatelessWidget {
 }
 
 class _StatusRow extends StatelessWidget {
-  const _StatusRow({Key key, this.conversation}) : super(key: key);
+  const _StatusRow({
+    Key? key,
+    required this.conversation,
+  }) : super(key: key);
   final ConversationItem conversation;
 
   @override
@@ -301,8 +305,8 @@ class _StatusRow extends StatelessWidget {
 
 class _UnreadText extends StatelessWidget {
   const _UnreadText({
-    Key key,
-    @required this.conversation,
+    Key? key,
+    required this.conversation,
   }) : super(key: key);
 
   final ConversationItem conversation;
@@ -327,9 +331,9 @@ class _UnreadText extends StatelessWidget {
 
 class _MessagePreview extends StatelessWidget {
   const _MessagePreview({
-    Key key,
-    @required this.messageColor,
-    @required this.conversation,
+    Key? key,
+    required this.messageColor,
+    required this.conversation,
   }) : super(key: key);
 
   final Color messageColor;
@@ -348,14 +352,17 @@ class _MessagePreview extends StatelessWidget {
 }
 
 class _MessageContent extends StatelessWidget {
-  const _MessageContent({Key key, this.conversation}) : super(key: key);
+  const _MessageContent({
+    Key? key,
+    required this.conversation,
+  }) : super(key: key);
   final ConversationItem conversation;
 
   @override
   Widget build(BuildContext context) {
     final dynamicColor = BrightnessData.themeOf(context).secondaryText;
-    String icon;
-    String content;
+    String? icon;
+    String? content;
 
     if (conversation.messageStatus == MessageStatus.failed) {
       icon = Resources.assetsImagesSendingSvg;
@@ -393,7 +400,7 @@ class _MessageContent extends StatelessWidget {
       content = '[${Localization.of(context).audio}]';
       icon = Resources.assetsImagesAudioSvg;
     } else if (conversation.contentType == MessageCategory.appButtonGroup) {
-      content = jsonDecode(conversation.content)
+      content = jsonDecode(conversation.content!)
           .map((e) => ActionData.fromJson(e))
           .map((e) => '[${e.label}]')
           .join();
@@ -439,13 +446,16 @@ class _MessageContent extends StatelessWidget {
 }
 
 class _MessageStatusIcon extends StatelessWidget {
-  const _MessageStatusIcon({Key key, this.conversation}) : super(key: key);
+  const _MessageStatusIcon({
+    Key? key,
+    required this.conversation,
+  }) : super(key: key);
 
   final ConversationItem conversation;
 
   @override
   Widget build(BuildContext context) {
-    if (MultiAuthCubit.of(context)?.state?.current?.account?.userId ==
+    if (MultiAuthCubit.of(context).state.current?.account.userId ==
             EnumToString.convertToString(conversation.messageStatus) &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&

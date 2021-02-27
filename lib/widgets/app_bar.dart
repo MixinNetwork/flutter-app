@@ -4,9 +4,9 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 
 class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MixinAppBar({
-    Key key,
+    Key? key,
     this.title,
-    this.actions,
+    this.actions = const [],
   }) : super(key: key);
 
   final dynamic title;
@@ -35,8 +35,8 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
               ),
       ),
       actions: actions
-          ?.map((e) => DefaultTextStyle(style: actionTextStyle, child: e))
-          ?.toList(),
+          .map((e) => DefaultTextStyle(style: actionTextStyle, child: e))
+          .toList(),
       elevation: 0,
       centerTitle: true,
       backgroundColor: BrightnessData.themeOf(context).primary,

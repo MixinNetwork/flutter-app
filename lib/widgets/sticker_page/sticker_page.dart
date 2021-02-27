@@ -17,12 +17,12 @@ import 'bloc/cubit/sticker_cubit.dart';
 
 class StickerPage extends StatelessWidget {
   const StickerPage({
-    Key key,
+    Key? key,
     this.tabController,
-    this.stickerAlbumsCubit,
+    required this.stickerAlbumsCubit,
   }) : super(key: key);
 
-  final TabController tabController;
+  final TabController? tabController;
   final StickerAlbumsCubit stickerAlbumsCubit;
 
   @override
@@ -43,7 +43,7 @@ class StickerPage extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(11),
               child: BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-                converter: (state) => (state?.length ?? 0) + 2,
+                converter: (state) => (state.length) + 2,
                 builder: (context, tabLength) => Column(
                   children: [
                     Expanded(
@@ -70,8 +70,8 @@ class StickerPage extends StatelessWidget {
 
 class _StickerAlbumPage extends StatelessWidget {
   const _StickerAlbumPage({
-    Key key,
-    this.index,
+    Key? key,
+    required this.index,
   }) : super(key: key);
 
   final int index;
@@ -105,7 +105,7 @@ class _StickerAlbumPage extends StatelessWidget {
       },
       child: Builder(
         builder: (context) => BlocConverter<StickerCubit, List<Sticker>, int>(
-          converter: (state) => state?.length ?? 0,
+          converter: (state) => state.length,
           builder: (context, itemCount) => GridView.builder(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -129,10 +129,10 @@ class _StickerAlbumPage extends StatelessWidget {
 
 class _StickerAlbumPageItem extends StatelessWidget {
   const _StickerAlbumPageItem({
-    Key key,
-    this.index,
-    this.updateUsedAt,
-    this.rightClickDelete,
+    Key? key,
+    required this.index,
+    required this.updateUsedAt,
+    this.rightClickDelete = false,
   }) : super(key: key);
 
   final int index;
@@ -149,14 +149,16 @@ class _StickerAlbumPageItem extends StatelessWidget {
           onTap: () async {
             final accountServer =
                 Provider.of<AccountServer>(context, listen: false);
+            final conversationItem =
+                BlocProvider.of<ConversationCubit>(context).state;
+            if (conversationItem == null) return;
+
             await Future.wait([
               if (updateUsedAt)
                 accountServer.database.stickerDao
                     .updateUsedAt(sticker.stickerId, DateTime.now()),
               accountServer.sendStickerMessage(
-                BlocProvider.of<ConversationCubit>(context)
-                    .state
-                    .conversationId,
+                conversationItem.conversationId,
                 sticker.stickerId,
               ),
             ]);
@@ -171,13 +173,13 @@ class _StickerAlbumPageItem extends StatelessWidget {
 
 class _StickerAlbumBar extends StatelessWidget {
   const _StickerAlbumBar({
-    Key key,
-    this.tabLength,
+    Key? key,
+    required this.tabLength,
     this.tabController,
   }) : super(key: key);
 
   final int tabLength;
-  final TabController tabController;
+  final TabController? tabController;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -211,8 +213,8 @@ class _StickerAlbumBar extends StatelessWidget {
 
 class _StickerAlbumBarItem extends StatelessWidget {
   const _StickerAlbumBarItem({
-    Key key,
-    this.index,
+    Key? key,
+    required this.index,
   }) : super(key: key);
 
   final int index;
@@ -231,7 +233,7 @@ class _StickerAlbumBarItem extends StatelessWidget {
                       1: Resources.assetsImagesPersonalStickerSvg,
                       // todo
                       // 2: Resources.assetsImagesGifStickerSvg
-                    }[index],
+                    }[index]!,
                     width: 24,
                     height: 24,
                   );

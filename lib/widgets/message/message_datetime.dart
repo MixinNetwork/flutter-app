@@ -5,8 +5,8 @@ import 'package:intl/intl.dart';
 
 class MessageDatetime extends StatelessWidget {
   const MessageDatetime({
-    Key key,
-    @required this.dateTime,
+    Key? key,
+    required this.dateTime,
   }) : super(key: key);
 
   final DateTime dateTime;

@@ -4,8 +4,8 @@ import '../brightness_observer.dart';
 
 class MessageName extends StatelessWidget {
   const MessageName({
-    Key key,
-    this.userName,
+    Key? key,
+    required this.userName,
   }) : super(key: key);
 
   final String userName;

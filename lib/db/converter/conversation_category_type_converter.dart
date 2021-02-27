@@ -6,10 +6,10 @@ class ConversationCategoryTypeConverter
   const ConversationCategoryTypeConverter();
 
   @override
-  ConversationCategory mapToDart(String fromDb) =>
+  ConversationCategory? mapToDart(String? fromDb) =>
       const ConversationCategoryJsonConverter().fromJson(fromDb);
 
   @override
-  String mapToSql(ConversationCategory value) =>
+  String? mapToSql(ConversationCategory? value) =>
       const ConversationCategoryJsonConverter().toJson(value);
 }

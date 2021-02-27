@@ -20,7 +20,12 @@ import 'vo/blaze_message_data.dart';
 
 class Blaze {
   Blaze(
-      this.userId, this.sessionId, this.privateKey, this.database, this.client);
+    this.userId,
+    this.sessionId,
+    this.privateKey,
+    this.database,
+    this.client,
+  );
 
   final String userId;
   final String sessionId;
@@ -28,7 +33,7 @@ class Blaze {
   final Database database;
   final Client client; // todo delete
 
-  IOWebSocketChannel channel;
+  late IOWebSocketChannel channel;
 
   void connect() {
     final token = signAuthTokenWithEdDSA(
@@ -47,10 +52,10 @@ class Blaze {
       final data = blazeMessage.data;
       if (blazeMessage.action == acknowledgeMessageReceipts) {
         // makeMessageStatus
-        updateRemoteMessageStatus(data['messageId'], MessageStatus.delivered);
+        updateRemoteMessageStatus(data!['messageId'], MessageStatus.delivered);
       } else if (blazeMessage.action == createMessage) {
-        final messageData = BlazeMessageData.fromJson(data);
-        if (messageData.userId == userId && messageData.category == null) {
+        final messageData = BlazeMessageData.fromJson(data!);
+        if (messageData.userId == userId) {
           updateRemoteMessageStatus(
               messageData.messageId, MessageStatus.delivered);
         } else {
@@ -85,7 +90,8 @@ class Blaze {
   }
 
   void _sendListPending() {
-    _sendGZip(BlazeMessage(id: const Uuid().v4(), action: 'LIST_PENDING_MESSAGES'));
+    _sendGZip(
+        BlazeMessage(id: const Uuid().v4(), action: 'LIST_PENDING_MESSAGES'));
   }
 
   void _sendGZip(BlazeMessage msg) {
@@ -100,7 +106,7 @@ class Blaze {
   }
 
   Future<void> disconnect() async {
-    await channel?.sink?.close();
+    await channel.sink.close();
   }
 }
 

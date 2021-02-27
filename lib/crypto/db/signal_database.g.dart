@@ -10,127 +10,113 @@ part of 'signal_database.dart';
 class Identity extends DataClass implements Insertable<Identity> {
   final int id;
   final String address;
-  final int registrationId;
+  final int? registrationId;
   final Uint8List publicKey;
-  final Uint8List privateKey;
-  final int nextPrekeyId;
+  final Uint8List? privateKey;
+  final int? nextPrekeyId;
   final int timestamp;
   Identity(
-      {@required this.id,
-      @required this.address,
+      {required this.id,
+      required this.address,
       this.registrationId,
-      @required this.publicKey,
+      required this.publicKey,
       this.privateKey,
       this.nextPrekeyId,
-      @required this.timestamp});
+      required this.timestamp});
   factory Identity.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String prefix}) {
+      {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return Identity(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id']),
-      address:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}address']),
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id'])!,
+      address: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}address'])!,
       registrationId: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}registration_id']),
       publicKey: uint8ListType
-          .mapFromDatabaseResponse(data['${effectivePrefix}public_key']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}public_key'])!,
       privateKey: uint8ListType
           .mapFromDatabaseResponse(data['${effectivePrefix}private_key']),
       nextPrekeyId: intType
           .mapFromDatabaseResponse(data['${effectivePrefix}next_prekey_id']),
       timestamp:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp']),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
     );
   }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (!nullToAbsent || id != null) {
-      map['_id'] = Variable<int>(id);
-    }
-    if (!nullToAbsent || address != null) {
-      map['address'] = Variable<String>(address);
-    }
+    map['_id'] = Variable<int>(id);
+    map['address'] = Variable<String>(address);
     if (!nullToAbsent || registrationId != null) {
-      map['registration_id'] = Variable<int>(registrationId);
+      map['registration_id'] = Variable<int?>(registrationId);
     }
-    if (!nullToAbsent || publicKey != null) {
-      map['public_key'] = Variable<Uint8List>(publicKey);
-    }
+    map['public_key'] = Variable<Uint8List>(publicKey);
     if (!nullToAbsent || privateKey != null) {
-      map['private_key'] = Variable<Uint8List>(privateKey);
+      map['private_key'] = Variable<Uint8List?>(privateKey);
     }
     if (!nullToAbsent || nextPrekeyId != null) {
-      map['next_prekey_id'] = Variable<int>(nextPrekeyId);
+      map['next_prekey_id'] = Variable<int?>(nextPrekeyId);
     }
-    if (!nullToAbsent || timestamp != null) {
-      map['timestamp'] = Variable<int>(timestamp);
-    }
+    map['timestamp'] = Variable<int>(timestamp);
     return map;
   }
 
   IdentitiesCompanion toCompanion(bool nullToAbsent) {
     return IdentitiesCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      address: address == null && nullToAbsent
-          ? const Value.absent()
-          : Value(address),
+      id: Value(id),
+      address: Value(address),
       registrationId: registrationId == null && nullToAbsent
           ? const Value.absent()
           : Value(registrationId),
-      publicKey: publicKey == null && nullToAbsent
-          ? const Value.absent()
-          : Value(publicKey),
+      publicKey: Value(publicKey),
       privateKey: privateKey == null && nullToAbsent
           ? const Value.absent()
           : Value(privateKey),
       nextPrekeyId: nextPrekeyId == null && nullToAbsent
           ? const Value.absent()
           : Value(nextPrekeyId),
-      timestamp: timestamp == null && nullToAbsent
-          ? const Value.absent()
-          : Value(timestamp),
+      timestamp: Value(timestamp),
     );
   }
 
   factory Identity.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer}) {
+      {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return Identity(
       id: serializer.fromJson<int>(json['_id']),
       address: serializer.fromJson<String>(json['address']),
-      registrationId: serializer.fromJson<int>(json['registration_id']),
+      registrationId: serializer.fromJson<int?>(json['registration_id']),
       publicKey: serializer.fromJson<Uint8List>(json['public_key']),
-      privateKey: serializer.fromJson<Uint8List>(json['private_key']),
-      nextPrekeyId: serializer.fromJson<int>(json['next_prekey_id']),
+      privateKey: serializer.fromJson<Uint8List?>(json['private_key']),
+      nextPrekeyId: serializer.fromJson<int?>(json['next_prekey_id']),
       timestamp: serializer.fromJson<int>(json['timestamp']),
     );
   }
   @override
-  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       '_id': serializer.toJson<int>(id),
       'address': serializer.toJson<String>(address),
-      'registration_id': serializer.toJson<int>(registrationId),
+      'registration_id': serializer.toJson<int?>(registrationId),
       'public_key': serializer.toJson<Uint8List>(publicKey),
-      'private_key': serializer.toJson<Uint8List>(privateKey),
-      'next_prekey_id': serializer.toJson<int>(nextPrekeyId),
+      'private_key': serializer.toJson<Uint8List?>(privateKey),
+      'next_prekey_id': serializer.toJson<int?>(nextPrekeyId),
       'timestamp': serializer.toJson<int>(timestamp),
     };
   }
 
   Identity copyWith(
-          {int id,
-          String address,
-          int registrationId,
-          Uint8List publicKey,
-          Uint8List privateKey,
-          int nextPrekeyId,
-          int timestamp}) =>
+          {int? id,
+          String? address,
+          int? registrationId,
+          Uint8List? publicKey,
+          Uint8List? privateKey,
+          int? nextPrekeyId,
+          int? timestamp}) =>
       Identity(
         id: id ?? this.id,
         address: address ?? this.address,
@@ -181,10 +167,10 @@ class Identity extends DataClass implements Insertable<Identity> {
 class IdentitiesCompanion extends UpdateCompanion<Identity> {
   final Value<int> id;
   final Value<String> address;
-  final Value<int> registrationId;
+  final Value<int?> registrationId;
   final Value<Uint8List> publicKey;
-  final Value<Uint8List> privateKey;
-  final Value<int> nextPrekeyId;
+  final Value<Uint8List?> privateKey;
+  final Value<int?> nextPrekeyId;
   final Value<int> timestamp;
   const IdentitiesCompanion({
     this.id = const Value.absent(),
@@ -197,23 +183,23 @@ class IdentitiesCompanion extends UpdateCompanion<Identity> {
   });
   IdentitiesCompanion.insert({
     this.id = const Value.absent(),
-    @required String address,
+    required String address,
     this.registrationId = const Value.absent(),
-    @required Uint8List publicKey,
+    required Uint8List publicKey,
     this.privateKey = const Value.absent(),
     this.nextPrekeyId = const Value.absent(),
-    @required int timestamp,
-  })  : address = Value(address),
+    required int timestamp,
+  })   : address = Value(address),
         publicKey = Value(publicKey),
         timestamp = Value(timestamp);
   static Insertable<Identity> custom({
-    Expression<int> id,
-    Expression<String> address,
-    Expression<int> registrationId,
-    Expression<Uint8List> publicKey,
-    Expression<Uint8List> privateKey,
-    Expression<int> nextPrekeyId,
-    Expression<int> timestamp,
+    Expression<int>? id,
+    Expression<String>? address,
+    Expression<int?>? registrationId,
+    Expression<Uint8List>? publicKey,
+    Expression<Uint8List?>? privateKey,
+    Expression<int?>? nextPrekeyId,
+    Expression<int>? timestamp,
   }) {
     return RawValuesInsertable({
       if (id != null) '_id': id,
@@ -227,13 +213,13 @@ class IdentitiesCompanion extends UpdateCompanion<Identity> {
   }
 
   IdentitiesCompanion copyWith(
-      {Value<int> id,
-      Value<String> address,
-      Value<int> registrationId,
-      Value<Uint8List> publicKey,
-      Value<Uint8List> privateKey,
-      Value<int> nextPrekeyId,
-      Value<int> timestamp}) {
+      {Value<int>? id,
+      Value<String>? address,
+      Value<int?>? registrationId,
+      Value<Uint8List>? publicKey,
+      Value<Uint8List?>? privateKey,
+      Value<int?>? nextPrekeyId,
+      Value<int>? timestamp}) {
     return IdentitiesCompanion(
       id: id ?? this.id,
       address: address ?? this.address,
@@ -255,16 +241,16 @@ class IdentitiesCompanion extends UpdateCompanion<Identity> {
       map['address'] = Variable<String>(address.value);
     }
     if (registrationId.present) {
-      map['registration_id'] = Variable<int>(registrationId.value);
+      map['registration_id'] = Variable<int?>(registrationId.value);
     }
     if (publicKey.present) {
       map['public_key'] = Variable<Uint8List>(publicKey.value);
     }
     if (privateKey.present) {
-      map['private_key'] = Variable<Uint8List>(privateKey.value);
+      map['private_key'] = Variable<Uint8List?>(privateKey.value);
     }
     if (nextPrekeyId.present) {
-      map['next_prekey_id'] = Variable<int>(nextPrekeyId.value);
+      map['next_prekey_id'] = Variable<int?>(nextPrekeyId.value);
     }
     if (timestamp.present) {
       map['timestamp'] = Variable<int>(timestamp.value);
@@ -289,11 +275,10 @@ class IdentitiesCompanion extends UpdateCompanion<Identity> {
 
 class Identities extends Table with TableInfo<Identities, Identity> {
   final GeneratedDatabase _db;
-  final String _alias;
+  final String? _alias;
   Identities(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  GeneratedIntColumn _id;
-  GeneratedIntColumn get id => _id ??= _constructId();
+  late final GeneratedIntColumn id = _constructId();
   GeneratedIntColumn _constructId() {
     return GeneratedIntColumn('_id', $tableName, false,
         declaredAsPrimaryKey: true,
@@ -302,8 +287,7 @@ class Identities extends Table with TableInfo<Identities, Identity> {
   }
 
   final VerificationMeta _addressMeta = const VerificationMeta('address');
-  GeneratedTextColumn _address;
-  GeneratedTextColumn get address => _address ??= _constructAddress();
+  late final GeneratedTextColumn address = _constructAddress();
   GeneratedTextColumn _constructAddress() {
     return GeneratedTextColumn('address', $tableName, false,
         $customConstraints: 'NOT NULL');
@@ -311,25 +295,21 @@ class Identities extends Table with TableInfo<Identities, Identity> {
 
   final VerificationMeta _registrationIdMeta =
       const VerificationMeta('registrationId');
-  GeneratedIntColumn _registrationId;
-  GeneratedIntColumn get registrationId =>
-      _registrationId ??= _constructRegistrationId();
+  late final GeneratedIntColumn registrationId = _constructRegistrationId();
   GeneratedIntColumn _constructRegistrationId() {
     return GeneratedIntColumn('registration_id', $tableName, true,
         $customConstraints: '');
   }
 
   final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
-  GeneratedBlobColumn _publicKey;
-  GeneratedBlobColumn get publicKey => _publicKey ??= _constructPublicKey();
+  late final GeneratedBlobColumn publicKey = _constructPublicKey();
   GeneratedBlobColumn _constructPublicKey() {
     return GeneratedBlobColumn('public_key', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _privateKeyMeta = const VerificationMeta('privateKey');
-  GeneratedBlobColumn _privateKey;
-  GeneratedBlobColumn get privateKey => _privateKey ??= _constructPrivateKey();
+  late final GeneratedBlobColumn privateKey = _constructPrivateKey();
   GeneratedBlobColumn _constructPrivateKey() {
     return GeneratedBlobColumn('private_key', $tableName, true,
         $customConstraints: '');
@@ -337,17 +317,14 @@ class Identities extends Table with TableInfo<Identities, Identity> {
 
   final VerificationMeta _nextPrekeyIdMeta =
       const VerificationMeta('nextPrekeyId');
-  GeneratedIntColumn _nextPrekeyId;
-  GeneratedIntColumn get nextPrekeyId =>
-      _nextPrekeyId ??= _constructNextPrekeyId();
+  late final GeneratedIntColumn nextPrekeyId = _constructNextPrekeyId();
   GeneratedIntColumn _constructNextPrekeyId() {
     return GeneratedIntColumn('next_prekey_id', $tableName, true,
         $customConstraints: '');
   }
 
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
-  GeneratedIntColumn _timestamp;
-  GeneratedIntColumn get timestamp => _timestamp ??= _constructTimestamp();
+  late final GeneratedIntColumn timestamp = _constructTimestamp();
   GeneratedIntColumn _constructTimestamp() {
     return GeneratedIntColumn('timestamp', $tableName, false,
         $customConstraints: 'NOT NULL');
@@ -375,11 +352,11 @@ class Identities extends Table with TableInfo<Identities, Identity> {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('_id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id'], _idMeta));
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id']!, _idMeta));
     }
     if (data.containsKey('address')) {
       context.handle(_addressMeta,
-          address.isAcceptableOrUnknown(data['address'], _addressMeta));
+          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
     } else if (isInserting) {
       context.missing(_addressMeta);
     }
@@ -387,11 +364,11 @@ class Identities extends Table with TableInfo<Identities, Identity> {
       context.handle(
           _registrationIdMeta,
           registrationId.isAcceptableOrUnknown(
-              data['registration_id'], _registrationIdMeta));
+              data['registration_id']!, _registrationIdMeta));
     }
     if (data.containsKey('public_key')) {
       context.handle(_publicKeyMeta,
-          publicKey.isAcceptableOrUnknown(data['public_key'], _publicKeyMeta));
+          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
     } else if (isInserting) {
       context.missing(_publicKeyMeta);
     }
@@ -399,17 +376,17 @@ class Identities extends Table with TableInfo<Identities, Identity> {
       context.handle(
           _privateKeyMeta,
           privateKey.isAcceptableOrUnknown(
-              data['private_key'], _privateKeyMeta));
+              data['private_key']!, _privateKeyMeta));
     }
     if (data.containsKey('next_prekey_id')) {
       context.handle(
           _nextPrekeyIdMeta,
           nextPrekeyId.isAcceptableOrUnknown(
-              data['next_prekey_id'], _nextPrekeyIdMeta));
+              data['next_prekey_id']!, _nextPrekeyIdMeta));
     }
     if (data.containsKey('timestamp')) {
       context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp'], _timestampMeta));
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
@@ -419,7 +396,7 @@ class Identities extends Table with TableInfo<Identities, Identity> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Identity map(Map<String, dynamic> data, {String tablePrefix}) {
+  Identity map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Identity.fromData(data, _db, prefix: effectivePrefix);
   }
@@ -437,48 +414,39 @@ class PreKey extends DataClass implements Insertable<PreKey> {
   final int id;
   final int prekeyId;
   final Uint8List record;
-  PreKey({@required this.id, @required this.prekeyId, @required this.record});
+  PreKey({required this.id, required this.prekeyId, required this.record});
   factory PreKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String prefix}) {
+      {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return PreKey(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id']),
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id'])!,
       prekeyId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id']),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id'])!,
       record: uint8ListType
-          .mapFromDatabaseResponse(data['${effectivePrefix}record']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
     );
   }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (!nullToAbsent || id != null) {
-      map['_id'] = Variable<int>(id);
-    }
-    if (!nullToAbsent || prekeyId != null) {
-      map['prekey_id'] = Variable<int>(prekeyId);
-    }
-    if (!nullToAbsent || record != null) {
-      map['record'] = Variable<Uint8List>(record);
-    }
+    map['_id'] = Variable<int>(id);
+    map['prekey_id'] = Variable<int>(prekeyId);
+    map['record'] = Variable<Uint8List>(record);
     return map;
   }
 
   PrekeysCompanion toCompanion(bool nullToAbsent) {
     return PrekeysCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      prekeyId: prekeyId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(prekeyId),
-      record:
-          record == null && nullToAbsent ? const Value.absent() : Value(record),
+      id: Value(id),
+      prekeyId: Value(prekeyId),
+      record: Value(record),
     );
   }
 
   factory PreKey.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer}) {
+      {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return PreKey(
       id: serializer.fromJson<int>(json['_id']),
@@ -487,7 +455,7 @@ class PreKey extends DataClass implements Insertable<PreKey> {
     );
   }
   @override
-  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       '_id': serializer.toJson<int>(id),
@@ -496,7 +464,7 @@ class PreKey extends DataClass implements Insertable<PreKey> {
     };
   }
 
-  PreKey copyWith({int id, int prekeyId, Uint8List record}) => PreKey(
+  PreKey copyWith({int? id, int? prekeyId, Uint8List? record}) => PreKey(
         id: id ?? this.id,
         prekeyId: prekeyId ?? this.prekeyId,
         record: record ?? this.record,
@@ -534,14 +502,14 @@ class PrekeysCompanion extends UpdateCompanion<PreKey> {
   });
   PrekeysCompanion.insert({
     this.id = const Value.absent(),
-    @required int prekeyId,
-    @required Uint8List record,
-  })  : prekeyId = Value(prekeyId),
+    required int prekeyId,
+    required Uint8List record,
+  })   : prekeyId = Value(prekeyId),
         record = Value(record);
   static Insertable<PreKey> custom({
-    Expression<int> id,
-    Expression<int> prekeyId,
-    Expression<Uint8List> record,
+    Expression<int>? id,
+    Expression<int>? prekeyId,
+    Expression<Uint8List>? record,
   }) {
     return RawValuesInsertable({
       if (id != null) '_id': id,
@@ -551,7 +519,7 @@ class PrekeysCompanion extends UpdateCompanion<PreKey> {
   }
 
   PrekeysCompanion copyWith(
-      {Value<int> id, Value<int> prekeyId, Value<Uint8List> record}) {
+      {Value<int>? id, Value<int>? prekeyId, Value<Uint8List>? record}) {
     return PrekeysCompanion(
       id: id ?? this.id,
       prekeyId: prekeyId ?? this.prekeyId,
@@ -587,11 +555,10 @@ class PrekeysCompanion extends UpdateCompanion<PreKey> {
 
 class Prekeys extends Table with TableInfo<Prekeys, PreKey> {
   final GeneratedDatabase _db;
-  final String _alias;
+  final String? _alias;
   Prekeys(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  GeneratedIntColumn _id;
-  GeneratedIntColumn get id => _id ??= _constructId();
+  late final GeneratedIntColumn id = _constructId();
   GeneratedIntColumn _constructId() {
     return GeneratedIntColumn('_id', $tableName, false,
         declaredAsPrimaryKey: true,
@@ -600,16 +567,14 @@ class Prekeys extends Table with TableInfo<Prekeys, PreKey> {
   }
 
   final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
-  GeneratedIntColumn _prekeyId;
-  GeneratedIntColumn get prekeyId => _prekeyId ??= _constructPrekeyId();
+  late final GeneratedIntColumn prekeyId = _constructPrekeyId();
   GeneratedIntColumn _constructPrekeyId() {
     return GeneratedIntColumn('prekey_id', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  GeneratedBlobColumn _record;
-  GeneratedBlobColumn get record => _record ??= _constructRecord();
+  late final GeneratedBlobColumn record = _constructRecord();
   GeneratedBlobColumn _constructRecord() {
     return GeneratedBlobColumn('record', $tableName, false,
         $customConstraints: 'NOT NULL');
@@ -629,17 +594,17 @@ class Prekeys extends Table with TableInfo<Prekeys, PreKey> {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('_id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id'], _idMeta));
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id']!, _idMeta));
     }
     if (data.containsKey('prekey_id')) {
       context.handle(_prekeyIdMeta,
-          prekeyId.isAcceptableOrUnknown(data['prekey_id'], _prekeyIdMeta));
+          prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta));
     } else if (isInserting) {
       context.missing(_prekeyIdMeta);
     }
     if (data.containsKey('record')) {
       context.handle(_recordMeta,
-          record.isAcceptableOrUnknown(data['record'], _recordMeta));
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
@@ -649,7 +614,7 @@ class Prekeys extends Table with TableInfo<Prekeys, PreKey> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  PreKey map(Map<String, dynamic> data, {String tablePrefix}) {
+  PreKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return PreKey.fromData(data, _db, prefix: effectivePrefix);
   }
@@ -669,59 +634,46 @@ class SignedPreKey extends DataClass implements Insertable<SignedPreKey> {
   final Uint8List record;
   final int timestamp;
   SignedPreKey(
-      {@required this.id,
-      @required this.prekeyId,
-      @required this.record,
-      @required this.timestamp});
+      {required this.id,
+      required this.prekeyId,
+      required this.record,
+      required this.timestamp});
   factory SignedPreKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String prefix}) {
+      {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return SignedPreKey(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id']),
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id'])!,
       prekeyId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id']),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id'])!,
       record: uint8ListType
-          .mapFromDatabaseResponse(data['${effectivePrefix}record']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
       timestamp:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp']),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
     );
   }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (!nullToAbsent || id != null) {
-      map['_id'] = Variable<int>(id);
-    }
-    if (!nullToAbsent || prekeyId != null) {
-      map['prekey_id'] = Variable<int>(prekeyId);
-    }
-    if (!nullToAbsent || record != null) {
-      map['record'] = Variable<Uint8List>(record);
-    }
-    if (!nullToAbsent || timestamp != null) {
-      map['timestamp'] = Variable<int>(timestamp);
-    }
+    map['_id'] = Variable<int>(id);
+    map['prekey_id'] = Variable<int>(prekeyId);
+    map['record'] = Variable<Uint8List>(record);
+    map['timestamp'] = Variable<int>(timestamp);
     return map;
   }
 
   SignedPrekeysCompanion toCompanion(bool nullToAbsent) {
     return SignedPrekeysCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      prekeyId: prekeyId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(prekeyId),
-      record:
-          record == null && nullToAbsent ? const Value.absent() : Value(record),
-      timestamp: timestamp == null && nullToAbsent
-          ? const Value.absent()
-          : Value(timestamp),
+      id: Value(id),
+      prekeyId: Value(prekeyId),
+      record: Value(record),
+      timestamp: Value(timestamp),
     );
   }
 
   factory SignedPreKey.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer}) {
+      {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return SignedPreKey(
       id: serializer.fromJson<int>(json['_id']),
@@ -731,7 +683,7 @@ class SignedPreKey extends DataClass implements Insertable<SignedPreKey> {
     );
   }
   @override
-  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       '_id': serializer.toJson<int>(id),
@@ -742,7 +694,7 @@ class SignedPreKey extends DataClass implements Insertable<SignedPreKey> {
   }
 
   SignedPreKey copyWith(
-          {int id, int prekeyId, Uint8List record, int timestamp}) =>
+          {int? id, int? prekeyId, Uint8List? record, int? timestamp}) =>
       SignedPreKey(
         id: id ?? this.id,
         prekeyId: prekeyId ?? this.prekeyId,
@@ -786,17 +738,17 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPreKey> {
   });
   SignedPrekeysCompanion.insert({
     this.id = const Value.absent(),
-    @required int prekeyId,
-    @required Uint8List record,
-    @required int timestamp,
-  })  : prekeyId = Value(prekeyId),
+    required int prekeyId,
+    required Uint8List record,
+    required int timestamp,
+  })   : prekeyId = Value(prekeyId),
         record = Value(record),
         timestamp = Value(timestamp);
   static Insertable<SignedPreKey> custom({
-    Expression<int> id,
-    Expression<int> prekeyId,
-    Expression<Uint8List> record,
-    Expression<int> timestamp,
+    Expression<int>? id,
+    Expression<int>? prekeyId,
+    Expression<Uint8List>? record,
+    Expression<int>? timestamp,
   }) {
     return RawValuesInsertable({
       if (id != null) '_id': id,
@@ -807,10 +759,10 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPreKey> {
   }
 
   SignedPrekeysCompanion copyWith(
-      {Value<int> id,
-      Value<int> prekeyId,
-      Value<Uint8List> record,
-      Value<int> timestamp}) {
+      {Value<int>? id,
+      Value<int>? prekeyId,
+      Value<Uint8List>? record,
+      Value<int>? timestamp}) {
     return SignedPrekeysCompanion(
       id: id ?? this.id,
       prekeyId: prekeyId ?? this.prekeyId,
@@ -851,11 +803,10 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPreKey> {
 
 class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPreKey> {
   final GeneratedDatabase _db;
-  final String _alias;
+  final String? _alias;
   SignedPrekeys(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  GeneratedIntColumn _id;
-  GeneratedIntColumn get id => _id ??= _constructId();
+  late final GeneratedIntColumn id = _constructId();
   GeneratedIntColumn _constructId() {
     return GeneratedIntColumn('_id', $tableName, false,
         declaredAsPrimaryKey: true,
@@ -864,24 +815,21 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPreKey> {
   }
 
   final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
-  GeneratedIntColumn _prekeyId;
-  GeneratedIntColumn get prekeyId => _prekeyId ??= _constructPrekeyId();
+  late final GeneratedIntColumn prekeyId = _constructPrekeyId();
   GeneratedIntColumn _constructPrekeyId() {
     return GeneratedIntColumn('prekey_id', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  GeneratedBlobColumn _record;
-  GeneratedBlobColumn get record => _record ??= _constructRecord();
+  late final GeneratedBlobColumn record = _constructRecord();
   GeneratedBlobColumn _constructRecord() {
     return GeneratedBlobColumn('record', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
-  GeneratedIntColumn _timestamp;
-  GeneratedIntColumn get timestamp => _timestamp ??= _constructTimestamp();
+  late final GeneratedIntColumn timestamp = _constructTimestamp();
   GeneratedIntColumn _constructTimestamp() {
     return GeneratedIntColumn('timestamp', $tableName, false,
         $customConstraints: 'NOT NULL');
@@ -901,23 +849,23 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPreKey> {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('_id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id'], _idMeta));
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id']!, _idMeta));
     }
     if (data.containsKey('prekey_id')) {
       context.handle(_prekeyIdMeta,
-          prekeyId.isAcceptableOrUnknown(data['prekey_id'], _prekeyIdMeta));
+          prekeyId.isAcceptableOrUnknown(data['prekey_id']!, _prekeyIdMeta));
     } else if (isInserting) {
       context.missing(_prekeyIdMeta);
     }
     if (data.containsKey('record')) {
       context.handle(_recordMeta,
-          record.isAcceptableOrUnknown(data['record'], _recordMeta));
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
     if (data.containsKey('timestamp')) {
       context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp'], _timestampMeta));
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
@@ -927,7 +875,7 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPreKey> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  SignedPreKey map(Map<String, dynamic> data, {String tablePrefix}) {
+  SignedPreKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return SignedPreKey.fromData(data, _db, prefix: effectivePrefix);
   }
@@ -947,60 +895,47 @@ class Session extends DataClass implements Insertable<Session> {
   final Uint8List record;
   final int timestamp;
   Session(
-      {@required this.id,
-      @required this.address,
-      @required this.record,
-      @required this.timestamp});
+      {required this.id,
+      required this.address,
+      required this.record,
+      required this.timestamp});
   factory Session.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String prefix}) {
+      {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     final intType = db.typeSystem.forDartType<int>();
     final stringType = db.typeSystem.forDartType<String>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return Session(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id']),
-      address:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}address']),
+      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}_id'])!,
+      address: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}address'])!,
       record: uint8ListType
-          .mapFromDatabaseResponse(data['${effectivePrefix}record']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
       timestamp:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp']),
+          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
     );
   }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (!nullToAbsent || id != null) {
-      map['_id'] = Variable<int>(id);
-    }
-    if (!nullToAbsent || address != null) {
-      map['address'] = Variable<String>(address);
-    }
-    if (!nullToAbsent || record != null) {
-      map['record'] = Variable<Uint8List>(record);
-    }
-    if (!nullToAbsent || timestamp != null) {
-      map['timestamp'] = Variable<int>(timestamp);
-    }
+    map['_id'] = Variable<int>(id);
+    map['address'] = Variable<String>(address);
+    map['record'] = Variable<Uint8List>(record);
+    map['timestamp'] = Variable<int>(timestamp);
     return map;
   }
 
   SessionsCompanion toCompanion(bool nullToAbsent) {
     return SessionsCompanion(
-      id: id == null && nullToAbsent ? const Value.absent() : Value(id),
-      address: address == null && nullToAbsent
-          ? const Value.absent()
-          : Value(address),
-      record:
-          record == null && nullToAbsent ? const Value.absent() : Value(record),
-      timestamp: timestamp == null && nullToAbsent
-          ? const Value.absent()
-          : Value(timestamp),
+      id: Value(id),
+      address: Value(address),
+      record: Value(record),
+      timestamp: Value(timestamp),
     );
   }
 
   factory Session.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer}) {
+      {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return Session(
       id: serializer.fromJson<int>(json['_id']),
@@ -1010,7 +945,7 @@ class Session extends DataClass implements Insertable<Session> {
     );
   }
   @override
-  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       '_id': serializer.toJson<int>(id),
@@ -1020,7 +955,8 @@ class Session extends DataClass implements Insertable<Session> {
     };
   }
 
-  Session copyWith({int id, String address, Uint8List record, int timestamp}) =>
+  Session copyWith(
+          {int? id, String? address, Uint8List? record, int? timestamp}) =>
       Session(
         id: id ?? this.id,
         address: address ?? this.address,
@@ -1064,17 +1000,17 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   });
   SessionsCompanion.insert({
     this.id = const Value.absent(),
-    @required String address,
-    @required Uint8List record,
-    @required int timestamp,
-  })  : address = Value(address),
+    required String address,
+    required Uint8List record,
+    required int timestamp,
+  })   : address = Value(address),
         record = Value(record),
         timestamp = Value(timestamp);
   static Insertable<Session> custom({
-    Expression<int> id,
-    Expression<String> address,
-    Expression<Uint8List> record,
-    Expression<int> timestamp,
+    Expression<int>? id,
+    Expression<String>? address,
+    Expression<Uint8List>? record,
+    Expression<int>? timestamp,
   }) {
     return RawValuesInsertable({
       if (id != null) '_id': id,
@@ -1085,10 +1021,10 @@ class SessionsCompanion extends UpdateCompanion<Session> {
   }
 
   SessionsCompanion copyWith(
-      {Value<int> id,
-      Value<String> address,
-      Value<Uint8List> record,
-      Value<int> timestamp}) {
+      {Value<int>? id,
+      Value<String>? address,
+      Value<Uint8List>? record,
+      Value<int>? timestamp}) {
     return SessionsCompanion(
       id: id ?? this.id,
       address: address ?? this.address,
@@ -1129,11 +1065,10 @@ class SessionsCompanion extends UpdateCompanion<Session> {
 
 class Sessions extends Table with TableInfo<Sessions, Session> {
   final GeneratedDatabase _db;
-  final String _alias;
+  final String? _alias;
   Sessions(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  GeneratedIntColumn _id;
-  GeneratedIntColumn get id => _id ??= _constructId();
+  late final GeneratedIntColumn id = _constructId();
   GeneratedIntColumn _constructId() {
     return GeneratedIntColumn('_id', $tableName, false,
         declaredAsPrimaryKey: true,
@@ -1142,24 +1077,21 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   }
 
   final VerificationMeta _addressMeta = const VerificationMeta('address');
-  GeneratedTextColumn _address;
-  GeneratedTextColumn get address => _address ??= _constructAddress();
+  late final GeneratedTextColumn address = _constructAddress();
   GeneratedTextColumn _constructAddress() {
     return GeneratedTextColumn('address', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  GeneratedBlobColumn _record;
-  GeneratedBlobColumn get record => _record ??= _constructRecord();
+  late final GeneratedBlobColumn record = _constructRecord();
   GeneratedBlobColumn _constructRecord() {
     return GeneratedBlobColumn('record', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
-  GeneratedIntColumn _timestamp;
-  GeneratedIntColumn get timestamp => _timestamp ??= _constructTimestamp();
+  late final GeneratedIntColumn timestamp = _constructTimestamp();
   GeneratedIntColumn _constructTimestamp() {
     return GeneratedIntColumn('timestamp', $tableName, false,
         $customConstraints: 'NOT NULL');
@@ -1179,23 +1111,23 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('_id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id'], _idMeta));
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['_id']!, _idMeta));
     }
     if (data.containsKey('address')) {
       context.handle(_addressMeta,
-          address.isAcceptableOrUnknown(data['address'], _addressMeta));
+          address.isAcceptableOrUnknown(data['address']!, _addressMeta));
     } else if (isInserting) {
       context.missing(_addressMeta);
     }
     if (data.containsKey('record')) {
       context.handle(_recordMeta,
-          record.isAcceptableOrUnknown(data['record'], _recordMeta));
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
     if (data.containsKey('timestamp')) {
       context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp'], _timestampMeta));
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
     } else if (isInserting) {
       context.missing(_timestampMeta);
     }
@@ -1205,7 +1137,7 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Session map(Map<String, dynamic> data, {String tablePrefix}) {
+  Session map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return Session.fromData(data, _db, prefix: effectivePrefix);
   }
@@ -1224,51 +1156,40 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   final String senderId;
   final Uint8List record;
   SenderKey(
-      {@required this.groupId, @required this.senderId, @required this.record});
+      {required this.groupId, required this.senderId, required this.record});
   factory SenderKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String prefix}) {
+      {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
     final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return SenderKey(
       groupId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}group_id']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}group_id'])!,
       senderId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}sender_id']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}sender_id'])!,
       record: uint8ListType
-          .mapFromDatabaseResponse(data['${effectivePrefix}record']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
     );
   }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (!nullToAbsent || groupId != null) {
-      map['group_id'] = Variable<String>(groupId);
-    }
-    if (!nullToAbsent || senderId != null) {
-      map['sender_id'] = Variable<String>(senderId);
-    }
-    if (!nullToAbsent || record != null) {
-      map['record'] = Variable<Uint8List>(record);
-    }
+    map['group_id'] = Variable<String>(groupId);
+    map['sender_id'] = Variable<String>(senderId);
+    map['record'] = Variable<Uint8List>(record);
     return map;
   }
 
   SenderKeysCompanion toCompanion(bool nullToAbsent) {
     return SenderKeysCompanion(
-      groupId: groupId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(groupId),
-      senderId: senderId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(senderId),
-      record:
-          record == null && nullToAbsent ? const Value.absent() : Value(record),
+      groupId: Value(groupId),
+      senderId: Value(senderId),
+      record: Value(record),
     );
   }
 
   factory SenderKey.fromJson(Map<String, dynamic> json,
-      {ValueSerializer serializer}) {
+      {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return SenderKey(
       groupId: serializer.fromJson<String>(json['group_id']),
@@ -1277,7 +1198,7 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
     );
   }
   @override
-  Map<String, dynamic> toJson({ValueSerializer serializer}) {
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'group_id': serializer.toJson<String>(groupId),
@@ -1286,7 +1207,7 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
     };
   }
 
-  SenderKey copyWith({String groupId, String senderId, Uint8List record}) =>
+  SenderKey copyWith({String? groupId, String? senderId, Uint8List? record}) =>
       SenderKey(
         groupId: groupId ?? this.groupId,
         senderId: senderId ?? this.senderId,
@@ -1324,16 +1245,16 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
     this.record = const Value.absent(),
   });
   SenderKeysCompanion.insert({
-    @required String groupId,
-    @required String senderId,
-    @required Uint8List record,
-  })  : groupId = Value(groupId),
+    required String groupId,
+    required String senderId,
+    required Uint8List record,
+  })   : groupId = Value(groupId),
         senderId = Value(senderId),
         record = Value(record);
   static Insertable<SenderKey> custom({
-    Expression<String> groupId,
-    Expression<String> senderId,
-    Expression<Uint8List> record,
+    Expression<String>? groupId,
+    Expression<String>? senderId,
+    Expression<Uint8List>? record,
   }) {
     return RawValuesInsertable({
       if (groupId != null) 'group_id': groupId,
@@ -1343,9 +1264,9 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
   }
 
   SenderKeysCompanion copyWith(
-      {Value<String> groupId,
-      Value<String> senderId,
-      Value<Uint8List> record}) {
+      {Value<String>? groupId,
+      Value<String>? senderId,
+      Value<Uint8List>? record}) {
     return SenderKeysCompanion(
       groupId: groupId ?? this.groupId,
       senderId: senderId ?? this.senderId,
@@ -1381,27 +1302,24 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
 
 class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   final GeneratedDatabase _db;
-  final String _alias;
+  final String? _alias;
   SenderKeys(this._db, [this._alias]);
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
-  GeneratedTextColumn _groupId;
-  GeneratedTextColumn get groupId => _groupId ??= _constructGroupId();
+  late final GeneratedTextColumn groupId = _constructGroupId();
   GeneratedTextColumn _constructGroupId() {
     return GeneratedTextColumn('group_id', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
-  GeneratedTextColumn _senderId;
-  GeneratedTextColumn get senderId => _senderId ??= _constructSenderId();
+  late final GeneratedTextColumn senderId = _constructSenderId();
   GeneratedTextColumn _constructSenderId() {
     return GeneratedTextColumn('sender_id', $tableName, false,
         $customConstraints: 'NOT NULL');
   }
 
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  GeneratedBlobColumn _record;
-  GeneratedBlobColumn get record => _record ??= _constructRecord();
+  late final GeneratedBlobColumn record = _constructRecord();
   GeneratedBlobColumn _constructRecord() {
     return GeneratedBlobColumn('record', $tableName, false,
         $customConstraints: 'NOT NULL');
@@ -1422,19 +1340,19 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
     final data = instance.toColumns(true);
     if (data.containsKey('group_id')) {
       context.handle(_groupIdMeta,
-          groupId.isAcceptableOrUnknown(data['group_id'], _groupIdMeta));
+          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
     } else if (isInserting) {
       context.missing(_groupIdMeta);
     }
     if (data.containsKey('sender_id')) {
       context.handle(_senderIdMeta,
-          senderId.isAcceptableOrUnknown(data['sender_id'], _senderIdMeta));
+          senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta));
     } else if (isInserting) {
       context.missing(_senderIdMeta);
     }
     if (data.containsKey('record')) {
       context.handle(_recordMeta,
-          record.isAcceptableOrUnknown(data['record'], _recordMeta));
+          record.isAcceptableOrUnknown(data['record']!, _recordMeta));
     } else if (isInserting) {
       context.missing(_recordMeta);
     }
@@ -1444,7 +1362,7 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   @override
   Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
   @override
-  SenderKey map(Map<String, dynamic> data, {String tablePrefix}) {
+  SenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
     return SenderKey.fromData(data, _db, prefix: effectivePrefix);
   }
@@ -1464,19 +1382,12 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
 abstract class _$SignalDatabase extends GeneratedDatabase {
   _$SignalDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$SignalDatabase.connect(DatabaseConnection c) : super.connect(c);
-  Identities _identities;
-  Identities get identities => _identities ??= Identities(this);
-  Prekeys _prekeys;
-  Prekeys get prekeys => _prekeys ??= Prekeys(this);
-  SignedPrekeys _signedPrekeys;
-  SignedPrekeys get signedPrekeys => _signedPrekeys ??= SignedPrekeys(this);
-  Sessions _sessions;
-  Sessions get sessions => _sessions ??= Sessions(this);
-  SenderKeys _senderKeys;
-  SenderKeys get senderKeys => _senderKeys ??= SenderKeys(this);
-  IdentityDao _identityDao;
-  IdentityDao get identityDao =>
-      _identityDao ??= IdentityDao(this as SignalDatabase);
+  late final Identities identities = Identities(this);
+  late final Prekeys prekeys = Prekeys(this);
+  late final SignedPrekeys signedPrekeys = SignedPrekeys(this);
+  late final Sessions sessions = Sessions(this);
+  late final SenderKeys senderKeys = SenderKeys(this);
+  late final IdentityDao identityDao = IdentityDao(this as SignalDatabase);
   Selectable<Identity> getLocalIdentity() {
     return customSelect('SELECT * FROM identities WHERE address = \'-1\'',
         variables: [], readsFrom: {identities}).map(identities.mapFromRow);
@@ -1484,14 +1395,14 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
 
   Selectable<Identity> getIdentity(String address) {
     return customSelect('SELECT * FROM identities WHERE address = :address',
-        variables: [Variable.withString(address)],
+        variables: [Variable<String>(address)],
         readsFrom: {identities}).map(identities.mapFromRow);
   }
 
   Future<int> deleteIdentity(String address) {
     return customUpdate(
       'DELETE FROM identities WHERE address = :address',
-      variables: [Variable.withString(address)],
+      variables: [Variable<String>(address)],
       updates: {identities},
       updateKind: UpdateKind.delete,
     );

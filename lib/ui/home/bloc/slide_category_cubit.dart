@@ -9,6 +9,6 @@ class SlideCategoryCubit extends Cubit<SlideCategoryState> {
       : super(const SlideCategoryState(
             type: SlideCategoryType.contacts, id: 'Contacts'));
 
-  void select(SlideCategoryType type, [String id]) =>
+  void select(SlideCategoryType type, [String? id]) =>
       emit(SlideCategoryState(type: type, id: id));
 }

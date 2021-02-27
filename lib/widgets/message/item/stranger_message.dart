@@ -12,16 +12,19 @@ import 'package:flutter_app/db/extension/conversation.dart';
 
 import '../../interacter_decorated_box.dart';
 
-
 class StrangerMessage extends StatelessWidget {
-  const StrangerMessage({Key key, this.message}) : super(key: key);
+  const StrangerMessage({
+    Key? key,
+    required this.message,
+  }) : super(key: key);
 
   final MessageItem message;
 
   @override
   Widget build(BuildContext context) {
     final isBotConversation =
-        BlocProvider.of<ConversationCubit>(context).state?.isBotConversation;
+        BlocProvider.of<ConversationCubit>(context).state?.isBotConversation ??
+            false;
     return Column(
       children: [
         Text(
@@ -56,8 +59,12 @@ class StrangerMessage extends StatelessWidget {
                 // isBotConversation
                 //     ? todo open home page
                 //     : todo block
-                Provider.of<AccountServer>(context, listen: false).sendTextMessage(
-                  BlocProvider.of<ConversationCubit>(context).state.conversationId,
+                final conversationItem =
+                    BlocProvider.of<ConversationCubit>(context).state;
+                if (conversationItem == null) return;
+                Provider.of<AccountServer>(context, listen: false)
+                    .sendTextMessage(
+                  conversationItem.conversationId,
                   'Hi',
                 );
               },
@@ -71,42 +78,42 @@ class StrangerMessage extends StatelessWidget {
 
 class _StrangerButton extends StatelessWidget {
   const _StrangerButton(
-      this.text, {
-        Key key,
-        this.onTap,
-      }) : super(key: key);
+    this.text, {
+    Key? key,
+    this.onTap,
+  }) : super(key: key);
 
   final String text;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
-    onTap: onTap,
-    decoration: BoxDecoration(
-      color: BrightnessData.themeOf(context).primary,
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: ConstrainedBox(
-      constraints: const BoxConstraints(
-        minWidth: 162,
-        minHeight: 36,
-        maxHeight: 36,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
+        onTap: onTap,
+        decoration: BoxDecoration(
+          color: BrightnessData.themeOf(context).primary,
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 14,
-              color: BrightnessData.themeOf(context).accent,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 162,
+            minHeight: 36,
+            maxHeight: 36,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
+            child: Center(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: BrightnessData.themeOf(context).accent,
+                ),
+              ),
             ),
           ),
         ),
-      ),
-    ),
-  );
+      );
 }

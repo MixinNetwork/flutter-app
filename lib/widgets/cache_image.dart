@@ -6,12 +6,12 @@ class CacheImage extends StatelessWidget {
     this.src, {
     this.width,
     this.height,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final String src;
-  final double width;
-  final double height;
+  final double? width;
+  final double? height;
 
   @override
   Widget build(BuildContext context) => CachedNetworkImage(

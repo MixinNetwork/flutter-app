@@ -23,10 +23,10 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   }
 
   Selectable<User> fuzzySearchGroupUser({
-    String id,
-    String conversationId,
-    String username,
-    String identityNumber,
+    required String id,
+    required String conversationId,
+    required String username,
+    required String identityNumber,
   }) =>
       db.fuzzySearchGroupUser(
         id,
@@ -36,8 +36,8 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       );
 
   Selectable<User> groupParticipants({
-    String conversationId,
-    String id,
+    required String conversationId,
+    required String id,
   }) =>
       db.groupParticipants(
         conversationId,

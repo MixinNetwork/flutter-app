@@ -7,8 +7,8 @@ import 'package:flutter_svg/svg.dart';
 
 class MessageStatusWidget extends StatelessWidget {
   const MessageStatusWidget({
-    Key key,
-    @required this.status,
+    Key? key,
+    required this.status,
   }) : super(key: key);
 
   final MessageStatus status;

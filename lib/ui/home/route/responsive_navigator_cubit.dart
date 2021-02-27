@@ -36,11 +36,11 @@ class ResponsiveNavigatorCubit extends Cubit<ResponsiveNavigatorState> {
     'About': aboutPage,
   };
 
-  MaterialPage _route(String name, Object arguments) {
+  MaterialPage _route(String name, Object? arguments) {
     switch (name) {
       case chatPage:
         return MaterialPage(
-          key: const Key(chatPage),
+          key: const ValueKey(chatPage),
           name: chatPage,
           child: ChatPage(
             key: _chatPageKey,
@@ -48,13 +48,13 @@ class ResponsiveNavigatorCubit extends Cubit<ResponsiveNavigatorState> {
         );
       case editProfilePage:
         return MaterialPage(
-          key: const Key(editProfilePage),
+          key: const ValueKey(editProfilePage),
           name: editProfilePage,
           child: EditProfilePage(),
         );
       case notificationPage:
         return MaterialPage(
-          key: const Key(notificationPage),
+          key: const ValueKey(notificationPage),
           name: notificationPage,
           child: NotificationPage(),
         );
@@ -74,7 +74,7 @@ class ResponsiveNavigatorCubit extends Cubit<ResponsiveNavigatorState> {
       ));
   }
 
-  void pushPage(String name, {Object arguments}) {
+  void pushPage(String name, {Object? arguments}) {
     final page = _route(name, arguments);
     var index = -1;
     index = state.pages

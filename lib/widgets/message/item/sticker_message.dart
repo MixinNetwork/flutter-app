@@ -10,9 +10,9 @@ import '../message_status.dart';
 
 class StickerMessageWidget extends StatelessWidget {
   const StickerMessageWidget({
-    Key key,
-    @required this.message,
-    @required this.isCurrentUser,
+    Key? key,
+    required this.message,
+    required this.isCurrentUser,
   }) : super(key: key);
 
   final MessageItem message;
@@ -22,42 +22,44 @@ class StickerMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     double width;
     double height;
-    if (message.assetWidth == null || message.assetHeight == null) {
+    final assetWidth = message.assetWidth;
+    final assetHeight = message.assetHeight;
+    if (assetWidth == null || assetHeight == null) {
       height = 120;
       width = 120;
-    } else if (message.assetWidth * 2 < dpToPx(context, 48) ||
-        message.assetHeight * 2 < dpToPx(context, 48)) {
-      if (message.assetWidth < message.assetHeight) {
-        if (dpToPx(context, 48) * message.assetHeight / message.assetWidth >
+    } else if (assetWidth * 2 < dpToPx(context, 48) ||
+        assetHeight * 2 < dpToPx(context, 48)) {
+      if (assetWidth < assetHeight) {
+        if (dpToPx(context, 48) * assetHeight / assetWidth >
             dpToPx(context, 120)) {
           height = 120;
-          width = 120 * message.assetWidth / message.assetHeight;
+          width = 120 * assetWidth / assetHeight;
         } else {
           width = 48;
-          height = 48 * message.assetHeight / message.assetWidth;
+          height = 48 * assetHeight / assetWidth;
         }
       } else {
-        if (dpToPx(context, 48) * message.assetWidth / message.assetHeight >
+        if (dpToPx(context, 48) * assetWidth / assetHeight >
             dpToPx(context, 120)) {
           width = 120;
-          height = 120 * message.assetHeight / message.assetWidth;
+          height = 120 * assetHeight / assetWidth;
         } else {
           height = 48;
-          width = 48 * message.assetWidth / message.assetHeight;
+          width = 48 * assetWidth / assetHeight;
         }
       }
-    } else if (message.assetWidth * 2 < dpToPx(context, 120) ||
-        message.assetHeight * 2 > dpToPx(context, 120)) {
-      if (message.assetWidth > message.assetHeight) {
+    } else if (assetWidth * 2 < dpToPx(context, 120) ||
+        assetHeight * 2 > dpToPx(context, 120)) {
+      if (assetWidth > assetHeight) {
         width = 120;
-        height = 120 * message.assetHeight / message.assetWidth;
+        height = 120 * assetHeight / assetWidth;
       } else {
         height = 120;
-        width = 120 * message.assetWidth / message.assetHeight;
+        width = 120 * assetWidth / assetHeight;
       }
     } else {
-      width = pxToDp(context, message.assetWidth * 2);
-      height = pxToDp(context, message.assetHeight * 2);
+      width = pxToDp(context, assetWidth * 2);
+      height = pxToDp(context, assetHeight * 2);
     }
     return MessageBubble(
       showNip: true,
@@ -75,7 +77,7 @@ class StickerMessageWidget extends StatelessWidget {
             ),
           if (message.assetUrl != null)
             CacheImage(
-              message.assetUrl,
+              message.assetUrl!,
               height: height,
               width: width,
             ),

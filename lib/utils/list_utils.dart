@@ -17,14 +17,14 @@ extension ListExtension<T> on List<T> {
     return buffer;
   }
 
-  T getOrNull(index) {
+  T? getOrNull(index) {
     if (index < 0) return null;
     if (isEmpty) return null;
     if (length < index + 1) return null;
     return this[index];
   }
 
-  T get lastOrNull {
+  T? get lastOrNull {
     try {
       return last;
     } catch (e) {
@@ -32,7 +32,7 @@ extension ListExtension<T> on List<T> {
     }
   }
 
-  T get firstOrNull {
+  T? get firstOrNull {
     try {
       return first;
     } catch (e) {

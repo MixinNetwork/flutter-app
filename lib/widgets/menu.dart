@@ -11,9 +11,9 @@ import 'interacter_decorated_box.dart';
 
 class ContextMenuPortalEntry extends StatelessWidget {
   const ContextMenuPortalEntry({
-    Key key,
-    @required this.child,
-    @required this.menus,
+    Key? key,
+    required this.child,
+    required this.menus,
   }) : super(key: key);
 
   final Widget child;
@@ -23,7 +23,7 @@ class ContextMenuPortalEntry extends StatelessWidget {
   Widget build(BuildContext context) => BlocProvider(
         create: (context) => OffsetCubit(null),
         child: Builder(
-          builder: (context) => BlocBuilder<OffsetCubit, Offset>(
+          builder: (context) => BlocBuilder<OffsetCubit, Offset?>(
             builder: (context, offset) => Barrier(
               duration: const Duration(milliseconds: 100),
               visible: offset != null,
@@ -39,11 +39,11 @@ class ContextMenuPortalEntry extends StatelessWidget {
                     opacity: progress,
                     child: child,
                   ),
-                  child: BlocBuilder<OffsetCubit, Offset>(
+                  child: BlocBuilder<OffsetCubit, Offset?>(
                     buildWhen: (a, b) => b != null,
                     builder: (context, offset) => CustomSingleChildLayout(
                       delegate: PositionedLayoutDelegate(
-                        position: offset,
+                        position: offset!,
                       ),
                       child: ContextMenuPage(menus: menus),
                     ),
@@ -65,11 +65,11 @@ class ContextMenuPortalEntry extends StatelessWidget {
 
 class Barrier extends StatelessWidget {
   const Barrier({
-    Key key,
-    @required this.onClose,
-    @required this.visible,
-    @required this.child,
-    @required this.duration,
+    Key? key,
+    required this.onClose,
+    required this.visible,
+    required this.child,
+    required this.duration,
   }) : super(key: key);
 
   final Widget child;
@@ -91,7 +91,9 @@ class Barrier extends StatelessWidget {
 }
 
 class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
-  PositionedLayoutDelegate({this.position});
+  PositionedLayoutDelegate({
+    required this.position,
+  });
 
   final Offset position;
 
@@ -121,8 +123,8 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
 
 class ContextMenuPage extends StatelessWidget {
   const ContextMenuPage({
-    Key key,
-    @required this.menus,
+    Key? key,
+    required this.menus,
   }) : super(key: key);
 
   final List<ContextMenu> menus;
@@ -138,18 +140,18 @@ class ContextMenuPage extends StatelessWidget {
             Colors.transparent,
             const Color.fromRGBO(255, 255, 255, 0.08),
             brightnessData,
-          ),
+          )!,
         ),
         boxShadow: [
           BoxShadow(
             color: const Color.fromRGBO(0, 0, 0, 0.15),
-            offset: Offset(0, lerpDouble(0, 2, brightnessData)),
-            blurRadius: lerpDouble(16, 40, brightnessData),
+            offset: Offset(0, lerpDouble(0, 2, brightnessData)!),
+            blurRadius: lerpDouble(16, 40, brightnessData)!,
           ),
           BoxShadow(
             color: const Color.fromRGBO(0, 0, 0, 0.07),
-            offset: Offset(0, lerpDouble(4, 0, brightnessData)),
-            blurRadius: lerpDouble(6, 12, brightnessData),
+            offset: Offset(0, lerpDouble(4, 0, brightnessData)!),
+            blurRadius: lerpDouble(6, 12, brightnessData)!,
           ),
         ],
         color: BrightnessData.dynamicColor(
@@ -174,8 +176,8 @@ class ContextMenuPage extends StatelessWidget {
 
 class ContextMenu extends StatelessWidget {
   const ContextMenu({
-    Key key,
-    this.title,
+    Key? key,
+    required this.title,
     this.isDestructiveAction = false,
     this.onTap,
   }) : super(
@@ -184,7 +186,7 @@ class ContextMenu extends StatelessWidget {
 
   final String title;
   final bool isDestructiveAction;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {

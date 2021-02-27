@@ -11,19 +11,19 @@ enum SlideCategoryType {
 
 class SlideCategoryState extends Equatable {
   const SlideCategoryState({
-    @required this.type,
+    required this.type,
     this.id,
   });
 
   final SlideCategoryType type;
-  final String id;
+  final String? id;
 
   @override
-  List<Object> get props => [type, id];
+  List<Object?> get props => [type, id];
 
   SlideCategoryState copyWith({
-    final SlideCategoryType type,
-    final String id,
+    final SlideCategoryType? type,
+    final String? id,
   }) {
     return SlideCategoryState(
       type: type ?? this.type,

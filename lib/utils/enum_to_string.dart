@@ -7,9 +7,7 @@ class EnumToString {
         splitEnum[0] == enumItem.runtimeType.toString();
   }
 
-  static String convertToString(enumItem) {
-    if (enumItem == null) return null;
-
+  static String convertToString(dynamic enumItem) {
     assert(_isEnumItem(enumItem),
     '$enumItem of type ${enumItem.runtimeType.toString()} is not an enum item');
     final _tmp = enumItem.toString().split('.')[1].toUpperCase();
@@ -17,14 +15,14 @@ class EnumToString {
   }
 
 
-  static T fromString<T>(List<T> enumValues, String value) {
+  static T? fromString<T>(List<T?>? enumValues, String? value) {
     if (value == null || enumValues == null) return null;
 
     return enumValues.singleWhere(
             (enumItem) =>
         EnumToString.convertToString(enumItem)
-            ?.toUpperCase() ==
-            value?.toUpperCase(),
+            .toUpperCase() ==
+            value.toUpperCase(),
         orElse: () => null);
   }
 

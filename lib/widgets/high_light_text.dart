@@ -4,13 +4,13 @@ import 'package:flutter/widgets.dart';
 class HighlightText extends StatelessWidget {
   const HighlightText(
     this.text, {
-    Key key,
+    Key? key,
     this.style,
     this.highlightTextSpans = const [],
   }) : super(key: key);
 
   final String text;
-  final TextStyle style;
+  final TextStyle? style;
   final List<HighlightTextSpan> highlightTextSpans;
 
   @override
@@ -22,7 +22,7 @@ class HighlightText extends StatelessWidget {
 
   List<InlineSpan> _buildSpan() {
     final map = Map<String, HighlightTextSpan>.fromIterable(
-      highlightTextSpans.where((element) => element.text?.isNotEmpty == true),
+      highlightTextSpans.where((element) => element.text.isNotEmpty == true),
       key: (item) => item.text.toLowerCase(),
     );
     final pattern = "(${map.keys.map(RegExp.escape).join('|')})";
@@ -35,13 +35,13 @@ class HighlightText extends StatelessWidget {
       RegExp(pattern, caseSensitive: false),
       onMatch: (Match match) {
         final text = match[0];
-        final highlightTextSpan = map[text.toLowerCase()];
+        final highlightTextSpan = map[text?.toLowerCase()];
         children.add(
           TextSpan(
             text: text,
-            style: style?.merge(highlightTextSpan.style) ??
-                highlightTextSpan.style,
-            recognizer: TapGestureRecognizer()..onTap = highlightTextSpan.onTap,
+            style: style?.merge(highlightTextSpan?.style) ??
+                highlightTextSpan?.style,
+            recognizer: TapGestureRecognizer()..onTap = highlightTextSpan?.onTap,
           ),
         );
         return '';
@@ -64,6 +64,6 @@ class HighlightTextSpan {
   });
 
   final String text;
-  final VoidCallback onTap;
-  final TextStyle style;
+  final VoidCallback? onTap;
+  final TextStyle? style;
 }

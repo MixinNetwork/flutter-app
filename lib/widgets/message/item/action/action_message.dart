@@ -16,8 +16,8 @@ import '../../../interacter_decorated_box.dart';
 
 class ActionMessage extends StatelessWidget {
   const ActionMessage({
-    Key key,
-    this.message,
+    Key? key,
+    required this.message,
   }) : super(key: key);
 
   final MessageItem message;
@@ -33,20 +33,21 @@ class ActionMessage extends StatelessWidget {
             spacing: 10,
             runSpacing: 8,
             children: List<Widget>.from(
-              jsonDecode(message.content)
+              jsonDecode(message.content!)
                   .map((e) => ActionData.fromJson(e))
                   .map(
                     (e) => InteractableDecoratedBox.color(
                       onTap: () {
                         if (e.action.startsWith('input:/')) {
                           final content = e.action.substring(6).trim();
-                          if (content?.isNotEmpty == true)
+                          final conversationItem =
+                              BlocProvider.of<ConversationCubit>(context).state;
+                          if (content?.isNotEmpty == true &&
+                              conversationItem != null)
                             return Provider.of<AccountServer>(context,
                                     listen: false)
                                 .sendTextMessage(
-                              BlocProvider.of<ConversationCubit>(context)
-                                  .state
-                                  .conversationId,
+                              conversationItem.conversationId,
                               content,
                             );
                         }

@@ -16,15 +16,10 @@ void main() async {
   await DesktopWindow.setMinWindowSize(
       const Size(slidePageMinWidth + responsiveNavigationMinWidth, 480));
 
-  final list = await Future.wait([
-    LoadBalancer.create(16, IsolateRunner.spawn),
-    HydratedStorage.build(
-      storageDirectory: await getApplicationDocumentsDirectory(),
-    ),
-  ]);
-
-  LoadBalancerUtils.loadBalancer = list[0];
-  HydratedBloc.storage = list[1];
+  LoadBalancerUtils.loadBalancer = await LoadBalancer.create(16, IsolateRunner.spawn);
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: await getApplicationDocumentsDirectory(),
+  );
 
   debugHighlightDeprecatedWidgets = true;
   runApp(App());

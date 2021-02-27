@@ -7,7 +7,7 @@ import 'action_button.dart';
 
 class SearchBar extends StatelessWidget {
   const SearchBar({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -94,7 +94,7 @@ class SearchBar extends StatelessWidget {
 
 class CreateGroupContanier extends StatelessWidget {
   const CreateGroupContanier({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

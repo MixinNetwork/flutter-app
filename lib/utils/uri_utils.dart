@@ -8,7 +8,7 @@ Future<bool> openUri(String text) {
   if(uri.scheme == null) return Future.value(false);
 
   if (uri.isScheme(mixinScheme)) {
-    final host = EnumToString.fromString(MixinSchemeHost.values, uri?.host);
+    final host = EnumToString.fromString(MixinSchemeHost.values, uri.host);
 
     final protocolUrl = mixinProtocolUrls[host];
     if (protocolUrl != null) {

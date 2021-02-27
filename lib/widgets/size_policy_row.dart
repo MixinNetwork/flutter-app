@@ -4,8 +4,8 @@ import 'package:flutter/widgets.dart';
 
 class SizePolicyRow extends StatelessWidget {
   const SizePolicyRow({
-    Key key,
-    @required this.children,
+    Key? key,
+    required this.children,
   }) : super(key: key);
 
   final List<SizePolicyData> children;
@@ -21,12 +21,13 @@ class SizePolicyRow extends StatelessWidget {
       children.toList()
         ..sort((a, b) {
           if (b.sizePolicyOrder == null) return -1;
-          return a.sizePolicyOrder.compareTo(b.sizePolicyOrder);
+          if (a.sizePolicyOrder == null) return 0;
+          return a.sizePolicyOrder!.compareTo(b.sizePolicyOrder!);
         })
         ..forEach((element) {
           if (element.maxWidth != null) {
             final widgetStretchWidth =
-                min(stretchWidth, element.maxWidth - element.minWidth);
+                min(stretchWidth, element.maxWidth! - element.minWidth);
             children.firstWhere((e) => identical(e, element))._width =
                 (element.minWidth + widgetStretchWidth);
             stretchWidth -= widgetStretchWidth;
@@ -49,18 +50,16 @@ class SizePolicyRow extends StatelessWidget {
 
 class SizePolicyData {
   SizePolicyData({
-    @required this.minWidth,
+    required this.minWidth,
     this.maxWidth,
-    this.sizePolicyOrder,
-    @required this.child,
+    this. sizePolicyOrder,
+    required this.child,
   });
 
   final double minWidth;
-  final double maxWidth;
-  final int sizePolicyOrder;
+  final double? maxWidth;
+  final int? sizePolicyOrder;
   final Widget child;
 
-  double _width;
-
-  double get stretchWidth => maxWidth - minWidth;
+  double? _width;
 }

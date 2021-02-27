@@ -7,6 +7,8 @@ part of 'live_message.dart';
 // **************************************************************************
 
 LiveMessage _$LiveMessageFromJson(Map<String, dynamic> json) {
+  $checkKeys(json,
+      disallowNullValues: const ['width', 'height', 'thumb_url', 'url']);
   return LiveMessage(
     json['width'] as int,
     json['height'] as int,

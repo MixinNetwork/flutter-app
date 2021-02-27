@@ -7,17 +7,16 @@ part of 'plain_json_message.dart';
 // **************************************************************************
 
 PlainJsonMessage _$PlainJsonMessageFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, disallowNullValues: const ['action']);
   return PlainJsonMessage(
     json['action'] as String,
-    (json['messages'] as List)?.map((e) => e as String)?.toList(),
+    (json['messages'] as List<dynamic>).map((e) => e as String).toList(),
     json['user_id'] as String,
     json['message_id'] as String,
     json['session_id'] as String,
-    (json['ack_messages'] as List)
-        ?.map((e) => e == null
-            ? null
-            : BlazeAckMessage.fromJson(e as Map<String, dynamic>))
-        ?.toList(),
+    (json['ack_messages'] as List<dynamic>)
+        .map((e) => BlazeAckMessage.fromJson(e as Map<String, dynamic>))
+        .toList(),
   );
 }
 

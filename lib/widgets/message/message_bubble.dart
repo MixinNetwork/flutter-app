@@ -5,9 +5,9 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 
 class MessageBubble extends StatelessWidget {
   const MessageBubble({
-    Key key,
-    this.isCurrentUser,
-    this.child,
+    Key? key,
+    required this.isCurrentUser,
+    required this.child,
     this.showNip = true,
     this.showBubble = true,
     this.padding = const EdgeInsets.all(10),

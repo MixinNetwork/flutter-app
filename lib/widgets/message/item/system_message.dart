@@ -9,8 +9,8 @@ import '../../brightness_observer.dart';
 
 class SystemMessage extends StatelessWidget {
   const SystemMessage({
-    Key key,
-    this.message,
+    Key? key,
+    required this.message,
   }) : super(key: key);
 
   final MessageItem message;
@@ -41,42 +41,42 @@ class SystemMessage extends StatelessWidget {
                       text = Localization.of(context).chatGroupJoin(
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.participantFullName,
+                            : message.participantFullName!,
                       );
                       break;
                     case MessageAction.exit:
                       text = Localization.of(context).chatGroupExit(
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.participantFullName,
+                            : message.participantFullName!,
                       );
                       break;
                     case MessageAction.add:
                       text = Localization.of(context).chatGroupAdd(
                         message.relationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.userFullName,
+                            : message.userFullName!,
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.participantFullName,
+                            : message.participantFullName!,
                       );
                       break;
                     case MessageAction.remove:
                       text = Localization.of(context).chatGroupRemove(
                         message.relationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.userFullName,
+                            : message.userFullName!,
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.participantFullName,
+                            : message.participantFullName!,
                       );
                       break;
                     case MessageAction.create:
                       text = Localization.of(context).chatGroupCreate(
                         message.relationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.userFullName,
-                        message.groupName,
+                            : message.userFullName!,
+                        message.groupName!,
                       );
                       break;
                     // case MessageAction.update:

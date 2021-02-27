@@ -91,7 +91,7 @@ class SendMessageHelper {
         'application/octet-stream';
     final attachment = _attachmentUtil.getAttachmentFile(
         MessageCategory.plainData, conversationId, messageId);
-    // ignore: cascade_invocations
+
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
@@ -115,6 +115,7 @@ class SendMessageHelper {
     await _attachmentUtil
         .uploadAttachment(attachment, messageId)
         .then((attachmentId) async {
+      if (attachmentId == null) return;
       final attachmentMessage = AttachmentMessage(
           null,
           null,

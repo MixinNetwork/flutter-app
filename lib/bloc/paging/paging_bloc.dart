@@ -12,11 +12,12 @@ import 'package:flutter_app/bloc/subscribe_mixin.dart';
 class PagingState<T> extends Equatable {
   const PagingState({
     this.map = const {},
-    this.count,
+    this.count = 0,
     this.initialized = false,
     this.index = 0,
     this.alignment = 0,
   });
+
   final Map<int, T> map;
   final int count;
   final bool initialized;
@@ -33,11 +34,11 @@ class PagingState<T> extends Equatable {
       ];
 
   PagingState<T> copyWith({
-    Map<int, T> map,
-    int count,
-    bool initialized,
-    int index,
-    double alignment,
+    Map<int, T>? map,
+    int? count,
+    bool? initialized,
+    int? index,
+    double? alignment,
   }) {
     return PagingState(
       map: map ?? this.map,
@@ -75,6 +76,7 @@ class PagingInitEvent extends PagingEvent {
 
 class PagingItemPositionEvent extends PagingEvent {
   PagingItemPositionEvent(this.itemPositions);
+
   final List<int> itemPositions;
 
   @override
@@ -89,13 +91,13 @@ class PagingUpdateEvent extends PagingEvent {
 abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     with SubscribeMixin {
   PagingBloc({
-    this.itemPositionsListener,
-    this.limit,
+    required this.itemPositionsListener,
+    required this.limit,
     this.jumpTo,
     int offset = 0,
     int index = 0,
     double alignment = 0,
-    PagingState<T> initState,
+    required PagingState<T> initState,
   }) : super(initState) {
     itemPositionsListener.itemPositions.addListener(onItemPositions);
     add(PagingInitEvent(
@@ -105,11 +107,11 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     ));
   }
 
-  final ItemPositionsListener itemPositionsListener;
-  final void Function({int index, double alignment}) jumpTo;
+  late final ItemPositionsListener itemPositionsListener;
+  final void Function({int index, double alignment})? jumpTo;
 
   int limit;
-  List<int> lastItemPositions;
+  List<int> lastItemPositions = [];
 
   void onItemPositions() => add(PagingItemPositionEvent(
       itemPositionsListener.itemPositions.value.map((e) => e.index).toList()));
@@ -122,9 +124,8 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
   @override
   Stream<Transition<PagingEvent, PagingState<T>>> transformEvents(
-    Stream<PagingEvent> events,
-    TransitionFunction<PagingEvent, PagingState> transitionFn,
-  ) {
+      Stream<PagingEvent> events,
+      TransitionFunction<PagingEvent, PagingState<T>> transitionFn) {
     final nonDebounceStream =
         events.where((event) => event is! PagingItemPositionEvent);
     final debounceStream =
@@ -222,8 +223,8 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     final end = min(_end, state.count);
     final loadedindexes = state.map.keys.toList();
 
-    Tuple2<int, int> before;
-    Tuple2<int, int> after;
+    Tuple2<int, int>? before;
+    Tuple2<int, int>? after;
 
     if (start < loadedindexes.first)
       before = Tuple2(start, min(loadedindexes.first, end));
@@ -238,5 +239,6 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   }
 
   Future<int> queryCount();
+
   Future<List<T>> queryRange(int limit, int offset);
 }

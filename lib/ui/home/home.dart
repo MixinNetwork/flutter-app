@@ -35,7 +35,7 @@ class HomePage extends StatelessWidget {
               child: ResponsiveNavigator(
                 switchWidth: responsiveNavigationMinWidth + 260,
                 leftPage: MaterialPage(
-                  key: const Key('center'),
+                  key: const ValueKey('center'),
                   name: 'center',
                   child: SizedBox(
                     key: _conversationPageKey,
@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 rightEmptyPage: MaterialPage(
-                  key: const Key('empty'),
+                  key: const ValueKey('empty'),
                   name: 'empty',
                   child: DecoratedBox(
                     child: Empty(
@@ -63,7 +63,7 @@ class HomePage extends StatelessWidget {
 
 class _CenterPage extends StatelessWidget {
   const _CenterPage({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override

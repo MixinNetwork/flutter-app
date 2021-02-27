@@ -7,6 +7,13 @@ part of 'snapshot_message.dart';
 // **************************************************************************
 
 SnapshotMessage _$SnapshotMessageFromJson(Map<String, dynamic> json) {
+  $checkKeys(json, disallowNullValues: const [
+    'snapshot_id',
+    'type',
+    'asset_id',
+    'amount',
+    'created_at'
+  ]);
   return SnapshotMessage(
     json['snapshot_id'] as String,
     json['type'] as String,
