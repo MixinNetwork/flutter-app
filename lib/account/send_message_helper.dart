@@ -29,7 +29,7 @@ class SendMessageHelper {
     final category =
         isPlain ? MessageCategory.plainText : MessageCategory.signalText;
     final message = Message(
-      messageId: Uuid().v4(),
+      messageId: const Uuid().v4(),
       conversationId: conversationId,
       userId: senderId,
       category: category,
@@ -67,7 +67,7 @@ class SendMessageHelper {
 
     final encoded = base64.encode(utf8.encode(jsonEncode(stickerMessage)));
     final message = Message(
-      messageId: Uuid().v4(),
+      messageId: const Uuid().v4(),
       conversationId: conversationId,
       userId: senderId,
       category: category,
@@ -85,7 +85,7 @@ class SendMessageHelper {
 
   void sendDataMessage(
       String conversationId, String senderId, XFile file, bool isPlain) async {
-    final messageId = Uuid().v4();
+    final messageId = const Uuid().v4();
     final mimeType = file.mimeType ??
         lookupMimeType(file.path) ??
         'application/octet-stream';
@@ -145,7 +145,7 @@ class SendMessageHelper {
         isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
     final encoded = base64.encode(utf8.encode(jsonEncode(contactMessage)));
     final message = Message(
-      messageId: Uuid().v4(),
+      messageId: const Uuid().v4(),
       conversationId: conversationId,
       userId: senderId,
       category: category,

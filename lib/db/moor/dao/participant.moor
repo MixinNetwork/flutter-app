@@ -1,6 +1,6 @@
 import '../mixin.moor';
 
-participantsAvatar AS UserItem:
+participantsAvatar:
 SELECT u.*
 FROM participants p,
      users u

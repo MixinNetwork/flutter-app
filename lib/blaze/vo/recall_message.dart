@@ -9,7 +9,7 @@ class RecallMessage {
   factory RecallMessage.fromJson(Map<String, dynamic> json) =>
       _$RecallMessageFromJson(json);
 
-  @JsonKey(name: 'message_id', nullable: false)
+  @JsonKey(name: 'message_id', disallowNullValue: true)
   String messageId;
 
   Map<String, dynamic> toJson() => _$RecallMessageToJson(this);

@@ -50,5 +50,5 @@ class MentionCubit extends Cubit<Tuple2<String, List<User>>>
     await super.close();
   }
 
-  void add(String keyword) => streamController.add(keyword);
+  void send(String keyword) => streamController.add(keyword);
 }

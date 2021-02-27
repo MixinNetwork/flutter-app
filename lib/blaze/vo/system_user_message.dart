@@ -10,9 +10,9 @@ class SystemUserMessage {
   factory SystemUserMessage.fromJson(Map<String, dynamic> json) =>
       _$SystemUserMessageFromJson(json);
 
-  @JsonKey(name: 'action', nullable: false)
+  @JsonKey(name: 'action', disallowNullValue: true)
   SystemUserAction action;
-  @JsonKey(name: 'user_id', nullable: false)
+  @JsonKey(name: 'user_id', disallowNullValue: true)
   String userId;
 
   Map<String, dynamic> toJson() => _$SystemUserMessageToJson(this);

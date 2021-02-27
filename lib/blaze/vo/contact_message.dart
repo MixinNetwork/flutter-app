@@ -11,7 +11,7 @@ class ContactMessage {
   factory ContactMessage.fromJson(Map<String, dynamic> json) =>
       _$ContactMessageFromJson(json);
 
-  @JsonKey(name: 'user_id', nullable: false)
+  @JsonKey(name: 'user_id', disallowNullValue: true)
   String userId;
 
   Map<String, dynamic> toJson() => _$ContactMessageToJson(this);

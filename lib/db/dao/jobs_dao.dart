@@ -13,7 +13,7 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
 
   Future<int> insertSendingJob(String messageId, String conversationId) =>
       insert(Job(
-          jobId: Uuid().v4(),
+          jobId: const Uuid().v4(),
           action: sendingMessage,
           priority: 5,
           blazeMessage: messageId,

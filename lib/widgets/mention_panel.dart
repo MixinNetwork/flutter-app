@@ -97,7 +97,7 @@ class _MentionPanel extends StatelessWidget {
       ),
       child: BlocConsumer(
         buildWhen: (a, b) => b.item2?.isNotEmpty == true,
-        cubit: mentionCubit,
+        bloc: mentionCubit,
         builder: (context, Tuple2<String, List<User>> tuple) =>
             ListView.builder(
           controller: scrollController,

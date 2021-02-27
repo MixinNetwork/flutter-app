@@ -9,11 +9,11 @@ class AppButton {
   factory AppButton.fromJson(Map<String, dynamic> json) =>
       _$AppButtonFromJson(json);
 
-  @JsonKey(name: 'label',nullable: true)
+  @JsonKey(name: 'label',disallowNullValue: false)
   String label;
-  @JsonKey(name: 'color', nullable: true)
+  @JsonKey(name: 'color', disallowNullValue: false)
   String color;
-  @JsonKey(name: 'action', nullable: true)
+  @JsonKey(name: 'action', disallowNullValue: false)
   String action;
 
   Map<String, dynamic> toJson() => _$AppButtonToJson(this);

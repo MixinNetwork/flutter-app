@@ -15,9 +15,9 @@ class BlazeMessage {
   factory BlazeMessage.fromJson(Map<String, dynamic> json) =>
       _$BlazeMessageFromJson(json);
 
-  @JsonKey(name: 'id', nullable: false)
+  @JsonKey(name: 'id', disallowNullValue: true)
   String id;
-  @JsonKey(name: 'action', nullable: false)
+  @JsonKey(name: 'action', disallowNullValue: true)
   String action;
   @JsonKey(name: 'params')
   dynamic params;

@@ -10,13 +10,13 @@ class LiveMessage {
   factory LiveMessage.fromJson(Map<String, dynamic> json) =>
       _$LiveMessageFromJson(json);
 
-  @JsonKey(name: 'width', nullable: false)
+  @JsonKey(name: 'width', disallowNullValue: true)
   int width;
-  @JsonKey(name: 'height', nullable: false)
+  @JsonKey(name: 'height', disallowNullValue: true)
   int height;
-  @JsonKey(name: 'thumb_url', nullable: false)
+  @JsonKey(name: 'thumb_url', disallowNullValue: true)
   String thumbUrl;
-  @JsonKey(name: 'url', nullable: false)
+  @JsonKey(name: 'url', disallowNullValue: true)
   String url;
 
   Map<String, dynamic> toJson() => _$LiveMessageToJson(this);

@@ -14,7 +14,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       : super(const PagingState<ConversationItem>()) {
     addSubscription(slideCategoryCubit
         .distinct()
-        .listen((event) => _switchBloc(slideCategoryCubit.state, limit)));
+        .listen((event) => _switchBloc(event, limit)));
   }
 
   final SlideCategoryCubit slideCategoryCubit;

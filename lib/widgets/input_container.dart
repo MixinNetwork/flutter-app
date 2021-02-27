@@ -54,7 +54,7 @@ class InputContainer extends StatelessWidget {
                 final mention = mentionRegExp
                     .stringMatch(textEditingController.text)
                     ?.replaceFirst('@', '');
-                BlocProvider.of<MentionCubit>(context).add(mention);
+                BlocProvider.of<MentionCubit>(context).send(mention);
               });
               return textEditingController;
             },

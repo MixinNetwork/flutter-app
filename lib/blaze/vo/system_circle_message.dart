@@ -9,9 +9,9 @@ class SystemCircleMessage {
   factory SystemCircleMessage.fromJson(Map<String, dynamic> json) =>
       _$SystemCircleMessageFromJson(json);
 
-  @JsonKey(name: 'action', nullable: false)
+  @JsonKey(name: 'action', disallowNullValue: true)
   SystemCircleAction action;
-  @JsonKey(name: 'circle_id', nullable: false)
+  @JsonKey(name: 'circle_id', disallowNullValue: true)
   String circleId;
   @JsonKey(name: 'conversation_id')
   String conversationId;

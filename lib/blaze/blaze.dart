@@ -76,7 +76,7 @@ class Blaze {
     final blazeMessage = BlazeAckMessage(
         messageId: messageId, status: EnumToString.convertToString(status));
     database.jobsDao.insert(Job(
-        jobId: Uuid().v4(),
+        jobId: const Uuid().v4(),
         action: acknowledgeMessageReceipts,
         priority: 5,
         blazeMessage: jsonEncode(blazeMessage),
@@ -85,7 +85,7 @@ class Blaze {
   }
 
   void _sendListPending() {
-    _sendGZip(BlazeMessage(id: Uuid().v4(), action: 'LIST_PENDING_MESSAGES'));
+    _sendGZip(BlazeMessage(id: const Uuid().v4(), action: 'LIST_PENDING_MESSAGES'));
   }
 
   void _sendGZip(BlazeMessage msg) {

@@ -157,7 +157,7 @@ class AccountServer {
         quoteMessageId: message.quoteMessageId);
 
     return BlazeMessage(
-        id: Uuid().v4(), action: createMessage, params: blazeParam);
+        id: const Uuid().v4(), action: createMessage, params: blazeParam);
   }
 
   void sendTextMessage(
@@ -260,7 +260,7 @@ class AccountServer {
     final jobs = ids
         .map((id) => jsonEncode(BlazeAckMessage(messageId: id, status: status)))
         .map((blazeMessage) => Job(
-            jobId: Uuid().v4(),
+            jobId: const Uuid().v4(),
             action: acknowledgeMessageReceipts,
             priority: 5,
             blazeMessage: blazeMessage,
@@ -336,5 +336,4 @@ class AccountServer {
   void uploadAttachment(db.MessageItem message) {
     // TODO
   }
-
 }

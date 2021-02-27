@@ -30,64 +30,71 @@ dependencies:
     sdk: flutter
   http: ^0.13.0
   qr_flutter: ^3.2.0
-  uuid: ^2.2.2
+  uuid: ^3.0.0
   cryptography: ^1.4.1
-  web_socket_channel: ^1.2.0
-  moor: ^3.4.0
+  web_socket_channel: ^2.0.0
+  moor: ^4.1.0
   sqlite3_flutter_libs: ^0.4.0+1
   libsignal_protocol_dart: ^0.2.1
-  path_provider: ^1.6.27
+  path_provider: ^2.0.0
   path: ^1.8.0
-  hive: ^1.4.4+1
-  hive_flutter: ^0.3.1
+  hive: ^1.6.0-nullsafety.2
+  hive_flutter: ^1.0.0-nullsafety.0
   cached_network_image: ^2.5.0
-  very_good_analysis: ^1.0.4
+  very_good_analysis: ^2.0.0-nullsafety.0
   desktop_window: ^0.3.0
-  bloc: ^6.1.1
-  flutter_bloc: ^6.1.2
-  equatable: ^1.2.6
+  bloc: ^7.0.0-nullsafety.2
+  flutter_bloc: ^7.0.0-nullsafety.2
+  equatable: ^2.0.0-nullsafety.3
   intl: ^0.17.0
-  flutter_svg: ^0.20.0-nullsafety.3
-  tuple: ^1.0.3
+  flutter_svg: ^0.21.0-nullsafety.0
+  tuple: ^2.0.0-nullsafety.0
   archive: ^3.0.0
-  hydrated_bloc: ^6.1.0
-  rxdart: ^0.25.0
-  json_annotation: ^3.1.1
-  provider: ^4.3.3
+  hydrated_bloc: ^7.0.0-nullsafety.1
+  rxdart: ^0.26.0-nullsafety.1
+  json_annotation: ^4.0.0
+  provider: ^5.0.0-nullsafety.5
   isolate: ^2.0.3
   dio: ^3.0.10
   scrollable_positioned_list: ^0.1.9
-  recase: ^3.0.1
-  file_selector: ^0.7.0+2
+  recase: ^4.0.0-nullsafety.0
+  file_selector: ^0.8.0
   # file_selector_platform_interface: ^1.0.3+1
-  file_selector_macos: ^0.0.3
+  file_selector_macos: ^0.0.4
   file_selector_windows: ^0.0.2
   file_selector_linux: ^0.0.2
   mime: ^1.0.0
-  url_launcher: ^5.7.10
+  url_launcher: ^6.0.1
   filesize: ^1.0.4
-  flutter_portal: ^0.3.0
+  flutter_portal: ^0.4.0-nullsafety.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 dependency_overrides:
-  crypto: ^3.0.0
-  http_parser: ^4.0.0
-  http: ^0.13.0
-  archive: ^3.0.0
-  analyzer: ^1.0.0
-  cli_util: ^0.3.0
-  args: ^2.0.0
+  build_runner: ^1.11.5
+  web_socket_channel: ^2.0.0
+  tuple: ^2.0.0-nullsafety.0
+#  cryptography: ^2.0.0-nullsafety.2
+  fixnum: ^1.0.0-nullsafety.0
+  crypto: ^3.0.0-nullsafety.0
   convert: ^3.0.0
-  pub_semver: ^2.0.0
-  xml: ^5.0.0-nullsafety.0
+  http_parser: ^4.0.0
+  uuid: ^3.0.0
+  recase: ^4.0.0-nullsafety.0
+  json_annotation: ^4.0.0
+  equatable: ^2.0.0-nullsafety.3
+  flutter_cache_manager: ^3.0.0-nullsafety.0
+  http: ^0.13.0
+  sqflite_common: ^2.0.0
+  synchronized: ^3.0.0
+  quiver: ^3.0.0
 
 dev_dependencies:
-  hive_generator: ^0.8.2
-  moor_generator: ^3.4.1
-  build_runner: ^1.11.3
-  json_serializable: ^3.5.1
+  hive_generator: ^0.9.0-nullsafety.1
+  moor_generator: ^4.1.0
+  build_runner: ^1.11.5
+  json_serializable: ^4.0.1
   flutter_test:
     sdk: flutter
 
