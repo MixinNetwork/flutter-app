@@ -63,7 +63,8 @@ class AccountServer {
     _sendMessageHelper = SendMessageHelper(
         database.messagesDao, database.jobsDao, _attachmentUtil);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
-    _decryptMessage = DecryptMessage(userId, database, client, _attachmentUtil);
+    _decryptMessage =
+        DecryptMessage(userId, database, client, privateKey, _attachmentUtil);
   }
 
   late String userId;
@@ -138,6 +139,8 @@ class AccountServer {
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
+        } else if (message.category.isEncrypted) {
+          // todo send encrypted
         } else {
           // todo send signal
         }

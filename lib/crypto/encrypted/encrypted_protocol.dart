@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_app/utils/crypted_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -12,7 +14,7 @@ class EncryptedProtocol {
     final messageKey = _encryptCipherMessageKey(
         privateKey, otherPublicKey, aesGcmKey.extractSync());
     final messageKeyWithSession = [
-      ...Uuid().parse(otherSessionId),
+      ...Uuid.parse(otherSessionId),
       ...messageKey
     ];
 
@@ -30,14 +32,16 @@ class EncryptedProtocol {
 
   List<int> _encryptCipherMessageKey(
       ed.PrivateKey privateKey, List<int> otherPublicKey, List<int> aesGcmKey) {
-    final private = privateKeyToCurve25519(privateKey.bytes);
+    final private =
+        privateKeyToCurve25519(Uint8List.fromList(privateKey.bytes));
     final sharedSecret = calculateAgreement(otherPublicKey, private);
     return aesEncrypt(sharedSecret, aesGcmKey);
   }
 
   List<int> _decryptCipherMessageKey(ed.PrivateKey privateKey,
       List<int> otherPublicKey, List<int> cipherText, List<int> iv) {
-    final private = privateKeyToCurve25519(privateKey.bytes);
+    final private =
+        privateKeyToCurve25519(Uint8List.fromList(privateKey.bytes));
     final sharedSecret = calculateAgreement(otherPublicKey, private);
     return aesDecrypt(sharedSecret, iv, cipherText);
   }

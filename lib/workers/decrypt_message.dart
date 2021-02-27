@@ -17,6 +17,7 @@ import 'package:flutter_app/blaze/vo/system_conversation_message.dart';
 import 'package:flutter_app/blaze/vo/system_session_message.dart';
 import 'package:flutter_app/blaze/vo/system_user_message.dart';
 import 'package:flutter_app/constants/constants.dart';
+import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -33,15 +34,21 @@ import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart';
+
 import '../db/extension/message.dart' show QueteMessage;
 import 'injector.dart';
 
 class DecryptMessage extends Injector {
-  DecryptMessage(
-      String userId, Database database, Client client, this._attachmentUtil)
-      : super(userId, database, client);
+  DecryptMessage(String userId, Database database, Client client,
+      String privateKey, this._attachmentUtil)
+      : super(userId, database, client) {
+    _privateKey = PrivateKey(base64Decode(privateKey));
+  }
 
   String? _conversationId;
+  late PrivateKey _privateKey;
+  late EncryptedProtocol _encryptedProtocol;
 
   // ignore: unused_field
   final AttachmentUtil _attachmentUtil;
@@ -61,6 +68,8 @@ class DecryptMessage extends Injector {
       _processSignalMessage(data);
     } else if (category.isPlain) {
       _processPlainMessage(data);
+    } else if (category.isEncrypted) {
+      _processEncryptedMessage(data);
     } else if (category.isSystem) {
       _processSystemMessage(data);
     } else if (category == MessageCategory.appButtonGroup ||
@@ -105,6 +114,21 @@ class DecryptMessage extends Injector {
         data.userId = data.representativeId;
       }
       _processDecryptSuccess(data, data.data);
+    }
+  }
+
+  void _processEncryptedMessage(BlazeMessageData data) {
+    try {
+      final decryptedContent = _encryptedProtocol.decryptMessage(
+          _privateKey, base64Decode(data.data));
+      final plainText = utf8.decode(decryptedContent);
+      try {
+        _processDecryptSuccess(data, plainText);
+      } catch (e) {
+        // todo insertInvalidMessage
+      }
+    } catch (e) {
+      // todo
     }
   }
 
