@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/app.dart';
@@ -16,7 +15,8 @@ void main() async {
   await DesktopWindow.setMinWindowSize(
       const Size(slidePageMinWidth + responsiveNavigationMinWidth, 480));
 
-  LoadBalancerUtils.loadBalancer = await LoadBalancer.create(16, IsolateRunner.spawn);
+  LoadBalancerUtils.loadBalancer =
+      await LoadBalancer.create(16, IsolateRunner.spawn);
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: await getApplicationDocumentsDirectory(),
   );

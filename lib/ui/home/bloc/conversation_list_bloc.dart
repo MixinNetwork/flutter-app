@@ -107,9 +107,7 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
     Future<int> Function() queryCount,
     Future<List<ConversationItem>> Function(int limit, int offset) queryRange,
     Stream<Null> updateEvent,
-  )   : assert(queryCount != null),
-        assert(queryRange != null),
-        _queryCount = queryCount,
+  )   : _queryCount = queryCount,
         _queryRange = queryRange,
         super(
           initState: const PagingState<ConversationItem>(),

@@ -131,10 +131,12 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   Stream<Transition<PagingEvent, PagingState<T>>> transformEvents(
       Stream<PagingEvent> events,
       TransitionFunction<PagingEvent, PagingState<T>> transitionFn) {
+    final asBroadcastStream = events.asBroadcastStream();
     final nonDebounceStream =
-        events.where((event) => event is! PagingItemPositionEvent);
-    final debounceStream =
-        events.where((event) => event is PagingItemPositionEvent).distinct();
+        asBroadcastStream.where((event) => event is! PagingItemPositionEvent);
+    final debounceStream = asBroadcastStream
+        .where((event) => event is PagingItemPositionEvent)
+        .distinct();
 
     return super.transformEvents(
         Rx.merge([nonDebounceStream, debounceStream]), transitionFn);
