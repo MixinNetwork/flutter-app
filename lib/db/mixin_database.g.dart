@@ -3876,7 +3876,7 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
 class User extends DataClass implements Insertable<User> {
   final String userId;
   final String identityNumber;
-  final UserRelationship relationship;
+  final UserRelationship? relationship;
   final String? fullName;
   final String? avatarUrl;
   final String? phone;
@@ -3890,7 +3890,7 @@ class User extends DataClass implements Insertable<User> {
   User(
       {required this.userId,
       required this.identityNumber,
-      required this.relationship,
+      this.relationship,
       this.fullName,
       this.avatarUrl,
       this.phone,
@@ -3912,7 +3912,7 @@ class User extends DataClass implements Insertable<User> {
       identityNumber: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}identity_number'])!,
       relationship: Users.$converter0.mapToDart(stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}relationship']))!,
+          .mapFromDatabaseResponse(data['${effectivePrefix}relationship'])),
       fullName: stringType
           .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
       avatarUrl: stringType
@@ -3940,9 +3940,9 @@ class User extends DataClass implements Insertable<User> {
     final map = <String, Expression>{};
     map['user_id'] = Variable<String>(userId);
     map['identity_number'] = Variable<String>(identityNumber);
-    {
+    if (!nullToAbsent || relationship != null) {
       final converter = Users.$converter0;
-      map['relationship'] = Variable<String>(converter.mapToSql(relationship)!);
+      map['relationship'] = Variable<String?>(converter.mapToSql(relationship));
     }
     if (!nullToAbsent || fullName != null) {
       map['full_name'] = Variable<String?>(fullName);
@@ -3983,7 +3983,9 @@ class User extends DataClass implements Insertable<User> {
     return UsersCompanion(
       userId: Value(userId),
       identityNumber: Value(identityNumber),
-      relationship: Value(relationship),
+      relationship: relationship == null && nullToAbsent
+          ? const Value.absent()
+          : Value(relationship),
       fullName: fullName == null && nullToAbsent
           ? const Value.absent()
           : Value(fullName),
@@ -4019,7 +4021,8 @@ class User extends DataClass implements Insertable<User> {
     return User(
       userId: serializer.fromJson<String>(json['user_id']),
       identityNumber: serializer.fromJson<String>(json['identity_number']),
-      relationship: serializer.fromJson<UserRelationship>(json['relationship']),
+      relationship:
+          serializer.fromJson<UserRelationship?>(json['relationship']),
       fullName: serializer.fromJson<String?>(json['full_name']),
       avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
       phone: serializer.fromJson<String?>(json['phone']),
@@ -4038,7 +4041,7 @@ class User extends DataClass implements Insertable<User> {
     return <String, dynamic>{
       'user_id': serializer.toJson<String>(userId),
       'identity_number': serializer.toJson<String>(identityNumber),
-      'relationship': serializer.toJson<UserRelationship>(relationship),
+      'relationship': serializer.toJson<UserRelationship?>(relationship),
       'full_name': serializer.toJson<String?>(fullName),
       'avatar_url': serializer.toJson<String?>(avatarUrl),
       'phone': serializer.toJson<String?>(phone),
@@ -4148,7 +4151,7 @@ class User extends DataClass implements Insertable<User> {
 class UsersCompanion extends UpdateCompanion<User> {
   final Value<String> userId;
   final Value<String> identityNumber;
-  final Value<UserRelationship> relationship;
+  final Value<UserRelationship?> relationship;
   final Value<String?> fullName;
   final Value<String?> avatarUrl;
   final Value<String?> phone;
@@ -4177,7 +4180,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   UsersCompanion.insert({
     required String userId,
     required String identityNumber,
-    required UserRelationship relationship,
+    this.relationship = const Value.absent(),
     this.fullName = const Value.absent(),
     this.avatarUrl = const Value.absent(),
     this.phone = const Value.absent(),
@@ -4189,12 +4192,11 @@ class UsersCompanion extends UpdateCompanion<User> {
     this.biography = const Value.absent(),
     this.isScam = const Value.absent(),
   })  : userId = Value(userId),
-        identityNumber = Value(identityNumber),
-        relationship = Value(relationship);
+        identityNumber = Value(identityNumber);
   static Insertable<User> custom({
     Expression<String>? userId,
     Expression<String>? identityNumber,
-    Expression<UserRelationship>? relationship,
+    Expression<UserRelationship?>? relationship,
     Expression<String?>? fullName,
     Expression<String?>? avatarUrl,
     Expression<String?>? phone,
@@ -4226,7 +4228,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   UsersCompanion copyWith(
       {Value<String>? userId,
       Value<String>? identityNumber,
-      Value<UserRelationship>? relationship,
+      Value<UserRelationship?>? relationship,
       Value<String?>? fullName,
       Value<String?>? avatarUrl,
       Value<String?>? phone,
@@ -4266,7 +4268,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     if (relationship.present) {
       final converter = Users.$converter0;
       map['relationship'] =
-          Variable<String>(converter.mapToSql(relationship.value)!);
+          Variable<String?>(converter.mapToSql(relationship.value));
     }
     if (fullName.present) {
       map['full_name'] = Variable<String?>(fullName.value);
@@ -4347,8 +4349,8 @@ class Users extends Table with TableInfo<Users, User> {
       const VerificationMeta('relationship');
   late final GeneratedTextColumn relationship = _constructRelationship();
   GeneratedTextColumn _constructRelationship() {
-    return GeneratedTextColumn('relationship', $tableName, false,
-        $customConstraints: 'NOT NULL');
+    return GeneratedTextColumn('relationship', $tableName, true,
+        $customConstraints: '');
   }
 
   final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
@@ -10981,9 +10983,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentionRead: row.readInt('mentionRead'),
         groupName: row.readString('groupName'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship'))!,
+            Users.$converter0.mapToDart(row.readString('relationship')),
         participantRelationship: Users.$converter0
-            .mapToDart(row.readString('participantRelationship'))!,
+            .mapToDart(row.readString('participantRelationship')),
       );
     });
   }
@@ -11062,9 +11064,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentionRead: row.readInt('mentionRead'),
         groupName: row.readString('groupName'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship'))!,
+            Users.$converter0.mapToDart(row.readString('relationship')),
         participantRelationship: Users.$converter0
-            .mapToDart(row.readString('participantRelationship'))!,
+            .mapToDart(row.readString('participantRelationship')),
       );
     });
   }
@@ -11286,7 +11288,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship'))!,
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11356,7 +11358,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship'))!,
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11425,7 +11427,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship'))!,
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11495,7 +11497,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship'))!,
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11553,7 +11555,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentionCount: row.readInt('mentionCount'),
         mentions: row.readString('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship'))!,
+            Users.$converter0.mapToDart(row.readString('relationship')),
       );
     });
   }
@@ -11687,8 +11689,8 @@ class MessageItem {
   final String? mentions;
   final int? mentionRead;
   final String? groupName;
-  final UserRelationship relationship;
-  final UserRelationship participantRelationship;
+  final UserRelationship? relationship;
+  final UserRelationship? participantRelationship;
   MessageItem({
     required this.messageId,
     required this.conversationId,
@@ -11741,8 +11743,8 @@ class MessageItem {
     this.mentions,
     this.mentionRead,
     this.groupName,
-    required this.relationship,
-    required this.participantRelationship,
+    this.relationship,
+    this.participantRelationship,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -12451,7 +12453,7 @@ class ConversationItem {
   final String participantUserId;
   final int mentionCount;
   final String? mentions;
-  final UserRelationship relationship;
+  final UserRelationship? relationship;
   ConversationItem({
     required this.conversationId,
     this.groupIconUrl,
@@ -12483,7 +12485,7 @@ class ConversationItem {
     required this.participantUserId,
     required this.mentionCount,
     this.mentions,
-    required this.relationship,
+    this.relationship,
   });
   @override
   int get hashCode => $mrjf($mrjc(
