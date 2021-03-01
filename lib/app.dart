@@ -2,7 +2,6 @@ import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
-import 'package:flutter_app/ui/home/bloc/draft_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
@@ -20,63 +19,20 @@ import 'account/account_server.dart';
 import 'constants/brightness_theme_data.dart';
 
 class App extends StatelessWidget {
+  final accountServer = AccountServer();
+
   @override
   Widget build(BuildContext context) => BlocProvider(
         create: (context) => MultiAuthCubit(),
         child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
           converter: (state) => state.current,
           builder: (context, authState) {
-            Widget app = MaterialApp(
-              title: 'Mixin',
-              debugShowCheckedModeBanner: false,
-              localizationsDelegates: const [
-                Localization.delegate,
-                GlobalMaterialLocalizations.delegate,
-                GlobalCupertinoLocalizations.delegate,
-                GlobalWidgetsLocalizations.delegate,
-              ],
-              supportedLocales: [
-                ...Localization.delegate.supportedLocales,
-              ],
-              builder: (context, child) {
-                try {
-                  Provider.of<AccountServer>(context).language =
-                      Localizations.localeOf(context).languageCode;
-                } catch (_) {}
-                return BrightnessObserver(
-                  child: child!,
-                  lightThemeData: lightBrightnessThemeData,
-                  darkThemeData: darkBrightnessThemeData,
-                );
-              },
-              home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
-                converter: (state) => state.current != null,
-                builder: (context, authAvailable) {
-                  AccountServer? accountServer;
-                  try {
-                    accountServer = Provider.of<AccountServer>(context);
-                  } catch (_) {}
-                  if (authAvailable && accountServer != null) {
-                    BlocProvider.of<ConversationListBloc>(context)
-                      ..limit = MediaQuery.of(context).size.height ~/ 40
-                      ..init();
-                    accountServer.initSticker();
-                    return HomePage();
-                  }
-                  return const LandingPage();
-                },
-              ),
-            );
-            app = Portal(child: app);
+            const Widget app = Portal(child: _App());
             if (authState == null) return app;
 
-            final slideCategoryCubit = SlideCategoryCubit();
-            final draftCubit = DraftCubit();
-            final responsiveNavigatorCubit = ResponsiveNavigatorCubit();
-
-            return FutureBuilder(
+            return FutureBuilder<AccountServer>(
+              key: ValueKey(authState),
               future: () async {
-                final accountServer = AccountServer();
                 await accountServer.initServer(
                   authState.account.userId,
                   authState.account.sessionId,
@@ -86,67 +42,123 @@ class App extends StatelessWidget {
                 return accountServer;
               }(),
               builder: (BuildContext context,
-                      AsyncSnapshot<AccountServer> snapshot) =>
-                  Provider<AccountServer?>(
-                key: ValueKey(snapshot.data?.userId),
-                create: (context) => snapshot.data,
-                dispose: (BuildContext context, AccountServer? accountServer) =>
-                    accountServer?.stop(),
-                child: Builder(
-                  builder: (context) {
-                    if (snapshot.connectionState == ConnectionState.done)
-                      return MultiBlocProvider(
-                        providers: [
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                slideCategoryCubit,
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) => draftCubit,
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                responsiveNavigatorCubit,
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                ConversationListBloc(
-                                    slideCategoryCubit, snapshot.data!.database),
-                          ),
-                          BlocProvider(
-                            create: (BuildContext context) =>
-                                ConversationCubit(draftCubit, snapshot.data!),
-                          ),
-                        ],
-                        child: Builder(
-                          builder: (context) {
-                            final accountServer =
-                                Provider.of<AccountServer>(context);
-                            return MultiBlocProvider(
-                              key: ValueKey(accountServer.userId),
-                              providers: [
-                                BlocProvider(
-                                  create: (BuildContext context) =>
-                                      ParticipantsCubit(
-                                    userDao: accountServer.database.userDao,
-                                    conversationCubit:
-                                        BlocProvider.of<ConversationCubit>(
-                                            context),
-                                    userId: accountServer.userId,
-                                  ),
-                                ),
-                              ],
-                              child: app,
-                            );
-                          },
-                        ),
-                      );
-                    return app;
-                  },
-                ),
-              ),
+                  AsyncSnapshot<AccountServer> snapshot) {
+                if (snapshot.data != null)
+                  return _Providers(
+                    app: app,
+                    accountServer: snapshot.data!,
+                  );
+                return app;
+              },
             );
           },
         ),
       );
+}
+
+class _Providers extends StatelessWidget {
+  const _Providers({
+    Key? key,
+    required this.app,
+    required this.accountServer,
+  }) : super(key: key);
+
+  final Widget app;
+  final AccountServer accountServer;
+
+  @override
+  Widget build(BuildContext context) => Provider<AccountServer>(
+        key: ValueKey(accountServer.userId),
+        create: (context) => accountServer,
+        dispose: (BuildContext context, AccountServer accountServer) =>
+            accountServer.stop(),
+        child: Builder(
+          builder: (context) => MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (BuildContext context) => SlideCategoryCubit(),
+              ),
+              BlocProvider(
+                create: (BuildContext context) => ResponsiveNavigatorCubit(),
+              ),
+              BlocProvider(
+                create: (BuildContext context) =>
+                    ConversationCubit(accountServer),
+              ),
+              BlocProvider(
+                create: (BuildContext context) => ParticipantsCubit(
+                  userDao: accountServer.database.userDao,
+                  conversationCubit:
+                      BlocProvider.of<ConversationCubit>(context),
+                  userId: accountServer.userId,
+                ),
+              ),
+            ],
+            child: Builder(
+              builder: (context) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (BuildContext context) => ConversationListBloc(
+                      context.read<SlideCategoryCubit>(),
+                      accountServer.database,
+                    ),
+                  ),
+                ],
+                child: app,
+              ),
+            ),
+          ),
+        ),
+      );
+}
+
+class _App extends StatelessWidget {
+  const _App({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Mixin',
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        Localization.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        ...Localization.delegate.supportedLocales,
+      ],
+      builder: (context, child) {
+        try {
+          Provider.of<AccountServer>(context).language =
+              Localizations.localeOf(context).languageCode;
+        } catch (_) {}
+        return BrightnessObserver(
+          child: child!,
+          lightThemeData: lightBrightnessThemeData,
+          darkThemeData: darkBrightnessThemeData,
+        );
+      },
+      home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
+        converter: (state) => state.current != null,
+        builder: (context, authAvailable) {
+          AccountServer? accountServer;
+          try {
+            accountServer = Provider.of<AccountServer>(context);
+          } catch (_) {}
+          if (authAvailable && accountServer != null) {
+            BlocProvider.of<ConversationListBloc>(context)
+              ..limit = MediaQuery.of(context).size.height ~/ 40
+              ..init();
+            accountServer.initSticker();
+            return HomePage();
+          }
+          return const LandingPage();
+        },
+      ),
+    );
+  }
 }

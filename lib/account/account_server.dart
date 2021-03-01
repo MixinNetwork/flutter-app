@@ -27,7 +27,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
 class AccountServer {
-  static late String sid;
+  static String? sid;
 
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
@@ -38,6 +38,9 @@ class AccountServer {
     String identityNumber,
     String privateKey,
   ) async {
+    if (sid == sessionId) return;
+    sid = sessionId;
+
     this.userId = userId;
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;
@@ -76,12 +79,6 @@ class AccountServer {
   late AttachmentUtil _attachmentUtil;
 
   void start() {
-    // todo remove, development only
-    if (sid == sessionId) {
-      return;
-    }
-
-    sid = sessionId;
     blaze.connect();
     database.floodMessagesDao.findFloodMessage().listen((list) {
       if (list.isNotEmpty == true) {

@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,24 +10,24 @@ class MessageStatusIcon extends StatelessWidget {
     required this.status,
   }) : super(key: key);
 
-  final String status;
+  final MessageStatus? status;
 
   @override
   Widget build(BuildContext context) {
     var color = BrightnessData.themeOf(context).secondaryText;
     String icon;
     switch (status) {
-      case 'SENT':
+      case MessageStatus.sent:
         icon = Resources.assetsImagesSentSvg;
         break;
-      case 'DELIVERED':
+      case MessageStatus.delivered:
         icon = Resources.assetsImagesDeliveredSvg;
         break;
-      case 'READ':
+      case MessageStatus.read:
         icon = Resources.assetsImagesReadSvg;
         color = BrightnessData.themeOf(context).accent;
         break;
-      case 'SENDING':
+      case MessageStatus.sending:
       default:
         icon = Resources.assetsImagesSendingSvg;
         break;

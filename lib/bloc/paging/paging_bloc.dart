@@ -99,7 +99,7 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     double alignment = 0,
     required PagingState<T> initState,
   }) : super(initState) {
-    itemPositionsListener.itemPositions.addListener(onItemPositions);
+    itemPositionsListener?.itemPositions.addListener(onItemPositions);
     add(PagingInitEvent(
       offset: offset,
       index: index,
@@ -107,18 +107,23 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     ));
   }
 
-  late final ItemPositionsListener itemPositionsListener;
+  final ItemPositionsListener? itemPositionsListener;
   final void Function({int index, double alignment})? jumpTo;
 
   int limit;
   List<int> lastItemPositions = [];
 
-  void onItemPositions() => add(PagingItemPositionEvent(
-      itemPositionsListener.itemPositions.value.map((e) => e.index).toList()));
+  void onItemPositions() {
+    final list =
+        itemPositionsListener?.itemPositions.value.map((e) => e.index).toList();
+    if (list?.isEmpty ?? true) return;
+
+    add(PagingItemPositionEvent(list!));
+  }
 
   @override
   Future<void> close() async {
-    itemPositionsListener.itemPositions.removeListener(onItemPositions);
+    itemPositionsListener?.itemPositions.removeListener(onItemPositions);
     await super.close();
   }
 
