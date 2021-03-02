@@ -14,6 +14,7 @@ void main() {
   gcmAesTest();
   encryptedTest();
   encryptedDecryptTest();
+  debugPrint('Done!');
 }
 
 void aesTest() {

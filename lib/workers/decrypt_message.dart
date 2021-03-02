@@ -41,10 +41,8 @@ import 'injector.dart';
 
 class DecryptMessage extends Injector {
   DecryptMessage(String userId, Database database, Client client,
-      String privateKey, this._attachmentUtil)
-      : super(userId, database, client) {
-    _privateKey = PrivateKey(base64Decode(privateKey));
-  }
+      this._privateKey, this._attachmentUtil)
+      : super(userId, database, client);
 
   String? _conversationId;
   late PrivateKey _privateKey;

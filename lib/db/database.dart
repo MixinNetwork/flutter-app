@@ -12,6 +12,7 @@ import 'dao/conversations_dao.dart';
 import 'dao/flood_messages_dao.dart';
 import 'dao/jobs_dao.dart';
 import 'dao/messages_dao.dart';
+import 'dao/participant_session_dao.dart';
 import 'dao/participants_dao.dart';
 import 'dao/users_dao.dart';
 import 'mixin_database.dart';
@@ -28,6 +29,7 @@ class Database {
     stickerDao = StickerDao(_database);
     stickerAlbumsDao = StickerAlbumsDao(_database);
     stickerRelationshipsDao = StickerRelationshipsDao(_database);
+    participantSessionDao = ParticipantSessionDao(_database);
   }
 
   // static MixinDatabase _database;
@@ -50,6 +52,8 @@ class Database {
   late final ParticipantsDao participantsDao;
 
   late final UserDao userDao;
+
+  late final ParticipantSessionDao participantSessionDao;
 
   late final StickerDao stickerDao;
 

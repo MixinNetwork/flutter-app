@@ -41,7 +41,7 @@ CREATE TABLE messages_history ( message_id TEXT NOT NULL, PRIMARY KEY(message_id
 
 CREATE TABLE offsets ( "key" TEXT NOT NULL, timestamp TEXT NOT NULL, PRIMARY KEY("key") );
 
-CREATE TABLE participant_session ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER, created_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(conversation_id, user_id, session_id) );
+CREATE TABLE participant_session (conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER, created_at INTEGER MAPPED BY `const MillisDateConverter()`, public_key TEXT, PRIMARY KEY(conversation_id, user_id, session_id));
 
 CREATE TABLE participants ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT MAPPED By `const ParticipantRoleConverter()`, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(conversation_id,user_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
