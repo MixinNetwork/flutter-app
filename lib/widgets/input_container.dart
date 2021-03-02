@@ -15,6 +15,7 @@ import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
 import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_app/utils/reg_exp_utils.dart';
+import 'package:flutter_app/utils/text_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/hoer_overlay.dart';
 import 'package:flutter_app/widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
@@ -93,11 +94,11 @@ class InputContainer extends StatelessWidget {
                                 onKey: (FocusNode node, RawKeyEvent event) {
                                   if (setEquals(
                                       RawKeyboard.instance.keysPressed,
-                                      {LogicalKeyboardKey.enter})) {
+                                      {LogicalKeyboardKey.enter}))
                                     return _sendMessage(context)
-                                        ? KeyEventResult.ignored
-                                        : KeyEventResult.handled;
-                                  }
+                                        ? KeyEventResult.handled
+                                        : KeyEventResult.ignored;
+
 
                                   return KeyEventResult.ignored;
                                 },
@@ -123,7 +124,7 @@ class InputContainer extends StatelessWidget {
                           ActionButton(
                             name: Resources.assetsImagesIcSendPng,
                             color: BrightnessData.themeOf(context).icon,
-                            onTap: () => _sendMessage(context),
+                            onTap: () => _sendMessage(context, force: true),
                           ),
                         ],
                       ),
@@ -136,12 +137,15 @@ class InputContainer extends StatelessWidget {
         ),
       );
 
-  bool _sendMessage(BuildContext context) {
+  bool _sendMessage(
+    BuildContext context, {
+    bool force = false,
+  }) {
     final textEditingController = context.read<TextEditingController>();
 
     final text = textEditingController.value.text;
-    final valid = textEditingController.value.isComposingRangeValid;
-    if (text.trim().isNotEmpty == true && !valid) {
+    if (text.trim().isNotEmpty == true &&
+        (force || textEditingController.value.composing.composed)) {
       textEditingController.text = '';
       final conversationItem =
           BlocProvider.of<ConversationCubit>(context).state;
@@ -150,8 +154,10 @@ class InputContainer extends StatelessWidget {
           conversationItem.conversationId,
           text,
         );
+
+      return true;
     }
-    return valid;
+    return false;
   }
 }
 
