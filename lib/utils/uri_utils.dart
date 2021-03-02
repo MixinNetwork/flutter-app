@@ -5,7 +5,7 @@ import 'enum_to_string.dart';
 
 Future<bool> openUri(String text) {
   final uri = Uri.parse(text);
-  if(uri.scheme == null) return Future.value(false);
+  if(uri.scheme.isEmpty) return Future.value(false);
 
   if (uri.isScheme(mixinScheme)) {
     final host = EnumToString.fromString(MixinSchemeHost.values, uri.host);

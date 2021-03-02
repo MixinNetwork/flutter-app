@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/media_status.dart';
+import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
@@ -16,8 +16,8 @@ import '../message_bubble.dart';
 import '../message_datetime.dart';
 import '../message_status.dart';
 
-class ImageMessageWidget extends StatelessWidget {
-  const ImageMessageWidget({
+class VideoMessageWidget extends StatelessWidget {
+  const VideoMessageWidget({
     Key? key,
     required this.message,
     required this.isCurrentUser,
@@ -44,6 +44,9 @@ class ImageMessageWidget extends StatelessWidget {
                 } else {
                   context.read<AccountServer>().downloadAttachment(message);
                 }
+              } else if (message.mediaStatus == MediaStatus.done &&
+                  message.mediaUrl != null) {
+                openUri(Uri.file(message.mediaUrl!).toString());
               }
             },
             child: MessageBubble(
@@ -58,15 +61,9 @@ class ImageMessageWidget extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (message.thumbImage != null &&
-                          message.mediaUrl == null)
+                      if (message.thumbImage != null)
                         Image.memory(
                           base64Decode(message.thumbImage!),
-                          fit: BoxFit.cover,
-                        ),
-                      if (message.mediaUrl != null)
-                        Image.file(
-                          File(message.mediaUrl!),
                           fit: BoxFit.cover,
                         ),
                       Center(

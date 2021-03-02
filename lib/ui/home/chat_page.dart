@@ -170,13 +170,10 @@ class _List extends StatelessWidget {
                 key: key,
                 child: Builder(builder: (context) {
                   if (center == null) return const SizedBox();
-                  return ColoredBox(
-                    color: Colors.red,
-                    child: MessageItemWidget(
-                      prev: top.lastOrNull,
-                      message: center,
-                      next: bottom.firstOrNull,
-                    ),
+                  return MessageItemWidget(
+                    prev: top.lastOrNull,
+                    message: center,
+                    next: bottom.firstOrNull,
                   );
                 }),
               ),

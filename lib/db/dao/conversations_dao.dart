@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' show ConversationStatus;
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
+    show ConversationStatus;
 
 part 'conversations_dao.g.dart';
 
@@ -25,10 +26,11 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<Conversation> getConversationById(String conversationId) {
-    final query = select(db.conversations)
-      ..where((tbl) => tbl.conversationId.equals(conversationId));
-    return query.getSingle();
+  Future<Conversation?> getConversationById(String conversationId) async {
+    final list = await (select(db.conversations)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .get();
+    return list.isEmpty ? null : list.first;
   }
 
   Selectable<ConversationItem> contactConversations(
@@ -80,16 +82,17 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
         const ConversationsCompanion(pinTime: Value(null)),
       );
 
-  Future<int> deleteConversation(String conversationId) => (delete(db.conversations)
-          ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .go();
+  Future<int> deleteConversation(String conversationId) =>
+      (delete(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .go();
 
-  void updateConversationStatusById(String conversationId, ConversationStatus status)async {
-    await db.customUpdate(
-        'UPDATE conversations SET status = ? WHERE conversation_id = ?',
-        variables: [
-          Variable.withString(conversationId),
-          Variable<ConversationStatus>(status)
-        ]);
-  }
+  Future<int> updateConversationStatusById(
+          String conversationId, ConversationStatus status) async =>
+      await db.customUpdate(
+          'UPDATE conversations SET status = ? WHERE conversation_id = ?',
+          variables: [
+            Variable.withString(conversationId),
+            Variable<ConversationStatus>(status)
+          ]);
 }

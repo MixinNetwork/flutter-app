@@ -158,9 +158,10 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     });
   }
 
-  Future<QuoteMessageItem> findMessageItemById(
-      String conversationId, String messageId) {
-    return db.findMessageItemById(conversationId, messageId).getSingle();
+  Future<QuoteMessageItem?> findMessageItemById(
+      String conversationId, String messageId) async {
+    final list = await db.findMessageItemById(conversationId, messageId).get();
+    return list.isEmpty ? null : list.first;
   }
 
   void updateMessageContent(String messageId, String encoded) async {

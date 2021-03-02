@@ -13,7 +13,9 @@ AppCard _$AppCardFromJson(Map<String, dynamic> json) {
     json['title'] as String,
     json['description'] as String,
     json['action'] as String,
-    DateTime.parse(json['updatedAt'] as String),
+    json['updatedAt'] == null
+        ? null
+        : DateTime.parse(json['updatedAt'] as String),
   );
 }
 
@@ -23,5 +25,5 @@ Map<String, dynamic> _$AppCardToJson(AppCard instance) => <String, dynamic>{
       'title': instance.title,
       'description': instance.description,
       'action': instance.action,
-      'updatedAt': instance.updatedAt.toIso8601String(),
+      'updatedAt': instance.updatedAt?.toIso8601String(),
     };

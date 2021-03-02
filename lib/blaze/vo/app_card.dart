@@ -21,7 +21,7 @@ class AppCard {
   @JsonKey(name: 'action', disallowNullValue: false)
   String action;
   @JsonKey(name: 'updatedAt')
-  DateTime updatedAt;
+  DateTime? updatedAt;
 
   Map<String, dynamic> toJson() => _$AppCardToJson(this);
 }

@@ -32,6 +32,7 @@ import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
+import 'package:very_good_analysis/very_good_analysis.dart';
 import '../db/extension/message.dart' show QueteMessage;
 import 'injector.dart';
 
@@ -152,7 +153,7 @@ class DecryptMessage extends Injector {
     // todo check
     final message = Message(
       messageId: data.messageId,
-      conversationId: data.conversationId,
+      conversationId: data.conversationId!,
       userId: data.userId,
       category: data.category,
       content: content,
@@ -168,7 +169,7 @@ class DecryptMessage extends Injector {
     final appCard = AppCard.fromJson(jsonDecode(content));
     final message = Message(
       messageId: data.messageId,
-      conversationId: data.conversationId,
+      conversationId: data.conversationId!,
       userId: data.representativeId,
       category: data.category,
       content: content,
@@ -194,11 +195,11 @@ class DecryptMessage extends Injector {
 
   Future<Message> _generateMessage(
       BlazeMessageData data, MessageGenerator generator) async {
-    if (data.quoteMessageId == null || data.quoteMessageId.isEmpty) {
+    if (data.quoteMessageId == null || (data.quoteMessageId?.isEmpty ?? true))
       return generator(null);
-    }
+
     final quoteMessage = await database.messagesDao
-        .findMessageItemById(data.conversationId, data.quoteMessageId);
+        .findMessageItemById(data.conversationId!, data.quoteMessageId!);
 
     if (quoteMessage != null) {
       return generator(quoteMessage.toJson());
@@ -227,7 +228,7 @@ class DecryptMessage extends Injector {
       final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
-            conversationId: data.conversationId,
+            conversationId: data.conversationId!,
             userId: data.userId,
             category: data.category,
             content: plain,
@@ -250,7 +251,7 @@ class DecryptMessage extends Injector {
       final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
-            conversationId: data.conversationId,
+            conversationId: data.conversationId!,
             userId: data.userId,
             category: data.category,
             content: attachment.attachmentId,
@@ -288,7 +289,7 @@ class DecryptMessage extends Injector {
       final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
-            conversationId: data.conversationId,
+            conversationId: data.conversationId!,
             userId: data.userId,
             category: data.category,
             content: attachment.attachmentId,
@@ -327,7 +328,7 @@ class DecryptMessage extends Injector {
       final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
-            conversationId: data.conversationId,
+            conversationId: data.conversationId!,
             userId: data.userId,
             category: data.category,
             content: attachment.attachmentId,
@@ -362,7 +363,7 @@ class DecryptMessage extends Injector {
       final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
-            conversationId: data.conversationId,
+            conversationId: data.conversationId!,
             userId: data.userId,
             category: data.category,
             content: attachment.attachmentId,
@@ -402,7 +403,7 @@ class DecryptMessage extends Injector {
       }
       final message = Message(
           messageId: data.messageId,
-          conversationId: data.conversationId,
+          conversationId: data.conversationId!,
           userId: data.userId,
           category: data.category,
           content: plainText,
@@ -426,7 +427,7 @@ class DecryptMessage extends Injector {
       final message = await _generateMessage(data, (String? quoteContent) {
         return Message(
             messageId: data.messageId,
-            conversationId: data.conversationId,
+            conversationId: data.conversationId!,
             userId: data.userId,
             category: data.category,
             content: plainText,
@@ -450,7 +451,7 @@ class DecryptMessage extends Injector {
           LiveMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       final message = Message(
           messageId: data.messageId,
-          conversationId: data.conversationId,
+          conversationId: data.conversationId!,
           userId: data.userId,
           category: data.category,
           mediaWidth: liveMessage.width,
@@ -484,7 +485,7 @@ class DecryptMessage extends Injector {
       }
       final message = Message(
           messageId: data.messageId,
-          conversationId: data.conversationId,
+          conversationId: data.conversationId!,
           userId: data.userId,
           category: data.category,
           content: plain,
@@ -500,7 +501,7 @@ class DecryptMessage extends Injector {
       }
       final message = Message(
         messageId: data.messageId,
-        conversationId: data.conversationId,
+        conversationId: data.conversationId!,
         userId: data.userId,
         category: data.category,
         content: plain,
@@ -530,7 +531,7 @@ class DecryptMessage extends Injector {
     final message = db.Message(
         messageId: data.messageId,
         userId: userId,
-        conversationId: data.conversationId,
+        conversationId: data.conversationId!,
         category: data.category,
         content: '',
         createdAt: data.createdAt,
@@ -551,8 +552,8 @@ class DecryptMessage extends Injector {
     } else if (systemMessage.action == MessageAction.remove ||
         systemMessage.action == MessageAction.exit) {
       if (systemMessage.participantId == accountId) {
-        database.conversationDao.updateConversationStatusById(
-            data.conversationId, ConversationStatus.quit);
+        unawaited(database.conversationDao.updateConversationStatusById(
+            data.conversationId!, ConversationStatus.quit));
       }
       // todo remove signal key
     } else if (systemMessage.action == MessageAction.update) {
@@ -564,7 +565,10 @@ class DecryptMessage extends Injector {
     } else if (systemMessage.action == MessageAction.create) {
     } else if (systemMessage.action == MessageAction.role) {
       database.participantsDao.updateParticipantRole(
-          data.conversationId, systemMessage.participantId, systemMessage.role);
+        data.conversationId!,
+        systemMessage.participantId!,
+        systemMessage.role!,
+      );
     }
     await database.messagesDao.insert(message, accountId);
   }

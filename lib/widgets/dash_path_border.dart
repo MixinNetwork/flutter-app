@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 /// Creates a new path that is drawn from the segments of `source`.
@@ -22,7 +21,7 @@ Path dashPath(
   // TODO: Is there some way to determine how much of a path would be visible today?
 
   final dest = Path();
-  for (final PathMetric metric in source.computeMetrics()) {
+  for (final metric in source.computeMetrics()) {
     var distance = dashOffset._calculate(metric.length);
     var draw = true;
     while (distance < metric.length) {

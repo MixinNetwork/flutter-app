@@ -33,7 +33,10 @@ class SystemMessage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 5,
+                  horizontal: 10,
+                ),
                 child: Builder(builder: (context) {
                   String text;
                   switch (message.actionName) {
@@ -41,7 +44,7 @@ class SystemMessage extends StatelessWidget {
                       text = Localization.of(context).chatGroupJoin(
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.participantFullName!,
+                            : message.participantFullName,
                       );
                       break;
                     case MessageAction.exit:

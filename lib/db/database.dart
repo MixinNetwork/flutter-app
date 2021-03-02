@@ -64,11 +64,11 @@ class Database {
   }
 
   void mock() async {
-    final user = await (_database.select(_database.users)
+    final list = await (_database.select(_database.users)
           ..where((tbl) => tbl.userId.equals('mockUserId0'))
           ..limit(1))
-        .getSingle();
-    if (user != null) return;
+        .get();
+    if (list.isEmpty) return;
 
     debugPrint('mock start');
     await _database.transaction(() async {

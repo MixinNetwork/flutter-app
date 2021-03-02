@@ -6,7 +6,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 class ClampingViewport extends Viewport {
   ClampingViewport({
@@ -94,7 +93,6 @@ class ClampingRenderViewport extends RenderViewport {
 
   @override
   set anchor(double value) {
-    assert(value != null);
     if (value == _anchor) return;
     _anchor = value;
     markNeedsLayout();
@@ -118,8 +116,6 @@ class ClampingRenderViewport extends RenderViewport {
 
   @override
   Rect describeSemanticsClip(RenderSliver child) {
-    assert(axis != null);
-
     if (_calculatedCacheExtent == null) {
       return semanticBounds;
     }

@@ -231,7 +231,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     return result;
   }
 
-  Future<int> _centerMessageOffset(String messageId) async {
+  Future<int> _centerMessageOffset(String? messageId) async {
     var offset = 0;
     if (messageId != null)
       offset = (await messagesDao.messageRowIdByConversationId(messageId).get())

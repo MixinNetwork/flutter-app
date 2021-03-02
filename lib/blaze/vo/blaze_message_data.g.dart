@@ -18,7 +18,7 @@ BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
     'source'
   ]);
   return BlazeMessageData(
-    json['conversation_id'] as String,
+    json['conversation_id'] as String?,
     json['user_id'] as String,
     json['message_id'] as String,
     const MessageCategoryJsonConverter().fromJson(json['category'] as String),
@@ -28,27 +28,35 @@ BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
     DateTime.parse(json['updated_at'] as String),
     json['source'] as String,
     json['representative_id'] as String,
-    json['quote_message_id'] as String,
+    json['quote_message_id'] as String?,
     json['session_id'] as String,
   );
 }
 
-Map<String, dynamic> _$BlazeMessageDataToJson(BlazeMessageData instance) =>
-    <String, dynamic>{
-      'conversation_id': instance.conversationId,
-      'user_id': instance.userId,
-      'message_id': instance.messageId,
-      'category':
-          const MessageCategoryJsonConverter().toJson(instance.category),
-      'data': instance.data,
-      'status': _$MessageStatusEnumMap[instance.status],
-      'created_at': instance.createdAt.toIso8601String(),
-      'updated_at': instance.updatedAt.toIso8601String(),
-      'source': instance.source,
-      'representative_id': instance.representativeId,
-      'quote_message_id': instance.quoteMessageId,
-      'session_id': instance.sessionId,
-    };
+Map<String, dynamic> _$BlazeMessageDataToJson(BlazeMessageData instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('conversation_id', instance.conversationId);
+  val['user_id'] = instance.userId;
+  val['message_id'] = instance.messageId;
+  val['category'] =
+      const MessageCategoryJsonConverter().toJson(instance.category);
+  val['data'] = instance.data;
+  val['status'] = _$MessageStatusEnumMap[instance.status];
+  val['created_at'] = instance.createdAt.toIso8601String();
+  val['updated_at'] = instance.updatedAt.toIso8601String();
+  val['source'] = instance.source;
+  val['representative_id'] = instance.representativeId;
+  val['quote_message_id'] = instance.quoteMessageId;
+  val['session_id'] = instance.sessionId;
+  return val;
+}
 
 K _$enumDecode<K, V>(
   Map<K, V> enumValues,

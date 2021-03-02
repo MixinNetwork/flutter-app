@@ -16,11 +16,11 @@ class SystemConversationMessage {
   @JsonKey(name: 'action')
   MessageAction action;
   @JsonKey(name: 'participant_id')
-  String participantId;
+  String? participantId;
   @JsonKey(name: 'user_id')
   String userId;
   @JsonKey(name: 'role')
-  ParticipantRole role;
+  ParticipantRole? role;
 
   Map<String, dynamic> toJson() => _$SystemConversationMessageToJson(this);
 }

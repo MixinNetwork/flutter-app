@@ -3,6 +3,7 @@ import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_bot_sdk_dart/src/vo/app.dart';
 
 class Injector {
   Injector(this.accountId, this.database, this.client);
@@ -11,7 +12,7 @@ class Injector {
   Database database;
   Client client;
 
-  void syncConversion(String conversationId) async {
+  void syncConversion(String? conversationId) async {
     if (conversationId == null || conversationId == systemUser) {
       return;
     }
@@ -104,22 +105,24 @@ class Injector {
       if (response.data != null) {
         final result = response.data;
         user = db.User(
-            userId: result.userId,
-            identityNumber: result.identityNumber,
-            relationship: result.relationship,
-            fullName: result.fullName,
-            avatarUrl: result.avatarUrl,
-            phone: result.phone,
-            isVerified: result.isVerified ? 1 : 0,
-            appId: result.app?.appId,
-            biography: result.biography,
-            muteUntil: DateTime.tryParse(result.muteUntil),
-            isScam: result.isScam ? 1 : 0,
-            createdAt: result.createdAt);
+          userId: result.userId,
+          identityNumber: result.identityNumber,
+          relationship: result.relationship,
+          fullName: result.fullName,
+          avatarUrl: result.avatarUrl,
+          phone: result.phone,
+          isVerified: result.isVerified ? 1 : 0,
+          appId: result.app?.appId,
+          biography: result.biography,
+          muteUntil: DateTime.tryParse(result.muteUntil),
+          isScam: result.isScam ? 1 : 0,
+          createdAt: result.createdAt,
+        );
         await database.userDao.insert(user);
-        final app = result.app;
+        final App? app = result.app;
         if (app != null) {
-          await database.appsDao.insert(db.App(
+          await database.appsDao.insert(
+            db.App(
               appId: app.appId,
               appNumber: app.appNumber,
               homeUri: app.homeUri,
@@ -132,16 +135,18 @@ class Injector {
               capabilities: app.capabilites.toString(),
               creatorId: app.creatorId,
               resourcePatterns: app.resourcePatterns.toString(),
-              updatedAt: app.updatedAt));
+              updatedAt: app.updatedAt,
+            ),
+          );
         }
       }
     }
-    return user;
+    return user!;
   }
 
   void refreshSticker(String stickerId) {
     client.accountApi.getStickerById(stickerId).then((value) {
-      final sticker = value.data;
+      final Sticker? sticker = value.data;
       if (sticker != null) {
         database.stickerDao.insert(db.Sticker(
           stickerId: sticker.stickerId,
@@ -154,6 +159,8 @@ class Injector {
           createdAt: sticker.createdAt,
         ));
       }
-    }).catchError((e) => debugPrint(e));
+    }).catchError((e) {
+      debugPrint(e);
+    });
   }
 }

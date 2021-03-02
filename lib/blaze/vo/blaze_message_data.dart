@@ -26,7 +26,7 @@ class BlazeMessageData {
       _$BlazeMessageDataFromJson(json);
 
   @JsonKey(name: 'conversation_id', disallowNullValue: true)
-  String conversationId;
+  String? conversationId;
   @JsonKey(name: 'user_id', disallowNullValue: true)
   String userId;
   @JsonKey(name: 'message_id', disallowNullValue: true)
@@ -46,7 +46,7 @@ class BlazeMessageData {
   @JsonKey(name: 'representative_id')
   String representativeId;
   @JsonKey(name: 'quote_message_id')
-  String quoteMessageId;
+  String? quoteMessageId;
   @JsonKey(name: 'session_id')
   String sessionId;
 

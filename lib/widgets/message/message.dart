@@ -22,6 +22,7 @@ import 'item/image_message.dart';
 import 'item/secret_message.dart';
 import 'item/system_message.dart';
 import 'item/unknown_message.dart';
+import 'item/video_message.dart';
 import 'item/waiting_message.dart';
 
 class MessageItemWidget extends StatelessWidget {
@@ -38,8 +39,6 @@ class MessageItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (message == null) return const SizedBox(height: 40);
-
     final isCurrentUser = message.relationship == UserRelationship.me;
 
     final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
@@ -125,6 +124,11 @@ class MessageItemWidget extends StatelessWidget {
                   );
                 if (message.type.isImage)
                   return ImageMessageWidget(
+                    message: message,
+                    isCurrentUser: isCurrentUser,
+                  );
+                if (message.type.isVideo)
+                  return VideoMessageWidget(
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );

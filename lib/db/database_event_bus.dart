@@ -12,7 +12,6 @@ class DataBaseEventBus {
 
   Stream<T> watch<T>(DatabaseEvent event, [bool nullable = false]) =>
       _streamController.stream
-          .where((e) => e != null)
           .where((e) => event == e.item1)
           .where((e) => nullable ? true : e.item2 != null)
           .where((e) => e.item2 is T)

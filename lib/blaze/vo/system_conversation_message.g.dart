@@ -10,9 +10,9 @@ SystemConversationMessage _$SystemConversationMessageFromJson(
     Map<String, dynamic> json) {
   return SystemConversationMessage(
     const MessageActionJsonConverter().fromJson(json['action'] as String),
-    json['participant_id'] as String,
+    json['participant_id'] as String?,
     json['user_id'] as String,
-    _$enumDecode(_$ParticipantRoleEnumMap, json['role']),
+    _$enumDecodeNullable(_$ParticipantRoleEnumMap, json['role']),
   );
 }
 
@@ -49,6 +49,17 @@ K _$enumDecode<K, V>(
       return MapEntry(unknownValue, enumValues.values.first);
     },
   ).key;
+}
+
+K? _$enumDecodeNullable<K, V>(
+  Map<K, V> enumValues,
+  dynamic source, {
+  K? unknownValue,
+}) {
+  if (source == null) {
+    return null;
+  }
+  return _$enumDecode<K, V>(enumValues, source, unknownValue: unknownValue);
 }
 
 const _$ParticipantRoleEnumMap = {
