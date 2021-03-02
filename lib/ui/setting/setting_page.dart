@@ -1,14 +1,15 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:provider/provider.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({Key? key}) : super(key: key);
@@ -201,16 +202,16 @@ class _UserProfile extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ClipOval(
-          child: BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
-            converter: (state) => state.current?.account.avatarUrl,
-            when: (a, b) => b != null,
-            builder: (context, avatarUrl) => CachedNetworkImage(
-              imageUrl: avatarUrl,
-              width: 90,
-              height: 90,
-            ),
-          ),
+        Builder(
+          builder: (context) {
+            final account = context.read<MultiAuthCubit>().state.current!.account;
+            return AvatarWidget(
+              userId: account.userId,
+              name: account.fullName!,
+              avatarUrl: account.avatarUrl,
+              size: 90,
+            );
+          }
         ),
         const SizedBox(height: 10),
         BlocConverter<MultiAuthCubit, MultiAuthState, String?>(

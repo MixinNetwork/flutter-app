@@ -1,12 +1,13 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
+import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
@@ -43,17 +44,16 @@ class EditProfilePage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 40),
-              ClipOval(
-                child: BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
-                  converter: (state) => state.current?.account.avatarUrl,
-                  when: (a, b) => b != null,
-                  builder: (context, avatarUrl) => CachedNetworkImage(
-                    imageUrl: avatarUrl,
-                    width: 100,
-                    height: 100,
-                  ),
-                ),
-              ),
+              Builder(builder: (context) {
+                final account =
+                    context.read<MultiAuthCubit>().state.current!.account;
+                return AvatarWidget(
+                  userId: account.userId,
+                  name: account.fullName!,
+                  avatarUrl: account.avatarUrl,
+                  size: 100,
+                );
+              }),
               const SizedBox(height: 10),
               BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
                 converter: (state) => state.current?.account.identityNumber,

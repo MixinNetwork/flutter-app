@@ -40,7 +40,7 @@ dependencies:
   path: ^1.8.0
   hive: ^1.6.0-nullsafety.2
   hive_flutter: ^1.0.0-nullsafety.0
-  cached_network_image: ^2.5.0
+  cached_network_image: ^3.0.0-nullsafety
   very_good_analysis: ^2.0.0-nullsafety.0
   desktop_window: ^0.3.0
   bloc: ^7.0.0-nullsafety.2
@@ -55,7 +55,7 @@ dependencies:
   json_annotation: ^4.0.0
   provider: ^5.0.0-nullsafety.5
   isolate: ^2.0.3
-  dio: ^3.0.10
+  dio: ^4.0.0-beta2
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   recase: ^4.0.0-nullsafety.0
   file_selector: ^0.8.0
@@ -75,7 +75,7 @@ dependency_overrides:
   build_runner: ^1.11.5
   web_socket_channel: ^2.0.0
   tuple: ^2.0.0-nullsafety.0
-#  cryptography: ^2.0.0-nullsafety.2
+  dio: ^4.0.0-beta2
   fixnum: ^1.0.0-nullsafety.0
   crypto: ^3.0.0-nullsafety.0
   convert: ^3.0.0

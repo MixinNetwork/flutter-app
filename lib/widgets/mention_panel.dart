@@ -146,7 +146,9 @@ class _MentionItem extends StatelessWidget {
           child: Row(
             children: [
               AvatarWidget(
-                user: user,
+                userId: user.userId,
+                name: user.fullName!,
+                avatarUrl: user.avatarUrl,
                 size: 32,
               ),
               const SizedBox(width: 6),

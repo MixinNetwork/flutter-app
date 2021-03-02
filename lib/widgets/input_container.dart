@@ -362,11 +362,6 @@ class HighlightTextEditingController extends TextEditingController {
   final ParticipantsCubit participantsCubit;
 
   @override
-  set text(String newText) {
-    super.text = newText;
-  }
-
-  @override
   TextSpan buildTextSpan({
     required BuildContext context,
     TextStyle? style,

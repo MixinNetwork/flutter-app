@@ -69,14 +69,15 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (users.isEmpty)
-      return SizedBox.fromSize(size: Size.square(size));
+    if (users.isEmpty) return SizedBox.fromSize(size: Size.square(size));
     switch (users.length) {
       case 1:
         return AvatarWidget(
-          user: users.single,
           size: size,
           clipOval: false,
+          userId: users.single.userId,
+          name: users.single.fullName!,
+          avatarUrl: users.single.avatarUrl,
         );
       case 2:
         return Row(
@@ -87,7 +88,9 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
           children: [
             Expanded(
                 child: AvatarWidget(
-              user: users[0],
+              userId: users[0].userId,
+              name: users[0].fullName!,
+              avatarUrl: users[0].avatarUrl,
               size: size,
               clipOval: false,
             )),
@@ -116,7 +119,9 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
 
   Widget _buildAvatarImage(User user) => Expanded(
         child: AvatarWidget(
-          user: user,
+          userId: user.userId,
+          name: user.fullName!,
+          avatarUrl: user.avatarUrl,
           size: size,
           clipOval: false,
         ),
@@ -126,21 +131,25 @@ class _AvatarPuzzlesWidget extends StatelessWidget {
 class AvatarWidget extends StatelessWidget {
   const AvatarWidget({
     Key? key,
-    required this.user,
     required this.size,
     this.clipOval = true,
+    required this.avatarUrl,
+    required this.userId,
+    required this.name,
   }) : super(key: key);
 
-  final User user;
+  final String? avatarUrl;
+  final String userId;
+  final String name;
   final double size;
   final bool clipOval;
 
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (user.avatarUrl?.isNotEmpty == true)
+    if (avatarUrl?.isNotEmpty == true)
       child = CacheImage(
-        user.avatarUrl!,
+        avatarUrl!,
         width: size,
         height: size,
       );
@@ -149,13 +158,13 @@ class AvatarWidget extends StatelessWidget {
         size: Size.square(size),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: getAvatarColorById(user.userId),
+            color: getAvatarColorById(userId),
           ),
           child: Center(
             child: Text(
-              user.fullName![0],
+              name[0],
               style: TextStyle(
-                color: getNameColorById(user.userId),
+                color: getNameColorById(userId),
                 fontWeight: FontWeight.w600,
               ),
             ),
