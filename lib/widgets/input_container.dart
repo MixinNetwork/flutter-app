@@ -43,7 +43,7 @@ class InputContainer extends StatelessWidget {
           participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
         ),
         child: Builder(
-          builder: (context) => ListenableProvider<TextEditingController>(
+          builder: (context) => ChangeNotifierProvider<TextEditingController>(
             create: (BuildContext _) {
               final textEditingController = HighlightTextEditingController(
                 highlightTextStyle: TextStyle(
@@ -59,9 +59,6 @@ class InputContainer extends StatelessWidget {
               });
               return textEditingController;
             },
-            dispose: (BuildContext context,
-                    TextEditingController textEditingController) =>
-                textEditingController.dispose(),
             child: LayoutBuilder(
               builder: (context, BoxConstraints constraints) => SizedBox(
                 height: 56,
@@ -122,7 +119,7 @@ class InputContainer extends StatelessWidget {
                           ),
                           const SizedBox(width: 16),
                           ActionButton(
-                            name: Resources.assetsImagesIcSendPng,
+                            name: Resources.assetsImagesIcSendSvg,
                             color: BrightnessData.themeOf(context).icon,
                             onTap: () => _sendMessage(context, force: true),
                           ),
@@ -193,7 +190,7 @@ class _StickerButton extends StatelessWidget {
                   ),
                   child: InteractableDecoratedBox(
                     child: ActionButton(
-                      name: Resources.assetsImagesIcStickerPng,
+                      name: Resources.assetsImagesIcStickerSvg,
                       color: BrightnessData.themeOf(context).icon,
                     ),
                   ),
@@ -226,7 +223,7 @@ class _FileButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionButton(
-      name: Resources.assetsImagesIcFilePng,
+      name: Resources.assetsImagesIcFileSvg,
       color: actionColor,
       onTap: () async {
         final file = await selectFile();
@@ -283,7 +280,7 @@ class _PreviewImage extends StatelessWidget {
               child: Row(
                 children: [
                   ActionButton(
-                    name: Resources.assetsImagesIcClosePng,
+                    name: Resources.assetsImagesIcCloseSvg,
                     color: BrightnessData.themeOf(context).icon,
                     onTap: () => Navigator.pop(context, false),
                   ),

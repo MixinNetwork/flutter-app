@@ -18,7 +18,7 @@ import 'package:flutter_app/db/extension/message_category.dart';
 import '../menu.dart';
 import 'item/action/action_message.dart';
 import 'item/file_message.dart';
-import 'item/image_message.dart';
+import 'item/image_message/image_message.dart';
 import 'item/secret_message.dart';
 import 'item/system_message.dart';
 import 'item/unknown_message.dart';

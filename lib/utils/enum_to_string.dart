@@ -7,7 +7,8 @@ class EnumToString {
         splitEnum[0] == enumItem.runtimeType.toString();
   }
 
-  static String convertToString(dynamic enumItem) {
+  static String? convertToString(dynamic enumItem) {
+    if(enumItem == null) return null;
     assert(_isEnumItem(enumItem),
     '$enumItem of type ${enumItem.runtimeType.toString()} is not an enum item');
     final _tmp = enumItem.toString().split('.')[1].toUpperCase();
@@ -21,7 +22,7 @@ class EnumToString {
     return enumValues.singleWhere(
             (enumItem) =>
         EnumToString.convertToString(enumItem)
-            .toUpperCase() ==
+            ?.toUpperCase() ==
             value.toUpperCase(),
         orElse: () => null);
   }

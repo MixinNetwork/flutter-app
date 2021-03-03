@@ -17,7 +17,7 @@ class MixinBackButton extends StatelessWidget {
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(right: 8.0),
         child: ActionButton(
-          name: Resources.assetsImagesIcBackPng,
+          name: Resources.assetsImagesIcBackSvg,
           color: color ?? BrightnessData.themeOf(context).icon,
           onTap: () {
             if (onTap != null) return onTap?.call();

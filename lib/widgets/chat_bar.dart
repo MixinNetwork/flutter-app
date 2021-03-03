@@ -56,12 +56,12 @@ class ChatBar extends StatelessWidget {
             ),
           ),
           ActionButton(
-            name: Resources.assetsImagesIcSearchPng,
+            name: Resources.assetsImagesIcSearchSvg,
             color: actionColor,
           ),
           const SizedBox(width: 14),
           ActionButton(
-            name: Resources.assetsImagesIcScreenPng,
+            name: Resources.assetsImagesIcScreenSvg,
             color: actionColor,
           ),
         ]),

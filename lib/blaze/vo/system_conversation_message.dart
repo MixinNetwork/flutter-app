@@ -18,7 +18,7 @@ class SystemConversationMessage {
   @JsonKey(name: 'participant_id')
   String? participantId;
   @JsonKey(name: 'user_id')
-  String userId;
+  String? userId;
   @JsonKey(name: 'role')
   ParticipantRole? role;
 

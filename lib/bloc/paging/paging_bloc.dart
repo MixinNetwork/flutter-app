@@ -91,7 +91,7 @@ class PagingUpdateEvent extends PagingEvent {
 abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
     with SubscribeMixin {
   PagingBloc({
-    required this.itemPositionsListener,
+    this.itemPositionsListener,
     required this.limit,
     this.jumpTo,
     int offset = 0,

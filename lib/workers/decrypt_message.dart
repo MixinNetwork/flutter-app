@@ -519,7 +519,7 @@ class DecryptMessage extends Injector {
     if (systemMessage.action != MessageAction.update) {
       syncConversion(data.conversationId);
     }
-    final userId = systemMessage.userId;
+    final userId = systemMessage.userId ?? data.userId;
     if (userId == systemUser &&
         (await database.userDao.findUserById(userId)) == null) {
       // todo UserRelationship

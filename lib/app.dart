@@ -27,7 +27,7 @@ class App extends StatelessWidget {
         child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
           converter: (state) => state.current,
           builder: (context, authState) {
-            const Widget app = Portal(child: _App());
+            const app = _App();
             if (authState == null) return app;
 
             return FutureBuilder<AccountServer>(
@@ -45,7 +45,9 @@ class App extends StatelessWidget {
                   AsyncSnapshot<AccountServer> snapshot) {
                 if (snapshot.data != null)
                   return _Providers(
-                    app: app,
+                    app: const Portal(
+                      child: app,
+                    ),
                     accountServer: snapshot.data!,
                   );
                 return app;

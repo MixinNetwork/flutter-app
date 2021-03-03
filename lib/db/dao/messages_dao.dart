@@ -175,4 +175,17 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<int> messageRowIdByConversationId(String lastReadMessageId) =>
       db.messageRowIdByConversationId(lastReadMessageId);
+
+  Selectable<int> mediaMessageRowIdByConversationId(
+    String conversationId,
+    String messageId,
+  ) =>
+      db.mediaMessageRowIdByConversationId(conversationId, messageId);
+
+  Selectable<int> mediaMessagesCount(String conversationId) =>
+      db.mediaMessagesCount(conversationId);
+
+  Selectable<MessageItem> mediaMessages(
+          String conversationId, int limit, int offset) =>
+      db.mediaMessages(conversationId, offset, limit);
 }

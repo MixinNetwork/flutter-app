@@ -10912,7 +10912,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
         variables: [
           Variable<String>(conversationId),
           Variable<int>(offset),
@@ -10986,6 +10986,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Users.$converter0.mapToDart(row.readString('relationship')),
         participantRelationship: Users.$converter0
             .mapToDart(row.readString('participantRelationship')),
+        avatarUrl: row.readString('avatarUrl'),
       );
     });
   }
@@ -10995,7 +10996,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
     $arrayStartIndex += messageIds.length;
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.message_id in ($expandedmessageIds)\n        ORDER BY m.created_at DESC',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.message_id in ($expandedmessageIds)\n        ORDER BY m.created_at DESC',
         variables: [
           for (var $ in messageIds) Variable<String>($)
         ],
@@ -11067,6 +11068,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Users.$converter0.mapToDart(row.readString('relationship')),
         participantRelationship: Users.$converter0
             .mapToDart(row.readString('participantRelationship')),
+        avatarUrl: row.readString('avatarUrl'),
       );
     });
   }
@@ -11221,6 +11223,108 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaName: row.readString('mediaName'),
       );
     });
+  }
+
+  Selectable<MessageItem> mediaMessages(
+      String conversationId, int offset, int limit) {
+    return customSelect(
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u1.relationship AS participantRelationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<int>(offset),
+          Variable<int>(limit)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          snapshots,
+          assets,
+          stickers,
+          hyperlinks,
+          messageMentions,
+          conversations
+        }).map((QueryRow row) {
+      return MessageItem(
+        messageId: row.readString('messageId'),
+        conversationId: row.readString('conversationId'),
+        userId: row.readString('userId'),
+        userFullName: row.readString('userFullName'),
+        userIdentityNumber: row.readString('userIdentityNumber'),
+        appId: row.readString('appId'),
+        type: Messages.$converter0.mapToDart(row.readString('type'))!,
+        content: row.readString('content'),
+        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
+        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        mediaStatus:
+            Messages.$converter1.mapToDart(row.readString('mediaStatus')),
+        mediaWaveform: row.readString('mediaWaveform'),
+        mediaName: row.readString('mediaName'),
+        mediaMimeType: row.readString('mediaMimeType'),
+        mediaSize: row.readInt('mediaSize'),
+        mediaWidth: row.readInt('mediaWidth'),
+        mediaHeight: row.readInt('mediaHeight'),
+        thumbImage: row.readString('thumbImage'),
+        thumbUrl: row.readString('thumbUrl'),
+        mediaUrl: row.readString('mediaUrl'),
+        mediaDuration: row.readString('mediaDuration'),
+        quoteId: row.readString('quoteId'),
+        quoteContent: row.readString('quoteContent'),
+        participantFullName: row.readString('participantFullName'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
+        participantUserId: row.readString('participantUserId'),
+        snapshotId: row.readString('snapshotId'),
+        snapshotType: row.readString('snapshotType'),
+        snapshotAmount: row.readString('snapshotAmount'),
+        assetSymbol: row.readString('assetSymbol'),
+        assetId: row.readString('assetId'),
+        assetIcon: row.readString('assetIcon'),
+        assetUrl: row.readString('assetUrl'),
+        assetWidth: row.readInt('assetWidth'),
+        assetHeight: row.readInt('assetHeight'),
+        stickerId: row.readString('stickerId'),
+        assetName: row.readString('assetName'),
+        assetType: row.readString('assetType'),
+        siteName: row.readString('siteName'),
+        siteTitle: row.readString('siteTitle'),
+        siteDescription: row.readString('siteDescription'),
+        siteImage: row.readString('siteImage'),
+        sharedUserId: row.readString('sharedUserId'),
+        sharedUserFullName: row.readString('sharedUserFullName'),
+        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
+        sharedUserAppId: row.readString('sharedUserAppId'),
+        mentions: row.readString('mentions'),
+        mentionRead: row.readInt('mentionRead'),
+        groupName: row.readString('groupName'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+        participantRelationship: Users.$converter0
+            .mapToDart(row.readString('participantRelationship')),
+        avatarUrl: row.readString('avatarUrl'),
+      );
+    });
+  }
+
+  Selectable<int> mediaMessagesCount(String conversationId) {
+    return customSelect(
+        'SELECT Count(*)\n        FROM messages m\n        WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')',
+        variables: [Variable<String>(conversationId)],
+        readsFrom: {messages}).map((QueryRow row) => row.readInt('Count(*)'));
+  }
+
+  Selectable<int> mediaMessageRowIdByConversationId(
+      String conversationId, String messageId) {
+    return customSelect(
+        'SELECT count(*) FROM messages WHERE conversation_id = :conversationId\n        AND created_at > (SELECT created_at FROM messages WHERE message_id = :messageId)\n        AND category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')\n        ORDER BY created_at DESC, rowid DESC',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages
+        }).map((QueryRow row) => row.readInt('count(*)'));
   }
 
   Selectable<int> contactConversationCount() {
@@ -11691,6 +11795,7 @@ class MessageItem {
   final String? groupName;
   final UserRelationship? relationship;
   final UserRelationship? participantRelationship;
+  final String? avatarUrl;
   MessageItem({
     required this.messageId,
     required this.conversationId,
@@ -11745,6 +11850,7 @@ class MessageItem {
     this.groupName,
     this.relationship,
     this.participantRelationship,
+    this.avatarUrl,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -11790,7 +11896,7 @@ class MessageItem {
                                                                               .hashCode,
                                                                           $mrjc(
                                                                               thumbUrl.hashCode,
-                                                                              $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(participantFullName.hashCode, $mrjc(actionName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetId.hashCode, $mrjc(assetIcon.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(mentions.hashCode, $mrjc(mentionRead.hashCode, $mrjc(groupName.hashCode, $mrjc(relationship.hashCode, participantRelationship.hashCode)))))))))))))))))))))))))))))))))))))))))))))))))))));
+                                                                              $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(participantFullName.hashCode, $mrjc(actionName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetId.hashCode, $mrjc(assetIcon.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(mentions.hashCode, $mrjc(mentionRead.hashCode, $mrjc(groupName.hashCode, $mrjc(relationship.hashCode, $mrjc(participantRelationship.hashCode, avatarUrl.hashCode))))))))))))))))))))))))))))))))))))))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -11847,7 +11953,8 @@ class MessageItem {
           other.mentionRead == this.mentionRead &&
           other.groupName == this.groupName &&
           other.relationship == this.relationship &&
-          other.participantRelationship == this.participantRelationship);
+          other.participantRelationship == this.participantRelationship &&
+          other.avatarUrl == this.avatarUrl);
   @override
   String toString() {
     return (StringBuffer('MessageItem(')
@@ -11903,7 +12010,8 @@ class MessageItem {
           ..write('mentionRead: $mentionRead, ')
           ..write('groupName: $groupName, ')
           ..write('relationship: $relationship, ')
-          ..write('participantRelationship: $participantRelationship')
+          ..write('participantRelationship: $participantRelationship, ')
+          ..write('avatarUrl: $avatarUrl')
           ..write(')'))
         .toString();
   }

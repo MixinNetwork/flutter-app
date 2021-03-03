@@ -13,5 +13,5 @@ class MessageCategoryTypeConverter
 
   @override
   String? mapToSql(MessageCategory? value) =>
-      EnumToString.convertToString(value).constantCase;
+      EnumToString.convertToString(value)?.constantCase;
 }

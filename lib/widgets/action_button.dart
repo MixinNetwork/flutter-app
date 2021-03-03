@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
+import 'package:flutter_svg/svg.dart';
 
 class ActionButton extends StatelessWidget {
   const ActionButton({
@@ -38,7 +39,7 @@ class ActionButton extends StatelessWidget {
         ),
         child: Padding(
           padding: padding,
-          child: Image.asset(
+          child: SvgPicture.asset(
             name,
             width: size,
             height: size,

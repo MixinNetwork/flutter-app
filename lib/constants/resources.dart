@@ -6,6 +6,9 @@ class Resources {
   const Resources._();
   static const String assetsImagesAppButtonSvg = 'assets/images/app_button.svg';
 
+  static const String assetsImagesAttachmentDownloadSvg =
+      'assets/images/attachment_download.svg';
+
   static const String assetsImagesAudioSvg = 'assets/images/audio.svg';
 
   static const String assetsImagesBotPng = 'assets/images/bot.png';
@@ -18,6 +21,8 @@ class Resources {
 
   static const String assetsImagesConversationEmptySvg =
       'assets/images/conversation_empty.svg';
+
+  static const String assetsImagesCopySvg = 'assets/images/copy.svg';
 
   static const String assetsImagesDarkReceiverNipBubblePng =
       'assets/images/dark_receiver_nip_bubble.png';
@@ -44,16 +49,15 @@ class Resources {
   static const String assetsImagesIcArrowRightSvg =
       'assets/images/ic_arrow_right.svg';
 
-  static const String assetsImagesIcBackPng = 'assets/images/ic_back.png';
+  static const String assetsImagesIcBackSvg = 'assets/images/ic_back.svg';
 
   static const String assetsImagesIcBackupSvg = 'assets/images/ic_backup.svg';
 
-  static const String assetsImagesIcClosePng = 'assets/images/ic_close.png';
+  static const String assetsImagesIcCloseSvg = 'assets/images/ic_close.svg';
 
-  static const String assetsImagesIcCreateGroupPng =
-      'assets/images/ic_create_group.png';
+  static const String assetsImagesIcCreateSvg = 'assets/images/ic_create.svg';
 
-  static const String assetsImagesIcFilePng = 'assets/images/ic_file.png';
+  static const String assetsImagesIcFileSvg = 'assets/images/ic_file.svg';
 
   static const String assetsImagesIcNotificationSvg =
       'assets/images/ic_notification.svg';
@@ -62,18 +66,16 @@ class Resources {
 
   static const String assetsImagesIcRetrySvg = 'assets/images/ic_retry.svg';
 
-  static const String assetsImagesIcScreenPng = 'assets/images/ic_screen.png';
-
-  static const String assetsImagesIcSearchPng = 'assets/images/ic_search.png';
+  static const String assetsImagesIcScreenSvg = 'assets/images/ic_screen.svg';
 
   static const String assetsImagesIcSearchSvg = 'assets/images/ic_search.svg';
 
-  static const String assetsImagesIcSendPng = 'assets/images/ic_send.png';
+  static const String assetsImagesIcSendSvg = 'assets/images/ic_send.svg';
 
   static const String assetsImagesIcSignOutSvg =
       'assets/images/ic_sign_out.svg';
 
-  static const String assetsImagesIcStickerPng = 'assets/images/ic_sticker.png';
+  static const String assetsImagesIcStickerSvg = 'assets/images/ic_sticker.svg';
 
   static const String assetsImagesIcStorageUsageSvg =
       'assets/images/ic_storage_usage.svg';
@@ -108,6 +110,8 @@ class Resources {
 
   static const String assetsImagesSentSvg = 'assets/images/sent.svg';
 
+  static const String assetsImagesShareSvg = 'assets/images/share.svg';
+
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
 
   static const String assetsImagesStrangersPng = 'assets/images/strangers.png';
@@ -121,4 +125,8 @@ class Resources {
   static const String assetsImagesVideoCallSvg = 'assets/images/video_call.svg';
 
   static const String assetsImagesWarningSvg = 'assets/images/warning.svg';
+
+  static const String assetsImagesZoomInSvg = 'assets/images/zoom_in.svg';
+
+  static const String assetsImagesZoomOutSvg = 'assets/images/zoom_out.svg';
 }

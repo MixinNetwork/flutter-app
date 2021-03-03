@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_svg/svg.dart';
 
 import 'action_button.dart';
 
@@ -53,8 +54,8 @@ class SearchBar extends StatelessWidget {
                     const BoxConstraints.expand(width: 40, height: 32),
                 prefixIcon: Padding(
                   padding: const EdgeInsets.only(left: 16, right: 8),
-                  child: Image.asset(
-                    Resources.assetsImagesIcSearchPng,
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesIcSearchSvg,
                     color: hintColor,
                   ),
                 ),
@@ -70,7 +71,7 @@ class SearchBar extends StatelessWidget {
         ),
         const SizedBox(width: 8),
         ActionButton(
-          name: Resources.assetsImagesIcCreateGroupPng,
+          name: Resources.assetsImagesIcCreateSvg,
           onTap: () {
             _showDialog(context);
           },
@@ -114,7 +115,7 @@ class CreateGroupContanier extends StatelessWidget {
               children: [
                 Row(children: [
                   ActionButton(
-                      name: 'assets/images/ic_close.png',
+                      name: Resources.assetsImagesIcCloseSvg,
                       onTap: () {
                         Navigator.pop(context);
                       }),

@@ -11,7 +11,7 @@ SystemConversationMessage _$SystemConversationMessageFromJson(
   return SystemConversationMessage(
     const MessageActionJsonConverter().fromJson(json['action'] as String),
     json['participant_id'] as String?,
-    json['user_id'] as String,
+    json['user_id'] as String?,
     _$enumDecodeNullable(_$ParticipantRoleEnumMap, json['role']),
   );
 }
