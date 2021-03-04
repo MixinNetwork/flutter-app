@@ -36,7 +36,7 @@ dependencies:
   moor: ^4.1.0
   sqlite3_flutter_libs: ^0.4.0+1
   libsignal_protocol_dart: ^0.2.1
-  path_provider: ^2.0.0
+  path_provider: ^2.0.1
   path: ^1.8.0
   hive: ^1.6.0-nullsafety.2
   hive_flutter: ^1.0.0-nullsafety.0

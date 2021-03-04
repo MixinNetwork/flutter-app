@@ -25,25 +25,27 @@ class FullScreenPortal extends StatelessWidget {
     return BlocProvider(
       create: (BuildContext context) => BoolCubit(false),
       child: Builder(
-        builder: (context) => Barrier(
-          duration: duration,
-          visible: context.read<BoolCubit>().state,
-          onClose: () => context.read<BoolCubit>().emit(false),
-          child: PortalEntry(
-            closeDuration: duration,
-            visible: context.read<BoolCubit>().state,
-            portal: TweenAnimationBuilder<double>(
-              duration: duration,
-              tween:
-                  Tween(begin: 0, end: context.read<BoolCubit>().state ? 1 : 0),
-              curve: curve,
-              builder: (context, progress, child) => Opacity(
-                opacity: progress,
-                child: child,
+        builder: (context) => BlocBuilder<BoolCubit, bool>(
+          builder: (context, visible) => Barrier(
+            duration: duration,
+            visible: visible,
+            onClose: () => context.read<BoolCubit>().emit(false),
+            child: PortalEntry(
+              closeDuration: duration,
+              visible: visible,
+              portal: TweenAnimationBuilder<double>(
+                duration: duration,
+                tween: Tween(
+                    begin: 0, end: context.read<BoolCubit>().state ? 1 : 0),
+                curve: curve,
+                builder: (context, progress, child) => Opacity(
+                  opacity: progress,
+                  child: child,
+                ),
+                child: portalBuilder(context),
               ),
-              child: portalBuilder(context),
+              child: builder(context),
             ),
-            child: builder(context),
           ),
         ),
       ),

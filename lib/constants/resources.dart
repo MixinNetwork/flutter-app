@@ -94,10 +94,14 @@ class Resources {
 
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';
 
+  static const String assetsImagesNextSvg = 'assets/images/next.svg';
+
   static const String assetsImagesPersonalStickerSvg =
       'assets/images/personal_sticker.svg';
 
   static const String assetsImagesPinSvg = 'assets/images/pin.svg';
+
+  static const String assetsImagesPrevSvg = 'assets/images/prev.svg';
 
   static const String assetsImagesReadSvg = 'assets/images/read.svg';
 
