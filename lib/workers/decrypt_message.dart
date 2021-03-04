@@ -83,8 +83,8 @@ class DecryptMessage extends Injector {
       final plain = utf8.decode(base64.decode(data.data));
       final plainJsonMessage = PlainJsonMessage.fromJson(jsonDecode(plain));
       if (plainJsonMessage.action == acknowledgeMessageReceipts &&
-          plainJsonMessage.ackMessages.isNotEmpty == true) {
-        _markMessageStatus(plainJsonMessage.ackMessages);
+          plainJsonMessage.ackMessages?.isNotEmpty == true) {
+        _markMessageStatus(plainJsonMessage.ackMessages!);
       } else if (plainJsonMessage.action == resendMessages) {
         // todo
       } else if (plainJsonMessage.action == resendKey) {
@@ -155,7 +155,7 @@ class DecryptMessage extends Injector {
       messageId: data.messageId,
       conversationId: data.conversationId!,
       userId: data.userId,
-      category: data.category,
+      category: data.category!,
       content: content,
       status: MessageStatus.delivered,
       createdAt: data.createdAt,
@@ -171,7 +171,7 @@ class DecryptMessage extends Injector {
       messageId: data.messageId,
       conversationId: data.conversationId!,
       userId: data.representativeId,
-      category: data.category,
+      category: data.category!,
       content: content,
       status: MessageStatus.delivered,
       createdAt: data.createdAt,
@@ -230,7 +230,7 @@ class DecryptMessage extends Injector {
             messageId: data.messageId,
             conversationId: data.conversationId!,
             userId: data.userId,
-            category: data.category,
+            category: data.category!,
             content: plain,
             status: messageStatus,
             createdAt: data.createdAt,
@@ -253,7 +253,7 @@ class DecryptMessage extends Injector {
             messageId: data.messageId,
             conversationId: data.conversationId!,
             userId: data.userId,
-            category: data.category,
+            category: data.category!,
             content: attachment.attachmentId,
             mediaUrl: null,
             mediaMimeType: attachment.mimeType,
@@ -291,7 +291,7 @@ class DecryptMessage extends Injector {
             messageId: data.messageId,
             conversationId: data.conversationId!,
             userId: data.userId,
-            category: data.category,
+            category: data.category!,
             content: attachment.attachmentId,
             name: attachment.name,
             mediaMimeType: attachment.mimeType,
@@ -330,7 +330,7 @@ class DecryptMessage extends Injector {
             messageId: data.messageId,
             conversationId: data.conversationId!,
             userId: data.userId,
-            category: data.category,
+            category: data.category!,
             content: attachment.attachmentId,
             name: attachment.name,
             mediaMimeType: attachment.mimeType,
@@ -365,7 +365,7 @@ class DecryptMessage extends Injector {
             messageId: data.messageId,
             conversationId: data.conversationId!,
             userId: data.userId,
-            category: data.category,
+            category: data.category!,
             content: attachment.attachmentId,
             name: attachment.name,
             mediaMimeType: attachment.mimeType,
@@ -405,7 +405,7 @@ class DecryptMessage extends Injector {
           messageId: data.messageId,
           conversationId: data.conversationId!,
           userId: data.userId,
-          category: data.category,
+          category: data.category!,
           content: plainText,
           name: stickerMessage.name,
           stickerId: stickerMessage.stickerId,
@@ -429,7 +429,7 @@ class DecryptMessage extends Injector {
             messageId: data.messageId,
             conversationId: data.conversationId!,
             userId: data.userId,
-            category: data.category,
+            category: data.category!,
             content: plainText,
             name: user.fullName ?? '',
             sharedUserId: contactMessage.userId,
@@ -453,7 +453,7 @@ class DecryptMessage extends Injector {
           messageId: data.messageId,
           conversationId: data.conversationId!,
           userId: data.userId,
-          category: data.category,
+          category: data.category!,
           mediaWidth: liveMessage.width,
           mediaHeight: liveMessage.height,
           mediaUrl: liveMessage.url,
@@ -487,7 +487,7 @@ class DecryptMessage extends Injector {
           messageId: data.messageId,
           conversationId: data.conversationId!,
           userId: data.userId,
-          category: data.category,
+          category: data.category!,
           content: plain,
           status: messageStatus,
           createdAt: data.createdAt);
@@ -503,7 +503,7 @@ class DecryptMessage extends Injector {
         messageId: data.messageId,
         conversationId: data.conversationId!,
         userId: data.userId,
-        category: data.category,
+        category: data.category!,
         content: plain,
         status: messageStatus,
         createdAt: data.createdAt,
@@ -532,7 +532,7 @@ class DecryptMessage extends Injector {
         messageId: data.messageId,
         userId: userId,
         conversationId: data.conversationId!,
-        category: data.category,
+        category: data.category!,
         content: '',
         createdAt: data.createdAt,
         status: data.status,

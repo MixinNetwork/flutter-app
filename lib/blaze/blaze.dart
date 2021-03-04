@@ -48,32 +48,39 @@ class Blaze {
         pingInterval: const Duration(seconds: 15));
     channel.stream
         .asyncMap((message) async => await parseBlazeMessage(message))
-        .listen((blazeMessage) async {
-      final data = blazeMessage.data;
-      if (blazeMessage.action == acknowledgeMessageReceipts) {
-        // makeMessageStatus
-        updateRemoteMessageStatus(data!['messageId'], MessageStatus.delivered);
-      } else if (blazeMessage.action == createMessage) {
-        final messageData = BlazeMessageData.fromJson(data!);
-        if (messageData.userId == userId) {
+        .listen(
+      (blazeMessage) async {
+        final data = blazeMessage.data;
+        if (blazeMessage.action == acknowledgeMessageReceipts) {
+          // makeMessageStatus
           updateRemoteMessageStatus(
-              messageData.messageId, MessageStatus.delivered);
-        } else {
-          await database.floodMessagesDao
-              .insert(FloodMessage(
-                  messageId: messageData.messageId,
-                  data: jsonEncode(data),
-                  createdAt: messageData.createdAt))
-              .then((value) {});
+              data!['messageId'], MessageStatus.delivered);
+        } else if (blazeMessage.action == createMessage) {
+          final messageData = BlazeMessageData.fromJson(data!);
+          if (messageData.userId == userId && messageData.category == null) {
+            updateRemoteMessageStatus(
+                messageData.messageId, MessageStatus.delivered);
+          } else {
+            await database.floodMessagesDao
+                .insert(FloodMessage(
+                    messageId: messageData.messageId,
+                    data: jsonEncode(data),
+                    createdAt: messageData.createdAt))
+                .then((value) {});
+          }
+        } else if (data != null) {
+          updateRemoteMessageStatus(
+              data['message_id'], MessageStatus.delivered);
         }
-      } else if (data != null) {
-        updateRemoteMessageStatus(data['message_id'], MessageStatus.delivered);
-      }
-    }, onError: (error) {
-      debugPrint('onError');
-    }, onDone: () {
-      debugPrint('onDone');
-    }, cancelOnError: true);
+      },
+      onError: (error) {
+        debugPrint('onError');
+      },
+      onDone: () {
+        debugPrint('onDone');
+      },
+      cancelOnError: true,
+    );
     _sendListPending();
   }
 

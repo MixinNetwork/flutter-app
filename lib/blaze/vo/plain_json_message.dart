@@ -14,7 +14,7 @@ class PlainJsonMessage {
   @JsonKey(name: 'action', disallowNullValue: true)
   String action;
   @JsonKey(name: 'messages')
-  List<String> messages;
+  List<String>? messages;
   @JsonKey(name: 'user_id')
   String userId;
   @JsonKey(name: 'message_id')
@@ -22,7 +22,7 @@ class PlainJsonMessage {
   @JsonKey(name: 'session_id')
   String sessionId;
   @JsonKey(name: 'ack_messages')
-  List<BlazeAckMessage> ackMessages;
+  List<BlazeAckMessage>? ackMessages;
 
   Map<String, dynamic> toJson() => _$PlainJsonMessageToJson(this);
 }

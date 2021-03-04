@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/widgets/avatar_view/bloc/cubit/avatar_cubit.dart';
 import 'package:flutter_app/widgets/cache_image.dart';
@@ -24,24 +25,27 @@ class ConversationAvatarWidget extends StatelessWidget {
         size: Size.square(size),
         child: ClipOval(
           child: Builder(
-            builder: (context) {
-              if (conversation.groupIconUrl != null)
-                return CacheImage(
-                  conversation.groupIconUrl!,
-                  width: size,
-                  height: size,
-                );
-              return BlocProvider(
-                key: Key(conversation.conversationId),
-                create: (context) => AvatarCubit(
-                  Provider.of<AccountServer>(context, listen: false)
-                      .database
-                      .participantsDao,
-                  conversation,
-                ),
-                child: Builder(
-                  builder: (context) =>
-                      BlocConverter<AvatarCubit, List<User>, List<User>>(
+            builder: (context) => BlocProvider(
+              key: Key(conversation.conversationId),
+              create: (context) => AvatarCubit(
+                Provider.of<AccountServer>(context, listen: false)
+                    .database
+                    .participantsDao,
+                conversation,
+              ),
+              child: Builder(
+                builder: (context) {
+                  if (!conversation.isGroupConversation) {
+                    return AvatarWidget(
+                      userId: conversation.conversationId,
+                      name: conversation.name ?? '',
+                      avatarUrl: conversation.groupIconUrl ??
+                          conversation.avatarUrl ??
+                          '',
+                      size: size,
+                    );
+                  }
+                  return BlocConverter<AvatarCubit, List<User>, List<User>>(
                     converter: (state) =>
                         conversation.category == ConversationCategory.contact
                             ? state
@@ -51,10 +55,10 @@ class ConversationAvatarWidget extends StatelessWidget {
                             : state,
                     builder: (context, state) =>
                         _AvatarPuzzlesWidget(state, size),
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           ),
         ),
       );

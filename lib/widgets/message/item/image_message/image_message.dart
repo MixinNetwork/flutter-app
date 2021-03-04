@@ -108,7 +108,7 @@ class _ImageMessage extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.file(
-                      File(message.mediaUrl!),
+                      File(message.mediaUrl ?? ''),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Image.memory(
                         base64Decode(message.thumbImage!),
