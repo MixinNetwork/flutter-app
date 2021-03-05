@@ -216,10 +216,12 @@ class _Bar extends StatelessWidget {
           onTap: () async {
             // TODO toast
             if (message.mediaUrl?.isEmpty ?? true) return;
-            final directory = await getDirectoryPath(
-                confirmButtonText: Localization.of(context).save);
-            await File(message.mediaUrl!)
-                .copy('$directory${Platform.pathSeparator}${basename(message.mediaUrl!)}');
+            final path = await getSavePath(
+              confirmButtonText: Localization.of(context).save,
+              suggestedName: message.mediaName ?? basename(message.mediaUrl!),
+            );
+            if (path?.isEmpty ?? true) return;
+            await File(message.mediaUrl!).copy(path!);
           },
         ),
         const SizedBox(width: 24),

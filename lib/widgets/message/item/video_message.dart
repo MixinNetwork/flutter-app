@@ -37,25 +37,25 @@ class VideoMessageWidget extends StatelessWidget {
           final scale = message.mediaWidth! / message.mediaHeight!;
           final height = width / scale;
 
-          return InteractableDecoratedBox(
-            onTap: () {
-              if (message.mediaStatus == MediaStatus.canceled) {
-                if (message.relationship == UserRelationship.me &&
-                    message.mediaUrl?.isNotEmpty == true) {
-                  // TODO upload
-                  context.read<AccountServer>().uploadAttachment(message);
-                } else {
-                  context.read<AccountServer>().downloadAttachment(message);
+          return MessageBubble(
+            showNip: false,
+            isCurrentUser: isCurrentUser,
+            padding: const EdgeInsets.all(2),
+            child: InteractableDecoratedBox(
+              onTap: () {
+                if (message.mediaStatus == MediaStatus.canceled) {
+                  if (message.relationship == UserRelationship.me &&
+                      message.mediaUrl?.isNotEmpty == true) {
+                    // TODO upload
+                    context.read<AccountServer>().uploadAttachment(message);
+                  } else {
+                    context.read<AccountServer>().downloadAttachment(message);
+                  }
+                } else if (message.mediaStatus == MediaStatus.done &&
+                    message.mediaUrl != null) {
+                  openUri(Uri.file(message.mediaUrl!).toString());
                 }
-              } else if (message.mediaStatus == MediaStatus.done &&
-                  message.mediaUrl != null) {
-                openUri(Uri.file(message.mediaUrl!).toString());
-              }
-            },
-            child: MessageBubble(
-              showNip: false,
-              isCurrentUser: isCurrentUser,
-              padding: const EdgeInsets.all(2),
+              },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: SizedBox(
