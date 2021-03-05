@@ -12,7 +12,7 @@ class Injector {
   Database database;
   Client client;
 
-  void syncConversion(String? conversationId) async {
+  Future<void> syncConversion(String? conversationId) async {
     if (conversationId == null || conversationId == systemUser) {
       return;
     }

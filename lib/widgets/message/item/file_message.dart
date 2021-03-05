@@ -20,7 +20,6 @@ import '../message_bubble.dart';
 import '../message_datetime.dart';
 import '../message_status.dart';
 
-// todo status
 class FileMessage extends StatelessWidget {
   const FileMessage({
     Key? key,
@@ -37,6 +36,13 @@ class FileMessage extends StatelessWidget {
   Widget build(BuildContext context) => MessageBubble(
         showNip: showNip,
         isCurrentUser: isCurrentUser,
+        outerTimeAndStatusWidget: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            MessageDatetime(dateTime: message.createdAt),
+            if (isCurrentUser) MessageStatusWidget(status: message.status),
+          ],
+        ),
         child: InteractableDecoratedBox(
           onTap: () async {
             if (message.mediaStatus == MediaStatus.canceled) {
@@ -120,28 +126,19 @@ class FileMessage extends StatelessWidget {
                       Text(
                         message.mediaName ?? '',
                         style: TextStyle(
-                          fontSize: 15,
+                          fontSize: 14,
                           color: BrightnessData.themeOf(context).text,
                         ),
                       ),
                       Text(
                         filesize(message.mediaSize),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           color: BrightnessData.themeOf(context).secondaryText,
                         ),
                       ),
                     ],
                   ),
-                ],
-              ),
-              const SizedBox(width: 6),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  MessageDatetime(dateTime: message.createdAt),
-                  if (isCurrentUser)
-                    MessageStatusWidget(status: message.status),
                 ],
               ),
             ],

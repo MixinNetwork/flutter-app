@@ -54,43 +54,43 @@ class DecryptMessage extends Injector {
     final data = BlazeMessageData.fromJson(
         await LoadBalancerUtils.jsonDecode(floodMessage.data));
     if (data.conversationId != null) {
-      syncConversion(data.conversationId);
+      await syncConversion(data.conversationId);
     }
     final category = data.category;
     if (category.isSignal) {
-      _processSignalMessage(data);
+      await _processSignalMessage(data);
     } else if (category.isPlain) {
-      _processPlainMessage(data);
+      await _processPlainMessage(data);
     } else if (category.isSystem) {
-      _processSystemMessage(data);
+      await _processSystemMessage(data);
     } else if (category == MessageCategory.appButtonGroup ||
         category == MessageCategory.appCard) {
-      _processApp(data);
+      await _processApp(data);
     } else if (category == MessageCategory.messageRecall) {
-      _processRecallMessage(data);
+      await _processRecallMessage(data);
     }
-    _updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
+    await _updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
     await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
 
-  void _processSignalMessage(BlazeMessageData data) {
+  Future<void> _processSignalMessage(BlazeMessageData data) async {
     // todo decrypt
-    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+    await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
   }
 
-  void _processPlainMessage(BlazeMessageData data) {
+  Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
       final plain = utf8.decode(base64.decode(data.data));
       final plainJsonMessage = PlainJsonMessage.fromJson(jsonDecode(plain));
       if (plainJsonMessage.action == acknowledgeMessageReceipts &&
           plainJsonMessage.ackMessages?.isNotEmpty == true) {
-        _markMessageStatus(plainJsonMessage.ackMessages!);
+        await _markMessageStatus(plainJsonMessage.ackMessages!);
       } else if (plainJsonMessage.action == resendMessages) {
         // todo
       } else if (plainJsonMessage.action == resendKey) {
         // todo
       }
-      _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+      await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
         data.category == MessageCategory.plainVideo ||
@@ -108,42 +108,42 @@ class DecryptMessage extends Injector {
     }
   }
 
-  void _processSystemMessage(BlazeMessageData data) {
+  Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
           jsonDecode(utf8.decode(base64.decode(data.data))));
-      _processSystemConversationMessage(data, systemMessage);
+      await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
       final systemMessage = SystemUserMessage.fromJson(
           jsonDecode(utf8.decode(base64.decode(data.data))));
-      _processSystemUserMessage(systemMessage);
+      await _processSystemUserMessage(systemMessage);
     } else if (data.category == MessageCategory.systemCircle) {
       final systemMessage = SystemCircleMessage.fromJson(
           jsonDecode(utf8.decode(base64.decode(data.data))));
-      _processSystemCircleMessage(data, systemMessage);
+      await _processSystemCircleMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
       final systemSnapshot = SnapshotMessage.fromJson(
           jsonDecode(utf8.decode(base64.decode(data.data))));
-      _processSystemSnapshotMessage(data, systemSnapshot);
+      await _processSystemSnapshotMessage(data, systemSnapshot);
     } else if (data.category == MessageCategory.systemSession) {
       final systemSession = SystemSessionMessage.fromJson(
           jsonDecode(utf8.decode(base64.decode(data.data))));
-      _processSystemSessionMessage(systemSession);
+      await _processSystemSessionMessage(systemSession);
     }
-    _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+    await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
   }
 
-  void _processApp(BlazeMessageData data) {
+  Future<void> _processApp(BlazeMessageData data) async {
     if (data.category == MessageCategory.appButtonGroup) {
-      _processAppButton(data);
+      await _processAppButton(data);
     } else if (data.category == MessageCategory.appCard) {
-      _processAppCard(data);
+      await _processAppCard(data);
     } else {
-      _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+      await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
     }
   }
 
-  void _processAppButton(BlazeMessageData data) {
+  Future<void> _processAppButton(BlazeMessageData data) async {
     final content = utf8.decode(base64.decode(data.data));
     // ignore: unused_local_variable
     final apps = (jsonDecode(content) as List)
@@ -160,37 +160,39 @@ class DecryptMessage extends Injector {
       status: MessageStatus.delivered,
       createdAt: data.createdAt,
     );
-    database.messagesDao.insert(message, accountId);
-    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+    await database.messagesDao.insert(message, accountId);
+    await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
   }
 
-  void _processAppCard(BlazeMessageData data) {
+  Future<void> _processAppCard(BlazeMessageData data) async {
     final content = utf8.decode(base64.decode(data.data));
     final appCard = AppCard.fromJson(jsonDecode(content));
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId!,
-      userId: data.representativeId,
+      userId: data.representativeId.isNotEmpty
+          ? data.representativeId
+          : data.userId,
       category: data.category!,
       content: content,
       status: MessageStatus.delivered,
       createdAt: data.createdAt,
     );
-    database.appsDao.findUserById(appCard.appId).then((app) {
+    await database.appsDao.findUserById(appCard.appId).then((app) {
       if (app == null || app.updatedAt != appCard.updatedAt) {
         syncUser(appCard.appId);
       }
     });
-    database.messagesDao.insert(message, accountId);
-    _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+    await database.messagesDao.insert(message, accountId);
+    await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
   }
 
-  void _processRecallMessage(BlazeMessageData data) {
+  Future<void> _processRecallMessage(BlazeMessageData data) async {
     // todo
     // ignore: unused_local_variable
     final recallMessage = RecallMessage.fromJson(
         jsonDecode(utf8.decode(base64.decode(data.data))));
-    _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+    await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
   }
 
   Future<Message> _generateMessage(
@@ -241,7 +243,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isImage) {
       String plain;
       if (data.category == MessageCategory.signalImage) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -279,7 +281,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isVideo) {
       String plain;
       if (data.category == MessageCategory.signalVideo) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -318,7 +320,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isData) {
       String plain;
       if (data.category == MessageCategory.signalData) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -353,7 +355,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isAudio) {
       String plain;
       if (data.category == MessageCategory.signalAudio) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -389,7 +391,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isSticker) {
       String plain;
       if (data.category == MessageCategory.signalSticker) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -416,7 +418,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isContact) {
       String plain;
       if (data.category == MessageCategory.signalContact) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -431,7 +433,7 @@ class DecryptMessage extends Injector {
             userId: data.userId,
             category: data.category!,
             content: plainText,
-            name: user.fullName ?? '',
+            name: user.fullName,
             sharedUserId: contactMessage.userId,
             status: messageStatus,
             createdAt: data.createdAt,
@@ -442,7 +444,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isLive) {
       String plain;
       if (data.category == MessageCategory.signalLive) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -464,7 +466,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isLocation) {
       String plain;
       if (data.category == MessageCategory.signalLocation) {
-        _updateRemoteMessageStatus(data.messageId, messageStatus);
+        await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
         plain = utf8.decode(base64.decode(plainText));
@@ -480,7 +482,7 @@ class DecryptMessage extends Injector {
       if (locationMessage == null ||
           locationMessage.latitude == 0.0 ||
           locationMessage.longitude == 0.0) {
-        _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+        await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
         return;
       }
       final message = Message(
@@ -511,13 +513,13 @@ class DecryptMessage extends Injector {
       await database.messagesDao.insert(message, accountId);
     }
 
-    _updateRemoteMessageStatus(data.messageId, messageStatus);
+    await _updateRemoteMessageStatus(data.messageId, messageStatus);
   }
 
-  void _processSystemConversationMessage(
+  Future<void> _processSystemConversationMessage(
       BlazeMessageData data, SystemConversationMessage systemMessage) async {
     if (systemMessage.action != MessageAction.update) {
-      syncConversion(data.conversationId);
+      await syncConversion(data.conversationId);
     }
     final userId = systemMessage.userId ?? data.userId;
     if (userId == systemUser &&
@@ -543,7 +545,7 @@ class DecryptMessage extends Injector {
       // database.participantsDao.insert(db.Participant(conversationId: data.conversationId,userId: systemMessage.participantId, role: '' ,createdAt: data.createdAt));
       // todo refresh conversation and signal key
       if (systemMessage.participantId == accountId) {
-        syncConversion(data.conversationId);
+        await syncConversion(data.conversationId);
         // } else if (systemMessage.userId != selfId && no signal key) {
       } else {
         // syncSession();
@@ -560,7 +562,7 @@ class DecryptMessage extends Injector {
       if (systemMessage.participantId != null) {
         await syncUser(systemMessage.userId);
       } else {
-        syncConversion(data.conversationId);
+        await syncConversion(data.conversationId);
       }
     } else if (systemMessage.action == MessageAction.create) {
     } else if (systemMessage.action == MessageAction.role) {
@@ -573,14 +575,15 @@ class DecryptMessage extends Injector {
     await database.messagesDao.insert(message, accountId);
   }
 
-  void _processSystemUserMessage(SystemUserMessage systemMessage) {
+  Future<void> _processSystemUserMessage(
+      SystemUserMessage systemMessage) async {
     if (systemMessage.action == SystemUserAction.update) {
-      syncUser(systemMessage.userId);
+      await syncUser(systemMessage.userId);
     }
   }
 
-  void _processSystemCircleMessage(
-      BlazeMessageData data, SystemCircleMessage systemMessage) {
+  Future<void> _processSystemCircleMessage(
+      BlazeMessageData data, SystemCircleMessage systemMessage) async {
     if (systemMessage.action == SystemCircleAction.create ||
         systemMessage.action == SystemCircleAction.update) {
       // todo refresh circle
@@ -589,22 +592,23 @@ class DecryptMessage extends Injector {
     } else if (systemMessage.action == SystemCircleAction.delete) {}
   }
 
-  void _processSystemSnapshotMessage(
-      BlazeMessageData data, SnapshotMessage systemSnapshot) {
+  Future<void> _processSystemSnapshotMessage(
+      BlazeMessageData data, SnapshotMessage systemSnapshot) async {
     // todo process snapshot message
   }
 
-  void _processSystemSessionMessage(SystemSessionMessage systemSession) {
+  Future<void> _processSystemSessionMessage(SystemSessionMessage systemSession) async{
     // todo only run mobile client
   }
 
-  void _updateRemoteMessageStatus(messageId, MessageStatus status) {
+  Future<void> _updateRemoteMessageStatus(
+      messageId, MessageStatus status) async {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
     final blazeMessage = BlazeAckMessage(
         messageId: messageId, status: EnumToString.convertToString(status));
-    database.jobsDao.insert(Job(
+    await database.jobsDao.insert(Job(
         jobId: const Uuid().v4(),
         action: acknowledgeMessageReceipts,
         priority: 5,
@@ -613,7 +617,7 @@ class DecryptMessage extends Injector {
         runCount: 0));
   }
 
-  void _markMessageStatus(List<BlazeAckMessage> messages) async {
+  Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
     final messageIds = <String>[];
     messages
         .takeWhile((m) => m.status != 'READ' || m.status != 'MENTION_READ')
@@ -625,7 +629,7 @@ class DecryptMessage extends Injector {
     });
 
     if (messageIds.isNotEmpty) {
-      database.messagesDao.markMessageRead(messageIds);
+      await database.messagesDao.markMessageRead(messageIds);
       // todo refresh conversion
     }
   }
