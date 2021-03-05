@@ -1,6 +1,4 @@
 import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/utils/enum_to_string.dart';
-import 'package:recase/recase.dart';
 import 'package:moor/moor.dart';
 
 class MessageCategoryTypeConverter

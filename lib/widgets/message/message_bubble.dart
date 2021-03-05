@@ -11,6 +11,7 @@ class MessageBubble extends StatelessWidget {
     this.showNip = true,
     this.showBubble = true,
     this.padding = const EdgeInsets.all(10),
+    this.outerTimeAndStatusWidget,
   }) : super(key: key);
 
   final Widget child;
@@ -18,20 +19,21 @@ class MessageBubble extends StatelessWidget {
   final bool showNip;
   final bool showBubble;
   final EdgeInsetsGeometry padding;
+  final Widget? outerTimeAndStatusWidget;
 
   @override
   Widget build(BuildContext context) {
     final bubbleColor = isCurrentUser
         ? BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(177, 218, 236, 1),
-      darkColor: const Color.fromRGBO(59, 79, 103, 1),
-    )
+            context,
+            const Color.fromRGBO(177, 218, 236, 1),
+            darkColor: const Color.fromRGBO(59, 79, 103, 1),
+          )
         : BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(255, 255, 255, 1),
-      darkColor: const Color.fromRGBO(52, 59, 67, 1),
-    );
+            context,
+            const Color.fromRGBO(255, 255, 255, 1),
+            darkColor: const Color.fromRGBO(52, 59, 67, 1),
+          );
     final isDark = BrightnessData.of(context) == 1;
     Widget _child = Padding(
       padding: padding,
@@ -72,21 +74,21 @@ class MessageBubble extends StatelessWidget {
           decoration: BoxDecoration(
             image: showBubble
                 ? DecorationImage(
-              image: AssetImage(
-                isCurrentUser
-                    ? isDark
-                    ? Resources.assetsImagesDarkSenderNipBubblePng
-                    : Resources.assetsImagesLightSenderNipBubblePng
-                    : isDark
-                    ? Resources.assetsImagesDarkReceiverNipBubblePng
-                    : Resources.assetsImagesLightReceiverNipBubblePng,
-              ),
-              centerSlice: Rect.fromCenter(
-                center: const Offset(21, 22),
-                width: 1,
-                height: 1,
-              ),
-            )
+                    image: AssetImage(
+                      isCurrentUser
+                          ? isDark
+                              ? Resources.assetsImagesDarkSenderNipBubblePng
+                              : Resources.assetsImagesLightSenderNipBubblePng
+                          : isDark
+                              ? Resources.assetsImagesDarkReceiverNipBubblePng
+                              : Resources.assetsImagesLightReceiverNipBubblePng,
+                    ),
+                    centerSlice: Rect.fromCenter(
+                      center: const Offset(21, 22),
+                      width: 1,
+                      height: 1,
+                    ),
+                  )
                 : null,
           ),
           child: _child,
@@ -96,12 +98,23 @@ class MessageBubble extends StatelessWidget {
 
     return Align(
       alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minWidth: 42,
-          minHeight: 44,
-        ),
-        child: _child,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 42,
+              minHeight: 44,
+            ),
+            child: _child,
+          ),
+          if (outerTimeAndStatusWidget != null)
+            Padding(
+              padding: EdgeInsets.only(right: isCurrentUser ? 20 : 10),
+              child: outerTimeAndStatusWidget!,
+            ),
+        ],
       ),
     );
   }

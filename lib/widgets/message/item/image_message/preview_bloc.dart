@@ -1,4 +1,3 @@
-import 'package:flutter/src/widgets/page_view.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
