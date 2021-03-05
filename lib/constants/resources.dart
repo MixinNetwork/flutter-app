@@ -101,6 +101,8 @@ class Resources {
 
   static const String assetsImagesPinSvg = 'assets/images/pin.svg';
 
+  static const String assetsImagesPlaySvg = 'assets/images/play.svg';
+
   static const String assetsImagesPrevSvg = 'assets/images/prev.svg';
 
   static const String assetsImagesReadSvg = 'assets/images/read.svg';
