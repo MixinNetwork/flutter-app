@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/utils/crypted_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -46,13 +48,22 @@ class EncryptedProtocol {
     return aesDecrypt(sharedSecret, iv, cipherText);
   }
 
-  List<int> decryptMessage(ed.PrivateKey privateKey, List<int> cipherText) {
+  List<int> decryptMessage(
+      ed.PrivateKey privateKey, List<int> sessionId, List<int> cipherText) {
+    final sessionSize = leByteArrayToInt(cipherText.sublist(1, 3));
     final senderPublicKey = cipherText.sublist(3, 35);
-    // final sessionId = cipherText.sublist(35, 99);
-    final messageKey = cipherText.sublist(51, 99);
-    final message = cipherText.sublist(99, cipherText.length);
+    List<int>? messageKey;
+    for (var i = 0; i < sessionSize; ++i) {
+      final offset = i * 64;
+      final sid = cipherText.sublist(35 + offset, 51 + offset);
+      if (listEquals(sid, sessionId)) {
+        messageKey = cipherText.sublist(51 + offset, 99 + offset);
+      }
+    }
+    final message =
+        cipherText.sublist(35 + sessionSize * 64, cipherText.length);
 
-    final iv = messageKey.sublist(0, 16);
+    final iv = messageKey!.sublist(0, 16);
 
     final decodedMessageKey = _decryptCipherMessageKey(privateKey,
         senderPublicKey, messageKey.sublist(16, messageKey.length), iv);

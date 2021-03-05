@@ -49,8 +49,8 @@ void encryptedTest() {
   final encodedContent =
       protocol.encryptMessage(privateKey, source, pub.toList(), otherSessionId);
 
-  final decrypted =
-      protocol.decryptMessage(privateKey, Uint8List.fromList(encodedContent));
+  final decrypted = protocol.decryptMessage(privateKey,
+      Uuid.parse(otherSessionId), Uint8List.fromList(encodedContent));
 
   assert(listEquals(source, decrypted));
 }
@@ -60,8 +60,10 @@ void encryptedDecryptTest() {
       base64Decode('JgW0ffnk+0PN8nJVtfCWZmxv99QIqPw5lquMUov26u0=');
   final encodedContent = base64Decode(
       'AQEApm78Ps6VRCy0MCdUtYGEpBb8bxxaGYkn93pjgaP5RlDr9Z76fkRHmaAUmezSrhV59cj7xD+c9V37wRZPdFVgGTkjhv8FTrj25j/DERttJqIdPnzMLYgWmOA1VJ1PfoE8Jso0liRlFVywvX0ocX+LQw30r454kKsar2oXerP4');
+
+  final sessionId = base64Decode('6/We+n5ER5mgFJns0q4VeQ==');
   final protocol = EncryptedProtocol();
   final decrypted = protocol.decryptMessage(
-      ed.PrivateKey(privateKey), Uint8List.fromList(encodedContent));
+      ed.PrivateKey(privateKey), sessionId, Uint8List.fromList(encodedContent));
   assert(listEquals(utf8.encode('LA'), decrypted));
 }

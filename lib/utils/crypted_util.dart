@@ -81,3 +81,7 @@ Uint8List toLeByteArray(int v) {
   result[1] = v >> 8;
   return result;
 }
+
+int leByteArrayToInt(List<int> array) {
+  return array[0] + array[1];
+}

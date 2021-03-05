@@ -41,11 +41,15 @@ import 'injector.dart';
 
 class DecryptMessage extends Injector {
   DecryptMessage(String userId, Database database, Client client,
+      this._sessionId,
       this._privateKey, this._attachmentUtil)
-      : super(userId, database, client);
+      : super(userId, database, client) {
+    _encryptedProtocol = EncryptedProtocol();
+  }
 
   String? _conversationId;
-  late PrivateKey _privateKey;
+  late final String _sessionId;
+  late final PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
 
   // ignore: unused_field
@@ -118,7 +122,7 @@ class DecryptMessage extends Injector {
   void _processEncryptedMessage(BlazeMessageData data) {
     try {
       final decryptedContent = _encryptedProtocol.decryptMessage(
-          _privateKey, base64Decode(data.data));
+          _privateKey,Uuid.parse(_sessionId), base64Decode(data.data));
       final plainText = utf8.decode(decryptedContent);
       try {
         _processDecryptSuccess(data, plainText);
@@ -127,6 +131,7 @@ class DecryptMessage extends Injector {
       }
     } catch (e) {
       // todo
+      debugPrint(e.toString());
     }
   }
 

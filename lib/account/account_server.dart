@@ -67,7 +67,7 @@ class AccountServer {
     blaze = Blaze(userId, sessionId, privateKey, database, client);
 
     _decryptMessage = DecryptMessage(
-        userId, database, client, this.privateKey, _attachmentUtil);
+        userId, database, client, sessionId, this.privateKey, _attachmentUtil);
   }
 
   late String userId;
