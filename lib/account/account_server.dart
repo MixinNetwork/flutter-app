@@ -80,13 +80,16 @@ class AccountServer {
 
   void start() {
     blaze.connect();
-    database.floodMessagesDao.findFloodMessage().listen((list) {
-      if (list.isNotEmpty == true) {
-        for (final message in list) {
-          _decryptMessage.process(message);
-        }
+    database.floodMessagesDao
+        .findFloodMessage()
+        .where((list) => list.isNotEmpty)
+        .asyncMapDrop((list) async {
+      for (final message in list) {
+        await _decryptMessage.process(message);
       }
-    });
+      return list;
+    }).listen((_) {});
+
     database.jobsDao
         .findAckJobs()
         .where((jobs) => jobs.isNotEmpty == true)

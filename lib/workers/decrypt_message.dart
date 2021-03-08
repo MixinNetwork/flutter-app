@@ -50,7 +50,7 @@ class DecryptMessage extends Injector {
     _conversationId = conversationId;
   }
 
-  void process(FloodMessage floodMessage) async {
+  Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
         await LoadBalancerUtils.jsonDecode(floodMessage.data));
     if (data.conversationId != null) {
@@ -81,7 +81,7 @@ class DecryptMessage extends Injector {
   Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
       final plain = utf8.decode(base64.decode(data.data));
-      final plainJsonMessage = PlainJsonMessage.fromJson(jsonDecode(plain));
+      final plainJsonMessage = PlainJsonMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       if (plainJsonMessage.action == acknowledgeMessageReceipts &&
           plainJsonMessage.ackMessages?.isNotEmpty == true) {
         await _markMessageStatus(plainJsonMessage.ackMessages!);
@@ -111,23 +111,23 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
-          jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
       await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
       final systemMessage = SystemUserMessage.fromJson(
-          jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
       await _processSystemUserMessage(systemMessage);
     } else if (data.category == MessageCategory.systemCircle) {
       final systemMessage = SystemCircleMessage.fromJson(
-          jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
       await _processSystemCircleMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
       final systemSnapshot = SnapshotMessage.fromJson(
-          jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
       await _processSystemSnapshotMessage(data, systemSnapshot);
     } else if (data.category == MessageCategory.systemSession) {
       final systemSession = SystemSessionMessage.fromJson(
-          jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
       await _processSystemSessionMessage(systemSession);
     }
     await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
@@ -146,7 +146,7 @@ class DecryptMessage extends Injector {
   Future<void> _processAppButton(BlazeMessageData data) async {
     final content = utf8.decode(base64.decode(data.data));
     // ignore: unused_local_variable
-    final apps = (jsonDecode(content) as List)
+    final apps = (await LoadBalancerUtils.jsonDecode(content) as List)
         .map((e) =>
             e == null ? null : AppButton.fromJson(e as Map<String, dynamic>))
         .toList();
@@ -166,7 +166,7 @@ class DecryptMessage extends Injector {
 
   Future<void> _processAppCard(BlazeMessageData data) async {
     final content = utf8.decode(base64.decode(data.data));
-    final appCard = AppCard.fromJson(jsonDecode(content));
+    final appCard = AppCard.fromJson(await LoadBalancerUtils.jsonDecode(content));
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId!,
@@ -191,7 +191,7 @@ class DecryptMessage extends Injector {
     // todo
     // ignore: unused_local_variable
     final recallMessage = RecallMessage.fromJson(
-        jsonDecode(utf8.decode(base64.decode(data.data))));
+        await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
     await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
   }
 

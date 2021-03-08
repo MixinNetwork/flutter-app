@@ -9,11 +9,9 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
 
   Future<int> insert(User user) => into(db.users).insertOnConflictUpdate(user);
 
-  void insertAll(List<User> users) async {
-    await batch((batch) {
+   Future<void> insertAll(List<User> users) async => batch((batch) {
       batch.insertAllOnConflictUpdate(db.users, users);
     });
-  }
 
   Future deleteUser(User user) => delete(db.users).delete(user);
 

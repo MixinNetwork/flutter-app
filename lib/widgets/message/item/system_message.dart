@@ -71,7 +71,7 @@ class SystemMessage extends StatelessWidget {
                             : message.userFullName!,
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.participantFullName!,
+                            : message.participantFullName ?? '',
                       );
                       break;
                     case MessageAction.create:
