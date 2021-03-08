@@ -21,6 +21,7 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/message/item/action/action_data.dart';
+import 'package:flutter_app/widgets/message/item/action_card/action_card_data.dart';
 import 'package:flutter_app/widgets/message_status_icon.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
@@ -399,13 +400,17 @@ class _MessageContent extends StatelessWidget {
       content = '[${Localization.of(context).audio}]';
       icon = Resources.assetsImagesAudioSvg;
     } else if (conversation.contentType == MessageCategory.appButtonGroup) {
-      content = jsonDecode(conversation.content!)
-          .map((e) => ActionData.fromJson(e))
-          .map((e) => '[${e.label}]')
-          .join();
+      content = 'APP_BUTTON_GROUP';
+      if (conversation.content != null)
+        content = jsonDecode(conversation.content!)
+            .map((e) => ActionData.fromJson(e))
+            .map((e) => '[${e.label}]')
+            .join();
       icon = Resources.assetsImagesAppButtonSvg;
     } else if (conversation.contentType == MessageCategory.appCard) {
       content = 'APP_CARD';
+      if (conversation.content != null)
+        content = AppCardData.fromJson(jsonDecode(conversation.content!)).title;
       icon = Resources.assetsImagesAppButtonSvg;
     } else if (conversation.contentType.isContact) {
       content = '[${Localization.of(context).contact}]';
