@@ -13,6 +13,8 @@ class Resources {
 
   static const String assetsImagesBotPng = 'assets/images/bot.png';
 
+  static const String assetsImagesBotFillSvg = 'assets/images/bot_fill.svg';
+
   static const String assetsImagesCirclePng = 'assets/images/circle.png';
 
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
@@ -125,6 +127,8 @@ class Resources {
   static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
 
   static const String assetsImagesUploadSvg = 'assets/images/upload.svg';
+
+  static const String assetsImagesVerifiedSvg = 'assets/images/verified.svg';
 
   static const String assetsImagesVideoSvg = 'assets/images/video.svg';
 

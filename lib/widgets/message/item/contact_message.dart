@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 
 import '../../brightness_observer.dart';
@@ -52,12 +53,23 @@ class ContactMessage extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  message.sharedUserFullName!,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 14,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        message.sharedUserFullName!,
+                        style: TextStyle(
+                          color: BrightnessData.themeOf(context).text,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    VerifiedOrBotWidget(
+                      verified: message.sharedUserIsVerified == 1,
+                      isBot: message.sharedUserAppId != null,
+                    ),
+                  ],
                 ),
                 Text(
                   message.sharedUserIdentityNumber,

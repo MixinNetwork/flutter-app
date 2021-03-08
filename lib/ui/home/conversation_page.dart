@@ -30,6 +30,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 
 class ConversationPage extends StatelessWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -217,17 +218,31 @@ class _Item extends StatelessWidget {
                         Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                (conversation.groupName?.trim().isNotEmpty ==
-                                            true
-                                        ? conversation.groupName
-                                        : conversation.name) ??
-                                    '',
-                                style: TextStyle(
-                                  color: BrightnessData.themeOf(context).text,
-                                  fontSize: 16,
-                                ),
-                                overflow: TextOverflow.ellipsis,
+                              child: Row(
+                                children: [
+                                  Flexible(
+                                    child: Text(
+                                      (conversation.groupName
+                                                      ?.trim()
+                                                      .isNotEmpty ==
+                                                  true
+                                              ? conversation.groupName
+                                              : conversation.name) ??
+                                          '',
+                                      style: TextStyle(
+                                        color: BrightnessData.themeOf(context)
+                                            .text,
+                                        fontSize: 16,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  VerifiedOrBotWidget(
+                                    verified: conversation.ownerVerified == 1,
+                                    isBot: conversation.isBotConversation,
+                                  ),
+                                ],
                               ),
                             ),
                             Text(
@@ -267,6 +282,39 @@ class _Item extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class VerifiedOrBotWidget extends StatelessWidget {
+  const VerifiedOrBotWidget({
+    Key? key,
+    required this.verified,
+    required this.isBot,
+  }) : super(key: key);
+  final bool verified;
+  final bool isBot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (verified || isBot) const SizedBox(width: 4),
+        if (verified)
+          SvgPicture.asset(
+            Resources.assetsImagesVerifiedSvg,
+            width: 12,
+            height: 12,
+          ),
+        if (isBot)
+          SvgPicture.asset(
+            Resources.assetsImagesBotFillSvg,
+            width: 12,
+            height: 12,
+          ),
+        if (verified || isBot) const SizedBox(width: 4),
+      ],
     );
   }
 }
@@ -344,6 +392,7 @@ class _MessagePreview extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _MessageStatusIcon(conversation: conversation),
+          const SizedBox(width: 2),
           Expanded(
             child: _MessageContent(conversation: conversation),
           ),
