@@ -58,7 +58,7 @@ dependencies:
   dio: ^4.0.0-beta2
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   recase: ^4.0.0-nullsafety.0
-  file_selector: ^0.8.0
+  file_selector: ^0.8.2
   # file_selector_platform_interface: ^1.0.3+1
   file_selector_macos: ^0.0.4
   file_selector_windows: ^0.0.2

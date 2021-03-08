@@ -12,7 +12,7 @@ class Injector {
   Database database;
   Client client;
 
-  void syncConversion(String? conversationId) async {
+  Future<void> syncConversion(String? conversationId) async {
     if (conversationId == null || conversationId == systemUser) {
       return;
     }
@@ -43,13 +43,13 @@ class Injector {
             muteUntil: DateTime.parse(response.data.muteUntil),
           ),
         );
-        refreshParticipants(
+        await refreshParticipants(
             response.data.conversationId, response.data.participants);
       }
     }
   }
 
-  void refreshParticipants(
+  Future<void> refreshParticipants(
       String conversationId, List<ParticipantRequest> participants) async {
     final local =
         await database.participantsDao.getParticipants(conversationId);
@@ -67,17 +67,17 @@ class Injector {
         local.where((item) => !online.any((e) => e.userId == item.userId));
     if (add.isNotEmpty) {
       database.participantsDao.insertAll(add.toList());
-      fetchUsers(add.map((e) => e.userId).toList());
+      await fetchUsers(add.map((e) => e.userId).toList());
     }
     if (remove.isNotEmpty) {
       // database.participantsDao.deleteAll(remove);
     }
   }
 
-  void fetchUsers(List<String> ids) async {
+  Future<void> fetchUsers(List<String> ids) async {
     final response = await client.userApi.getUsers(ids);
     if (response.data != null && response.data.isNotEmpty) {
-      database.userDao.insertAll(response.data
+      await database.userDao.insertAll(response.data
           .map((e) => db.User(
                 userId: e.userId,
                 identityNumber: e.identityNumber,
