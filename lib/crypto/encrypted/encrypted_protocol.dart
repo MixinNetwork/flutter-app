@@ -48,9 +48,10 @@ class EncryptedProtocol {
     return aesDecrypt(sharedSecret, iv, cipherText);
   }
 
-  List<int> decryptMessage(
+  List<int>? decryptMessage(
       ed.PrivateKey privateKey, List<int> sessionId, List<int> cipherText) {
     final sessionSize = leByteArrayToInt(cipherText.sublist(1, 3));
+
     final senderPublicKey = cipherText.sublist(3, 35);
     List<int>? messageKey;
     for (var i = 0; i < sessionSize; ++i) {
@@ -60,10 +61,13 @@ class EncryptedProtocol {
         messageKey = cipherText.sublist(51 + offset, 99 + offset);
       }
     }
+    if (messageKey == null) {
+      return null;
+    }
     final message =
         cipherText.sublist(35 + sessionSize * 64, cipherText.length);
 
-    final iv = messageKey!.sublist(0, 16);
+    final iv = messageKey.sublist(0, 16);
 
     final decodedMessageKey = _decryptCipherMessageKey(privateKey,
         senderPublicKey, messageKey.sublist(16, messageKey.length), iv);

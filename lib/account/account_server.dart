@@ -145,7 +145,7 @@ class AccountServer {
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
         } else if (message.category.isEncrypted) {
-          final conversation = database.conversationDao
+          final conversation = await database.conversationDao
               .getConversationById(message.conversationId);
           if (conversation == null) return;
           final participantSessionKey = await database.participantSessionDao

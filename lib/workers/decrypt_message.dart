@@ -112,8 +112,8 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.plainLive ||
         data.category == MessageCategory.plainPost ||
         data.category == MessageCategory.plainLocation) {
-      if (data.representativeId.isNotEmpty == true) {
-        data.userId = data.representativeId;
+      if (data.representativeId?.isNotEmpty == true) {
+        data.userId = data.representativeId!;
       }
       _processDecryptSuccess(data, data.data);
     }
@@ -122,12 +122,16 @@ class DecryptMessage extends Injector {
   void _processEncryptedMessage(BlazeMessageData data) {
     try {
       final decryptedContent = _encryptedProtocol.decryptMessage(
-          _privateKey,Uuid.parse(_sessionId), base64Decode(data.data));
-      final plainText = utf8.decode(decryptedContent);
-      try {
-        _processDecryptSuccess(data, plainText);
-      } catch (e) {
-        // todo insertInvalidMessage
+          _privateKey, Uuid.parse(_sessionId), base64Decode(data.data));
+      if (decryptedContent == null) {
+        print('null');
+      } else {
+        final plainText = utf8.decode(decryptedContent);
+        try {
+          _processDecryptSuccess(data, plainText);
+        } catch (e) {
+          // todo insertInvalidMessage
+        }
       }
     } catch (e) {
       // todo
@@ -197,7 +201,7 @@ class DecryptMessage extends Injector {
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId!,
-      userId: data.representativeId,
+      userId: data.representativeId!,
       category: data.category!,
       content: content,
       status: MessageStatus.delivered,

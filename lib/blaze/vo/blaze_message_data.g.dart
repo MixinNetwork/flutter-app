@@ -27,7 +27,7 @@ BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
     DateTime.parse(json['created_at'] as String),
     DateTime.parse(json['updated_at'] as String),
     json['source'] as String,
-    json['representative_id'] as String,
+    json['representative_id'] as String?,
     json['quote_message_id'] as String?,
     json['session_id'] as String,
   );

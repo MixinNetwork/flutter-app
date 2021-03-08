@@ -44,7 +44,7 @@ class BlazeMessageData {
   @JsonKey(name: 'source', disallowNullValue: true)
   String source;
   @JsonKey(name: 'representative_id')
-  String representativeId;
+  String? representativeId;
   @JsonKey(name: 'quote_message_id')
   String? quoteMessageId;
   @JsonKey(name: 'session_id')
