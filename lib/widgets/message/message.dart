@@ -18,6 +18,7 @@ import 'package:flutter_app/db/extension/message_category.dart';
 import '../menu.dart';
 import 'item/action/action_message.dart';
 import 'item/action_card/action_message.dart';
+import 'item/contact_message.dart';
 import 'item/file_message.dart';
 import 'item/image_message/image_message.dart';
 import 'item/secret_message.dart';
@@ -100,6 +101,13 @@ class MessageItemWidget extends StatelessWidget {
                 ),
               ],
               builder: (BuildContext context) {
+                if (message.type.isContact)
+                  return ContactMessage(
+                    showNip: showNip,
+                    isCurrentUser: isCurrentUser,
+                    message: message,
+                  );
+
                 if (message.type == MessageCategory.appCard)
                   return ActionCardMessage(
                     showNip: showNip,
