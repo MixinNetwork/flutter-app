@@ -67,6 +67,8 @@ dependencies:
   url_launcher: ^6.0.1
   filesize: ^1.0.4
   flutter_portal: ^0.4.0-nullsafety.0
+  flutter_markdown: ^0.6.0
+  markdown: ^4.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -89,6 +91,7 @@ dependency_overrides:
   sqflite_common: ^2.0.0
   synchronized: ^3.0.0
   quiver: ^3.0.0
+  scrollable_positioned_list: ^0.2.0-nullsafety.0
 
 dev_dependencies:
   hive_generator: ^0.9.0-nullsafety.1
