@@ -100,8 +100,6 @@ class SendMessageHelper {
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
     final attachment =
         _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
-    final bytes = await file.readAsBytes();
-    final image = decodeVideo(bytes);
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
