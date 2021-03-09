@@ -23,6 +23,7 @@ import 'item/file_message.dart';
 import 'item/image_message/image_message.dart';
 import 'item/secret_message.dart';
 import 'item/system_message.dart';
+import 'item/transfer_message.dart';
 import 'item/unknown_message.dart';
 import 'item/video_message.dart';
 import 'item/waiting_message.dart';
@@ -101,6 +102,13 @@ class MessageItemWidget extends StatelessWidget {
                 ),
               ],
               builder: (BuildContext context) {
+                if (message.type == MessageCategory.systemAccountSnapshot)
+                  return TransferMessage(
+                    showNip: showNip,
+                    isCurrentUser: isCurrentUser,
+                    message: message,
+                  );
+
                 if (message.type.isContact)
                   return ContactMessage(
                     showNip: showNip,
