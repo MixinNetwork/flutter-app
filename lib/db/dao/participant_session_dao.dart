@@ -13,4 +13,11 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteParticipantSession(ParticipantSessionData participantSession) =>
       delete(db.participantSession).delete(participantSession);
+
+  Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
+      String conversationId, String userId) {
+    return db
+        .getParticipantSessionKeyWithoutSelf(conversationId, userId)
+        .getSingle();
+  }
 }

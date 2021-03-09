@@ -289,7 +289,7 @@ packages:
       name: file_selector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.8.2"
+    version: "0.8.0"
   file_selector_linux:
     dependency: "direct main"
     description:
@@ -311,13 +311,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
-  file_selector_web:
-    dependency: transitive
-    description:
-      name: file_selector_web
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.8.1"
   file_selector_windows:
     dependency: "direct main"
     description:
@@ -575,8 +568,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "43d24d4d283f9705fda122a72cb7c8536e58916b"
-      resolved-ref: "43d24d4d283f9705fda122a72cb7c8536e58916b"
+      ref: ea5cdd2a40b9475f32a10d2de44f0ad7167f4b39
+      resolved-ref: ea5cdd2a40b9475f32a10d2de44f0ad7167f4b39
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"

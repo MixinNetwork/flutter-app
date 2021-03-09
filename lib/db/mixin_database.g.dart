@@ -8313,12 +8313,14 @@ class ParticipantSessionData extends DataClass
   final String sessionId;
   final int? sentToServer;
   final DateTime? createdAt;
+  final String? publicKey;
   ParticipantSessionData(
       {required this.conversationId,
       required this.userId,
       required this.sessionId,
       this.sentToServer,
-      this.createdAt});
+      this.createdAt,
+      this.publicKey});
   factory ParticipantSessionData.fromData(
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
@@ -8336,6 +8338,8 @@ class ParticipantSessionData extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}sent_to_server']),
       createdAt: ParticipantSession.$converter0.mapToDart(intType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      publicKey: stringType
+          .mapFromDatabaseResponse(data['${effectivePrefix}public_key']),
     );
   }
   @override
@@ -8351,6 +8355,9 @@ class ParticipantSessionData extends DataClass
       final converter = ParticipantSession.$converter0;
       map['created_at'] = Variable<int?>(converter.mapToSql(createdAt));
     }
+    if (!nullToAbsent || publicKey != null) {
+      map['public_key'] = Variable<String?>(publicKey);
+    }
     return map;
   }
 
@@ -8365,6 +8372,9 @@ class ParticipantSessionData extends DataClass
       createdAt: createdAt == null && nullToAbsent
           ? const Value.absent()
           : Value(createdAt),
+      publicKey: publicKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(publicKey),
     );
   }
 
@@ -8377,6 +8387,7 @@ class ParticipantSessionData extends DataClass
       sessionId: serializer.fromJson<String>(json['session_id']),
       sentToServer: serializer.fromJson<int?>(json['sent_to_server']),
       createdAt: serializer.fromJson<DateTime?>(json['created_at']),
+      publicKey: serializer.fromJson<String?>(json['public_key']),
     );
   }
   @override
@@ -8388,6 +8399,7 @@ class ParticipantSessionData extends DataClass
       'session_id': serializer.toJson<String>(sessionId),
       'sent_to_server': serializer.toJson<int?>(sentToServer),
       'created_at': serializer.toJson<DateTime?>(createdAt),
+      'public_key': serializer.toJson<String?>(publicKey),
     };
   }
 
@@ -8396,13 +8408,15 @@ class ParticipantSessionData extends DataClass
           String? userId,
           String? sessionId,
           int? sentToServer,
-          DateTime? createdAt}) =>
+          DateTime? createdAt,
+          String? publicKey}) =>
       ParticipantSessionData(
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
         sessionId: sessionId ?? this.sessionId,
         sentToServer: sentToServer ?? this.sentToServer,
         createdAt: createdAt ?? this.createdAt,
+        publicKey: publicKey ?? this.publicKey,
       );
   @override
   String toString() {
@@ -8411,7 +8425,8 @@ class ParticipantSessionData extends DataClass
           ..write('userId: $userId, ')
           ..write('sessionId: $sessionId, ')
           ..write('sentToServer: $sentToServer, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('publicKey: $publicKey')
           ..write(')'))
         .toString();
   }
@@ -8421,8 +8436,10 @@ class ParticipantSessionData extends DataClass
       conversationId.hashCode,
       $mrjc(
           userId.hashCode,
-          $mrjc(sessionId.hashCode,
-              $mrjc(sentToServer.hashCode, createdAt.hashCode)))));
+          $mrjc(
+              sessionId.hashCode,
+              $mrjc(sentToServer.hashCode,
+                  $mrjc(createdAt.hashCode, publicKey.hashCode))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -8431,7 +8448,8 @@ class ParticipantSessionData extends DataClass
           other.userId == this.userId &&
           other.sessionId == this.sessionId &&
           other.sentToServer == this.sentToServer &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.publicKey == this.publicKey);
 }
 
 class ParticipantSessionCompanion
@@ -8441,12 +8459,14 @@ class ParticipantSessionCompanion
   final Value<String> sessionId;
   final Value<int?> sentToServer;
   final Value<DateTime?> createdAt;
+  final Value<String?> publicKey;
   const ParticipantSessionCompanion({
     this.conversationId = const Value.absent(),
     this.userId = const Value.absent(),
     this.sessionId = const Value.absent(),
     this.sentToServer = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.publicKey = const Value.absent(),
   });
   ParticipantSessionCompanion.insert({
     required String conversationId,
@@ -8454,6 +8474,7 @@ class ParticipantSessionCompanion
     required String sessionId,
     this.sentToServer = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.publicKey = const Value.absent(),
   })  : conversationId = Value(conversationId),
         userId = Value(userId),
         sessionId = Value(sessionId);
@@ -8463,6 +8484,7 @@ class ParticipantSessionCompanion
     Expression<String>? sessionId,
     Expression<int?>? sentToServer,
     Expression<DateTime?>? createdAt,
+    Expression<String?>? publicKey,
   }) {
     return RawValuesInsertable({
       if (conversationId != null) 'conversation_id': conversationId,
@@ -8470,6 +8492,7 @@ class ParticipantSessionCompanion
       if (sessionId != null) 'session_id': sessionId,
       if (sentToServer != null) 'sent_to_server': sentToServer,
       if (createdAt != null) 'created_at': createdAt,
+      if (publicKey != null) 'public_key': publicKey,
     });
   }
 
@@ -8478,13 +8501,15 @@ class ParticipantSessionCompanion
       Value<String>? userId,
       Value<String>? sessionId,
       Value<int?>? sentToServer,
-      Value<DateTime?>? createdAt}) {
+      Value<DateTime?>? createdAt,
+      Value<String?>? publicKey}) {
     return ParticipantSessionCompanion(
       conversationId: conversationId ?? this.conversationId,
       userId: userId ?? this.userId,
       sessionId: sessionId ?? this.sessionId,
       sentToServer: sentToServer ?? this.sentToServer,
       createdAt: createdAt ?? this.createdAt,
+      publicKey: publicKey ?? this.publicKey,
     );
   }
 
@@ -8507,6 +8532,9 @@ class ParticipantSessionCompanion
       final converter = ParticipantSession.$converter0;
       map['created_at'] = Variable<int?>(converter.mapToSql(createdAt.value));
     }
+    if (publicKey.present) {
+      map['public_key'] = Variable<String?>(publicKey.value);
+    }
     return map;
   }
 
@@ -8517,7 +8545,8 @@ class ParticipantSessionCompanion
           ..write('userId: $userId, ')
           ..write('sessionId: $sessionId, ')
           ..write('sentToServer: $sentToServer, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('publicKey: $publicKey')
           ..write(')'))
         .toString();
   }
@@ -8565,9 +8594,16 @@ class ParticipantSession extends Table
         $customConstraints: '');
   }
 
+  final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
+  late final GeneratedTextColumn publicKey = _constructPublicKey();
+  GeneratedTextColumn _constructPublicKey() {
+    return GeneratedTextColumn('public_key', $tableName, true,
+        $customConstraints: '');
+  }
+
   @override
   List<GeneratedColumn> get $columns =>
-      [conversationId, userId, sessionId, sentToServer, createdAt];
+      [conversationId, userId, sessionId, sentToServer, createdAt, publicKey];
   @override
   ParticipantSession get asDslTable => this;
   @override
@@ -8607,6 +8643,10 @@ class ParticipantSession extends Table
               data['sent_to_server']!, _sentToServerMeta));
     }
     context.handle(_createdAtMeta, const VerificationResult.success());
+    if (data.containsKey('public_key')) {
+      context.handle(_publicKeyMeta,
+          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
+    }
     return context;
   }
 
@@ -10909,6 +10949,21 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {participants, users}).map(users.mapFromRow);
   }
 
+  Selectable<ParticipantSessionKey> getParticipantSessionKeyWithoutSelf(
+      String conversationId, String userId) {
+    return customSelect(
+        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id != :userId',
+        variables: [Variable<String>(conversationId), Variable<String>(userId)],
+        readsFrom: {participantSession}).map((QueryRow row) {
+      return ParticipantSessionKey(
+        conversationId: row.readString('conversation_id'),
+        userId: row.readString('user_id'),
+        sessionId: row.readString('session_id'),
+        publicKey: row.readString('public_key'),
+      );
+    });
+  }
+
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
@@ -11739,6 +11794,40 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           ),
         ],
       );
+}
+
+class ParticipantSessionKey {
+  final String conversationId;
+  final String userId;
+  final String sessionId;
+  final String? publicKey;
+  ParticipantSessionKey({
+    required this.conversationId,
+    required this.userId,
+    required this.sessionId,
+    this.publicKey,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(conversationId.hashCode,
+      $mrjc(userId.hashCode, $mrjc(sessionId.hashCode, publicKey.hashCode))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ParticipantSessionKey &&
+          other.conversationId == this.conversationId &&
+          other.userId == this.userId &&
+          other.sessionId == this.sessionId &&
+          other.publicKey == this.publicKey);
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantSessionKey(')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('publicKey: $publicKey')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class MessageItem {

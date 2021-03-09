@@ -12,6 +12,7 @@ import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants/constants.dart';
+import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
@@ -25,6 +26,7 @@ import 'package:flutter_app/utils/stream_extension.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart';
 
 class AccountServer {
   static String? sid;
@@ -44,18 +46,18 @@ class AccountServer {
     this.userId = userId;
     this.sessionId = sessionId;
     this.identityNumber = identityNumber;
-    this.privateKey = privateKey;
+    this.privateKey = PrivateKey(base64Decode(privateKey));
 
     client = Client();
     (client.dio.transformer as DefaultTransformer).jsonDecodeCallback =
         LoadBalancerUtils.jsonDecode;
     client.initMixin(userId, sessionId, privateKey, scp);
 
-    await _initDatabase();
+    await _initDatabase(privateKey);
     start();
   }
 
-  Future _initDatabase() async {
+  Future _initDatabase(String privateKey) async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
@@ -63,13 +65,15 @@ class AccountServer {
     _sendMessageHelper = SendMessageHelper(
         database.messagesDao, database.jobsDao, _attachmentUtil);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
-    _decryptMessage = DecryptMessage(userId, database, client, _attachmentUtil);
+
+    _decryptMessage = DecryptMessage(
+        userId, database, client, sessionId, this.privateKey, _attachmentUtil);
   }
 
   late String userId;
   late String sessionId;
   late String identityNumber;
-  late String privateKey;
+  late PrivateKey privateKey;
 
   late Client client;
   late Database database;
@@ -77,6 +81,8 @@ class AccountServer {
   late DecryptMessage _decryptMessage;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil _attachmentUtil;
+
+  final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();
 
   void start() {
     blaze.connect();
@@ -137,6 +143,28 @@ class AccountServer {
             content = base64.encode(utf8.encode(content!));
           }
           final blazeMessage = _createBlazeMessage(message, content!);
+          blaze.deliver(message, blazeMessage);
+          await database.messagesDao
+              .updateMessageStatusById(message.messageId, MessageStatus.sent);
+          await database.jobsDao.deleteJobById(job.jobId);
+        } else if (message.category.isEncrypted) {
+          final conversation = await database.conversationDao
+              .getConversationById(message.conversationId);
+          if (conversation == null) return;
+          final participantSessionKey = await database.participantSessionDao
+              .getParticipantSessionKeyWithoutSelf(
+                  message.conversationId, userId);
+          if (participantSessionKey == null) {
+            // todo throw checksum
+            return;
+          }
+          final content = _encryptedProtocol.encryptMessage(
+              privateKey,
+              utf8.encode(message.content!),
+              base64.decode(participantSessionKey.publicKey!),
+              participantSessionKey.sessionId);
+          final blazeMessage =
+              _createBlazeMessage(message, base64Encode(content));
           blaze.deliver(message, blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
