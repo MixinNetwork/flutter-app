@@ -96,7 +96,6 @@ class InputContainer extends StatelessWidget {
                                         ? KeyEventResult.handled
                                         : KeyEventResult.ignored;
 
-
                                   return KeyEventResult.ignored;
                                 },
                                 child: TextField(
@@ -232,16 +231,22 @@ class _FileButton extends StatelessWidget {
         final conversationItem =
             BlocProvider.of<ConversationCubit>(context).state;
         if (conversationItem == null) return;
-
         if (file.isImage) {
           if ((await _PreviewImage.push(context, file)) ?? false) return;
-          return Provider.of<AccountServer>(context, listen: false)
+          return await Provider.of<AccountServer>(context, listen: false)
               .sendImageMessage(
             conversationItem.conversationId,
-            File(file.path),
+            file,
+          );
+        } else if (file.isVideo) {
+          return Provider.of<AccountServer>(context, listen: false)
+              .sendVideoMessage(
+            conversationItem.conversationId,
+            file,
           );
         }
-        Provider.of<AccountServer>(context, listen: false).sendAttachment(
+        await Provider.of<AccountServer>(context, listen: false)
+            .sendDataMessage(
           conversationItem.conversationId,
           file,
         );

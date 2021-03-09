@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:file_selector/file_selector.dart';
@@ -198,74 +197,42 @@ class AccountServer {
         conversationId, userId, content, isPlain);
   }
 
-  void sendImageMessage(
-    String conversationId,
-    File image, [
-    bool isPlain = true,
-  ]) {
-    _sendAttachmentMessage(conversationId, image,
-        isPlain ? MessageCategory.plainImage : MessageCategory.signalImage);
-  }
+  Future<void> sendImageMessage(String conversationId,
+      XFile image, [
+        bool isPlain = true,
+      ]) =>
+      _sendMessageHelper.sendImageMessage(conversationId, userId, image,
+          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage);
 
-  void sendVideoMessage(
-    String conversationId,
-    File video, [
-    bool isPlain = true,
-  ]) {
-    _sendAttachmentMessage(conversationId, video,
-        isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo);
-  }
+  Future<void> sendVideoMessage(String conversationId,
+      XFile video, [
+        bool isPlain = true,
+      ]) =>
+      _sendMessageHelper.sendVideoMessage(conversationId, userId, video,
+          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo);
 
-  void sendAudioMessage(
-    String conversationId,
-    File audio, [
-    bool isPlain = true,
-  ]) {
-    _sendAttachmentMessage(conversationId, audio,
-        isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio);
-  }
+  Future<void> sendAudioMessage(String conversationId,
+      XFile audio, [
+        bool isPlain = true,
+      ]) =>
+      _sendMessageHelper.sendAudioMessage(conversationId, userId, audio,
+          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio);
 
-  void sendDataMessage(
-    String conversationId,
-    File file, [
-    bool isPlain = true,
-  ]) {
-    _sendAttachmentMessage(conversationId, file,
-        isPlain ? MessageCategory.plainData : MessageCategory.signalData);
-  }
 
-  void sendAttachment(String conversationId, XFile file,
-      [bool isPlain = true]) async {
-    _sendMessageHelper.sendDataMessage(conversationId, userId, file, isPlain);
-  }
+  Future<void> sendDataMessage(String conversationId, XFile file,
+      [bool isPlain = true]) =>
+      _sendMessageHelper.sendDataMessage(conversationId, userId, file,
+          isPlain ? MessageCategory.plainData : MessageCategory.signalData);
 
-  Future<void> _sendAttachmentMessage(
-      String conversationId, File file, MessageCategory category) async {
-    if (category.isImage) {
-      // todo
-      // final imageInfo = await getImageInfo(Image.file(file).image);
-      // final width = imageInfo.image.width;
-      // final height = imageInfo.image.height;
-    } else if (category.isVideo) {
-      // todo get width height
-    } else if (category.isAudio) {
-      // todo get width height
-    } else {
-      // todo get mime type
-    }
-  }
-
-  Future<void> sendStickerMessage(
-    String conversationId,
-    String stickerId, {
-    bool isPlain = true,
-  }) =>
+  Future<void> sendStickerMessage(String conversationId,
+      String stickerId, {
+        bool isPlain = true,
+      }) =>
       _sendMessageHelper.sendStickerMessage(
-        conversationId,
-        userId,
-        StickerMessage(stickerId, null, null),
-        isPlain: isPlain,
-      );
+          conversationId,
+          userId,
+          StickerMessage(stickerId, null, null),
+          isPlain ? MessageCategory.plainSticker : MessageCategory.signalSticker);
 
   void sendContactMessage(
       String conversationId, String shareUserId, String shareUserFullName,

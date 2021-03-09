@@ -32,7 +32,7 @@ class AttachmentMessage {
   @JsonKey(name: 'size', disallowNullValue: true)
   int size;
   @JsonKey(name: 'name')
-  String name;
+  String? name;
   @JsonKey(name: 'width')
   int? width;
   @JsonKey(name: 'height')

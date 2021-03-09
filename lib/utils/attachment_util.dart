@@ -126,9 +126,7 @@ class AttachmentUtil {
       path = _getVideosPath(conversationId);
     } else if (category.isAudio) {
       path = _getAudiosPath(conversationId);
-    } else
-    // if (category.isData)
-    {
+    } else {
       path = _getFilesPath(conversationId);
     }
     return File(p.join(path, messageId));

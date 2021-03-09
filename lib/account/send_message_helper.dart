@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:image/image.dart';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_app/blaze/vo/attachment_message.dart';
@@ -20,8 +21,6 @@ class SendMessageHelper {
 
   final MessagesDao _messagesDao;
   final JobsDao _jobsDao;
-
-  // ignore: unused_field
   final AttachmentUtil _attachmentUtil;
 
   void sendTextMessage(String conversationId, String senderId, String content,
@@ -42,29 +41,115 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void sendImageMessage(String conversationId, String senderId, String content,
-      bool isPlain) async {
-    // ignore: unused_local_variable
-    final category =
-        isPlain ? MessageCategory.plainImage : MessageCategory.signalImage;
+  Future<void> sendImageMessage(String conversationId, String senderId,
+      XFile file, MessageCategory category) async {
+    final messageId = const Uuid().v4();
+    final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'image/jpeg';
+    final attachment =
+        _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
+    final bytes = await file.readAsBytes();
+    final image = decodeImage(bytes);
+    await attachment.create(recursive: true);
+    await File(file.path).copy(attachment.path);
+    final attachmentSize = await attachment.length();
+    final message = Message(
+      messageId: messageId,
+      conversationId: conversationId,
+      userId: senderId,
+      content: '',
+      category: category,
+      mediaUrl: attachment.path,
+      mediaMimeType: mimeType,
+      mediaSize: await attachment.length(),
+      mediaWidth: image!.width,
+      mediaHeight: image.height,
+      // thumbImage: , // todo
+      name: file.name,
+      mediaStatus: MediaStatus.pending,
+      status: MessageStatus.pending,
+      createdAt: DateTime.now(),
+    );
+    await _messagesDao.insert(message, senderId);
+    await _attachmentUtil
+        .uploadAttachment(attachment, messageId)
+        .then((attachmentId) async {
+      if (attachmentId == null) return;
+      final attachmentMessage = AttachmentMessage(
+          null,
+          null,
+          attachmentId,
+          mimeType,
+          attachmentSize,
+          null,
+          image.width,
+          image.height,
+          null,
+          null,
+          null,
+          null);
+
+      final encoded = base64.encode(utf8.encode(jsonEncode(attachmentMessage)));
+      _messagesDao.updateMessageContent(messageId, encoded);
+      await _jobsDao.insertSendingJob(messageId, conversationId);
+    });
   }
 
-  void sendVideoMessage(String conversationId, String senderId, String content,
-      bool isPlain) async {
-    // ignore: unused_local_variable
-    final category =
-        isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
+  Future<void> sendVideoMessage(String conversationId, String senderId,
+      XFile file, MessageCategory category) async {
+    final messageId = const Uuid().v4();
+    final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
+    final attachment =
+        _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
+    final bytes = await file.readAsBytes();
+    final image = decodeVideo(bytes);
+    await attachment.create(recursive: true);
+    await File(file.path).copy(attachment.path);
+    final attachmentSize = await attachment.length();
+    final message = Message(
+      messageId: messageId,
+      conversationId: conversationId,
+      userId: senderId,
+      content: '',
+      category: category,
+      mediaUrl: attachment.path,
+      mediaMimeType: mimeType,
+      mediaSize: await attachment.length(),
+      // mediaWidth: , // todo
+      // mediaHeight: ,// todo
+      // thumbImage: , //todo
+      // mediaDuration: , // todo
+      name: file.name,
+      mediaStatus: MediaStatus.pending,
+      status: MessageStatus.pending,
+      createdAt: DateTime.now(),
+    );
+    await _messagesDao.insert(message, senderId);
+    await _attachmentUtil
+        .uploadAttachment(attachment, messageId)
+        .then((attachmentId) async {
+      if (attachmentId == null) return;
+      final attachmentMessage = AttachmentMessage(
+          null,
+          null,
+          attachmentId,
+          mimeType,
+          attachmentSize,
+          file.name,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null);
+
+      final encoded = base64.encode(utf8.encode(jsonEncode(attachmentMessage)));
+      _messagesDao.updateMessageContent(messageId, encoded);
+      await _jobsDao.insertSendingJob(messageId, conversationId);
+    });
   }
 
-  Future<void> sendStickerMessage(
-    String conversationId,
-    String senderId,
-    StickerMessage stickerMessage, {
-    bool isPlain = true,
-  }) async {
-    final category =
-        isPlain ? MessageCategory.plainSticker : MessageCategory.signalSticker;
-
+  Future<void> sendStickerMessage(String conversationId, String senderId,
+      StickerMessage stickerMessage, MessageCategory category) async {
     final encoded = base64.encode(utf8.encode(jsonEncode(stickerMessage)));
     final message = Message(
       messageId: const Uuid().v4(),
@@ -83,20 +168,18 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void sendDataMessage(
-      String conversationId, String senderId, XFile file, bool isPlain) async {
+  Future<void> sendDataMessage(String conversationId, String senderId,
+      XFile file, MessageCategory category) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ??
         lookupMimeType(file.path) ??
         'application/octet-stream';
-    final attachment = _attachmentUtil.getAttachmentFile(
-        MessageCategory.plainData, conversationId, messageId);
+    final attachment =
+        _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
 
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
-    final category =
-        isPlain ? MessageCategory.plainData : MessageCategory.signalData;
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -160,11 +243,55 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void sendAudioMessage(String conversationId, String senderId, String content,
-      bool isPlain) async {
-    // ignore: unused_local_variable
-    final category =
-        isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio;
+  Future<void> sendAudioMessage(String conversationId, String senderId,
+      XFile file, MessageCategory category) async {
+    final messageId = const Uuid().v4();
+    final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
+    final attachment =
+        _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
+
+    await attachment.create(recursive: true);
+    await File(file.path).copy(attachment.path);
+    final attachmentSize = await attachment.length();
+    final message = Message(
+      messageId: messageId,
+      conversationId: conversationId,
+      userId: senderId,
+      content: '',
+      category: category,
+      mediaUrl: attachment.path,
+      mediaMimeType: mimeType,
+      mediaSize: await attachment.length(),
+      // mediaDuration: , // todo
+      // waveForm: , // todo
+      name: file.name,
+      mediaStatus: MediaStatus.pending,
+      status: MessageStatus.pending,
+      createdAt: DateTime.now(),
+    );
+    await _messagesDao.insert(message, senderId);
+    await _attachmentUtil
+        .uploadAttachment(attachment, messageId)
+        .then((attachmentId) async {
+      if (attachmentId == null) return;
+      final attachmentMessage = AttachmentMessage(
+          null,
+          null,
+          attachmentId,
+          mimeType,
+          attachmentSize,
+          file.name,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null);
+
+      final encoded = base64.encode(utf8.encode(jsonEncode(attachmentMessage)));
+      _messagesDao.updateMessageContent(messageId, encoded);
+      await _jobsDao.insertSendingJob(messageId, conversationId);
+    });
   }
 
   void sendLiveMessage(String conversationId, String senderId, String content,
