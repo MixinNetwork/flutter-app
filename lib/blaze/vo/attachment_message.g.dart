@@ -15,7 +15,7 @@ AttachmentMessage _$AttachmentMessageFromJson(Map<String, dynamic> json) {
     json['attachment_id'] as String,
     json['mime_type'] as String,
     json['size'] as int,
-    json['name'] as String,
+    json['name'] as String?,
     json['width'] as int?,
     json['height'] as int?,
     json['thumbnail'] as String?,

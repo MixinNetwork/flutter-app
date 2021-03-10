@@ -5,6 +5,8 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/db/converter/message_status_type_converter.dart';
+import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -54,7 +56,7 @@ class Blaze {
         if (blazeMessage.action == acknowledgeMessageReceipts) {
           // makeMessageStatus
           updateRemoteMessageStatus(
-              data!['messageId'], MessageStatus.delivered);
+              data!['message_id'], MessageStatus.delivered);
         } else if (blazeMessage.action == createMessage) {
           final messageData = BlazeMessageData.fromJson(data!);
           if (messageData.userId == userId && messageData.category == null) {
@@ -68,6 +70,10 @@ class Blaze {
                     createdAt: messageData.createdAt))
                 .then((value) {});
           }
+        } else if (blazeMessage.action == acknowledgeMessageReceipt) {
+          await makeMessageStatus(data!['message_id'],const MessageStatusTypeConverter().mapToDart(data['status'])!);
+          updateRemoteMessageStatus(
+              data['message_id'], MessageStatus.delivered);
         } else if (data != null) {
           updateRemoteMessageStatus(
               data['message_id'], MessageStatus.delivered);
@@ -94,6 +100,13 @@ class Blaze {
         blazeMessage: jsonEncode(blazeMessage),
         createdAt: DateTime.now(),
         runCount: 0));
+  }
+
+  Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
+    final currentStatus = await database.messagesDao.findMessageStatusById(messageId);
+    if(currentStatus.index < status.index){
+      await database.messagesDao.updateMessageStatusById(messageId, status);
+    }
   }
 
   void _sendListPending() {

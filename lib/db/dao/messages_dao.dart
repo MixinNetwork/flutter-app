@@ -70,6 +70,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
+  Future<MessageStatus> findMessageStatusById(String messageId) =>
+      db.findMessageStatusById(messageId).getSingle();
+
   Future<int> updateMediaMessageUrl(String path, String messageId) async {
     final result = await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))

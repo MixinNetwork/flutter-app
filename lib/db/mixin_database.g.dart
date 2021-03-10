@@ -11135,6 +11135,15 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {messages}).map((QueryRow row) => row.readInt('rowid'));
   }
 
+  Selectable<MessageStatus> findMessageStatusById(String messageId) {
+    return customSelect(
+            'SELECT status FROM messages WHERE message_id = :messageId',
+            variables: [Variable<String>(messageId)],
+            readsFrom: {messages})
+        .map((QueryRow row) =>
+            Messages.$converter2.mapToDart(row.readString('status'))!);
+  }
+
   Selectable<SendingMessage> sendingMessage(String message_id) {
     return customSelect(
         'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type,\n      m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key,\n      m.media_digest, m.media_status, m.status, m.created_at, m.action, m.participant_id, m.snapshot_id, m.hyperlink,\n      m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content,\n      rm.status as resend_status, rm.user_id as resend_user_id, rm.session_id as resend_session_id\n      FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id\n      WHERE m.message_id = :message_id AND (m.status = \'SENDING\' OR rm.status = 1) AND m.content IS NOT NULL',
