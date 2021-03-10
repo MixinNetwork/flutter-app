@@ -92,6 +92,9 @@ class Resources {
 
   static const String assetsImagesLiveSvg = 'assets/images/live.svg';
 
+  static const String assetsImagesLocationMarkSvg =
+      'assets/images/location_mark.svg';
+
   static const String assetsImagesLogoPng = 'assets/images/logo.png';
 
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';

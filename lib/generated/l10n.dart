@@ -1,5 +1,3 @@
-// @dart=2.9
-
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -17,23 +15,35 @@ import 'intl/messages_all.dart';
 class Localization {
   Localization();
 
-  static Localization current;
+  static Localization? _current;
+
+  static Localization get current {
+    assert(_current != null, 'No instance of Localization was loaded. Try to initialize the Localization delegate before accessing Localization.current.');
+    return _current!;
+  }
 
   static const AppLocalizationDelegate delegate =
     AppLocalizationDelegate();
 
   static Future<Localization> load(Locale locale) {
     final name = (locale.countryCode?.isEmpty ?? false) ? locale.languageCode : locale.toString();
-    final localeName = Intl.canonicalizedLocale(name);
+    final localeName = Intl.canonicalizedLocale(name); 
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
-      Localization.current = Localization();
-
-      return Localization.current;
+      final instance = Localization();
+      Localization._current = instance;
+ 
+      return instance;
     });
-  }
+  } 
 
   static Localization of(BuildContext context) {
+    final instance = Localization.maybeOf(context);
+    assert(instance != null, 'No instance of Localization present in the widget tree. Did you add Localization.delegate in localizationsDelegates?');
+    return instance!;
+  }
+
+  static Localization? maybeOf(BuildContext context) {
     return Localizations.of<Localization>(context, Localization);
   }
 
@@ -776,11 +786,9 @@ class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
   bool shouldReload(AppLocalizationDelegate old) => false;
 
   bool _isSupported(Locale locale) {
-    if (locale != null) {
-      for (var supportedLocale in supportedLocales) {
-        if (supportedLocale.languageCode == locale.languageCode) {
-          return true;
-        }
+    for (var supportedLocale in supportedLocales) {
+      if (supportedLocale.languageCode == locale.languageCode) {
+        return true;
       }
     }
     return false;
