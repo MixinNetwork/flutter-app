@@ -28,11 +28,12 @@ Uint8List aesGcmDecrypt(List<int> cipherText, SecretKey aesKey) {
   return decrypted;
 }
 
-List<int> aesEncrypt(List<int> key, List<int> plainText) {
+List<int> aesEncrypt(List<int> key, List<int> plainText, [List<int>? iv]) {
   final cbcCipher = CBCBlockCipher(AESFastEngine());
-  final iv = Nonce.randomBytes(16).bytes;
+  final nonce = iv ?? Nonce.randomBytes(16).bytes;
   final ivParams = ParametersWithIV<KeyParameter>(
-      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
+      KeyParameter(Uint8List.fromList(key)),
+      Uint8List.fromList(nonce));
   final paddingParams =
       PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
           ivParams, null);
@@ -43,7 +44,7 @@ List<int> aesEncrypt(List<int> key, List<int> plainText) {
   final result = paddedCipher.process(Uint8List.fromList(plainText));
 
   return [
-    ...iv,
+    ...nonce,
     ...result,
   ];
 }
