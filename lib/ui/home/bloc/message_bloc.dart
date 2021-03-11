@@ -26,6 +26,15 @@ class _MessageInitEvent extends _MessageEvent {
   List<Object?> get props => [centerOffset];
 }
 
+class _MessageScrollEvent extends _MessageEvent {
+  _MessageScrollEvent({required this.messageId});
+
+  final String messageId;
+
+  @override
+  List<Object?> get props => [messageId];
+}
+
 class _MessageLoadMoreEvent extends _MessageEvent {}
 
 class _MessageLoadAfterEvent extends _MessageLoadMoreEvent {}
@@ -71,7 +80,8 @@ class MessageState extends Equatable {
   MessageItem? get bottomMessage =>
       bottom.lastOrNull ?? center ?? top.lastOrNull;
 
-  MessageItem? get topMessage => top.firstOrNull ?? center ?? bottom.firstOrNull;
+  MessageItem? get topMessage =>
+      top.firstOrNull ?? center ?? bottom.firstOrNull;
 
   MessageState copyWith({
     final String? conversationId,
@@ -149,6 +159,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     } else if (event is _MessageInsertOrReplaceEvent) {
       final result = _insertOrReplace(conversationId, event.data);
       if (result != null) yield result;
+    } else if (event is _MessageScrollEvent) {
+      final list =
+          await messagesDao.messageIndex(conversationId, event.messageId).get();
+      if (list.isNotEmpty) add(_MessageInitEvent(centerOffset: list.first));
+      print(list.first);
     }
   }
 
@@ -231,17 +246,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     return result;
   }
 
-  Future<int> _centerMessageOffset(String? messageId) async {
-    var offset = 0;
-    if (messageId != null)
-      offset = (await messagesDao.messageRowIdByConversationId(messageId).get())
-          .firstWhere(
-        (element) => element > 0,
-        orElse: () => 0,
-      );
-    return offset;
-  }
-
   Future<MessageState> _messagesByConversationId(
     String conversationId,
     int limit, {
@@ -295,7 +299,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
   }
 
-  MessageState? _insertOrReplace(String conversationId, List<MessageItem> list) {
+  MessageState? _insertOrReplace(
+      String conversationId, List<MessageItem> list) {
     final top = state.top.toList();
     var center = state.center;
     var bottom = state.bottom.toList();
@@ -325,7 +330,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       }
 
       // New message must be after last bottom message.
-      if (bottomMessage != null && bottomMessage.createdAt.isAfter(item.createdAt)) continue;
+      if (bottomMessage != null &&
+          bottomMessage.createdAt.isAfter(item.createdAt)) continue;
 
       if (state.bottomOffset == 0) {
         bottom = [...bottom, item];
@@ -365,4 +371,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       bottom: bottom,
     );
   }
+
+  void scrollTo(String messageId) =>
+      add(_MessageScrollEvent(messageId: messageId));
 }

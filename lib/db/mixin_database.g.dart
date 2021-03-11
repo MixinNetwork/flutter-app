@@ -11128,11 +11128,16 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<int> messageRowIdByConversationId(String conversationId) {
+  Selectable<int> messageIndex(String conversationId, String messageId) {
     return customSelect(
-        'SELECT rowid FROM messages WHERE conversation_id = :conversationId ORDER BY created_at DESC',
-        variables: [Variable<String>(conversationId)],
-        readsFrom: {messages}).map((QueryRow row) => row.readInt('rowid'));
+        'SELECT count(1) FROM messages WHERE conversation_id = :conversationId\n            AND rowid > (SELECT rowid FROM messages WHERE message_id = :messageId)',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages
+        }).map((QueryRow row) => row.readInt('count(1)'));
   }
 
   Selectable<MessageStatus> findMessageStatusById(String messageId) {

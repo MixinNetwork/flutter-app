@@ -51,7 +51,8 @@ class SystemMessage extends StatelessWidget {
                       text = Localization.of(context).chatGroupExit(
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
-                            : message.participantFullName!,
+                        // TODO why message.participantFullName is empty
+                            : message.participantFullName ?? '',
                       );
                       break;
                     case MessageAction.add:

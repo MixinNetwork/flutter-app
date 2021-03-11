@@ -138,7 +138,7 @@ class _List extends StatelessWidget {
           final key = ValueKey(
             Tuple2(
               state.conversationId,
-              state.center?.messageId,
+              identityHashCode(state.center),
             ),
           );
           final top = state.top;
@@ -168,14 +168,17 @@ class _List extends StatelessWidget {
               ),
               SliverToBoxAdapter(
                 key: key,
-                child: Builder(builder: (context) {
-                  if (center == null) return const SizedBox();
-                  return MessageItemWidget(
-                    prev: top.lastOrNull,
-                    message: center,
-                    next: bottom.firstOrNull,
-                  );
-                }),
+                child: Container(
+                  color: Colors.red,
+                  child: Builder(builder: (context) {
+                    if (center == null) return const SizedBox();
+                    return MessageItemWidget(
+                      prev: top.lastOrNull,
+                      message: center,
+                      next: bottom.firstOrNull,
+                    );
+                  }),
+                ),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(

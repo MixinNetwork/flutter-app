@@ -444,7 +444,7 @@ class _MessageContent extends StatelessWidget {
       content = 'post';
     } else if (conversation.contentType.isLocation) {
       content = '[${Localization.of(context).location}]';
-      // icon = Resources.assetsImagesLocationSvg;
+      icon = Resources.assetsImagesLocationSvg;
     } else if (conversation.contentType.isAudio) {
       content = '[${Localization.of(context).audio}]';
       icon = Resources.assetsImagesAudioSvg;

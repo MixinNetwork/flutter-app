@@ -12,6 +12,7 @@ class MessageBubble extends StatelessWidget {
     this.showBubble = true,
     this.padding = const EdgeInsets.all(10),
     this.outerTimeAndStatusWidget,
+    this.quoteMessage,
   }) : super(key: key);
 
   final Widget child;
@@ -20,6 +21,7 @@ class MessageBubble extends StatelessWidget {
   final bool showBubble;
   final EdgeInsetsGeometry padding;
   final Widget? outerTimeAndStatusWidget;
+  final Widget? quoteMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,17 @@ class MessageBubble extends StatelessWidget {
       padding: padding,
       child: child,
     );
+    if (quoteMessage != null)
+      _child = IntrinsicWidth(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            quoteMessage!,
+            _child,
+          ],
+        ),
+      );
     if (!showNip) {
       _child = ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 38),

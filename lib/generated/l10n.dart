@@ -517,6 +517,16 @@ class Localization {
     );
   }
 
+  /// `post`
+  String get post {
+    return Intl.message(
+      'post',
+      name: 'post',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Location`
   String get location {
     return Intl.message(
@@ -762,6 +772,26 @@ class Localization {
     return Intl.message(
       'You\'re now an admin',
       name: 'chatGroupRole',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Message not found`
+  String get chatNotFound {
+    return Intl.message(
+      'Message not found',
+      name: 'chatNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Extensions`
+  String get extensions {
+    return Intl.message(
+      'Extensions',
+      name: 'extensions',
       desc: '',
       args: [],
     );

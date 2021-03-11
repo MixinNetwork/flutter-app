@@ -176,9 +176,6 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         ]);
   }
 
-  Selectable<int> messageRowIdByConversationId(String lastReadMessageId) =>
-      db.messageRowIdByConversationId(lastReadMessageId);
-
   Selectable<int> mediaMessageRowIdByConversationId(
     String conversationId,
     String messageId,
@@ -191,4 +188,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Selectable<MessageItem> mediaMessages(
           String conversationId, int limit, int offset) =>
       db.mediaMessages(conversationId, offset, limit);
+
+  Selectable<int> messageIndex(String conversationId, String messageId) =>
+      db.messageIndex(conversationId, messageId);
 }

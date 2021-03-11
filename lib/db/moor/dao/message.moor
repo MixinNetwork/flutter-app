@@ -53,8 +53,9 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         WHERE m.message_id in :messageIds
         ORDER BY m.created_at DESC;
 
-messageRowIdByConversationId:
-SELECT rowid FROM messages WHERE conversation_id = :conversationId ORDER BY created_at DESC;
+messageIndex:
+SELECT count(1) FROM messages WHERE conversation_id = :conversationId
+            AND rowid > (SELECT rowid FROM messages WHERE message_id = :messageId);
 
 findMessageStatusById:
 SELECT status FROM messages WHERE message_id = :messageId;

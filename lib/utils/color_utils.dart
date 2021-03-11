@@ -1,21 +1,20 @@
 import 'dart:ui';
 
 import 'package:flutter_app/constants/brightness_theme_data.dart';
-import 'package:uuid/uuid.dart';
 
 
 Color getNameColorById(String userId) {
-  final hashCode = Uuid.parse(userId).hashCode;
+  final hashCode = userId.trim().hashCode;
   return nameColors[hashCode % nameColors.length];
 }
 
 Color getAvatarColorById(String userId) {
-  final hashCode = Uuid.parse(userId).hashCode;
+  final hashCode = userId.trim().hashCode;
   return avatarColors[hashCode % avatarColors.length];
 }
 
 Color getCircleColorById(String circleId) {
-  final hashCode = Uuid.parse(circleId).hashCode;
+  final hashCode = circleId.trim().hashCode;
   return circleColors[hashCode % circleColors.length];
 }
 
