@@ -11248,6 +11248,60 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<QuoteMessageItem> findMessageItemByMessageId(String messageId) {
+    return customSelect(
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n      u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n      m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n      m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n      m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration,\n      m.quote_message_id as quoteId, m.quote_content as quoteContent,\n      st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n      st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n      su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.mentions AS mentions\n      FROM messages m\n      INNER JOIN users u ON m.user_id = u.user_id\n      LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n      LEFT JOIN users su ON m.shared_user_id = su.user_id\n      LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n      WHERE m.message_id = :messageId AND m.status != \'FAILED\'',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          stickers,
+          messageMentions
+        }).map((QueryRow row) {
+      return QuoteMessageItem(
+        messageId: row.readString('messageId'),
+        conversationId: row.readString('conversationId'),
+        userId: row.readString('userId'),
+        userFullName: row.readString('userFullName'),
+        userIdentityNumber: row.readString('userIdentityNumber'),
+        appId: row.readString('appId'),
+        type: Messages.$converter0.mapToDart(row.readString('type'))!,
+        content: row.readString('content'),
+        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
+        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        mediaStatus:
+            Messages.$converter1.mapToDart(row.readString('mediaStatus')),
+        mediaWaveform: row.readString('mediaWaveform'),
+        mediaName: row.readString('mediaName'),
+        mediaMimeType: row.readString('mediaMimeType'),
+        mediaSize: row.readInt('mediaSize'),
+        mediaWidth: row.readInt('mediaWidth'),
+        mediaHeight: row.readInt('mediaHeight'),
+        thumbImage: row.readString('thumbImage'),
+        thumbUrl: row.readString('thumbUrl'),
+        mediaUrl: row.readString('mediaUrl'),
+        mediaDuration: row.readString('mediaDuration'),
+        quoteId: row.readString('quoteId'),
+        quoteContent: row.readString('quoteContent'),
+        assetUrl: row.readString('assetUrl'),
+        assetWidth: row.readInt('assetWidth'),
+        assetHeight: row.readInt('assetHeight'),
+        stickerId: row.readString('stickerId'),
+        assetName: row.readString('assetName'),
+        assetType: row.readString('assetType'),
+        sharedUserId: row.readString('sharedUserId'),
+        sharedUserFullName: row.readString('sharedUserFullName'),
+        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
+        sharedUserAppId: row.readString('sharedUserAppId'),
+        mentions: row.readString('mentions'),
+      );
+    });
+  }
+
   Selectable<SearchMessageItem> fuzzySearchMessage(String query, int limit) {
     return customSelect(
         'SELECT m.conversation_id AS conversationId, c.icon_url AS conversationAvatarUrl,\n    c.name AS conversationName, c.category AS conversationCategory, count(m.message_id) as messageCount,\n    u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n    INNER JOIN users u ON c.owner_id = u.user_id\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    WHERE m.message_id = messages_fts.message_id\n    GROUP BY m.conversation_id\n    ORDER BY max(m.created_at) DESC\n    LIMIT :limit',

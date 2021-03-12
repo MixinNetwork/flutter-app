@@ -187,58 +187,52 @@ class AccountServer {
         id: const Uuid().v4(), action: createMessage, params: blazeParam);
   }
 
-  void sendTextMessage(
-    String conversationId,
-    String content, [
-    bool isPlain = true,
-  ]) {
+  void sendTextMessage(String conversationId, String content,
+      {bool isPlain = true, String? quoteMessageId}) async {
     if (content.isEmpty) return;
-    _sendMessageHelper.sendTextMessage(
-        conversationId, userId, content, isPlain);
+    await _sendMessageHelper.sendTextMessage(
+        conversationId, userId, content, isPlain, quoteMessageId);
   }
 
-  Future<void> sendImageMessage(String conversationId,
-      XFile image, [
-        bool isPlain = true,
-      ]) =>
+  Future<void> sendImageMessage(String conversationId, XFile image,
+      {bool isPlain = true, String? quoteMessageId}) =>
       _sendMessageHelper.sendImageMessage(conversationId, userId, image,
-          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage);
+          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
+          quoteMessageId);
 
-  Future<void> sendVideoMessage(String conversationId,
-      XFile video, [
-        bool isPlain = true,
-      ]) =>
+  Future<void> sendVideoMessage(String conversationId, XFile video,
+      {bool isPlain = true, String? quoteMessageId}) =>
       _sendMessageHelper.sendVideoMessage(conversationId, userId, video,
-          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo);
+          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo,
+          quoteMessageId);
 
-  Future<void> sendAudioMessage(String conversationId,
-      XFile audio, [
-        bool isPlain = true,
-      ]) =>
+  Future<void> sendAudioMessage(String conversationId, XFile audio,
+      {bool isPlain = true, String? quoteMessageId}) =>
       _sendMessageHelper.sendAudioMessage(conversationId, userId, audio,
-          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio);
-
+          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio,
+          quoteMessageId);
 
   Future<void> sendDataMessage(String conversationId, XFile file,
-      [bool isPlain = true]) =>
+          [bool isPlain = true, String? quoteMessageId]) =>
       _sendMessageHelper.sendDataMessage(conversationId, userId, file,
-          isPlain ? MessageCategory.plainData : MessageCategory.signalData);
+          isPlain ? MessageCategory.plainData : MessageCategory.signalData,
+          quoteMessageId);
 
-  Future<void> sendStickerMessage(String conversationId,
-      String stickerId, {
-        bool isPlain = true,
-      }) =>
+  Future<void> sendStickerMessage(String conversationId, String stickerId,
+          {bool isPlain = true}) =>
       _sendMessageHelper.sendStickerMessage(
           conversationId,
           userId,
           StickerMessage(stickerId, null, null),
-          isPlain ? MessageCategory.plainSticker : MessageCategory.signalSticker);
+          isPlain
+              ? MessageCategory.plainSticker
+              : MessageCategory.signalSticker);
 
   void sendContactMessage(
       String conversationId, String shareUserId, String shareUserFullName,
-      [bool isPlain = true]) {
+      {bool isPlain = true, String? quoteMessageId}) {
     _sendMessageHelper.sendContactMessage(conversationId, userId,
-        ContactMessage(shareUserId), shareUserFullName, isPlain);
+        ContactMessage(shareUserId), shareUserFullName, isPlain,quoteMessageId);
   }
 
   void selectConversation(String? conversationId) {

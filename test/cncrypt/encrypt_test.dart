@@ -43,7 +43,7 @@ void encryptedTest() {
   final protocol = EncryptedProtocol();
   final privateKey = ed.generateKey().privateKey;
   final otherPublicKey = ed.generateKey().publicKey;
-  final otherSessionId = Uuid().v4();
+  final otherSessionId = const Uuid().v4();
   final pub = publicKeyToCurve25519(Uint8List.fromList(otherPublicKey.bytes));
 
   final encodedContent =

@@ -18,4 +18,9 @@ class LoadBalancerUtils {
 
   static Future<dynamic> jsonDecode(String json) =>
       runLoadBalancer(_jsonDecode, json);
+
+  static String _jsonEncode(Object? object) => convert.jsonEncode(object);
+
+  static Future<String> jsonEncode(Object? object)  => runLoadBalancer(_jsonEncode, object);
+
 }

@@ -158,8 +158,7 @@ class InputContainer extends StatelessWidget {
         Provider.of<AccountServer>(context, listen: false).sendTextMessage(
           conversationItem.conversationId,
           text,
-          // TODO send quoteMessage id
-          // context.read<QuoteMessageCubit>().state?.messageId,
+          quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
         );
 
       return true;

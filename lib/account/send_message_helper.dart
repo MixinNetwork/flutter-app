@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_app/utils/load_balancer_utils.dart';
 import 'package:image/image.dart';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
+import 'package:flutter_app/db/extension/message.dart' show QueteMessage;
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -23,10 +25,12 @@ class SendMessageHelper {
   final JobsDao _jobsDao;
   final AttachmentUtil _attachmentUtil;
 
-  void sendTextMessage(String conversationId, String senderId, String content,
-      bool isPlain) async {
+  Future<void> sendTextMessage(String conversationId, String senderId,
+      String content, bool isPlain, String? quoteMessageId) async {
     final category =
         isPlain ? MessageCategory.plainText : MessageCategory.signalText;
+    final quoteMessage =
+        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -34,6 +38,8 @@ class SendMessageHelper {
       category: category,
       content: content,
       status: MessageStatus.sending,
+      quoteMessageId: quoteMessageId,
+      quoteContent: quoteMessage?.toJson(),
       createdAt: DateTime.now(),
     );
 
@@ -42,7 +48,7 @@ class SendMessageHelper {
   }
 
   Future<void> sendImageMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category) async {
+      XFile file, MessageCategory category, String? quoteMessageId) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'image/jpeg';
     final attachment =
@@ -52,6 +58,8 @@ class SendMessageHelper {
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
+    final quoteMessage =
+        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -68,6 +76,8 @@ class SendMessageHelper {
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
       createdAt: DateTime.now(),
+      quoteMessageId: quoteMessageId,
+      quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
     await _attachmentUtil
@@ -95,7 +105,7 @@ class SendMessageHelper {
   }
 
   Future<void> sendVideoMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category) async {
+      XFile file, MessageCategory category, String? quoteMessageId) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
     final attachment =
@@ -103,6 +113,8 @@ class SendMessageHelper {
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
+    final quoteMessage =
+        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -120,6 +132,8 @@ class SendMessageHelper {
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
       createdAt: DateTime.now(),
+      quoteMessageId: quoteMessageId,
+      quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
     await _attachmentUtil
@@ -167,7 +181,7 @@ class SendMessageHelper {
   }
 
   Future<void> sendDataMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category) async {
+      XFile file, MessageCategory category, String? quoteMessageId) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ??
         lookupMimeType(file.path) ??
@@ -178,6 +192,8 @@ class SendMessageHelper {
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
+    final quoteMessage =
+        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -191,6 +207,8 @@ class SendMessageHelper {
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
       createdAt: DateTime.now(),
+      quoteMessageId: quoteMessageId,
+      quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
     await _attachmentUtil
@@ -222,10 +240,13 @@ class SendMessageHelper {
       String senderId,
       ContactMessage contactMessage,
       String shareUserFullName,
-      bool isPlain) async {
+      bool isPlain,
+      String? quoteMessageId) async {
     final category =
         isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
     final encoded = base64.encode(utf8.encode(jsonEncode(contactMessage)));
+    final quoteMessage =
+        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -236,13 +257,15 @@ class SendMessageHelper {
       name: shareUserFullName,
       status: MessageStatus.sending,
       createdAt: DateTime.now(),
+      quoteMessageId: quoteMessageId,
+      quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> sendAudioMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category) async {
+      XFile file, MessageCategory category, String? quoteMessageId) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
     final attachment =
@@ -251,6 +274,8 @@ class SendMessageHelper {
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
+    final quoteMessage =
+        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -266,6 +291,8 @@ class SendMessageHelper {
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
       createdAt: DateTime.now(),
+      quoteMessageId: quoteMessageId,
+      quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
     await _attachmentUtil
@@ -293,10 +320,13 @@ class SendMessageHelper {
   }
 
   void sendLiveMessage(String conversationId, String senderId, String content,
-      bool isPlain) async {
+      bool isPlain, String? quoteMessageId) async {
     // ignore: unused_local_variable
     final category =
         isPlain ? MessageCategory.plainLive : MessageCategory.signalLive;
+    // ignore: unused_local_variable
+    final quoteMessage =
+        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
   }
 
   void sendPostMessage(String conversationId, String senderId, String content,
