@@ -191,9 +191,7 @@ class QuoteMessage extends StatelessWidget {
           inputMode: inputMode,
         );
       }
-    } catch (e) {
-      print(e);
-    }
+    } catch (_) {}
 
     return _QuoteMessageBase(
       messageId: id!,

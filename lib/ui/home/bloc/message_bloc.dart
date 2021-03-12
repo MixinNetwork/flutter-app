@@ -11,6 +11,7 @@ import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:uuid/uuid.dart';
 
 abstract class _MessageEvent extends Equatable {
   @override
@@ -58,6 +59,7 @@ class MessageState extends Equatable {
     this.conversationId,
     this.bottomOffset = 0,
     this.topOffset = 0,
+    this.initUUID,
   });
 
   final String? conversationId;
@@ -66,6 +68,7 @@ class MessageState extends Equatable {
   final List<MessageItem> bottom;
   final int bottomOffset;
   final int topOffset;
+  final String? initUUID;
 
   @override
   List<Object?> get props => [
@@ -75,6 +78,7 @@ class MessageState extends Equatable {
         bottom,
         bottomOffset,
         topOffset,
+        initUUID,
       ];
 
   MessageItem? get bottomMessage =>
@@ -90,6 +94,7 @@ class MessageState extends Equatable {
     final List<MessageItem>? bottom,
     final int? bottomOffset,
     final int? topOffset,
+    final String? initUUID,
   }) {
     return MessageState(
       conversationId: conversationId ?? this.conversationId,
@@ -98,6 +103,7 @@ class MessageState extends Equatable {
       bottom: bottom ?? this.bottom,
       bottomOffset: bottomOffset ?? this.bottomOffset,
       topOffset: topOffset ?? this.topOffset,
+      initUUID: initUUID ?? this.initUUID,
     );
   }
 }
@@ -163,7 +169,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       final list =
           await messagesDao.messageIndex(conversationId, event.messageId).get();
       if (list.isNotEmpty) add(_MessageInitEvent(centerOffset: list.first));
-      print(list.first);
     }
   }
 
@@ -242,6 +247,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       center: state.center,
       bottom: state.bottom,
       top: state.top,
+      initUUID: const Uuid().v4(),
     );
     return result;
   }

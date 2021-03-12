@@ -143,7 +143,7 @@ class _List extends StatelessWidget {
           final key = ValueKey(
             Tuple2(
               state.conversationId,
-              identityHashCode(state.center),
+              state.initUUID,
             ),
           );
           final top = state.top;
