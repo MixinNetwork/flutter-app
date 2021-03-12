@@ -161,6 +161,8 @@ class InputContainer extends StatelessWidget {
           quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
         );
 
+      context.read<QuoteMessageCubit>().emit(null);
+
       return true;
     }
     return false;

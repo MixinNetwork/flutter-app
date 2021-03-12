@@ -8,6 +8,7 @@ import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/message/item/quote_message.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart';
@@ -34,6 +35,10 @@ class FileMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MessageBubble(
+        quoteMessage: QuoteMessage(
+          id: message.quoteId,
+          content: message.quoteContent,
+        ),
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: Row(

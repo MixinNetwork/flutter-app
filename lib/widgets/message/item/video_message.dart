@@ -8,6 +8,7 @@ import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
+import 'package:flutter_app/widgets/message/item/quote_message.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,10 @@ class VideoMessageWidget extends StatelessWidget {
           final height = width / scale;
 
           return MessageBubble(
+            quoteMessage: QuoteMessage(
+              id: message.quoteId,
+              content: message.quoteContent,
+            ),
             showNip: false,
             isCurrentUser: isCurrentUser,
             padding: const EdgeInsets.all(2),

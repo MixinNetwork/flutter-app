@@ -17,6 +17,7 @@ import '../../../status.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime.dart';
 import '../../message_status.dart';
+import '../quote_message.dart';
 import 'image_preview_portal.dart';
 
 class ImageMessageWidget extends StatelessWidget {
@@ -77,6 +78,10 @@ class _ImageMessage extends StatelessWidget {
         final height = width / scale;
 
         return MessageBubble(
+          quoteMessage: QuoteMessage(
+            id: message.quoteId,
+            content: message.quoteContent,
+          ),
           showNip: false,
           isCurrentUser: isCurrentUser,
           padding: const EdgeInsets.all(2),
