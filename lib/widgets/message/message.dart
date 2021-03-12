@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/ui/home/bloc/quote_message_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/message/item/sticker_message.dart';
 import 'package:flutter_app/widgets/message/item/stranger_message.dart';
@@ -14,6 +15,7 @@ import 'package:flutter_app/widgets/message/message_name.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
+import 'package:provider/provider.dart';
 
 import '../menu.dart';
 import 'item/action/action_message.dart';
@@ -65,11 +67,6 @@ class MessageItemWidget extends StatelessWidget {
         if (datetime != null) MessageDayTime(dateTime: datetime),
         Builder(
           builder: (context) {
-            if (message.type == MessageCategory.appButtonGroup)
-              return ActionMessage(
-                message: message,
-              );
-
             if (message.type == MessageCategory.systemConversation)
               return SystemMessage(
                 message: message,
@@ -86,9 +83,23 @@ class MessageItemWidget extends StatelessWidget {
               userName: user,
               isCurrentUser: isCurrentUser,
               menus: [
-                ContextMenu(
-                  title: Localization.of(context).reply,
-                ),
+                if (message.type.isText ||
+                    message.type.isImage ||
+                    message.type.isVideo ||
+                    message.type.isLive ||
+                    message.type.isData ||
+                    message.type.isPost ||
+                    message.type.isLocation ||
+                    message.type.isAudio ||
+                    message.type.isSticker ||
+                    message.type.isContact ||
+                    message.type == MessageCategory.appCard ||
+                    message.type == MessageCategory.appButtonGroup)
+                  ContextMenu(
+                    title: Localization.of(context).reply,
+                    onTap: () =>
+                        context.read<QuoteMessageCubit>().emit(message),
+                  ),
                 ContextMenu(
                   title: Localization.of(context).forward,
                 ),
@@ -129,6 +140,11 @@ class MessageItemWidget extends StatelessWidget {
                   return ContactMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
+                    message: message,
+                  );
+
+                if (message.type == MessageCategory.appButtonGroup)
+                  return ActionMessage(
                     message: message,
                   );
 

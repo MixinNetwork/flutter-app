@@ -15,6 +15,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import 'bloc/quote_message_cubit.dart';
+
 class ChatPage extends StatelessWidget {
   const ChatPage({Key? key}) : super(key: key);
 
@@ -53,6 +55,9 @@ class ChatContainer extends StatelessWidget {
             conversationCubit: BlocProvider.of<ConversationCubit>(context),
             limit: windowHeight ~/ 20,
           ),
+        ),
+        BlocProvider(
+          create: (context) => QuoteMessageCubit(),
         ),
       ],
       child: Builder(

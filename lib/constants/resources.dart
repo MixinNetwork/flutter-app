@@ -17,6 +17,8 @@ class Resources {
 
   static const String assetsImagesCirclePng = 'assets/images/circle.png';
 
+  static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
+
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
 
   static const String assetsImagesContactsPng = 'assets/images/contacts.png';

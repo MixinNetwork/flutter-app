@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/extension/message.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
@@ -23,26 +24,37 @@ class QuoteMessage extends StatelessWidget {
     Key? key,
     this.content,
     this.id,
+    this.message,
   }) : super(key: key);
 
   final String? content;
   final String? id;
+  final MessageItem? message;
 
   @override
   Widget build(BuildContext context) {
     if (id?.isEmpty ?? true) return const SizedBox();
+    var inputMode = false;
 
     try {
-      final map = jsonDecode(content!);
-      final quote = mapToQuoteMessage(map);
-      if (quote.type.isText)
+      late dynamic quote;
+      if (message != null) {
+        quote = message;
+        inputMode = true;
+      } else {
+        final map = jsonDecode(content!);
+        quote = mapToQuoteMessage(map);
+      }
+      final MessageCategory type = quote.type;
+      if (type.isText)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
           name: quote.userFullName,
           description: quote.content!,
+          inputMode: inputMode,
         );
-      if (quote.type.isImage)
+      if (type.isImage)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -57,8 +69,9 @@ class QuoteMessage extends StatelessWidget {
           ),
           icon: SvgPicture.asset(Resources.assetsImagesImageSvg),
           description: Localization.of(context).image,
+          inputMode: inputMode,
         );
-      if (quote.type.isVideo)
+      if (type.isVideo)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -69,9 +82,10 @@ class QuoteMessage extends StatelessWidget {
           ),
           icon: SvgPicture.asset(Resources.assetsImagesVideoSvg),
           description: Localization.of(context).video,
+          inputMode: inputMode,
         );
 
-      if (quote.type.isLive)
+      if (type.isLive)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -82,17 +96,19 @@ class QuoteMessage extends StatelessWidget {
           ),
           icon: SvgPicture.asset(Resources.assetsImagesLiveSvg),
           description: Localization.of(context).live,
+          inputMode: inputMode,
         );
 
-      if (quote.type.isData)
+      if (type.isData)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesFileSvg),
           description: quote.mediaName ?? Localization.of(context).file,
+          inputMode: inputMode,
         );
-      if (quote.type.isPost)
+      if (type.isPost)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -100,24 +116,27 @@ class QuoteMessage extends StatelessWidget {
           icon: SvgPicture.asset(Resources.assetsImagesFileSvg),
           //TODO MD ??
           description: Localization.of(context).post,
+          inputMode: inputMode,
         );
-      if (quote.type.isLocation)
+      if (type.isLocation)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesLocationSvg),
           description: Localization.of(context).location,
+          inputMode: inputMode,
         );
-      if (quote.type.isAudio)
+      if (type.isAudio)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesAudioSvg),
           description: Localization.of(context).audio,
+          inputMode: inputMode,
         );
-      if (quote.type.isSticker)
+      if (type.isSticker)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -125,8 +144,9 @@ class QuoteMessage extends StatelessWidget {
           image: CacheImage(quote.assetUrl!),
           icon: SvgPicture.asset(Resources.assetsImagesStickerSvg),
           description: Localization.of(context).sticker,
+          inputMode: inputMode,
         );
-      if (quote.type.isContact)
+      if (type.isContact)
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -142,11 +162,12 @@ class QuoteMessage extends StatelessWidget {
           ),
           icon: SvgPicture.asset(Resources.assetsImagesContactSvg),
           description: quote.sharedUserIdentityNumber,
+          inputMode: inputMode,
         );
-      if (quote.type == MessageCategory.appCard ||
-          quote.type == MessageCategory.appButtonGroup) {
+      if (type == MessageCategory.appCard ||
+          type == MessageCategory.appButtonGroup) {
         String? description;
-        switch (quote.type) {
+        switch (type) {
           case MessageCategory.appButtonGroup:
             description = jsonDecode(quote.content!)
                 .map((e) => ActionData.fromJson(e))
@@ -167,15 +188,19 @@ class QuoteMessage extends StatelessWidget {
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesAppButtonSvg),
           description: description ?? Localization.of(context).extensions,
+          inputMode: inputMode,
         );
       }
-    } catch (_) {}
+    } catch (e) {
+      print(e);
+    }
 
     return _QuoteMessageBase(
       messageId: id!,
       userId: null,
       description: Localization.of(context).chatNotFound,
       icon: SvgPicture.asset(Resources.assetsImagesRecallSvg),
+      inputMode: inputMode,
     );
   }
 }
@@ -189,6 +214,7 @@ class _QuoteMessageBase extends StatelessWidget {
     required this.description,
     this.icon,
     this.image,
+    required this.inputMode,
   }) : super(key: key);
 
   final String messageId;
@@ -197,14 +223,16 @@ class _QuoteMessageBase extends StatelessWidget {
   final String description;
   final Widget? icon;
   final Widget? image;
+  final bool inputMode;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
         onTap: () => context.read<MessageBloc>().scrollTo(messageId),
+        behavior: HitTestBehavior.opaque,
         child: Container(
           height: 50,
-          color: const Color.fromRGBO(0, 0, 0, 0.04),
-          margin: const EdgeInsets.all(2),
+          color: inputMode ? null : const Color.fromRGBO(0, 0, 0, 0.04),
+          margin: inputMode ? null : const EdgeInsets.all(2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,19 +240,27 @@ class _QuoteMessageBase extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SvgPicture.asset(
-                    Resources.assetsImagesQuoteBorderSvg,
-                    height: 50,
-                    width: 6,
-                    color: userId?.isNotEmpty == true
-                        ? getNameColorById(userId!)
-                        : BrightnessData.themeOf(context).accent,
-                  ),
+                  if (inputMode)
+                    Container(
+                      width: 6,
+                      color: userId?.isNotEmpty == true
+                          ? getNameColorById(userId!)
+                          : BrightnessData.themeOf(context).accent,
+                    ),
+                  if (!inputMode)
+                    SvgPicture.asset(
+                      Resources.assetsImagesQuoteBorderSvg,
+                      height: 50,
+                      width: 6,
+                      color: userId?.isNotEmpty == true
+                          ? getNameColorById(userId!)
+                          : BrightnessData.themeOf(context).accent,
+                    ),
                   Padding(
                     padding: const EdgeInsets.only(
-                      top: 8,
+                      top: 6,
                       left: 6,
-                      bottom: 8,
+                      bottom: 6,
                     ),
                     child: Column(
                       mainAxisSize: MainAxisSize.max,

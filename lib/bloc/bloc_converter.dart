@@ -4,7 +4,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class BlocConverter<C extends Cubit<S>, S, T> extends StatefulWidget {
+class BlocConverter<C extends Bloc<Object?, S>, S, T> extends StatefulWidget {
   const BlocConverter({
     Key? key,
     this.cubit,
@@ -34,7 +34,7 @@ class BlocConverter<C extends Cubit<S>, S, T> extends StatefulWidget {
 
 typedef BlocConverterCondition<S, T> = T Function(S state);
 
-class _BlocConverterState<C extends Cubit<S>, S, T>
+class _BlocConverterState<C extends Bloc<Object?, S>, S, T>
     extends State<BlocConverter<C, S, T>> {
   StreamSubscription<T?>? _subscription;
   late T _previousState;

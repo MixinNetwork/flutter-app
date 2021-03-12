@@ -260,19 +260,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         )
         .get();
     final topOffset = list.length + bottomOffset;
-    /*
-    select m.category FROM messages m
-                  INNER JOIN users u ON m.user_id = u.user_id
-                  LEFT JOIN users u1 ON m.participant_id = u1.user_id
-                  LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-                  LEFT JOIN assets a ON s.asset_id = a.asset_id
-                  LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-                  LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-                  LEFT JOIN users su ON m.shared_user_id = su.user_id
-                  LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-                  LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-                  WHERE  m.conversation_id = '40ffe365-e2fb-3261-963a-de5a57f539d9'
-     */
 
     MessageItem? centerMessage;
     if (centerOffset >= 0)

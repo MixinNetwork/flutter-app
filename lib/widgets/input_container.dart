@@ -8,11 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/mention_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/quote_message_cubit.dart';
 import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:flutter_app/utils/text_utils.dart';
@@ -24,11 +24,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 
 import 'action_button.dart';
 import 'dash_path_border.dart';
 import 'interacter_decorated_box.dart';
 import 'mention_panel.dart';
+import 'message/item/quote_message.dart';
 
 class InputContainer extends StatelessWidget {
   const InputContainer({
@@ -60,72 +62,79 @@ class InputContainer extends StatelessWidget {
               return textEditingController;
             },
             child: LayoutBuilder(
-              builder: (context, BoxConstraints constraints) => SizedBox(
-                height: 56,
-                child: MentionPanelPortalEntry(
-                  constraints: constraints,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: BrightnessData.themeOf(context).primary,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _FileButton(
-                              actionColor:
-                                  BrightnessData.themeOf(context).icon),
-                          const SizedBox(width: 6),
-                          const _StickerButton(),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                minHeight: 32,
-                              ),
-                              child: Focus(
-                                onKey: (FocusNode node, RawKeyEvent event) {
-                                  if (setEquals(
-                                      RawKeyboard.instance.keysPressed,
-                                      {LogicalKeyboardKey.enter}))
-                                    return _sendMessage(context)
-                                        ? KeyEventResult.handled
-                                        : KeyEventResult.ignored;
-
-                                  return KeyEventResult.ignored;
-                                },
-                                child: TextField(
-                                  maxLines: 5,
-                                  minLines: 1,
-                                  controller:
-                                      context.read<TextEditingController>(),
-                                  style: TextStyle(
-                                    color: BrightnessData.themeOf(context).text,
-                                    fontSize: 14,
+              builder: (context, BoxConstraints constraints) => MentionPanelPortalEntry(
+                constraints: constraints,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const _QuoteMessage(),
+                    SizedBox(
+                      height: 56,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: BrightnessData.themeOf(context).primary,
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              _FileButton(
+                                  actionColor:
+                                      BrightnessData.themeOf(context).icon),
+                              const SizedBox(width: 6),
+                              const _StickerButton(),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    minHeight: 32,
                                   ),
-                                  decoration: const InputDecoration(
-                                    isDense: true,
-                                    enabledBorder: InputBorder.none,
-                                    focusedBorder: InputBorder.none,
+                                  child: Focus(
+                                    onKey: (FocusNode node, RawKeyEvent event) {
+                                      if (setEquals(
+                                          RawKeyboard.instance.keysPressed,
+                                          {LogicalKeyboardKey.enter}))
+                                        return _sendMessage(context)
+                                            ? KeyEventResult.handled
+                                            : KeyEventResult.ignored;
+
+                                        return KeyEventResult.ignored;
+                                      },
+                                      child: TextField(
+                                        maxLines: 5,
+                                        minLines: 1,
+                                        controller:
+                                            context.read<TextEditingController>(),
+                                        style: TextStyle(
+                                          color:
+                                              BrightnessData.themeOf(context).text,
+                                          fontSize: 14,
+                                        ),
+                                        decoration: const InputDecoration(
+                                          isDense: true,
+                                          enabledBorder: InputBorder.none,
+                                          focusedBorder: InputBorder.none,
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                                const SizedBox(width: 16),
+                                ActionButton(
+                                  name: Resources.assetsImagesIcSendSvg,
+                                  color: BrightnessData.themeOf(context).icon,
+                                  onTap: () => _sendMessage(context, force: true),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(width: 16),
-                          ActionButton(
-                            name: Resources.assetsImagesIcSendSvg,
-                            color: BrightnessData.themeOf(context).icon,
-                            onTap: () => _sendMessage(context, force: true),
-                          ),
-                        ],
-                      ),
+                        ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -149,12 +158,69 @@ class InputContainer extends StatelessWidget {
         Provider.of<AccountServer>(context, listen: false).sendTextMessage(
           conversationItem.conversationId,
           text,
+          // TODO send quoteMessage id
+          // context.read<QuoteMessageCubit>().state?.messageId,
         );
 
       return true;
     }
     return false;
   }
+}
+
+class _QuoteMessage extends StatelessWidget {
+  const _QuoteMessage();
+
+  @override
+  Widget build(BuildContext context) =>
+      BlocBuilder<QuoteMessageCubit, MessageItem?>(
+        builder: (context, message) => TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: message != null ? 1 : 0),
+          duration: const Duration(milliseconds: 150),
+          curve: Curves.easeOut,
+          builder: (BuildContext context, double progress, Widget? child) =>
+              ClipRect(
+            child: Align(
+              alignment: const AlignmentDirectional(1.0, -1.0),
+              heightFactor: progress,
+              child: child,
+            ),
+          ),
+          child: BlocBuilder<QuoteMessageCubit, MessageItem?>(
+            buildWhen: (a, b) => b != null,
+            builder: (context, message) {
+              if (message == null) return const SizedBox();
+              return DecoratedBox(
+                decoration: BoxDecoration(
+                  color: BrightnessData.themeOf(context).popUp,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: QuoteMessage(
+                        id: message.messageId,
+                        message: message,
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => context.read<QuoteMessageCubit>().emit(null),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        child: SvgPicture.asset(
+                          Resources.assetsImagesCloseOvalSvg,
+                          height: 22,
+                          width: 22,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      );
 }
 
 class _StickerButton extends StatelessWidget {
