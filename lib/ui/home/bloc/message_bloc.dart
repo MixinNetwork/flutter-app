@@ -349,11 +349,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           final newPixels = position.pixels;
           if (newMaxScrollExtent != oldMaxScrollExtent &&
               newMaxScrollExtent != newPixels) {
-            scrollController.animateTo(
-              newMaxScrollExtent,
-              duration: const Duration(milliseconds: 100),
-              curve: Curves.easeOut,
-            );
+            scrollController.jumpTo(newMaxScrollExtent);
           }
         });
       }
