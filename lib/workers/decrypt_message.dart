@@ -217,10 +217,9 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
-    // todo
-    // ignore: unused_local_variable
     final recallMessage = RecallMessage.fromJson(
         await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
+    await database.messagesDao.recallMessage(recallMessage.messageId);
     await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
   }
 
