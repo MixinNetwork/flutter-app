@@ -235,68 +235,74 @@ class _QuoteMessageBase extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (inputMode)
-                    Container(
-                      width: 6,
-                      color: userId?.isNotEmpty == true
-                          ? getNameColorById(userId!)
-                          : BrightnessData.themeOf(context).accent,
-                    ),
-                  if (!inputMode)
-                    SvgPicture.asset(
-                      Resources.assetsImagesQuoteBorderSvg,
-                      height: 50,
-                      width: 6,
-                      color: userId?.isNotEmpty == true
-                          ? getNameColorById(userId!)
-                          : BrightnessData.themeOf(context).accent,
-                    ),
-                  Padding(
-                    padding: const EdgeInsets.only(
-                      top: 6,
-                      left: 6,
-                      bottom: 6,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (name != null)
-                          Text(
-                            name!,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: BrightnessData.themeOf(context).accent,
-                            ),
-                          ),
-                        Row(
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (inputMode)
+                      Container(
+                        width: 6,
+                        color: userId?.isNotEmpty == true
+                            ? getNameColorById(userId!)
+                            : BrightnessData.themeOf(context).accent,
+                      ),
+                    if (!inputMode)
+                      SvgPicture.asset(
+                        Resources.assetsImagesQuoteBorderSvg,
+                        height: 50,
+                        width: 6,
+                        color: userId?.isNotEmpty == true
+                            ? getNameColorById(userId!)
+                            : BrightnessData.themeOf(context).accent,
+                      ),
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: 6,
+                          left: 6,
+                          bottom: 6,
+                        ),
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            if (icon != null)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 4),
-                                child: icon,
+                            if (name != null)
+                              Text(
+                                name!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: BrightnessData.themeOf(context).accent,
+                                ),
                               ),
-                            Text(
-                              description,
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: BrightnessData.themeOf(context)
-                                    .secondaryText,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (icon != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: icon,
+                                  ),
+                                Flexible(
+                                  child: Text(
+                                    description,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: BrightnessData.themeOf(context)
+                                          .secondaryText,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               const SizedBox(width: 8),
               if (image != null)
