@@ -145,6 +145,7 @@ class MessageItemWidget extends StatelessWidget {
 
                 if (message.type == MessageCategory.appButtonGroup)
                   return ActionMessage(
+                    isCurrentUser: isCurrentUser,
                     message: message,
                   );
 
