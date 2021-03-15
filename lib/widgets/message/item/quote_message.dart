@@ -9,6 +9,7 @@ import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/utils/color_utils.dart';
+import 'package:flutter_app/utils/markdown.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
@@ -114,8 +115,7 @@ class QuoteMessage extends StatelessWidget {
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesFileSvg),
-          //TODO MD ??
-          description: Localization.of(context).post,
+          description: (quote.content! as String).postOptimizeMarkdown,
           inputMode: inputMode,
         );
       if (type.isLocation)

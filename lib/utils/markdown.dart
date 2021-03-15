@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:markdown/markdown.dart';
 
 extension MarkdownExtension on String {
   String postLengthOptimize() {
@@ -13,6 +16,12 @@ extension MarkdownExtension on String {
   }
 
   String postOptimize() => split('\n').take(20).join('\n').postLengthOptimize();
+
+  String get postOptimizeMarkdown {
+    final lines = const LineSplitter().convert(postOptimize());
+    final astNodes = Document().parseLines(lines);
+    return astNodes.map((e) => e.textContent).join().replaceAll(RegExp(r'\s+'), ' ');
+  }
 }
 
 MarkdownStyleSheet markdownStyleSheet(BuildContext context) {

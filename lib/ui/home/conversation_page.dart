@@ -16,6 +16,7 @@ import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/utils/list_utils.dart';
+import 'package:flutter_app/utils/markdown.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
@@ -440,8 +441,7 @@ class _MessageContent extends StatelessWidget {
       icon = Resources.assetsImagesFileSvg;
     } else if (conversation.contentType.isPost) {
       icon = Resources.assetsImagesFileSvg;
-      // todo
-      content = 'post';
+      content = conversation.content!.postOptimizeMarkdown;
     } else if (conversation.contentType.isLocation) {
       content = '[${Localization.of(context).location}]';
       icon = Resources.assetsImagesLocationSvg;
