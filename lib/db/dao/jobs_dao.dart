@@ -42,6 +42,15 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
     return query.watch();
   }
 
+  Stream<List<Job>> findRecallMessageJobs() {
+    final query = select(db.jobs)
+      ..where((Jobs row) {
+        return row.action.equals(recallMessage);
+      })
+      ..limit(100);
+    return query.watch();
+  }
+
   Stream<List<Job>> findSendingJobs() {
     final query = select(db.jobs)
       ..where((Jobs row) {

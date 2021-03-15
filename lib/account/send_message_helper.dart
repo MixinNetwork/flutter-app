@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_app/utils/load_balancer_utils.dart';
+import 'package:flutter_app/blaze/vo/recall_message.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:image/image.dart';
 
 import 'package:file_selector/file_selector.dart';
@@ -354,5 +355,20 @@ class SendMessageHelper {
       String conversationId, String senderId, String content, bool isPlain) {
     // ignore: unused_local_variable
     const category = MessageCategory.appButtonGroup;
+  }
+
+  Future<void> sendRecallMessage(
+      String conversationId, List<String> messageIds) async {
+    messageIds.forEach((messageId) async {
+      await _jobsDao.insert(Job(
+          conversationId: conversationId,
+          jobId: const Uuid().v4(),
+          action: recallMessage,
+          priority: 5,
+          blazeMessage: jsonEncode(RecallMessage(messageId)),
+          createdAt: DateTime.now(),
+          runCount: 0));
+      await _messagesDao.recallMessage(messageId);
+    });
   }
 }

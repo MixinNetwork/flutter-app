@@ -11348,6 +11348,15 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Future<int> recallMessage(String messageId) {
+    return customUpdate(
+      'UPDATE messages SET category = \'MESSAGE_RECALL\', content = NULL, media_url = NULL, media_mime_type = NULL, media_size = NULL,\n    media_duration = NULL, media_width = NULL, media_height = NULL, media_hash = NULL, thumb_image = NULL, media_key = NULL,\n    media_digest = NUll, media_status = NULL, "action" = NULL, participant_id = NULL, snapshot_id = NULL, hyperlink = NULL, name = NULL,\n    album_id = NULL, sticker_id = NULL, shared_user_id = NULL, media_waveform = NULL, quote_message_id = NULL, quote_content = NULL WHERE message_id = :messageId',
+      variables: [Variable<String>(messageId)],
+      updates: {messages},
+      updateKind: UpdateKind.update,
+    );
+  }
+
   Selectable<MessageItem> mediaMessages(
       String conversationId, int offset, int limit) {
     return customSelect(

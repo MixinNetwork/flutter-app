@@ -198,4 +198,6 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<int> messageIndex(String conversationId, String messageId) =>
       db.messageIndex(conversationId, messageId);
+
+  Future<int> recallMessage(String messageId) => db.recallMessage(messageId);
 }

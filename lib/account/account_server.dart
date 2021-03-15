@@ -9,6 +9,7 @@ import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
+import 'package:flutter_app/blaze/vo/recall_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
@@ -98,19 +99,25 @@ class AccountServer {
     database.jobsDao
         .findAckJobs()
         .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(runAckJob)
+        .asyncMapDrop(_runAckJob)
+        .listen((_) {});
+
+    database.jobsDao
+        .findRecallMessageJobs()
+        .where((jobs) => jobs.isNotEmpty == true)
+        .asyncMapDrop(_runRecallJob)
         .listen((_) {});
 
     database.jobsDao
         .findSendingJobs()
         .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(runSendJob)
+        .asyncMapDrop(_runSendJob)
         .listen((_) {});
 
     // database.mock();
   }
 
-  Future<void> runAckJob(List<db.Job> jobs) async {
+  Future<void> _runAckJob(List<db.Job> jobs) async {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
@@ -126,7 +133,23 @@ class AccountServer {
     await database.jobsDao.deleteJobs(jobIds);
   }
 
-  Future<void> runSendJob(List<db.Job> jobs) async {
+  Future<void> _runRecallJob(List<db.Job> jobs) async {
+    jobs.where((element) => element.blazeMessage != null).forEach(
+          (e) async {
+        final blazeParam = BlazeMessageParam(
+            conversationId: e.conversationId,
+            messageId: const Uuid().v4(),
+            category: MessageCategory.messageRecall,
+            data: base64.encode(utf8.encode(e.blazeMessage!)));
+        final blazeMessage = BlazeMessage(
+            id: const Uuid().v4(), action: createMessage, params: blazeParam);
+        blaze.deliver(blazeMessage);
+        await database.jobsDao.deleteJobById(e.jobId);
+      },
+    );
+  }
+
+  Future<void> _runSendJob(List<db.Job> jobs) async {
     jobs.where((element) => element.blazeMessage != null).forEach((job) async {
       final message =
           await database.messagesDao.sendingMessage(job.blazeMessage!);
@@ -142,7 +165,7 @@ class AccountServer {
             content = base64.encode(utf8.encode(content!));
           }
           final blazeMessage = _createBlazeMessage(message, content!);
-          blaze.deliver(message, blazeMessage);
+          blaze.deliver(blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
@@ -164,7 +187,7 @@ class AccountServer {
               participantSessionKey.sessionId);
           final blazeMessage =
               _createBlazeMessage(message, base64Encode(content));
-          blaze.deliver(message, blazeMessage);
+          blaze.deliver(blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
@@ -234,6 +257,8 @@ class AccountServer {
     _sendMessageHelper.sendContactMessage(conversationId, userId,
         ContactMessage(shareUserId), shareUserFullName, isPlain,quoteMessageId);
   }
+
+  Future<void> sendRecallMessage(String conversationId,List<String>messageIds) => _sendMessageHelper.sendRecallMessage(conversationId, messageIds);
 
   void selectConversation(String? conversationId) {
     _decryptMessage.setConversationId(conversationId);

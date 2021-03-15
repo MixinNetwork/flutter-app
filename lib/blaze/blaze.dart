@@ -119,7 +119,7 @@ class Blaze {
         GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }
 
-  void deliver(SendingMessage message, BlazeMessage blazeMessage) {
+  void deliver(BlazeMessage blazeMessage) {
     // todo check send callback
     channel.sink.add(GZipEncoder()
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
