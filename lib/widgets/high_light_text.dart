@@ -7,17 +7,20 @@ class HighlightText extends StatelessWidget {
     Key? key,
     this.style,
     this.highlightTextSpans = const [],
+    this.maxLines,
   }) : super(key: key);
 
   final String text;
   final TextStyle? style;
   final List<HighlightTextSpan> highlightTextSpans;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) => Text.rich(
         TextSpan(
           children: _buildSpan(),
         ),
+        maxLines: maxLines,
       );
 
   List<InlineSpan> _buildSpan() {
@@ -27,8 +30,7 @@ class HighlightText extends StatelessWidget {
     );
     final pattern = "(${map.keys.map(RegExp.escape).join('|')})";
 
-    if(pattern == '()')
-      return [TextSpan(text: text, style: style)];
+    if (pattern == '()') return [TextSpan(text: text, style: style)];
 
     final children = <InlineSpan>[];
     text.splitMapJoin(
@@ -41,7 +43,8 @@ class HighlightText extends StatelessWidget {
             text: text,
             style: style?.merge(highlightTextSpan?.style) ??
                 highlightTextSpan?.style,
-            recognizer: TapGestureRecognizer()..onTap = highlightTextSpan?.onTap,
+            recognizer: TapGestureRecognizer()
+              ..onTap = highlightTextSpan?.onTap,
           ),
         );
         return '';

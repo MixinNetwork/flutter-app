@@ -141,15 +141,15 @@ class _SendTextField extends StatelessWidget {
   Widget build(BuildContext context) =>
       Selector2<TextEditingController, MentionCubit, bool>(
         selector: (context, TextEditingController controller,
-            MentionCubit mentionCubit) =>
-        controller.text.trim().isNotEmpty == true &&
+                MentionCubit mentionCubit) =>
+            controller.text.trim().isNotEmpty == true &&
             controller.value.composing.composed &&
-            (mentionCubit.state.item1?.isNotEmpty ?? true),
+            (mentionCubit.state.text?.isNotEmpty ?? true),
         builder: (context, sendable, child) => FocusableActionDetector(
           shortcuts: {
             if (sendable)
               LogicalKeySet(LogicalKeyboardKey.enter):
-              const SendMessageIntent(),
+                  const SendMessageIntent(),
           },
           actions: {
             SendMessageIntent: CallbackAction<Intent>(

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
@@ -6,10 +9,10 @@ import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/mention_cubit.dart';
 import 'package:flutter_app/utils/reg_exp_utils.dart';
+import 'package:flutter_app/utils/text_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
 
 import 'avatar_view/avatar_view.dart';
 import 'brightness_observer.dart';
@@ -28,53 +31,97 @@ class MentionPanelPortalEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<MentionCubit, Tuple2<String?, List<User>>, bool>(
-        converter: (state) => state.item2.isNotEmpty,
-        builder: (context, visible) => PortalEntry(
-          visible: visible &&
-              BlocProvider.of<ConversationCubit>(context)
-                      .state
-                      ?.isGroupConversation ==
-                  true,
-          childAnchor: Alignment.topCenter,
-          portalAnchor: Alignment.bottomCenter,
-          closeDuration: const Duration(milliseconds: 150),
-          portal: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxHeight: 168,
-              minWidth: constraints.maxWidth,
-              maxWidth: constraints.maxWidth,
-            ),
-            child: ClipRRect(
-              child: TweenAnimationBuilder<double>(
-                duration: const Duration(milliseconds: 150),
-                curve: Curves.easeOut,
-                tween: Tween(begin: 0, end: visible ? 1 : 0),
-                builder: (context, progress, child) => FractionalTranslation(
-                  translation: Offset(0, 1 - progress),
-                  child: child,
-                ),
-                child: _MentionPanel(
-                  mentionCubit: BlocProvider.of<MentionCubit>(context),
-                  onSelect: (User user) {
-                    final textEditingController =
-                        context.read<TextEditingController>();
-                    textEditingController
-                      ..text = textEditingController.text.replaceFirst(
-                          mentionRegExp, '@${user.identityNumber} ')
-                      ..selection = TextSelection.fromPosition(
-                        TextPosition(
-                          offset: textEditingController.text.length,
-                        ),
-                      );
-                  },
+      BlocConverter<MentionCubit, MentionState, bool>(
+        converter: (state) => state.users.isNotEmpty,
+        builder: (context, visible) => Selector<TextEditingController, bool>(
+          selector: (context, controller) =>
+              visible && controller.value.composing.composed,
+          builder: (context, selectable, child) => FocusableActionDetector(
+            shortcuts: selectable
+                ? {
+                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
+                        const _ListSelectionNextIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
+                        const _ListSelectionPrevIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.tab):
+                        const _ListSelectionNextIntent(),
+                    LogicalKeySet(LogicalKeyboardKey.enter):
+                        const _ListSelectionSelectedIntent(),
+                    if (Platform.isMacOS) ...{
+                      LogicalKeySet(LogicalKeyboardKey.control,
+                              LogicalKeyboardKey.keyN):
+                          const _ListSelectionNextIntent(),
+                      LogicalKeySet(LogicalKeyboardKey.control,
+                              LogicalKeyboardKey.keyP):
+                          const _ListSelectionPrevIntent(),
+                    }
+                  }
+                : const {},
+            actions: {
+              _ListSelectionNextIntent: CallbackAction<Intent>(
+                onInvoke: (Intent intent) =>
+                    context.read<MentionCubit>().next(),
+              ),
+              _ListSelectionPrevIntent: CallbackAction<Intent>(
+                onInvoke: (Intent intent) =>
+                    context.read<MentionCubit>().prev(),
+              ),
+              _ListSelectionSelectedIntent: CallbackAction<Intent>(
+                onInvoke: (Intent intent) {
+                  final state = context.read<MentionCubit>().state;
+                  _select(context, state.users[state.index]);
+                },
+              ),
+            },
+            child: child!,
+          ),
+          child: PortalEntry(
+            visible: visible &&
+                BlocProvider.of<ConversationCubit>(context)
+                        .state
+                        ?.isGroupConversation ==
+                    true,
+            childAnchor: Alignment.topCenter,
+            portalAnchor: Alignment.bottomCenter,
+            closeDuration: const Duration(milliseconds: 150),
+            portal: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: 168,
+                minWidth: constraints.maxWidth,
+                maxWidth: constraints.maxWidth,
+              ),
+              child: ClipRRect(
+                child: TweenAnimationBuilder<double>(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeOut,
+                  tween: Tween(begin: 0, end: visible ? 1 : 0),
+                  builder: (context, progress, child) => FractionalTranslation(
+                    translation: Offset(0, 1 - progress),
+                    child: child,
+                  ),
+                  child: _MentionPanel(
+                    mentionCubit: BlocProvider.of<MentionCubit>(context),
+                    onSelect: (User user) => _select(context, user),
+                  ),
                 ),
               ),
             ),
+            child: child,
           ),
-          child: child,
         ),
       );
+
+  void _select(BuildContext context, User user) {
+    final textEditingController = context.read<TextEditingController>();
+    textEditingController
+      ..text = textEditingController.text
+          .replaceFirst(mentionRegExp, '@${user.identityNumber} ')
+      ..selection = TextSelection.fromPosition(
+        TextPosition(
+          offset: textEditingController.text.length,
+        ),
+      );
+  }
 }
 
 class _MentionPanel extends StatelessWidget {
@@ -88,34 +135,26 @@ class _MentionPanel extends StatelessWidget {
   final Function(User user) onSelect;
 
   @override
-  Widget build(BuildContext context) {
-    final scrollController = ScrollController();
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: BrightnessData.themeOf(context).popUp,
-      ),
-      child: BlocConsumer<MentionCubit, Tuple2<String?, List<User>>>(
-        buildWhen: (a, b) => b.item2.isNotEmpty == true,
-        bloc: mentionCubit,
-        builder: (context, Tuple2<String?, List<User>> tuple) =>
-            ListView.builder(
-          controller: scrollController,
-          itemCount: tuple.item2.length,
-          shrinkWrap: true,
-          itemBuilder: (BuildContext context, int index) => _MentionItem(
-            user: tuple.item2[index],
-            keyword: tuple.item1,
-            onSelect: onSelect,
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: BrightnessData.themeOf(context).popUp,
+        ),
+        child: BlocBuilder<MentionCubit, MentionState>(
+          buildWhen: (a, b) => b.users.isNotEmpty == true,
+          bloc: mentionCubit,
+          builder: (context, MentionState state) => ListView.builder(
+            controller: context.read<MentionCubit>().scrollController,
+            itemCount: state.users.length,
+            shrinkWrap: true,
+            itemBuilder: (BuildContext context, int index) => _MentionItem(
+              user: state.users[index],
+              keyword: state.text,
+              selected: state.index == index,
+              onSelect: onSelect,
+            ),
           ),
         ),
-        listener: (BuildContext context, Tuple2<String?, List<User>> state) {
-          if (!scrollController.hasClients) return;
-          scrollController.jumpTo(0);
-        },
-      ),
-    );
-  }
+      );
 }
 
 class _MentionItem extends StatelessWidget {
@@ -141,7 +180,8 @@ class _MentionItem extends StatelessWidget {
         ),
         tapDowningColor: BrightnessData.themeOf(context).listSelected,
         onTap: () => onSelect?.call(user),
-        child: Padding(
+        child: Container(
+          height: 48,
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
@@ -161,6 +201,7 @@ class _MentionItem extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       color: BrightnessData.themeOf(context).text,
+                      height: 1,
                     ),
                     highlightTextSpans: [
                       HighlightTextSpan(
@@ -170,6 +211,7 @@ class _MentionItem extends StatelessWidget {
                         ),
                       ),
                     ],
+                    maxLines: 1,
                   ),
                   const SizedBox(height: 2),
                   HighlightText(
@@ -180,12 +222,13 @@ class _MentionItem extends StatelessWidget {
                     ),
                     highlightTextSpans: [
                       HighlightTextSpan(
-                        keyword??'',
+                        keyword ?? '',
                         style: TextStyle(
                           color: BrightnessData.themeOf(context).accent,
                         ),
                       )
                     ],
+                    maxLines: 1,
                   ),
                 ],
               ),
@@ -193,4 +236,16 @@ class _MentionItem extends StatelessWidget {
           ),
         ),
       );
+}
+
+class _ListSelectionNextIntent extends Intent {
+  const _ListSelectionNextIntent();
+}
+
+class _ListSelectionPrevIntent extends Intent {
+  const _ListSelectionPrevIntent();
+}
+
+class _ListSelectionSelectedIntent extends Intent {
+  const _ListSelectionSelectedIntent();
 }
