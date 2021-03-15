@@ -94,41 +94,14 @@ class InputContainer extends StatelessWidget {
                                   constraints: const BoxConstraints(
                                     minHeight: 32,
                                   ),
-                                  child: Focus(
-                                    onKey: (FocusNode node, RawKeyEvent event) {
-                                      if (setEquals(
-                                          RawKeyboard.instance.keysPressed,
-                                          {LogicalKeyboardKey.enter}))
-                                        return _sendMessage(context)
-                                            ? KeyEventResult.handled
-                                            : KeyEventResult.ignored;
-
-                                      return KeyEventResult.ignored;
-                                    },
-                                    child: TextField(
-                                      maxLines: 5,
-                                      minLines: 1,
-                                      controller:
-                                          context.read<TextEditingController>(),
-                                      style: TextStyle(
-                                        color: BrightnessData.themeOf(context)
-                                            .text,
-                                        fontSize: 14,
-                                      ),
-                                      decoration: const InputDecoration(
-                                        isDense: true,
-                                        enabledBorder: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
-                                      ),
-                                    ),
-                                  ),
+                                  child: const _SendTextField(),
                                 ),
                               ),
                               const SizedBox(width: 16),
                               ActionButton(
                                 name: Resources.assetsImagesIcSendSvg,
                                 color: BrightnessData.themeOf(context).icon,
-                                onTap: () => _sendMessage(context, force: true),
+                                onTap: () => _sendMessage(context),
                               ),
                             ],
                           ),
@@ -142,32 +115,63 @@ class InputContainer extends StatelessWidget {
           ),
         ),
       );
+}
 
-  bool _sendMessage(
-    BuildContext context, {
-    bool force = false,
-  }) {
-    final textEditingController = context.read<TextEditingController>();
+void _sendMessage(BuildContext context) {
+  final textEditingController = context.read<TextEditingController>();
+  final text = textEditingController.value.text;
+  if (text.trim().isEmpty) return;
 
-    final text = textEditingController.value.text;
-    if (text.trim().isNotEmpty == true &&
-        (force || textEditingController.value.composing.composed)) {
-      textEditingController.text = '';
-      final conversationItem =
-          BlocProvider.of<ConversationCubit>(context).state;
-      if (conversationItem != null)
-        Provider.of<AccountServer>(context, listen: false).sendTextMessage(
-          conversationItem.conversationId,
-          text,
-          quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
-        );
+  textEditingController.text = '';
+  final conversationItem = BlocProvider.of<ConversationCubit>(context).state;
+  if (conversationItem != null)
+    Provider.of<AccountServer>(context, listen: false).sendTextMessage(
+      conversationItem.conversationId,
+      text,
+      quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
+    );
 
-      context.read<QuoteMessageCubit>().emit(null);
+  context.read<QuoteMessageCubit>().emit(null);
+}
 
-      return true;
-    }
-    return false;
-  }
+class _SendTextField extends StatelessWidget {
+  const _SendTextField();
+
+  @override
+  Widget build(BuildContext context) =>
+      Selector2<TextEditingController, MentionCubit, bool>(
+        selector: (context, TextEditingController controller,
+            MentionCubit mentionCubit) =>
+        controller.text.trim().isNotEmpty == true &&
+            controller.value.composing.composed &&
+            (mentionCubit.state.item1?.isNotEmpty ?? true),
+        builder: (context, sendable, child) => FocusableActionDetector(
+          shortcuts: {
+            if (sendable)
+              LogicalKeySet(LogicalKeyboardKey.enter):
+              const SendMessageIntent(),
+          },
+          actions: {
+            SendMessageIntent: CallbackAction<Intent>(
+              onInvoke: (Intent intent) => _sendMessage(context),
+            ),
+          },
+          child: TextField(
+            maxLines: 5,
+            minLines: 1,
+            controller: context.read<TextEditingController>(),
+            style: TextStyle(
+              color: BrightnessData.themeOf(context).text,
+              fontSize: 14,
+            ),
+            decoration: const InputDecoration(
+              isDense: true,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+            ),
+          ),
+        ),
+      );
 }
 
 class _QuoteMessage extends StatelessWidget {
@@ -481,4 +485,8 @@ class HighlightTextEditingController extends TextEditingController {
       children: children,
     );
   }
+}
+
+class SendMessageIntent extends Intent {
+  const SendMessageIntent();
 }
