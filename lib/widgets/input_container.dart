@@ -62,7 +62,8 @@ class InputContainer extends StatelessWidget {
               return textEditingController;
             },
             child: LayoutBuilder(
-              builder: (context, BoxConstraints constraints) => MentionPanelPortalEntry(
+              builder: (context, BoxConstraints constraints) =>
+                  MentionPanelPortalEntry(
                 constraints: constraints,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -102,37 +103,37 @@ class InputContainer extends StatelessWidget {
                                             ? KeyEventResult.handled
                                             : KeyEventResult.ignored;
 
-                                        return KeyEventResult.ignored;
-                                      },
-                                      child: TextField(
-                                        maxLines: 5,
-                                        minLines: 1,
-                                        controller:
-                                            context.read<TextEditingController>(),
-                                        style: TextStyle(
-                                          color:
-                                              BrightnessData.themeOf(context).text,
-                                          fontSize: 14,
-                                        ),
-                                        decoration: const InputDecoration(
-                                          isDense: true,
-                                          enabledBorder: InputBorder.none,
-                                          focusedBorder: InputBorder.none,
-                                        ),
+                                      return KeyEventResult.ignored;
+                                    },
+                                    child: TextField(
+                                      maxLines: 5,
+                                      minLines: 1,
+                                      controller:
+                                          context.read<TextEditingController>(),
+                                      style: TextStyle(
+                                        color: BrightnessData.themeOf(context)
+                                            .text,
+                                        fontSize: 14,
+                                      ),
+                                      decoration: const InputDecoration(
+                                        isDense: true,
+                                        enabledBorder: InputBorder.none,
+                                        focusedBorder: InputBorder.none,
                                       ),
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 16),
-                                ActionButton(
-                                  name: Resources.assetsImagesIcSendSvg,
-                                  color: BrightnessData.themeOf(context).icon,
-                                  onTap: () => _sendMessage(context, force: true),
-                                ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 16),
+                              ActionButton(
+                                name: Resources.assetsImagesIcSendSvg,
+                                color: BrightnessData.themeOf(context).icon,
+                                onTap: () => _sendMessage(context, force: true),
+                              ),
+                            ],
                           ),
                         ),
+                      ),
                     ),
                   ],
                 ),
@@ -299,7 +300,7 @@ class _FileButton extends StatelessWidget {
             BlocProvider.of<ConversationCubit>(context).state;
         if (conversationItem == null) return;
         if (file.isImage) {
-          if ((await _PreviewImage.push(context, file)) ?? false) return;
+          if ((await _PreviewImage.push(context, file)) != true) return;
           return await Provider.of<AccountServer>(context, listen: false)
               .sendImageMessage(
             conversationItem.conversationId,
@@ -341,82 +342,88 @@ class _PreviewImage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).primary,
-        ),
-        child: Column(
-          children: [
-            SizedBox(
-              height: 58,
-              child: Row(
-                children: [
-                  ActionButton(
-                    name: Resources.assetsImagesIcCloseSvg,
-                    color: BrightnessData.themeOf(context).icon,
-                    onTap: () => Navigator.pop(context, false),
-                  ),
-                  Text(
-                    Localization.of(context).preview,
-                    style: TextStyle(
-                      color: BrightnessData.themeOf(context).text,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+  Widget build(BuildContext context) =>
+      BlocConverter<ConversationCubit, ConversationItem?, String?>(
+        converter: (state) => state?.conversationId,
+        when: (a, b) => a != b,
+        listener: (context, switched) => Navigator.pop(context, false),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: BrightnessData.themeOf(context).primary,
+          ),
+          child: Column(
+            children: [
+              SizedBox(
+                height: 58,
+                child: Row(
+                  children: [
+                    ActionButton(
+                      name: Resources.assetsImagesIcCloseSvg,
+                      color: BrightnessData.themeOf(context).icon,
+                      onTap: () => Navigator.pop(context, false),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  top: 1,
-                  right: 16,
-                  left: 16,
-                  bottom: 30,
+                    Text(
+                      Localization.of(context).preview,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).text,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-                child: DecoratedBox(
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    top: 1,
+                    right: 16,
+                    left: 16,
+                    bottom: 30,
+                  ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: BrightnessData.themeOf(context).listSelected,
+                      borderRadius: BorderRadius.circular(8),
+                      border: DashPathBorder.all(
+                        borderSide: BorderSide(
+                          color: BrightnessData.dynamicColor(
+                            context,
+                            const Color.fromRGBO(229, 231, 235, 1),
+                            darkColor: const Color.fromRGBO(255, 255, 255, 0.8),
+                          ),
+                        ),
+                        dashArray: CircularIntervalList([4, 4]),
+                      ),
+                    ),
+                    child: Image.file(File(xFile.path)),
+                  ),
+                ),
+              ),
+              ClipOval(
+                child: InteractableDecoratedBox.color(
+                  onTap: () => Navigator.pop(context, true),
                   decoration: BoxDecoration(
-                    color: BrightnessData.themeOf(context).listSelected,
-                    borderRadius: BorderRadius.circular(8),
-                    border: DashPathBorder.all(
-                      borderSide: BorderSide(
+                    color: BrightnessData.themeOf(context).accent,
+                  ),
+                  child: SizedBox.fromSize(
+                    size: const Size.square(50),
+                    child: Center(
+                      child: SvgPicture.asset(
+                        Resources.assetsImagesIcArrowRightSvg,
                         color: BrightnessData.dynamicColor(
                           context,
-                          const Color.fromRGBO(229, 231, 235, 1),
-                          darkColor: const Color.fromRGBO(255, 255, 255, 0.8),
+                          const Color.fromRGBO(255, 255, 255, 1),
+                          darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
                         ),
                       ),
-                      dashArray: CircularIntervalList([4, 4]),
-                    ),
-                  ),
-                  child: Image.file(File(xFile.path)),
-                ),
-              ),
-            ),
-            ClipOval(
-              child: InteractableDecoratedBox.color(
-                onTap: () => Navigator.pop(context, true),
-                decoration: BoxDecoration(
-                  color: BrightnessData.themeOf(context).accent,
-                ),
-                child: SizedBox.fromSize(
-                  size: const Size.square(50),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesIcArrowRightSvg,
-                      color: BrightnessData.dynamicColor(
-                        context,
-                        const Color.fromRGBO(255, 255, 255, 1),
-                        darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-          ],
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       );
 }
