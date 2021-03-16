@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter_app/blaze/vo/location_message.dart';
 import 'package:flutter_app/blaze/vo/recall_message.dart';
 import 'package:flutter_app/constants/constants.dart';
 import 'package:image/image.dart';
@@ -504,7 +503,7 @@ class SendMessageHelper {
         .uploadAttachment(file, messageId)
         .then((attachmentId) async {
       if (attachmentId == null) return;
-      final duration = mediaDuration != null ? int.parse(mediaDuration!) : null;
+      final duration = mediaDuration != null ? int.parse(mediaDuration) : null;
       final attachmentMessage = AttachmentMessage(
           null,
           null,

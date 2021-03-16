@@ -11,7 +11,7 @@ import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
-import 'package:flutter_app/widgets/message/item/image_message/preview_bloc.dart';
+import 'package:flutter_app/widgets/message/item/image/preview_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path/path.dart';
