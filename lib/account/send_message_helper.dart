@@ -238,7 +238,7 @@ class SendMessageHelper {
     });
   }
 
-  void sendContactMessage(
+  Future<void> sendContactMessage(
       String conversationId,
       String senderId,
       ContactMessage contactMessage,
@@ -322,17 +322,36 @@ class SendMessageHelper {
     });
   }
 
-  void sendLiveMessage(String conversationId, String senderId, String content,
-      bool isPlain, String? quoteMessageId) async {
-    // ignore: unused_local_variable
+  Future<void> _sendLiveMessage(
+      String conversationId,
+      String senderId,
+      String content,
+      String mediaUrl,
+      String thumbImage,
+      int mediaWidth,
+      int mediaHeight,
+      bool isPlain) async {
     final category =
         isPlain ? MessageCategory.plainLive : MessageCategory.signalLive;
-    // ignore: unused_local_variable
-    final quoteMessage =
-        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+    final message = Message(
+      messageId: const Uuid().v4(),
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: content,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+      mediaUrl: mediaUrl,
+      thumbImage: thumbImage,
+      mediaWidth: mediaWidth,
+      mediaHeight: mediaHeight,
+    );
+
+    await _messagesDao.insert(message, senderId);
+    await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void _sendPostMessage(String conversationId, String senderId, String content,
+  Future<void> _sendPostMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
     final category =
         isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
@@ -345,12 +364,12 @@ class SendMessageHelper {
       status: MessageStatus.sending,
       createdAt: DateTime.now(),
     );
-    
+
     await _messagesDao.insert(message, senderId);
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void _sendLocationMessage(String conversationId, String senderId,
+  Future<void> _sendLocationMessage(String conversationId, String senderId,
       String content, bool isPlain) async {
     final category = isPlain
         ? MessageCategory.plainLocation
@@ -369,16 +388,21 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void sendAppCardMessage(
-      String conversationId, String senderId, String content, bool isPlain) {
-    // ignore: unused_local_variable
+  Future<void> _sendAppCardMessage(
+      String conversationId, String senderId, String content) async {
     const category = MessageCategory.appCard;
-  }
+    final message = Message(
+      messageId: const Uuid().v4(),
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: content,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+    );
 
-  void sendAppButtonGroup(
-      String conversationId, String senderId, String content, bool isPlain) {
-    // ignore: unused_local_variable
-    const category = MessageCategory.appButtonGroup;
+    await _messagesDao.insert(message, senderId);
+    await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> sendRecallMessage(
@@ -441,15 +465,24 @@ class SendMessageHelper {
               ? MessageCategory.plainSticker
               : MessageCategory.signalSticker);
     } else if (message.category.isContact) {
-      sendContactMessage(conversationId, senderId,
+      await sendContactMessage(conversationId, senderId,
           ContactMessage(message.sharedUserId!), message.name!, isPlain, null);
     } else if (message.category.isLive) {
-      sendLiveMessage(
-          conversationId, senderId, message.mediaUrl!, isPlain, null);
+      await _sendLiveMessage(
+          conversationId,
+          senderId,
+          message.content!,
+          message.mediaUrl!,
+          message.thumbImage!,
+          message.mediaWidth!,
+          message.mediaHeight!,
+          isPlain);
     } else if (message.category.isPost) {
-      _sendPostMessage(conversationId, senderId, message.content!, isPlain);
+      await _sendPostMessage(conversationId, senderId, message.content!, isPlain);
     } else if (message.category.isLocation) {
-      _sendLocationMessage(conversationId, senderId, message.content!, isPlain);
+      await _sendLocationMessage(conversationId, senderId, message.content!, isPlain);
+    } else if(message.category == MessageCategory.appCard){
+      await _sendAppCardMessage(conversationId, senderId, message.content!);
     }
   }
 }
