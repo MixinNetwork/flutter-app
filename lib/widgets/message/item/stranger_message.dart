@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
+import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -44,10 +45,19 @@ class StrangerMessage extends StatelessWidget {
               isBotConversation
                   ? Localization.of(context).botInteractOpen
                   : Localization.of(context).block,
-              onTap: () {
-                // isBotConversation
-                //     ? todo open home page
-                //     : todo block
+              onTap: () async {
+                final conversationItem =
+                    BlocProvider.of<ConversationCubit>(context).state;
+                if (conversationItem == null) return;
+                if (conversationItem.isBotConversation) {
+                  final app = await context.read<AccountServer>().database.appsDao.findUserById(conversationItem.appId!);
+                  if(app == null) return;
+                  await openUri(app.homeUri);
+                } else {
+                  // TODO block
+                  debugPrint('block');
+                }
+
               },
             ),
             const SizedBox(width: 16),
@@ -56,17 +66,18 @@ class StrangerMessage extends StatelessWidget {
                   ? Localization.of(context).botInteractHi
                   : Localization.of(context).addContact,
               onTap: () {
-                // isBotConversation
-                //     ? todo open home page
-                //     : todo block
                 final conversationItem =
                     BlocProvider.of<ConversationCubit>(context).state;
                 if (conversationItem == null) return;
-                Provider.of<AccountServer>(context, listen: false)
-                    .sendTextMessage(
-                  conversationItem.conversationId,
-                  'Hi',
-                );
+                if (conversationItem.isBotConversation)
+                  Provider.of<AccountServer>(context, listen: false)
+                      .sendTextMessage(
+                    conversationItem.conversationId,
+                    'Hi',
+                  );
+                else
+                  // TODO add user
+                  debugPrint('add user');
               },
             ),
           ],
