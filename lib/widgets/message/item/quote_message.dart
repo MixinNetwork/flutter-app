@@ -199,6 +199,7 @@ class QuoteMessage extends StatelessWidget {
       description: Localization.of(context).chatNotFound,
       icon: SvgPicture.asset(Resources.assetsImagesRecallSvg),
       inputMode: inputMode,
+      onTap: () {},
     );
   }
 }
@@ -213,6 +214,7 @@ class _QuoteMessageBase extends StatelessWidget {
     this.icon,
     this.image,
     required this.inputMode,
+    this.onTap,
   }) : super(key: key);
 
   final String messageId;
@@ -222,10 +224,17 @@ class _QuoteMessageBase extends StatelessWidget {
   final Widget? icon;
   final Widget? image;
   final bool inputMode;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
-        onTap: () => context.read<MessageBloc>().scrollTo(messageId),
+        onTap: () {
+          if (onTap != null) {
+            onTap!();
+            return;
+          }
+          context.read<MessageBloc>().scrollTo(messageId);
+        },
         behavior: HitTestBehavior.opaque,
         child: Container(
           height: 50,
