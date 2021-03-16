@@ -14,6 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 import 'account/account_server.dart';
 import 'constants/brightness_theme_data.dart';
@@ -29,10 +30,14 @@ class App extends StatelessWidget {
           builder: (context, authState) {
             const app = _App();
             if (authState == null) return app;
-
-            return FutureBuilder<AccountServer>(
-              key: ValueKey(authState),
-              future: () async {
+            return FutureProvider<AccountServer?>(
+              key: ValueKey(Tuple4(
+                authState.account.userId,
+                authState.account.sessionId,
+                authState.account.identityNumber,
+                authState.privateKey,
+              )),
+              create: (BuildContext context) async {
                 await accountServer.initServer(
                   authState.account.userId,
                   authState.account.sessionId,
@@ -40,18 +45,21 @@ class App extends StatelessWidget {
                   authState.privateKey,
                 );
                 return accountServer;
-              }(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<AccountServer> snapshot) {
-                if (snapshot.data != null)
-                  return _Providers(
-                    app: const Portal(
-                      child: app,
-                    ),
-                    accountServer: snapshot.data!,
-                  );
-                return app;
               },
+              initialData: null,
+              builder: (BuildContext context, _) => Consumer<AccountServer?>(
+                builder: (context, accountServer, child) {
+                  if (accountServer != null)
+                    return _Providers(
+                      app: Portal(
+                        child: child!,
+                      ),
+                      accountServer: accountServer,
+                    );
+                  return child!;
+                },
+                child: app,
+              ),
             );
           },
         ),
@@ -120,47 +128,42 @@ class _App extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mixin',
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        Localization.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: [
-        ...Localization.delegate.supportedLocales,
-      ],
-      builder: (context, child) {
-        try {
-          Provider.of<AccountServer>(context).language =
-              Localizations.localeOf(context).languageCode;
-        } catch (_) {}
-        return BrightnessObserver(
-          child: child!,
-          lightThemeData: lightBrightnessThemeData,
-          darkThemeData: darkBrightnessThemeData,
-        );
-      },
-      home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
-        converter: (state) => state.current != null,
-        builder: (context, authAvailable) {
-          AccountServer? accountServer;
+  Widget build(BuildContext context) => MaterialApp(
+        title: 'Mixin',
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          Localization.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+        ],
+        supportedLocales: [
+          ...Localization.delegate.supportedLocales,
+        ],
+        builder: (context, child) {
           try {
-            accountServer = Provider.of<AccountServer>(context);
+            Provider.of<AccountServer>(context).language =
+                Localizations.localeOf(context).languageCode;
           } catch (_) {}
-          if (authAvailable && accountServer != null) {
-            BlocProvider.of<ConversationListBloc>(context)
-              ..limit = MediaQuery.of(context).size.height ~/ 40
-              ..init();
-            accountServer.initSticker();
-            return HomePage();
-          }
-          return const LandingPage();
+          return BrightnessObserver(
+            child: child!,
+            lightThemeData: lightBrightnessThemeData,
+            darkThemeData: darkBrightnessThemeData,
+          );
         },
-      ),
-    );
-  }
+        home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
+          converter: (state) => state.current != null,
+          builder: (context, authAvailable) {
+            final accountServer = context.read<AccountServer?>();
+            if (authAvailable && accountServer != null) {
+              BlocProvider.of<ConversationListBloc>(context)
+                ..limit = MediaQuery.of(context).size.height ~/ 40
+                ..init();
+              accountServer.initSticker();
+              return HomePage();
+            }
+            return const LandingPage();
+          },
+        ),
+      );
 }
