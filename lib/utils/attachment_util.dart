@@ -15,7 +15,7 @@ class AttachmentUtil {
     _attachmentClient = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10)
       ..badCertificateCallback =
-          ((X509Certificate cert, String host, int port) => true);
+      ((X509Certificate cert, String host, int port) => true);
   }
 
   final String _mediaPath;
@@ -37,7 +37,7 @@ class AttachmentUtil {
 
       if (response.data != null && response.data.viewUrl != null) {
         final request =
-            await _attachmentClient.getUrl(Uri.parse(response.data.viewUrl));
+        await _attachmentClient.getUrl(Uri.parse(response.data.viewUrl));
 
         request.headers
             .add(HttpHeaders.contentTypeHeader, 'application/octet-stream');
@@ -70,54 +70,60 @@ class AttachmentUtil {
   }
 
   Future<String?> uploadAttachment(File file, String messageId) async {
-    final response = await _client.attachmentApi.postAttachment();
-    if (response.data != null && response.data.uploadUrl != null) {
-      final fileStream = file.openRead();
+    try {
+      final response = await _client.attachmentApi.postAttachment();
+      if (response.data != null && response.data.uploadUrl != null) {
+        final fileStream = file.openRead();
 
-      final totalBytes = await file.length();
+        final totalBytes = await file.length();
 
-      final request =
-          await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl));
+        final request =
+        await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl));
 
-      request.headers
-        ..add(HttpHeaders.contentTypeHeader, 'application/octet-stream')
-        ..add(HttpHeaders.connectionHeader, 'close')
-        ..add(HttpHeaders.contentLengthHeader, totalBytes)
-        ..add('x-amz-acl', 'public-read');
+        request.headers..add(
+            HttpHeaders.contentTypeHeader, 'application/octet-stream')..add(
+            HttpHeaders.connectionHeader, 'close')..add(
+            HttpHeaders.contentLengthHeader, totalBytes)..add(
+            'x-amz-acl', 'public-read');
 
-      var byteCount = 0;
+        var byteCount = 0;
 
-      await request.addStream(fileStream.transform(
-        StreamTransformer.fromHandlers(
-          handleData: (data, sink) {
-            byteCount += data.length;
-            // upload progress
-            debugPrint('$byteCount / $totalBytes');
-            sink.add(data);
-          },
-          handleError: (error, stack, sink) {},
-          handleDone: (sink) {
-            sink.close();
-          },
-        ),
-      ));
+        await request.addStream(fileStream.transform(
+          StreamTransformer.fromHandlers(
+            handleData: (data, sink) {
+              byteCount += data.length;
+              // upload progress
+              debugPrint('$byteCount / $totalBytes');
+              sink.add(data);
+            },
+            handleError: (error, stack, sink) {},
+            handleDone: (sink) {
+              sink.close();
+            },
+          ),
+        ));
 
-      final httpResponse = await request.close();
-      if (httpResponse.statusCode == 200) {
-        await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
-        return response.data.attachmentId;
+        final httpResponse = await request.close();
+        if (httpResponse.statusCode == 200) {
+          await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
+          return response.data.attachmentId;
+        } else {
+          await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
+          return null;
+        }
       } else {
         await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
         return null;
       }
-    } else {
+    } catch (e) {
+      debugPrint(e.toString());
       await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
       return null;
     }
   }
 
-  File getAttachmentFile(
-      MessageCategory category, String conversationId, String messageId) {
+  File getAttachmentFile(MessageCategory category, String conversationId,
+      String messageId) {
     assert(category.isAttachment);
     String? path;
     if (category.isImage) {
@@ -155,11 +161,11 @@ class AttachmentUtil {
     return p.join(_mediaPath, 'Files', conversationId);
   }
 
-  static Future<AttachmentUtil> init(
-      Client client, MessagesDao messagesDao, String identityNumber) async {
+  static Future<AttachmentUtil> init(Client client, MessagesDao messagesDao,
+      String identityNumber) async {
     final documentDirectory = await getApplicationDocumentsDirectory();
     final mediaDirectory =
-        File(p.join(documentDirectory.path, identityNumber, 'Media'));
+    File(p.join(documentDirectory.path, identityNumber, 'Media'));
     return AttachmentUtil(client, messagesDao, mediaDirectory.path);
   }
 }

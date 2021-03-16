@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:file_selector/file_selector.dart';
@@ -351,8 +352,6 @@ class AccountServer {
         category: message.type,
       );
 
-  // maybe rename reuploadAttachment
-  void uploadAttachment(db.MessageItem message) {
-    // TODO
-  }
+   void uploadAttachment(db.MessageItem message) =>  _attachmentUtil.uploadAttachment(File(message.mediaUrl!), message.messageId);
+
 }
