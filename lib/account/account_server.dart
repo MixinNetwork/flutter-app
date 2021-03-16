@@ -379,8 +379,14 @@ class AccountServer {
         message.conversationId,
         message.messageId,
         File(message.mediaUrl!),
+        message.mediaName,
         message.mediaMimeType!,
-        message.mediaName!,
-        message.mediaSize!);
+        message.mediaSize!,
+        message.mediaWidth,
+        message.mediaHeight,
+        message.thumbImage,
+        message.mediaDuration,
+        message.mediaWaveform
+    );
   }
 }

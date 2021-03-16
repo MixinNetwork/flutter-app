@@ -488,15 +488,36 @@ class SendMessageHelper {
     }
   }
 
-  Future<void> reUploadAttachment(String conversationId, String messageId,
-      File file, String mimeType, String name, int mediaSize) async {
+  Future<void> reUploadAttachment(
+      String conversationId,
+      String messageId,
+      File file,
+      String? name,
+      String mediaMimeType,
+      int mediaSize,
+      int? mediaWidth,
+      int? mediaHeight,
+      String? thumbImage,
+      String? mediaDuration,
+      dynamic? mediaWaveform) async {
     await _attachmentUtil
         .uploadAttachment(file, messageId)
         .then((attachmentId) async {
       if (attachmentId == null) return;
-      // Todo Some data missing
-      final attachmentMessage = AttachmentMessage(null, null, attachmentId,
-          mimeType, mediaSize, name, null, null, null, null, null, null);
+      final duration = mediaDuration != null ? int.parse(mediaDuration!) : null;
+      final attachmentMessage = AttachmentMessage(
+          null,
+          null,
+          attachmentId,
+          mediaMimeType,
+          mediaSize,
+          name,
+          mediaWidth,
+          mediaHeight,
+          thumbImage,
+          duration,
+          mediaWaveform,
+          null);
       final encoded = base64.encode(utf8.encode(jsonEncode(attachmentMessage)));
       _messagesDao.updateMessageContent(messageId, encoded);
       await _jobsDao.insertSendingJob(messageId, conversationId);
