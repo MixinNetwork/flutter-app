@@ -94,7 +94,7 @@ class _ImageMessage extends StatelessWidget {
                 case MediaStatus.canceled:
                   if (message.relationship == UserRelationship.me &&
                       message.mediaUrl?.isNotEmpty == true) {
-                    context.read<AccountServer>().uploadAttachment(message);
+                    context.read<AccountServer>().reUploadAttachment(message);
                   } else {
                     context.read<AccountServer>().downloadAttachment(message);
                   }

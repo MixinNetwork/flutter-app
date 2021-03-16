@@ -136,7 +136,7 @@ class AccountServer {
 
   Future<void> _runRecallJob(List<db.Job> jobs) async {
     jobs.where((element) => element.blazeMessage != null).forEach(
-          (e) async {
+      (e) async {
         final blazeParam = BlazeMessageParam(
             conversationId: e.conversationId,
             messageId: const Uuid().v4(),
@@ -219,26 +219,38 @@ class AccountServer {
   }
 
   Future<void> sendImageMessage(String conversationId, XFile image,
-      {bool isPlain = true, String? quoteMessageId}) =>
-      _sendMessageHelper.sendImageMessage(conversationId, userId, image,
+          {bool isPlain = true, String? quoteMessageId}) =>
+      _sendMessageHelper.sendImageMessage(
+          conversationId,
+          userId,
+          image,
           isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
           quoteMessageId);
 
   Future<void> sendVideoMessage(String conversationId, XFile video,
-      {bool isPlain = true, String? quoteMessageId}) =>
-      _sendMessageHelper.sendVideoMessage(conversationId, userId, video,
+          {bool isPlain = true, String? quoteMessageId}) =>
+      _sendMessageHelper.sendVideoMessage(
+          conversationId,
+          userId,
+          video,
           isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo,
           quoteMessageId);
 
   Future<void> sendAudioMessage(String conversationId, XFile audio,
-      {bool isPlain = true, String? quoteMessageId}) =>
-      _sendMessageHelper.sendAudioMessage(conversationId, userId, audio,
+          {bool isPlain = true, String? quoteMessageId}) =>
+      _sendMessageHelper.sendAudioMessage(
+          conversationId,
+          userId,
+          audio,
           isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio,
           quoteMessageId);
 
   Future<void> sendDataMessage(String conversationId, XFile file,
           [bool isPlain = true, String? quoteMessageId]) =>
-      _sendMessageHelper.sendDataMessage(conversationId, userId, file,
+      _sendMessageHelper.sendDataMessage(
+          conversationId,
+          userId,
+          file,
           isPlain ? MessageCategory.plainData : MessageCategory.signalData,
           quoteMessageId);
 
@@ -255,13 +267,23 @@ class AccountServer {
   void sendContactMessage(
       String conversationId, String shareUserId, String shareUserFullName,
       {bool isPlain = true, String? quoteMessageId}) {
-    _sendMessageHelper.sendContactMessage(conversationId, userId,
-        ContactMessage(shareUserId), shareUserFullName, isPlain,quoteMessageId);
+    _sendMessageHelper.sendContactMessage(
+        conversationId,
+        userId,
+        ContactMessage(shareUserId),
+        shareUserFullName,
+        isPlain,
+        quoteMessageId);
   }
 
-  Future<void> sendRecallMessage(String conversationId,List<String>messageIds) => _sendMessageHelper.sendRecallMessage(conversationId, messageIds);
+  Future<void> sendRecallMessage(
+          String conversationId, List<String> messageIds) =>
+      _sendMessageHelper.sendRecallMessage(conversationId, messageIds);
 
-  Future<void> forwardMessage(String conversationId, String forwardMessageId, bool isPlain) => _sendMessageHelper.forwardMessage(conversationId, userId, forwardMessageId, isPlain);
+  Future<void> forwardMessage(
+          String conversationId, String forwardMessageId, bool isPlain) =>
+      _sendMessageHelper.forwardMessage(
+          conversationId, userId, forwardMessageId, isPlain);
 
   void selectConversation(String? conversationId) {
     _decryptMessage.setConversationId(conversationId);
@@ -352,6 +374,13 @@ class AccountServer {
         category: message.type,
       );
 
-   void uploadAttachment(db.MessageItem message) =>  _attachmentUtil.uploadAttachment(File(message.mediaUrl!), message.messageId);
-
+  Future<void> reUploadAttachment(db.MessageItem message) async {
+    await _sendMessageHelper.reUploadAttachment(
+        message.conversationId,
+        message.messageId,
+        File(message.mediaUrl!),
+        message.mediaMimeType!,
+        message.mediaName!,
+        message.mediaSize!);
+  }
 }

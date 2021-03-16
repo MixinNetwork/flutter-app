@@ -351,8 +351,8 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  Future<void> _sendPostMessage(String conversationId, String senderId, String content,
-      bool isPlain) async {
+  Future<void> _sendPostMessage(String conversationId, String senderId,
+      String content, bool isPlain) async {
     final category =
         isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
     final message = Message(
@@ -478,11 +478,28 @@ class SendMessageHelper {
           message.mediaHeight!,
           isPlain);
     } else if (message.category.isPost) {
-      await _sendPostMessage(conversationId, senderId, message.content!, isPlain);
+      await _sendPostMessage(
+          conversationId, senderId, message.content!, isPlain);
     } else if (message.category.isLocation) {
-      await _sendLocationMessage(conversationId, senderId, message.content!, isPlain);
-    } else if(message.category == MessageCategory.appCard){
+      await _sendLocationMessage(
+          conversationId, senderId, message.content!, isPlain);
+    } else if (message.category == MessageCategory.appCard) {
       await _sendAppCardMessage(conversationId, senderId, message.content!);
     }
+  }
+
+  Future<void> reUploadAttachment(String conversationId, String messageId,
+      File file, String mimeType, String name, int mediaSize) async {
+    await _attachmentUtil
+        .uploadAttachment(file, messageId)
+        .then((attachmentId) async {
+      if (attachmentId == null) return;
+      // Todo Some data missing
+      final attachmentMessage = AttachmentMessage(null, null, attachmentId,
+          mimeType, mediaSize, name, null, null, null, null, null, null);
+      final encoded = base64.encode(utf8.encode(jsonEncode(attachmentMessage)));
+      _messagesDao.updateMessageContent(messageId, encoded);
+      await _jobsDao.insertSendingJob(messageId, conversationId);
+    });
   }
 }
