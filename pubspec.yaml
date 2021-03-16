@@ -21,7 +21,7 @@ dependencies:
   mixin_bot_sdk_dart:
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: ea5cdd2a40b9475f32a10d2de44f0ad7167f4b39
+      ref: 07e492bfcb6bbc8ab614d078fd2830fcfb0465b7
     # local path
   #    path: ../mixin_bot_sdk_dart
   flutter:
@@ -34,8 +34,8 @@ dependencies:
   cryptography: ^1.4.1
   web_socket_channel: ^2.0.0
   moor: ^4.1.0
-  sqlite3_flutter_libs: ^0.4.0+1
-  libsignal_protocol_dart: ^0.2.1
+  sqlite3_flutter_libs: ^0.4.1
+  libsignal_protocol_dart: ^0.3.0-nullsafety.0
   path_provider: ^2.0.1
   path: ^1.8.0
   hive: ^1.6.0-nullsafety.2
