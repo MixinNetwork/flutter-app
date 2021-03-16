@@ -184,7 +184,7 @@ class MessageItemWidget extends StatelessWidget {
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );
-                if (message.type.isVideo)
+                if (message.type.isVideo || message.type.isLive)
                   return VideoMessageWidget(
                     message: message,
                     isCurrentUser: isCurrentUser,
