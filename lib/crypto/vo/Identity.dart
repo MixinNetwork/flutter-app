@@ -4,7 +4,7 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 extension IdentityExtension on Identity {
   IdentityKeyPair getIdentityKeyPair() {
     final publicKey = IdentityKey.fromBytes(this.publicKey, 0);
-    final privateKey = Curve.decodePrivatePoint(this.privateKey);
+    final privateKey = Curve.decodePrivatePoint(this.privateKey!);
     return IdentityKeyPair(publicKey, privateKey);
   }
 

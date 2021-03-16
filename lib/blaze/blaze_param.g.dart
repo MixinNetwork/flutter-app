@@ -12,7 +12,7 @@ BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) {
     recipientId: json['recipient_id'] as String?,
     messageId: json['message_id'] as String?,
     category: const MessageCategoryJsonConverter()
-        .fromJson(json['category'] as String),
+        .fromJson(json['category'] as String?),
     data: json['data'] as String?,
     status: json['status'] as String?,
     recipients: (json['recipients'] as List<dynamic>?)

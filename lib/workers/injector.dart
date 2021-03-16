@@ -3,7 +3,6 @@ import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:mixin_bot_sdk_dart/src/vo/app.dart';
 
 class Injector {
   Injector(this.accountId, this.database, this.client);
@@ -22,9 +21,9 @@ class Injector {
       final response =
           await client.conversationApi.getConversation(conversationId);
       if (response.data != null) {
-        var ownerId = response.data.creatorId;
-        if (response.data.category == ConversationCategory.contact) {
-          response.data.participants.forEach((item) {
+        var ownerId = response.data!.creatorId;
+        if (response.data!.category == ConversationCategory.contact) {
+          response.data!.participants.forEach((item) {
             if (item.userId != accountId) {
               ownerId = item.userId;
             }
@@ -33,18 +32,18 @@ class Injector {
 
         await database.conversationDao.insert(
           db.Conversation(
-            conversationId: response.data.conversationId,
+            conversationId: response.data!.conversationId,
             ownerId: ownerId,
-            category: response.data.category,
-            name: response.data.name,
-            announcement: response.data.announcement,
-            createdAt: response.data.createdAt,
+            category: response.data!.category,
+            name: response.data!.name,
+            announcement: response.data!.announcement,
+            createdAt: response.data!.createdAt,
             status: ConversationStatus.success,
-            muteUntil: DateTime.parse(response.data.muteUntil),
+            muteUntil: DateTime.parse(response.data!.muteUntil),
           ),
         );
         await refreshParticipants(
-            response.data.conversationId, response.data.participants);
+            response.data!.conversationId, response.data!.participants);
       }
     }
   }
@@ -76,8 +75,8 @@ class Injector {
 
   Future<void> fetchUsers(List<String> ids) async {
     final response = await client.userApi.getUsers(ids);
-    if (response.data != null && response.data.isNotEmpty) {
-      await database.userDao.insertAll(response.data
+    if (response.data != null && response.data!.isNotEmpty) {
+      await database.userDao.insertAll(response.data!
           .map((e) => db.User(
                 userId: e.userId,
                 identityNumber: e.identityNumber,
@@ -94,7 +93,7 @@ class Injector {
               ))
           .toList());
     } else {
-      debugPrint(response.error.toJson().toString());
+      debugPrint(response.error!.toJson().toString());
     }
   }
 
@@ -103,7 +102,7 @@ class Injector {
     if (user == null) {
       final response = await client.userApi.getUserById(userId);
       if (response.data != null) {
-        final result = response.data;
+        final result = response.data!;
         user = db.User(
           userId: result.userId,
           identityNumber: result.identityNumber,
@@ -119,7 +118,7 @@ class Injector {
           createdAt: result.createdAt,
         );
         await database.userDao.insert(user);
-        final App? app = result.app;
+        final app = result.app;
         if (app != null) {
           await database.appsDao.insert(
             db.App(
@@ -146,7 +145,7 @@ class Injector {
 
   void refreshSticker(String stickerId) {
     client.accountApi.getStickerById(stickerId).then((value) {
-      final Sticker? sticker = value.data;
+      final sticker = value.data;
       if (sticker != null) {
         database.stickerDao.insert(db.Sticker(
           stickerId: sticker.stickerId,

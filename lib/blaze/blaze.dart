@@ -6,7 +6,6 @@ import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/db/converter/message_status_type_converter.dart';
-import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -92,7 +91,7 @@ class Blaze {
 
   void updateRemoteMessageStatus(String messageId, MessageStatus status) {
     final blazeMessage = BlazeAckMessage(
-        messageId: messageId, status: EnumToString.convertToString(status));
+        messageId: messageId, status: EnumToString.convertToString(status)!);
     database.jobsDao.insert(Job(
         jobId: const Uuid().v4(),
         action: acknowledgeMessageReceipts,

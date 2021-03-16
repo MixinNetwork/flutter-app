@@ -61,7 +61,7 @@ List<int> aesDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
   return paddedCipher.process(Uint8List.fromList(cipherText));
 }
 
-List<int> calculateAgreement(List<int> publicKey, List<int> privateKey) {
+List<int> calculateAgreement(List<int>? publicKey, List<int>? privateKey) {
   if (publicKey == null) {
     throw Exception('publicKey value is null');
   }

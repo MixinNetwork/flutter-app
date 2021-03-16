@@ -154,7 +154,10 @@ class _App extends StatelessWidget {
         home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
           converter: (state) => state.current != null,
           builder: (context, authAvailable) {
-            final accountServer = context.read<AccountServer?>();
+            AccountServer? accountServer;
+            try {
+              accountServer = context.read<AccountServer?>();
+            } catch (_) {}
             if (authAvailable && accountServer != null) {
               BlocProvider.of<ConversationListBloc>(context)
                 ..limit = MediaQuery.of(context).size.height ~/ 40

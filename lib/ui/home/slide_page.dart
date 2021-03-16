@@ -55,13 +55,12 @@ class SlidePage extends StatelessWidget {
             Builder(
               builder: (context) => BlocConverter<MultiAuthCubit,
                   MultiAuthState, Tuple2<String, String>>(
-                converter: (state) => Tuple2(state.current!.account.fullName,
-                    state.current!.account.avatarUrl),
+                converter: (state) => Tuple2(state.current!.account.fullName!,
+                    state.current!.account.avatarUrl!),
                 when: (a, b) => b?.item1 != null && b?.item2 != null,
                 builder: (context, tuple) =>
                     BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-                  converter: (state) =>
-                      state.type == SlideCategoryType.setting,
+                  converter: (state) => state.type == SlideCategoryType.setting,
                   builder: (context, selected) => SelectItem(
                     icon: ClipOval(
                       child: CachedNetworkImage(

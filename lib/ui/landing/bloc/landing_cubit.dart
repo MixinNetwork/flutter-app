@@ -6,6 +6,7 @@ import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
@@ -53,11 +54,11 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           Uri.encodeComponent(base64.encode(keyPair.publicKey.serialize()));
 
       emit(state.copyWith(
-        authUrl: 'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
+        authUrl: 'mixin://device/auth?id=${rsp.data!.deviceId}&pub_key=$pubKey',
         status: LandingStatus.ready,
       ));
 
-      deviceId = rsp.data.deviceId;
+      deviceId = rsp.data!.deviceId;
       streamSubscription = Stream.periodic(const Duration(seconds: 1), (i) => i)
           .listen(periodicStreamController.add);
       addSubscription(streamSubscription);
@@ -77,11 +78,19 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
             status: LandingStatus.needReload,
           ));
         })
+        .where((_) => deviceId != null)
         .asyncMap((event) async {
-          final rsp = await client.provisioningApi.getProvisioning(deviceId);
-          return rsp.data?.secret;
+          print('event: $event');
+          print('deviceId: $deviceId');
+          try {
+            final rsp = await client.provisioningApi.getProvisioning(deviceId!);
+            return rsp.data?.secret;
+          } catch (e,s) {
+            print('e: $e, s: $s');
+            return null;
+          }
         })
-        .handleError((_) => null)
+        .handleError((e) => null)
         .where((secret) => secret?.isNotEmpty == true)
         .doOnData((secret) {
           streamSubscription?.cancel();
@@ -125,7 +134,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
         sessionId: msg['session_id'],
         platform: 'Desktop',
         purpose: 'SESSION',
-        sessionSecret: base64.encode(edKeyPair.publicKey.bytes),
+        sessionSecret: base64.encode(edKeyPair.publicKey!.bytes),
         appVersion: '0.0.1',
         registrationId: registrationId,
         platformVersion: 'OS X 10.15.6',
@@ -133,10 +142,10 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     );
 
     if (rsp.data != null) {
-      final privateKey = base64.encode(edKeyPair.privateKey.bytes);
+      final privateKey = base64.encode(edKeyPair.privateKey!.bytes);
 
       return Tuple2(
-        rsp.data,
+        rsp.data!,
         privateKey,
       );
     }

@@ -8,13 +8,17 @@ part 'system_conversation_message.g.dart';
 @MessageActionJsonConverter()
 class SystemConversationMessage {
   SystemConversationMessage(
-      this.action, this.participantId, this.userId, this.role);
+    this.action,
+    this.participantId,
+    this.userId,
+    this.role,
+  );
 
   factory SystemConversationMessage.fromJson(Map<String, dynamic> json) =>
       _$SystemConversationMessageFromJson(json);
 
   @JsonKey(name: 'action')
-  MessageAction action;
+  MessageAction? action;
   @JsonKey(name: 'participant_id')
   String? participantId;
   @JsonKey(name: 'user_id')

@@ -18,16 +18,16 @@ environment:
   sdk: '>=2.12.0-0 <3.0.0'
 
 dependencies:
-  mixin_bot_sdk_dart:
-    git:
-      url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: 07e492bfcb6bbc8ab614d078fd2830fcfb0465b7
-    # local path
-  #    path: ../mixin_bot_sdk_dart
   flutter:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
+  mixin_bot_sdk_dart:
+    git:
+      url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
+      ref: 7c77844edd34cf2bf532c30ca603474e5a472e1b
+#         local path
+#    path: ../mixin_bot_sdk_dart
   http: ^0.13.0
   qr_flutter: ^3.2.0
   uuid: ^3.0.0

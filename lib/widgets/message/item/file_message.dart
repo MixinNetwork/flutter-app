@@ -53,9 +53,9 @@ class FileMessage extends StatelessWidget {
             if (message.mediaStatus == MediaStatus.canceled) {
               if (message.relationship == UserRelationship.me &&
                   message.mediaUrl?.isNotEmpty == true) {
-                context.read<AccountServer>().reUploadAttachment(message);
+                await context.read<AccountServer>().reUploadAttachment(message);
               } else {
-                context.read<AccountServer>().downloadAttachment(message);
+                await context.read<AccountServer>().downloadAttachment(message);
               }
             } else if (message.mediaStatus == MediaStatus.done &&
                 message.mediaUrl != null) {

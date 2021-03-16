@@ -21,7 +21,7 @@ BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
     json['conversation_id'] as String?,
     json['user_id'] as String,
     json['message_id'] as String,
-    const MessageCategoryJsonConverter().fromJson(json['category'] as String),
+    const MessageCategoryJsonConverter().fromJson(json['category'] as String?),
     json['data'] as String,
     _$enumDecode(_$MessageStatusEnumMap, json['status']),
     DateTime.parse(json['created_at'] as String),

@@ -9,7 +9,7 @@ part of 'system_conversation_message.dart';
 SystemConversationMessage _$SystemConversationMessageFromJson(
     Map<String, dynamic> json) {
   return SystemConversationMessage(
-    const MessageActionJsonConverter().fromJson(json['action'] as String),
+    const MessageActionJsonConverter().fromJson(json['action'] as String?),
     json['participant_id'] as String?,
     json['user_id'] as String?,
     _$enumDecodeNullable(_$ParticipantRoleEnumMap, json['role']),

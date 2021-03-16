@@ -10,7 +10,6 @@ import 'package:flutter_app/blaze/blaze.dart';
 import 'package:flutter_app/blaze/blaze_message.dart';
 import 'package:flutter_app/blaze/blaze_param.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
-import 'package:flutter_app/blaze/vo/recall_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
@@ -49,10 +48,14 @@ class AccountServer {
     this.identityNumber = identityNumber;
     this.privateKey = PrivateKey(base64Decode(privateKey));
 
-    client = Client();
+    client = Client(
+      userId: userId,
+      sessionId: sessionId,
+      privateKey: privateKey,
+      scp: scp,
+    );
     (client.dio.transformer as DefaultTransformer).jsonDecodeCallback =
         LoadBalancerUtils.jsonDecode;
-    client.initMixin(userId, sessionId, privateKey, scp);
 
     await _initDatabase(privateKey);
     start();
@@ -296,7 +299,8 @@ class AccountServer {
     final status = EnumToString.convertToString(MessageStatus.read);
     final now = DateTime.now();
     final jobs = ids
-        .map((id) => jsonEncode(BlazeAckMessage(messageId: id, status: status)))
+        .map(
+            (id) => jsonEncode(BlazeAckMessage(messageId: id, status: status!)))
         .map((blazeMessage) => Job(
             jobId: const Uuid().v4(),
             action: acknowledgeMessageReceipts,
@@ -322,7 +326,7 @@ class AccountServer {
   void initSticker() {
     client.accountApi.getStickerAlbums().then((res) {
       if (res.data != null) {
-        res.data.forEach((item) async {
+        res.data!.forEach((item) async {
           await database.stickerAlbumsDao.insert(db.StickerAlbum(
               albumId: item.albumId,
               name: item.name,
@@ -344,7 +348,7 @@ class AccountServer {
     client.accountApi.getStickersByAlbumId(albumId).then((res) {
       if (res.data != null) {
         final relationships = <StickerRelationship>[];
-        res.data.forEach((sticker) {
+        res.data!.forEach((sticker) {
           relationships.add(StickerRelationship(
               albumId: albumId, stickerId: sticker.stickerId));
           database.stickerDao.insert(db.Sticker(
@@ -366,7 +370,7 @@ class AccountServer {
     });
   }
 
-  void downloadAttachment(db.MessageItem message) =>
+  Future<void> downloadAttachment(db.MessageItem message) =>
       _attachmentUtil.downloadAttachment(
         content: message.content!,
         messageId: message.messageId,
@@ -374,19 +378,17 @@ class AccountServer {
         category: message.type,
       );
 
-  Future<void> reUploadAttachment(db.MessageItem message) async {
-    await _sendMessageHelper.reUploadAttachment(
-        message.conversationId,
-        message.messageId,
-        File(message.mediaUrl!),
-        message.mediaName,
-        message.mediaMimeType!,
-        message.mediaSize!,
-        message.mediaWidth,
-        message.mediaHeight,
-        message.thumbImage,
-        message.mediaDuration,
-        message.mediaWaveform
-    );
-  }
+  Future<void> reUploadAttachment(db.MessageItem message) =>
+      _sendMessageHelper.reUploadAttachment(
+          message.conversationId,
+          message.messageId,
+          File(message.mediaUrl!),
+          message.mediaName,
+          message.mediaMimeType!,
+          message.mediaSize!,
+          message.mediaWidth,
+          message.mediaHeight,
+          message.thumbImage,
+          message.mediaDuration,
+          message.mediaWaveform);
 }
