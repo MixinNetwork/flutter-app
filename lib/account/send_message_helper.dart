@@ -9,6 +9,7 @@ import 'package:flutter_app/blaze/vo/attachment_message.dart';
 import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/db/extension/message.dart' show QueteMessage;
+import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/dao/jobs_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -370,5 +371,62 @@ class SendMessageHelper {
           runCount: 0));
       await _messagesDao.recallMessage(messageId);
     });
+  }
+
+  Future<void> forwardMessage(String conversationId, String senderId,
+      String forwardMessageId, bool isPlain) async {
+    final message = await _messagesDao.findMessageByMessageId(messageId);
+    if (message == null) {
+      return;
+    } else if (message.category.isText == true) {
+      await sendTextMessage(
+          conversationId, senderId, message.content!, isPlain, null);
+    } else if (message.category.isImage) {
+      await sendImageMessage(
+          conversationId,
+          senderId,
+          XFile(message.mediaUrl!),
+          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
+          null);
+    } else if (message.category.isVideo) {
+      await sendVideoMessage(
+          conversationId,
+          senderId,
+          XFile(message.mediaUrl!),
+          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo,
+          null);
+    } else if (message.category.isAudio) {
+      await sendAudioMessage(
+          conversationId,
+          senderId,
+          XFile(message.mediaUrl!),
+          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio,
+          null);
+    } else if (message.category.isData) {
+      await sendVideoMessage(
+          conversationId,
+          senderId,
+          XFile(message.mediaUrl!),
+          isPlain ? MessageCategory.plainData : MessageCategory.signalData,
+          null);
+    } else if (message.category.isSticker) {
+      await sendStickerMessage(
+          conversationId,
+          senderId,
+          StickerMessage(message.stickerId!, null, null),
+          isPlain
+              ? MessageCategory.plainSticker
+              : MessageCategory.signalSticker);
+    } else if (message.category.isContact) {
+      sendContactMessage(conversationId, senderId,
+          ContactMessage(message.sharedUserId!), message.name!, isPlain, null);
+    } else if (message.category.isLive) {
+      sendLiveMessage(
+          conversationId, senderId, message.mediaUrl!, isPlain, null);
+    } else if (message.category.isPost) {
+      sendPostMessage(conversationId, senderId, message.content!, isPlain);
+    } else if (message.category.isLocation) {
+      sendLocationMessage(conversationId, senderId, message.content!, isPlain);
+    }
   }
 }

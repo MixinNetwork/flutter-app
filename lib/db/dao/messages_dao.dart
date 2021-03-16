@@ -174,6 +174,10 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return await db.findMessageItemByMessageId(messageId).getSingleOrNull();
   }
 
+  Future<Message?> findMessageByMessageId(String messageId) async {
+    return await db.findMessageByMessageId(messageId).getSingleOrNull();
+  }
+
   void updateMessageContent(String messageId, String encoded) async {
     await db.customUpdate(
         'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',

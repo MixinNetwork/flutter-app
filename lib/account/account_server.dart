@@ -260,6 +260,8 @@ class AccountServer {
 
   Future<void> sendRecallMessage(String conversationId,List<String>messageIds) => _sendMessageHelper.sendRecallMessage(conversationId, messageIds);
 
+  Future<void> forwardMessage(String conversationId, String forwardMessageId, bool isPlain) => _sendMessageHelper.forwardMessage(conversationId, userId, forwardMessageId, isPlain);
+
   void selectConversation(String? conversationId) {
     _decryptMessage.setConversationId(conversationId);
     _markRead(conversationId);
