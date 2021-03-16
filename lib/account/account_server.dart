@@ -391,4 +391,46 @@ class AccountServer {
           message.thumbImage,
           message.mediaDuration,
           message.mediaWaveform);
+
+  Future<void> addUser(String userId) =>
+      _relationship(
+          RelationshipRequest(userId: userId, action: RelationshipAction.add));
+
+  Future<void> removeUser(String userId) =>
+      _relationship(
+          RelationshipRequest(
+              userId: userId, action: RelationshipAction.remove));
+
+  Future<void> blockUser(String userId) =>
+      _relationship(
+          RelationshipRequest(
+              userId: userId, action: RelationshipAction.block));
+
+  Future<void> unblockUser(String userId) =>
+      _relationship(
+          RelationshipRequest(
+              userId: userId, action: RelationshipAction.unblock));
+
+  Future<void> _relationship(RelationshipRequest request) async {
+    await client.userApi.relationships(request).then((response) async {
+      final user = response.data;
+      if (user != null) {
+        await database.userDao.insert(db.User(
+            userId: user.userId,
+            identityNumber: user.identityNumber,
+            relationship: user.relationship,
+            fullName: user.fullName,
+            avatarUrl: user.avatarUrl,
+            phone: user.phone,
+            isVerified: user.isVerified ? 1 : 0,
+            appId: user.app?.appId,
+            biography: user.biography,
+            muteUntil: DateTime.tryParse(user.muteUntil),
+            isScam: user.isScam ? 1 : 0,
+            createdAt: user.createdAt));
+      }
+    }).catchError((e) {
+      debugPrint(e);
+    });
+  }
 }
