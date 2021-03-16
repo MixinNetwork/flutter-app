@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter_app/blaze/vo/location_message.dart';
 import 'package:flutter_app/blaze/vo/recall_message.dart';
 import 'package:flutter_app/constants/constants.dart';
 import 'package:image/image.dart';
@@ -331,19 +332,41 @@ class SendMessageHelper {
         await _messagesDao.findMessageItemByMessageId(quoteMessageId);
   }
 
-  void sendPostMessage(String conversationId, String senderId, String content,
+  void _sendPostMessage(String conversationId, String senderId, String content,
       bool isPlain) async {
-    // ignore: unused_local_variable
     final category =
         isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
+    final message = Message(
+      messageId: const Uuid().v4(),
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: content,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+    );
+    
+    await _messagesDao.insert(message, senderId);
+    await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  void sendLocationMessage(String conversationId, String senderId,
+  void _sendLocationMessage(String conversationId, String senderId,
       String content, bool isPlain) async {
-    // ignore: unused_local_variable
     final category = isPlain
         ? MessageCategory.plainLocation
         : MessageCategory.signalLocation;
+    final message = Message(
+      messageId: const Uuid().v4(),
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: content,
+      status: MessageStatus.sending,
+      createdAt: DateTime.now(),
+    );
+
+    await _messagesDao.insert(message, senderId);
+    await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
   void sendAppCardMessage(
@@ -375,7 +398,7 @@ class SendMessageHelper {
 
   Future<void> forwardMessage(String conversationId, String senderId,
       String forwardMessageId, bool isPlain) async {
-    final message = await _messagesDao.findMessageByMessageId(messageId);
+    final message = await _messagesDao.findMessageByMessageId(forwardMessageId);
     if (message == null) {
       return;
     } else if (message.category.isText == true) {
@@ -424,9 +447,9 @@ class SendMessageHelper {
       sendLiveMessage(
           conversationId, senderId, message.mediaUrl!, isPlain, null);
     } else if (message.category.isPost) {
-      sendPostMessage(conversationId, senderId, message.content!, isPlain);
+      _sendPostMessage(conversationId, senderId, message.content!, isPlain);
     } else if (message.category.isLocation) {
-      sendLocationMessage(conversationId, senderId, message.content!, isPlain);
+      _sendLocationMessage(conversationId, senderId, message.content!, isPlain);
     }
   }
 }
