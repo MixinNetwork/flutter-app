@@ -9,17 +9,15 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
 
   Future<int> insert(User user) => into(db.users).insertOnConflictUpdate(user);
 
-   Future<void> insertAll(List<User> users) async => batch((batch) {
-      batch.insertAllOnConflictUpdate(db.users, users);
-    });
+  Future<void> insertAll(List<User> users) async => batch((batch) {
+        batch.insertAllOnConflictUpdate(db.users, users);
+      });
 
   Future deleteUser(User user) => delete(db.users).delete(user);
 
-  Future<User?> findUserById(userId) async {
-    final query = select(db.users)..where((tbl) => tbl.userId.equals(userId));
-    final list = await query.get();
-    return list.isEmpty ? null : list.first;
-  }
+  Future<User?> findUserById(userId) async =>
+      (select(db.users)..where((tbl) => tbl.userId.equals(userId)))
+          .getSingleOrNull();
 
   Selectable<User> fuzzySearchGroupUser({
     required String id,

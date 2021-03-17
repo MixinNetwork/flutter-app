@@ -12,7 +12,7 @@ class BlazeMessageParamSession {
   factory BlazeMessageParamSession.fromJson(Map<String, dynamic> json) =>
       _$BlazeMessageParamSessionFromJson(json);
 
-  @JsonKey(name: 'user_id', disallowNullValue: true)
+  @JsonKey(name: 'user_id')
   String userId;
   @JsonKey(name: 'session_id')
   String sessionId;

@@ -11,9 +11,9 @@ class AppButton {
 
   @JsonKey(name: 'label',disallowNullValue: false)
   String label;
-  @JsonKey(name: 'color', disallowNullValue: false)
+  @JsonKey(name: 'color')
   String color;
-  @JsonKey(name: 'action', disallowNullValue: false)
+  @JsonKey(name: 'action')
   String action;
 
   Map<String, dynamic> toJson() => _$AppButtonToJson(this);

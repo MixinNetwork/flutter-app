@@ -12,8 +12,7 @@ class AppsDao extends DatabaseAccessor<MixinDatabase> with _$AppsDaoMixin {
 
   Future deleteApp(App app) => delete(db.apps).delete(app);
 
-  Future<App?> findUserById(String appId) async{
-    final list = await (select(db.apps)..where((tbl) => tbl.appId.equals(appId))).get();
-    return list.isEmpty ? null : list.first;
-  }
+  Future<App?> findUserById(String appId) async =>
+      (select(db.apps)..where((tbl) => tbl.appId.equals(appId)))
+          .getSingleOrNull();
 }

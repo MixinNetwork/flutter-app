@@ -7,8 +7,6 @@ part of 'system_session_message.dart';
 // **************************************************************************
 
 SystemSessionMessage _$SystemSessionMessageFromJson(Map<String, dynamic> json) {
-  $checkKeys(json,
-      disallowNullValues: const ['action', 'user_id', 'session_id']);
   return SystemSessionMessage(
     _$enumDecode(_$SystemUserActionEnumMap, json['action']),
     json['user_id'] as String,
@@ -16,21 +14,12 @@ SystemSessionMessage _$SystemSessionMessageFromJson(Map<String, dynamic> json) {
 }
 
 Map<String, dynamic> _$SystemSessionMessageToJson(
-    SystemSessionMessage instance) {
-  final val = <String, dynamic>{
-    'action': _$SystemUserActionEnumMap[instance.action],
-    'user_id': instance.userId,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('session_id', instance.sessionId);
-  return val;
-}
+        SystemSessionMessage instance) =>
+    <String, dynamic>{
+      'action': _$SystemUserActionEnumMap[instance.action],
+      'user_id': instance.userId,
+      'session_id': instance.sessionId,
+    };
 
 K _$enumDecode<K, V>(
   Map<K, V> enumValues,

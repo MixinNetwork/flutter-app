@@ -7,7 +7,6 @@ part of 'location_message.dart';
 // **************************************************************************
 
 LocationMessage _$LocationMessageFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['latitude', 'longitude']);
   return LocationMessage(
     (json['latitude'] as num).toDouble(),
     (json['longitude'] as num).toDouble(),

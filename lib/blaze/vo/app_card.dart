@@ -12,13 +12,13 @@ class AppCard {
 
   @JsonKey(name: 'app_id')
   String appId;
-  @JsonKey(name: 'icon_url', disallowNullValue: false)
+  @JsonKey(name: 'icon_url')
   String iconUrl;
-  @JsonKey(name: 'title', disallowNullValue: false)
+  @JsonKey(name: 'title')
   String title;
-  @JsonKey(name: 'description', disallowNullValue: false)
+  @JsonKey(name: 'description')
   String description;
-  @JsonKey(name: 'action', disallowNullValue: false)
+  @JsonKey(name: 'action')
   String action;
   @JsonKey(name: 'updatedAt')
   DateTime? updatedAt;

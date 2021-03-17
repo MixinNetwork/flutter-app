@@ -79,17 +79,10 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           ));
         })
         .where((_) => deviceId != null)
-        .asyncMap((event) async {
-          print('event: $event');
-          print('deviceId: $deviceId');
-          try {
-            final rsp = await client.provisioningApi.getProvisioning(deviceId!);
-            return rsp.data?.secret;
-          } catch (e,s) {
-            print('e: $e, s: $s');
-            return null;
-          }
-        })
+        .asyncMap((event) async =>
+            (await client.provisioningApi.getProvisioning(deviceId!))
+                .data
+                ?.secret)
         .handleError((e) => null)
         .where((secret) => secret?.isNotEmpty == true)
         .doOnData((secret) {

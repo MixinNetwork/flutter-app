@@ -7,7 +7,6 @@ part of 'system_circle_message.dart';
 // **************************************************************************
 
 SystemCircleMessage _$SystemCircleMessageFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['action', 'circle_id']);
   return SystemCircleMessage(
     _$enumDecode(_$SystemCircleActionEnumMap, json['action']),
     json['circle_id'] as String,

@@ -10,9 +10,9 @@ class LocationMessage {
   factory LocationMessage.fromJson(Map<String, dynamic> json) =>
       _$LocationMessageFromJson(json);
 
-  @JsonKey(name: 'latitude', disallowNullValue: true)
+  @JsonKey(name: 'latitude')
   double latitude;
-  @JsonKey(name: 'longitude', disallowNullValue: true)
+  @JsonKey(name: 'longitude')
   double longitude;
   @JsonKey(name: 'name')
   String name;

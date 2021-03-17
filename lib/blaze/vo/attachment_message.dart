@@ -25,11 +25,11 @@ class AttachmentMessage {
   dynamic key;
   @JsonKey(name: 'digest')
   dynamic digest;
-  @JsonKey(name: 'attachment_id', disallowNullValue: true)
+  @JsonKey(name: 'attachment_id')
   String attachmentId;
-  @JsonKey(name: 'mime_type', disallowNullValue: true)
+  @JsonKey(name: 'mime_type')
   String mimeType;
-  @JsonKey(name: 'size', disallowNullValue: true)
+  @JsonKey(name: 'size')
   int size;
   @JsonKey(name: 'name')
   String? name;

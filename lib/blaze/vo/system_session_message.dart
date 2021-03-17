@@ -10,11 +10,11 @@ class SystemSessionMessage {
   factory SystemSessionMessage.fromJson(Map<String, dynamic> json) =>
       _$SystemSessionMessageFromJson(json);
 
-  @JsonKey(name: 'action', disallowNullValue: true)
+  @JsonKey(name: 'action')
   SystemUserAction action;
-  @JsonKey(name: 'user_id', disallowNullValue: true)
+  @JsonKey(name: 'user_id')
   String userId;
-  @JsonKey(name: 'session_id', disallowNullValue: true)
+  @JsonKey(name: 'session_id')
   String? sessionId;
 
   Map<String, dynamic> toJson() => _$SystemSessionMessageToJson(this);

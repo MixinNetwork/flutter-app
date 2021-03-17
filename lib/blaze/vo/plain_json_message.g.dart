@@ -7,7 +7,6 @@ part of 'plain_json_message.dart';
 // **************************************************************************
 
 PlainJsonMessage _$PlainJsonMessageFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['action']);
   return PlainJsonMessage(
     json['action'] as String,
     (json['messages'] as List<dynamic>?)?.map((e) => e as String).toList(),

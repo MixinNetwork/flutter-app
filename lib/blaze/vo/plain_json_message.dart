@@ -11,7 +11,7 @@ class PlainJsonMessage {
   factory PlainJsonMessage.fromJson(Map<String, dynamic> json) =>
       _$PlainJsonMessageFromJson(json);
 
-  @JsonKey(name: 'action', disallowNullValue: true)
+  @JsonKey(name: 'action')
   String action;
   @JsonKey(name: 'messages')
   List<String>? messages;

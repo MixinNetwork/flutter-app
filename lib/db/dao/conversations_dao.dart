@@ -26,12 +26,10 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<Conversation?> getConversationById(String conversationId) async {
-    final list = await (select(db.conversations)
-          ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .get();
-    return list.isEmpty ? null : list.first;
-  }
+  Future<Conversation?> getConversationById(String conversationId) async =>
+      (select(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .getSingleOrNull();
 
   Selectable<ConversationItem> contactConversations(
     int limit,

@@ -7,7 +7,6 @@ part of 'recall_message.dart';
 // **************************************************************************
 
 RecallMessage _$RecallMessageFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['message_id']);
   return RecallMessage(
     json['message_id'] as String,
   );

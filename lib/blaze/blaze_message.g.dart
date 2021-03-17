@@ -7,7 +7,6 @@ part of 'blaze_message.dart';
 // **************************************************************************
 
 BlazeMessage _$BlazeMessageFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['id', 'action']);
   return BlazeMessage(
     id: json['id'] as String,
     action: json['action'] as String,

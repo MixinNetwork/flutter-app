@@ -11,7 +11,7 @@ enum MessageAction {
 }
 
 class MessageActionJsonConverter
-    extends EnumStringJsonConverter<MessageAction> {
+    extends EnumJsonConverter<MessageAction> {
   const MessageActionJsonConverter();
 
   @override

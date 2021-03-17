@@ -25,23 +25,23 @@ class BlazeMessageData {
   factory BlazeMessageData.fromJson(Map<String, dynamic> json) =>
       _$BlazeMessageDataFromJson(json);
 
-  @JsonKey(name: 'conversation_id', disallowNullValue: true)
+  @JsonKey(name: 'conversation_id')
   String? conversationId;
-  @JsonKey(name: 'user_id', disallowNullValue: true)
+  @JsonKey(name: 'user_id')
   String userId;
-  @JsonKey(name: 'message_id', disallowNullValue: true)
+  @JsonKey(name: 'message_id')
   String messageId;
   @JsonKey(name: 'category')
   MessageCategory? category;
-  @JsonKey(name: 'data', disallowNullValue: true)
+  @JsonKey(name: 'data')
   String data;
-  @JsonKey(name: 'status', disallowNullValue: true)
+  @JsonKey(name: 'status')
   MessageStatus status;
-  @JsonKey(name: 'created_at', disallowNullValue: true)
+  @JsonKey(name: 'created_at')
   DateTime createdAt;
-  @JsonKey(name: 'updated_at', disallowNullValue: true)
+  @JsonKey(name: 'updated_at')
   DateTime updatedAt;
-  @JsonKey(name: 'source', disallowNullValue: true)
+  @JsonKey(name: 'source')
   String source;
   @JsonKey(name: 'representative_id')
   String? representativeId;

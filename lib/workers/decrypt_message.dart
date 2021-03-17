@@ -29,7 +29,6 @@ import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/enum/system_circle_action.dart';
 import 'package:flutter_app/enum/system_user_action.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
-import 'package:flutter_app/utils/enum_to_string.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';

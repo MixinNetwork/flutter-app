@@ -7,7 +7,6 @@ part of 'system_user_message.dart';
 // **************************************************************************
 
 SystemUserMessage _$SystemUserMessageFromJson(Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['action', 'user_id']);
   return SystemUserMessage(
     _$enumDecode(_$SystemUserActionEnumMap, json['action']),
     json['user_id'] as String,

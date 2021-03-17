@@ -21,15 +21,15 @@ class SnapshotMessage {
   factory SnapshotMessage.fromJson(Map<String, dynamic> json) =>
       _$SnapshotMessageFromJson(json);
 
-  @JsonKey(name: 'snapshot_id', disallowNullValue: true)
+  @JsonKey(name: 'snapshot_id')
   String snapshotId;
-  @JsonKey(name: 'type', disallowNullValue: true)
+  @JsonKey(name: 'type')
   String type;
-  @JsonKey(name: 'asset_id', disallowNullValue: true)
+  @JsonKey(name: 'asset_id')
   String assetId;
-  @JsonKey(name: 'amount', disallowNullValue: true)
+  @JsonKey(name: 'amount')
   String amount;
-  @JsonKey(name: 'created_at', disallowNullValue: true)
+  @JsonKey(name: 'created_at')
   String createdAt;
   @JsonKey(name: 'opponent_id')
   String opponentId;

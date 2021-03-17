@@ -1,11 +1,10 @@
 import 'package:flutter_app/constants/constants.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import 'enum_to_string.dart';
 
 Future<bool> openUri(String text) {
   final uri = Uri.parse(text);
-  if(uri.scheme.isEmpty) return Future.value(false);
+  if (uri.scheme.isEmpty) return Future.value(false);
 
   if (uri.isScheme(mixinScheme)) {
     final host = EnumToString.fromString(MixinSchemeHost.values, uri.host);

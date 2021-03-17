@@ -64,7 +64,7 @@ enum MessageCategory {
 }
 
 class MessageCategoryJsonConverter
-    extends EnumStringJsonConverter<MessageCategory> {
+    extends EnumJsonConverter<MessageCategory> {
   const MessageCategoryJsonConverter();
   @override
   List<MessageCategory> enumValues() => MessageCategory.values;

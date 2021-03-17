@@ -8,7 +8,6 @@ part of 'blaze_message_param_session.dart';
 
 BlazeMessageParamSession _$BlazeMessageParamSessionFromJson(
     Map<String, dynamic> json) {
-  $checkKeys(json, disallowNullValues: const ['user_id']);
   return BlazeMessageParamSession(
     userId: json['user_id'] as String,
     sessionId: json['session_id'] as String,

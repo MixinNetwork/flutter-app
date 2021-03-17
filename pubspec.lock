@@ -207,12 +207,10 @@ packages:
   dart_jsonwebtoken:
     dependency: transitive
     description:
-      path: "."
-      ref: nullsafety
-      resolved-ref: "93aac5d7c3b79b42eb59c946244f2aab76d18a39"
-      url: "git@github.com:MixinNetwork/jsonwebtoken.git"
-    source: git
-    version: "2.0.0-nullsafety.1"
+      name: dart_jsonwebtoken
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.0-nullsafety.2"
   dart_style:
     dependency: transitive
     description:
@@ -566,8 +564,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "153a83d9d2de87b71bc07755511b2474e12f4d33"
-      resolved-ref: "153a83d9d2de87b71bc07755511b2474e12f4d33"
+      ref: "9a01e2e6320d300f823f02283edc2b58376678bb"
+      resolved-ref: "9a01e2e6320d300f823f02283edc2b58376678bb"
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"
