@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
@@ -25,6 +26,7 @@ import 'item/file_message.dart';
 import 'item/image/image_message.dart';
 import 'item/location/location_message.dart';
 import 'item/post_message.dart';
+import 'item/recall_message.dart';
 import 'item/secret_message.dart';
 import 'item/system_message.dart';
 import 'item/transfer_message.dart';
@@ -82,7 +84,7 @@ class MessageItemWidget extends StatelessWidget {
             return _MessageBubbleMargin(
               userName: user,
               isCurrentUser: isCurrentUser,
-              menus: [
+              buildMenus: () => [
                 if (message.type.isText ||
                     message.type.isImage ||
                     message.type.isVideo ||
@@ -109,8 +111,18 @@ class MessageItemWidget extends StatelessWidget {
                     onTap: () =>
                         Clipboard.setData(ClipboardData(text: message.content)),
                   ),
+                if (DateTime.now().isBefore(
+                    message.createdAt.add(const Duration(minutes: 30))))
+                  ContextMenu(
+                    title: Localization.of(context).deleteForEveryone,
+                    isDestructiveAction: true,
+                    onTap: () => context
+                        .read<AccountServer>()
+                        .sendRecallMessage(
+                            message.conversationId, [message.messageId]),
+                  ),
                 ContextMenu(
-                  title: Localization.of(context).delete,
+                  title: Localization.of(context).deleteForMe,
                   isDestructiveAction: true,
                 ),
               ],
@@ -189,6 +201,12 @@ class MessageItemWidget extends StatelessWidget {
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );
+                if (message.type.isRecall)
+                  return RecallMessage(
+                    showNip: showNip,
+                    isCurrentUser: isCurrentUser,
+                    message: message,
+                  );
                 return UnknownMessage(
                   showNip: showNip,
                   isCurrentUser: isCurrentUser,
@@ -209,13 +227,13 @@ class _MessageBubbleMargin extends StatelessWidget {
     required this.isCurrentUser,
     required this.userName,
     required this.builder,
-    required this.menus,
+    required this.buildMenus,
   }) : super(key: key);
 
   final bool isCurrentUser;
   final String? userName;
   final WidgetBuilder builder;
-  final List<ContextMenu> menus;
+  final List<ContextMenu> Function() buildMenus;
 
   @override
   Widget build(BuildContext context) => MessageBubbleMargin(
@@ -225,7 +243,7 @@ class _MessageBubbleMargin extends StatelessWidget {
           children: [
             if (userName != null) MessageName(userName: userName!),
             ContextMenuPortalEntry(
-              menus: menus,
+              buildMenus: buildMenus,
               child: Builder(builder: builder),
             ),
           ],

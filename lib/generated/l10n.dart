@@ -796,6 +796,46 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Delete for me`
+  String get deleteForMe {
+    return Intl.message(
+      'Delete for me',
+      name: 'deleteForMe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete for Everyone`
+  String get deleteForEveryone {
+    return Intl.message(
+      'Delete for Everyone',
+      name: 'deleteForEveryone',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You deleted this message`
+  String get chatRecallMe {
+    return Intl.message(
+      'You deleted this message',
+      name: 'chatRecallMe',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `This message was deleted`
+  String get chatRecallDelete {
+    return Intl.message(
+      'This message was deleted',
+      name: 'chatRecallDelete',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

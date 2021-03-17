@@ -71,5 +71,9 @@
   "chatGroupCreate": "{name}创建了群组{groupName}",
   "chatGroupRole": "你现在成为管理员",
   "chatNotFound": "找不到该消息",
-  "extensions": "机器人"
+  "extensions": "机器人",
+  "deleteForMe": "删除",
+  "deleteForEveryone": "撤回",
+  "chatRecallMe": "你撤回了一条消息",
+  "chatRecallDelete": "此消息已撤回"
 }

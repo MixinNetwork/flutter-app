@@ -129,7 +129,7 @@ class _CircleList extends StatelessWidget {
                       selected: selected,
                       count: 99,
                     ),
-                    menus: [
+                    buildMenus: () => [
                       ContextMenu(
                         title: Localization.of(context).editCircleName,
                       ),

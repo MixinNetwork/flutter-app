@@ -29,6 +29,7 @@ import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
@@ -127,7 +128,7 @@ class _List extends StatelessWidget {
                                 .pushPage(ResponsiveNavigatorCubit.chatPage);
                           },
                         ),
-                        menus: [
+                        buildMenus: () => [
                           if (conversation.pinTime != null)
                             ContextMenu(
                               title: Localization.of(context).unPin,
@@ -410,6 +411,7 @@ class _MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isCurrentUser = UserRelationship.me == conversation.relationship;
     final dynamicColor = BrightnessData.themeOf(context).secondaryText;
     String? icon;
     String? content;
@@ -468,8 +470,8 @@ class _MessageContent extends StatelessWidget {
       content = '[${Localization.of(context).videoCall}]';
       icon = Resources.assetsImagesVideoCallSvg;
     } else if (conversation.contentType.isRecall) {
-      // todo
-      // content = '[${Localization.of(context).recall}]';
+      content =
+          '[${isCurrentUser ? Localization.of(context).chatRecallMe : Localization.of(context).chatRecallDelete}]';
       icon = Resources.assetsImagesRecallSvg;
     } else if (conversation.contentType.isGroupCall) {
 // todo

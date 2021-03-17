@@ -206,6 +206,6 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<void> recallMessage(String messageId) async {
     await db.recallMessage(messageId);
     // Maybe use another event
-    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageId);
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
   }
 }

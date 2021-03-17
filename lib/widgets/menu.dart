@@ -13,11 +13,11 @@ class ContextMenuPortalEntry extends StatelessWidget {
   const ContextMenuPortalEntry({
     Key? key,
     required this.child,
-    required this.menus,
+    required this.buildMenus,
   }) : super(key: key);
 
   final Widget child;
-  final List<ContextMenu> menus;
+  final List<ContextMenu> Function() buildMenus;
 
   @override
   Widget build(BuildContext context) => BlocProvider(
@@ -45,7 +45,7 @@ class ContextMenuPortalEntry extends StatelessWidget {
                       delegate: PositionedLayoutDelegate(
                         position: offset!,
                       ),
-                      child: ContextMenuPage(menus: menus),
+                      child: ContextMenuPage(menus: buildMenus()),
                     ),
                   ),
                 ),
