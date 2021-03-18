@@ -277,11 +277,16 @@ class _QuoteMessageBase extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             if (name != null)
-                              Text(
-                                name!,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: BrightnessData.themeOf(context).accent,
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Text(
+                                  name!,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    color:
+                                        BrightnessData.themeOf(context).accent,
+                                    height: 1,
+                                  ),
                                 ),
                               ),
                             Row(
@@ -299,6 +304,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                       fontSize: 12,
                                       color: BrightnessData.themeOf(context)
                                           .secondaryText,
+                                      height: 1,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
