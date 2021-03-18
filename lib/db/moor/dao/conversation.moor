@@ -192,3 +192,6 @@ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.catego
                 ELSE m.created_at
               END
             DESC;
+
+allUnseenMessageCount:
+SELECT SUM(unseen_message_count) FROM conversations WHERE mute_until <= :now;

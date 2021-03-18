@@ -11802,6 +11802,17 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<int?> allUnseenMessageCount(DateTime? now) {
+    return customSelect(
+        'SELECT SUM(unseen_message_count) FROM conversations WHERE mute_until <= :now',
+        variables: [
+          Variable<int?>(Conversations.$converter5.mapToSql(now))
+        ],
+        readsFrom: {
+          conversations
+        }).map((QueryRow row) => row.readInt('SUM(unseen_message_count)'));
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

@@ -12,13 +12,29 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationsDaoMixin {
   ConversationsDao(MixinDatabase db) : super(db);
 
-  Stream<Null> get updateEvent => db.tableUpdates(TableUpdateQuery.onAllTables([
+  late Stream<Null> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
+    db.conversations,
+    db.users,
+    db.messages,
+    db.snapshots,
+    db.messageMentions,
+  ]));
+
+  late Stream<int> allUnseenMessageCountEvent = db
+      .tableUpdates(TableUpdateQuery.onAllTables([
         db.conversations,
         db.users,
         db.messages,
         db.snapshots,
         db.messageMentions,
-      ]));
+      ]))
+      .asyncMap(
+          (event) => db.allUnseenMessageCount(DateTime.now()).getSingleOrNull())
+      .where((event) => event != null)
+      .map((event) => event!);
+
+  Future<int?> allUnseenMessageCount() =>
+      db.allUnseenMessageCount(DateTime.now()).getSingleOrNull();
 
   Future<int> insert(Conversation conversation) async {
     final result =
@@ -93,4 +109,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
             Variable.withString(conversationId),
             Variable<ConversationStatus>(status)
           ]);
+
+  Future<ConversationItem?> conversationItem(String conversationId) =>
+      db.conversationItem(conversationId).getSingleOrNull();
 }

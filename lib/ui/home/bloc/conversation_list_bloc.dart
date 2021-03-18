@@ -5,6 +5,7 @@ import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
+import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -15,6 +16,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     addSubscription(slideCategoryCubit
         .distinct()
         .listen((event) => _switchBloc(event, limit)));
+    _initBadge();
   }
 
   final SlideCategoryCubit slideCategoryCubit;
@@ -98,6 +100,18 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   Future<void> close() async {
     await Future.wait(_map.values.map((e) => e.close()));
     await super.close();
+  }
+
+  Future<void> _initBadge() async {
+    final updateBadge = (int? count) async {
+      if ((count ?? 0) == 0) return await FlutterAppIconBadge.removeBadge();
+      await FlutterAppIconBadge.updateBadge(count!);
+    };
+
+    final count = await database.conversationDao.allUnseenMessageCount();
+    if (count != null) await updateBadge(count);
+    addSubscription(database.conversationDao.allUnseenMessageCountEvent
+        .listen(updateBadge));
   }
 }
 

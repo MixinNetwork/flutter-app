@@ -124,12 +124,13 @@ void _sendMessage(BuildContext context) {
 
   textEditingController.text = '';
   final conversationItem = BlocProvider.of<ConversationCubit>(context).state;
-  if (conversationItem != null)
-    Provider.of<AccountServer>(context, listen: false).sendTextMessage(
-      conversationItem.conversationId,
-      text,
-      quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
-    );
+  if (conversationItem == null) return;
+
+  context.read<AccountServer>().sendTextMessage(
+        conversationItem.conversationId,
+        text,
+        quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
+      );
 
   context.read<QuoteMessageCubit>().emit(null);
 }
