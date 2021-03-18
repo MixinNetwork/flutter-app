@@ -45,7 +45,7 @@ class LocalNotificationCenter {
           .distinct();
 
   /// example:
-  ///   context.read<LocalNotificationCenter>().showNotificationWithIconBadge(
+  ///   context.read<LocalNotificationCenter>().showNotification(
   //         title: 'title',
   //         body: text,
   //         uri: Uri(
@@ -53,7 +53,7 @@ class LocalNotificationCenter {
   //           host: conversationId,
   //         ),
   //       );
-  Future<void> showNotificationWithIconBadge({
+  Future<void> showNotification({
     required String title,
     required String body,
     Uri? uri,
