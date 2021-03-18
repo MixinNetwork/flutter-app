@@ -16,18 +16,18 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     with _$MessagesDaoMixin {
   MessagesDao(MixinDatabase db) : super(db);
 
-  Stream<Null> get updateEvent => db.tableUpdates(TableUpdateQuery.onAllTables([
-        db.messages,
-        db.users,
-        db.snapshots,
-        db.assets,
-        db.stickers,
-        db.hyperlinks,
-        db.messageMentions,
-        db.conversations,
-      ]));
+  late Stream<Null> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
+    db.messages,
+    db.users,
+    db.snapshots,
+    db.assets,
+    db.stickers,
+    db.hyperlinks,
+    db.messageMentions,
+    db.conversations,
+  ]));
 
-  Stream<List<MessageItem>> get insertOrReplaceMessageStream => db.eventBus
+  late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
       .asyncMap(
         (event) => db.messagesByMessageIds(event.toList()).get(),
