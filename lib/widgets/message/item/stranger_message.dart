@@ -50,14 +50,16 @@ class StrangerMessage extends StatelessWidget {
                     BlocProvider.of<ConversationCubit>(context).state;
                 if (conversationItem == null) return;
                 if (conversationItem.isBotConversation) {
-                  final app = await context.read<AccountServer>().database.appsDao.findUserById(conversationItem.appId!);
-                  if(app == null) return;
+                  final app = await context
+                      .read<AccountServer>()
+                      .database
+                      .appsDao
+                      .findUserById(conversationItem.appId!);
+                  if (app == null) return;
                   await openUri(app.homeUri);
                 } else {
-                  // TODO block
-                  debugPrint('block');
+                  await context.read<AccountServer>().blockUser(message.userId);
                 }
-
               },
             ),
             const SizedBox(width: 16),
@@ -76,8 +78,7 @@ class StrangerMessage extends StatelessWidget {
                     'Hi',
                   );
                 else
-                  // TODO add user
-                  debugPrint('add user');
+                  context.read<AccountServer>().addUser(message.userId);
               },
             ),
           ],
