@@ -11465,6 +11465,35 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.readInt('count(*)'));
   }
 
+  Selectable<NotificationMessage> notificationMessage(String messageId) {
+    return customSelect(
+        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.full_name       AS userFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messageMentions
+        }).map((QueryRow row) {
+      return NotificationMessage(
+        messageId: row.readString('messageId'),
+        conversationId: row.readString('conversationId'),
+        userId: row.readString('userId'),
+        userFullName: row.readString('userFullName'),
+        type: Messages.$converter0.mapToDart(row.readString('type'))!,
+        content: row.readString('content'),
+        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        groupName: row.readString('groupName'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+      );
+    });
+  }
+
   Selectable<int> contactConversationCount() {
     return customSelect(
         'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'FRIEND\'\n       AND ou.app_id IS NULL\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',
@@ -12708,6 +12737,80 @@ class SearchMessageDetailItem {
           ..write('content: $content, ')
           ..write('createdAt: $createdAt, ')
           ..write('mediaName: $mediaName')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class NotificationMessage {
+  final String messageId;
+  final String conversationId;
+  final String userId;
+  final String? userFullName;
+  final MessageCategory type;
+  final String? content;
+  final MessageStatus status;
+  final String? groupName;
+  final UserRelationship? relationship;
+  final DateTime? muteUntil;
+  NotificationMessage({
+    required this.messageId,
+    required this.conversationId,
+    required this.userId,
+    this.userFullName,
+    required this.type,
+    this.content,
+    required this.status,
+    this.groupName,
+    this.relationship,
+    this.muteUntil,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode,
+      $mrjc(
+          conversationId.hashCode,
+          $mrjc(
+              userId.hashCode,
+              $mrjc(
+                  userFullName.hashCode,
+                  $mrjc(
+                      type.hashCode,
+                      $mrjc(
+                          content.hashCode,
+                          $mrjc(
+                              status.hashCode,
+                              $mrjc(
+                                  groupName.hashCode,
+                                  $mrjc(relationship.hashCode,
+                                      muteUntil.hashCode))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is NotificationMessage &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.userId == this.userId &&
+          other.userFullName == this.userFullName &&
+          other.type == this.type &&
+          other.content == this.content &&
+          other.status == this.status &&
+          other.groupName == this.groupName &&
+          other.relationship == this.relationship &&
+          other.muteUntil == this.muteUntil);
+  @override
+  String toString() {
+    return (StringBuffer('NotificationMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('status: $status, ')
+          ..write('groupName: $groupName, ')
+          ..write('relationship: $relationship, ')
+          ..write('muteUntil: $muteUntil')
           ..write(')'))
         .toString();
   }

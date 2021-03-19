@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
@@ -7,7 +5,6 @@ import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
 import 'package:flutter_app/bloc/paging/paging_bloc.dart';
@@ -16,13 +13,11 @@ import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/utils/list_utils.dart';
-import 'package:flutter_app/utils/markdown.dart';
+import 'package:flutter_app/utils/message_optimize.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_app/widgets/menu.dart';
-import 'package:flutter_app/widgets/message/item/action/action_data.dart';
-import 'package:flutter_app/widgets/message/item/action_card/action_card_data.dart';
 import 'package:flutter_app/widgets/message_status_icon.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
@@ -33,6 +28,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
+import 'package:tuple/tuple.dart';
 
 class ConversationPage extends StatelessWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -76,7 +72,7 @@ class _Empty extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          Localization.of(context).noData,
+          Localization.current.noData,
           style: TextStyle(
             color: dynamicColor,
             fontSize: 14,
@@ -131,7 +127,7 @@ class _List extends StatelessWidget {
                         buildMenus: () => [
                           if (conversation.pinTime != null)
                             ContextMenu(
-                              title: Localization.of(context).unPin,
+                              title: Localization.current.unPin,
                               onTap: () => Provider.of<AccountServer>(
                                 context,
                                 listen: false,
@@ -142,7 +138,7 @@ class _List extends StatelessWidget {
                             ),
                           if (conversation.pinTime == null)
                             ContextMenu(
-                              title: Localization.of(context).pin,
+                              title: Localization.current.pin,
                               onTap: () => Provider.of<AccountServer>(
                                 context,
                                 listen: false,
@@ -152,10 +148,10 @@ class _List extends StatelessWidget {
                                   .pin(conversation.conversationId),
                             ),
                           ContextMenu(
-                            title: Localization.of(context).unMute,
+                            title: Localization.current.unMute,
                           ),
                           ContextMenu(
-                            title: Localization.of(context).deleteChat,
+                            title: Localization.current.deleteChat,
                             isDestructiveAction: true,
                             onTap: () => Provider.of<AccountServer>(
                               context,
@@ -411,91 +407,35 @@ class _MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isCurrentUser = UserRelationship.me == conversation.relationship;
     final dynamicColor = BrightnessData.themeOf(context).secondaryText;
-    String? icon;
-    String? content;
-
-    if (conversation.messageStatus == MessageStatus.failed) {
-      icon = Resources.assetsImagesSendingSvg;
-      content = Localization.of(context).waitingForThisMessage;
-    } else if (conversation.contentType.isText) {
-      // todo markdown and mention
-      content = conversation.content;
-    } else if (conversation.contentType ==
-        MessageCategory.systemAccountSnapshot) {
-      content = '[${Localization.of(context).transfer}]';
-      icon = Resources.assetsImagesTransferSvg;
-    } else if (conversation.contentType.isSticker) {
-      content = '[${Localization.of(context).sticker}]';
-      icon = Resources.assetsImagesStickerSvg;
-    } else if (conversation.contentType.isImage) {
-      content = '[${Localization.of(context).image}]';
-      icon = Resources.assetsImagesImageSvg;
-    } else if (conversation.contentType.isVideo) {
-      content = '[${Localization.of(context).video}]';
-      icon = Resources.assetsImagesVideoSvg;
-    } else if (conversation.contentType.isLive) {
-      content = '[${Localization.of(context).live}]';
-      icon = Resources.assetsImagesLiveSvg;
-    } else if (conversation.contentType.isData) {
-      content = '[${Localization.of(context).file}]';
-      icon = Resources.assetsImagesFileSvg;
-    } else if (conversation.contentType.isPost) {
-      icon = Resources.assetsImagesFileSvg;
-      content = conversation.content!.postOptimizeMarkdown;
-    } else if (conversation.contentType.isLocation) {
-      content = '[${Localization.of(context).location}]';
-      icon = Resources.assetsImagesLocationSvg;
-    } else if (conversation.contentType.isAudio) {
-      content = '[${Localization.of(context).audio}]';
-      icon = Resources.assetsImagesAudioSvg;
-    } else if (conversation.contentType == MessageCategory.appButtonGroup) {
-      content = 'APP_BUTTON_GROUP';
-      if (conversation.content != null)
-        content = jsonDecode(conversation.content!)
-            .map((e) => ActionData.fromJson(e))
-            .map((e) => '[${e.label}]')
-            .join();
-      icon = Resources.assetsImagesAppButtonSvg;
-    } else if (conversation.contentType == MessageCategory.appCard) {
-      content = 'APP_CARD';
-      if (conversation.content != null)
-        content = AppCardData.fromJson(jsonDecode(conversation.content!)).title;
-      icon = Resources.assetsImagesAppButtonSvg;
-    } else if (conversation.contentType.isContact) {
-      content = '[${Localization.of(context).contact}]';
-      icon = Resources.assetsImagesContactSvg;
-    } else if (conversation.contentType.isCallMessage) {
-      content = '[${Localization.of(context).videoCall}]';
-      icon = Resources.assetsImagesVideoCallSvg;
-    } else if (conversation.contentType.isRecall) {
-      content =
-          '[${isCurrentUser ? Localization.of(context).chatRecallMe : Localization.of(context).chatRecallDelete}]';
-      icon = Resources.assetsImagesRecallSvg;
-    } else if (conversation.contentType.isGroupCall) {
-// todo
-    }
-
-    return Row(
-      children: [
-        if (icon != null)
-          SvgPicture.asset(
-            icon,
-            color: dynamicColor,
-          ),
-        if (content != null)
-          Expanded(
-            child: Text(
-              content,
-              style: TextStyle(
-                color: dynamicColor,
-                fontSize: 14,
-              ),
-              overflow: TextOverflow.ellipsis,
+    return FutureBuilder<Tuple2<String?, String?>>(
+      future: messageOptimize(
+        conversation.messageStatus,
+        conversation.contentType,
+        conversation.content,
+        UserRelationship.me == conversation.relationship ,
+      ),
+      initialData: const Tuple2<String?, String?>(null, null),
+      builder: (context, snapshot) => Row(
+        children: [
+          if (snapshot.data?.item1 != null)
+            SvgPicture.asset(
+              snapshot.data!.item1!,
+              color: dynamicColor,
             ),
-          ),
-      ].joinList(const SizedBox(width: 4)),
+          if (snapshot.data?.item2 != null)
+            Expanded(
+              child: Text(
+                snapshot.data!.item2!,
+                style: TextStyle(
+                  color: dynamicColor,
+                  fontSize: 14,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+        ].joinList(const SizedBox(width: 4)),
+      ),
     );
   }
 }

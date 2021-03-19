@@ -6,7 +6,6 @@ import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
-import 'package:flutter_app/ui/home/local_notification_center.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -24,56 +23,51 @@ class App extends StatelessWidget {
   final accountServer = AccountServer();
 
   @override
-  Widget build(BuildContext context) => Provider<LocalNotificationCenter>(
-        create: (context) => LocalNotificationCenter(),
-        dispose: (context, localNotificationCenter) =>
-            localNotificationCenter.dispose(),
-        child: MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (context) => MultiAuthCubit(),
-            ),
-          ],
-          child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
-            converter: (state) => state.current,
-            builder: (context, authState) {
-              const app = _App();
-              if (authState == null) return app;
-              return FutureProvider<AccountServer?>(
-                key: ValueKey(Tuple4(
-                  authState.account.userId,
-                  authState.account.sessionId,
-                  authState.account.identityNumber,
-                  authState.privateKey,
-                )),
-                create: (BuildContext context) async {
-                  await accountServer.initServer(
-                    authState.account.userId,
-                    authState.account.sessionId,
-                    authState.account.identityNumber,
-                    authState.privateKey,
-                  );
-                  return accountServer;
-                },
-                initialData: null,
-                builder: (BuildContext context, _) => Consumer<AccountServer?>(
-                  builder: (context, accountServer, child) {
-                    if (accountServer != null)
-                      return _Providers(
-                        app: Portal(
-                          child: child!,
-                        ),
-                        accountServer: accountServer,
-                      );
-                    return child!;
-                  },
-                  child: app,
-                ),
-              );
+  Widget build(BuildContext context) => MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (context) => MultiAuthCubit(),
+      ),
+    ],
+    child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
+      converter: (state) => state.current,
+      builder: (context, authState) {
+        const app = _App();
+        if (authState == null) return app;
+        return FutureProvider<AccountServer?>(
+          key: ValueKey(Tuple4(
+            authState.account.userId,
+            authState.account.sessionId,
+            authState.account.identityNumber,
+            authState.privateKey,
+          )),
+          create: (BuildContext context) async {
+            await accountServer.initServer(
+              authState.account.userId,
+              authState.account.sessionId,
+              authState.account.identityNumber,
+              authState.privateKey,
+            );
+            return accountServer;
+          },
+          initialData: null,
+          builder: (BuildContext context, _) => Consumer<AccountServer?>(
+            builder: (context, accountServer, child) {
+              if (accountServer != null)
+                return _Providers(
+                  app: Portal(
+                    child: child!,
+                  ),
+                  accountServer: accountServer,
+                );
+              return child!;
             },
+            child: app,
           ),
-        ),
-      );
+        );
+      },
+    ),
+  );
 }
 
 class _Providers extends StatelessWidget {
@@ -102,9 +96,9 @@ class _Providers extends StatelessWidget {
                 create: (BuildContext context) => ResponsiveNavigatorCubit(),
               ),
               BlocProvider(
-                create: (BuildContext _) => ConversationCubit(
+                create: (BuildContext context) => ConversationCubit(
                   accountServer: accountServer,
-                    localNotificationCenter: context.read<LocalNotificationCenter>(),
+                  responsiveNavigatorCubit: context.read<ResponsiveNavigatorCubit>(),
                 ),
               ),
               BlocProvider(

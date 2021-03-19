@@ -23,10 +23,6 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   late Stream<int> allUnseenMessageCountEvent = db
       .tableUpdates(TableUpdateQuery.onAllTables([
         db.conversations,
-        db.users,
-        db.messages,
-        db.snapshots,
-        db.messageMentions,
       ]))
       .asyncMap(
           (event) => db.allUnseenMessageCount(DateTime.now()).getSingleOrNull())

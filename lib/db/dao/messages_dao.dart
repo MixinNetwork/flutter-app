@@ -34,6 +34,12 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       )
       .distinct();
 
+  late Stream<NotificationMessage> insertMessageStream = db.eventBus
+      .watch<String>(DatabaseEvent.insert)
+      .asyncMap((event) => db.notificationMessage(event).getSingleOrNull())
+      .where((event) => event != null)
+      .cast<NotificationMessage>();
+
   Future<int> insert(Message message, String userId) async {
     final result = await into(db.messages).insertOnConflictUpdate(message);
     if (message.category.isText) {
@@ -45,6 +51,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         .updateLastMessageId(message.conversationId, message.messageId);
     await _takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
+    db.eventBus.send(DatabaseEvent.insert, message.messageId);
     return result;
   }
 

@@ -109,7 +109,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     };
 
     final count = await database.conversationDao.allUnseenMessageCount();
-    if (count != null) await updateBadge(count);
+    await updateBadge(count);
     addSubscription(database.conversationDao.allUnseenMessageCountEvent
         .listen(updateBadge));
   }

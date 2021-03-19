@@ -13,76 +13,58 @@ enum NotificationScheme {
 }
 
 class LocalNotificationCenter {
-  LocalNotificationCenter() {
-    _init();
-  }
-
-  final StreamController<Uri> payloadStreamController =
+  static final StreamController<Uri> _payloadStreamController =
       StreamController<Uri>.broadcast();
-  var _id = 0;
+  static var _id = 0;
+  static var initialed = false;
 
-  Future<void> _init() async {
+  static Future<void> initListener() async {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: _onSelectNotification);
     await flutterLocalNotificationsPlugin.cancelAll();
     _id = 0;
+    initialed = true;
   }
 
-  Future<void> dispose() => payloadStreamController.close();
-
-  Future<dynamic> _onSelectNotification(String? payload) async {
+  static Future<dynamic> _onSelectNotification(String? payload) async {
     if (payload?.isEmpty ?? true) return;
     try {
-      payloadStreamController.add(Uri.parse(payload!));
+      _payloadStreamController.add(Uri.parse(payload!));
     } catch (_) {}
   }
 
-  Stream<Uri> notificationSelectEvent(NotificationScheme notificationScheme) =>
-      payloadStreamController.stream
-          .where((e) =>
-              e.scheme.toUpperCase() ==
-              EnumToString.convertToString(notificationScheme))
-          .distinct();
+  static Stream<Uri> notificationSelectEvent(
+          NotificationScheme notificationScheme) =>
+      _payloadStreamController.stream.where((e) =>
+          e.scheme.toUpperCase() ==
+          EnumToString.convertToString(notificationScheme));
 
-  /// example:
-  ///   context.read<LocalNotificationCenter>().showNotification(
-  //         title: 'title',
-  //         body: text,
-  //         uri: Uri(
-  //           scheme: EnumToString.convertToString(NotificationScheme.conversation),
-  //           host: conversationId,
-  //         ),
-  //       );
-  Future<void> showNotification({
+  static Future<void> showNotification({
     required String title,
     required String body,
-    Uri? uri,
+    required Uri uri,
   }) async {
     await _requestPermission();
 
+    // TODO Set mixin.caf to be invalid.
     const platformChannelSpecifics = NotificationDetails(
-      macOS: MacOSNotificationDetails(
-          // TODO
-          //   sound:
-          ),
+      macOS: MacOSNotificationDetails(sound: 'mixin.caf'),
     );
     await flutterLocalNotificationsPlugin.show(
       _id++,
       title,
       body,
       platformChannelSpecifics,
-      payload: uri?.toString(),
+      payload: uri.toString(),
     );
   }
 
-  Future<void> _requestPermission() async {
-    await flutterLocalNotificationsPlugin
-        .resolvePlatformSpecificImplementation<
-            MacOSFlutterLocalNotificationsPlugin>()
-        ?.requestPermissions(
-          alert: true,
-          badge: true,
-          sound: true,
-        );
-  }
+  static Future<bool?>? _requestPermission() => flutterLocalNotificationsPlugin
+      .resolvePlatformSpecificImplementation<
+          MacOSFlutterLocalNotificationsPlugin>()
+      ?.requestPermissions(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
 }
