@@ -836,6 +836,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Recent conversations`
+  String get recentConversations {
+    return Intl.message(
+      'Recent conversations',
+      name: 'recentConversations',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

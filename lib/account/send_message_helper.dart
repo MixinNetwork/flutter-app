@@ -424,7 +424,7 @@ class SendMessageHelper {
     final message = await _messagesDao.findMessageByMessageId(forwardMessageId);
     if (message == null) {
       return;
-    } else if (message.category.isText == true) {
+    } else if (message.category.isText) {
       await sendTextMessage(
           conversationId, senderId, message.content!, isPlain, null);
     } else if (message.category.isImage) {

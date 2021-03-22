@@ -100,6 +100,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "post" : MessageLookupByLibrary.simpleMessage("文章"),
     "preview" : MessageLookupByLibrary.simpleMessage("预览"),
     "provisioning" : MessageLookupByLibrary.simpleMessage("处理中"),
+    "recentConversations" : MessageLookupByLibrary.simpleMessage("最近聊天"),
     "reply" : MessageLookupByLibrary.simpleMessage("回复"),
     "save" : MessageLookupByLibrary.simpleMessage("保存"),
     "search" : MessageLookupByLibrary.simpleMessage("搜索"),

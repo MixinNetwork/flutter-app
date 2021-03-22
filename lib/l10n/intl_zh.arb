@@ -75,5 +75,6 @@
   "deleteForMe": "删除",
   "deleteForEveryone": "撤回",
   "chatRecallMe": "你撤回了一条消息",
-  "chatRecallDelete": "此消息已撤回"
+  "chatRecallDelete": "此消息已撤回",
+  "recentConversations": "最近聊天"
 }

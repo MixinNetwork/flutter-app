@@ -9,3 +9,6 @@ SELECT u.* FROM participants p, users u
 
 groupParticipants:
 SELECT u.* FROM participants p, users u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id AND u.user_id != :id;
+
+friends:
+SELECT * FROM users WHERE relationship = 'FRIEND' ORDER BY full_name, user_id ASC;

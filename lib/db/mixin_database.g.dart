@@ -10910,6 +10910,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {participants, users}).map(users.mapFromRow);
   }
 
+  Selectable<User> friends() {
+    return customSelect(
+        'SELECT * FROM users WHERE relationship = \'FRIEND\' ORDER BY full_name, user_id ASC',
+        variables: [],
+        readsFrom: {users}).map(users.mapFromRow);
+  }
+
   Selectable<StickerAlbum> systemAlbums() {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
@@ -11840,6 +11847,62 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {
           conversations
         }).map((QueryRow row) => row.readInt('SUM(unseen_message_count)'));
+  }
+
+  Selectable<ConversationItem> conversationItems() {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\')\n                    AND c.status = 2\n                    ORDER BY c.pin_time DESC, c.last_message_created_at DESC',
+        variables: [],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
   }
 
   @override

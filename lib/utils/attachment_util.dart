@@ -23,7 +23,7 @@ class AttachmentUtil {
   final Client _client;
   late final HttpClient _attachmentClient;
 
-  Future<void> downloadAttachment({
+   Future<String?> downloadAttachment({
     required String messageId,
     required String content,
     required String conversationId,
@@ -63,6 +63,7 @@ class AttachmentUtil {
           await file.delete();
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
         }
+        return file.path;
       }
     } catch (e) {
       await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);

@@ -17,7 +17,10 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
+import '../dialog.dart';
+import '../forward_widget/forward_widget.dart';
 import '../menu.dart';
 import 'item/action/action_message.dart';
 import 'item/action_card/action_message.dart';
@@ -102,9 +105,31 @@ class MessageItemWidget extends StatelessWidget {
                     onTap: () =>
                         context.read<QuoteMessageCubit>().emit(message),
                   ),
-                ContextMenu(
-                  title: Localization.of(context).forward,
-                ),
+                if (message.type.isText ||
+                    message.type.isImage ||
+                    message.type.isVideo ||
+                    message.type.isAudio ||
+                    message.type.isData ||
+                    message.type.isSticker ||
+                    message.type.isContact ||
+                    message.type.isLive ||
+                    message.type.isPost ||
+                    message.type.isLocation ||
+                    message.type == MessageCategory.appCard)
+                  ContextMenu(
+                    title: Localization.of(context).forward,
+                    onTap: () async {
+                      final result =
+                          await showMixinDialog<Tuple2<String, bool>>(
+                              context: context, child: const ForwardWidget());
+                      if (result == null) return;
+                      await context.read<AccountServer>().forwardMessage(
+                            result.item1,
+                            message.messageId,
+                            result.item2,
+                          );
+                    },
+                  ),
                 if (message.type.isText)
                   ContextMenu(
                     title: Localization.of(context).copy,

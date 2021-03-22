@@ -108,4 +108,6 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
 
   Future<ConversationItem?> conversationItem(String conversationId) =>
       db.conversationItem(conversationId).getSingleOrNull();
+
+  Selectable<ConversationItem> conversationItems() => db.conversationItems();
 }

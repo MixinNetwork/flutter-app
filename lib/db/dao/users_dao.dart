@@ -40,4 +40,6 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
         conversationId,
         id,
       );
+
+  Selectable<User> friends() => db.friends();
 }

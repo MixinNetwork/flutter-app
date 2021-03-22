@@ -77,5 +77,6 @@
   "deleteForMe": "Delete for me",
   "deleteForEveryone": "Delete for Everyone",
   "chatRecallMe": "You deleted this message",
-  "chatRecallDelete": "This message was deleted"
+  "chatRecallDelete": "This message was deleted",
+  "recentConversations": "Recent conversations"
 }

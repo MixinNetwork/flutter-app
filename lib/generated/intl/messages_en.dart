@@ -102,6 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "post" : MessageLookupByLibrary.simpleMessage("post"),
     "preview" : MessageLookupByLibrary.simpleMessage("Preview"),
     "provisioning" : MessageLookupByLibrary.simpleMessage("Provisioning"),
+    "recentConversations" : MessageLookupByLibrary.simpleMessage("Recent conversations"),
     "reply" : MessageLookupByLibrary.simpleMessage("Reply"),
     "save" : MessageLookupByLibrary.simpleMessage("Save"),
     "search" : MessageLookupByLibrary.simpleMessage("Search"),

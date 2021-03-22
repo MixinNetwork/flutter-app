@@ -213,7 +213,7 @@ class AccountServer {
         id: const Uuid().v4(), action: createMessage, params: blazeParam);
   }
 
-  void sendTextMessage(String conversationId, String content,
+  Future<void> sendTextMessage(String conversationId, String content,
       {bool isPlain = true, String? quoteMessageId}) async {
     if (content.isEmpty) return;
     await _sendMessageHelper.sendTextMessage(
@@ -248,7 +248,7 @@ class AccountServer {
           quoteMessageId);
 
   Future<void> sendDataMessage(String conversationId, XFile file,
-          [bool isPlain = true, String? quoteMessageId]) =>
+          {bool isPlain = true, String? quoteMessageId}) =>
       _sendMessageHelper.sendDataMessage(
           conversationId,
           userId,
@@ -369,7 +369,7 @@ class AccountServer {
     });
   }
 
-  Future<void> downloadAttachment(db.MessageItem message) =>
+  Future<String?> downloadAttachment(db.MessageItem message) =>
       _attachmentUtil.downloadAttachment(
         content: message.content!,
         messageId: message.messageId,
@@ -391,24 +391,17 @@ class AccountServer {
           message.mediaDuration,
           message.mediaWaveform);
 
-  Future<void> addUser(String userId) =>
-      _relationship(
-          RelationshipRequest(userId: userId, action: RelationshipAction.add));
+  Future<void> addUser(String userId) => _relationship(
+      RelationshipRequest(userId: userId, action: RelationshipAction.add));
 
-  Future<void> removeUser(String userId) =>
-      _relationship(
-          RelationshipRequest(
-              userId: userId, action: RelationshipAction.remove));
+  Future<void> removeUser(String userId) => _relationship(
+      RelationshipRequest(userId: userId, action: RelationshipAction.remove));
 
-  Future<void> blockUser(String userId) =>
-      _relationship(
-          RelationshipRequest(
-              userId: userId, action: RelationshipAction.block));
+  Future<void> blockUser(String userId) => _relationship(
+      RelationshipRequest(userId: userId, action: RelationshipAction.block));
 
-  Future<void> unblockUser(String userId) =>
-      _relationship(
-          RelationshipRequest(
-              userId: userId, action: RelationshipAction.unblock));
+  Future<void> unblockUser(String userId) => _relationship(
+      RelationshipRequest(userId: userId, action: RelationshipAction.unblock));
 
   Future<void> _relationship(RelationshipRequest request) async {
     await client.userApi.relationships(request).then((response) async {

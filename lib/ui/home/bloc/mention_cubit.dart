@@ -8,6 +8,7 @@ import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/db/dao/users_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
+import 'package:flutter_app/utils/sort.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'multi_auth_cubit.dart';
@@ -55,19 +56,32 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       Rx.combineLatest2<String?, List<User>, MentionState>(
         streamController.stream,
         participantsCubit,
-        (a, b) => MentionState(
-          text: a,
-          users: a != null
-              ? participantsCubit.state
-                  .where(
-                    (user) =>
-                        (user.fullName?.contains(a) ?? false) ||
-                        user.identityNumber.contains(a),
-                  )
-                  .toList()
-              : [],
-          index: 0,
-        ),
+        (a, b) {
+          late List<User> users;
+          if (a == null)
+            users = [];
+          else {
+            final keyword = a.toLowerCase();
+            users = participantsCubit.state
+                .where(
+                  (user) =>
+                      (user.fullName?.toLowerCase().contains(keyword) ??
+                          false) ||
+                      user.identityNumber.contains(a),
+                )
+                .toList()
+                  ..sort(compareValuesBy((e) {
+                    final indexOf = e.fullName?.toLowerCase().indexOf(keyword) ?? -1;
+                    if (indexOf != -1) return indexOf;
+                    return e.identityNumber.indexOf(a);
+                  }));
+          }
+          return MentionState(
+            text: a,
+            users: users,
+            index: 0,
+          );
+        },
       ).listen(emit),
     );
   }
