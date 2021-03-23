@@ -127,11 +127,16 @@ class Resources {
   static const String assetsImagesRecentStickerSvg =
       'assets/images/recent_sticker.svg';
 
+  static const String assetsImagesSelectedSvg = 'assets/images/selected.svg';
+
   static const String assetsImagesSendingSvg = 'assets/images/sending.svg';
 
   static const String assetsImagesSentSvg = 'assets/images/sent.svg';
 
   static const String assetsImagesShareSvg = 'assets/images/share.svg';
+
+  static const String assetsImagesSmallCloseSvg =
+      'assets/images/small_close.svg';
 
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
 

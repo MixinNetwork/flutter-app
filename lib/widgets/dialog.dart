@@ -148,10 +148,10 @@ class _DialogPage extends StatelessWidget {
 abstract class DialogInteracterEntry<T> extends StatelessWidget {
   const DialogInteracterEntry({
     Key? key,
-    required this.value,
+    this.value,
   }) : super(key: key);
 
-  final T value;
+  final T? value;
 
   void handleTap(BuildContext context) => Navigator.pop<T>(context, value);
 }
@@ -160,10 +160,14 @@ abstract class DialogInteracterEntry<T> extends StatelessWidget {
 class MixinButton<T> extends DialogInteracterEntry<T> {
   const MixinButton({
     Key? key,
-    required T value,
+    T? value,
     this.backgroundTransparent = false,
     required this.child,
     this.onTap,
+    this.padding = const EdgeInsets.symmetric(
+      vertical: 8,
+      horizontal: 16,
+    ),
   }) : super(
           key: key,
           value: value,
@@ -172,6 +176,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
   final bool backgroundTransparent;
   final Widget child;
   final VoidCallback? onTap;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -196,14 +201,9 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
           fontSize: 16,
           color: textColor,
         ),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: 8,
-              horizontal: 16,
-            ),
-            child: child,
-          ),
+        child: Padding(
+          padding: padding,
+          child: child,
         ),
       ),
     );

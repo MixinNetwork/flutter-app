@@ -16,4 +16,9 @@ extension Conversation on ConversationItem {
       category == ConversationCategory.contact &&
       relationship == UserRelationship.stranger &&
       appId == null;
+
+  String get validName =>
+      groupName?.trim().isNotEmpty == true ? groupName! : name ?? '';
 }
+
+void importConversationExtension() {}

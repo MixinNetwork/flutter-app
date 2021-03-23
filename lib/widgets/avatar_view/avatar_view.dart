@@ -54,7 +54,7 @@ class ConversationAvatarWidget extends StatelessWidget {
                                 .toList()
                             : state,
                     builder: (context, state) =>
-                        _AvatarPuzzlesWidget(state, size),
+                        AvatarPuzzlesWidget(state, size),
                   );
                 },
               ),
@@ -64,8 +64,8 @@ class ConversationAvatarWidget extends StatelessWidget {
       );
 }
 
-class _AvatarPuzzlesWidget extends StatelessWidget {
-  const _AvatarPuzzlesWidget(this.users, this.size, {Key? key})
+class AvatarPuzzlesWidget extends StatelessWidget {
+  const AvatarPuzzlesWidget(this.users, this.size, {Key? key})
       : super(key: key);
 
   final List<User> users;

@@ -846,6 +846,56 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Next`
+  String get next {
+    return Intl.message(
+      'Next',
+      name: 'next',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New conversation`
+  String get newConversation {
+    return Intl.message(
+      'New conversation',
+      name: 'newConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} Participants`
+  String participantsCount(Object count) {
+    return Intl.message(
+      '$count Participants',
+      name: 'participantsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Conversation Name`
+  String get conversationName {
+    return Intl.message(
+      'Conversation Name',
+      name: 'conversationName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Create`
+  String get create {
+    return Intl.message(
+      'Create',
+      name: 'create',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

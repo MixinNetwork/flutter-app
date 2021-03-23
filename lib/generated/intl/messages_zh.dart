@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m7(date) => "${date}加入";
 
+  static m8(count) => "共 ${count} 人";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("关于"),
@@ -65,7 +67,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
     "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
     "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),
+    "conversationName" : MessageLookupByLibrary.simpleMessage("群组名称"),
     "copy" : MessageLookupByLibrary.simpleMessage("复制"),
+    "create" : MessageLookupByLibrary.simpleMessage("创建"),
     "dataAndStorageUsage" : MessageLookupByLibrary.simpleMessage("数据和存储使用情况"),
     "delete" : MessageLookupByLibrary.simpleMessage("删除"),
     "deleteChat" : MessageLookupByLibrary.simpleMessage("删除对话"),
@@ -86,6 +90,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "location" : MessageLookupByLibrary.simpleMessage("位置"),
     "mute" : MessageLookupByLibrary.simpleMessage("静音"),
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
+    "newConversation" : MessageLookupByLibrary.simpleMessage("创建群组"),
+    "next" : MessageLookupByLibrary.simpleMessage("下一步"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),
     "notification" : MessageLookupByLibrary.simpleMessage("通知"),
     "pageDeleteCircle" : m6,
@@ -94,6 +100,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("通过 QrCode 登录 Mixin Messenger"),
     "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
+    "participantsCount" : m8,
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("手机号"),
     "pin" : MessageLookupByLibrary.simpleMessage("置顶"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("请稍等一下"),

@@ -76,5 +76,10 @@
   "deleteForEveryone": "撤回",
   "chatRecallMe": "你撤回了一条消息",
   "chatRecallDelete": "此消息已撤回",
-  "recentConversations": "最近聊天"
+  "recentConversations": "最近聊天",
+  "next": "下一步",
+  "newConversation": "创建群组",
+  "participantsCount": "共 {count} 人",
+  "conversationName": "群组名称",
+  "create": "创建"
 }

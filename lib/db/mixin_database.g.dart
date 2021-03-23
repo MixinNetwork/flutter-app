@@ -10917,6 +10917,16 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {users}).map(users.mapFromRow);
   }
 
+  Selectable<User> usersByIn(List<String> userIds) {
+    var $arrayStartIndex = 1;
+    final expandeduserIds = $expandVar($arrayStartIndex, userIds.length);
+    $arrayStartIndex += userIds.length;
+    return customSelect(
+        'SELECT * FROM users WHERE user_id IN ($expandeduserIds)',
+        variables: [for (var $ in userIds) Variable<String>($)],
+        readsFrom: {users}).map(users.mapFromRow);
+  }
+
   Selectable<StickerAlbum> systemAlbums() {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',

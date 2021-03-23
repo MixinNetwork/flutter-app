@@ -13,14 +13,12 @@ import 'package:flutter_app/widgets/message/item/text/text_message.dart';
 import 'package:flutter_app/widgets/message/message_bubble_margin.dart';
 import 'package:flutter_app/widgets/message/message_day_time.dart';
 import 'package:flutter_app/widgets/message/message_name.dart';
+import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
 
-import '../dialog.dart';
-import '../forward_widget/forward_widget.dart';
 import '../menu.dart';
 import 'item/action/action_message.dart';
 import 'item/action_card/action_message.dart';
@@ -119,14 +117,17 @@ class MessageItemWidget extends StatelessWidget {
                   ContextMenu(
                     title: Localization.of(context).forward,
                     onTap: () async {
-                      final result =
-                          await showMixinDialog<Tuple2<String, bool>>(
-                              context: context, child: const ForwardWidget());
-                      if (result == null) return;
+                      final result = await showConversationSelector(
+                        context: context,
+                        singleSelect: true,
+                        title: Localization.of(context).forward,
+                        onlyContact: false,
+                      );
+                      if (result.isEmpty) return;
                       await context.read<AccountServer>().forwardMessage(
-                            result.item1,
+                            result.first.item1,
                             message.messageId,
-                            result.item2,
+                            result.first.item2,
                           );
                     },
                   ),

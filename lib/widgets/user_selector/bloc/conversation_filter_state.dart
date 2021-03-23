@@ -1,7 +1,8 @@
-part of 'forward_cubit.dart';
+part of 'conversation_filter_cubit.dart';
 
-class ForwardState extends Equatable {
-  const ForwardState({
+
+class ConversationFilterState extends Equatable {
+  const ConversationFilterState({
     this.recentConversations = const [],
     this.friends = const [],
     this.bots = const [],
@@ -20,13 +21,13 @@ class ForwardState extends Equatable {
         keyword,
       ];
 
-  ForwardState copyWith({
+  ConversationFilterState copyWith({
     List<ConversationItem>? recentConversations,
     List<User>? friends,
     List<User>? bots,
     String? keyword,
   }) {
-    return ForwardState(
+    return ConversationFilterState(
       recentConversations: recentConversations ?? this.recentConversations,
       friends: friends ?? this.friends,
       bots: bots ?? this.bots,

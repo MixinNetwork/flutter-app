@@ -78,5 +78,10 @@
   "deleteForEveryone": "Delete for Everyone",
   "chatRecallMe": "You deleted this message",
   "chatRecallDelete": "This message was deleted",
-  "recentConversations": "Recent conversations"
+  "recentConversations": "Recent conversations",
+  "next": "Next",
+  "newConversation": "New conversation",
+  "participantsCount": "{count} Participants",
+  "conversationName": "Conversation Name",
+  "create": "Create"
 }

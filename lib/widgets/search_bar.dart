@@ -1,10 +1,20 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import 'action_button.dart';
+import 'avatar_view/avatar_view.dart';
+import 'dialog.dart';
 
 class SearchBar extends StatelessWidget {
   const SearchBar({
@@ -72,8 +82,25 @@ class SearchBar extends StatelessWidget {
         const SizedBox(width: 8),
         ActionButton(
           name: Resources.assetsImagesIcCreateSvg,
-          onTap: () {
-            _showDialog(context);
+          onTap: () async {
+            final result = await showConversationSelector(
+              context: context,
+              singleSelect: false,
+              title: Localization.of(context).newConversation,
+              onlyContact: true,
+            );
+            if (result.isEmpty) return;
+            final userIds = [
+              context.read<AccountServer>().userId,
+              ...result.map(
+                (e) => e.item1,
+              )
+            ];
+
+            await showMixinDialog(
+              context: context,
+              child: _NewConversationConfirm(userIds),
+            );
           },
           padding: const EdgeInsets.all(8),
           size: 24,
@@ -83,91 +110,103 @@ class SearchBar extends StatelessWidget {
       ],
     );
   }
-
-  Future<void> _showDialog(BuildContext context) async {
-    await showDialog<int>(
-        context: context,
-        builder: (BuildContext context) {
-          return const CreateGroupContanier();
-        });
-  }
 }
 
-class CreateGroupContanier extends StatelessWidget {
-  const CreateGroupContanier({
+class _NewConversationConfirm extends HookWidget {
+  const _NewConversationConfirm(
+    this.userIds, {
     Key? key,
   }) : super(key: key);
 
+  final List<String> userIds;
+
   @override
   Widget build(BuildContext context) {
-    return UnconstrainedBox(
-      child: Material(
-        color: Colors.transparent,
-        child: Container(
-            width: 480,
-            height: 600,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: const Color(0xFF3E4148),
-              borderRadius: BorderRadius.circular(11),
+    final users = useMemoizedFuture(
+      () => context
+          .read<AccountServer>()
+          .database
+          .userDao
+          .usersByIn(userIds.sublist(0, min(4, userIds.length)))
+          .get(),
+      <User>[],
+    );
+
+    final name = useState('');
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        height: 390,
+        width: 340,
+        padding: const EdgeInsets.all(30),
+        child: Column(
+          children: [
+            Text(
+              Localization.of(context).newConversation,
+              style: TextStyle(
+                fontSize: 16,
+                color: BrightnessData.themeOf(context).text,
+              ),
             ),
-            child: Column(
+            const SizedBox(height: 24),
+            ClipOval(
+              child: SizedBox(
+                height: 60,
+                width: 60,
+                child: AvatarPuzzlesWidget(users, 60),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              Localization.of(context).participantsCount(userIds.length),
+              style: TextStyle(
+                fontSize: 14,
+                color: BrightnessData.themeOf(context).secondaryText,
+              ),
+            ),
+            const SizedBox(height: 48),
+            Container(
+              height: 48,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              alignment: Alignment.center,
+              child: TextField(
+                onChanged: (text) => name.value = text,
+                style: const TextStyle(
+                  color: Colors.white,
+                ),
+                scrollPadding: EdgeInsets.zero,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(0),
+                  isDense: true,
+                  hintText: Localization.of(context).conversationName,
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
+                  focusedBorder: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 64),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Row(children: [
-                  ActionButton(
-                      name: Resources.assetsImagesIcCloseSvg,
-                      onTap: () {
-                        Navigator.pop(context);
-                      }),
-                  const Spacer(),
-                  Text.rich(
-                    TextSpan(children: [
-                      const TextSpan(
-                          text: 'Add Participants\n',
-                          style: TextStyle(color: Colors.white)),
-                      TextSpan(
-                          text: '3/256',
-                          style:
-                              TextStyle(color: Colors.white.withOpacity(0.4))),
-                    ]),
-                    textAlign: TextAlign.center,
-                    strutStyle: const StrutStyle(height: 1.5),
-                  ),
-                  const Spacer(),
-                  const InkWell(
-                    child: Text(
-                      'Next',
-                      style: TextStyle(color: Colors.blueAccent),
-                    ),
-                  )
-                ]),
-                Container(
-                  margin: const EdgeInsets.only(top: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(24)),
-                  child: TextField(
-                    onChanged: (string) => {},
-                    style: const TextStyle(
-                      color: Colors.white,
-                    ),
-                    scrollPadding: EdgeInsets.zero,
-                    decoration: InputDecoration(
-                      icon: Image.asset('assets/images/ic_search.png',
-                          width: 20, height: 20),
-                      contentPadding: const EdgeInsets.all(0),
-                      isDense: true,
-                      hintText: 'Search',
-                      hintStyle:
-                          TextStyle(color: Colors.white.withOpacity(0.08)),
-                      focusedBorder: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                    ),
-                  ),
+                MixinButton(
+                    backgroundTransparent: true,
+                    child: Text(Localization.of(context).cancel),
+                    onTap: () => Navigator.pop(context)),
+                MixinButton(
+                  child: Text(Localization.of(context).create),
+                  onTap: () {
+                    // TODO  create conversation;
+                  },
                 ),
               ],
-            )),
+            ),
+          ],
+        ),
       ),
     );
   }

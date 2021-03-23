@@ -42,4 +42,6 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       );
 
   Selectable<User> friends() => db.friends();
+
+  Selectable<User> usersByIn(List<String> userIds) => db.usersByIn(userIds);
 }

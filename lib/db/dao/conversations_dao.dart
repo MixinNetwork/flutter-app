@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:moor/moor.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
-    show ConversationStatus;
+    hide User, Conversation;
+import 'package:moor/moor.dart';
 
 part 'conversations_dao.g.dart';
 

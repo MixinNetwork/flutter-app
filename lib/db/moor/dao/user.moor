@@ -12,3 +12,6 @@ SELECT u.* FROM participants p, users u WHERE p.conversation_id = :conversationI
 
 friends:
 SELECT * FROM users WHERE relationship = 'FRIEND' ORDER BY full_name, user_id ASC;
+
+usersByIn:
+SELECT * FROM users WHERE user_id IN :userIds;

@@ -6,33 +6,43 @@ import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/db/extension/user.dart';
 import 'package:flutter_app/utils/sort.dart';
 
-part 'forward_state.dart';
+part 'conversation_filter_state.dart';
 
-class ForwardCubit extends Cubit<ForwardState> {
-  ForwardCubit(this.accountServer) : super(const ForwardState()) {
+class ConversationFilterCubit extends Cubit<ConversationFilterState> {
+  ConversationFilterCubit(this.accountServer, this.onlyContact)
+      : super(const ConversationFilterState()) {
     _init();
   }
 
   final AccountServer accountServer;
+  final bool onlyContact;
 
   late List<ConversationItem> conversations;
   late List<User> friends;
   late List<User> bots;
 
   Future<void> _init() async {
-    conversations =
-        await accountServer.database.conversationDao.conversationItems().get();
-    final contactConversationIds = conversations
-        .where((element) => element.isContactConversation)
-        .map((e) => e.ownerId)
-        .toSet();
+    var contactConversationIds = <String?>{};
+    if (onlyContact) {
+      conversations = [];
+    } else {
+      conversations = await accountServer.database.conversationDao
+          .conversationItems()
+          .get();
+      contactConversationIds = conversations
+          .where((element) => element.isContactConversation)
+          .map((e) => e.ownerId)
+          .toSet();
+    }
 
     friends = <User>[];
     bots = <User>[];
 
-    (await accountServer.database.userDao.friends().get())
-        .where((element) => !contactConversationIds.contains(element.userId))
-        .forEach((e) {
+    Iterable<User> users = await accountServer.database.userDao.friends().get();
+    if (!onlyContact)
+      users = users
+          .where((element) => !contactConversationIds.contains(element.userId));
+    users.forEach((e) {
       if (e.isBot) {
         bots.add(e);
       } else {

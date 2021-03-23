@@ -35,6 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m7(date) => "${date} join";
 
+  static m8(count) => "${count} Participants";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("About"),
@@ -67,7 +69,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
     "contact" : MessageLookupByLibrary.simpleMessage("Contact"),
     "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
+    "conversationName" : MessageLookupByLibrary.simpleMessage("Conversation Name"),
     "copy" : MessageLookupByLibrary.simpleMessage("Copy"),
+    "create" : MessageLookupByLibrary.simpleMessage("Create"),
     "dataAndStorageUsage" : MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
     "delete" : MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteChat" : MessageLookupByLibrary.simpleMessage("Delete Chat"),
@@ -88,6 +92,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "location" : MessageLookupByLibrary.simpleMessage("Location"),
     "mute" : MessageLookupByLibrary.simpleMessage("Mute"),
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
+    "newConversation" : MessageLookupByLibrary.simpleMessage("New conversation"),
+    "next" : MessageLookupByLibrary.simpleMessage("Next"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
     "notification" : MessageLookupByLibrary.simpleMessage("Notification"),
     "pageDeleteCircle" : m6,
@@ -96,6 +102,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),
     "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("Select a conversation to start messaging"),
+    "participantsCount" : m8,
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("Phone number"),
     "pin" : MessageLookupByLibrary.simpleMessage("Pin"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("Please wait a moment"),
