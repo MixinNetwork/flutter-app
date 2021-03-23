@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/db/dao/circles_dao.dart';
 import 'package:flutter_app/db/dao/sticker_albums_dao.dart';
 import 'package:flutter_app/db/dao/sticker_relationships_dao.dart';
 import 'package:flutter_app/db/dao/stickers_dao.dart';
@@ -8,6 +9,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
 
 import 'dao/apps_dao.dart';
+import 'dao/circle_conversations_dao.dart';
 import 'dao/conversations_dao.dart';
 import 'dao/flood_messages_dao.dart';
 import 'dao/jobs_dao.dart';
@@ -21,6 +23,8 @@ class Database {
   Database(this._database) {
     appsDao = AppsDao(_database);
     conversationDao = ConversationsDao(_database);
+    circlesDao = CirclesDao(_database);
+    circleConversationDao = CircleConversationDao(_database);
     floodMessagesDao = FloodMessagesDao(_database);
     messagesDao = MessagesDao(_database);
     jobsDao = JobsDao(_database);
@@ -44,6 +48,10 @@ class Database {
   late final MessagesDao messagesDao;
 
   late final ConversationsDao conversationDao;
+
+  late final CirclesDao circlesDao;
+
+  late final CircleConversationDao circleConversationDao;
 
   late final FloodMessagesDao floodMessagesDao;
 

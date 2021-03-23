@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
@@ -9,7 +10,6 @@ import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_portal/flutter_portal.dart';
@@ -168,7 +168,9 @@ class _App extends StatelessWidget {
               BlocProvider.of<ConversationListBloc>(context)
                 ..limit = MediaQuery.of(context).size.height ~/ 40
                 ..init();
-              accountServer.initSticker();
+              accountServer
+                ..initSticker()
+                ..initCircles();
               return HomePage();
             }
             return const LandingPage();

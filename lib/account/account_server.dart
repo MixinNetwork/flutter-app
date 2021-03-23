@@ -343,6 +343,49 @@ class AccountServer {
     });
   }
 
+  final refreshUserIdSet = <dynamic>{};
+
+  void initCircles() {
+    refreshUserIdSet.clear();
+    client.circleApi.getCircles().then((res) {
+      if (res.data != null) {
+        res.data?.forEach((circle) async {
+          await database.circlesDao.insertUpdate(Circle(
+              circleId: circle.circleId,
+              name: circle.name,
+              createdAt: circle.createdAt,
+              orderedAt: null));
+          await handleCircle(circle);
+        });
+      }
+    }).catchError((e) {
+      debugPrint(e);
+    });
+  }
+
+  Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
+    final ccList =
+        (await client.circleApi.getCircleConversations(circle.circleId)).data;
+    if (ccList == null) {
+      return;
+    }
+    ccList.forEach((cc) async {
+      await database.circleConversationDao.insert(db.CircleConversation(
+          conversationId: cc.conversationId,
+          circleId: cc.circleId,
+          createdAt: cc.createdAt));
+      if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
+        final u = await database.userDao.findUserById(cc.userId);
+        if (u == null) {
+          refreshUserIdSet.add(cc.userId);
+        }
+      }
+    });
+    if (ccList.length >= 500) {
+      await handleCircle(circle, offset: offset ?? 0 + 500);
+    }
+  }
+
   void _updateStickerAlbums(String albumId) {
     client.accountApi.getStickersByAlbumId(albumId).then((res) {
       if (res.data != null) {
