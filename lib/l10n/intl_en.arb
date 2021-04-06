@@ -83,5 +83,9 @@
   "newConversation": "New conversation",
   "participantsCount": "{count} Participants",
   "conversationName": "Conversation Name",
-  "create": "Create"
+  "create": "Create",
+  "searchEmpty": "No chats, \ncontacts or messages found.",
+  "more": "more",
+  "less": "less",
+  "searchRelatedMessage": "{count} related messages"
 }

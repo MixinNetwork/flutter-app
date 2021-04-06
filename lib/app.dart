@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import 'account/account_server.dart';
+import 'bloc/search_cubit.dart';
 import 'constants/brightness_theme_data.dart';
 
 class App extends StatelessWidget {
@@ -24,50 +25,50 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MultiBlocProvider(
-    providers: [
-      BlocProvider(
-        create: (context) => MultiAuthCubit(),
-      ),
-    ],
-    child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
-      converter: (state) => state.current,
-      builder: (context, authState) {
-        const app = _App();
-        if (authState == null) return app;
-        return FutureProvider<AccountServer?>(
-          key: ValueKey(Tuple4(
-            authState.account.userId,
-            authState.account.sessionId,
-            authState.account.identityNumber,
-            authState.privateKey,
-          )),
-          create: (BuildContext context) async {
-            await accountServer.initServer(
-              authState.account.userId,
-              authState.account.sessionId,
-              authState.account.identityNumber,
-              authState.privateKey,
-            );
-            return accountServer;
-          },
-          initialData: null,
-          builder: (BuildContext context, _) => Consumer<AccountServer?>(
-            builder: (context, accountServer, child) {
-              if (accountServer != null)
-                return _Providers(
-                  app: Portal(
-                    child: child!,
-                  ),
-                  accountServer: accountServer,
-                );
-              return child!;
-            },
-            child: app,
+        providers: [
+          BlocProvider(
+            create: (context) => MultiAuthCubit(),
           ),
-        );
-      },
-    ),
-  );
+        ],
+        child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
+          converter: (state) => state.current,
+          builder: (context, authState) {
+            const app = _App();
+            if (authState == null) return app;
+            return FutureProvider<AccountServer?>(
+              key: ValueKey(Tuple4(
+                authState.account.userId,
+                authState.account.sessionId,
+                authState.account.identityNumber,
+                authState.privateKey,
+              )),
+              create: (BuildContext context) async {
+                await accountServer.initServer(
+                  authState.account.userId,
+                  authState.account.sessionId,
+                  authState.account.identityNumber,
+                  authState.privateKey,
+                );
+                return accountServer;
+              },
+              initialData: null,
+              builder: (BuildContext context, _) => Consumer<AccountServer?>(
+                builder: (context, accountServer, child) {
+                  if (accountServer != null)
+                    return _Providers(
+                      app: Portal(
+                        child: child!,
+                      ),
+                      accountServer: accountServer,
+                    );
+                  return child!;
+                },
+                child: app,
+              ),
+            );
+          },
+        ),
+      );
 }
 
 class _Providers extends StatelessWidget {
@@ -98,7 +99,8 @@ class _Providers extends StatelessWidget {
               BlocProvider(
                 create: (BuildContext context) => ConversationCubit(
                   accountServer: accountServer,
-                  responsiveNavigatorCubit: context.read<ResponsiveNavigatorCubit>(),
+                  responsiveNavigatorCubit:
+                      context.read<ResponsiveNavigatorCubit>(),
                 ),
               ),
               BlocProvider(
@@ -107,6 +109,14 @@ class _Providers extends StatelessWidget {
                   conversationCubit:
                       BlocProvider.of<ConversationCubit>(context),
                   userId: accountServer.userId,
+                ),
+              ),
+              BlocProvider(
+                create: (BuildContext context) => SearchCubit(
+                  userDao: accountServer.database.userDao,
+                  conversationDao: accountServer.database.conversationDao,
+                  messagesDao: accountServer.database.messagesDao,
+                  id: accountServer.userId,
                 ),
               ),
             ],

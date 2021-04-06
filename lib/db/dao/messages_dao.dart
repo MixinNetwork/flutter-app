@@ -215,4 +215,10 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
   }
+
+  Selectable<SearchMessageItem> fuzzySearchMessage({
+    required String query,
+    required int limit,
+  }) =>
+      db.fuzzySearchMessage(query, limit);
 }

@@ -15,3 +15,17 @@ SELECT * FROM users WHERE relationship = 'FRIEND' ORDER BY full_name, user_id AS
 
 usersByIn:
 SELECT * FROM users WHERE user_id IN :userIds;
+
+fuzzySearchUser:
+SELECT *
+FROM   users
+WHERE  user_id != :id
+       AND relationship = 'FRIEND'
+       AND ( full_name LIKE '%'
+                            || :username
+                            || '%' ESCAPE '\\'
+              OR identity_number LIKE '%'
+                                      || :identityNumber
+                                      || '%' ESCAPE '\\' )
+ORDER  BY full_name = :username COLLATE nocase
+           OR identity_number = :identityNumber COLLATE nocase DESC;

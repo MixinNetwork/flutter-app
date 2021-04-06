@@ -37,6 +37,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m8(count) => "共 ${count} 人";
 
+  static m9(count) => "${count} 条相关的消息";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("关于"),
@@ -86,8 +88,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "image" : MessageLookupByLibrary.simpleMessage("照片"),
     "initializing" : MessageLookupByLibrary.simpleMessage("初始化"),
     "introduction" : MessageLookupByLibrary.simpleMessage("介绍"),
+    "less" : MessageLookupByLibrary.simpleMessage("更少"),
     "live" : MessageLookupByLibrary.simpleMessage("Live"),
     "location" : MessageLookupByLibrary.simpleMessage("位置"),
+    "more" : MessageLookupByLibrary.simpleMessage("更多"),
     "mute" : MessageLookupByLibrary.simpleMessage("静音"),
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
     "newConversation" : MessageLookupByLibrary.simpleMessage("创建群组"),
@@ -111,6 +115,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "reply" : MessageLookupByLibrary.simpleMessage("回复"),
     "save" : MessageLookupByLibrary.simpleMessage("保存"),
     "search" : MessageLookupByLibrary.simpleMessage("搜索"),
+    "searchEmpty" : MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
+    "searchRelatedMessage" : m9,
     "signOut" : MessageLookupByLibrary.simpleMessage("登出"),
     "sticker" : MessageLookupByLibrary.simpleMessage("贴纸"),
     "strangerFromMessage" : MessageLookupByLibrary.simpleMessage("他/她不是你的联系人"),

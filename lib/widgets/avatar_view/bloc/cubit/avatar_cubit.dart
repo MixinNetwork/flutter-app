@@ -6,10 +6,10 @@ import 'package:flutter_app/db/mixin_database.dart';
 class AvatarCubit extends Cubit<List<User>> with SubscribeMixin {
   AvatarCubit(
     ParticipantsDao participantsDao,
-    ConversationItem conversation,
+    String conversationId,
   ) : super(const []) {
     final selectable =
-        participantsDao.participantsAvatar(conversation.conversationId);
+        participantsDao.participantsAvatar(conversationId);
 
     selectable.get().then(emit);
     addSubscription(selectable.watch().listen(emit));

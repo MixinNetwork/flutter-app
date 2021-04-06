@@ -896,6 +896,46 @@ class Localization {
       args: [],
     );
   }
+
+  /// `No chats, \ncontacts or messages found.`
+  String get searchEmpty {
+    return Intl.message(
+      'No chats, \ncontacts or messages found.',
+      name: 'searchEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `more`
+  String get more {
+    return Intl.message(
+      'more',
+      name: 'more',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `less`
+  String get less {
+    return Intl.message(
+      'less',
+      name: 'less',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} related messages`
+  String searchRelatedMessage(Object count) {
+    return Intl.message(
+      '$count related messages',
+      name: 'searchRelatedMessage',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

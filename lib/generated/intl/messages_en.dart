@@ -37,6 +37,8 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m8(count) => "${count} Participants";
 
+  static m9(count) => "${count} related messages";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
     "about" : MessageLookupByLibrary.simpleMessage("About"),
@@ -88,8 +90,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "image" : MessageLookupByLibrary.simpleMessage("Image"),
     "initializing" : MessageLookupByLibrary.simpleMessage("Initializing"),
     "introduction" : MessageLookupByLibrary.simpleMessage("Introduction"),
+    "less" : MessageLookupByLibrary.simpleMessage("less"),
     "live" : MessageLookupByLibrary.simpleMessage("Live"),
     "location" : MessageLookupByLibrary.simpleMessage("Location"),
+    "more" : MessageLookupByLibrary.simpleMessage("more"),
     "mute" : MessageLookupByLibrary.simpleMessage("Mute"),
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
     "newConversation" : MessageLookupByLibrary.simpleMessage("New conversation"),
@@ -113,6 +117,8 @@ class MessageLookup extends MessageLookupByLibrary {
     "reply" : MessageLookupByLibrary.simpleMessage("Reply"),
     "save" : MessageLookupByLibrary.simpleMessage("Save"),
     "search" : MessageLookupByLibrary.simpleMessage("Search"),
+    "searchEmpty" : MessageLookupByLibrary.simpleMessage("No chats, \ncontacts or messages found."),
+    "searchRelatedMessage" : m9,
     "signOut" : MessageLookupByLibrary.simpleMessage("Sign Out"),
     "sticker" : MessageLookupByLibrary.simpleMessage("Sticker"),
     "strangerFromMessage" : MessageLookupByLibrary.simpleMessage("This sender is not in your contacts"),

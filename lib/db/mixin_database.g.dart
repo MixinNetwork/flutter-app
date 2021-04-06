@@ -10927,6 +10927,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {users}).map(users.mapFromRow);
   }
 
+  Selectable<User> fuzzySearchUser(
+      String id, String username, String identityNumber) {
+    return customSelect(
+        'SELECT *\nFROM   users\nWHERE  user_id != :id\n       AND relationship = \'FRIEND\'\n       AND ( full_name LIKE \'%\'\n                            || :username\n                            || \'%\' ESCAPE \'\\\'\n              OR identity_number LIKE \'%\'\n                                      || :identityNumber\n                                      || \'%\' ESCAPE \'\\\' )\nORDER  BY full_name = :username COLLATE nocase\n           OR identity_number = :identityNumber COLLATE nocase DESC',
+        variables: [
+          Variable<String>(id),
+          Variable<String>(username),
+          Variable<String>(identityNumber)
+        ],
+        readsFrom: {
+          users
+        }).map(users.mapFromRow);
+  }
+
   Selectable<StickerAlbum> systemAlbums() {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
@@ -11327,7 +11341,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SearchMessageItem> fuzzySearchMessage(String query, int limit) {
     return customSelect(
-        'SELECT m.conversation_id AS conversationId, c.icon_url AS conversationAvatarUrl,\n    c.name AS conversationName, c.category AS conversationCategory, count(m.message_id) as messageCount,\n    u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n    INNER JOIN users u ON c.owner_id = u.user_id\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    WHERE m.message_id = messages_fts.message_id\n    GROUP BY m.conversation_id\n    ORDER BY max(m.created_at) DESC\n    LIMIT :limit',
+        'SELECT m.conversation_id AS conversationId, c.icon_url AS conversationAvatarUrl,\n            c.name AS conversationName, c.category AS conversationCategory, count(m.message_id) as messageCount,\n            u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n            c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName\n            FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n			INNER JOIN users u ON c.owner_id = u.user_id\n            INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n            WHERE m.message_id = messages_fts.message_id\n            GROUP BY m.conversation_id\n            ORDER BY max(m.created_at) DESC\n            LIMIT :limit',
         variables: [
           Variable<String>(query),
           Variable<int>(limit)
@@ -11348,6 +11362,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         userId: row.readString('userId'),
         userAvatarUrl: row.readString('userAvatarUrl'),
         userFullName: row.readString('userFullName'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
       );
     });
   }
@@ -11848,6 +11866,64 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<ConversationItem> conversationByOwnerId(String? id) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE ou.relationship = \'FRIEND\' AND c.owner_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
+        variables: [
+          Variable<String?>(id)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
+  }
+
   Selectable<int?> allUnseenMessageCount(DateTime? now) {
     return customSelect(
         'SELECT SUM(unseen_message_count) FROM conversations WHERE mute_until <= :now',
@@ -11911,6 +11987,27 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mentions: row.readString('mentions'),
         relationship:
             Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
+  }
+
+  Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName,\n        ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl,\n        ou.is_verified AS isVerified, ou.app_id AS appId\n        FROM conversations c\n        INNER JOIN users ou ON ou.user_id = c.owner_id\n        LEFT JOIN messages m ON c.last_message_id = m.message_id\n        WHERE (c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\')\n        OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n            AND (ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\'\n                OR ou.identity_number like \'%\' || :query || \'%\' ESCAPE \'\\\'))\n        ORDER BY\n            (c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)\n                OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n                    AND (ou.full_name = :query COLLATE NOCASE\n                        OR ou.identity_number = :query COLLATE NOCASE)) DESC,\n            c.pin_time DESC,\n            m.created_at DESC',
+        variables: [Variable<String>(query)],
+        readsFrom: {conversations, users, messages}).map((QueryRow row) {
+      return SearchConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        userId: row.readString('userId'),
+        fullName: row.readString('fullName'),
+        avatarUrl: row.readString('avatarUrl'),
+        isVerified: row.readInt('isVerified'),
+        appId: row.readString('appId'),
       );
     });
   }
@@ -12702,6 +12799,9 @@ class SearchMessageItem {
   final String userId;
   final String? userAvatarUrl;
   final String? userFullName;
+  final String? groupIconUrl;
+  final ConversationCategory? category;
+  final String? groupName;
   SearchMessageItem({
     required this.conversationId,
     this.conversationAvatarUrl,
@@ -12711,6 +12811,9 @@ class SearchMessageItem {
     required this.userId,
     this.userAvatarUrl,
     this.userFullName,
+    this.groupIconUrl,
+    this.category,
+    this.groupName,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -12725,8 +12828,14 @@ class SearchMessageItem {
                       messageCount.hashCode,
                       $mrjc(
                           userId.hashCode,
-                          $mrjc(userAvatarUrl.hashCode,
-                              userFullName.hashCode))))))));
+                          $mrjc(
+                              userAvatarUrl.hashCode,
+                              $mrjc(
+                                  userFullName.hashCode,
+                                  $mrjc(
+                                      groupIconUrl.hashCode,
+                                      $mrjc(category.hashCode,
+                                          groupName.hashCode)))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -12738,7 +12847,10 @@ class SearchMessageItem {
           other.messageCount == this.messageCount &&
           other.userId == this.userId &&
           other.userAvatarUrl == this.userAvatarUrl &&
-          other.userFullName == this.userFullName);
+          other.userFullName == this.userFullName &&
+          other.groupIconUrl == this.groupIconUrl &&
+          other.category == this.category &&
+          other.groupName == this.groupName);
   @override
   String toString() {
     return (StringBuffer('SearchMessageItem(')
@@ -12749,7 +12861,10 @@ class SearchMessageItem {
           ..write('messageCount: $messageCount, ')
           ..write('userId: $userId, ')
           ..write('userAvatarUrl: $userAvatarUrl, ')
-          ..write('userFullName: $userFullName')
+          ..write('userFullName: $userFullName, ')
+          ..write('groupIconUrl: $groupIconUrl, ')
+          ..write('category: $category, ')
+          ..write('groupName: $groupName')
           ..write(')'))
         .toString();
   }
@@ -13068,6 +13183,80 @@ class ConversationItem {
           ..write('mentionCount: $mentionCount, ')
           ..write('mentions: $mentions, ')
           ..write('relationship: $relationship')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class SearchConversationItem {
+  final String conversationId;
+  final String? groupIconUrl;
+  final ConversationCategory? category;
+  final String? groupName;
+  final String ownerIdentityNumber;
+  final String? userId;
+  final String? fullName;
+  final String? avatarUrl;
+  final int? isVerified;
+  final String? appId;
+  SearchConversationItem({
+    required this.conversationId,
+    this.groupIconUrl,
+    this.category,
+    this.groupName,
+    required this.ownerIdentityNumber,
+    this.userId,
+    this.fullName,
+    this.avatarUrl,
+    this.isVerified,
+    this.appId,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      conversationId.hashCode,
+      $mrjc(
+          groupIconUrl.hashCode,
+          $mrjc(
+              category.hashCode,
+              $mrjc(
+                  groupName.hashCode,
+                  $mrjc(
+                      ownerIdentityNumber.hashCode,
+                      $mrjc(
+                          userId.hashCode,
+                          $mrjc(
+                              fullName.hashCode,
+                              $mrjc(
+                                  avatarUrl.hashCode,
+                                  $mrjc(isVerified.hashCode,
+                                      appId.hashCode))))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is SearchConversationItem &&
+          other.conversationId == this.conversationId &&
+          other.groupIconUrl == this.groupIconUrl &&
+          other.category == this.category &&
+          other.groupName == this.groupName &&
+          other.ownerIdentityNumber == this.ownerIdentityNumber &&
+          other.userId == this.userId &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.isVerified == this.isVerified &&
+          other.appId == this.appId);
+  @override
+  String toString() {
+    return (StringBuffer('SearchConversationItem(')
+          ..write('conversationId: $conversationId, ')
+          ..write('groupIconUrl: $groupIconUrl, ')
+          ..write('category: $category, ')
+          ..write('groupName: $groupName, ')
+          ..write('ownerIdentityNumber: $ownerIdentityNumber, ')
+          ..write('userId: $userId, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('appId: $appId')
           ..write(')'))
         .toString();
   }

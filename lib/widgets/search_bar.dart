@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/bloc/search_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/hook.dart';
@@ -38,76 +39,82 @@ class SearchBar extends StatelessWidget {
       darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
     );
     final hintColor = BrightnessData.themeOf(context).secondaryText;
-    return Row(
-      children: [
-        const SizedBox(width: 20),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: TextField(
-              onChanged: (string) => {},
-              style: TextStyle(
-                color: BrightnessData.themeOf(context).text,
-                fontSize: 14,
-              ),
-              scrollPadding: EdgeInsets.zero,
-              decoration: InputDecoration(
-                isDense: true,
-                border: outlineInputBorder,
-                focusedBorder: outlineInputBorder,
-                enabledBorder: outlineInputBorder,
-                filled: true,
-                fillColor: backgroundColor,
-                hoverColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                prefixIconConstraints:
-                    const BoxConstraints.expand(width: 40, height: 32),
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.only(left: 16, right: 8),
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesIcSearchSvg,
-                    color: hintColor,
-                  ),
-                ),
-                contentPadding: const EdgeInsets.only(right: 8),
-                hintText: Localization.of(context).search,
-                hintStyle: TextStyle(
-                  color: hintColor,
+    return ColoredBox(
+      color: BrightnessData.themeOf(context).primary,
+      child: Row(
+        children: [
+          const SizedBox(width: 20),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              child: TextField(
+                focusNode: context.read<FocusNode>(),
+                controller: context.read<TextEditingController>(),
+                onChanged: (keyword) =>
+                    context.read<SearchCubit>().keyword = keyword,
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).text,
                   fontSize: 14,
+                ),
+                scrollPadding: EdgeInsets.zero,
+                decoration: InputDecoration(
+                  isDense: true,
+                  border: outlineInputBorder,
+                  focusedBorder: outlineInputBorder,
+                  enabledBorder: outlineInputBorder,
+                  filled: true,
+                  fillColor: backgroundColor,
+                  hoverColor: Colors.transparent,
+                  focusColor: Colors.transparent,
+                  prefixIconConstraints:
+                      const BoxConstraints.expand(width: 40, height: 32),
+                  prefixIcon: Padding(
+                    padding: const EdgeInsets.only(left: 16, right: 8),
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesIcSearchSvg,
+                      color: hintColor,
+                    ),
+                  ),
+                  contentPadding: const EdgeInsets.only(right: 8),
+                  hintText: Localization.of(context).search,
+                  hintStyle: TextStyle(
+                    color: hintColor,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 8),
-        ActionButton(
-          name: Resources.assetsImagesIcCreateSvg,
-          onTap: () async {
-            final result = await showConversationSelector(
-              context: context,
-              singleSelect: false,
-              title: Localization.of(context).newConversation,
-              onlyContact: true,
-            );
-            if (result.isEmpty) return;
-            final userIds = [
-              context.read<AccountServer>().userId,
-              ...result.map(
-                (e) => e.item1,
-              )
-            ];
+          const SizedBox(width: 8),
+          ActionButton(
+            name: Resources.assetsImagesIcCreateSvg,
+            onTap: () async {
+              final result = await showConversationSelector(
+                context: context,
+                singleSelect: false,
+                title: Localization.of(context).newConversation,
+                onlyContact: true,
+              );
+              if (result.isEmpty) return;
+              final userIds = [
+                context.read<AccountServer>().userId,
+                ...result.map(
+                  (e) => e.item1,
+                )
+              ];
 
-            await showMixinDialog(
-              context: context,
-              child: _NewConversationConfirm(userIds),
-            );
-          },
-          padding: const EdgeInsets.all(8),
-          size: 24,
-          color: BrightnessData.themeOf(context).icon,
-        ),
-        const SizedBox(width: 12),
-      ],
+              await showMixinDialog(
+                context: context,
+                child: _NewConversationConfirm(userIds),
+              );
+            },
+            padding: const EdgeInsets.all(8),
+            size: 24,
+            color: BrightnessData.themeOf(context).icon,
+          ),
+          const SizedBox(width: 12),
+        ],
+      ),
     );
   }
 }

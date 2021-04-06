@@ -17,10 +17,6 @@ class ConversationCubit extends SimpleCubit<ConversationItem?>
     addSubscription(
       LocalNotificationCenter.notificationSelectEvent(
               NotificationScheme.conversation)
-          .where((event) {
-            print('fuck notificationSelectEvent: $event');
-            return true;
-          })
           .asyncMap((event) => accountServer.database.conversationDao
               .conversationItem(event.host))
           .where((event) => event != null)

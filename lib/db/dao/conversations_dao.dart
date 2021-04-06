@@ -110,4 +110,10 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
       db.conversationItem(conversationId).getSingleOrNull();
 
   Selectable<ConversationItem> conversationItems() => db.conversationItems();
+
+  Selectable<SearchConversationItem> fuzzySearchConversation(String query) =>
+      db.fuzzySearchConversation(query);
+
+  Future<ConversationItem?> conversationByUserId(String id) =>
+      db.conversationByOwnerId(id).getSingleOrNull();
 }

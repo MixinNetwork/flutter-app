@@ -13,41 +13,59 @@ import 'package:provider/provider.dart';
 class ConversationAvatarWidget extends StatelessWidget {
   const ConversationAvatarWidget({
     Key? key,
-    required this.conversation,
+    this.conversation,
     required this.size,
+    this.conversationId,
+    this.fullName,
+    this.groupIconUrl,
+    this.avatarUrl,
+    this.category,
   }) : super(key: key);
 
-  final ConversationItem conversation;
+  final ConversationItem? conversation;
+  final String? conversationId;
+  final String? fullName;
+  final String? groupIconUrl;
+  final String? avatarUrl;
+  final ConversationCategory? category;
   final double size;
 
   @override
-  Widget build(BuildContext context) => SizedBox.fromSize(
-        size: Size.square(size),
-        child: ClipOval(
-          child: Builder(
-            builder: (context) => BlocProvider(
-              key: Key(conversation.conversationId),
+  Widget build(BuildContext context) {
+    final _conversationId = conversation?.conversationId ?? conversationId;
+    assert(_conversationId != null);
+    final _name = conversation?.name ?? fullName;
+    final _groupIconUrl = conversation?.groupIconUrl ?? groupIconUrl;
+    final _avatarUrl = conversation?.avatarUrl ?? avatarUrl;
+    final _category = conversation?.category ?? category;
+    assert(_category != null);
+
+    return SizedBox.fromSize(
+      size: Size.square(size),
+      child: ClipOval(
+        child: Builder(
+          builder: (context) {
+            return BlocProvider(
+              key: Key(_conversationId!),
               create: (context) => AvatarCubit(
                 Provider.of<AccountServer>(context, listen: false)
                     .database
                     .participantsDao,
-                conversation,
+                _conversationId,
               ),
               child: Builder(
                 builder: (context) {
-                  if (!conversation.isGroupConversation) {
+                  if (!(_category == ConversationCategory.group)) {
                     return AvatarWidget(
-                      userId: conversation.conversationId,
-                      name: conversation.name ?? '',
-                      avatarUrl: conversation.groupIconUrl ??
-                          conversation.avatarUrl ??
-                          '',
+                      userId: _conversationId,
+                      name: _name ?? '',
+                      avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
                       size: size,
                     );
                   }
                   return BlocConverter<AvatarCubit, List<User>, List<User>>(
                     converter: (state) =>
-                        conversation.category == ConversationCategory.contact
+                        _category == ConversationCategory.contact
                             ? state
                                 .where((element) =>
                                     element.relationship != UserRelationship.me)
@@ -58,10 +76,12 @@ class ConversationAvatarWidget extends StatelessWidget {
                   );
                 },
               ),
-            ),
-          ),
+            );
+          },
         ),
-      );
+      ),
+    );
+  }
 }
 
 class AvatarPuzzlesWidget extends StatelessWidget {

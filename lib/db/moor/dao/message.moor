@@ -108,15 +108,16 @@ SELECT * FROM messages WHERE message_id = :messageId;
 
 fuzzySearchMessage AS SearchMessageItem:
 SELECT m.conversation_id AS conversationId, c.icon_url AS conversationAvatarUrl,
-    c.name AS conversationName, c.category AS conversationCategory, count(m.message_id) as messageCount,
-    u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName
-    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
-    INNER JOIN users u ON c.owner_id = u.user_id
-    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
-    WHERE m.message_id = messages_fts.message_id
-    GROUP BY m.conversation_id
-    ORDER BY max(m.created_at) DESC
-    LIMIT :limit;
+            c.name AS conversationName, c.category AS conversationCategory, count(m.message_id) as messageCount,
+            u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
+            c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName
+            FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+			INNER JOIN users u ON c.owner_id = u.user_id
+            INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+            WHERE m.message_id = messages_fts.message_id
+            GROUP BY m.conversation_id
+            ORDER BY max(m.created_at) DESC
+            LIMIT :limit;
 
 fuzzySearchMessageByConversationId AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
