@@ -79,10 +79,11 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.circle:
         _map[state] ??= _ConversationListBloc(
           limit,
-          () =>
-              database.conversationDao.strangerConversationCount().getSingle(),
+          () => database.conversationDao
+              .conversationsCountByCircleId(state.id!)
+              .getSingle(),
           (limit, offset) => database.conversationDao
-              .strangerConversations(limit, offset)
+              .conversationsByCircleId(state.id!, limit, offset)
               .get(),
           database.conversationDao.updateEvent,
         );

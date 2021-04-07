@@ -21,5 +21,8 @@ class CirclesDao extends DatabaseAccessor<MixinDatabase>
     });
   }
 
-  Future deleteCircle(Circle circle) => delete(db.circles).delete(circle);
+  Future<int> deleteCircle(String circleId) =>
+      (delete(db.circles)..where((tbl) => tbl.circleId.equals(circleId))).go();
+
+  Selectable<ConversationCircleItem> allCircles() => db.allCircles();
 }

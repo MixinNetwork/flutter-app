@@ -9,13 +9,14 @@ import 'package:flutter_app/utils/sort.dart';
 part 'conversation_filter_state.dart';
 
 class ConversationFilterCubit extends Cubit<ConversationFilterState> {
-  ConversationFilterCubit(this.accountServer, this.onlyContact)
+  ConversationFilterCubit(this.accountServer, this.onlyContact,this.afterInit)
       : super(const ConversationFilterState()) {
     _init();
   }
 
   final AccountServer accountServer;
   final bool onlyContact;
+  final Function(ConversationFilterState) afterInit;
 
   late List<ConversationItem> conversations;
   late List<User> friends;
@@ -51,6 +52,7 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     });
 
     _filterList();
+    afterInit(state);
   }
 
   set keyword(String keyword) {

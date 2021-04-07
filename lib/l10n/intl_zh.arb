@@ -85,5 +85,6 @@
   "searchEmpty": "找不到联系人或消息。",
   "more": "更多",
   "less": "更少",
-  "searchRelatedMessage": "{count} 条相关的消息"
+  "searchRelatedMessage": "{count} 条相关的消息",
+  "newCircle": "创建圈子"
 }

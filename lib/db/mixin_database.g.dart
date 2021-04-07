@@ -10887,6 +10887,25 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final StickerRelationshipsDao stickerRelationshipsDao =
       StickerRelationshipsDao(this as MixinDatabase);
   late final UserDao userDao = UserDao(this as MixinDatabase);
+  Selectable<ConversationCircleItem> allCircles() {
+    return customSelect(
+        'SELECT ci.circle_id, ci.name, ci.created_at, count(c.conversation_id) as count, sum(c.unseen_message_count) as unseen_message_count\n        FROM circles ci LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations c ON c.conversation_id = cc.conversation_id\n        GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        variables: [],
+        readsFrom: {
+          circles,
+          conversations,
+          circleConversations
+        }).map((QueryRow row) {
+      return ConversationCircleItem(
+        circleId: row.readString('circle_id'),
+        name: row.readString('name'),
+        createdAt: Circles.$converter0.mapToDart(row.readInt('created_at'))!,
+        count: row.readInt('count'),
+        unseenMessageCount: row.readInt('unseen_message_count'),
+      );
+    });
+  }
+
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(
@@ -11994,6 +12013,81 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<ConversationItem> conversationsByCircleId(
+      String circle_id, int limit, int offset) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM circle_conversations cc\n            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE cc.circle_id = :circle_id\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        variables: [
+          Variable<String>(circle_id),
+          Variable<int>(limit),
+          Variable<int>(offset)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions,
+          circleConversations
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.readString('conversationId'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
+        lastReadMessageId: row.readString('lastReadMessageId'),
+        unseenMessageCount: row.readInt('unseenMessageCount'),
+        ownerId: row.readString('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+        avatarUrl: row.readString('avatarUrl'),
+        name: row.readString('name'),
+        ownerVerified: row.readInt('ownerVerified'),
+        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
+        appId: row.readString('appId'),
+        content: row.readString('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.readString('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
+        lastMessageCreatedAt:
+            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
+        mediaUrl: row.readString('mediaUrl'),
+        senderId: row.readString('senderId'),
+        actionName:
+            Messages.$converter4.mapToDart(row.readString('actionName')),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.readString('messageStatus')),
+        senderFullName: row.readString('senderFullName'),
+        snapshotType: row.readString('SnapshotType'),
+        participantFullName: row.readString('participantFullName'),
+        participantUserId: row.readString('participantUserId'),
+        mentionCount: row.readInt('mentionCount'),
+        mentions: row.readString('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.readString('relationship')),
+      );
+    });
+  }
+
+  Selectable<int> conversationsCountByCircleId(String circle_id) {
+    return customSelect(
+        'SELECT COUNT(*)\n            FROM circle_conversations cc\n            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            WHERE cc.circle_id = :circle_id',
+        variables: [
+          Variable<String>(circle_id)
+        ],
+        readsFrom: {
+          circleConversations,
+          conversations,
+          users
+        }).map((QueryRow row) => row.readInt('COUNT(*)'));
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -12069,6 +12163,48 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           ),
         ],
       );
+}
+
+class ConversationCircleItem {
+  final String circleId;
+  final String name;
+  final DateTime createdAt;
+  final int count;
+  final int? unseenMessageCount;
+  ConversationCircleItem({
+    required this.circleId,
+    required this.name,
+    required this.createdAt,
+    required this.count,
+    this.unseenMessageCount,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      circleId.hashCode,
+      $mrjc(
+          name.hashCode,
+          $mrjc(createdAt.hashCode,
+              $mrjc(count.hashCode, unseenMessageCount.hashCode)))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ConversationCircleItem &&
+          other.circleId == this.circleId &&
+          other.name == this.name &&
+          other.createdAt == this.createdAt &&
+          other.count == this.count &&
+          other.unseenMessageCount == this.unseenMessageCount);
+  @override
+  String toString() {
+    return (StringBuffer('ConversationCircleItem(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('count: $count, ')
+          ..write('unseenMessageCount: $unseenMessageCount')
+          ..write(')'))
+        .toString();
+  }
 }
 
 class ParticipantSessionKey {

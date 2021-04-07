@@ -96,6 +96,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "more" : MessageLookupByLibrary.simpleMessage("more"),
     "mute" : MessageLookupByLibrary.simpleMessage("Mute"),
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
+    "newCircle" : MessageLookupByLibrary.simpleMessage("New circle"),
     "newConversation" : MessageLookupByLibrary.simpleMessage("New conversation"),
     "next" : MessageLookupByLibrary.simpleMessage("Next"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),

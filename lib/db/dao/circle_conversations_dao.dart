@@ -11,6 +11,10 @@ class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(CircleConversation circleConversation) =>
       into(db.circleConversations).insertOnConflictUpdate(circleConversation);
 
-  Future deleteCircleConversation(CircleConversation circleConversation) =>
+  Future<int> deleteCircleConversation(CircleConversation circleConversation) =>
       delete(db.circleConversations).delete(circleConversation);
+
+  SimpleSelectStatement<CircleConversations, CircleConversation>
+      allCircleConversations(String circleId) => select(db.circleConversations)
+        ..where((tbl) => tbl.circleId.equals(circleId));
 }

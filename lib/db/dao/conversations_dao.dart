@@ -18,6 +18,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     db.messages,
     db.snapshots,
     db.messageMentions,
+    db.circleConversations,
   ]));
 
   late Stream<int> allUnseenMessageCountEvent = db
@@ -116,4 +117,11 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
 
   Future<ConversationItem?> conversationByUserId(String id) =>
       db.conversationByOwnerId(id).getSingleOrNull();
+
+  Selectable<ConversationItem> conversationsByCircleId(
+          String circleId, int limit, int offset) =>
+      db.conversationsByCircleId(circleId, limit, offset);
+
+  Selectable<int> conversationsCountByCircleId(String circleId) =>
+      db.conversationsCountByCircleId(circleId);
 }

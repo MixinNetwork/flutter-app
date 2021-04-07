@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/db/dao/conversations_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
@@ -59,7 +60,7 @@ class SearchCubit extends Cubit<SearchState> with SubscribeMixin {
           ),
         )
     .map((event) {
-      print('fuck messages: ${event.messages}');
+      debugPrint('fuck messages: ${event.messages}');
       return event;
     })
         .listen(emit));

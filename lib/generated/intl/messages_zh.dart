@@ -94,6 +94,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "more" : MessageLookupByLibrary.simpleMessage("更多"),
     "mute" : MessageLookupByLibrary.simpleMessage("静音"),
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
+    "newCircle" : MessageLookupByLibrary.simpleMessage("创建圈子"),
     "newConversation" : MessageLookupByLibrary.simpleMessage("创建群组"),
     "next" : MessageLookupByLibrary.simpleMessage("下一步"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),

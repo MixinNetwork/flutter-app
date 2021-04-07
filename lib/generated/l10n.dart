@@ -936,6 +936,16 @@ class Localization {
       args: [count],
     );
   }
+
+  /// `New circle`
+  String get newCircle {
+    return Intl.message(
+      'New circle',
+      name: 'newCircle',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

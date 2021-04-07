@@ -23,7 +23,7 @@ import 'bloc/conversation_filter_cubit.dart';
 
 String _getConversationName(dynamic item) {
   if (item is ConversationItem) return item.validName;
-  if (item is User) return item.fullName!;
+  if (item is User) return item.fullName ?? '?';
   throw ArgumentError('must be ConversationItem or User');
 }
 
@@ -49,7 +49,7 @@ extension _AvatarUser on User {
   Widget get avatarWidget => AvatarWidget(
         size: 50,
         avatarUrl: avatarUrl,
-        name: fullName!,
+        name: fullName ?? '?',
         userId: userId,
       );
 }
@@ -66,6 +66,7 @@ Future<List<Tuple2<String, bool>>> showConversationSelector({
   required bool singleSelect,
   required String title,
   required bool onlyContact,
+  List<String> initSelectIds = const [],
 }) async {
   return await showMixinDialog<List<Tuple2<String, bool>>>(
         context: context,
@@ -73,6 +74,7 @@ Future<List<Tuple2<String, bool>>> showConversationSelector({
           title: title,
           singleSelect: singleSelect,
           onlyContact: onlyContact,
+          initSelectIds: initSelectIds,
         ),
       ) ??
       [];
@@ -83,22 +85,16 @@ class _ConversationSelector extends HookWidget {
     required this.singleSelect,
     required this.title,
     required this.onlyContact,
+    this.initSelectIds = const [],
   });
 
   final String title;
   final bool singleSelect;
   final bool onlyContact;
+  final List<String> initSelectIds;
 
   @override
   Widget build(BuildContext context) {
-    final conversationFilterCubit = useBloc(() => ConversationFilterCubit(
-          useContext().read<AccountServer>(),
-          onlyContact,
-        ));
-    final conversationFilterState =
-        useBlocState<ConversationFilterCubit, ConversationFilterState>(
-            bloc: conversationFilterCubit);
-
     final selector = useBloc(() => SimpleCubit<List<dynamic>>(const []));
     final selectItem = (dynamic item) {
       final list = [...selector.state];
@@ -108,6 +104,27 @@ class _ConversationSelector extends HookWidget {
         list.add(item);
       selector.emit(list);
     };
+
+    final conversationFilterCubit = useBloc(() => ConversationFilterCubit(
+            useContext().read<AccountServer>(), onlyContact, (state) {
+          state.recentConversations.forEach((element) {
+            if (!initSelectIds.contains(element.conversationId)) return;
+            selectItem(element);
+          });
+          state.friends.forEach((element) {
+            if (!initSelectIds.contains(element.userId)) return;
+            selectItem(element);
+          });
+          state.bots.forEach((element) {
+            if (!initSelectIds.contains(element.userId)) return;
+            selectItem(element);
+          });
+        }));
+    final conversationFilterState =
+        useBlocState<ConversationFilterCubit, ConversationFilterState>(
+      bloc: conversationFilterCubit,
+    );
+
     useEffect(
       () => selector.listen((event) {
         if (event.isNotEmpty && singleSelect) {
@@ -178,12 +195,14 @@ class _ConversationSelector extends HookWidget {
                               padding: const EdgeInsets.all(8),
                               onTap: () => Navigator.pop(
                                 context,
-                                selected.map(
-                                  (item) => Tuple2(
-                                    _getConversationId(item),
-                                    _isBot(item),
-                                  ),
-                                ).toList(),
+                                selected
+                                    .map(
+                                      (item) => Tuple2(
+                                        _getConversationId(item),
+                                        _isBot(item),
+                                      ),
+                                    )
+                                    .toList(),
                               ),
                               child: Text(
                                 Localization.of(context).next,
@@ -341,7 +360,7 @@ class _ConversationSelector extends HookWidget {
                             child: _BaseItem(
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
-                              title: item.fullName!,
+                              title: item.fullName ?? '',
                               showSelector: !singleSelect,
                               selected: selected.any((element) =>
                                   _getConversationId(element) == item.userId),

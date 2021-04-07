@@ -87,5 +87,6 @@
   "searchEmpty": "No chats, \ncontacts or messages found.",
   "more": "more",
   "less": "less",
-  "searchRelatedMessage": "{count} related messages"
+  "searchRelatedMessage": "{count} related messages",
+  "newCircle": "New circle"
 }

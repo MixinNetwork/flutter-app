@@ -47,6 +47,8 @@ class Resources {
 
   static const String assetsImagesIcAboutSvg = 'assets/images/ic_about.svg';
 
+  static const String assetsImagesIcAddSvg = 'assets/images/ic_add.svg';
+
   static const String assetsImagesIcAppearanceSvg =
       'assets/images/ic_appearance.svg';
 

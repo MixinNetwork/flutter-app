@@ -143,10 +143,10 @@ class _NewConversationConfirm extends HookWidget {
     return Material(
       color: Colors.transparent,
       child: Container(
-        height: 390,
         width: 340,
         padding: const EdgeInsets.all(30),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Text(
               Localization.of(context).newConversation,
