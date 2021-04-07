@@ -591,6 +591,7 @@ class DecryptMessage extends Injector {
       } else {
         await syncConversion(data.conversationId);
       }
+      return;
     } else if (systemMessage.action == MessageAction.create) {
     } else if (systemMessage.action == MessageAction.role) {
       database.participantsDao.updateParticipantRole(
@@ -598,6 +599,9 @@ class DecryptMessage extends Injector {
         systemMessage.participantId!,
         systemMessage.role!,
       );
+      if (systemMessage.participantId == accountId) {
+        return;
+      }
     }
     await database.messagesDao.insert(message, accountId);
   }

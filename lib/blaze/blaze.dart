@@ -51,12 +51,15 @@ class Blaze {
         .listen(
       (blazeMessage) async {
         final data = blazeMessage.data;
+        if (data == null) {
+          return;
+        }
         if (blazeMessage.action == acknowledgeMessageReceipts) {
           // makeMessageStatus
           updateRemoteMessageStatus(
-              data!['message_id'], MessageStatus.delivered);
+              data['message_id'], MessageStatus.delivered);
         } else if (blazeMessage.action == createMessage) {
-          final messageData = BlazeMessageData.fromJson(data!);
+          final messageData = BlazeMessageData.fromJson(data);
           if (messageData.userId == userId && messageData.category == null) {
             updateRemoteMessageStatus(
                 messageData.messageId, MessageStatus.delivered);
@@ -69,10 +72,10 @@ class Blaze {
                 .then((value) {});
           }
         } else if (blazeMessage.action == acknowledgeMessageReceipt) {
-          await makeMessageStatus(data!['message_id'],const MessageStatusTypeConverter().mapToDart(data['status'])!);
+          await makeMessageStatus(data['message_id'],const MessageStatusTypeConverter().mapToDart(data['status'])!);
           updateRemoteMessageStatus(
               data['message_id'], MessageStatus.delivered);
-        } else if (data != null) {
+        } else {
           updateRemoteMessageStatus(
               data['message_id'], MessageStatus.delivered);
         }
