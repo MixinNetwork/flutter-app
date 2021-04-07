@@ -468,4 +468,88 @@ class AccountServer {
       debugPrint(e);
     });
   }
+
+  Future<void> createGroupConversation(String name, List<db.User> users) async {
+    final conversationId = const Uuid().v4();
+    final response = await client.conversationApi.createConversation(
+        ConversationRequest(conversationId: conversationId, name: name.trim()));
+    if (response.data != null) {
+      final conversation = response.data!;
+      await database.conversationDao.insert(db.Conversation(
+          conversationId: conversation.conversationId,
+          ownerId: conversation.creatorId,
+          category: conversation.category,
+          name: conversation.name,
+          iconUrl: conversation.iconUrl,
+          announcement: conversation.announcement,
+          codeUrl: conversation.codeUrl,
+          payType: null,
+          createdAt: conversation.createdAt,
+          pinTime: null,
+          lastMessageId: null,
+          lastMessageCreatedAt: null,
+          lastReadMessageId: null,
+          unseenMessageCount: 0,
+          status: ConversationStatus.success,
+          draft: null,
+          muteUntil: DateTime.tryParse(conversation.muteUntil)));
+      conversation.participants.forEach((participant) async {
+        database.participantsDao.insert(db.Participant(
+            conversationId: conversation.conversationId,
+            userId: participant.userId,
+            createdAt: participant.createdAt ?? DateTime.now(),
+            role: participant.role));
+      });
+    }
+  }
+
+  Future<void> exitGroup(String conversationId) async {
+    await client.conversationApi
+        .exit(conversationId)
+        .then((response) => {})
+        .catchError((error) {
+      debugPrint(error);
+    });
+  }
+
+  Future<void> addParticipant(
+    String conversationId,
+    String userId,
+  ) async {
+    await client.conversationApi
+        .participants(conversationId, 'ADD',
+            [ParticipantRequest(userId: userId)])
+        .then((response) => {})
+        .catchError((error) {
+          debugPrint(error);
+        });
+  }
+
+  Future<void> removeParticipant(
+      String conversationId,
+      String userId,
+      ) async {
+    await client.conversationApi
+        .participants(conversationId, 'REMOVE',
+        [ParticipantRequest(userId: userId)])
+        .then((response) => {})
+        .catchError((error) {
+      debugPrint(error);
+    });
+  }
+
+  Future<void> updateParticipantRole(
+      String conversationId,
+      String userId,
+      ParticipantRole role
+      ) async {
+    await client.conversationApi
+        .participants(conversationId, 'REMOVE',
+        [ParticipantRequest(userId: userId, role: role)])
+        .then((response) => {})
+        .catchError((error) {
+      debugPrint(error);
+    });
+  }
+
 }

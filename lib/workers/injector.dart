@@ -59,7 +59,7 @@ class Injector {
               conversationId: conversationId,
               userId: item.userId,
               role: item.role,
-              createdAt: item.createdAt))
+              createdAt: item.createdAt ?? DateTime.now()))
         });
     final add = online.where((item) => !localIds.any((e) => e == item.userId));
     final remove =
