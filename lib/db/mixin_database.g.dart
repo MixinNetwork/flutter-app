@@ -11339,43 +11339,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {messages}).map(messages.mapFromRow);
   }
 
-  Selectable<SearchMessageItem> fuzzySearchMessage(String query, int limit) {
+  Selectable<SearchMessageDetailItem> fuzzySearchMessage(
+      String query, int limit) {
     return customSelect(
-        'SELECT m.conversation_id AS conversationId, c.icon_url AS conversationAvatarUrl,\n            c.name AS conversationName, c.category AS conversationCategory, count(m.message_id) as messageCount,\n            u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n            c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName\n            FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n			INNER JOIN users u ON c.owner_id = u.user_id\n            INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n            WHERE m.message_id = messages_fts.message_id\n            GROUP BY m.conversation_id\n            ORDER BY max(m.created_at) DESC\n            LIMIT :limit',
+        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName,\n    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n    INNER JOIN users u ON m.user_id = u.user_id\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    WHERE m.message_id = fts.message_id\n    ORDER BY m.created_at DESC\n    LIMIT :limit',
         variables: [
           Variable<String>(query),
           Variable<int>(limit)
         ],
         readsFrom: {
           messages,
-          conversations,
           users,
+          conversations,
           messagesFts
         }).map((QueryRow row) {
-      return SearchMessageItem(
-        conversationId: row.readString('conversationId'),
-        conversationAvatarUrl: row.readString('conversationAvatarUrl'),
-        conversationName: row.readString('conversationName'),
-        conversationCategory: Conversations.$converter0
-            .mapToDart(row.readString('conversationCategory')),
-        messageCount: row.readInt('messageCount'),
-        userId: row.readString('userId'),
-        userAvatarUrl: row.readString('userAvatarUrl'),
-        userFullName: row.readString('userFullName'),
-        groupIconUrl: row.readString('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-      );
-    });
-  }
-
-  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
-      String query, String conversationId) {
-    return customSelect(
-        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query AND conversation_id = :conversationId) fts\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.message_id = fts.message_id\n    ORDER BY m.created_at DESC',
-        variables: [Variable<String>(query), Variable<String>(conversationId)],
-        readsFrom: {messages, users, messagesFts}).map((QueryRow row) {
       return SearchMessageDetailItem(
         messageId: row.readString('messageId'),
         userId: row.readString('userId'),
@@ -11385,6 +11362,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.readString('content'),
         createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
         mediaName: row.readString('mediaName'),
+        groupIconUrl: row.readString('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.readString('category')),
+        groupName: row.readString('groupName'),
+        conversationId: row.readString('conversationId'),
       );
     });
   }
@@ -12790,86 +12772,6 @@ class QuoteMessageItem {
   }
 }
 
-class SearchMessageItem {
-  final String conversationId;
-  final String? conversationAvatarUrl;
-  final String? conversationName;
-  final ConversationCategory? conversationCategory;
-  final int messageCount;
-  final String userId;
-  final String? userAvatarUrl;
-  final String? userFullName;
-  final String? groupIconUrl;
-  final ConversationCategory? category;
-  final String? groupName;
-  SearchMessageItem({
-    required this.conversationId,
-    this.conversationAvatarUrl,
-    this.conversationName,
-    this.conversationCategory,
-    required this.messageCount,
-    required this.userId,
-    this.userAvatarUrl,
-    this.userFullName,
-    this.groupIconUrl,
-    this.category,
-    this.groupName,
-  });
-  @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          conversationAvatarUrl.hashCode,
-          $mrjc(
-              conversationName.hashCode,
-              $mrjc(
-                  conversationCategory.hashCode,
-                  $mrjc(
-                      messageCount.hashCode,
-                      $mrjc(
-                          userId.hashCode,
-                          $mrjc(
-                              userAvatarUrl.hashCode,
-                              $mrjc(
-                                  userFullName.hashCode,
-                                  $mrjc(
-                                      groupIconUrl.hashCode,
-                                      $mrjc(category.hashCode,
-                                          groupName.hashCode)))))))))));
-  @override
-  bool operator ==(dynamic other) =>
-      identical(this, other) ||
-      (other is SearchMessageItem &&
-          other.conversationId == this.conversationId &&
-          other.conversationAvatarUrl == this.conversationAvatarUrl &&
-          other.conversationName == this.conversationName &&
-          other.conversationCategory == this.conversationCategory &&
-          other.messageCount == this.messageCount &&
-          other.userId == this.userId &&
-          other.userAvatarUrl == this.userAvatarUrl &&
-          other.userFullName == this.userFullName &&
-          other.groupIconUrl == this.groupIconUrl &&
-          other.category == this.category &&
-          other.groupName == this.groupName);
-  @override
-  String toString() {
-    return (StringBuffer('SearchMessageItem(')
-          ..write('conversationId: $conversationId, ')
-          ..write('conversationAvatarUrl: $conversationAvatarUrl, ')
-          ..write('conversationName: $conversationName, ')
-          ..write('conversationCategory: $conversationCategory, ')
-          ..write('messageCount: $messageCount, ')
-          ..write('userId: $userId, ')
-          ..write('userAvatarUrl: $userAvatarUrl, ')
-          ..write('userFullName: $userFullName, ')
-          ..write('groupIconUrl: $groupIconUrl, ')
-          ..write('category: $category, ')
-          ..write('groupName: $groupName')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class SearchMessageDetailItem {
   final String messageId;
   final String userId;
@@ -12879,6 +12781,10 @@ class SearchMessageDetailItem {
   final String? content;
   final DateTime createdAt;
   final String? mediaName;
+  final String? groupIconUrl;
+  final ConversationCategory? category;
+  final String? groupName;
+  final String conversationId;
   SearchMessageDetailItem({
     required this.messageId,
     required this.userId,
@@ -12888,6 +12794,10 @@ class SearchMessageDetailItem {
     this.content,
     required this.createdAt,
     this.mediaName,
+    this.groupIconUrl,
+    this.category,
+    this.groupName,
+    required this.conversationId,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -12900,8 +12810,20 @@ class SearchMessageDetailItem {
                   userFullName.hashCode,
                   $mrjc(
                       type.hashCode,
-                      $mrjc(content.hashCode,
-                          $mrjc(createdAt.hashCode, mediaName.hashCode))))))));
+                      $mrjc(
+                          content.hashCode,
+                          $mrjc(
+                              createdAt.hashCode,
+                              $mrjc(
+                                  mediaName.hashCode,
+                                  $mrjc(
+                                      groupIconUrl.hashCode,
+                                      $mrjc(
+                                          category.hashCode,
+                                          $mrjc(
+                                              groupName.hashCode,
+                                              conversationId
+                                                  .hashCode))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -12913,7 +12835,11 @@ class SearchMessageDetailItem {
           other.type == this.type &&
           other.content == this.content &&
           other.createdAt == this.createdAt &&
-          other.mediaName == this.mediaName);
+          other.mediaName == this.mediaName &&
+          other.groupIconUrl == this.groupIconUrl &&
+          other.category == this.category &&
+          other.groupName == this.groupName &&
+          other.conversationId == this.conversationId);
   @override
   String toString() {
     return (StringBuffer('SearchMessageDetailItem(')
@@ -12924,7 +12850,11 @@ class SearchMessageDetailItem {
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('createdAt: $createdAt, ')
-          ..write('mediaName: $mediaName')
+          ..write('mediaName: $mediaName, ')
+          ..write('groupIconUrl: $groupIconUrl, ')
+          ..write('category: $category, ')
+          ..write('groupName: $groupName, ')
+          ..write('conversationId: $conversationId')
           ..write(')'))
         .toString();
   }

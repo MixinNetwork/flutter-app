@@ -63,6 +63,7 @@ class ConversationCubit extends SimpleCubit<ConversationItem?>
     );
   }
 
+  int? initIndex;
   final AccountServer accountServer;
 
   @override

@@ -19,7 +19,7 @@ class SearchState extends Equatable {
 
   final List<User> users;
   final List<SearchConversationItem> conversations;
-  final List<SearchMessageItem> messages;
+  final List<SearchMessageDetailItem> messages;
   final String keyword;
 
   @override
@@ -53,9 +53,9 @@ class SearchCubit extends Cubit<SearchState> with SubscribeMixin {
                 .get(),
             conversations:
                 await conversationDao.fuzzySearchConversation(keyword).get(),
-            // messages: await messagesDao
-            //     .fuzzySearchMessage(query: keyword, limit: 10)
-            //     .get(),
+            messages: await messagesDao
+                .fuzzySearchMessage(query: keyword, limit: 10)
+                .get(),
           ),
         )
     .map((event) {

@@ -219,34 +219,56 @@ class _SearchList extends HookWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                final messages = searchState.messages[index];
+                final message = searchState.messages[index];
+                String? icon;
+                late String description;
+                if (message.type == MessageCategory.signalData ||
+                    message.type == MessageCategory.plainData) {
+                  icon = Resources.assetsImagesFileSvg;
+                  description = message.mediaName!;
+                } else if (message.type == MessageCategory.signalContact ||
+                    message.type == MessageCategory.plainContact) {
+                  icon = Resources.assetsImagesContactSvg;
+                  description = message.mediaName!;
+                } else {
+                  description = message.content!;
+                }
+
                 return _SearchItem(
                   avatar: ConversationAvatarWidget(
-                    conversationId: messages.conversationId,
-                    fullName: messages.groupName ?? messages.userFullName,
-                    groupIconUrl: messages.groupIconUrl,
-                    avatarUrl: messages.userAvatarUrl,
-                    category: messages.category,
+                    conversationId: message.conversationId,
+                    fullName: message.groupName ?? message.userFullName,
+                    groupIconUrl: message.groupIconUrl,
+                    avatarUrl: message.userAvatarUrl,
+                    category: message.category,
                     size: 50,
                   ),
-                  name: (messages.groupName?.trim().isNotEmpty == true
-                          ? messages.groupName
-                          : messages.userFullName) ??
+                  name: (message.groupName?.trim().isNotEmpty == true
+                          ? message.groupName
+                          : message.userFullName) ??
                       '',
                   nameHighlight: false,
                   keyword: searchState.keyword,
-                  description: Localization.of(context)
-                      .searchRelatedMessage(messages.messageCount),
+                  descriptionIcon: icon,
+                  description: description,
+                  date: message.createdAt,
                   onTap: () async {
                     _clear(context);
 
-                    context.read<ConversationCubit>().emit(
-                          await context
-                              .read<AccountServer>()
-                              .database
-                              .conversationDao
-                              .conversationItem(messages.conversationId),
-                        );
+                    final conversation = await context
+                        .read<AccountServer>()
+                        .database
+                        .conversationDao
+                        .conversationItem(message.conversationId);
+
+                    final index = await context
+                        .read<AccountServer>()
+                        .database
+                        .messagesDao
+                        .messageIndex(message.conversationId, message.messageId)
+                        .getSingleOrNull();
+                    context.read<ConversationCubit>().initIndex = index;
+                    context.read<ConversationCubit>().emit(conversation);
                     ResponsiveNavigatorCubit.of(context)
                         .pushPage(ResponsiveNavigatorCubit.chatPage);
                   },
@@ -279,6 +301,8 @@ class _SearchItem extends StatelessWidget {
     this.nameHighlight = true,
     required this.onTap,
     this.description,
+    this.descriptionIcon,
+    this.date,
   }) : super(key: key);
 
   final Widget avatar;
@@ -287,6 +311,8 @@ class _SearchItem extends StatelessWidget {
   final bool nameHighlight;
   final VoidCallback onTap;
   final String? description;
+  final String? descriptionIcon;
+  final DateTime? date;
 
   @override
   Widget build(BuildContext context) => GestureDetector(
@@ -312,6 +338,8 @@ class _SearchItem extends StatelessWidget {
                 children: [
                   HighlightText(
                     name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).text,
                       fontSize: 16,
@@ -327,12 +355,43 @@ class _SearchItem extends StatelessWidget {
                     ],
                   ),
                   if (description != null)
-                    Text(
-                      description!,
-                      style: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
-                        fontSize: 14,
-                      ),
+                    Row(
+                      children: [
+                        if (descriptionIcon != null)
+                          SvgPicture.asset(
+                            descriptionIcon!,
+                            color:
+                                BrightnessData.themeOf(context).secondaryText,
+                          ),
+                        Expanded(
+                          child: HighlightText(
+                            description!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: BrightnessData.themeOf(context).text,
+                              fontSize: 14,
+                            ),
+                            highlightTextSpans: [
+                              HighlightTextSpan(
+                                keyword,
+                                style: TextStyle(
+                                  color: BrightnessData.themeOf(context).accent,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (date != null)
+                          Text(
+                            convertStringTime(date!),
+                            style: TextStyle(
+                              color:
+                                  BrightnessData.themeOf(context).secondaryText,
+                              fontSize: 12,
+                            ),
+                          ),
+                      ],
                     ),
                 ],
               ),

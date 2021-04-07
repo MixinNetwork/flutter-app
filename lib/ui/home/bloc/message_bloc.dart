@@ -152,23 +152,30 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     if (!(event is _MessageInitEvent) && state.conversationId != conversationId)
       return;
 
-    if (event is _MessageInitEvent)
+    if (event is _MessageInitEvent) {
       yield await _resetMessageList(
-          conversationId, finalLimit, event.centerOffset);
-    else if (event is _MessageLoadMoreEvent) {
-      if (event is _MessageLoadAfterEvent) {
-        if (state.bottomOffset == 0) return;
-        yield await _after(conversationId);
-      } else if (event is _MessageLoadBeforeEvent) {
-        yield await _before(conversationId);
+        conversationId,
+        finalLimit,
+        event.centerOffset,
+      );
+      conversationCubit.initIndex = null;
+    } else {
+      if (event is _MessageLoadMoreEvent) {
+        if (event is _MessageLoadAfterEvent) {
+          if (state.bottomOffset == 0) return;
+          yield await _after(conversationId);
+        } else if (event is _MessageLoadBeforeEvent) {
+          yield await _before(conversationId);
+        }
+      } else if (event is _MessageInsertOrReplaceEvent) {
+        final result = _insertOrReplace(conversationId, event.data);
+        if (result != null) yield result;
+      } else if (event is _MessageScrollEvent) {
+        final index = await messagesDao
+            .messageIndex(conversationId, event.messageId)
+            .getSingleOrNull();
+        if (index != null) add(_MessageInitEvent(centerOffset: index));
       }
-    } else if (event is _MessageInsertOrReplaceEvent) {
-      final result = _insertOrReplace(conversationId, event.data);
-      if (result != null) yield result;
-    } else if (event is _MessageScrollEvent) {
-      final list =
-          await messagesDao.messageIndex(conversationId, event.messageId).get();
-      if (list.isNotEmpty) add(_MessageInitEvent(centerOffset: list.first));
     }
   }
 
@@ -233,8 +240,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     int limit, [
     int? centerOffset,
   ]) async {
-    final _centerOffset =
-        centerOffset ?? (conversationCubit.state?.unseenMessageCount ?? 0) - 1;
+    final _centerOffset = centerOffset ??
+        conversationCubit.initIndex ??
+        (conversationCubit.state?.unseenMessageCount ?? 0) - 1;
 
     final state = await _messagesByConversationId(
       conversationId,

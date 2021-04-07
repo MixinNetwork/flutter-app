@@ -8,12 +8,14 @@ class HighlightText extends StatelessWidget {
     this.style,
     this.highlightTextSpans = const [],
     this.maxLines,
+    this.overflow,
   }) : super(key: key);
 
   final String text;
   final TextStyle? style;
   final List<HighlightTextSpan> highlightTextSpans;
   final int? maxLines;
+  final TextOverflow? overflow;
 
   @override
   Widget build(BuildContext context) => Text.rich(
@@ -21,6 +23,7 @@ class HighlightText extends StatelessWidget {
           children: _buildSpan(),
         ),
         maxLines: maxLines,
+        overflow: overflow,
       );
 
   List<InlineSpan> _buildSpan() {
