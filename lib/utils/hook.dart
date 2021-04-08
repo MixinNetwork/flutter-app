@@ -2,11 +2,11 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
- T useMemoizedFuture<T>(
-    Future<T> Function() futureBuilder,
-    T initialData, {
-      List<Object?> keys = const <Object>[],
-    }) =>
+T useMemoizedFuture<T>(
+  Future<T> Function() futureBuilder,
+  T initialData, {
+  List<Object?> keys = const <Object>[],
+}) =>
     useFuture(
       useMemoized(
         futureBuilder,
@@ -31,8 +31,9 @@ S useBlocState<B extends Bloc<dynamic, S>, S>({
 }) {
   final _bloc = useMemoized(
     () => bloc ?? useContext().read<B>(),
-    keys,
+    [bloc ?? useContext().read<B>(), ...keys],
   );
-  return useStream(_bloc, initialData: _bloc.state, preserveState: preserveState).data
-      as S;
+  return useStream(_bloc,
+          initialData: _bloc.state, preserveState: preserveState)
+      .data as S;
 }

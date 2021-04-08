@@ -1,60 +1,71 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
+import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class ResponsiveNavigator extends StatelessWidget {
+abstract class AbstractResponsiveNavigatorCubit
+    extends Cubit<ResponsiveNavigatorState> {
+  AbstractResponsiveNavigatorCubit(ResponsiveNavigatorState initialState)
+      : super(initialState);
+
+  void updateNavigationMode(bool navigationMode);
+
+  void onPopPage();
+}
+
+class ResponsiveNavigator extends HookWidget {
   const ResponsiveNavigator({
     Key? key,
     required this.leftPage,
     required this.rightEmptyPage,
     required this.switchWidth,
+    required this.responsiveNavigatorCubit,
   }) : super(key: key);
 
   final MaterialPage leftPage;
   final MaterialPage rightEmptyPage;
   final double switchWidth;
+  final AbstractResponsiveNavigatorCubit responsiveNavigatorCubit;
 
   @override
-  Widget build(BuildContext context) =>
-      LayoutBuilder(builder: (context, boxConstraints) {
-        final navigationMode = boxConstraints.maxWidth < switchWidth;
-        BlocProvider.of<ResponsiveNavigatorCubit>(context)
-            .updateNavigationMode(navigationMode);
-        return Row(
-          children: [
-            if (!navigationMode) leftPage.child,
-            Expanded(
-              child: ClipRect(
-                child: BlocConverter<ResponsiveNavigatorCubit,
-                    ResponsiveNavigatorState, List<MaterialPage>>(
-                  converter: (state) => state.pages,
-                  builder: (context, pages) => Navigator(
-                    transitionDelegate: DefaultTransitionDelegate(
-                      routeWithoutAnimation: {
-                        leftPage.name,
-                        rightEmptyPage.name,
-                      },
-                    ),
-                    onPopPage: (Route<dynamic> route, dynamic result) {
-                      BlocProvider.of<ResponsiveNavigatorCubit>(context)
-                          .onPopPage();
-                      return route.didPop(result);
-                    },
-                    pages: [
-                      if (navigationMode) leftPage,
-                      if (!navigationMode && pages.isEmpty) rightEmptyPage,
-                      ...pages,
-                    ],
-                  ),
+  Widget build(BuildContext context) {
+    final responsiveNavigatorState =
+        useBlocState(bloc: responsiveNavigatorCubit);
+    return LayoutBuilder(builder: (context, boxConstraints) {
+      final navigationMode = boxConstraints.maxWidth < switchWidth;
+      responsiveNavigatorCubit.updateNavigationMode(navigationMode);
+      return Row(
+        children: [
+          if (!navigationMode) leftPage.child,
+          Expanded(
+            child: ClipRect(
+              child: Navigator(
+                transitionDelegate: DefaultTransitionDelegate(
+                  routeWithoutAnimation: {
+                    leftPage.name,
+                    rightEmptyPage.name,
+                  },
                 ),
+                onPopPage: (Route<dynamic> route, dynamic result) {
+                  responsiveNavigatorCubit.onPopPage();
+                  return route.didPop(result);
+                },
+                pages: [
+                  if (navigationMode) leftPage,
+                  if (!navigationMode && responsiveNavigatorState.pages.isEmpty)
+                    rightEmptyPage,
+                  ...responsiveNavigatorState.pages,
+                ],
               ),
             ),
-          ],
-        );
-      });
+          ),
+        ],
+      );
+    });
+  }
 }
 
 class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {

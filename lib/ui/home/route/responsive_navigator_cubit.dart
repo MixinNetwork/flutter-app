@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/ui/home/chat_page.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
 import 'package:flutter_app/ui/setting/edit_profile_page.dart';
 import 'package:flutter_app/ui/setting/notification_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,7 +11,7 @@ import 'package:tuple/tuple.dart';
 
 part 'responsive_navigator_state.dart';
 
-class ResponsiveNavigatorCubit extends Cubit<ResponsiveNavigatorState> {
+class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
   ResponsiveNavigatorCubit() : super(const ResponsiveNavigatorState());
 
   static ResponsiveNavigatorCubit of(BuildContext context) =>

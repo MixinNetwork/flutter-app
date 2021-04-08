@@ -11,6 +11,7 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/empty.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:provider/provider.dart';
 
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;
@@ -33,6 +34,8 @@ class HomePage extends StatelessWidget {
             SizePolicyData(
               minWidth: responsiveNavigationMinWidth,
               child: ResponsiveNavigator(
+                responsiveNavigatorCubit:
+                    context.read<ResponsiveNavigatorCubit>(),
                 switchWidth: responsiveNavigationMinWidth + 260,
                 leftPage: MaterialPage(
                   key: const ValueKey('center'),
