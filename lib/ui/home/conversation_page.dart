@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/bloc/search_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -60,6 +59,12 @@ class ConversationPage extends HookWidget {
     final textEditingController = useTextEditingController();
     final focusNode = useFocusNode();
 
+    final slideCategoryState =
+        useBlocState<SlideCategoryCubit, SlideCategoryState>(
+      when: (state) => state.type != SlideCategoryType.setting,
+      keys: [key],
+    );
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<TextEditingController>.value(
@@ -76,10 +81,8 @@ class ConversationPage extends HookWidget {
             const SearchBar(),
             if (!hasKeyword)
               Expanded(
-                child: BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
-                  builder: (context, state) => _List(
-                    key: PageStorageKey(state),
-                  ),
+                child: _List(
+                  key: PageStorageKey(slideCategoryState),
                 ),
               ),
             if (hasKeyword)
@@ -536,39 +539,39 @@ class _SearchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    color: BrightnessData.themeOf(context).primary,
-    padding: const EdgeInsets.only(
-      top: 16,
-      bottom: 10,
-      right: 20,
-      left: 20,
-    ),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            color: BrightnessData.themeOf(context).text,
-          ),
+        color: BrightnessData.themeOf(context).primary,
+        padding: const EdgeInsets.only(
+          top: 16,
+          bottom: 10,
+          right: 20,
+          left: 20,
         ),
-        if (showMore)
-          GestureDetector(
-            onTap: onTap,
-            child: Text(
-              more
-                  ? Localization.of(context).more
-                  : Localization.of(context).less,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
               style: TextStyle(
                 fontSize: 14,
-                color: BrightnessData.themeOf(context).accent,
+                color: BrightnessData.themeOf(context).text,
               ),
             ),
-          ),
-      ],
-    ),
-  );
+            if (showMore)
+              GestureDetector(
+                onTap: onTap,
+                child: Text(
+                  more
+                      ? Localization.of(context).more
+                      : Localization.of(context).less,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: BrightnessData.themeOf(context).accent,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      );
 }
 
 class _Empty extends StatelessWidget {
@@ -601,93 +604,91 @@ class _Empty extends StatelessWidget {
   }
 }
 
-class _List extends StatelessWidget {
+class _List extends HookWidget {
   const _List({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => ColoredBox(
-        color: BrightnessData.themeOf(context).primary,
-        child: BlocBuilder<SlideCategoryCubit, SlideCategoryState>(
-          builder: (context, slideCategoryState) => BlocConverter<
-              ConversationListBloc, PagingState<ConversationItem>, int>(
-            converter: (state) => state.count,
-            builder: (context, count) {
-              if (count <= 0) return const _Empty();
-              return ScrollablePositionedList.builder(
-                key: PageStorageKey(slideCategoryState),
-                itemPositionsListener:
-                    BlocProvider.of<ConversationListBloc>(context)
-                        .itemPositionsListener,
-                itemCount: count,
-                itemBuilder: (context, index) => BlocConverter<
-                    ConversationListBloc,
-                    PagingState<ConversationItem>,
-                    ConversationItem?>(
-                  converter: (state) => state.map[index],
-                  builder: (context, conversation) {
-                    if (conversation == null) return const SizedBox(height: 80);
-                    return BlocConverter<ConversationCubit, ConversationItem?,
-                        bool>(
-                      converter: (state) =>
-                          conversation.conversationId == state?.conversationId,
-                      builder: (context, selected) => ContextMenuPortalEntry(
-                        child: _Item(
-                          selected: selected,
-                          conversation: conversation,
-                          onTap: () {
-                            BlocProvider.of<ConversationCubit>(context)
-                                .emit(conversation);
-                            ResponsiveNavigatorCubit.of(context)
-                                .pushPage(ResponsiveNavigatorCubit.chatPage);
-                          },
-                        ),
-                        buildMenus: () => [
-                          if (conversation.pinTime != null)
-                            ContextMenu(
-                              title: Localization.current.unPin,
-                              onTap: () => Provider.of<AccountServer>(
-                                context,
-                                listen: false,
-                              )
-                                  .database
-                                  .conversationDao
-                                  .unpin(conversation.conversationId),
-                            ),
-                          if (conversation.pinTime == null)
-                            ContextMenu(
-                              title: Localization.current.pin,
-                              onTap: () => Provider.of<AccountServer>(
-                                context,
-                                listen: false,
-                              )
-                                  .database
-                                  .conversationDao
-                                  .pin(conversation.conversationId),
-                            ),
-                          ContextMenu(
-                            title: Localization.current.unMute,
-                          ),
-                          ContextMenu(
-                            title: Localization.current.deleteChat,
-                            isDestructiveAction: true,
-                            onTap: () => Provider.of<AccountServer>(
-                              context,
-                              listen: false,
-                            ).database.conversationDao.deleteConversation(
-                                conversation.conversationId),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+  Widget build(BuildContext context) {
+    final slideCategoryState =
+        (key as PageStorageKey<SlideCategoryState>).value;
+
+    final conversationListBloc = context.read<ConversationListBloc>();
+    final pagingState =
+        useBlocState<ConversationListBloc, PagingState<ConversationItem>>(
+      bloc: conversationListBloc,
+    );
+    final conversationItem =
+        useBlocState<ConversationCubit, ConversationItem?>();
+
+    Widget child;
+    if (pagingState.count <= 0)
+      child = const _Empty();
+    else {
+      child = ScrollablePositionedList.builder(
+        key: PageStorageKey(slideCategoryState),
+        itemPositionsListener:
+            conversationListBloc.itemPositionsListener(slideCategoryState),
+        itemCount: pagingState.count,
+        itemBuilder: (context, index) {
+          final conversation = pagingState.map[index];
+          if (conversation == null) return const SizedBox(height: 80);
+          final selected =
+              conversation.conversationId == conversationItem?.conversationId;
+
+          return ContextMenuPortalEntry(
+            child: _Item(
+              selected: selected,
+              conversation: conversation,
+              onTap: () {
+                BlocProvider.of<ConversationCubit>(context).emit(conversation);
+                ResponsiveNavigatorCubit.of(context)
+                    .pushPage(ResponsiveNavigatorCubit.chatPage);
+              },
+            ),
+            buildMenus: () => [
+              if (conversation.pinTime != null)
+                ContextMenu(
+                  title: Localization.current.unPin,
+                  onTap: () => Provider.of<AccountServer>(
+                    context,
+                    listen: false,
+                  ).database.conversationDao.unpin(conversation.conversationId),
                 ),
-              );
-            },
-          ),
-        ),
+              if (conversation.pinTime == null)
+                ContextMenu(
+                  title: Localization.current.pin,
+                  onTap: () => Provider.of<AccountServer>(
+                    context,
+                    listen: false,
+                  ).database.conversationDao.pin(conversation.conversationId),
+                ),
+              ContextMenu(
+                title: Localization.current.unMute,
+              ),
+              ContextMenu(
+                title: Localization.current.deleteChat,
+                isDestructiveAction: true,
+                onTap: () => Provider.of<AccountServer>(
+                  context,
+                  listen: false,
+                )
+                    .database
+                    .conversationDao
+                    .deleteConversation(conversation.conversationId),
+              ),
+            ],
+          );
+        },
       );
+    }
+
+    return ColoredBox(
+      color: BrightnessData.themeOf(context).primary,
+      child: child,
+    );
+  }
 }
 
 class _Item extends StatelessWidget {

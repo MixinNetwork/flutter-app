@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
+import 'package:tuple/tuple.dart';
 
 T useMemoizedFuture<T>(
   Future<T> Function() futureBuilder,
@@ -28,12 +29,20 @@ S useBlocState<B extends Bloc<dynamic, S>, S>({
   B? bloc,
   List<Object?> keys = const <Object>[],
   bool preserveState = false,
+  bool Function(S state)? when,
 }) {
-  final _bloc = useMemoized(
-    () => bloc ?? useContext().read<B>(),
+  final tuple = useMemoized(
+    () {
+      final b = bloc ?? useContext().read<B>();
+      Stream<S> stream = b;
+      if (when != null) stream = stream.where(when);
+      return Tuple2(stream, b.state);
+    },
     [bloc ?? useContext().read<B>(), ...keys],
   );
-  return useStream(_bloc,
-          initialData: _bloc.state, preserveState: preserveState)
-      .data as S;
+  return useStream(
+    tuple.item1,
+    initialData: tuple.item2,
+    preserveState: preserveState,
+  ).data as S;
 }

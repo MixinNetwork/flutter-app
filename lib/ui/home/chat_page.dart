@@ -40,7 +40,7 @@ class ChatContainer extends StatelessWidget {
     required this.onPressed,
   }) : super(key: key);
 
-  final Function onPressed;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
