@@ -22,6 +22,7 @@ import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/utils/stream_extension.dart';
+import 'package:flutter_app/utils/string_extension.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -539,17 +540,57 @@ class AccountServer {
   }
 
   Future<void> updateParticipantRole(
-      String conversationId,
-      String userId,
-      ParticipantRole role
-      ) async {
+      String conversationId, String userId, ParticipantRole role) async {
     await client.conversationApi
         .participants(conversationId, 'REMOVE',
-        [ParticipantRequest(userId: userId, role: role)])
+            [ParticipantRequest(userId: userId, role: role)])
         .then((response) => {})
+        .catchError((error) {
+          debugPrint(error);
+        });
+  }
+
+  Future<void> createCircle(String name) async {
+    await client.circleApi
+        .createCircle(CircleName(name: name))
+        .then((response) async => {
+              if (response.error != null)
+                {
+                  await database.circlesDao.insertUpdate(db.Circle(
+                      circleId: response.data!.circleId,
+                      name: response.data!.name,
+                      createdAt: response.data!.createdAt))
+                }
+            })
         .catchError((error) {
       debugPrint(error);
     });
   }
 
+  Future<void> updateCircle(String circleId, String name) async {
+    await client.circleApi
+        .updateCircle(circleId, CircleName(name: name))
+        .then((response) async => {
+              if (response.error != null)
+                {
+                  await database.circlesDao.insertUpdate(db.Circle(
+                      circleId: response.data!.circleId,
+                      name: response.data!.name,
+                      createdAt: response.data!.createdAt))
+                }
+            })
+        .catchError((error) {
+      debugPrint(error);
+    });
+  }
+
+  void _initConversation(String recipientId) {
+    // todo check conversation and initialize conversation
+  }
+
+  String _generateConversationId(String senderId, String recipientId) {
+    final mix = minOf(senderId, recipientId) + maxOf(senderId, recipientId);
+    // todo generateConversationId
+    return const Uuid().v4().toString();
+  }
 }

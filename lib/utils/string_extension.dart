@@ -21,3 +21,19 @@ extension StringExtension on String {
 
   static final regExp = RegExp(r'[a-zA-Z0-9]');
 }
+
+String minOf(String a, String b) {
+  if (a.compareTo(b) < 0) {
+    return a;
+  } else {
+    return b;
+  }
+}
+
+String maxOf(String a, String b) {
+  if (a.compareTo(b) > 0) {
+    return a;
+  } else {
+    return b;
+  }
+}
