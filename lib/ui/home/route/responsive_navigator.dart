@@ -11,9 +11,16 @@ abstract class AbstractResponsiveNavigatorCubit
   AbstractResponsiveNavigatorCubit(ResponsiveNavigatorState initialState)
       : super(initialState);
 
-  void updateNavigationMode(bool navigationMode);
+  void updateNavigationMode(bool navigationMode) =>
+      emit(state.copyWith(navigationMode: navigationMode));
 
-  void onPopPage();
+  void onPopPage() {
+    final bool = state.pages.isNotEmpty == true;
+    if (bool)
+      emit(state.copyWith(
+        pages: state.pages.toList()..removeLast(),
+      ));
+  }
 }
 
 class ResponsiveNavigator extends HookWidget {
@@ -23,12 +30,14 @@ class ResponsiveNavigator extends HookWidget {
     required this.rightEmptyPage,
     required this.switchWidth,
     required this.responsiveNavigatorCubit,
+    this.rightExpanded = true,
   }) : super(key: key);
 
   final MaterialPage leftPage;
   final MaterialPage rightEmptyPage;
   final double switchWidth;
   final AbstractResponsiveNavigatorCubit responsiveNavigatorCubit;
+  final bool rightExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -37,31 +46,36 @@ class ResponsiveNavigator extends HookWidget {
     return LayoutBuilder(builder: (context, boxConstraints) {
       final navigationMode = boxConstraints.maxWidth < switchWidth;
       responsiveNavigatorCubit.updateNavigationMode(navigationMode);
+      var leftChild = leftPage.child;
+      if (!rightExpanded) leftChild = Expanded(child: leftChild);
+      Widget rightChild = ClipRect(
+        child: Navigator(
+          transitionDelegate: DefaultTransitionDelegate(
+            routeWithoutAnimation: {
+              leftPage.name,
+              rightEmptyPage.name,
+            },
+          ),
+          onPopPage: (Route<dynamic> route, dynamic result) {
+            responsiveNavigatorCubit.onPopPage();
+            return route.didPop(result);
+          },
+          pages: [
+            if (navigationMode) leftPage,
+            if (!navigationMode && responsiveNavigatorState.pages.isEmpty)
+              rightEmptyPage,
+            ...responsiveNavigatorState.pages,
+          ],
+        ),
+      );
+      if (navigationMode || rightExpanded)
+        rightChild = Expanded(
+          child: rightChild,
+        );
       return Row(
         children: [
-          if (!navigationMode) leftPage.child,
-          Expanded(
-            child: ClipRect(
-              child: Navigator(
-                transitionDelegate: DefaultTransitionDelegate(
-                  routeWithoutAnimation: {
-                    leftPage.name,
-                    rightEmptyPage.name,
-                  },
-                ),
-                onPopPage: (Route<dynamic> route, dynamic result) {
-                  responsiveNavigatorCubit.onPopPage();
-                  return route.didPop(result);
-                },
-                pages: [
-                  if (navigationMode) leftPage,
-                  if (!navigationMode && responsiveNavigatorState.pages.isEmpty)
-                    rightEmptyPage,
-                  ...responsiveNavigatorState.pages,
-                ],
-              ),
-            ),
-          ),
+          if (!navigationMode) leftChild,
+          rightChild,
         ],
       );
     });

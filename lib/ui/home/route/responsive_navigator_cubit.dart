@@ -63,17 +63,6 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
     }
   }
 
-  void updateNavigationMode(bool navigationMode) =>
-      emit(state.copyWith(navigationMode: navigationMode));
-
-  void onPopPage() {
-    final bool = state.pages.isNotEmpty == true;
-    if (bool)
-      emit(state.copyWith(
-        pages: state.pages.toList()..removeLast(),
-      ));
-  }
-
   void pushPage(String name, {Object? arguments}) {
     final page = _route(name, arguments);
     var index = -1;
