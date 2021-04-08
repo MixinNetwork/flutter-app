@@ -86,5 +86,6 @@
   "more": "更多",
   "less": "更少",
   "searchRelatedMessage": "{count} 条相关的消息",
-  "newCircle": "创建圈子"
+  "newCircle": "创建圈子",
+  "messages": "消息"
 }

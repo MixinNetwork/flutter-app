@@ -91,6 +91,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "less" : MessageLookupByLibrary.simpleMessage("更少"),
     "live" : MessageLookupByLibrary.simpleMessage("Live"),
     "location" : MessageLookupByLibrary.simpleMessage("位置"),
+    "messages" : MessageLookupByLibrary.simpleMessage("消息"),
     "more" : MessageLookupByLibrary.simpleMessage("更多"),
     "mute" : MessageLookupByLibrary.simpleMessage("静音"),
     "name" : MessageLookupByLibrary.simpleMessage("名字"),

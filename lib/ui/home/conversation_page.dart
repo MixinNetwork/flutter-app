@@ -122,7 +122,12 @@ class _SearchList extends HookWidget {
             title: Localization.of(context).contact,
             showMore: searchState.users.length > _defaultLimit,
             more: type.value != _ShowMoreType.contact,
-            onTap: () => type.value = _ShowMoreType.contact,
+            onTap: () {
+              if (type.value != _ShowMoreType.contact)
+                type.value = _ShowMoreType.contact;
+              else
+                type.value = null;
+            },
           ),
         if (searchState.users.isNotEmpty)
           SliverList(
@@ -165,7 +170,12 @@ class _SearchList extends HookWidget {
             title: Localization.of(context).group,
             showMore: searchState.conversations.length > _defaultLimit,
             more: type.value != _ShowMoreType.conversation,
-            onTap: () => type.value = _ShowMoreType.conversation,
+            onTap: () {
+              if (type.value != _ShowMoreType.conversation)
+                type.value = _ShowMoreType.conversation;
+              else
+                type.value = null;
+            },
           ),
         if (searchState.conversations.isNotEmpty)
           SliverList(
@@ -210,10 +220,15 @@ class _SearchList extends HookWidget {
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
         if (searchState.messages.isNotEmpty)
           _SearchHeader(
-            title: Localization.of(context).group,
+            title: Localization.of(context).messages,
             showMore: searchState.messages.length > _defaultLimit,
             more: type.value != _ShowMoreType.message,
-            onTap: () => type.value = _ShowMoreType.message,
+            onTap: () {
+              if (type.value != _ShowMoreType.message)
+                type.value = _ShowMoreType.message;
+              else
+                type.value = null;
+            },
           ),
         if (searchState.messages.isNotEmpty)
           SliverList(
@@ -274,7 +289,7 @@ class _SearchList extends HookWidget {
                   },
                 );
               },
-              childCount: type.value == _ShowMoreType.conversation
+              childCount: type.value == _ShowMoreType.message
                   ? searchState.messages.length
                   : min(searchState.messages.length, _defaultLimit),
             ),
@@ -333,52 +348,30 @@ class _SearchItem extends StatelessWidget {
                 child: avatar,
               ),
               const SizedBox(width: 10),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  HighlightText(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: BrightnessData.themeOf(context).text,
-                      fontSize: 16,
-                    ),
-                    highlightTextSpans: [
-                      if (nameHighlight)
-                        HighlightTextSpan(
-                          keyword,
-                          style: TextStyle(
-                            color: BrightnessData.themeOf(context).accent,
-                          ),
-                        ),
-                    ],
-                  ),
-                  if (description != null)
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Row(
                       children: [
-                        if (descriptionIcon != null)
-                          SvgPicture.asset(
-                            descriptionIcon!,
-                            color:
-                                BrightnessData.themeOf(context).secondaryText,
-                          ),
                         Expanded(
                           child: HighlightText(
-                            description!,
+                            name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: BrightnessData.themeOf(context).text,
-                              fontSize: 14,
+                              fontSize: 16,
                             ),
                             highlightTextSpans: [
-                              HighlightTextSpan(
-                                keyword,
-                                style: TextStyle(
-                                  color: BrightnessData.themeOf(context).accent,
+                              if (nameHighlight)
+                                HighlightTextSpan(
+                                  keyword,
+                                  style: TextStyle(
+                                    color: BrightnessData.themeOf(context).accent,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -386,14 +379,46 @@ class _SearchItem extends StatelessWidget {
                           Text(
                             convertStringTime(date!),
                             style: TextStyle(
-                              color:
-                                  BrightnessData.themeOf(context).secondaryText,
+                              color: BrightnessData.themeOf(context)
+                                  .secondaryText,
                               fontSize: 12,
                             ),
                           ),
                       ],
                     ),
-                ],
+                    if (description != null)
+                      Row(
+                        children: [
+                          if (descriptionIcon != null)
+                            SvgPicture.asset(
+                              descriptionIcon!,
+                              color:
+                                  BrightnessData.themeOf(context).secondaryText,
+                            ),
+                          Expanded(
+                            child: HighlightText(
+                              description!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: BrightnessData.themeOf(context).text,
+                                fontSize: 14,
+                              ),
+                              highlightTextSpans: [
+                                HighlightTextSpan(
+                                  keyword,
+                                  style: TextStyle(
+                                    color:
+                                        BrightnessData.themeOf(context).accent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
               ),
             ],
           ),

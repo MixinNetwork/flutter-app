@@ -93,6 +93,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "less" : MessageLookupByLibrary.simpleMessage("less"),
     "live" : MessageLookupByLibrary.simpleMessage("Live"),
     "location" : MessageLookupByLibrary.simpleMessage("Location"),
+    "messages" : MessageLookupByLibrary.simpleMessage("Messages"),
     "more" : MessageLookupByLibrary.simpleMessage("more"),
     "mute" : MessageLookupByLibrary.simpleMessage("Mute"),
     "name" : MessageLookupByLibrary.simpleMessage("Name"),

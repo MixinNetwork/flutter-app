@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/db/dao/conversations_dao.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
@@ -44,7 +43,7 @@ class SearchCubit extends Cubit<SearchState> with SubscribeMixin {
   }) : super(const SearchState()) {
     addSubscription(_streamController.stream
         .distinct()
-        .throttleTime(const Duration(milliseconds: 200))
+        .debounceTime(const Duration(milliseconds: 200))
         .asyncMap(
           (keyword) async => SearchState(
             keyword: keyword,
@@ -54,15 +53,13 @@ class SearchCubit extends Cubit<SearchState> with SubscribeMixin {
                 .get(),
             conversations:
                 await conversationDao.fuzzySearchConversation(keyword).get(),
-            messages: await messagesDao
-                .fuzzySearchMessage(query: keyword, limit: 10)
-                .get(),
+            messages: keyword.trim().isEmpty
+                ? []
+                : await messagesDao
+                    .fuzzySearchMessage(query: keyword, limit: 4)
+                    .get(),
           ),
         )
-    .map((event) {
-      debugPrint('fuck messages: ${event.messages}');
-      return event;
-    })
         .listen(emit));
   }
 

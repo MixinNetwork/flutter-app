@@ -88,5 +88,6 @@
   "more": "more",
   "less": "less",
   "searchRelatedMessage": "{count} related messages",
-  "newCircle": "New circle"
+  "newCircle": "New circle",
+  "messages": "Messages"
 }
