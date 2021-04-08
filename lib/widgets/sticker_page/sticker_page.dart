@@ -158,8 +158,8 @@ class _StickerAlbumPageItem extends StatelessWidget {
                 accountServer.database.stickerDao
                     .updateUsedAt(sticker.stickerId, DateTime.now()),
               accountServer.sendStickerMessage(
-                conversationItem.conversationId,
                 sticker.stickerId,
+                conversationId: conversationItem.conversationId,
               ),
             ]);
           },

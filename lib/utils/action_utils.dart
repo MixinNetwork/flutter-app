@@ -11,8 +11,8 @@ extension ActionUtils on BuildContext {
       final conversationItem = read<ConversationCubit>().state;
       if (content.isNotEmpty == true && conversationItem != null)
         read<AccountServer>().sendTextMessage(
-          conversationItem.conversationId,
           content,
+          conversationId: conversationItem.conversationId
         );
 
       return true;

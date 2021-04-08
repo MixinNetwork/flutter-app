@@ -125,10 +125,9 @@ class MessageItemWidget extends StatelessWidget {
                       );
                       if (result.isEmpty) return;
                       await context.read<AccountServer>().forwardMessage(
-                            result.first.item1,
-                            message.messageId,
-                            result.first.item2,
-                          );
+                          message.messageId,
+                          conversationId: result.first.item1,
+                          isPlain: result.first.item2);
                     },
                   ),
                 if (message.type.isText)
@@ -144,8 +143,8 @@ class MessageItemWidget extends StatelessWidget {
                     isDestructiveAction: true,
                     onTap: () => context
                         .read<AccountServer>()
-                        .sendRecallMessage(
-                            message.conversationId, [message.messageId]),
+                        .sendRecallMessage([message.messageId],
+                            conversationId: message.conversationId),
                   ),
                 ContextMenu(
                   title: Localization.of(context).deleteForMe,

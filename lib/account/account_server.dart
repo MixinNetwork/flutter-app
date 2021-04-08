@@ -13,6 +13,8 @@ import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
+import 'package:flutter_app/crypto/uuid/uuid.dart';
+import 'package:flutter_app/crypto/vo/Identity.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
@@ -34,12 +36,10 @@ class AccountServer {
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
 
-  Future<void> initServer(
-    String userId,
-    String sessionId,
-    String identityNumber,
-    String privateKey,
-  ) async {
+  Future<void> initServer(String userId,
+      String sessionId,
+      String identityNumber,
+      String privateKey,) async {
     if (sid == sessionId) return;
     sid = sessionId;
 
@@ -65,7 +65,7 @@ class AccountServer {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
-        await AttachmentUtil.init(client, database.messagesDao, identityNumber);
+    await AttachmentUtil.init(client, database.messagesDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
         database.messagesDao, database.jobsDao, _attachmentUtil);
     blaze = Blaze(userId, sessionId, privateKey, database, client);
@@ -124,7 +124,7 @@ class AccountServer {
   Future<void> _runAckJob(List<db.Job> jobs) async {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
-        (e) async {
+            (e) async {
           final map = await LoadBalancerUtils.jsonDecode(e.blazeMessage!);
           return BlazeAckMessage(
               messageId: map['message_id'], status: map['status']);
@@ -139,7 +139,7 @@ class AccountServer {
 
   Future<void> _runRecallJob(List<db.Job> jobs) async {
     jobs.where((element) => element.blazeMessage != null).forEach(
-      (e) async {
+          (e) async {
         final blazeParam = BlazeMessageParam(
             conversationId: e.conversationId,
             messageId: const Uuid().v4(),
@@ -156,7 +156,7 @@ class AccountServer {
   Future<void> _runSendJob(List<db.Job> jobs) async {
     jobs.where((element) => element.blazeMessage != null).forEach((job) async {
       final message =
-          await database.messagesDao.sendingMessage(job.blazeMessage!);
+      await database.messagesDao.sendingMessage(job.blazeMessage!);
       if (message == null) {
         await database.jobsDao.deleteJobById(job.jobId);
       } else {
@@ -179,7 +179,7 @@ class AccountServer {
           if (conversation == null) return;
           final participantSessionKey = await database.participantSessionDao
               .getParticipantSessionKeyWithoutSelf(
-                  message.conversationId, userId);
+              message.conversationId, userId);
           if (participantSessionKey == null) {
             // todo throw checksum
             return;
@@ -190,7 +190,7 @@ class AccountServer {
               base64.decode(participantSessionKey.publicKey!),
               participantSessionKey.sessionId);
           final blazeMessage =
-              _createBlazeMessage(message, base64Encode(content));
+          _createBlazeMessage(message, base64Encode(content));
           blaze.deliver(blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
@@ -214,79 +214,102 @@ class AccountServer {
         id: const Uuid().v4(), action: createMessage, params: blazeParam);
   }
 
-  Future<void> sendTextMessage(String conversationId, String content,
-      {bool isPlain = true, String? quoteMessageId}) async {
+  Future<void> sendTextMessage(String content,
+      {String? conversationId,
+        String? recipientId,
+        String? quoteMessageId,
+        bool isPlain = true}) async {
     if (content.isEmpty) return;
     await _sendMessageHelper.sendTextMessage(
-        conversationId, userId, content, isPlain, quoteMessageId);
+        await _initConversation(conversationId, recipientId),
+        userId,
+        content,
+        isPlain,
+        quoteMessageId);
   }
 
-  Future<void> sendImageMessage(String conversationId, XFile image,
-          {bool isPlain = true, String? quoteMessageId}) =>
+  Future<void> sendImageMessage(XFile image,
+      {String? conversationId,
+        String? recipientId,
+        bool isPlain = true,
+        String? quoteMessageId}) async =>
       _sendMessageHelper.sendImageMessage(
-          conversationId,
+          await _initConversation(conversationId, recipientId),
           userId,
           image,
           isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
           quoteMessageId);
 
-  Future<void> sendVideoMessage(String conversationId, XFile video,
-          {bool isPlain = true, String? quoteMessageId}) =>
+  Future<void> sendVideoMessage(XFile video,
+      {String? conversationId,
+        String? recipientId,
+        bool isPlain = true,
+        String? quoteMessageId}) async =>
       _sendMessageHelper.sendVideoMessage(
-          conversationId,
+          await _initConversation(conversationId, recipientId),
           userId,
           video,
           isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo,
           quoteMessageId);
 
-  Future<void> sendAudioMessage(String conversationId, XFile audio,
-          {bool isPlain = true, String? quoteMessageId}) =>
+  Future<void> sendAudioMessage(XFile audio,
+      {String? conversationId,
+        String? recipientId,
+        bool isPlain = true,
+        String? quoteMessageId}) async =>
       _sendMessageHelper.sendAudioMessage(
-          conversationId,
+          await _initConversation(conversationId, recipientId),
           userId,
           audio,
           isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio,
           quoteMessageId);
 
-  Future<void> sendDataMessage(String conversationId, XFile file,
-          {bool isPlain = true, String? quoteMessageId}) =>
+  Future<void> sendDataMessage(XFile file,
+      {String? conversationId,
+        String? recipientId,
+        bool isPlain = true,
+        String? quoteMessageId}) async =>
       _sendMessageHelper.sendDataMessage(
-          conversationId,
+          await _initConversation(conversationId, recipientId),
           userId,
           file,
           isPlain ? MessageCategory.plainData : MessageCategory.signalData,
           quoteMessageId);
 
-  Future<void> sendStickerMessage(String conversationId, String stickerId,
-          {bool isPlain = true}) =>
+  Future<void> sendStickerMessage(String stickerId,
+      {String? conversationId, String? recipientId, bool isPlain = true}) async =>
       _sendMessageHelper.sendStickerMessage(
-          conversationId,
+          await _initConversation(conversationId, recipientId),
           userId,
           StickerMessage(stickerId, null, null),
           isPlain
               ? MessageCategory.plainSticker
               : MessageCategory.signalSticker);
 
-  void sendContactMessage(
-      String conversationId, String shareUserId, String shareUserFullName,
-      {bool isPlain = true, String? quoteMessageId}) {
-    _sendMessageHelper.sendContactMessage(
-        conversationId,
-        userId,
-        ContactMessage(shareUserId),
-        shareUserFullName,
-        isPlain,
-        quoteMessageId);
-  }
+  Future<void> sendContactMessage(String shareUserId, String shareUserFullName,
+      {String? conversationId,
+        String? recipientId,
+        bool isPlain = true,
+        String? quoteMessageId}) async =>
+      _sendMessageHelper.sendContactMessage(
+          await _initConversation(conversationId, recipientId),
+          userId,
+          ContactMessage(shareUserId),
+          shareUserFullName,
+          isPlain,
+          quoteMessageId);
 
-  Future<void> sendRecallMessage(
-          String conversationId, List<String> messageIds) =>
-      _sendMessageHelper.sendRecallMessage(conversationId, messageIds);
 
-  Future<void> forwardMessage(
-          String conversationId, String forwardMessageId, bool isPlain) =>
+  Future<void> sendRecallMessage(List<String> messageIds,
+      {String? conversationId, String? recipientId}) async =>
+      _sendMessageHelper.sendRecallMessage(
+          await _initConversation(conversationId, recipientId), messageIds);
+
+  Future<void> forwardMessage(String forwardMessageId,
+      {String? conversationId, String? recipientId, bool isPlain = true}) async =>
       _sendMessageHelper.forwardMessage(
-          conversationId, userId, forwardMessageId, isPlain);
+          await _initConversation(conversationId, recipientId), userId,
+          forwardMessageId, isPlain);
 
   void selectConversation(String? conversationId) {
     _decryptMessage.setConversationId(conversationId);
@@ -295,13 +318,14 @@ class AccountServer {
 
   void _markRead(conversationId) async {
     final ids =
-        await database.messagesDao.getUnreadMessageIds(conversationId, userId);
+    await database.messagesDao.getUnreadMessageIds(conversationId, userId);
     final status = EnumToString.convertToString(MessageStatus.read);
     final now = DateTime.now();
     final jobs = ids
         .map(
             (id) => jsonEncode(BlazeAckMessage(messageId: id, status: status!)))
-        .map((blazeMessage) => Job(
+        .map((blazeMessage) =>
+        Job(
             jobId: const Uuid().v4(),
             action: acknowledgeMessageReceipts,
             priority: 5,
@@ -435,17 +459,24 @@ class AccountServer {
           message.mediaDuration,
           message.mediaWaveform);
 
-  Future<void> addUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.add));
+  Future<void> addUser(String userId) =>
+      _relationship(
+          RelationshipRequest(userId: userId, action: RelationshipAction.add));
 
-  Future<void> removeUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.remove));
+  Future<void> removeUser(String userId) =>
+      _relationship(
+          RelationshipRequest(
+              userId: userId, action: RelationshipAction.remove));
 
-  Future<void> blockUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.block));
+  Future<void> blockUser(String userId) =>
+      _relationship(
+          RelationshipRequest(
+              userId: userId, action: RelationshipAction.block));
 
-  Future<void> unblockUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.unblock));
+  Future<void> unblockUser(String userId) =>
+      _relationship(
+          RelationshipRequest(
+              userId: userId, action: RelationshipAction.unblock));
 
   Future<void> _relationship(RelationshipRequest request) async {
     await client.userApi.relationships(request).then((response) async {
@@ -513,55 +544,52 @@ class AccountServer {
     });
   }
 
-  Future<void> addParticipant(
-    String conversationId,
-    String userId,
-  ) async {
+  Future<void> addParticipant(String conversationId,
+      String userId,) async {
     await client.conversationApi
-        .participants(conversationId, 'ADD',
-            [ParticipantRequest(userId: userId)])
-        .then((response) => {})
-        .catchError((error) {
-          debugPrint(error);
-        });
-  }
-
-  Future<void> removeParticipant(
-      String conversationId,
-      String userId,
-      ) async {
-    await client.conversationApi
-        .participants(conversationId, 'REMOVE',
-        [ParticipantRequest(userId: userId)])
+        .participants(
+        conversationId, 'ADD', [ParticipantRequest(userId: userId)])
         .then((response) => {})
         .catchError((error) {
       debugPrint(error);
     });
   }
 
-  Future<void> updateParticipantRole(
-      String conversationId, String userId, ParticipantRole role) async {
+  Future<void> removeParticipant(String conversationId,
+      String userId,) async {
     await client.conversationApi
-        .participants(conversationId, 'REMOVE',
-            [ParticipantRequest(userId: userId, role: role)])
+        .participants(
+        conversationId, 'REMOVE', [ParticipantRequest(userId: userId)])
         .then((response) => {})
         .catchError((error) {
-          debugPrint(error);
-        });
+      debugPrint(error);
+    });
+  }
+
+  Future<void> updateParticipantRole(String conversationId, String userId,
+      ParticipantRole role) async {
+    await client.conversationApi
+        .participants(conversationId, 'REMOVE',
+        [ParticipantRequest(userId: userId, role: role)])
+        .then((response) => {})
+        .catchError((error) {
+      debugPrint(error);
+    });
   }
 
   Future<void> createCircle(String name) async {
     await client.circleApi
         .createCircle(CircleName(name: name))
-        .then((response) async => {
-              if (response.error != null)
-                {
-                  await database.circlesDao.insertUpdate(db.Circle(
-                      circleId: response.data!.circleId,
-                      name: response.data!.name,
-                      createdAt: response.data!.createdAt))
-                }
-            })
+        .then((response) async =>
+    {
+      if (response.error != null)
+        {
+          await database.circlesDao.insertUpdate(db.Circle(
+              circleId: response.data!.circleId,
+              name: response.data!.name,
+              createdAt: response.data!.createdAt))
+        }
+    })
         .catchError((error) {
       debugPrint(error);
     });
@@ -570,27 +598,47 @@ class AccountServer {
   Future<void> updateCircle(String circleId, String name) async {
     await client.circleApi
         .updateCircle(circleId, CircleName(name: name))
-        .then((response) async => {
-              if (response.error != null)
-                {
-                  await database.circlesDao.insertUpdate(db.Circle(
-                      circleId: response.data!.circleId,
-                      name: response.data!.name,
-                      createdAt: response.data!.createdAt))
-                }
-            })
+        .then((response) async =>
+    {
+      if (response.error != null)
+        {
+          await database.circlesDao.insertUpdate(db.Circle(
+              circleId: response.data!.circleId,
+              name: response.data!.name,
+              createdAt: response.data!.createdAt))
+        }
+    })
         .catchError((error) {
       debugPrint(error);
     });
   }
 
-  void _initConversation(String recipientId) {
-    // todo check conversation and initialize conversation
-  }
-
-  String _generateConversationId(String senderId, String recipientId) {
-    final mix = minOf(senderId, recipientId) + maxOf(senderId, recipientId);
-    // todo generateConversationId
-    return const Uuid().v4().toString();
+  Future<String> _initConversation(String? cid, String? recipientId) async {
+    if (recipientId != null) {
+      final conversationId = generateConversationId(recipientId, userId);
+      final conversation =
+      await database.conversationDao.getConversationById(conversationId);
+      if (conversation == null) {
+        await database.conversationDao.insert(db.Conversation(
+            conversationId: conversationId,
+            category: ConversationCategory.contact,
+            createdAt: DateTime.now(),
+            ownerId: recipientId,
+            status: ConversationStatus.start));
+        database.participantsDao.insert(db.Participant(
+            conversationId: conversationId,
+            userId: userId,
+            createdAt: DateTime.now()));
+        database.participantsDao.insert(db.Participant(
+            conversationId: conversationId,
+            userId: recipientId,
+            createdAt: DateTime.now()));
+      }
+      return conversationId;
+    } else if (cid != null) {
+      return cid;
+    } else {
+      throw Exception('Parameter error');
+    }
   }
 }

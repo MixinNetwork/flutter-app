@@ -127,8 +127,8 @@ void _sendMessage(BuildContext context) {
   if (conversationItem == null) return;
 
   context.read<AccountServer>().sendTextMessage(
-        conversationItem.conversationId,
         text,
+    conversationId: conversationItem.conversationId,
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
       );
 
@@ -307,22 +307,16 @@ class _FileButton extends StatelessWidget {
         if (file.isImage) {
           if ((await _PreviewImage.push(context, file)) != true) return;
           return await Provider.of<AccountServer>(context, listen: false)
-              .sendImageMessage(
-            conversationItem.conversationId,
-            file,
-          );
+              .sendImageMessage(file,
+                  conversationId: conversationItem.conversationId);
         } else if (file.isVideo) {
           return Provider.of<AccountServer>(context, listen: false)
-              .sendVideoMessage(
-            conversationItem.conversationId,
-            file,
-          );
+              .sendVideoMessage(file,
+                  conversationId: conversationItem.conversationId);
         }
         await Provider.of<AccountServer>(context, listen: false)
-            .sendDataMessage(
-          conversationItem.conversationId,
-          file,
-        );
+            .sendDataMessage(file,
+                conversationId: conversationItem.conversationId);
       },
     );
   }
