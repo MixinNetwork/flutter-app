@@ -27,11 +27,12 @@ T useBloc<T extends Bloc>(
 S useBlocState<B extends Bloc<dynamic, S>, S>({
   B? bloc,
   List<Object?> keys = const <Object>[],
+  bool preserveState = false,
 }) {
   final _bloc = useMemoized(
     () => bloc ?? useContext().read<B>(),
     keys,
   );
-  return useStream(_bloc, initialData: _bloc.state, preserveState: false).data
+  return useStream(_bloc, initialData: _bloc.state, preserveState: preserveState).data
       as S;
 }

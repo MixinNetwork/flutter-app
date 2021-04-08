@@ -106,6 +106,13 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
 findMessageByMessageId AS Message:
 SELECT * FROM messages WHERE message_id = :messageId;
 
+fuzzySearchMessageCount:
+SELECT count(*)
+    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN users u ON c.owner_id = u.user_id
+    WHERE m.message_id = fts.message_id;
+
 fuzzySearchMessage AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
     m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName,
@@ -115,7 +122,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     INNER JOIN users u ON c.owner_id = u.user_id
     WHERE m.message_id = fts.message_id
     ORDER BY m.created_at DESC
-    LIMIT :limit;
+    LIMIT :limit OFFSET :offset;
 
 recallMessage:
 UPDATE messages SET category = 'MESSAGE_RECALL', content = NULL, media_url = NULL, media_mime_type = NULL, media_size = NULL,

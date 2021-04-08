@@ -36,7 +36,15 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:tuple/tuple.dart';
 
+import 'bloc/search_message_bloc.dart';
+
 const _defaultLimit = 3;
+
+void _clear(BuildContext context) {
+  context.read<SearchCubit>().keyword = '';
+  context.read<TextEditingController>().text = '';
+  context.read<FocusNode>().unfocus();
+}
 
 class ConversationPage extends HookWidget {
   const ConversationPage({Key? key}) : super(key: key);
@@ -99,35 +107,27 @@ class _SearchList extends HookWidget {
     final searchState = useBlocState<SearchCubit, SearchState>(
         bloc: context.read<SearchCubit>());
     final type = useState<_ShowMoreType?>(null);
-    if (searchState.isEmpty)
-      return Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 43,
-          vertical: 86,
-        ),
-        width: double.infinity,
-        color: BrightnessData.themeOf(context).primary,
-        child: Text(
-          Localization.of(context).searchEmpty,
-          style: TextStyle(
-            fontSize: 14,
-            color: BrightnessData.themeOf(context).secondaryText,
-          ),
-        ),
+    if (searchState.isEmpty) return const _SearchEmpty();
+    if (type.value == _ShowMoreType.message)
+      return _SearchMessageList(
+        keyword: searchState.keyword,
+        onTap: () => type.value = null,
       );
     return CustomScrollView(
       slivers: [
         if (searchState.users.isNotEmpty)
-          _SearchHeader(
-            title: Localization.of(context).contact,
-            showMore: searchState.users.length > _defaultLimit,
-            more: type.value != _ShowMoreType.contact,
-            onTap: () {
-              if (type.value != _ShowMoreType.contact)
-                type.value = _ShowMoreType.contact;
-              else
-                type.value = null;
-            },
+          SliverToBoxAdapter(
+            child: _SearchHeader(
+              title: Localization.of(context).contact,
+              showMore: searchState.users.length > _defaultLimit,
+              more: type.value != _ShowMoreType.contact,
+              onTap: () {
+                if (type.value != _ShowMoreType.contact)
+                  type.value = _ShowMoreType.contact;
+                else
+                  type.value = null;
+              },
+            ),
           ),
         if (searchState.users.isNotEmpty)
           SliverList(
@@ -166,16 +166,18 @@ class _SearchList extends HookWidget {
         if (searchState.users.isNotEmpty)
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
         if (searchState.conversations.isNotEmpty)
-          _SearchHeader(
-            title: Localization.of(context).group,
-            showMore: searchState.conversations.length > _defaultLimit,
-            more: type.value != _ShowMoreType.conversation,
-            onTap: () {
-              if (type.value != _ShowMoreType.conversation)
-                type.value = _ShowMoreType.conversation;
-              else
-                type.value = null;
-            },
+          SliverToBoxAdapter(
+            child: _SearchHeader(
+              title: Localization.of(context).group,
+              showMore: searchState.conversations.length > _defaultLimit,
+              more: type.value != _ShowMoreType.conversation,
+              onTap: () {
+                if (type.value != _ShowMoreType.conversation)
+                  type.value = _ShowMoreType.conversation;
+                else
+                  type.value = null;
+              },
+            ),
           ),
         if (searchState.conversations.isNotEmpty)
           SliverList(
@@ -219,74 +221,27 @@ class _SearchList extends HookWidget {
         if (searchState.conversations.isNotEmpty)
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
         if (searchState.messages.isNotEmpty)
-          _SearchHeader(
-            title: Localization.of(context).messages,
-            showMore: searchState.messages.length > _defaultLimit,
-            more: type.value != _ShowMoreType.message,
-            onTap: () {
-              if (type.value != _ShowMoreType.message)
-                type.value = _ShowMoreType.message;
-              else
-                type.value = null;
-            },
+          SliverToBoxAdapter(
+            child: _SearchHeader(
+              title: Localization.of(context).messages,
+              showMore: searchState.messages.length > _defaultLimit,
+              more: type.value != _ShowMoreType.message,
+              onTap: () {
+                if (type.value != _ShowMoreType.message)
+                  type.value = _ShowMoreType.message;
+                else
+                  type.value = null;
+              },
+            ),
           ),
         if (searchState.messages.isNotEmpty)
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 final message = searchState.messages[index];
-                String? icon;
-                late String description;
-                if (message.type == MessageCategory.signalData ||
-                    message.type == MessageCategory.plainData) {
-                  icon = Resources.assetsImagesFileSvg;
-                  description = message.mediaName!;
-                } else if (message.type == MessageCategory.signalContact ||
-                    message.type == MessageCategory.plainContact) {
-                  icon = Resources.assetsImagesContactSvg;
-                  description = message.mediaName!;
-                } else {
-                  description = message.content!;
-                }
-
-                return _SearchItem(
-                  avatar: ConversationAvatarWidget(
-                    conversationId: message.conversationId,
-                    fullName: message.groupName ?? message.userFullName,
-                    groupIconUrl: message.groupIconUrl,
-                    avatarUrl: message.userAvatarUrl,
-                    category: message.category,
-                    size: 50,
-                  ),
-                  name: (message.groupName?.trim().isNotEmpty == true
-                          ? message.groupName
-                          : message.userFullName) ??
-                      '',
-                  nameHighlight: false,
+                return _SearchMessageItem(
+                  message: message,
                   keyword: searchState.keyword,
-                  descriptionIcon: icon,
-                  description: description,
-                  date: message.createdAt,
-                  onTap: () async {
-                    _clear(context);
-
-                    final conversation = await context
-                        .read<AccountServer>()
-                        .database
-                        .conversationDao
-                        .conversationItem(message.conversationId);
-
-                    final index = await context
-                        .read<AccountServer>()
-                        .database
-                        .messagesDao
-                        .messageIndex(message.conversationId, message.messageId)
-                        .getSingleOrNull();
-                    context.read<ConversationCubit>().initIndex = index;
-                    context.read<ConversationCubit>().emit(conversation);
-                    ResponsiveNavigatorCubit.of(context)
-                        .pushPage(ResponsiveNavigatorCubit.chatPage);
-                  },
                 );
               },
               childCount: type.value == _ShowMoreType.message
@@ -299,11 +254,149 @@ class _SearchList extends HookWidget {
       ],
     );
   }
+}
 
-  void _clear(BuildContext context) {
-    context.read<SearchCubit>().keyword = '';
-    context.read<TextEditingController>().text = '';
-    context.read<FocusNode>().unfocus();
+class _SearchMessageItem extends StatelessWidget {
+  const _SearchMessageItem({
+    Key? key,
+    required this.message,
+    required this.keyword,
+  }) : super(key: key);
+
+  final SearchMessageDetailItem message;
+  final String keyword;
+
+  @override
+  Widget build(BuildContext context) {
+    String? icon;
+    late String description;
+    if (message.type == MessageCategory.signalData ||
+        message.type == MessageCategory.plainData) {
+      icon = Resources.assetsImagesFileSvg;
+      description = message.mediaName!;
+    } else if (message.type == MessageCategory.signalContact ||
+        message.type == MessageCategory.plainContact) {
+      icon = Resources.assetsImagesContactSvg;
+      description = message.mediaName!;
+    } else {
+      description = message.content!;
+    }
+
+    return _SearchItem(
+      avatar: ConversationAvatarWidget(
+        conversationId: message.conversationId,
+        fullName: message.groupName ?? message.userFullName,
+        groupIconUrl: message.groupIconUrl,
+        avatarUrl: message.userAvatarUrl,
+        category: message.category,
+        size: 50,
+      ),
+      name: (message.groupName?.trim().isNotEmpty == true
+              ? message.groupName
+              : message.userFullName) ??
+          '',
+      nameHighlight: false,
+      keyword: keyword,
+      descriptionIcon: icon,
+      description: description,
+      date: message.createdAt,
+      onTap: () async {
+        _clear(context);
+
+        final conversation = await context
+            .read<AccountServer>()
+            .database
+            .conversationDao
+            .conversationItem(message.conversationId);
+
+        final index = await context
+            .read<AccountServer>()
+            .database
+            .messagesDao
+            .messageIndex(message.conversationId, message.messageId)
+            .getSingleOrNull();
+        context.read<ConversationCubit>().initIndex = index;
+        context.read<ConversationCubit>().emit(conversation);
+        ResponsiveNavigatorCubit.of(context)
+            .pushPage(ResponsiveNavigatorCubit.chatPage);
+      },
+    );
+  }
+}
+
+class _SearchEmpty extends StatelessWidget {
+  const _SearchEmpty({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 43,
+        vertical: 86,
+      ),
+      width: double.infinity,
+      color: BrightnessData.themeOf(context).primary,
+      child: Text(
+        Localization.of(context).searchEmpty,
+        style: TextStyle(
+          fontSize: 14,
+          color: BrightnessData.themeOf(context).secondaryText,
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchMessageList extends HookWidget {
+  const _SearchMessageList({
+    Key? key,
+    required this.keyword,
+    required this.onTap,
+  }) : super(key: key);
+
+  final String keyword;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final searchMessageBloc = useBloc<SearchMessageBloc>(
+      () => SearchMessageBloc(
+        context.read<ConversationListBloc>().limit,
+        context.read<AccountServer>().database.messagesDao,
+        keyword,
+      ),
+      keys: [keyword],
+    );
+    final pageState = useBlocState<PagingBloc<SearchMessageDetailItem>,
+        PagingState<SearchMessageDetailItem>>(bloc: searchMessageBloc);
+
+    late Widget child;
+    if (pageState.count <= 0)
+      child = const _SearchEmpty();
+    else
+      child = ScrollablePositionedList.builder(
+        itemPositionsListener: searchMessageBloc.itemPositionsListener,
+        itemCount: pageState.count,
+        itemBuilder: (context, index) {
+          final message = pageState.map[index];
+          if (message == null) return const SizedBox(height: 80);
+          return _SearchMessageItem(message: message, keyword: keyword);
+        },
+      );
+
+    return Column(
+      children: [
+        _SearchHeader(
+          title: Localization.of(context).messages,
+          showMore: true,
+          more: false,
+          onTap: onTap,
+        ),
+        Expanded(child: child),
+      ],
+    );
   }
 }
 
@@ -369,7 +462,8 @@ class _SearchItem extends StatelessWidget {
                                 HighlightTextSpan(
                                   keyword,
                                   style: TextStyle(
-                                    color: BrightnessData.themeOf(context).accent,
+                                    color:
+                                        BrightnessData.themeOf(context).accent,
                                   ),
                                 ),
                             ],
@@ -379,8 +473,8 @@ class _SearchItem extends StatelessWidget {
                           Text(
                             convertStringTime(date!),
                             style: TextStyle(
-                              color: BrightnessData.themeOf(context)
-                                  .secondaryText,
+                              color:
+                                  BrightnessData.themeOf(context).secondaryText,
                               fontSize: 12,
                             ),
                           ),
@@ -441,42 +535,40 @@ class _SearchHeader extends StatelessWidget {
   final bool more;
 
   @override
-  Widget build(BuildContext context) => SliverToBoxAdapter(
-        child: Container(
-          color: BrightnessData.themeOf(context).primary,
-          padding: const EdgeInsets.only(
-            top: 16,
-            bottom: 10,
-            right: 20,
-            left: 20,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: BrightnessData.themeOf(context).text,
-                ),
-              ),
-              if (showMore)
-                GestureDetector(
-                  onTap: onTap,
-                  child: Text(
-                    more
-                        ? Localization.of(context).more
-                        : Localization.of(context).less,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: BrightnessData.themeOf(context).accent,
-                    ),
-                  ),
-                ),
-            ],
+  Widget build(BuildContext context) => Container(
+    color: BrightnessData.themeOf(context).primary,
+    padding: const EdgeInsets.only(
+      top: 16,
+      bottom: 10,
+      right: 20,
+      left: 20,
+    ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14,
+            color: BrightnessData.themeOf(context).text,
           ),
         ),
-      );
+        if (showMore)
+          GestureDetector(
+            onTap: onTap,
+            child: Text(
+              more
+                  ? Localization.of(context).more
+                  : Localization.of(context).less,
+              style: TextStyle(
+                fontSize: 14,
+                color: BrightnessData.themeOf(context).accent,
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
 }
 
 class _Empty extends StatelessWidget {

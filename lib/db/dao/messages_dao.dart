@@ -27,6 +27,13 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     db.conversations,
   ]));
 
+  late Stream<Null> searchMessageUpdateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
+    db.messages,
+    db.users,
+    db.conversations,
+    db.messagesFts,
+  ]));
+
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
       .asyncMap(
@@ -219,6 +226,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Selectable<SearchMessageDetailItem> fuzzySearchMessage({
     required String query,
     required int limit,
+    int offset = 0,
   }) =>
-      db.fuzzySearchMessage(query, limit);
+      db.fuzzySearchMessage(query, limit, offset);
+
+  Selectable<int> fuzzySearchMessageCount(String keyword) => db.fuzzySearchMessageCount(keyword);
 }
