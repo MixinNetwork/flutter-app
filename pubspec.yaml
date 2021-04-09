@@ -55,7 +55,7 @@ dependencies:
   json_annotation: ^4.0.0
   provider: ^5.0.0-nullsafety.5
   isolate: ^2.0.3
-  dio: ^4.0.0-beta2
+  dio: ^4.0.0-beta7
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   recase: ^4.0.0-nullsafety.0
   file_selector: ^0.8.2
@@ -81,7 +81,7 @@ dependency_overrides:
   build_runner: ^1.11.5
   web_socket_channel: ^2.0.0
   tuple: ^2.0.0-nullsafety.0
-  dio: ^4.0.0-beta2
+  dio: ^4.0.0-beta7
   fixnum: ^1.0.0-nullsafety.0
   crypto: ^3.0.0-nullsafety.0
   convert: ^3.0.0

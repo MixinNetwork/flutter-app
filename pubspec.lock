@@ -231,7 +231,7 @@ packages:
       name: dio
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.0.0-beta2"
+    version: "4.0.0"
   ed25519_edwards:
     dependency: transitive
     description:
@@ -592,8 +592,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "4b634ca685a415051a0e8d8e47f581ce0f8f81b5"
-      resolved-ref: "4b634ca685a415051a0e8d8e47f581ce0f8f81b5"
+      ref: "81c83a34bdf494636302dc2daa7f003cfc34856e"
+      resolved-ref: "81c83a34bdf494636302dc2daa7f003cfc34856e"
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"
