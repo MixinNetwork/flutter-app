@@ -304,3 +304,9 @@ SELECT COUNT(*)
             INNER JOIN conversations c ON c.conversation_id = cc.conversation_id
             INNER JOIN users ou ON ou.user_id = c.owner_id
             WHERE cc.circle_id = :circle_id;
+
+conversationParticipantsCount:
+SELECT count(1) FROM participants WHERE conversation_id = :conversationId;
+
+announcement:
+SELECT announcement FROM conversations WHERE conversation_id = :conversationId;

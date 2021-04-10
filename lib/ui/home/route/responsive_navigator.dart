@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -21,6 +23,25 @@ abstract class AbstractResponsiveNavigatorCubit
         pages: state.pages.toList()..removeLast(),
       ));
   }
+
+  MaterialPage route(String name, Object? arguments) ;
+
+    void pushPage(String name, {Object? arguments}) {
+    final page = route(name, arguments);
+    var index = -1;
+    index = state.pages
+        .indexWhere((element) => element.child.key == page.child.key);
+    if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
+    if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
+    emit(state.copyWith(
+      pages: state.pages.toList()..add(page),
+    ));
+  }
+
+  void popWhere(bool Function(MaterialPage page) test) => emit(state.copyWith(
+    pages: state.pages.toList()..removeWhere(test),
+  ));
+
 }
 
 class ResponsiveNavigator extends HookWidget {
@@ -30,14 +51,12 @@ class ResponsiveNavigator extends HookWidget {
     required this.rightEmptyPage,
     required this.switchWidth,
     required this.responsiveNavigatorCubit,
-    this.rightExpanded = true,
   }) : super(key: key);
 
   final MaterialPage leftPage;
   final MaterialPage rightEmptyPage;
   final double switchWidth;
   final AbstractResponsiveNavigatorCubit responsiveNavigatorCubit;
-  final bool rightExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -46,45 +65,40 @@ class ResponsiveNavigator extends HookWidget {
     return LayoutBuilder(builder: (context, boxConstraints) {
       final navigationMode = boxConstraints.maxWidth < switchWidth;
       responsiveNavigatorCubit.updateNavigationMode(navigationMode);
-      var leftChild = leftPage.child;
-      if (!rightExpanded) leftChild = Expanded(child: leftChild);
-      Widget rightChild = ClipRect(
-        child: Navigator(
-          transitionDelegate: DefaultTransitionDelegate(
-            routeWithoutAnimation: {
-              leftPage.name,
-              rightEmptyPage.name,
-            },
-          ),
-          onPopPage: (Route<dynamic> route, dynamic result) {
-            responsiveNavigatorCubit.onPopPage();
-            return route.didPop(result);
-          },
-          pages: [
-            if (navigationMode) leftPage,
-            if (!navigationMode && responsiveNavigatorState.pages.isEmpty)
-              rightEmptyPage,
-            ...responsiveNavigatorState.pages,
-          ],
-        ),
-      );
-      if (navigationMode || rightExpanded)
-        rightChild = Expanded(
-          child: rightChild,
-        );
       return Row(
         children: [
-          if (!navigationMode) leftChild,
-          rightChild,
+          if (!navigationMode) leftPage.child,
+          Expanded(
+            child: ClipRect(
+              child: Navigator(
+                transitionDelegate: WithoutAnimationDelegate(
+                  routeWithoutAnimation: {
+                    leftPage.name,
+                    rightEmptyPage.name,
+                  },
+                ),
+                onPopPage: (Route<dynamic> route, dynamic result) {
+                  responsiveNavigatorCubit.onPopPage();
+                  return route.didPop(result);
+                },
+                pages: [
+                  if (navigationMode) leftPage,
+                  if (!navigationMode && responsiveNavigatorState.pages.isEmpty)
+                    rightEmptyPage,
+                  ...responsiveNavigatorState.pages,
+                ],
+              ),
+            ),
+          ),
         ],
       );
     });
   }
 }
 
-class DefaultTransitionDelegate<T> extends TransitionDelegate<T> {
+class WithoutAnimationDelegate<T> extends TransitionDelegate<T> {
   /// Creates a default transition delegate.
-  const DefaultTransitionDelegate({
+  const WithoutAnimationDelegate({
     required this.routeWithoutAnimation,
   }) : super();
 

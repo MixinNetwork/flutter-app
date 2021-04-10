@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/ui/home/chat_page.dart';
@@ -36,7 +34,8 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
     'About': aboutPage,
   };
 
-  MaterialPage _route(String name, Object? arguments) {
+  @override
+  MaterialPage route(String name, Object? arguments) {
     switch (name) {
       case chatPage:
         return MaterialPage(
@@ -62,20 +61,4 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
         throw ArgumentError('Invalid route');
     }
   }
-
-  void pushPage(String name, {Object? arguments}) {
-    final page = _route(name, arguments);
-    var index = -1;
-    index = state.pages
-        .indexWhere((element) => element.child.key == page.child.key);
-    if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
-    if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
-    emit(state.copyWith(
-      pages: state.pages.toList()..add(page),
-    ));
-  }
-
-  void popWhere(bool Function(MaterialPage page) test) => emit(state.copyWith(
-        pages: state.pages.toList()..removeWhere(test),
-      ));
 }

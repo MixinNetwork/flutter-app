@@ -10960,6 +10960,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
+  Selectable<String?> biographyByIdentityNumber(String identityNumber) {
+    return customSelect(
+        'SELECT biography FROM users WHERE identity_number = :identityNumber',
+        variables: [Variable<String>(identityNumber)],
+        readsFrom: {users}).map((QueryRow row) => row.readString('biography'));
+  }
+
   Selectable<StickerAlbum> systemAlbums() {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
@@ -12101,6 +12108,28 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           conversations,
           users
         }).map((QueryRow row) => row.readInt('COUNT(*)'));
+  }
+
+  Selectable<int> conversationParticipantsCount(String conversationId) {
+    return customSelect(
+        'SELECT count(1) FROM participants WHERE conversation_id = :conversationId',
+        variables: [
+          Variable<String>(conversationId)
+        ],
+        readsFrom: {
+          participants
+        }).map((QueryRow row) => row.readInt('count(1)'));
+  }
+
+  Selectable<String?> announcement(String conversationId) {
+    return customSelect(
+        'SELECT announcement FROM conversations WHERE conversation_id = :conversationId',
+        variables: [
+          Variable<String>(conversationId)
+        ],
+        readsFrom: {
+          conversations
+        }).map((QueryRow row) => row.readString('announcement'));
   }
 
   @override

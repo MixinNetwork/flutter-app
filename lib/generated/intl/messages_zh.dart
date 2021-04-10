@@ -31,13 +31,15 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m5(name) => "等待${name}上线后建立加密会话。";
 
-  static m6(name) => "确定删除${name}圈子吗？";
+  static m7(count) => "${count} 成员";
 
-  static m7(date) => "${date}加入";
+  static m8(name) => "确定删除${name}圈子吗？";
 
-  static m8(count) => "共 ${count} 人";
+  static m9(date) => "${date}加入";
 
-  static m9(count) => "${count} 条相关的消息";
+  static m10(count) => "共 ${count} 人";
+
+  static m11(count) => "${count} 条相关的消息";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -67,9 +69,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatWaiting" : m5,
     "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("桌面端"),
     "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
+    "circles" : MessageLookupByLibrary.simpleMessage("圈子"),
+    "clearChat" : MessageLookupByLibrary.simpleMessage("清空聊天记录"),
     "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
     "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),
     "conversationName" : MessageLookupByLibrary.simpleMessage("群组名称"),
+    "conversationParticipantsCount" : m7,
     "copy" : MessageLookupByLibrary.simpleMessage("复制"),
     "create" : MessageLookupByLibrary.simpleMessage("创建"),
     "dataAndStorageUsage" : MessageLookupByLibrary.simpleMessage("数据和存储使用情况"),
@@ -80,7 +85,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteForMe" : MessageLookupByLibrary.simpleMessage("删除"),
     "editCircleName" : MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
     "editConversations" : MessageLookupByLibrary.simpleMessage("编辑会话"),
+    "editName" : MessageLookupByLibrary.simpleMessage("编辑名称"),
     "editProfile" : MessageLookupByLibrary.simpleMessage("编辑资料"),
+    "exitGroup" : MessageLookupByLibrary.simpleMessage("退出群组"),
     "extensions" : MessageLookupByLibrary.simpleMessage("机器人"),
     "file" : MessageLookupByLibrary.simpleMessage("文件"),
     "forward" : MessageLookupByLibrary.simpleMessage("转发"),
@@ -94,19 +101,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages" : MessageLookupByLibrary.simpleMessage("消息"),
     "more" : MessageLookupByLibrary.simpleMessage("更多"),
     "mute" : MessageLookupByLibrary.simpleMessage("静音"),
+    "muted" : MessageLookupByLibrary.simpleMessage("静音"),
     "name" : MessageLookupByLibrary.simpleMessage("名字"),
     "newCircle" : MessageLookupByLibrary.simpleMessage("创建圈子"),
     "newConversation" : MessageLookupByLibrary.simpleMessage("创建群组"),
     "next" : MessageLookupByLibrary.simpleMessage("下一步"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),
     "notification" : MessageLookupByLibrary.simpleMessage("通知"),
-    "pageDeleteCircle" : m6,
-    "pageEditProfileJoin" : m7,
+    "pageDeleteCircle" : m8,
+    "pageEditProfileJoin" : m9,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("通过 QrCode 登录 Mixin Messenger"),
     "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
-    "participantsCount" : m8,
+    "participantsCount" : m10,
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("手机号"),
     "pin" : MessageLookupByLibrary.simpleMessage("置顶"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("请稍等一下"),
@@ -114,15 +122,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "preview" : MessageLookupByLibrary.simpleMessage("预览"),
     "provisioning" : MessageLookupByLibrary.simpleMessage("处理中"),
     "recentConversations" : MessageLookupByLibrary.simpleMessage("最近聊天"),
+    "removeContact" : MessageLookupByLibrary.simpleMessage("删除联系人"),
     "reply" : MessageLookupByLibrary.simpleMessage("回复"),
+    "report" : MessageLookupByLibrary.simpleMessage("举报"),
     "save" : MessageLookupByLibrary.simpleMessage("保存"),
     "search" : MessageLookupByLibrary.simpleMessage("搜索"),
     "searchEmpty" : MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
-    "searchRelatedMessage" : m9,
+    "searchRelatedMessage" : m11,
+    "shareContact" : MessageLookupByLibrary.simpleMessage("发送名片"),
+    "sharedApps" : MessageLookupByLibrary.simpleMessage("分享的应用"),
+    "sharedMedia" : MessageLookupByLibrary.simpleMessage("媒体内容"),
     "signOut" : MessageLookupByLibrary.simpleMessage("登出"),
     "sticker" : MessageLookupByLibrary.simpleMessage("贴纸"),
     "strangerFromMessage" : MessageLookupByLibrary.simpleMessage("他/她不是你的联系人"),
     "strangers" : MessageLookupByLibrary.simpleMessage("陌生人"),
+    "transactions" : MessageLookupByLibrary.simpleMessage("转账记录"),
     "transfer" : MessageLookupByLibrary.simpleMessage("转账"),
     "unMute" : MessageLookupByLibrary.simpleMessage("取消静音"),
     "unPin" : MessageLookupByLibrary.simpleMessage("取消置顶"),

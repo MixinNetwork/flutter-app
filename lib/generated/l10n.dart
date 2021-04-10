@@ -956,6 +956,136 @@ class Localization {
       args: [],
     );
   }
+
+  /// `ID: {id}`
+  String conversationID(Object id) {
+    return Intl.message(
+      'ID: $id',
+      name: 'conversationID',
+      desc: '',
+      args: [id],
+    );
+  }
+
+  /// `{count} Participants`
+  String conversationParticipantsCount(Object count) {
+    return Intl.message(
+      '$count Participants',
+      name: 'conversationParticipantsCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Share Contact`
+  String get shareContact {
+    return Intl.message(
+      'Share Contact',
+      name: 'shareContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared Media`
+  String get sharedMedia {
+    return Intl.message(
+      'Shared Media',
+      name: 'sharedMedia',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Shared Apps`
+  String get sharedApps {
+    return Intl.message(
+      'Shared Apps',
+      name: 'sharedApps',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Muted`
+  String get muted {
+    return Intl.message(
+      'Muted',
+      name: 'muted',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit Name`
+  String get editName {
+    return Intl.message(
+      'Edit Name',
+      name: 'editName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transactions`
+  String get transactions {
+    return Intl.message(
+      'Transactions',
+      name: 'transactions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Circles`
+  String get circles {
+    return Intl.message(
+      'Circles',
+      name: 'circles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove Contact`
+  String get removeContact {
+    return Intl.message(
+      'Remove Contact',
+      name: 'removeContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear Chat`
+  String get clearChat {
+    return Intl.message(
+      'Clear Chat',
+      name: 'clearChat',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Report`
+  String get report {
+    return Intl.message(
+      'Report',
+      name: 'report',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete and Exit`
+  String get exitGroup {
+    return Intl.message(
+      'Delete and Exit',
+      name: 'exitGroup',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

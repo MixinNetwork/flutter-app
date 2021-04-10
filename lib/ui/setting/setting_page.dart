@@ -6,8 +6,7 @@ import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/interacter_decorated_box.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_app/widgets/cell.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:provider/provider.dart';
 
@@ -23,7 +22,7 @@ class SettingPage extends StatelessWidget {
             const SizedBox(height: 24),
             Column(
               children: [
-                _ItemContainer(
+                CellGroup(
                   child: _Item(
                     assetName: Resources.assetsImagesIcProfileSvg,
                     name: 'Edit Profile',
@@ -31,7 +30,7 @@ class SettingPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
-                _ItemContainer(
+                CellGroup(
                   child: Column(
                     children: [
                       _Item(
@@ -65,7 +64,7 @@ class SettingPage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            _ItemContainer(
+            CellGroup(
               child: _Item(
                 assetName: Resources.assetsImagesIcSignOutSvg,
                 title: Localization.of(context).signOut,
@@ -97,97 +96,27 @@ class _Item extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
-    final dynamicColor = color ?? BrightnessData.themeOf(context).text;
-    final backgroundColor = BrightnessData.themeOf(context).listSelected;
-    return BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState,
-            bool>(
+  Widget build(BuildContext context) =>
+      BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState, bool>(
         converter: (state) =>
             !state.navigationMode &&
             state.pages.any((element) =>
                 ResponsiveNavigatorCubit.settingTitlePageMap[name] ==
                 element.name),
-        builder: (context, selected) {
-          var selectedBackgroundColor = backgroundColor;
-          if (selected &&
-              !ResponsiveNavigatorCubit.of(context).state.navigationMode) {
-            selectedBackgroundColor = Color.alphaBlend(
-              BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(0, 0, 0, 0.05),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
-              ),
-              backgroundColor,
-            );
-          }
-          return InteractableDecoratedBox(
-            decoration: BoxDecoration(
-              color: selectedBackgroundColor,
-            ),
-            onTap: () {
-              if (onTap == null) {
-                ResponsiveNavigatorCubit.of(context).pushPage(
-                    ResponsiveNavigatorCubit.settingTitlePageMap[name]!);
-                return;
-              }
+        builder: (context, selected) => CellItem(
+          assetName: assetName,
+          title: title,
+          color: color,
+          selected: selected,
+          onTap: () {
+            if (onTap == null) {
+              ResponsiveNavigatorCubit.of(context)
+                  .pushPage(ResponsiveNavigatorCubit.settingTitlePageMap[name]!);
+              return;
+            }
 
-              onTap?.call();
-            },
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 17,
-                bottom: 17,
-                left: 16,
-                right: 10,
-              ),
-              child: Row(
-                children: [
-                  SvgPicture.asset(
-                    assetName,
-                    width: 24,
-                    height: 24,
-                    color: dynamicColor,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: dynamicColor,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  SvgPicture.asset(
-                    Resources.assetsImagesIcArrowRightSvg,
-                    width: 30,
-                    height: 30,
-                  ),
-                ],
-              ),
-            ),
-          );
-        });
-  }
-}
-
-class _ItemContainer extends StatelessWidget {
-  const _ItemContainer({
-    Key? key,
-    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
-    required this.child,
-  }) : super(key: key);
-
-  final BorderRadius borderRadius;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        child: ClipRRect(
-          borderRadius: borderRadius,
-          child: child,
+            onTap?.call();
+          },
         ),
       );
 }
@@ -202,17 +131,15 @@ class _UserProfile extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Builder(
-          builder: (context) {
-            final account = context.read<MultiAuthCubit>().state.current!.account;
-            return AvatarWidget(
-              userId: account.userId,
-              name: account.fullName!,
-              avatarUrl: account.avatarUrl,
-              size: 90,
-            );
-          }
-        ),
+        Builder(builder: (context) {
+          final account = context.read<MultiAuthCubit>().state.current!.account;
+          return AvatarWidget(
+            userId: account.userId,
+            name: account.fullName!,
+            avatarUrl: account.avatarUrl,
+            size: 90,
+          );
+        }),
         const SizedBox(height: 10),
         BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
           converter: (state) => state.current?.account.fullName,

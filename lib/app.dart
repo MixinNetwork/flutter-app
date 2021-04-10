@@ -9,8 +9,10 @@ import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/ui/landing/landing.dart';
+import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
@@ -167,24 +169,38 @@ class _App extends StatelessWidget {
             darkThemeData: darkBrightnessThemeData,
           );
         },
-        home: BlocConverter<MultiAuthCubit, MultiAuthState, bool>(
-          converter: (state) => state.current != null,
-          builder: (context, authAvailable) {
-            AccountServer? accountServer;
-            try {
-              accountServer = context.read<AccountServer?>();
-            } catch (_) {}
-            if (authAvailable && accountServer != null) {
-              BlocProvider.of<ConversationListBloc>(context)
-                ..limit = MediaQuery.of(context).size.height ~/ 40
-                ..init();
-              accountServer
-                ..initSticker()
-                ..initCircles();
-              return HomePage();
-            }
-            return const LandingPage();
-          },
-        ),
+        home: const _Home(),
       );
+}
+
+class _Home extends HookWidget {
+  const _Home({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final authAvailable =
+        useBlocState<MultiAuthCubit, MultiAuthState>().current != null;
+    AccountServer? accountServer;
+    try {
+      accountServer = context.read<AccountServer?>();
+    } catch (_) {}
+    final signed = authAvailable && accountServer != null;
+    useEffect(() {
+      if (signed) {
+        accountServer!
+          ..initSticker()
+          ..initCircles();
+      }
+    }, [signed]);
+
+    if (signed) {
+      BlocProvider.of<ConversationListBloc>(context)
+        ..limit = MediaQuery.of(context).size.height ~/ 40
+        ..init();
+      return HomePage();
+    }
+    return const LandingPage();
+  }
 }

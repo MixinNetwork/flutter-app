@@ -46,3 +46,26 @@ S useBlocState<B extends Bloc<dynamic, S>, S>({
     preserveState: preserveState,
   ).data as S;
 }
+
+T useBlocStateConverter<B extends Bloc<dynamic, S>, S, T>({
+  B? bloc,
+  List<Object?> keys = const <Object>[],
+  bool preserveState = false,
+  bool Function(T)? when,
+  required T Function(S) converter,
+}) {
+  final tuple = useMemoized(
+    () {
+      final b = bloc ?? useContext().read<B>();
+      var stream = b.map(converter);
+      if (when != null) stream = stream.where(when);
+      return Tuple2(stream, converter(b.state));
+    },
+    [bloc ?? useContext().read<B>(), ...keys],
+  );
+  return useStream(
+    tuple.item1,
+    initialData: tuple.item2,
+    preserveState: preserveState,
+  ).data as T;
+}

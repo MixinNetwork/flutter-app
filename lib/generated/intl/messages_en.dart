@@ -31,13 +31,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m5(name) => "Waiting for ${name} to get online and establish an encrypted session.";
 
-  static m6(name) => "Do you want to delete ${name} circle?";
+  static m6(id) => "ID: ${id}";
 
-  static m7(date) => "${date} join";
+  static m7(count) => "${count} Participants";
 
-  static m8(count) => "${count} Participants";
+  static m8(name) => "Do you want to delete ${name} circle?";
 
-  static m9(count) => "${count} related messages";
+  static m9(date) => "${date} join";
+
+  static m10(count) => "${count} Participants";
+
+  static m11(count) => "${count} related messages";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -69,9 +73,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatWaiting" : m5,
     "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("desktop"),
     "circle" : MessageLookupByLibrary.simpleMessage("Circle"),
+    "circles" : MessageLookupByLibrary.simpleMessage("Circles"),
+    "clearChat" : MessageLookupByLibrary.simpleMessage("Clear Chat"),
     "contact" : MessageLookupByLibrary.simpleMessage("Contact"),
     "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
+    "conversationID" : m6,
     "conversationName" : MessageLookupByLibrary.simpleMessage("Conversation Name"),
+    "conversationParticipantsCount" : m7,
     "copy" : MessageLookupByLibrary.simpleMessage("Copy"),
     "create" : MessageLookupByLibrary.simpleMessage("Create"),
     "dataAndStorageUsage" : MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
@@ -82,7 +90,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "deleteForMe" : MessageLookupByLibrary.simpleMessage("Delete for me"),
     "editCircleName" : MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
     "editConversations" : MessageLookupByLibrary.simpleMessage("Edit Conversations"),
+    "editName" : MessageLookupByLibrary.simpleMessage("Edit Name"),
     "editProfile" : MessageLookupByLibrary.simpleMessage("Edit Profile"),
+    "exitGroup" : MessageLookupByLibrary.simpleMessage("Delete and Exit"),
     "extensions" : MessageLookupByLibrary.simpleMessage("Extensions"),
     "file" : MessageLookupByLibrary.simpleMessage("File"),
     "forward" : MessageLookupByLibrary.simpleMessage("Forward"),
@@ -96,19 +106,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "messages" : MessageLookupByLibrary.simpleMessage("Messages"),
     "more" : MessageLookupByLibrary.simpleMessage("more"),
     "mute" : MessageLookupByLibrary.simpleMessage("Mute"),
+    "muted" : MessageLookupByLibrary.simpleMessage("Muted"),
     "name" : MessageLookupByLibrary.simpleMessage("Name"),
     "newCircle" : MessageLookupByLibrary.simpleMessage("New circle"),
     "newConversation" : MessageLookupByLibrary.simpleMessage("New conversation"),
     "next" : MessageLookupByLibrary.simpleMessage("Next"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
     "notification" : MessageLookupByLibrary.simpleMessage("Notification"),
-    "pageDeleteCircle" : m6,
-    "pageEditProfileJoin" : m7,
+    "pageDeleteCircle" : m8,
+    "pageEditProfileJoin" : m9,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),
     "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("Select a conversation to start messaging"),
-    "participantsCount" : m8,
+    "participantsCount" : m10,
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("Phone number"),
     "pin" : MessageLookupByLibrary.simpleMessage("Pin"),
     "pleaseWait" : MessageLookupByLibrary.simpleMessage("Please wait a moment"),
@@ -116,15 +127,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "preview" : MessageLookupByLibrary.simpleMessage("Preview"),
     "provisioning" : MessageLookupByLibrary.simpleMessage("Provisioning"),
     "recentConversations" : MessageLookupByLibrary.simpleMessage("Recent conversations"),
+    "removeContact" : MessageLookupByLibrary.simpleMessage("Remove Contact"),
     "reply" : MessageLookupByLibrary.simpleMessage("Reply"),
+    "report" : MessageLookupByLibrary.simpleMessage("Report"),
     "save" : MessageLookupByLibrary.simpleMessage("Save"),
     "search" : MessageLookupByLibrary.simpleMessage("Search"),
     "searchEmpty" : MessageLookupByLibrary.simpleMessage("No chats, \ncontacts or messages found."),
-    "searchRelatedMessage" : m9,
+    "searchRelatedMessage" : m11,
+    "shareContact" : MessageLookupByLibrary.simpleMessage("Share Contact"),
+    "sharedApps" : MessageLookupByLibrary.simpleMessage("Shared Apps"),
+    "sharedMedia" : MessageLookupByLibrary.simpleMessage("Shared Media"),
     "signOut" : MessageLookupByLibrary.simpleMessage("Sign Out"),
     "sticker" : MessageLookupByLibrary.simpleMessage("Sticker"),
     "strangerFromMessage" : MessageLookupByLibrary.simpleMessage("This sender is not in your contacts"),
     "strangers" : MessageLookupByLibrary.simpleMessage("Strangers"),
+    "transactions" : MessageLookupByLibrary.simpleMessage("Transactions"),
     "transfer" : MessageLookupByLibrary.simpleMessage("Transfer"),
     "unMute" : MessageLookupByLibrary.simpleMessage("UnMute"),
     "unPin" : MessageLookupByLibrary.simpleMessage("UnPin"),

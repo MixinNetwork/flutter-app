@@ -87,5 +87,17 @@
   "less": "更少",
   "searchRelatedMessage": "{count} 条相关的消息",
   "newCircle": "创建圈子",
-  "messages": "消息"
+  "messages": "消息",
+  "conversationParticipantsCount": "{count} 成员",
+  "shareContact": "发送名片",
+  "sharedMedia": "媒体内容",
+  "sharedApps": "分享的应用",
+  "muted": "静音",
+  "editName": "编辑名称",
+  "transactions": "转账记录",
+  "circles": "圈子",
+  "removeContact": "删除联系人",
+  "clearChat": "清空聊天记录",
+  "report": "举报",
+  "exitGroup": "退出群组"
 }

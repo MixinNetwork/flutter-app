@@ -29,3 +29,6 @@ WHERE  user_id != :id
                                       || '%' ESCAPE '\\' )
 ORDER  BY full_name = :username COLLATE nocase
            OR identity_number = :identityNumber COLLATE nocase DESC;
+
+biographyByIdentityNumber:
+SELECT biography FROM users WHERE identity_number = :identityNumber;

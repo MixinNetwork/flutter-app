@@ -1,100 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
+import 'package:flutter_app/ui/home/chat_page.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
+import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/back_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'avatar_view/avatar_view.dart';
 
-class ChatBar extends StatelessWidget {
+class ChatBar extends HookWidget {
   const ChatBar({
     Key? key,
-    required this.onPressed,
   }) : super(key: key);
-
-  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final actionColor = BrightnessData.themeOf(context).icon;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: BrightnessData.themeOf(context).primary,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
-        child: Row(children: [
-          Builder(
-            builder: (context) => ModalRoute.of(context)?.canPop ?? false
-                ? MixinBackButton(
-                    color: actionColor,
-                    onTap: () {
-                      BlocProvider.of<ConversationCubit>(context).emit(null);
-                      Navigator.pop(context);
-                    })
-                : const SizedBox(width: 16),
+    final chatSideCubit = context.read<ChatSideCubit>();
+
+    final hasSidePage = useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
+            bloc: chatSideCubit)
+        .pages
+        .isNotEmpty;
+    return Padding(
+      padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
+      child: Row(children: [
+        Builder(
+          builder: (context) => ModalRoute.of(context)?.canPop ?? false
+              ? MixinBackButton(
+                  color: actionColor,
+                  onTap: () {
+                    BlocProvider.of<ConversationCubit>(context).emit(null);
+                    Navigator.pop(context);
+                  })
+              : const SizedBox(width: 16),
+        ),
+        Expanded(
+          flex: 1,
+          child: Row(
+            children: [
+              const ConversationAvatar(),
+              const SizedBox(width: 10),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ConversationName(),
+                  const ConversationIDOrCount(),
+                ],
+              ),
+            ],
           ),
-          Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                const _Avatar(),
-                const SizedBox(width: 10),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const _Name(),
-                    const _ID(),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          ActionButton(
-            name: Resources.assetsImagesIcSearchSvg,
-            color: actionColor,
-          ),
-          const SizedBox(width: 14),
-          ActionButton(
-            name: Resources.assetsImagesIcScreenSvg,
-            color: actionColor,
-          ),
-        ]),
-      ),
+        ),
+        ActionButton(
+          name: Resources.assetsImagesIcSearchSvg,
+          color: actionColor,
+        ),
+        const SizedBox(width: 14),
+        ActionButton(
+          name: Resources.assetsImagesIcScreenSvg,
+          color: hasSidePage
+              ? BrightnessData.themeOf(context).accent
+              : actionColor,
+          onTap: chatSideCubit.toggleInfoPage,
+        ),
+      ]),
     );
   }
 }
 
-class _ID extends StatelessWidget {
-  const _ID({
+class ConversationIDOrCount extends HookWidget {
+  const ConversationIDOrCount({
     Key? key,
+    this.fontSize = 14,
   }) : super(key: key);
+
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) {
-    return BlocConverter<ConversationCubit, ConversationItem?, String?>(
-      converter: (state) => state?.ownerIdentityNumber,
-      when: (a, b) => b != null,
-      builder: (context, id) => Text(
-        id!,
-        style: TextStyle(
-          color: BrightnessData.themeOf(context).secondaryText,
-          fontSize: 14,
-        ),
+    final conversation = useBlocState<ConversationCubit, ConversationItem?>(
+        when: (state) => state != null)!;
+    final isGroupConversation = conversation.isGroupConversation;
+
+    final countStream = useMemoized(
+      () => context
+          .read<AccountServer>()
+          .database
+          .conversationDao
+          .conversationParticipantsCount(conversation.conversationId)
+          .watchSingle(),
+      [conversation.conversationId],
+    );
+
+    final textStyle = TextStyle(
+      color: BrightnessData.themeOf(context).secondaryText,
+      fontSize: fontSize,
+    );
+
+    if (!isGroupConversation)
+      return Text(
+        Localization.of(context)
+            .conversationID(conversation.ownerIdentityNumber),
+        style: textStyle,
+      );
+
+    return StreamBuilder<int>(
+      stream: countStream,
+      builder: (context, snapshot) => Text(
+        Localization.of(context)
+            .conversationParticipantsCount(snapshot.data ?? 0),
+        style: textStyle,
       ),
     );
   }
 }
 
-class _Name extends StatelessWidget {
-  const _Name({
+class ConversationName extends StatelessWidget {
+  const ConversationName({
     Key? key,
+    this.fontSize = 20,
   }) : super(key: key);
+
+  final double fontSize;
 
   @override
   Widget build(BuildContext context) =>
@@ -106,28 +142,27 @@ class _Name extends StatelessWidget {
         builder: (context, name) => Text(
           name!,
           style: TextStyle(
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(0, 0, 0, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-            ),
-            fontSize: 20,
+            color: BrightnessData.themeOf(context).text,
+            fontSize: fontSize,
           ),
         ),
       );
 }
 
-class _Avatar extends StatelessWidget {
-  const _Avatar({
+class ConversationAvatar extends StatelessWidget {
+  const ConversationAvatar({
     Key? key,
+    this.size = 50,
   }) : super(key: key);
+
+  final double size;
 
   @override
   Widget build(BuildContext context) =>
       BlocBuilder<ConversationCubit, ConversationItem?>(
         buildWhen: (a, b) => b != null,
         builder: (context, conversation) => ConversationAvatarWidget(
-          size: 50,
+          size: size,
           conversation: conversation!,
         ),
       );

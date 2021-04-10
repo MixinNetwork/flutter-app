@@ -124,4 +124,10 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<int> conversationsCountByCircleId(String circleId) =>
       db.conversationsCountByCircleId(circleId);
+
+  Selectable<int> conversationParticipantsCount(String conversationId) =>
+      db.conversationParticipantsCount(conversationId);
+
+  Selectable<String?> announcement(String conversationId) =>
+      db.announcement(conversationId);
 }

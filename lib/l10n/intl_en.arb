@@ -89,5 +89,18 @@
   "less": "less",
   "searchRelatedMessage": "{count} related messages",
   "newCircle": "New circle",
-  "messages": "Messages"
+  "messages": "Messages",
+  "conversationID": "ID: {id}",
+  "conversationParticipantsCount": "{count} Participants",
+  "shareContact": "Share Contact",
+  "sharedMedia": "Shared Media",
+  "sharedApps": "Shared Apps",
+  "muted": "Muted",
+  "editName": "Edit Name",
+  "transactions": "Transactions",
+  "circles": "Circles",
+  "removeContact": "Remove Contact",
+  "clearChat": "Clear Chat",
+  "report": "Report",
+  "exitGroup": "Delete and Exit"
 }
