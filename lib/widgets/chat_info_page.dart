@@ -94,7 +94,7 @@ class ChatInfoPage extends HookWidget {
                                 ),
                               )
                             : null,
-                        action: null,
+                        trailing: null,
                         onTap: () {
                           // if(muting)
                         },
@@ -121,21 +121,21 @@ class ChatInfoPage extends HookWidget {
                       CellItem(
                         title: Localization.of(context).clearChat,
                         color: BrightnessData.themeOf(context).red,
-                        action: null,
+                        trailing: null,
                         onTap: () {},
                       ),
                       if (isGroupConversation)
                         CellItem(
                           title: Localization.of(context).exitGroup,
                           color: BrightnessData.themeOf(context).red,
-                          action: null,
+                          trailing: null,
                           onTap: () {},
                         )
                       else
                         CellItem(
                           title: Localization.of(context).removeContact,
                           color: BrightnessData.themeOf(context).red,
-                          action: null,
+                          trailing: null,
                           onTap: () {},
                         ),
                     ],
@@ -147,7 +147,7 @@ class ChatInfoPage extends HookWidget {
                     child: CellItem(
                       title: Localization.of(context).report,
                       color: BrightnessData.themeOf(context).red,
-                      action: null,
+                      trailing: null,
                       onTap: () {},
                     ),
                   ),

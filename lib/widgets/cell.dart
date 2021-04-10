@@ -34,7 +34,7 @@ class CellItem extends StatelessWidget {
     this.color,
     this.onTap,
     this.selected = false,
-    this.action = const _Arrow(),
+    this.trailing = const _Arrow(),
     this.description,
   }) : super(key: key);
 
@@ -43,7 +43,7 @@ class CellItem extends StatelessWidget {
   final Color? color;
   final VoidCallback? onTap;
   final bool selected;
-  final Widget? action;
+  final Widget? trailing;
   final Widget? description;
 
   @override
@@ -95,8 +95,8 @@ class CellItem extends StatelessWidget {
             ),
             if (description != null) const SizedBox(width: 4),
             if (description != null) description!,
-            if (action != null) const SizedBox(width: 4),
-            if (action != null) action!,
+            if (trailing != null) const SizedBox(width: 4),
+            if (trailing != null) trailing!,
           ],
         ),
       ),
