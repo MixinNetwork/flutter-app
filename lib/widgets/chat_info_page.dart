@@ -5,6 +5,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/action_button.dart';
+import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
@@ -65,7 +66,28 @@ class ChatInfoPage extends HookWidget {
                   CellGroup(
                     child: CellItem(
                       title: Localization.of(context).shareContact,
-                      onTap: () {},
+                      onTap: () async {
+                        final conversation =
+                            context.read<ConversationCubit>().state;
+                        if (conversation == null) return;
+
+                        final result = await showConversationSelector(
+                          context: context,
+                          singleSelect: true,
+                          title: Localization.of(context).shareContact,
+                          onlyContact: false,
+                        );
+
+                        if (result.isEmpty) return;
+                        final conversationId = result[0].item1;
+
+                        await context.read<AccountServer>().sendContactMessage(
+                              conversation.ownerId!,
+                              conversation.name ?? '',
+                              conversationId: conversationId,
+                              recipientId: conversationId,
+                            );
+                      },
                     ),
                   ),
                 const SizedBox(height: 10),
