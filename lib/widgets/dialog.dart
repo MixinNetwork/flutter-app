@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 Future<T?> _showDialog<T>({
   required BuildContext context,
@@ -57,51 +58,65 @@ Future<T?> showMixinDialog<T>({
 class AlertDialogLayout extends StatelessWidget {
   const AlertDialogLayout({
     Key? key,
+    this.title,
+    this.titleMarginBottom = 48,
     required this.content,
     this.actions = const [],
     this.minWidth = 400,
     this.minHeight = 210,
   }) : super(key: key);
 
+  final Widget? title;
+  final double titleMarginBottom;
   final Widget content;
   final List<Widget> actions;
   final double minWidth;
   final double minHeight;
 
   @override
-  Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: BoxConstraints(
-        minWidth: minWidth,
-        minHeight: minHeight,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(30),
-        child: IntrinsicWidth(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              DefaultTextStyle(
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: BrightnessData.themeOf(context).text,
+  Widget build(BuildContext context) => Material(
+      color: Colors.transparent,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minWidth: minWidth,
+          minHeight: minHeight,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(30),
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (title != null)
+                  DefaultTextStyle(
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: BrightnessData.themeOf(context).text,
+                    ),
+                    child: title!,
+                  ),
+                if (title != null) const SizedBox(height: 48),
+                DefaultTextStyle(
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: BrightnessData.themeOf(context).text,
+                  ),
+                  child: content,
                 ),
-                child: content,
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: actions.joinList(const SizedBox(width: 4)),
-              ),
-            ],
+                const SizedBox(height: 30),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: actions.joinList(const SizedBox(width: 4)),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
-  }
 }
 
 class _DialogPage extends StatelessWidget {
@@ -208,4 +223,41 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
       ),
     );
   }
+}
+
+class DialogTextField extends HookWidget {
+  const DialogTextField({
+    Key? key,
+    required this.textEditingController,
+    required this.hintText,
+  }) : super(key: key);
+
+  final TextEditingController textEditingController;
+  final String hintText;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        alignment: Alignment.center,
+        child: TextField(
+          controller: textEditingController,
+          style: const TextStyle(
+            color: Colors.white,
+          ),
+          scrollPadding: EdgeInsets.zero,
+          decoration: InputDecoration(
+            contentPadding: const EdgeInsets.all(0),
+            isDense: true,
+            hintText: hintText,
+            hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
+            focusedBorder: InputBorder.none,
+            enabledBorder: InputBorder.none,
+          ),
+        ),
+      );
 }

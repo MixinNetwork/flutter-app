@@ -140,81 +140,66 @@ class _NewConversationConfirm extends HookWidget {
     );
 
     final name = useState('');
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 340,
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              Localization.of(context).newConversation,
-              style: TextStyle(
-                fontSize: 16,
-                color: BrightnessData.themeOf(context).text,
+    return AlertDialogLayout(
+      title: Text(Localization.of(context).newConversation),
+      titleMarginBottom: 24,
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipOval(
+            child: SizedBox(
+              height: 60,
+              width: 60,
+              child: AvatarPuzzlesWidget(users, 60),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            Localization.of(context).participantsCount(userIds.length),
+            style: TextStyle(
+              fontSize: 14,
+              color: BrightnessData.themeOf(context).secondaryText,
+            ),
+          ),
+          const SizedBox(height: 48),
+          Container(
+            height: 48,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(5),
+            ),
+            alignment: Alignment.center,
+            child: TextField(
+              onChanged: (text) => name.value = text,
+              style: const TextStyle(
+                color: Colors.white,
+              ),
+              scrollPadding: EdgeInsets.zero,
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(0),
+                isDense: true,
+                hintText: Localization.of(context).conversationName,
+                hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
               ),
             ),
-            const SizedBox(height: 24),
-            ClipOval(
-              child: SizedBox(
-                height: 60,
-                width: 60,
-                child: AvatarPuzzlesWidget(users, 60),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              Localization.of(context).participantsCount(userIds.length),
-              style: TextStyle(
-                fontSize: 14,
-                color: BrightnessData.themeOf(context).secondaryText,
-              ),
-            ),
-            const SizedBox(height: 48),
-            Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              alignment: Alignment.center,
-              child: TextField(
-                onChanged: (text) => name.value = text,
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
-                scrollPadding: EdgeInsets.zero,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(0),
-                  isDense: true,
-                  hintText: Localization.of(context).conversationName,
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 64),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                MixinButton(
-                    backgroundTransparent: true,
-                    child: Text(Localization.of(context).cancel),
-                    onTap: () => Navigator.pop(context)),
-                MixinButton(
-                  child: Text(Localization.of(context).create),
-                  onTap: () {
-                    // TODO  create conversation;
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
+      actions: [
+        MixinButton(
+            backgroundTransparent: true,
+            child: Text(Localization.of(context).cancel),
+            onTap: () => Navigator.pop(context)),
+        MixinButton(
+          child: Text(Localization.of(context).create),
+          onTap: () {
+            // TODO  create conversation;
+          },
+        ),
+      ],
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/widgets/avatar_view/bloc/cubit/avatar_cubit.dart';
 import 'package:flutter_app/widgets/cache_image.dart';
@@ -144,7 +143,7 @@ class AvatarPuzzlesWidget extends StatelessWidget {
   Widget _buildAvatarImage(User user) => Expanded(
         child: AvatarWidget(
           userId: user.userId,
-          name: user.fullName!,
+          name: user.fullName ?? '?',
           avatarUrl: user.avatarUrl,
           size: size,
           clipOval: false,

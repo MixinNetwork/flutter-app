@@ -170,13 +170,13 @@ class _CircleList extends HookWidget {
                   title: Localization.of(context).editConversations,
                   onTap: () async {
                     final initSelectIds = (await context
-                              .read<AccountServer>()
-                              .database
-                              .circleConversationDao
-                              .allCircleConversations(circle.circleId)
-                              .get())
-                          .map((e) => e.userId ?? e.conversationId)
-                          .toList();
+                            .read<AccountServer>()
+                            .database
+                            .circleConversationDao
+                            .allCircleConversations(circle.circleId)
+                            .get())
+                        .map((e) => e.userId ?? e.conversationId)
+                        .toList();
                     final result = await showConversationSelector(
                       context: context,
                       singleSelect: false,
@@ -331,64 +331,21 @@ class _EditCircleName extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final textEditingController = useTextEditingController.call(text: name);
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 340,
-        padding: const EdgeInsets.all(30),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              Localization.of(context).newConversation,
-              style: TextStyle(
-                fontSize: 16,
-                color: BrightnessData.themeOf(context).text,
-              ),
-            ),
-            const SizedBox(height: 48),
-            Container(
-              height: 48,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(5),
-              ),
-              alignment: Alignment.center,
-              child: TextField(
-                controller: textEditingController,
-                style: const TextStyle(
-                  color: Colors.white,
-                ),
-                scrollPadding: EdgeInsets.zero,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.all(0),
-                  isDense: true,
-                  hintText: Localization.of(context).conversationName,
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
-                  focusedBorder: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                ),
-              ),
-            ),
-            const SizedBox(height: 64),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                MixinButton(
-                    backgroundTransparent: true,
-                    child: Text(Localization.of(context).cancel),
-                    onTap: () => Navigator.pop(context)),
-                MixinButton(
-                  child: Text(Localization.of(context).create),
-                  onTap: () =>
-                      Navigator.pop(context, textEditingController.text),
-                ),
-              ],
-            ),
-          ],
+    return AlertDialogLayout(
+      title: Text(Localization.of(context).newConversation),
+      content: DialogTextField(
+          textEditingController: textEditingController,
+          hintText: Localization.of(context).conversationName),
+      actions: [
+        MixinButton(
+            backgroundTransparent: true,
+            child: Text(Localization.of(context).cancel),
+            onTap: () => Navigator.pop(context)),
+        MixinButton(
+          child: Text(Localization.of(context).create),
+          onTap: () => Navigator.pop(context, textEditingController.text),
         ),
-      ),
+      ],
     );
   }
 }
