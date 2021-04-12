@@ -40,7 +40,7 @@ class TextMessage extends StatelessWidget {
             Builder(
               builder: (context) => MentionBuilder(
                 mentionString: message.mentions,
-                builder: (context, mentionMapAsyncSnapshot) => HighlightText(
+                builder: (context, mentionMapAsyncSnapshot) => HighlightSelectableText(
                   message.content!,
                   highlightTextSpans: [
                     ...mentionNumberRegExp
