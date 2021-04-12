@@ -29,26 +29,26 @@ dependencies:
 #         local path
 #    path: ../mixin_bot_sdk_dart
   http: ^0.13.0
-  qr_flutter: ^3.2.0
+  qr_flutter: ^4.0.0
   uuid: ^3.0.0
-  cryptography: ^1.4.1
+  cryptography: ^2.0.1
   web_socket_channel: ^2.0.0
   moor: ^4.1.0
   sqlite3_flutter_libs: ^0.4.1
   libsignal_protocol_dart: ^0.3.0-nullsafety.0
   path_provider: ^2.0.1
   path: ^1.8.0
-  hive: ^1.6.0-nullsafety.2
-  hive_flutter: ^1.0.0-nullsafety.0
+  hive: ^2.0.2
+  hive_flutter: ^1.0.0
   cached_network_image: ^3.0.0-nullsafety
   very_good_analysis: ^2.0.0-nullsafety.0
-  desktop_window: ^0.3.0
-  bloc: ^7.0.0-nullsafety.2
-  flutter_bloc: ^7.0.0-nullsafety.2
+  desktop_window: ^0.4.0
+  bloc: ^7.0.0
+  flutter_bloc: ^7.0.0
   equatable: ^2.0.0-nullsafety.3
   intl: ^0.17.0
   flutter_svg: ^0.21.0-nullsafety.0
-  tuple: ^2.0.0-nullsafety.0
+  tuple: ^2.0.0
   archive: ^3.0.0
   hydrated_bloc: ^7.0.0-nullsafety.1
   rxdart: ^0.26.0-nullsafety.1
@@ -73,6 +73,7 @@ dependencies:
   flutter_local_notifications: ^5.0.0-nullsafety.1
   flutter_app_icon_badge: ^2.0.0
   flutter_hooks: ^0.16.0
+  objectbox: ^0.14.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -99,7 +100,8 @@ dependency_overrides:
   sliver_tools: ^0.2.0
 
 dev_dependencies:
-  hive_generator: ^0.9.0-nullsafety.1
+  hive_generator: ^1.0.1
+  objectbox_generator: ^0.14.0
   moor_generator: ^4.1.0
   build_runner: ^1.11.5
   json_serializable: ^4.0.1
