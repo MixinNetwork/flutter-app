@@ -26,12 +26,12 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
   static const aboutPage = 'aboutPage';
 
   static const settingTitlePageMap = {
-    'Edit Profile': editProfilePage,
-    'Notification': notificationPage,
-    'Chat Backup': chatBackupPage,
-    'Data and Storage Usage': dataAndStorageUsagePage,
-    'Appearance': appearancePage,
-    'About': aboutPage,
+    editProfilePage,
+    notificationPage,
+    chatBackupPage,
+    dataAndStorageUsagePage,
+    appearancePage,
+     aboutPage,
   };
 
   @override

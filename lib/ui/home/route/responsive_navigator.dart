@@ -24,9 +24,9 @@ abstract class AbstractResponsiveNavigatorCubit
       ));
   }
 
-  MaterialPage route(String name, Object? arguments) ;
+  MaterialPage route(String name, Object? arguments);
 
-    void pushPage(String name, {Object? arguments}) {
+  void pushPage(String name, {Object? arguments}) {
     final page = route(name, arguments);
     var index = -1;
     index = state.pages
@@ -39,9 +39,10 @@ abstract class AbstractResponsiveNavigatorCubit
   }
 
   void popWhere(bool Function(MaterialPage page) test) => emit(state.copyWith(
-    pages: state.pages.toList()..removeWhere(test),
-  ));
+        pages: state.pages.toList()..removeWhere(test),
+      ));
 
+  void clear() => emit(state.copyWith(pages: []));
 }
 
 class ResponsiveNavigator extends HookWidget {

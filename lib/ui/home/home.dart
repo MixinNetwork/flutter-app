@@ -79,13 +79,13 @@ class _CenterPage extends StatelessWidget {
           responsiveNavigatorCubit.popWhere((page) {
             if (responsiveNavigatorCubit.state.navigationMode) return true;
 
-            return ResponsiveNavigatorCubit.settingTitlePageMap.values
+            return ResponsiveNavigatorCubit.settingTitlePageMap
                 .any((element) => page.name == element);
           });
 
           if (isSetting && !responsiveNavigatorCubit.state.navigationMode)
             responsiveNavigatorCubit.pushPage(
-                ResponsiveNavigatorCubit.settingTitlePageMap.values.first);
+                ResponsiveNavigatorCubit.settingTitlePageMap.first);
         },
         child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
           converter: (state) => state.type == SlideCategoryType.setting,

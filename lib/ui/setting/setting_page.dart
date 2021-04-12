@@ -25,7 +25,7 @@ class SettingPage extends StatelessWidget {
                 CellGroup(
                   child: _Item(
                     assetName: Resources.assetsImagesIcProfileSvg,
-                    name: 'Edit Profile',
+                    pageName: ResponsiveNavigatorCubit.editProfilePage,
                     title: Localization.of(context).editProfile,
                   ),
                 ),
@@ -35,27 +35,27 @@ class SettingPage extends StatelessWidget {
                     children: [
                       _Item(
                         assetName: Resources.assetsImagesIcNotificationSvg,
-                        name: 'Notification',
+                        pageName: ResponsiveNavigatorCubit.notificationPage,
                         title: Localization.of(context).notification,
                       ),
                       _Item(
                         assetName: Resources.assetsImagesIcBackupSvg,
-                        name: 'Chat Backup',
+                        pageName: ResponsiveNavigatorCubit.chatBackupPage,
                         title: Localization.of(context).chatBackup,
                       ),
                       _Item(
                         assetName: Resources.assetsImagesIcStorageUsageSvg,
-                        name: 'Data and Storage Usage',
+                        pageName: ResponsiveNavigatorCubit.dataAndStorageUsagePage,
                         title: Localization.of(context).dataAndStorageUsage,
                       ),
                       _Item(
                         assetName: Resources.assetsImagesIcAppearanceSvg,
-                        name: 'Appearance',
+                        pageName: ResponsiveNavigatorCubit.appearancePage,
                         title: Localization.of(context).appearance,
                       ),
                       _Item(
                         assetName: Resources.assetsImagesIcAboutSvg,
-                        name: 'About',
+                        pageName: ResponsiveNavigatorCubit.aboutPage,
                         title: Localization.of(context).about,
                       ),
                     ],
@@ -68,7 +68,6 @@ class SettingPage extends StatelessWidget {
               child: _Item(
                 assetName: Resources.assetsImagesIcSignOutSvg,
                 title: Localization.of(context).signOut,
-                name: 'Sign Out',
                 onTap: () => MultiAuthCubit.of(context).signOut(),
                 color: BrightnessData.themeOf(context).red,
               ),
@@ -84,14 +83,14 @@ class _Item extends StatelessWidget {
     Key? key,
     required this.assetName,
     required this.title,
-    required this.name,
+    this.pageName,
     this.color,
     this.onTap,
   }) : super(key: key);
 
   final String assetName;
   final String title;
-  final String name;
+  final String? pageName;
   final Color? color;
   final VoidCallback? onTap;
 
@@ -100,18 +99,15 @@ class _Item extends StatelessWidget {
       BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState, bool>(
         converter: (state) =>
             !state.navigationMode &&
-            state.pages.any((element) =>
-                ResponsiveNavigatorCubit.settingTitlePageMap[name] ==
-                element.name),
+            state.pages.any((element) => pageName == element.name),
         builder: (context, selected) => CellItem(
           assetName: assetName,
           title: title,
           color: color,
           selected: selected,
           onTap: () {
-            if (onTap == null) {
-              ResponsiveNavigatorCubit.of(context)
-                  .pushPage(ResponsiveNavigatorCubit.settingTitlePageMap[name]!);
+            if (onTap == null && pageName != null) {
+              ResponsiveNavigatorCubit.of(context).pushPage(pageName!);
               return;
             }
 

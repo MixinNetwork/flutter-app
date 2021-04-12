@@ -45,7 +45,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   void toggleInfoPage() {
     if (state.pages.isEmpty)
       return emit(state.copyWith(pages: [route(ChatSideCubit.infoPage, null)]));
-    return emit(state.copyWith(pages: []));
+    return clear();
   }
 }
 
@@ -84,6 +84,7 @@ class ChatPage extends HookWidget {
           builder: (context, boxConstraints) {
             final navigationMode = boxConstraints.maxWidth <
                 (responsiveNavigationMinWidth + sidePageWidth);
+            chatSideCubit.updateNavigationMode(navigationMode);
 
             final hasPage = navigatorState.pages.isNotEmpty;
             return Row(
@@ -101,11 +102,6 @@ class ChatPage extends HookWidget {
                         : sidePageWidth,
                     child: ClipRect(
                       child: Navigator(
-                        transitionDelegate: WithoutAnimationDelegate(
-                          routeWithoutAnimation: {
-                            chatContainerPage.name,
-                          },
-                        ),
                         onPopPage: (Route<dynamic> route, dynamic result) {
                           chatSideCubit.onPopPage();
                           return route.didPop(result);

@@ -26,21 +26,29 @@ class ChatBar extends HookWidget {
     final actionColor = BrightnessData.themeOf(context).icon;
     final chatSideCubit = context.read<ChatSideCubit>();
 
-    final hasSidePage = useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
-            bloc: chatSideCubit)
-        .pages
-        .isNotEmpty;
+    final hasSidePage =
+        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, bool>(
+      bloc: chatSideCubit,
+      converter: (state) => state.pages.isNotEmpty,
+    );
+
+    final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
+        ResponsiveNavigatorState, bool>(
+      converter: (state) => state.navigationMode,
+    );
+
     return Padding(
       padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
       child: Row(children: [
         Builder(
-          builder: (context) => ModalRoute.of(context)?.canPop ?? false
+          builder: (context) => navigationMode
               ? MixinBackButton(
                   color: actionColor,
                   onTap: () {
                     BlocProvider.of<ConversationCubit>(context).emit(null);
-                    Navigator.pop(context);
-                  })
+                    context.read<ResponsiveNavigatorCubit>().clear();
+                  },
+                )
               : const SizedBox(width: 16),
         ),
         Expanded(
