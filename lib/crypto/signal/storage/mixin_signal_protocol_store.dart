@@ -54,13 +54,6 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  bool isTrustedIdentity(SignalProtocolAddress address, IdentityKey identityKey,
-      Direction direction) {
-    // TODO: implement isTrustedIdentity
-    throw UnimplementedError();
-  }
-
-  @override
   PreKeyRecord loadPreKey(int preKeyId) {
     // TODO: implement loadPreKey
     throw UnimplementedError();
@@ -95,12 +88,6 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  bool saveIdentity(SignalProtocolAddress address, IdentityKey identityKey) {
-    // TODO: implement saveIdentity
-    throw UnimplementedError();
-  }
-
-  @override
   void storePreKey(int preKeyId, PreKeyRecord record) {
     // TODO: implement storePreKey
   }
@@ -113,5 +100,17 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   @override
   void storeSignedPreKey(int signedPreKeyId, SignedPreKeyRecord record) {
     // TODO: implement storeSignedPreKey
+  }
+
+  @override
+  bool isTrustedIdentity(SignalProtocolAddress address, IdentityKey? identityKey, Direction direction) {
+    // TODO: implement isTrustedIdentity
+    throw UnimplementedError();
+  }
+
+  @override
+  bool saveIdentity(SignalProtocolAddress address, IdentityKey? identityKey) {
+    // TODO: implement saveIdentity
+    throw UnimplementedError();
   }
 }
