@@ -847,11 +847,21 @@ class Localization {
     );
   }
 
-  /// `New conversation`
-  String get newConversation {
+  /// `New Conversation`
+  String get createConversation {
     return Intl.message(
-      'New conversation',
-      name: 'newConversation',
+      'New Conversation',
+      name: 'createConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New Group Conversation`
+  String get createGroupConversation {
+    return Intl.message(
+      'New Group Conversation',
+      name: 'createGroupConversation',
       desc: '',
       args: [],
     );
@@ -928,10 +938,10 @@ class Localization {
   }
 
   /// `New circle`
-  String get newCircle {
+  String get createCircle {
     return Intl.message(
       'New circle',
-      name: 'newCircle',
+      name: 'createCircle',
       desc: '',
       args: [],
     );

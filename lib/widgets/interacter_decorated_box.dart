@@ -17,6 +17,7 @@ class InteracterBuilder extends StatefulWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onTapUp,
     this.onRightClick,
     this.onEnter,
     this.onExit,
@@ -30,6 +31,7 @@ class InteracterBuilder extends StatefulWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
+  final GestureTapUpCallback? onTapUp;
   final ValueChanged<PointerUpEvent>? onRightClick;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
@@ -89,6 +91,7 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
           });
           widget.onTap?.call();
         },
+        onTapUp: widget.onTapUp,
         onDoubleTap: widget.onDoubleTap,
         onLongPress: widget.onLongPress,
         child: Listener(
@@ -119,6 +122,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onTapUp,
     this.onRightClick,
     this.onEnter,
     this.onExit,
@@ -137,6 +141,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onTap,
     this.onDoubleTap,
     this.onLongPress,
+    this.onTapUp,
     this.onRightClick,
     this.onEnter,
     this.onExit,
@@ -161,6 +166,7 @@ class InteractableDecoratedBox extends StatelessWidget {
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
   final VoidCallback? onLongPress;
+  final GestureTapUpCallback? onTapUp;
   final ValueChanged<PointerUpEvent>? onRightClick;
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
@@ -173,6 +179,7 @@ class InteractableDecoratedBox extends StatelessWidget {
         onDoubleTap: onDoubleTap,
         onLongPress: onLongPress,
         onRightClick: onRightClick,
+        onTapUp: onTapUp,
         onEnter: onEnter,
         onExit: onExit,
         onHover: onHover,

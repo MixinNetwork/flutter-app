@@ -9,6 +9,7 @@ class ActionButton extends StatelessWidget {
   const ActionButton({
     required this.name,
     this.onTap,
+    this.onTapUp,
     this.padding = const EdgeInsets.all(8),
     this.size = 24,
     this.color,
@@ -19,6 +20,7 @@ class ActionButton extends StatelessWidget {
 
   final String name;
   final VoidCallback? onTap;
+  final GestureTapUpCallback? onTapUp;
   final EdgeInsets padding;
   final double size;
   final Color? color;
@@ -29,6 +31,7 @@ class ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
         onTap: onTap,
+        onTapUp: onTapUp,
         onEnter: onEnter,
         onExit: onExit,
         onHover: onHover,

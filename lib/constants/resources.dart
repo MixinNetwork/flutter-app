@@ -63,8 +63,6 @@ class Resources {
 
   static const String assetsImagesIcCloseSvg = 'assets/images/ic_close.svg';
 
-  static const String assetsImagesIcCreateSvg = 'assets/images/ic_create.svg';
-
   static const String assetsImagesIcFileSvg = 'assets/images/ic_file.svg';
 
   static const String assetsImagesIcNotificationSvg =

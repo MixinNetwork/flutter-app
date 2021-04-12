@@ -7,7 +7,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/widgets/action_button.dart';
+import 'package:flutter_app/widgets/Toast.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/menu.dart';
@@ -114,27 +114,7 @@ class _CircleList extends HookWidget {
     return Expanded(
       child: Column(
         children: [
-          _Title(
-            data: Localization.of(context).circles,
-            icon: Resources.assetsImagesIcAddSvg,
-            onTap: () async {
-              final list = await showConversationSelector(
-                context: context,
-                singleSelect: false,
-                title: Localization.of(context).newCircle,
-                onlyContact: false,
-              );
-
-              if (list.isEmpty) return;
-
-              final name = await showMixinDialog<String>(
-                context: context,
-                child: const _EditCircleName(),
-              );
-
-              // todo create circle
-            },
-          ),
+          _Title(data: Localization.of(context).circles),
           const SizedBox(height: 12),
           Expanded(
             child: ListView.separated(
@@ -173,9 +153,18 @@ class _CircleList extends HookWidget {
                           onTap: () async {
                             final name = await showMixinDialog<String>(
                               context: context,
-                              child: _EditCircleName(name: circle.name),
+                              child: EditCircleNameDialog(name: circle.name),
                             );
-                            // todo update circle name
+                            if(name?.isEmpty ?? true) return;
+
+                            showToastLoading(context);
+
+                            try {
+                              await context.read<AccountServer>().updateCircle(circle.circleId, name!);
+                            } catch (e) {
+                              return showToastFailed(context);
+                            }
+                            showToastSuccessful(context);
                           }),
                       ContextMenu(
                         title: Localization.of(context).editConversations,
@@ -302,13 +291,9 @@ class _Title extends StatelessWidget {
   const _Title({
     Key? key,
     required this.data,
-    this.icon,
-    this.onTap,
   }) : super(key: key);
 
   final String data;
-  final String? icon;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -325,20 +310,13 @@ class _Title extends StatelessWidget {
                 ),
               ),
             ),
-            if (icon != null)
-              ActionButton(
-                name: icon!,
-                color: BrightnessData.themeOf(context).secondaryText,
-                onTap: onTap,
-                size: 12,
-              ),
           ],
         ),
       );
 }
 
-class _EditCircleName extends HookWidget {
-  const _EditCircleName({
+class EditCircleNameDialog extends HookWidget {
+  const EditCircleNameDialog({
     Key? key,
     this.name = '',
   }) : super(key: key);
@@ -349,7 +327,7 @@ class _EditCircleName extends HookWidget {
   Widget build(BuildContext context) {
     final textEditingController = useTextEditingController.call(text: name);
     return AlertDialogLayout(
-      title: Text(Localization.of(context).newConversation),
+      title: Text(Localization.of(context).circles),
       content: DialogTextField(
           textEditingController: textEditingController,
           hintText: Localization.of(context).conversationName),

@@ -3,12 +3,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/search_cubit.dart';
+import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/ui/home/slide_page.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/Toast.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -87,42 +90,100 @@ class SearchBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 8),
-          ActionButton(
-            name: Resources.assetsImagesIcCreateSvg,
-            onTap: () async {
-              final result = await showConversationSelector(
-                context: context,
-                singleSelect: false,
-                title: Localization.of(context).newConversation,
-                onlyContact: true,
-              );
-              if (result.isEmpty) return;
-              final userIds = [
-                context.read<AccountServer>().userId,
-                ...result.map(
-                  (e) => e.item1,
-                )
-              ];
+          ContextMenuPortalEntry(
+            buildMenus: () => [
+              ContextMenu(
+                title: Localization.of(context).createConversation,
+                onTap: () async {
+                  final list = await showConversationSelector(
+                    context: context,
+                    singleSelect: true,
+                    title: Localization.of(context).createCircle,
+                    onlyContact: true,
+                  );
+                  if (list.isEmpty) return;
+                  final id = list[0].item1;
+                },
+              ),
+              ContextMenu(
+                title: Localization.of(context).createGroupConversation,
+                onTap: () async {
+                  final result = await showConversationSelector(
+                    context: context,
+                    singleSelect: false,
+                    title: Localization.of(context).createGroupConversation,
+                    onlyContact: true,
+                  );
+                  if (result.isEmpty) return;
+                  final userIds = [
+                    context.read<AccountServer>().userId,
+                    ...result.map(
+                      (e) => e.item1,
+                    )
+                  ];
 
-              final name = await showMixinDialog<String>(
-                context: context,
-                child: _NewConversationConfirm(userIds),
-              );
-              if (name?.isEmpty ?? true) return;
+                  final name = await showMixinDialog<String>(
+                    context: context,
+                    child: _NewConversationConfirm(userIds),
+                  );
+                  if (name?.isEmpty ?? true) return;
 
-              showToastLoading(context);
-              try {
-                await context
-                    .read<AccountServer>()
-                    .createGroupConversation(name!, userIds);
-              } catch (e) {
-                return showToastFailed(context);
-              }
-              showToastSuccessful(context);
-            },
-            padding: const EdgeInsets.all(8),
-            size: 24,
-            color: BrightnessData.themeOf(context).icon,
+                  showToastLoading(context);
+                  try {
+                    await context
+                        .read<AccountServer>()
+                        .createGroupConversation(name!, userIds);
+                  } catch (e) {
+                    return showToastFailed(context);
+                  }
+                  showToastSuccessful(context);
+                },
+              ),
+              ContextMenu(
+                title: Localization.of(context).createCircle,
+                onTap: () async {
+                  final list = await showConversationSelector(
+                    context: context,
+                    singleSelect: false,
+                    title: Localization.of(context).createCircle,
+                    onlyContact: false,
+                  );
+
+                  if (list.isEmpty) return;
+
+                  final name = await showMixinDialog<String>(
+                    context: context,
+                    child: const EditCircleNameDialog(),
+                  );
+
+                  if (name?.isEmpty ?? true) return;
+
+                  showToastLoading(context);
+
+                  try {
+                    await context
+                        .read<AccountServer>()
+                        .createCircle(name!, list.map((e) => e.item1).toList());
+                  } catch (e) {
+                    return showToastFailed(context);
+                  }
+                  showToastSuccessful(context);
+                },
+              ),
+            ],
+            child: Builder(
+                builder: (context) => ActionButton(
+                      name: Resources.assetsImagesIcAddSvg,
+                      size: 16,
+                      onTapUp: (event) {
+                        context.read<OffsetCubit>().emit(event.globalPosition);
+                      },
+                      onTap: () async {
+                        return;
+                      },
+                      padding: const EdgeInsets.all(8),
+                      color: BrightnessData.themeOf(context).icon,
+                    )),
           ),
           const SizedBox(width: 12),
         ],
@@ -153,7 +214,7 @@ class _NewConversationConfirm extends HookWidget {
 
     final textEditingController = useTextEditingController();
     return AlertDialogLayout(
-      title: Text(Localization.of(context).newConversation),
+      title: Text(Localization.of(context).group),
       titleMarginBottom: 24,
       content: Column(
         mainAxisSize: MainAxisSize.min,

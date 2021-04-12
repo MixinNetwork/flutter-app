@@ -589,7 +589,7 @@ class AccountServer {
         });
   }
 
-  Future<void> createCircle(String name) async {
+  Future<void> createCircle(String name, List<String> ids) async {
     await client.circleApi
         .createCircle(CircleName(name: name))
         .then((response) async => {
