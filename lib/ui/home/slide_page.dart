@@ -304,6 +304,8 @@ class _Title extends StatelessWidget {
             Expanded(
               child: Text(
                 data,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 style: TextStyle(
                   color: BrightnessData.themeOf(context).secondaryText,
                 ),
@@ -312,6 +314,7 @@ class _Title extends StatelessWidget {
             if (icon != null)
               ActionButton(
                 name: icon!,
+                color: BrightnessData.themeOf(context).secondaryText,
                 onTap: onTap,
                 size: 12,
               ),

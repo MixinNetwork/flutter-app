@@ -139,12 +139,12 @@ class _SearchList extends HookWidget {
                 final user = searchState.users[index];
                 return _SearchItem(
                   avatar: AvatarWidget(
-                    name: user.fullName!,
+                    name: user.fullName ?? '?',
                     userId: user.userId,
                     size: 50,
                     avatarUrl: user.avatarUrl,
                   ),
-                  name: user.fullName!,
+                  name: user.fullName ?? '?',
                   keyword: searchState.keyword,
                   onTap: () async {
                     _clear(context);

@@ -67,8 +67,7 @@ Future<List<Tuple2<String, bool>>> showConversationSelector({
   required String title,
   required bool onlyContact,
   List<String> initSelectIds = const [],
-}) async {
-  return await showMixinDialog<List<Tuple2<String, bool>>>(
+}) async => await showMixinDialog<List<Tuple2<String, bool>>>(
         context: context,
         child: _ConversationSelector(
           title: title,
@@ -78,7 +77,6 @@ Future<List<Tuple2<String, bool>>> showConversationSelector({
         ),
       ) ??
       [];
-}
 
 class _ConversationSelector extends HookWidget {
   const _ConversationSelector({
@@ -126,7 +124,7 @@ class _ConversationSelector extends HookWidget {
     );
 
     useEffect(
-      () => selector.listen((event) {
+      () => selector.stream.listen((event) {
         if (event.isNotEmpty && singleSelect) {
           final item = event.first;
           Navigator.pop(
