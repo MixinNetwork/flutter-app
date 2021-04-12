@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app/utils/crypted_util.dart';
 import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
