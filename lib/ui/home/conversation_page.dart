@@ -622,6 +622,11 @@ class _List extends HookWidget {
     final conversationItem =
         useBlocState<ConversationCubit, ConversationItem?>();
 
+    final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
+        ResponsiveNavigatorState, bool>(
+      converter: (state) => state.navigationMode,
+    );
+
     Widget child;
     if (pagingState.count <= 0)
       child = const _Empty();
@@ -635,7 +640,8 @@ class _List extends HookWidget {
           final conversation = pagingState.map[index];
           if (conversation == null) return const SizedBox(height: 80);
           final selected =
-              conversation.conversationId == conversationItem?.conversationId;
+              conversation.conversationId == conversationItem?.conversationId &&
+                  !navigationMode;
 
           return ContextMenuPortalEntry(
             child: _Item(
