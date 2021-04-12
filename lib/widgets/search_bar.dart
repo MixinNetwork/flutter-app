@@ -6,6 +6,7 @@ import 'package:flutter_app/bloc/search_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/hook.dart';
+import 'package:flutter_app/widgets/Toast.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
@@ -103,10 +104,21 @@ class SearchBar extends StatelessWidget {
                 )
               ];
 
-              await showMixinDialog(
+              final name = await showMixinDialog<String>(
                 context: context,
                 child: _NewConversationConfirm(userIds),
               );
+              if (name?.isEmpty ?? true) return;
+
+              showToastLoading(context);
+              try {
+                await context
+                    .read<AccountServer>()
+                    .createGroupConversation(name!, userIds);
+              } catch (e) {
+                return showToastFailed(context);
+              }
+              showToastSuccessful(context);
             },
             padding: const EdgeInsets.all(8),
             size: 24,
@@ -139,7 +151,7 @@ class _NewConversationConfirm extends HookWidget {
       <User>[],
     );
 
-    final name = useState('');
+    final textEditingController = useTextEditingController();
     return AlertDialogLayout(
       title: Text(Localization.of(context).newConversation),
       titleMarginBottom: 24,
@@ -162,29 +174,9 @@ class _NewConversationConfirm extends HookWidget {
             ),
           ),
           const SizedBox(height: 48),
-          Container(
-            height: 48,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            alignment: Alignment.center,
-            child: TextField(
-              onChanged: (text) => name.value = text,
-              style: const TextStyle(
-                color: Colors.white,
-              ),
-              scrollPadding: EdgeInsets.zero,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.all(0),
-                isDense: true,
-                hintText: Localization.of(context).conversationName,
-                hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
-                focusedBorder: InputBorder.none,
-                enabledBorder: InputBorder.none,
-              ),
-            ),
+          DialogTextField(
+            textEditingController: textEditingController,
+            hintText: '',
           ),
         ],
       ),
@@ -195,9 +187,7 @@ class _NewConversationConfirm extends HookWidget {
             onTap: () => Navigator.pop(context)),
         MixinButton(
           child: Text(Localization.of(context).create),
-          onTap: () {
-            // TODO  create conversation;
-          },
+          onTap: () => Navigator.pop(context, textEditingController.text),
         ),
       ],
     );

@@ -75,48 +75,48 @@ class AlertDialogLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Material(
-      color: Colors.transparent,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minWidth: minWidth,
-          minHeight: minHeight,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(30),
-          child: IntrinsicWidth(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (title != null)
+        color: Colors.transparent,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: minWidth,
+            minHeight: minHeight,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(30),
+            child: IntrinsicWidth(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (title != null)
+                    DefaultTextStyle(
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: BrightnessData.themeOf(context).text,
+                      ),
+                      child: title!,
+                    ),
+                  if (title != null) const SizedBox(height: 48),
                   DefaultTextStyle(
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                       color: BrightnessData.themeOf(context).text,
                     ),
-                    child: title!,
+                    child: content,
                   ),
-                if (title != null) const SizedBox(height: 48),
-                DefaultTextStyle(
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: BrightnessData.themeOf(context).text,
+                  const SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: actions.joinList(const SizedBox(width: 4)),
                   ),
-                  child: content,
-                ),
-                const SizedBox(height: 30),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: actions.joinList(const SizedBox(width: 4)),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
 }
 
 class _DialogPage extends StatelessWidget {

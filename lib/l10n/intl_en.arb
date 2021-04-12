@@ -102,5 +102,8 @@
   "removeContact": "Remove Contact",
   "clearChat": "Clear Chat",
   "report": "Report",
-  "exitGroup": "Delete and Exit"
+  "exitGroup": "Delete and Exit",
+  "loading": "Loading",
+  "failed": "Failed",
+  "successful": "Successful"
 }

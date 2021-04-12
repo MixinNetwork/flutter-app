@@ -99,5 +99,8 @@
   "removeContact": "删除联系人",
   "clearChat": "清空聊天记录",
   "report": "举报",
-  "exitGroup": "退出群组"
+  "exitGroup": "退出群组",
+  "loading": "加载中",
+  "failed": "失败",
+  "successful": "成功"
 }

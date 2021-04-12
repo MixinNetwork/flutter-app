@@ -38,6 +38,8 @@ class Resources {
 
   static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
 
+  static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
+
   static const String assetsImagesFileSvg = 'assets/images/file.svg';
 
   static const String assetsImagesGifStickerSvg =
@@ -143,6 +145,9 @@ class Resources {
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
 
   static const String assetsImagesStrangersPng = 'assets/images/strangers.png';
+
+  static const String assetsImagesSuccessfulSvg =
+      'assets/images/successful.svg';
 
   static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
 
