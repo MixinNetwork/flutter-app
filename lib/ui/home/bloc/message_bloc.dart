@@ -119,7 +119,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
     add(_MessageInitEvent());
     addSubscription(
-      conversationCubit.listen(
+      conversationCubit.stream.listen(
         (state) {
           if (state?.conversationId != null &&
               conversationId != state?.conversationId) {

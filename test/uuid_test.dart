@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app/crypto/uuid/uuid.dart';
 

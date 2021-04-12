@@ -94,7 +94,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     final bloc = _map[state];
     emit(bloc!.state);
     streamSubscription?.cancel();
-    streamSubscription = bloc.listen(emit);
+    streamSubscription = bloc.stream.listen(emit);
   }
 
   @override

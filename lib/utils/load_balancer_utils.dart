@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert' as convert;
 
 import 'package:flutter/foundation.dart';
-import 'package:isolate/load_balancer.dart';
+import 'package:isolate/isolate.dart';
 
 class LoadBalancerUtils {
   static LoadBalancer? loadBalancer;
