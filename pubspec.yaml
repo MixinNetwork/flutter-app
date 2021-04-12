@@ -31,7 +31,7 @@ dependencies:
   http: ^0.13.0
   qr_flutter: ^4.0.0
   uuid: ^3.0.0
-  cryptography: ^2.0.1
+  cryptography: ^1.4.1
   web_socket_channel: ^2.0.0
   moor: ^4.1.0
   sqlite3_flutter_libs: ^0.4.1
