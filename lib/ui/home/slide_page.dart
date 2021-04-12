@@ -15,6 +15,7 @@ import 'package:flutter_app/widgets/select_item.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
@@ -55,7 +56,7 @@ class SlidePage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             _Title(
-              data: Localization.of(context).circle,
+              data: Localization.of(context).circles,
               icon: Resources.assetsImagesIcAddSvg,
               onTap: () async {
                 final list = await showConversationSelector(
@@ -141,8 +142,8 @@ class _CircleList extends HookWidget {
             final circle = circles.data![index];
             return ContextMenuPortalEntry(
               child: SelectItem(
-                icon: Image.asset(
-                  Resources.assetsImagesCirclePng,
+                icon: SvgPicture.asset(
+                  Resources.assetsImagesCircleSvg,
                   width: 24,
                   height: 24,
                   color: getCircleColorById(circle.circleId),

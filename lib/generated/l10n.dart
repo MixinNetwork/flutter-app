@@ -147,16 +147,6 @@ class Localization {
     );
   }
 
-  /// `Circle`
-  String get circle {
-    return Intl.message(
-      'Circle',
-      name: 'circle',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Select a conversation to start messaging`
   String get pageRightEmptyMessage {
     return Intl.message(

@@ -68,7 +68,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatRecallMe" : MessageLookupByLibrary.simpleMessage("你撤回了一条消息"),
     "chatWaiting" : m5,
     "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("桌面端"),
-    "circle" : MessageLookupByLibrary.simpleMessage("圈子"),
     "circles" : MessageLookupByLibrary.simpleMessage("圈子"),
     "clearChat" : MessageLookupByLibrary.simpleMessage("清空聊天记录"),
     "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
