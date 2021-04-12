@@ -638,7 +638,7 @@ class DecryptMessage extends Injector {
       return;
     }
     final blazeMessage = BlazeAckMessage(
-        messageId: messageId, status: EnumToString.convertToString(status)!);
+        messageId: messageId, status: EnumToString.convertToString(status)!.toUpperCase());
     await database.jobsDao.insert(Job(
         jobId: const Uuid().v4(),
         action: acknowledgeMessageReceipts,

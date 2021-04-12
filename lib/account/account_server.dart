@@ -324,11 +324,11 @@ class AccountServer {
   void _markRead(conversationId) async {
     final ids =
         await database.messagesDao.getUnreadMessageIds(conversationId, userId);
-    final status = EnumToString.convertToString(MessageStatus.read);
+    final status = EnumToString.convertToString(MessageStatus.read)!.toUpperCase();
     final now = DateTime.now();
     final jobs = ids
         .map(
-            (id) => jsonEncode(BlazeAckMessage(messageId: id, status: status!)))
+            (id) => jsonEncode(BlazeAckMessage(messageId: id, status: status)))
         .map((blazeMessage) => Job(
             jobId: const Uuid().v4(),
             action: acknowledgeMessageReceipts,
