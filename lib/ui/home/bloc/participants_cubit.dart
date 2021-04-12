@@ -19,8 +19,8 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
 
       await streamSubscription?.cancel();
 
-      final selectable =
-          userDao.groupParticipants(conversationId: conversationId!, id: userId);
+      final selectable = userDao.groupParticipants(
+          conversationId: conversationId!, id: userId);
       emit(await selectable.get());
       final stream = selectable.watch();
       streamSubscription = stream.listen(emit);
@@ -28,7 +28,7 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
     };
     resetConversationId(conversationCubit.state?.conversationId);
     addSubscription(
-      conversationCubit
+      conversationCubit.stream
           .map((event) => event?.conversationId)
           .where((event) => event?.isNotEmpty == true)
           .distinct()

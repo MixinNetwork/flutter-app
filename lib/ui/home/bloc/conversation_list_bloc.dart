@@ -13,7 +13,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     with SubscribeMixin {
   ConversationListBloc(this.slideCategoryCubit, this.database)
       : super(const PagingState<ConversationItem>()) {
-    addSubscription(slideCategoryCubit
+    addSubscription(slideCategoryCubit.stream
         .distinct()
         .listen((event) => _switchBloc(event, limit)));
     _initBadge();

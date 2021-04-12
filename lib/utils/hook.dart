@@ -16,7 +16,7 @@ T useMemoizedFuture<T>(
       initialData: initialData,
     ).data as T;
 
-T useBloc<T extends Bloc>(
+T useBloc<T extends BlocBase>(
   T Function() valueBuilder, {
   List<Object?> keys = const <Object>[],
 }) {
@@ -25,7 +25,7 @@ T useBloc<T extends Bloc>(
   return sink;
 }
 
-S useBlocState<B extends Bloc<dynamic, S>, S>({
+S useBlocState<B extends BlocBase<S>, S>({
   B? bloc,
   List<Object?> keys = const <Object>[],
   bool preserveState = false,
@@ -34,7 +34,7 @@ S useBlocState<B extends Bloc<dynamic, S>, S>({
   final tuple = useMemoized(
     () {
       final b = bloc ?? useContext().read<B>();
-      Stream<S> stream = b;
+      var stream = b.stream;
       if (when != null) stream = stream.where(when);
       return Tuple2(stream, b.state);
     },
@@ -47,7 +47,7 @@ S useBlocState<B extends Bloc<dynamic, S>, S>({
   ).data as S;
 }
 
-T useBlocStateConverter<B extends Bloc<dynamic, S>, S, T>({
+T useBlocStateConverter<B extends BlocBase<S>, S, T>({
   B? bloc,
   List<Object?> keys = const <Object>[],
   bool preserveState = false,
@@ -57,7 +57,7 @@ T useBlocStateConverter<B extends Bloc<dynamic, S>, S, T>({
   final tuple = useMemoized(
     () {
       final b = bloc ?? useContext().read<B>();
-      var stream = b.map(converter);
+      var stream = b.stream.map(converter);
       if (when != null) stream = stream.where(when);
       return Tuple2(stream, converter(b.state));
     },

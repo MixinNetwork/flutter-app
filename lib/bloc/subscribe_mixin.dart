@@ -16,7 +16,7 @@ import 'package:bloc/bloc.dart';
 //   }
 // }
 //
-mixin SubscribeMixin<Event, State> on Bloc<Event, State> {
+mixin SubscribeMixin<State> on BlocBase<State> {
   List<StreamSubscription?> subscriptions = [];
 
   void addSubscription(StreamSubscription? streamSubscription) =>

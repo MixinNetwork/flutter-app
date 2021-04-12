@@ -15,7 +15,7 @@ class PreviewBloc extends PagingBloc<MessageItem> with SubscribeMixin {
           limit: 20,
           index: index,
         ) {
-    addSubscription(intCubit.distinct().listen(onItemPosition));
+    addSubscription(intCubit.stream.distinct().listen(onItemPosition));
   }
 
   final String conversationId;

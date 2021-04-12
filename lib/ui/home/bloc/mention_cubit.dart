@@ -55,7 +55,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
     addSubscription(
       Rx.combineLatest2<String?, List<User>, MentionState>(
         streamController.stream,
-        participantsCubit,
+        participantsCubit.stream,
         (a, b) {
           late List<User> users;
           if (a == null)
