@@ -27,56 +27,40 @@ class SlidePage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const SizedBox(height: 64),
-            const _Title(data: 'People'),
+            const SizedBox(height: 48),
+            _Item(
+              asset: Resources.assetsImagesChatSvg,
+              title: Localization.of(context).chats,
+              type: SlideCategoryType.chats,
+            ),
+            const SizedBox(height: 12),
+            _Title(data: Localization.of(context).people),
             const SizedBox(height: 12),
             _CategoryList(
               children: [
                 _Item(
-                  asset: Resources.assetsImagesContactsPng,
+                  asset: Resources.assetsImagesSlideContactsSvg,
                   title: Localization.of(context).contacts,
                   type: SlideCategoryType.contacts,
                 ),
                 _Item(
-                  asset: Resources.assetsImagesGroupPng,
+                  asset: Resources.assetsImagesGroupSvg,
                   title: Localization.of(context).group,
                   type: SlideCategoryType.groups,
                 ),
                 _Item(
-                  asset: Resources.assetsImagesBotPng,
+                  asset: Resources.assetsImagesBotSvg,
                   title: Localization.current.bots,
                   type: SlideCategoryType.bots,
                 ),
                 _Item(
-                  asset: Resources.assetsImagesStrangersPng,
+                  asset: Resources.assetsImagesStrangersSvg,
                   title: Localization.of(context).strangers,
                   type: SlideCategoryType.strangers,
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            _Title(
-              data: Localization.of(context).circles,
-              icon: Resources.assetsImagesIcAddSvg,
-              onTap: () async {
-                final list = await showConversationSelector(
-                  context: context,
-                  singleSelect: false,
-                  title: Localization.of(context).newCircle,
-                  onlyContact: false,
-                );
-
-                if (list.isEmpty) return;
-
-                final name = await showMixinDialog<String>(
-                  context: context,
-                  child: const _EditCircleName(),
-                );
-
-                // todo create circle
-              },
-            ),
-            const SizedBox(height: 12),
             const _CircleList(),
             const Spacer(),
             Builder(
@@ -126,109 +110,138 @@ class _CircleList extends HookWidget {
           .watch()),
       initialData: [],
     );
+    if (circles.data?.isEmpty ?? true) return const SizedBox();
     return Expanded(
-      child: ListView.separated(
-        itemCount: circles.data!.length,
-        separatorBuilder: (BuildContext context, int index) =>
-            const SizedBox(height: 8),
-        itemBuilder: (BuildContext context, int index) =>
-            BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-          converter: (state) {
-            final conversationCircleItem = circles.data![index];
-            return state.type == SlideCategoryType.circle &&
-                state.id == conversationCircleItem.circleId;
-          },
-          builder: (BuildContext context, bool selected) {
-            final circle = circles.data![index];
-            return ContextMenuPortalEntry(
-              child: SelectItem(
-                icon: SvgPicture.asset(
-                  Resources.assetsImagesCircleSvg,
-                  width: 24,
-                  height: 24,
-                  color: getCircleColorById(circle.circleId),
-                ),
-                title: circle.name,
-                onTap: () =>
-                    BlocProvider.of<SlideCategoryCubit>(context).select(
-                  SlideCategoryType.circle,
-                  circle.circleId,
-                ),
-                selected: selected,
-                count: circle.unseenMessageCount ?? 0,
-              ),
-              buildMenus: () => [
-                ContextMenu(
-                    title: Localization.of(context).editCircleName,
-                    onTap: () async {
-                      final name = await showMixinDialog<String>(
-                        context: context,
-                        child: _EditCircleName(name: circle.name),
-                      );
-                      // todo update circle name
-                    }),
-                ContextMenu(
-                  title: Localization.of(context).editConversations,
-                  onTap: () async {
-                    final initSelectIds = (await context
-                            .read<AccountServer>()
-                            .database
-                            .circleConversationDao
-                            .allCircleConversations(circle.circleId)
-                            .get())
-                        .map((e) => e.userId ?? e.conversationId)
-                        .toList();
-                    final result = await showConversationSelector(
-                      context: context,
-                      singleSelect: false,
-                      title: circle.name,
-                      onlyContact: false,
-                      initSelectIds: initSelectIds,
-                    );
+      child: Column(
+        children: [
+          _Title(
+            data: Localization.of(context).circles,
+            icon: Resources.assetsImagesIcAddSvg,
+            onTap: () async {
+              final list = await showConversationSelector(
+                context: context,
+                singleSelect: false,
+                title: Localization.of(context).newCircle,
+                onlyContact: false,
+              );
 
-                    // todo result update circle
-                  },
-                ),
-                ContextMenu(
-                  title: Localization.of(context).deleteCircle,
-                  isDestructiveAction: true,
-                  onTap: () {
-                    showMixinDialog(
-                      context: context,
-                      child: AlertDialogLayout(
-                        content: Text(Localization.of(context)
-                            .pageDeleteCircle(circle.name)),
-                        actions: [
-                          MixinButton(
-                            backgroundTransparent: true,
-                            child: Text(Localization.of(context).cancel),
-                            onTap: () => Navigator.pop(context),
-                          ),
-                          MixinButton(
-                            child: Text(Localization.of(context).delete),
-                            onTap: () {
-                              Navigator.pop(context);
-                              context
+              if (list.isEmpty) return;
+
+              final name = await showMixinDialog<String>(
+                context: context,
+                child: const _EditCircleName(),
+              );
+
+              // todo create circle
+            },
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: ListView.separated(
+              itemCount: circles.data!.length,
+              separatorBuilder: (BuildContext context, int index) =>
+                  const SizedBox(height: 8),
+              itemBuilder: (BuildContext context, int index) =>
+                  BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+                converter: (state) {
+                  final conversationCircleItem = circles.data![index];
+                  return state.type == SlideCategoryType.circle &&
+                      state.id == conversationCircleItem.circleId;
+                },
+                builder: (BuildContext context, bool selected) {
+                  final circle = circles.data![index];
+                  return ContextMenuPortalEntry(
+                    child: SelectItem(
+                      icon: SvgPicture.asset(
+                        Resources.assetsImagesCircleSvg,
+                        width: 24,
+                        height: 24,
+                        color: getCircleColorById(circle.circleId),
+                      ),
+                      title: circle.name,
+                      onTap: () =>
+                          BlocProvider.of<SlideCategoryCubit>(context).select(
+                        SlideCategoryType.circle,
+                        circle.circleId,
+                      ),
+                      selected: selected,
+                      count: circle.unseenMessageCount ?? 0,
+                    ),
+                    buildMenus: () => [
+                      ContextMenu(
+                          title: Localization.of(context).editCircleName,
+                          onTap: () async {
+                            final name = await showMixinDialog<String>(
+                              context: context,
+                              child: _EditCircleName(name: circle.name),
+                            );
+                            // todo update circle name
+                          }),
+                      ContextMenu(
+                        title: Localization.of(context).editConversations,
+                        onTap: () async {
+                          final initSelectIds = (await context
                                   .read<AccountServer>()
                                   .database
-                                  .circlesDao
-                                  .deleteCircle(circle.circleId);
-                              BlocProvider.of<SlideCategoryCubit>(context)
-                                  .select(
-                                SlideCategoryType.contacts,
-                                Localization.of(context).contacts,
-                              );
-                            },
-                          ),
-                        ],
+                                  .circleConversationDao
+                                  .allCircleConversations(circle.circleId)
+                                  .get())
+                              .map((e) => e.userId ?? e.conversationId)
+                              .toList();
+                          final result = await showConversationSelector(
+                            context: context,
+                            singleSelect: false,
+                            title: circle.name,
+                            onlyContact: false,
+                            initSelectIds: initSelectIds,
+                          );
+
+                          // todo result update circle
+                        },
                       ),
-                    );
-                  },
-                ),
-              ],
-            );
-          },
-        ),
+                      ContextMenu(
+                        title: Localization.of(context).deleteCircle,
+                        isDestructiveAction: true,
+                        onTap: () {
+                          showMixinDialog(
+                            context: context,
+                            child: AlertDialogLayout(
+                              content: Text(Localization.of(context)
+                                  .pageDeleteCircle(circle.name)),
+                              actions: [
+                                MixinButton(
+                                  backgroundTransparent: true,
+                                  child: Text(Localization.of(context).cancel),
+                                  onTap: () => Navigator.pop(context),
+                                ),
+                                MixinButton(
+                                  child: Text(Localization.of(context).delete),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    context
+                                        .read<AccountServer>()
+                                        .database
+                                        .circlesDao
+                                        .deleteCircle(circle.circleId);
+                                    BlocProvider.of<SlideCategoryCubit>(context)
+                                        .select(
+                                      SlideCategoryType.contacts,
+                                      Localization.of(context).contacts,
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -269,7 +282,7 @@ class _Item extends StatelessWidget {
       BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
         converter: (state) => state.type == type,
         builder: (BuildContext context, bool selected) => SelectItem(
-          icon: Image.asset(
+          icon: SvgPicture.asset(
             asset,
             width: 24,
             height: 24,

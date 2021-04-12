@@ -1,6 +1,7 @@
 part of 'slide_category_cubit.dart';
 
 enum SlideCategoryType {
+  chats,
   contacts,
   groups,
   bots,

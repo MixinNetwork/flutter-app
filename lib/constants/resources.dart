@@ -11,17 +11,17 @@ class Resources {
 
   static const String assetsImagesAudioSvg = 'assets/images/audio.svg';
 
-  static const String assetsImagesBotPng = 'assets/images/bot.png';
+  static const String assetsImagesBotSvg = 'assets/images/bot.svg';
 
   static const String assetsImagesBotFillSvg = 'assets/images/bot_fill.svg';
+
+  static const String assetsImagesChatSvg = 'assets/images/chat.svg';
 
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
 
   static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
 
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
-
-  static const String assetsImagesContactsPng = 'assets/images/contacts.png';
 
   static const String assetsImagesConversationEmptySvg =
       'assets/images/conversation_empty.svg';
@@ -45,7 +45,7 @@ class Resources {
   static const String assetsImagesGifStickerSvg =
       'assets/images/gif_sticker.svg';
 
-  static const String assetsImagesGroupPng = 'assets/images/group.png';
+  static const String assetsImagesGroupSvg = 'assets/images/group.svg';
 
   static const String assetsImagesIcAboutSvg = 'assets/images/ic_about.svg';
 
@@ -139,12 +139,15 @@ class Resources {
 
   static const String assetsImagesShareSvg = 'assets/images/share.svg';
 
+  static const String assetsImagesSlideContactsSvg =
+      'assets/images/slide_contacts.svg';
+
   static const String assetsImagesSmallCloseSvg =
       'assets/images/small_close.svg';
 
   static const String assetsImagesStickerSvg = 'assets/images/sticker.svg';
 
-  static const String assetsImagesStrangersPng = 'assets/images/strangers.png';
+  static const String assetsImagesStrangersSvg = 'assets/images/strangers.svg';
 
   static const String assetsImagesSuccessfulSvg =
       'assets/images/successful.svg';

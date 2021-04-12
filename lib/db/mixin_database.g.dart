@@ -10897,11 +10897,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           circleConversations
         }).map((QueryRow row) {
       return ConversationCircleItem(
-        circleId: row.readString('circle_id'),
-        name: row.readString('name'),
-        createdAt: Circles.$converter0.mapToDart(row.readInt('created_at'))!,
-        count: row.readInt('count'),
-        unseenMessageCount: row.readInt('unseen_message_count'),
+        circleId: row.read<String>('circle_id'),
+        name: row.read<String>('name'),
+        createdAt: Circles.$converter0.mapToDart(row.read<int>('created_at'))!,
+        count: row.read<int>('count'),
+        unseenMessageCount: row.read<int?>('unseen_message_count'),
       );
     });
   }
@@ -10963,8 +10963,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<String?> biographyByIdentityNumber(String identityNumber) {
     return customSelect(
         'SELECT biography FROM users WHERE identity_number = :identityNumber',
-        variables: [Variable<String>(identityNumber)],
-        readsFrom: {users}).map((QueryRow row) => row.readString('biography'));
+        variables: [
+          Variable<String>(identityNumber)
+        ],
+        readsFrom: {
+          users
+        }).map((QueryRow row) => row.read<String?>('biography'));
   }
 
   Selectable<StickerAlbum> systemAlbums() {
@@ -11013,10 +11017,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         variables: [Variable<String>(conversationId), Variable<String>(userId)],
         readsFrom: {participantSession}).map((QueryRow row) {
       return ParticipantSessionKey(
-        conversationId: row.readString('conversation_id'),
-        userId: row.readString('user_id'),
-        sessionId: row.readString('session_id'),
-        publicKey: row.readString('public_key'),
+        conversationId: row.read<String>('conversation_id'),
+        userId: row.read<String>('user_id'),
+        sessionId: row.read<String>('session_id'),
+        publicKey: row.read<String?>('public_key'),
       );
     });
   }
@@ -11041,64 +11045,64 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           conversations
         }).map((QueryRow row) {
       return MessageItem(
-        messageId: row.readString('messageId'),
-        conversationId: row.readString('conversationId'),
-        userId: row.readString('userId'),
-        userFullName: row.readString('userFullName'),
-        userIdentityNumber: row.readString('userIdentityNumber'),
-        appId: row.readString('appId'),
-        type: Messages.$converter0.mapToDart(row.readString('type'))!,
-        content: row.readString('content'),
-        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
-        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
         mediaStatus:
-            Messages.$converter1.mapToDart(row.readString('mediaStatus')),
-        mediaWaveform: row.readString('mediaWaveform'),
-        mediaName: row.readString('mediaName'),
-        mediaMimeType: row.readString('mediaMimeType'),
-        mediaSize: row.readInt('mediaSize'),
-        mediaWidth: row.readInt('mediaWidth'),
-        mediaHeight: row.readInt('mediaHeight'),
-        thumbImage: row.readString('thumbImage'),
-        thumbUrl: row.readString('thumbUrl'),
-        mediaUrl: row.readString('mediaUrl'),
-        mediaDuration: row.readString('mediaDuration'),
-        quoteId: row.readString('quoteId'),
-        quoteContent: row.readString('quoteContent'),
-        participantFullName: row.readString('participantFullName'),
+            Messages.$converter1.mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        participantFullName: row.read<String?>('participantFullName'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
-        participantUserId: row.readString('participantUserId'),
-        snapshotId: row.readString('snapshotId'),
-        snapshotType: row.readString('snapshotType'),
-        snapshotAmount: row.readString('snapshotAmount'),
-        assetSymbol: row.readString('assetSymbol'),
-        assetId: row.readString('assetId'),
-        assetIcon: row.readString('assetIcon'),
-        assetUrl: row.readString('assetUrl'),
-        assetWidth: row.readInt('assetWidth'),
-        assetHeight: row.readInt('assetHeight'),
-        stickerId: row.readString('stickerId'),
-        assetName: row.readString('assetName'),
-        assetType: row.readString('assetType'),
-        siteName: row.readString('siteName'),
-        siteTitle: row.readString('siteTitle'),
-        siteDescription: row.readString('siteDescription'),
-        siteImage: row.readString('siteImage'),
-        sharedUserId: row.readString('sharedUserId'),
-        sharedUserFullName: row.readString('sharedUserFullName'),
-        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
-        sharedUserAppId: row.readString('sharedUserAppId'),
-        mentions: row.readString('mentions'),
-        mentionRead: row.readInt('mentionRead'),
-        groupName: row.readString('groupName'),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
+        participantUserId: row.read<String>('participantUserId'),
+        snapshotId: row.read<String?>('snapshotId'),
+        snapshotType: row.read<String?>('snapshotType'),
+        snapshotAmount: row.read<String?>('snapshotAmount'),
+        assetSymbol: row.read<String?>('assetSymbol'),
+        assetId: row.read<String?>('assetId'),
+        assetIcon: row.read<String?>('assetIcon'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+        siteName: row.read<String?>('siteName'),
+        siteTitle: row.read<String?>('siteTitle'),
+        siteDescription: row.read<String?>('siteDescription'),
+        siteImage: row.read<String?>('siteImage'),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        mentions: row.read<String?>('mentions'),
+        mentionRead: row.read<int?>('mentionRead'),
+        groupName: row.read<String?>('groupName'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
         participantRelationship: Users.$converter0
-            .mapToDart(row.readString('participantRelationship')),
-        avatarUrl: row.readString('avatarUrl'),
+            .mapToDart(row.read<String?>('participantRelationship')),
+        avatarUrl: row.read<String?>('avatarUrl'),
       );
     });
   }
@@ -11123,64 +11127,64 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           conversations
         }).map((QueryRow row) {
       return MessageItem(
-        messageId: row.readString('messageId'),
-        conversationId: row.readString('conversationId'),
-        userId: row.readString('userId'),
-        userFullName: row.readString('userFullName'),
-        userIdentityNumber: row.readString('userIdentityNumber'),
-        appId: row.readString('appId'),
-        type: Messages.$converter0.mapToDart(row.readString('type'))!,
-        content: row.readString('content'),
-        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
-        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
         mediaStatus:
-            Messages.$converter1.mapToDart(row.readString('mediaStatus')),
-        mediaWaveform: row.readString('mediaWaveform'),
-        mediaName: row.readString('mediaName'),
-        mediaMimeType: row.readString('mediaMimeType'),
-        mediaSize: row.readInt('mediaSize'),
-        mediaWidth: row.readInt('mediaWidth'),
-        mediaHeight: row.readInt('mediaHeight'),
-        thumbImage: row.readString('thumbImage'),
-        thumbUrl: row.readString('thumbUrl'),
-        mediaUrl: row.readString('mediaUrl'),
-        mediaDuration: row.readString('mediaDuration'),
-        quoteId: row.readString('quoteId'),
-        quoteContent: row.readString('quoteContent'),
-        participantFullName: row.readString('participantFullName'),
+            Messages.$converter1.mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        participantFullName: row.read<String?>('participantFullName'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
-        participantUserId: row.readString('participantUserId'),
-        snapshotId: row.readString('snapshotId'),
-        snapshotType: row.readString('snapshotType'),
-        snapshotAmount: row.readString('snapshotAmount'),
-        assetSymbol: row.readString('assetSymbol'),
-        assetId: row.readString('assetId'),
-        assetIcon: row.readString('assetIcon'),
-        assetUrl: row.readString('assetUrl'),
-        assetWidth: row.readInt('assetWidth'),
-        assetHeight: row.readInt('assetHeight'),
-        stickerId: row.readString('stickerId'),
-        assetName: row.readString('assetName'),
-        assetType: row.readString('assetType'),
-        siteName: row.readString('siteName'),
-        siteTitle: row.readString('siteTitle'),
-        siteDescription: row.readString('siteDescription'),
-        siteImage: row.readString('siteImage'),
-        sharedUserId: row.readString('sharedUserId'),
-        sharedUserFullName: row.readString('sharedUserFullName'),
-        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
-        sharedUserAppId: row.readString('sharedUserAppId'),
-        mentions: row.readString('mentions'),
-        mentionRead: row.readInt('mentionRead'),
-        groupName: row.readString('groupName'),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
+        participantUserId: row.read<String>('participantUserId'),
+        snapshotId: row.read<String?>('snapshotId'),
+        snapshotType: row.read<String?>('snapshotType'),
+        snapshotAmount: row.read<String?>('snapshotAmount'),
+        assetSymbol: row.read<String?>('assetSymbol'),
+        assetId: row.read<String?>('assetId'),
+        assetIcon: row.read<String?>('assetIcon'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+        siteName: row.read<String?>('siteName'),
+        siteTitle: row.read<String?>('siteTitle'),
+        siteDescription: row.read<String?>('siteDescription'),
+        siteImage: row.read<String?>('siteImage'),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        mentions: row.read<String?>('mentions'),
+        mentionRead: row.read<int?>('mentionRead'),
+        groupName: row.read<String?>('groupName'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
         participantRelationship: Users.$converter0
-            .mapToDart(row.readString('participantRelationship')),
-        avatarUrl: row.readString('avatarUrl'),
+            .mapToDart(row.read<String?>('participantRelationship')),
+        avatarUrl: row.read<String?>('avatarUrl'),
       );
     });
   }
@@ -11194,7 +11198,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           messages
-        }).map((QueryRow row) => row.readInt('count(1)'));
+        }).map((QueryRow row) => row.read<int>('count(1)'));
   }
 
   Selectable<MessageStatus> findMessageStatusById(String messageId) {
@@ -11203,7 +11207,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             variables: [Variable<String>(messageId)],
             readsFrom: {messages})
         .map((QueryRow row) =>
-            Messages.$converter2.mapToDart(row.readString('status'))!);
+            Messages.$converter2.mapToDart(row.read<String>('status'))!);
   }
 
   Selectable<SendingMessage> sendingMessage(String message_id) {
@@ -11212,39 +11216,39 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         variables: [Variable<String>(message_id)],
         readsFrom: {messages, resendSessionMessages}).map((QueryRow row) {
       return SendingMessage(
-        messageId: row.readString('message_id'),
-        conversationId: row.readString('conversation_id'),
-        userId: row.readString('user_id'),
-        category: Messages.$converter0.mapToDart(row.readString('category'))!,
-        content: row.readString('content'),
-        mediaUrl: row.readString('media_url'),
-        mediaMimeType: row.readString('media_mime_type'),
-        mediaSize: row.readInt('media_size'),
-        mediaDuration: row.readString('media_duration'),
-        mediaWidth: row.readInt('media_width'),
-        mediaHeight: row.readInt('media_height'),
-        mediaHash: row.readString('media_hash'),
-        thumbImage: row.readString('thumb_image'),
-        mediaKey: row.readString('media_key'),
-        mediaDigest: row.readString('media_digest'),
+        messageId: row.read<String>('message_id'),
+        conversationId: row.read<String>('conversation_id'),
+        userId: row.read<String>('user_id'),
+        category: Messages.$converter0.mapToDart(row.read<String>('category'))!,
+        content: row.read<String?>('content'),
+        mediaUrl: row.read<String?>('media_url'),
+        mediaMimeType: row.read<String?>('media_mime_type'),
+        mediaSize: row.read<int?>('media_size'),
+        mediaDuration: row.read<String?>('media_duration'),
+        mediaWidth: row.read<int?>('media_width'),
+        mediaHeight: row.read<int?>('media_height'),
+        mediaHash: row.read<String?>('media_hash'),
+        thumbImage: row.read<String?>('thumb_image'),
+        mediaKey: row.read<String?>('media_key'),
+        mediaDigest: row.read<String?>('media_digest'),
         mediaStatus:
-            Messages.$converter1.mapToDart(row.readString('media_status')),
-        status: Messages.$converter2.mapToDart(row.readString('status'))!,
-        createdAt: Messages.$converter3.mapToDart(row.readInt('created_at'))!,
-        action: Messages.$converter4.mapToDart(row.readString('action')),
-        participantId: row.readString('participant_id'),
-        snapshotId: row.readString('snapshot_id'),
-        hyperlink: row.readString('hyperlink'),
-        name: row.readString('name'),
-        albumId: row.readString('album_id'),
-        stickerId: row.readString('sticker_id'),
-        sharedUserId: row.readString('shared_user_id'),
-        mediaWaveform: row.readString('media_waveform'),
-        quoteMessageId: row.readString('quote_message_id'),
-        quoteContent: row.readString('quote_content'),
-        resendStatus: row.readInt('resend_status'),
-        resendUserId: row.readString('resend_user_id'),
-        resendSessionId: row.readString('resend_session_id'),
+            Messages.$converter1.mapToDart(row.read<String?>('media_status')),
+        status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('created_at'))!,
+        action: Messages.$converter4.mapToDart(row.read<String?>('action')),
+        participantId: row.read<String?>('participant_id'),
+        snapshotId: row.read<String?>('snapshot_id'),
+        hyperlink: row.read<String?>('hyperlink'),
+        name: row.read<String?>('name'),
+        albumId: row.read<String?>('album_id'),
+        stickerId: row.read<String?>('sticker_id'),
+        sharedUserId: row.read<String?>('shared_user_id'),
+        mediaWaveform: row.read<String?>('media_waveform'),
+        quoteMessageId: row.read<String?>('quote_message_id'),
+        quoteContent: row.read<String?>('quote_content'),
+        resendStatus: row.read<int?>('resend_status'),
+        resendUserId: row.read<String?>('resend_user_id'),
+        resendSessionId: row.read<String?>('resend_session_id'),
       );
     });
   }
@@ -11264,43 +11268,43 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return QuoteMessageItem(
-        messageId: row.readString('messageId'),
-        conversationId: row.readString('conversationId'),
-        userId: row.readString('userId'),
-        userFullName: row.readString('userFullName'),
-        userIdentityNumber: row.readString('userIdentityNumber'),
-        appId: row.readString('appId'),
-        type: Messages.$converter0.mapToDart(row.readString('type'))!,
-        content: row.readString('content'),
-        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
-        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
         mediaStatus:
-            Messages.$converter1.mapToDart(row.readString('mediaStatus')),
-        mediaWaveform: row.readString('mediaWaveform'),
-        mediaName: row.readString('mediaName'),
-        mediaMimeType: row.readString('mediaMimeType'),
-        mediaSize: row.readInt('mediaSize'),
-        mediaWidth: row.readInt('mediaWidth'),
-        mediaHeight: row.readInt('mediaHeight'),
-        thumbImage: row.readString('thumbImage'),
-        thumbUrl: row.readString('thumbUrl'),
-        mediaUrl: row.readString('mediaUrl'),
-        mediaDuration: row.readString('mediaDuration'),
-        quoteId: row.readString('quoteId'),
-        quoteContent: row.readString('quoteContent'),
-        assetUrl: row.readString('assetUrl'),
-        assetWidth: row.readInt('assetWidth'),
-        assetHeight: row.readInt('assetHeight'),
-        stickerId: row.readString('stickerId'),
-        assetName: row.readString('assetName'),
-        assetType: row.readString('assetType'),
-        sharedUserId: row.readString('sharedUserId'),
-        sharedUserFullName: row.readString('sharedUserFullName'),
-        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
-        sharedUserAppId: row.readString('sharedUserAppId'),
-        mentions: row.readString('mentions'),
+            Messages.$converter1.mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        mentions: row.read<String?>('mentions'),
       );
     });
   }
@@ -11318,43 +11322,43 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return QuoteMessageItem(
-        messageId: row.readString('messageId'),
-        conversationId: row.readString('conversationId'),
-        userId: row.readString('userId'),
-        userFullName: row.readString('userFullName'),
-        userIdentityNumber: row.readString('userIdentityNumber'),
-        appId: row.readString('appId'),
-        type: Messages.$converter0.mapToDart(row.readString('type'))!,
-        content: row.readString('content'),
-        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
-        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
         mediaStatus:
-            Messages.$converter1.mapToDart(row.readString('mediaStatus')),
-        mediaWaveform: row.readString('mediaWaveform'),
-        mediaName: row.readString('mediaName'),
-        mediaMimeType: row.readString('mediaMimeType'),
-        mediaSize: row.readInt('mediaSize'),
-        mediaWidth: row.readInt('mediaWidth'),
-        mediaHeight: row.readInt('mediaHeight'),
-        thumbImage: row.readString('thumbImage'),
-        thumbUrl: row.readString('thumbUrl'),
-        mediaUrl: row.readString('mediaUrl'),
-        mediaDuration: row.readString('mediaDuration'),
-        quoteId: row.readString('quoteId'),
-        quoteContent: row.readString('quoteContent'),
-        assetUrl: row.readString('assetUrl'),
-        assetWidth: row.readInt('assetWidth'),
-        assetHeight: row.readInt('assetHeight'),
-        stickerId: row.readString('stickerId'),
-        assetName: row.readString('assetName'),
-        assetType: row.readString('assetType'),
-        sharedUserId: row.readString('sharedUserId'),
-        sharedUserFullName: row.readString('sharedUserFullName'),
-        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
-        sharedUserAppId: row.readString('sharedUserAppId'),
-        mentions: row.readString('mentions'),
+            Messages.$converter1.mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        mentions: row.read<String?>('mentions'),
       );
     });
   }
@@ -11376,7 +11380,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messagesFts,
           conversations,
           users
-        }).map((QueryRow row) => row.readInt('count(*)'));
+        }).map((QueryRow row) => row.read<int>('count(*)'));
   }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
@@ -11395,19 +11399,19 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messagesFts
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
-        messageId: row.readString('messageId'),
-        userId: row.readString('userId'),
-        userAvatarUrl: row.readString('userAvatarUrl'),
-        userFullName: row.readString('userFullName'),
-        type: Messages.$converter0.mapToDart(row.readString('type'))!,
-        content: row.readString('content'),
-        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
-        mediaName: row.readString('mediaName'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        conversationId: row.readString('conversationId'),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
       );
     });
   }
@@ -11441,64 +11445,64 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           conversations
         }).map((QueryRow row) {
       return MessageItem(
-        messageId: row.readString('messageId'),
-        conversationId: row.readString('conversationId'),
-        userId: row.readString('userId'),
-        userFullName: row.readString('userFullName'),
-        userIdentityNumber: row.readString('userIdentityNumber'),
-        appId: row.readString('appId'),
-        type: Messages.$converter0.mapToDart(row.readString('type'))!,
-        content: row.readString('content'),
-        createdAt: Messages.$converter3.mapToDart(row.readInt('createdAt'))!,
-        status: Messages.$converter2.mapToDart(row.readString('status'))!,
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
         mediaStatus:
-            Messages.$converter1.mapToDart(row.readString('mediaStatus')),
-        mediaWaveform: row.readString('mediaWaveform'),
-        mediaName: row.readString('mediaName'),
-        mediaMimeType: row.readString('mediaMimeType'),
-        mediaSize: row.readInt('mediaSize'),
-        mediaWidth: row.readInt('mediaWidth'),
-        mediaHeight: row.readInt('mediaHeight'),
-        thumbImage: row.readString('thumbImage'),
-        thumbUrl: row.readString('thumbUrl'),
-        mediaUrl: row.readString('mediaUrl'),
-        mediaDuration: row.readString('mediaDuration'),
-        quoteId: row.readString('quoteId'),
-        quoteContent: row.readString('quoteContent'),
-        participantFullName: row.readString('participantFullName'),
+            Messages.$converter1.mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        participantFullName: row.read<String?>('participantFullName'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
-        participantUserId: row.readString('participantUserId'),
-        snapshotId: row.readString('snapshotId'),
-        snapshotType: row.readString('snapshotType'),
-        snapshotAmount: row.readString('snapshotAmount'),
-        assetSymbol: row.readString('assetSymbol'),
-        assetId: row.readString('assetId'),
-        assetIcon: row.readString('assetIcon'),
-        assetUrl: row.readString('assetUrl'),
-        assetWidth: row.readInt('assetWidth'),
-        assetHeight: row.readInt('assetHeight'),
-        stickerId: row.readString('stickerId'),
-        assetName: row.readString('assetName'),
-        assetType: row.readString('assetType'),
-        siteName: row.readString('siteName'),
-        siteTitle: row.readString('siteTitle'),
-        siteDescription: row.readString('siteDescription'),
-        siteImage: row.readString('siteImage'),
-        sharedUserId: row.readString('sharedUserId'),
-        sharedUserFullName: row.readString('sharedUserFullName'),
-        sharedUserIdentityNumber: row.readString('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.readString('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.readInt('sharedUserIsVerified'),
-        sharedUserAppId: row.readString('sharedUserAppId'),
-        mentions: row.readString('mentions'),
-        mentionRead: row.readInt('mentionRead'),
-        groupName: row.readString('groupName'),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
+        participantUserId: row.read<String>('participantUserId'),
+        snapshotId: row.read<String?>('snapshotId'),
+        snapshotType: row.read<String?>('snapshotType'),
+        snapshotAmount: row.read<String?>('snapshotAmount'),
+        assetSymbol: row.read<String?>('assetSymbol'),
+        assetId: row.read<String?>('assetId'),
+        assetIcon: row.read<String?>('assetIcon'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+        siteName: row.read<String?>('siteName'),
+        siteTitle: row.read<String?>('siteTitle'),
+        siteDescription: row.read<String?>('siteDescription'),
+        siteImage: row.read<String?>('siteImage'),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        mentions: row.read<String?>('mentions'),
+        mentionRead: row.read<int?>('mentionRead'),
+        groupName: row.read<String?>('groupName'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
         participantRelationship: Users.$converter0
-            .mapToDart(row.readString('participantRelationship')),
-        avatarUrl: row.readString('avatarUrl'),
+            .mapToDart(row.read<String?>('participantRelationship')),
+        avatarUrl: row.read<String?>('avatarUrl'),
       );
     });
   }
@@ -11507,7 +11511,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     return customSelect(
         'SELECT Count(*)\n        FROM messages m\n        WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')',
         variables: [Variable<String>(conversationId)],
-        readsFrom: {messages}).map((QueryRow row) => row.readInt('Count(*)'));
+        readsFrom: {messages}).map((QueryRow row) => row.read<int>('Count(*)'));
   }
 
   Selectable<int> mediaMessageRowIdByConversationId(
@@ -11520,7 +11524,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           messages
-        }).map((QueryRow row) => row.readInt('count(*)'));
+        }).map((QueryRow row) => row.read<int>('count(*)'));
   }
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
@@ -11536,18 +11540,88 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return NotificationMessage(
-        messageId: row.readString('messageId'),
-        conversationId: row.readString('conversationId'),
-        userId: row.readString('userId'),
-        userFullName: row.readString('userFullName'),
-        type: Messages.$converter0.mapToDart(row.readString('type'))!,
-        content: row.readString('content'),
-        status: Messages.$converter2.mapToDart(row.readString('status'))!,
-        groupName: row.readString('groupName'),
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
+        groupName: row.read<String?>('groupName'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+      );
+    });
+  }
+
+  Selectable<int> chatConversationCount() {
+    return customSelect(
+        'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category IN (\'CONTACT\', \'GROUP\') AND c.status = 2\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',
+        variables: [],
+        readsFrom: {
+          conversations,
+          users,
+          messages
+        }).map((QueryRow row) => row.read<int>('Count(1)'));
+  }
+
+  Selectable<ConversationItem> chatConversations(int limit, int offset) {
+    return customSelect(
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\') AND c.status = 2\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
+        variables: [
+          Variable<int>(limit),
+          Variable<int>(offset)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+          snapshots,
+          messageMentions
+        }).map((QueryRow row) {
+      return ConversationItem(
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
+        contentType:
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
+        createdAt:
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
+        actionName:
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
+        messageStatus:
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
+        relationship:
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -11560,7 +11634,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           conversations,
           users,
           messages
-        }).map((QueryRow row) => row.readInt('Count(1)'));
+        }).map((QueryRow row) => row.read<int>('Count(1)'));
   }
 
   Selectable<ConversationItem> contactConversations(int limit, int offset) {
@@ -11578,46 +11652,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -11630,7 +11704,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           conversations,
           users,
           messages
-        }).map((QueryRow row) => row.readInt('Count(*)'));
+        }).map((QueryRow row) => row.read<int>('Count(*)'));
   }
 
   Selectable<ConversationItem> strangerConversations(int limit, int offset) {
@@ -11648,46 +11722,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -11699,7 +11773,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {
           conversations,
           messages
-        }).map((QueryRow row) => row.readInt('Count(*)'));
+        }).map((QueryRow row) => row.read<int>('Count(*)'));
   }
 
   Selectable<ConversationItem> groupConversations(int limit, int offset) {
@@ -11717,46 +11791,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -11769,7 +11843,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           conversations,
           users,
           messages
-        }).map((QueryRow row) => row.readInt('Count(*)'));
+        }).map((QueryRow row) => row.read<int>('Count(*)'));
   }
 
   Selectable<ConversationItem> botConversations(int limit, int offset) {
@@ -11787,46 +11861,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -11845,46 +11919,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -11903,46 +11977,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -11955,7 +12029,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           conversations
-        }).map((QueryRow row) => row.readInt('SUM(unseen_message_count)'));
+        }).map((QueryRow row) => row.read<int?>('SUM(unseen_message_count)'));
   }
 
   Selectable<ConversationItem> conversationItems() {
@@ -11970,46 +12044,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messageMentions
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -12020,17 +12094,17 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         variables: [Variable<String>(query)],
         readsFrom: {conversations, users, messages}).map((QueryRow row) {
       return SearchConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
-        userId: row.readString('userId'),
-        fullName: row.readString('fullName'),
-        avatarUrl: row.readString('avatarUrl'),
-        isVerified: row.readInt('isVerified'),
-        appId: row.readString('appId'),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
+        userId: row.read<String?>('userId'),
+        fullName: row.read<String?>('fullName'),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        isVerified: row.read<int?>('isVerified'),
+        appId: row.read<String?>('appId'),
       );
     });
   }
@@ -12053,46 +12127,46 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           circleConversations
         }).map((QueryRow row) {
       return ConversationItem(
-        conversationId: row.readString('conversationId'),
-        groupIconUrl: row.readString('groupIconUrl'),
+        conversationId: row.read<String>('conversationId'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
-            Conversations.$converter0.mapToDart(row.readString('category')),
-        groupName: row.readString('groupName'),
-        status: Conversations.$converter4.mapToDart(row.readInt('status'))!,
-        lastReadMessageId: row.readString('lastReadMessageId'),
-        unseenMessageCount: row.readInt('unseenMessageCount'),
-        ownerId: row.readString('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.readInt('pinTime')),
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
+        lastReadMessageId: row.read<String?>('lastReadMessageId'),
+        unseenMessageCount: row.read<int?>('unseenMessageCount'),
+        ownerId: row.read<String?>('ownerId'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
         muteUntil:
-            Conversations.$converter5.mapToDart(row.readInt('muteUntil')),
-        avatarUrl: row.readString('avatarUrl'),
-        name: row.readString('name'),
-        ownerVerified: row.readInt('ownerVerified'),
-        ownerIdentityNumber: row.readString('ownerIdentityNumber'),
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        name: row.read<String?>('name'),
+        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
-            Users.$converter2.mapToDart(row.readInt('ownerMuteUntil')),
-        appId: row.readString('appId'),
-        content: row.readString('content'),
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        appId: row.read<String?>('appId'),
+        content: row.read<String?>('content'),
         contentType:
-            Messages.$converter0.mapToDart(row.readString('contentType')),
+            Messages.$converter0.mapToDart(row.read<String?>('contentType')),
         createdAt:
-            Conversations.$converter1.mapToDart(row.readInt('createdAt'))!,
-        lastMessageCreatedAt:
-            Messages.$converter3.mapToDart(row.readInt('lastMessageCreatedAt')),
-        mediaUrl: row.readString('mediaUrl'),
-        senderId: row.readString('senderId'),
+            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        lastMessageCreatedAt: Messages.$converter3
+            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        senderId: row.read<String?>('senderId'),
         actionName:
-            Messages.$converter4.mapToDart(row.readString('actionName')),
+            Messages.$converter4.mapToDart(row.read<String?>('actionName')),
         messageStatus:
-            Messages.$converter2.mapToDart(row.readString('messageStatus')),
-        senderFullName: row.readString('senderFullName'),
-        snapshotType: row.readString('SnapshotType'),
-        participantFullName: row.readString('participantFullName'),
-        participantUserId: row.readString('participantUserId'),
-        mentionCount: row.readInt('mentionCount'),
-        mentions: row.readString('mentions'),
+            Messages.$converter2.mapToDart(row.read<String?>('messageStatus')),
+        senderFullName: row.read<String?>('senderFullName'),
+        snapshotType: row.read<String?>('SnapshotType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
+        mentionCount: row.read<int>('mentionCount'),
+        mentions: row.read<String?>('mentions'),
         relationship:
-            Users.$converter0.mapToDart(row.readString('relationship')),
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
       );
     });
   }
@@ -12107,7 +12181,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           circleConversations,
           conversations,
           users
-        }).map((QueryRow row) => row.readInt('COUNT(*)'));
+        }).map((QueryRow row) => row.read<int>('COUNT(*)'));
   }
 
   Selectable<int> conversationParticipantsCount(String conversationId) {
@@ -12118,7 +12192,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           participants
-        }).map((QueryRow row) => row.readInt('count(1)'));
+        }).map((QueryRow row) => row.read<int>('count(1)'));
   }
 
   Selectable<String?> announcement(String conversationId) {
@@ -12129,7 +12203,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           conversations
-        }).map((QueryRow row) => row.readString('announcement'));
+        }).map((QueryRow row) => row.read<String?>('announcement'));
   }
 
   @override

@@ -104,5 +104,7 @@
   "exitGroup": "Delete and Exit",
   "loading": "Loading",
   "failed": "Failed",
-  "successful": "Successful"
+  "successful": "Successful",
+  "people": "People",
+  "chats": "Chats"
 }

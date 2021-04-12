@@ -44,6 +44,12 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .getSingleOrNull();
 
+  Selectable<ConversationItem> chatConversations(
+    int limit,
+    int offset,
+  ) =>
+      db.chatConversations(limit, offset);
+
   Selectable<ConversationItem> contactConversations(
     int limit,
     int offset,
@@ -72,6 +78,8 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(ConversationsCompanion(lastMessageId: Value(messageId)));
+
+  Selectable<int> chatConversationCount() => db.chatConversationCount();
 
   Selectable<int> contactConversationCount() => db.contactConversationCount();
 
