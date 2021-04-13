@@ -7,7 +7,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/widgets/Toast.dart';
+import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/menu.dart';

@@ -14,7 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
-import 'Toast.dart';
+import 'toast.dart';
 import 'brightness_observer.dart';
 import 'cell.dart';
 import 'chat_bar.dart';

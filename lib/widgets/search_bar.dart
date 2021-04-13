@@ -8,7 +8,7 @@ import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/slide_page.dart';
 import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/Toast.dart';
+import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/menu.dart';
