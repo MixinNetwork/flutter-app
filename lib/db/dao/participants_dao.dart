@@ -9,7 +9,7 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantsDaoMixin {
   ParticipantsDao(MixinDatabase db) : super(db);
 
-  void insert(Participant participant) async =>
+    Future<int> insert(Participant participant)  =>
       into(db.participants).insertOnConflictUpdate(participant);
 
   void deleteParticipant(Participant participant) async =>

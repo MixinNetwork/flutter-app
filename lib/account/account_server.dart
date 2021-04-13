@@ -324,11 +324,11 @@ class AccountServer {
   void _markRead(conversationId) async {
     final ids =
         await database.messagesDao.getUnreadMessageIds(conversationId, userId);
-    final status = EnumToString.convertToString(MessageStatus.read)!.toUpperCase();
+    final status =
+        EnumToString.convertToString(MessageStatus.read)!.toUpperCase();
     final now = DateTime.now();
     final jobs = ids
-        .map(
-            (id) => jsonEncode(BlazeAckMessage(messageId: id, status: status)))
+        .map((id) => jsonEncode(BlazeAckMessage(messageId: id, status: status)))
         .map((blazeMessage) => Job(
             jobId: const Uuid().v4(),
             action: acknowledgeMessageReceipts,
@@ -532,8 +532,8 @@ class AccountServer {
           muteUntil: DateTime.tryParse(conversation.muteUntil),
         ),
       );
-      conversation.participants.forEach((participant) async {
-        database.participantsDao.insert(
+      for (final participant in conversation.participants) {
+        await database.participantsDao.insert(
           db.Participant(
             conversationId: conversation.conversationId,
             userId: participant.userId,
@@ -541,18 +541,15 @@ class AccountServer {
             role: participant.role,
           ),
         );
-      });
+      }
+      for (final userId in userIds) {
+        await addParticipant(conversationId, userId);
+      }
     }
   }
 
-  Future<void> exitGroup(String conversationId) async {
-    await client.conversationApi
-        .exit(conversationId)
-        .then((response) => {})
-        .catchError((error) {
-      debugPrint(error);
-    });
-  }
+  Future<void> exitGroup(String conversationId) =>
+      client.conversationApi.exit(conversationId).then((response) => {});
 
   Future<void> addParticipant(
     String conversationId,
@@ -637,11 +634,11 @@ class AccountServer {
             createdAt: DateTime.now(),
             ownerId: recipientId,
             status: ConversationStatus.start));
-        database.participantsDao.insert(db.Participant(
+        await database.participantsDao.insert(db.Participant(
             conversationId: conversationId,
             userId: userId,
             createdAt: DateTime.now()));
-        database.participantsDao.insert(db.Participant(
+        await database.participantsDao.insert(db.Participant(
             conversationId: conversationId,
             userId: recipientId,
             createdAt: DateTime.now()));

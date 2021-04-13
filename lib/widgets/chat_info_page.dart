@@ -14,6 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
+import 'Toast.dart';
 import 'brightness_observer.dart';
 import 'cell.dart';
 import 'chat_bar.dart';
@@ -164,7 +165,17 @@ class ChatInfoPage extends HookWidget {
                           title: Localization.of(context).exitGroup,
                           color: BrightnessData.themeOf(context).red,
                           trailing: null,
-                          onTap: () {},
+                          onTap: () async {
+                            final conversationId = context.read<ConversationCubit>().state?.conversationId;
+                            if(conversationId == null) return;
+                            showToastLoading(context);
+                            try {
+                              await context.read<AccountServer>().exitGroup(conversationId);
+                            } catch (e) {
+                              return showToastFailed(context);
+                            }
+                            showToastSuccessful(context);
+                          },
                         )
                       else
                         CellItem(
