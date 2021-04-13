@@ -8,6 +8,8 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import 'disable.dart';
+
 Future<T?> _showDialog<T>({
   required BuildContext context,
   bool barrierDismissible = true,
@@ -183,6 +185,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
       vertical: 8,
       horizontal: 16,
     ),
+    this.disable = false,
   }) : super(
           key: key,
           value: value,
@@ -192,6 +195,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
   final Widget child;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry padding;
+  final bool disable;
 
   @override
   Widget build(BuildContext context) {
@@ -207,18 +211,21 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
             context,
             const Color.fromRGBO(255, 255, 255, 1),
           );
-    return InteractableDecoratedBox.color(
-      decoration: boxDecoration,
-      onTap: () => onTap != null ? onTap?.call() : handleTap(context),
-      child: DefaultTextStyle(
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
-          color: textColor,
-        ),
-        child: Padding(
-          padding: padding,
-          child: child,
+    return Disable(
+      disable: disable,
+      child: InteractableDecoratedBox.color(
+        decoration: boxDecoration,
+        onTap: () => onTap != null ? onTap?.call() : handleTap(context),
+        child: DefaultTextStyle(
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 16,
+            color: textColor,
+          ),
+          child: Padding(
+            padding: padding,
+            child: child,
+          ),
         ),
       ),
     );

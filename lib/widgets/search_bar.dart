@@ -213,6 +213,7 @@ class _NewConversationConfirm extends HookWidget {
     );
 
     final textEditingController = useTextEditingController();
+    final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(
       title: Text(Localization.of(context).group),
       titleMarginBottom: 24,
@@ -248,6 +249,7 @@ class _NewConversationConfirm extends HookWidget {
             onTap: () => Navigator.pop(context)),
         MixinButton(
           child: Text(Localization.of(context).create),
+          disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
         ),
       ],

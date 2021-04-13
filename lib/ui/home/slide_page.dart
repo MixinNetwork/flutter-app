@@ -155,12 +155,14 @@ class _CircleList extends HookWidget {
                               context: context,
                               child: EditCircleNameDialog(name: circle.name),
                             );
-                            if(name?.isEmpty ?? true) return;
+                            if (name?.isEmpty ?? true) return;
 
                             showToastLoading(context);
 
                             try {
-                              await context.read<AccountServer>().updateCircle(circle.circleId, name!);
+                              await context
+                                  .read<AccountServer>()
+                                  .updateCircle(circle.circleId, name!);
                             } catch (e) {
                               return showToastFailed(context);
                             }
@@ -326,6 +328,7 @@ class EditCircleNameDialog extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final textEditingController = useTextEditingController.call(text: name);
+    final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(
       title: Text(Localization.of(context).circles),
       content: DialogTextField(
@@ -338,6 +341,7 @@ class EditCircleNameDialog extends HookWidget {
             onTap: () => Navigator.pop(context)),
         MixinButton(
           child: Text(Localization.of(context).create),
+          disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
         ),
       ],
