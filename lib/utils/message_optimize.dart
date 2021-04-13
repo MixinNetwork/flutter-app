@@ -44,7 +44,7 @@ Future<Tuple2<String?, String?>> messageOptimize(
     icon = Resources.assetsImagesFileSvg;
   } else if (messageCategory.isPost) {
     icon = Resources.assetsImagesFileSvg;
-    _content = _content!.postOptimizeMarkdown;
+    _content = _content?.postOptimizeMarkdown ?? Localization.current.post;
   } else if (messageCategory.isLocation) {
     _content = '[${Localization.current.location}]';
     icon = Resources.assetsImagesLocationSvg;

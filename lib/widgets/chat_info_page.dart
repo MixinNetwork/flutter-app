@@ -5,6 +5,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/action_button.dart';
+import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -124,7 +125,19 @@ class ChatInfoPage extends HookWidget {
                       if (!isGroupConversation)
                         CellItem(
                           title: Localization.of(context).editName,
-                          onTap: () {},
+                          onTap: () async {
+                            final name = await showMixinDialog<String>(
+                              context: context,
+                              child: EditNameDialog(
+                                  name: context
+                                          .read<ConversationCubit>()
+                                          .state
+                                          ?.name ??
+                                      ''),
+                            );
+
+                            // todo edit contact name;
+                          },
                         ),
                     ],
                   ),
@@ -215,6 +228,38 @@ class ConversationBio extends HookWidget {
         color: BrightnessData.themeOf(context).text,
         fontSize: fontSize,
       ),
+    );
+  }
+}
+
+class EditNameDialog extends HookWidget {
+  const EditNameDialog({
+    Key? key,
+    this.name = '',
+  }) : super(key: key);
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final textEditingController = useTextEditingController.call(text: name);
+    final textEditingValue = useValueListenable(textEditingController);
+    return AlertDialogLayout(
+      title: Text(Localization.of(context).editName),
+      content: DialogTextField(
+          textEditingController: textEditingController,
+          hintText: Localization.of(context).conversationName),
+      actions: [
+        MixinButton(
+            backgroundTransparent: true,
+            child: Text(Localization.of(context).cancel),
+            onTap: () => Navigator.pop(context)),
+        MixinButton(
+          child: Text(Localization.of(context).create),
+          disable: textEditingValue.text.isEmpty,
+          onTap: () => Navigator.pop(context, textEditingController.text),
+        ),
+      ],
     );
   }
 }
