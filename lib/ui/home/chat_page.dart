@@ -26,6 +26,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   ChatSideCubit() : super(const ResponsiveNavigatorState());
 
   static const infoPage = 'infoPage';
+  static const circles = 'circles';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -36,7 +37,17 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           name: infoPage,
           child: ChatInfoPage(),
         );
-
+      case circles:
+        if (arguments == null || !(arguments is Tuple2<String, String>))
+          throw ArgumentError('Invalid route');
+        return MaterialPage(
+          key: const ValueKey(circles),
+          name: circles,
+          child: CircleManagerPage(
+            name: arguments.item1,
+            conversationId: arguments.item2,
+          ),
+        );
       default:
         throw ArgumentError('Invalid route');
     }
@@ -62,7 +73,9 @@ class ChatPage extends HookWidget {
     final chatSideCubit = useBloc(() => ChatSideCubit(), keys: [
       conversationId,
     ]);
-    final navigatorState = useBlocState(bloc: chatSideCubit);
+    final navigatorState =
+        useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
+            bloc: chatSideCubit);
 
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),

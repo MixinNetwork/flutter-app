@@ -29,8 +29,10 @@ abstract class AbstractResponsiveNavigatorCubit
   void pushPage(String name, {Object? arguments}) {
     final page = route(name, arguments);
     var index = -1;
-    index = state.pages
-        .indexWhere((element) => element.child.key == page.child.key);
+    index = state.pages.indexWhere((element) =>
+        element.child.key != null &&
+        page.child.key != null &&
+        element.child.key == page.child.key);
     if (state.pages.isNotEmpty && index == state.pages.length - 1) return;
     if (index != -1) state.pages.removeRange(max(index, 0), state.pages.length);
     emit(state.copyWith(

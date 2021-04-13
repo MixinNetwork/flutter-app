@@ -1,0 +1,9 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+  <path fill-rule="evenodd" clip-rule="evenodd"
+        d="M8 16.0001C12.4183 16.0001 16 12.4183 16 8.00006C16 3.58178 12.4183 6.10352e-05 8 6.10352e-05C3.58172 6.10352e-05 0 3.58178 0 8.00006C0 12.4183 3.58172 16.0001 8 16.0001Z"
+        fill="#50BD5C"/>
+  <rect x="4" y="7.00006" width="8" height="2" rx="1" fill="white"/>
+  <rect x="9" y="4.00006" width="8" height="2" rx="1"
+        transform="rotate(90 9 4.00006)" fill="white"/>
+</svg>

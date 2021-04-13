@@ -172,18 +172,19 @@ class SearchBar extends StatelessWidget {
               ),
             ],
             child: Builder(
-                builder: (context) => ActionButton(
-                      name: Resources.assetsImagesIcAddSvg,
-                      size: 16,
-                      onTapUp: (event) {
-                        context.read<OffsetCubit>().emit(event.globalPosition);
-                      },
-                      onTap: () async {
-                        return;
-                      },
-                      padding: const EdgeInsets.all(8),
-                      color: BrightnessData.themeOf(context).icon,
-                    )),
+              builder: (context) => ActionButton(
+                name: Resources.assetsImagesIcAddSvg,
+                size: 16,
+                onTapUp: (event) {
+                  context.read<OffsetCubit>().emit(event.globalPosition);
+                },
+                onTap: () async {
+                  return;
+                },
+                padding: const EdgeInsets.all(8),
+                color: BrightnessData.themeOf(context).icon,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
         ],

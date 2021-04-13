@@ -31,17 +31,21 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m5(name) => "Waiting for ${name} to get online and establish an encrypted session.";
 
-  static m6(id) => "ID: ${id}";
+  static m6(name) => "${name}\'s Circles";
 
-  static m7(count) => "${count} Participants";
+  static m7(count) => "${count} Conversations";
 
-  static m8(name) => "Do you want to delete ${name} circle?";
+  static m8(id) => "ID: ${id}";
 
-  static m9(date) => "${date} join";
+  static m9(count) => "${count} Participants";
 
-  static m10(count) => "${count} Participants";
+  static m10(name) => "Do you want to delete ${name} circle?";
 
-  static m11(count) => "${count} related messages";
+  static m11(date) => "${date} join";
+
+  static m12(count) => "${count} Participants";
+
+  static m13(count) => "${count} related messages";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -73,13 +77,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatWaiting" : m5,
     "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("desktop"),
     "chats" : MessageLookupByLibrary.simpleMessage("Chats"),
+    "circleTitle" : m6,
     "circles" : MessageLookupByLibrary.simpleMessage("Circles"),
     "clearChat" : MessageLookupByLibrary.simpleMessage("Clear Chat"),
     "contact" : MessageLookupByLibrary.simpleMessage("Contact"),
     "contacts" : MessageLookupByLibrary.simpleMessage("Contacts"),
-    "conversationID" : m6,
+    "conversationCount" : m7,
+    "conversationID" : m8,
     "conversationName" : MessageLookupByLibrary.simpleMessage("Conversation Name"),
-    "conversationParticipantsCount" : m7,
+    "conversationParticipantsCount" : m9,
     "copy" : MessageLookupByLibrary.simpleMessage("Copy"),
     "create" : MessageLookupByLibrary.simpleMessage("Create"),
     "createCircle" : MessageLookupByLibrary.simpleMessage("New circle"),
@@ -116,13 +122,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "next" : MessageLookupByLibrary.simpleMessage("Next"),
     "noData" : MessageLookupByLibrary.simpleMessage("NO DATA"),
     "notification" : MessageLookupByLibrary.simpleMessage("Notification"),
-    "pageDeleteCircle" : m8,
-    "pageEditProfileJoin" : m9,
+    "pageDeleteCircle" : m10,
+    "pageEditProfileJoin" : m11,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login."),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("Login to Mixin Messenger by QR Code"),
     "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("Select a conversation to start messaging"),
-    "participantsCount" : m10,
+    "participantsCount" : m12,
     "people" : MessageLookupByLibrary.simpleMessage("People"),
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("Phone number"),
     "pin" : MessageLookupByLibrary.simpleMessage("Pin"),
@@ -137,7 +143,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "save" : MessageLookupByLibrary.simpleMessage("Save"),
     "search" : MessageLookupByLibrary.simpleMessage("Search"),
     "searchEmpty" : MessageLookupByLibrary.simpleMessage("No chats, \ncontacts or messages found."),
-    "searchRelatedMessage" : m11,
+    "searchRelatedMessage" : m13,
     "shareContact" : MessageLookupByLibrary.simpleMessage("Share Contact"),
     "sharedApps" : MessageLookupByLibrary.simpleMessage("Shared Apps"),
     "sharedMedia" : MessageLookupByLibrary.simpleMessage("Shared Media"),

@@ -107,5 +107,7 @@
   "failed": "Failed",
   "successful": "Successful",
   "people": "People",
-  "chats": "Chats"
+  "chats": "Chats",
+  "circleTitle": "{name}'s Circles",
+  "conversationCount": "{count} Conversations"
 }

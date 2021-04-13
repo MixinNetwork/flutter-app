@@ -1136,6 +1136,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `{name}'s Circles`
+  String circleTitle(Object name) {
+    return Intl.message(
+      '$name\'s Circles',
+      name: 'circleTitle',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `{count} Conversations`
+  String conversationCount(Object count) {
+    return Intl.message(
+      '$count Conversations',
+      name: 'conversationCount',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

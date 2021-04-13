@@ -25,4 +25,15 @@ class CirclesDao extends DatabaseAccessor<MixinDatabase>
       (delete(db.circles)..where((tbl) => tbl.circleId.equals(circleId))).go();
 
   Selectable<ConversationCircleItem> allCircles() => db.allCircles();
+
+  Selectable<ConversationCircleManagerItem> circleByConversationId(
+          String conversationId) =>
+      db.circleByConversationId(conversationId);
+
+  Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
+          String conversationId) =>
+      db.otherCircleByConversationId(conversationId);
+
+  Selectable<String> circlesNameByConversationId(String conversationId) =>
+      db.circlesNameByConversationId(conversationId);
 }

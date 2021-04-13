@@ -19,6 +19,11 @@ class Resources {
 
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
 
+  static const String assetsImagesCircleAddSvg = 'assets/images/circle_add.svg';
+
+  static const String assetsImagesCircleRemoveSvg =
+      'assets/images/circle_remove.svg';
+
   static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
 
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';

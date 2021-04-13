@@ -10906,6 +10906,59 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<ConversationCircleManagerItem> circleByConversationId(
+      String? conversationId) {
+    return customSelect(
+        'SELECT ci.circle_id, ci.name, count(c.conversation_id) as count FROM circles ci LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id\n        LEFT JOIN conversations c  ON c.conversation_id = cc.conversation_id\n        WHERE ci.circle_id IN (\n        SELECT cir.circle_id FROM circles cir LEFT JOIN circle_conversations ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId)\n        GROUP BY ci.circle_id\n        ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        variables: [
+          Variable<String?>(conversationId)
+        ],
+        readsFrom: {
+          circles,
+          conversations,
+          circleConversations
+        }).map((QueryRow row) {
+      return ConversationCircleManagerItem(
+        circleId: row.read<String>('circle_id'),
+        name: row.read<String>('name'),
+        count: row.read<int>('count'),
+      );
+    });
+  }
+
+  Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
+      String? conversationId) {
+    return customSelect(
+        'SELECT ci.circle_id, ci.name, count(c.conversation_id) as count FROM circles ci LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id\n        LEFT JOIN conversations c  ON c.conversation_id = cc.conversation_id\n        WHERE ci.circle_id NOT IN (\n        SELECT cir.circle_id FROM circles cir LEFT JOIN circle_conversations ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId)\n        GROUP BY ci.circle_id\n        ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        variables: [
+          Variable<String?>(conversationId)
+        ],
+        readsFrom: {
+          circles,
+          conversations,
+          circleConversations
+        }).map((QueryRow row) {
+      return ConversationCircleManagerItem(
+        circleId: row.read<String>('circle_id'),
+        name: row.read<String>('name'),
+        count: row.read<int>('count'),
+      );
+    });
+  }
+
+  Selectable<String> circlesNameByConversationId(String? conversationId) {
+    return customSelect(
+        'SELECT ci.name FROM circles ci\n        LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id\n        LEFT JOIN conversations c ON c.conversation_id = cc.conversation_id\n        WHERE cc.conversation_id = :conversationId',
+        variables: [
+          Variable<String?>(conversationId)
+        ],
+        readsFrom: {
+          circles,
+          circleConversations,
+          conversations
+        }).map((QueryRow row) => row.read<String>('name'));
+  }
+
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(
@@ -12320,6 +12373,36 @@ class ConversationCircleItem {
           ..write('createdAt: $createdAt, ')
           ..write('count: $count, ')
           ..write('unseenMessageCount: $unseenMessageCount')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ConversationCircleManagerItem {
+  final String circleId;
+  final String name;
+  final int count;
+  ConversationCircleManagerItem({
+    required this.circleId,
+    required this.name,
+    required this.count,
+  });
+  @override
+  int get hashCode =>
+      $mrjf($mrjc(circleId.hashCode, $mrjc(name.hashCode, count.hashCode)));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ConversationCircleManagerItem &&
+          other.circleId == this.circleId &&
+          other.name == this.name &&
+          other.count == this.count);
+  @override
+  String toString() {
+    return (StringBuffer('ConversationCircleManagerItem(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('count: $count')
           ..write(')'))
         .toString();
   }

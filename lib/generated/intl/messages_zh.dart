@@ -31,15 +31,19 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static m5(name) => "等待${name}上线后建立加密会话。";
 
-  static m7(count) => "${count} 成员";
+  static m6(name) => "${name}的圈子";
 
-  static m8(name) => "确定删除${name}圈子吗？";
+  static m7(count) => "${count} 个会话";
 
-  static m9(date) => "${date}加入";
+  static m9(count) => "${count} 成员";
 
-  static m10(count) => "共 ${count} 人";
+  static m10(name) => "确定删除${name}圈子吗？";
 
-  static m11(count) => "${count} 条相关的消息";
+  static m11(date) => "${date}加入";
+
+  static m12(count) => "共 ${count} 人";
+
+  static m13(count) => "${count} 条相关的消息";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static _notInlinedMessages(_) => <String, Function> {
@@ -69,12 +73,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatWaiting" : m5,
     "chatWaitingDesktop" : MessageLookupByLibrary.simpleMessage("桌面端"),
     "chats" : MessageLookupByLibrary.simpleMessage("全部聊天"),
+    "circleTitle" : m6,
     "circles" : MessageLookupByLibrary.simpleMessage("圈子"),
     "clearChat" : MessageLookupByLibrary.simpleMessage("清空聊天记录"),
     "contact" : MessageLookupByLibrary.simpleMessage("联系人"),
     "contacts" : MessageLookupByLibrary.simpleMessage("联系人"),
+    "conversationCount" : m7,
     "conversationName" : MessageLookupByLibrary.simpleMessage("群组名称"),
-    "conversationParticipantsCount" : m7,
+    "conversationParticipantsCount" : m9,
     "copy" : MessageLookupByLibrary.simpleMessage("复制"),
     "create" : MessageLookupByLibrary.simpleMessage("创建"),
     "createCircle" : MessageLookupByLibrary.simpleMessage("创建圈子"),
@@ -111,13 +117,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "next" : MessageLookupByLibrary.simpleMessage("下一步"),
     "noData" : MessageLookupByLibrary.simpleMessage("没有数据"),
     "notification" : MessageLookupByLibrary.simpleMessage("通知"),
-    "pageDeleteCircle" : m8,
-    "pageEditProfileJoin" : m9,
+    "pageDeleteCircle" : m10,
+    "pageEditProfileJoin" : m11,
     "pageLandingClickToReload" : MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
     "pageLandingLoginMessage" : MessageLookupByLibrary.simpleMessage("打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
     "pageLandingLoginTitle" : MessageLookupByLibrary.simpleMessage("通过 QrCode 登录 Mixin Messenger"),
     "pageRightEmptyMessage" : MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
-    "participantsCount" : m10,
+    "participantsCount" : m12,
     "people" : MessageLookupByLibrary.simpleMessage("通讯录"),
     "phoneNumber" : MessageLookupByLibrary.simpleMessage("手机号"),
     "pin" : MessageLookupByLibrary.simpleMessage("置顶"),
@@ -132,7 +138,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "save" : MessageLookupByLibrary.simpleMessage("保存"),
     "search" : MessageLookupByLibrary.simpleMessage("搜索"),
     "searchEmpty" : MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
-    "searchRelatedMessage" : m11,
+    "searchRelatedMessage" : m13,
     "shareContact" : MessageLookupByLibrary.simpleMessage("发送名片"),
     "sharedApps" : MessageLookupByLibrary.simpleMessage("分享的应用"),
     "sharedMedia" : MessageLookupByLibrary.simpleMessage("媒体内容"),

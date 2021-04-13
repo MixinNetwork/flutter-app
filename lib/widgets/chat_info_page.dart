@@ -1,23 +1,31 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
+import 'package:flutter_app/ui/home/chat_page.dart';
+import 'package:flutter_app/ui/home/slide_page.dart';
+import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/utils/list_utils.dart';
+import 'package:tuple/tuple.dart';
 
-import 'toast.dart';
+import 'app_bar.dart';
 import 'brightness_observer.dart';
 import 'cell.dart';
 import 'chat_bar.dart';
+import 'toast.dart';
 
 class ChatInfoPage extends HookWidget {
   const ChatInfoPage({Key? key}) : super(key: key);
@@ -147,7 +155,20 @@ class ChatInfoPage extends HookWidget {
                 CellGroup(
                   child: CellItem(
                     title: Localization.of(context).circles,
-                    onTap: () {},
+                    description: const _CircleNames(),
+                    onTap: () {
+                      final conversation =
+                          context.read<ConversationCubit>().state;
+                      if (conversation == null) return;
+
+                      context.read<ChatSideCubit>().pushPage(
+                            ChatSideCubit.circles,
+                            arguments: Tuple2<String, String>(
+                              conversation.validName,
+                              conversation.conversationId,
+                            ),
+                          );
+                    },
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -166,11 +187,16 @@ class ChatInfoPage extends HookWidget {
                           color: BrightnessData.themeOf(context).red,
                           trailing: null,
                           onTap: () async {
-                            final conversationId = context.read<ConversationCubit>().state?.conversationId;
-                            if(conversationId == null) return;
+                            final conversationId = context
+                                .read<ConversationCubit>()
+                                .state
+                                ?.conversationId;
+                            if (conversationId == null) return;
                             showToastLoading(context);
                             try {
-                              await context.read<AccountServer>().exitGroup(conversationId);
+                              await context
+                                  .read<AccountServer>()
+                                  .exitGroup(conversationId);
                             } catch (e) {
                               return showToastFailed(context);
                             }
@@ -202,6 +228,61 @@ class ChatInfoPage extends HookWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CircleNames extends HookWidget {
+  const _CircleNames();
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationItem?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (conversationId) => conversationId != null,
+    );
+
+    final circleNames = useStream<List<String>>(
+      useMemoized(
+        () => context
+            .read<AccountServer>()
+            .database
+            .circlesDao
+            .circlesNameByConversationId(conversationId ?? '')
+            .watch()
+            .where((event) => event.isNotEmpty),
+        [conversationId],
+      ),
+      initialData: [],
+    ).data as List<String>;
+
+    if (circleNames.isEmpty) return const SizedBox();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: circleNames
+          .map(
+            (e) => Container(
+              decoration: ShapeDecoration(
+                shape: StadiumBorder(
+                  side: BorderSide(
+                    color: BrightnessData.themeOf(context).secondaryText,
+                  ),
+                ),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              child: Text(
+                e,
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).secondaryText,
+                ),
+              ),
+            ),
+          )
+          .cast<Widget>()
+          .toList()
+          .joinList(const SizedBox(width: 8)),
     );
   }
 }
@@ -273,4 +354,188 @@ class EditNameDialog extends HookWidget {
       ],
     );
   }
+}
+
+class CircleManagerPage extends HookWidget {
+  const CircleManagerPage({
+    Key? key,
+    required this.name,
+    required this.conversationId,
+  }) : super(key: key);
+
+  final String name;
+  final String conversationId;
+
+  @override
+  Widget build(BuildContext context) {
+    final circles = useStream<List<ConversationCircleManagerItem>>(
+      useMemoized(
+        () => context
+            .read<AccountServer>()
+            .database
+            .circlesDao
+            .circleByConversationId(conversationId)
+            .watch(),
+        [conversationId],
+      ),
+      initialData: [],
+    ).data as List<ConversationCircleManagerItem>;
+    final otherCircles = useStream<List<ConversationCircleManagerItem>>(
+      useMemoized(
+        () => context
+            .read<AccountServer>()
+            .database
+            .circlesDao
+            .otherCircleByConversationId(conversationId)
+            .watch(),
+        [conversationId],
+      ),
+      initialData: [],
+    ).data as List<ConversationCircleManagerItem>;
+
+    return Scaffold(
+      appBar: MixinAppBar(
+        title: Text(Localization.of(context).circleTitle(name)),
+        actions: [
+          MixinButton(
+            child: SvgPicture.asset(
+              Resources.assetsImagesIcAddSvg,
+              width: 16,
+              height: 16,
+            ),
+            backgroundTransparent: true,
+            onTap: () async {
+              final name = await showMixinDialog<String>(
+                context: context,
+                child: const EditCircleNameDialog(),
+              );
+
+              try {
+                await context
+                    .read<AccountServer>()
+                    .createCircle(name!, []);
+              } catch (e) {
+                return showToastFailed(context);
+              }
+              showToastSuccessful(context);
+            },
+          ),
+        ],
+      ),
+      backgroundColor: BrightnessData.themeOf(context).background,
+      body: ListView(
+        children: <Widget>[
+          if (circles.isNotEmpty)
+            ...circles
+                .map(
+                  (e) => _CircleManagerItem(
+                    name: e.name,
+                    count: e.count,
+                    circleId: e.circleId,
+                    selected: true,
+                  ),
+                )
+                .toList(),
+          if (circles.isNotEmpty && otherCircles.isNotEmpty)
+            const SizedBox(height: 10),
+          if (otherCircles.isNotEmpty)
+            ...otherCircles
+                .map(
+                  (e) => _CircleManagerItem(
+                    name: e.name,
+                    count: e.count,
+                    circleId: e.circleId,
+                    selected: false,
+                  ),
+                )
+                .toList(),
+        ],
+      ),
+    );
+  }
+}
+
+class _CircleManagerItem extends StatelessWidget {
+  const _CircleManagerItem({
+    Key? key,
+    required this.name,
+    required this.count,
+    required this.circleId,
+    required this.selected,
+  }) : super(key: key);
+
+  final String name;
+  final int count;
+  final String circleId;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        height: 80,
+        color: BrightnessData.themeOf(context).primary,
+        child: Row(
+          children: [
+            GestureDetector(
+              child: Container(
+                height: 80,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SvgPicture.asset(
+                  selected
+                      ? Resources.assetsImagesCircleRemoveSvg
+                      : Resources.assetsImagesCircleAddSvg,
+                  height: 16,
+                  width: 16,
+                ),
+              ),
+              onTap: () {
+                if (selected) {
+                  // todo remove circle
+                  return;
+                }
+                // todo add circle
+              },
+            ),
+            const SizedBox(width: 4),
+            ClipOval(
+              child: Container(
+                color: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(246, 247, 250, 1),
+                  darkColor: const Color.fromRGBO(245, 247, 250, 1),
+                ),
+                height: 50,
+                width: 50,
+                alignment: Alignment.center,
+                child: SvgPicture.asset(
+                  Resources.assetsImagesCircleSvg,
+                  width: 18,
+                  height: 18,
+                  color: getCircleColorById(circleId),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).text,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  Localization.of(context).conversationCount(count),
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).secondaryText,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
 }
