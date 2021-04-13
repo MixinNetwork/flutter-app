@@ -501,11 +501,13 @@ class AccountServer {
   Future<void> createGroupConversation(
       String name, List<String> userIds) async {
     final conversationId = const Uuid().v4();
+
     final response = await client.conversationApi.createConversation(
       ConversationRequest(
-        conversationId: conversationId,
-        name: name.trim(),
-      ),
+          conversationId: conversationId,
+          category: ConversationCategory.group,
+          name: name.trim(),
+          participants: userIds.map((e) => ParticipantRequest(userId: e)).toList()),
     );
     if (response.data != null) {
       final conversation = response.data!;
