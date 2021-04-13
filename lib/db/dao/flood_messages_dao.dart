@@ -30,4 +30,6 @@ class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
     final query = selectOnly(db.floodMessages)..addColumns([countExp]);
     return query.map((row) => row.read(countExp)).getSingle();
   }
+
+   Future<DateTime?> getLastBlazeMessageCreatedAt() => db.getLastBlazeMessageCreatedAt().getSingleOrNull();
 }

@@ -110,9 +110,19 @@ class Blaze {
     }
   }
 
-  void _sendListPending() {
+  void _sendListPending() async {
+    final offset =
+        await database.floodMessagesDao.getLastBlazeMessageCreatedAt();
+    // ignore: prefer_typing_uninitialized_variables
+    var params;
+    if (offset != null) {
+      params = '{"offset":"${offset.toUtc()}"}';
+    }
     _sendGZip(
-        BlazeMessage(id: const Uuid().v4(), action: 'LIST_PENDING_MESSAGES'));
+        BlazeMessage(
+        id: const Uuid().v4(),
+        params: params,
+        action: 'LIST_PENDING_MESSAGES'));
   }
 
   void _sendGZip(BlazeMessage msg) {

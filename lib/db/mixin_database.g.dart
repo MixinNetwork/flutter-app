@@ -10888,6 +10888,16 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final StickerRelationshipsDao stickerRelationshipsDao =
       StickerRelationshipsDao(this as MixinDatabase);
   late final UserDao userDao = UserDao(this as MixinDatabase);
+  Selectable<DateTime> getLastBlazeMessageCreatedAt() {
+    return customSelect(
+        'SELECT created_at FROM flood_messages ORDER BY created_at DESC limit 1',
+        variables: [],
+        readsFrom: {
+          floodMessages
+        }).map((QueryRow row) =>
+        FloodMessages.$converter0.mapToDart(row.read<int>('created_at'))!);
+  }
+
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
         'SELECT ci.circle_id, ci.name, ci.created_at, count(c.conversation_id) as count, sum(c.unseen_message_count) as unseen_message_count\n        FROM circles ci LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations c ON c.conversation_id = cc.conversation_id\n        GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
