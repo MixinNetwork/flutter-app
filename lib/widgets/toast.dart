@@ -157,3 +157,13 @@ class _Successful extends StatelessWidget {
   Widget build(BuildContext context) =>
       SvgPicture.asset(Resources.assetsImagesSuccessfulSvg);
 }
+
+Future<void> runFutureWithToast(BuildContext context, Future<dynamic> future) async {
+  showToastLoading(context);
+  try {
+    await future;
+  } catch (e) {
+    return showToastFailed(context);
+  }
+  showToastSuccessful(context);
+}

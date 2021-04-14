@@ -135,17 +135,23 @@ class ChatInfoPage extends HookWidget {
                         CellItem(
                           title: Localization.of(context).editName,
                           onTap: () async {
+                            final conversation =
+                                context.read<ConversationCubit>().state;
+                            if (conversation == null ||
+                                (conversation.ownerId?.isEmpty ?? true)) return;
+
                             final name = await showMixinDialog<String>(
                               context: context,
-                              child: EditNameDialog(
-                                  name: context
-                                          .read<ConversationCubit>()
-                                          .state
-                                          ?.name ??
-                                      ''),
+                              child:
+                                  EditNameDialog(name: conversation.name ?? ''),
                             );
+                            if (name?.isEmpty ?? true) return;
 
-                            // todo edit contact name;
+                            await runFutureWithToast(
+                              context,
+                              context.read<AccountServer>().editContactName(
+                                  conversation.ownerId!, name!),
+                            );
                           },
                         ),
                     ],
@@ -192,15 +198,13 @@ class ChatInfoPage extends HookWidget {
                                 .state
                                 ?.conversationId;
                             if (conversationId == null) return;
-                            showToastLoading(context);
-                            try {
-                              await context
+
+                            await runFutureWithToast(
+                              context,
+                              context
                                   .read<AccountServer>()
-                                  .exitGroup(conversationId);
-                            } catch (e) {
-                              return showToastFailed(context);
-                            }
-                            showToastSuccessful(context);
+                                  .exitGroup(conversationId),
+                            );
                           },
                         )
                       else
@@ -405,19 +409,20 @@ class CircleManagerPage extends HookWidget {
             ),
             backgroundTransparent: true,
             onTap: () async {
+              final conversation = context.read<ConversationCubit>().state;
+              if (conversation?.conversationId.isEmpty ?? true) return;
+
               final name = await showMixinDialog<String>(
                 context: context,
                 child: const EditCircleNameDialog(),
               );
 
-              try {
-                await context
+              await runFutureWithToast(
+                context,
+                context
                     .read<AccountServer>()
-                    .createCircle(name!, []);
-              } catch (e) {
-                return showToastFailed(context);
-              }
-              showToastSuccessful(context);
+                    .createCircle(name!, [conversation!.conversationId]),
+              );
             },
           ),
         ],
@@ -487,12 +492,24 @@ class _CircleManagerItem extends StatelessWidget {
                   width: 16,
                 ),
               ),
-              onTap: () {
+              onTap: () async {
+                final conversation = context.read<ConversationCubit>().state;
+                if (conversation?.conversationId.isEmpty ?? true) return;
+
                 if (selected) {
-                  // todo remove circle
+                  await runFutureWithToast(
+                    context,
+                    context.read<AccountServer>().circleRemoveConversation(
+                        circleId, conversation!.conversationId),
+                  );
                   return;
                 }
-                // todo add circle
+
+                await runFutureWithToast(
+                  context,
+                  context.read<AccountServer>().circleAddConversation(
+                      circleId, conversation!.conversationId),
+                );
               },
             ),
             const SizedBox(width: 4),

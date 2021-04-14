@@ -103,6 +103,13 @@ class SearchBar extends StatelessWidget {
                   );
                   if (list.isEmpty) return;
                   final id = list[0].item1;
+
+                  await runFutureWithToast(
+                    context,
+                    context
+                        .read<AccountServer>()
+                        .createConversationByUserId(id),
+                  );
                 },
               ),
               ContextMenu(
@@ -128,15 +135,12 @@ class SearchBar extends StatelessWidget {
                   );
                   if (name?.isEmpty ?? true) return;
 
-                  showToastLoading(context);
-                  try {
-                    await context
+                  await runFutureWithToast(
+                    context,
+                    context
                         .read<AccountServer>()
-                        .createGroupConversation(name!, userIds);
-                  } catch (e) {
-                    return showToastFailed(context);
-                  }
-                  showToastSuccessful(context);
+                        .createGroupConversation(name!, userIds),
+                  );
                 },
               ),
               ContextMenu(
@@ -158,16 +162,12 @@ class SearchBar extends StatelessWidget {
 
                   if (name?.isEmpty ?? true) return;
 
-                  showToastLoading(context);
-
-                  try {
-                    await context
+                  await runFutureWithToast(
+                    context,
+                    context
                         .read<AccountServer>()
-                        .createCircle(name!, list.map((e) => e.item1).toList());
-                  } catch (e) {
-                    return showToastFailed(context);
-                  }
-                  showToastSuccessful(context);
+                        .createCircle(name!, list.map((e) => e.item1).toList()),
+                  );
                 },
               ),
             ],

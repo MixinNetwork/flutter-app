@@ -157,16 +157,12 @@ class _CircleList extends HookWidget {
                             );
                             if (name?.isEmpty ?? true) return;
 
-                            showToastLoading(context);
-
-                            try {
-                              await context
+                            await runFutureWithToast(
+                              context,
+                              context
                                   .read<AccountServer>()
-                                  .updateCircle(circle.circleId, name!);
-                            } catch (e) {
-                              return showToastFailed(context);
-                            }
-                            showToastSuccessful(context);
+                                  .updateCircle(circle.circleId, name!),
+                            );
                           }),
                       ContextMenu(
                         title: Localization.of(context).editConversations,
@@ -187,7 +183,12 @@ class _CircleList extends HookWidget {
                             initSelectIds: initSelectIds,
                           );
 
-                          // todo result update circle
+                          await runFutureWithToast(
+                            context,
+                            context
+                                .read<AccountServer>()
+                                .editCircleConversation(circle.circleId, result.map((e) => e.item1).toList()),
+                          );
                         },
                       ),
                       ContextMenu(

@@ -351,45 +351,39 @@ class AccountServer {
     // todo release resource
   }
 
-  void initSticker() {
-    client.accountApi.getStickerAlbums().then((res) {
-      if (res.data != null) {
-        res.data!.forEach((item) async {
-          await database.stickerAlbumsDao.insert(db.StickerAlbum(
-              albumId: item.albumId,
-              name: item.name,
-              iconUrl: item.iconUrl,
-              createdAt: item.createdAt,
-              updateAt: item.updateAt,
-              userId: item.userId,
-              category: item.category,
-              description: item.description));
-          _updateStickerAlbums(item.albumId);
-        });
-      }
-    }).catchError((e) {
-      debugPrint(e);
-    });
+  Future<void> initSticker() async {
+    final res = await client.accountApi.getStickerAlbums();
+    if (res.data != null) {
+      res.data!.forEach((item) async {
+        await database.stickerAlbumsDao.insert(db.StickerAlbum(
+            albumId: item.albumId,
+            name: item.name,
+            iconUrl: item.iconUrl,
+            createdAt: item.createdAt,
+            updateAt: item.updateAt,
+            userId: item.userId,
+            category: item.category,
+            description: item.description));
+        _updateStickerAlbums(item.albumId);
+      });
+    }
   }
 
   final refreshUserIdSet = <dynamic>{};
 
-  void initCircles() {
+  Future<void> initCircles() async {
     refreshUserIdSet.clear();
-    client.circleApi.getCircles().then((res) {
-      if (res.data != null) {
-        res.data?.forEach((circle) async {
-          await database.circlesDao.insertUpdate(Circle(
-              circleId: circle.circleId,
-              name: circle.name,
-              createdAt: circle.createdAt,
-              orderedAt: null));
-          await handleCircle(circle);
-        });
-      }
-    }).catchError((e) {
-      debugPrint(e);
-    });
+    final res = await client.circleApi.getCircles();
+    if (res.data != null) {
+      res.data?.forEach((circle) async {
+        await database.circlesDao.insertUpdate(Circle(
+            circleId: circle.circleId,
+            name: circle.name,
+            createdAt: circle.createdAt,
+            orderedAt: null));
+        await handleCircle(circle);
+      });
+    }
   }
 
   Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
@@ -415,11 +409,12 @@ class AccountServer {
     }
   }
 
-  void _updateStickerAlbums(String albumId) {
-    client.accountApi.getStickersByAlbumId(albumId).then((res) {
-      if (res.data != null) {
+  void _updateStickerAlbums(String albumId) async {
+    try {
+      final response = await client.accountApi.getStickersByAlbumId(albumId);
+      if (response.data != null) {
         final relationships = <StickerRelationship>[];
-        res.data!.forEach((sticker) {
+        response.data!.forEach((sticker) {
           relationships.add(StickerRelationship(
               albumId: albumId, stickerId: sticker.stickerId));
           database.stickerDao.insert(db.Sticker(
@@ -434,11 +429,11 @@ class AccountServer {
           ));
         });
 
-        database.stickerRelationshipsDao.insertAll(relationships);
+        await database.stickerRelationshipsDao.insertAll(relationships);
       }
-    }).catchError((e) {
-      debugPrint(e);
-    });
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 
   Future<String?> downloadAttachment(db.MessageItem message) =>
@@ -476,7 +471,8 @@ class AccountServer {
       RelationshipRequest(userId: userId, action: RelationshipAction.unblock));
 
   Future<void> _relationship(RelationshipRequest request) async {
-    await client.userApi.relationships(request).then((response) async {
+    try {
+      final response = await client.userApi.relationships(request);
       final user = response.data;
       if (user != null) {
         await database.userDao.insert(db.User(
@@ -493,9 +489,9 @@ class AccountServer {
             isScam: user.isScam ? 1 : 0,
             createdAt: user.createdAt));
       }
-    }).catchError((e) {
-      debugPrint(e);
-    });
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 
   Future<void> createGroupConversation(
@@ -504,10 +500,12 @@ class AccountServer {
 
     final response = await client.conversationApi.createConversation(
       ConversationRequest(
-          conversationId: conversationId,
-          category: ConversationCategory.group,
-          name: name.trim(),
-          participants: userIds.map((e) => ParticipantRequest(userId: e)).toList()),
+        conversationId: conversationId,
+        category: ConversationCategory.group,
+        name: name.trim(),
+        participants:
+            userIds.map((e) => ParticipantRequest(userId: e)).toList(),
+      ),
     );
     if (response.data != null) {
       final conversation = response.data!;
@@ -549,77 +547,75 @@ class AccountServer {
   }
 
   Future<void> exitGroup(String conversationId) =>
-      client.conversationApi.exit(conversationId).then((response) => {});
+      client.conversationApi.exit(conversationId);
 
   Future<void> addParticipant(
     String conversationId,
     String userId,
   ) async {
-    await client.conversationApi
-        .participants(
-            conversationId, 'ADD', [ParticipantRequest(userId: userId)])
-        .then((response) => {})
-        .catchError((error) {
-          debugPrint(error);
-        });
+    try {
+      await client.conversationApi.participants(
+          conversationId, 'ADD', [ParticipantRequest(userId: userId)]);
+    } catch (e) {
+      debugPrint('$e');
+      // throw error??
+    }
   }
 
   Future<void> removeParticipant(
     String conversationId,
     String userId,
   ) async {
-    await client.conversationApi
-        .participants(
-            conversationId, 'REMOVE', [ParticipantRequest(userId: userId)])
-        .then((response) => {})
-        .catchError((error) {
-          debugPrint(error);
-        });
+    try {
+      await client.conversationApi.participants(
+        conversationId,
+        'REMOVE',
+        [ParticipantRequest(userId: userId)],
+      );
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 
   Future<void> updateParticipantRole(
       String conversationId, String userId, ParticipantRole role) async {
-    await client.conversationApi
-        .participants(conversationId, 'REMOVE',
-            [ParticipantRequest(userId: userId, role: role)])
-        .then((response) => {})
-        .catchError((error) {
-          debugPrint(error);
-        });
+    try {
+      await client.conversationApi.participants(conversationId, 'REMOVE',
+          [ParticipantRequest(userId: userId, role: role)]);
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 
+  // todo ids not use
   Future<void> createCircle(String name, List<String> ids) async {
-    await client.circleApi
-        .createCircle(CircleName(name: name))
-        .then((response) async => {
-              if (response.error != null)
-                {
-                  await database.circlesDao.insertUpdate(db.Circle(
-                      circleId: response.data!.circleId,
-                      name: response.data!.name,
-                      createdAt: response.data!.createdAt))
-                }
-            })
-        .catchError((error) {
-      debugPrint(error);
-    });
+    final response =
+        await client.circleApi.createCircle(CircleName(name: name));
+
+    if (response.error != null) {
+      return await database.circlesDao.insertUpdate(
+        db.Circle(
+          circleId: response.data!.circleId,
+          name: response.data!.name,
+          createdAt: response.data!.createdAt,
+        ),
+      );
+    }
+
+    // todo throw error ???
   }
 
   Future<void> updateCircle(String circleId, String name) async {
-    await client.circleApi
-        .updateCircle(circleId, CircleName(name: name))
-        .then((response) async => {
-              if (response.error != null)
-                {
-                  await database.circlesDao.insertUpdate(db.Circle(
-                      circleId: response.data!.circleId,
-                      name: response.data!.name,
-                      createdAt: response.data!.createdAt))
-                }
-            })
-        .catchError((error) {
-      debugPrint(error);
-    });
+    final response =
+        await client.circleApi.updateCircle(circleId, CircleName(name: name));
+    if (response.error != null) {
+      await database.circlesDao.insertUpdate(db.Circle(
+          circleId: response.data!.circleId,
+          name: response.data!.name,
+          createdAt: response.data!.createdAt));
+    }
+
+    // todo throw error ???
   }
 
   Future<String> _initConversation(String? cid, String? recipientId) async {
@@ -649,5 +645,28 @@ class AccountServer {
     } else {
       throw Exception('Parameter error');
     }
+  }
+
+  Future<void> editContactName(String userId, String name) async {
+    // todo
+  }
+
+  // id == userId || id = conversationId
+  Future<void> editCircleConversation(String circleId, List<String> ids) async {
+    // todo
+  }
+
+  Future<void> createConversationByUserId(String userId) async {
+    // todo
+  }
+
+  Future<void> circleRemoveConversation(
+      String circleId, String conversationId) async {
+    // todo
+  }
+
+  Future<void> circleAddConversation(
+      String circleId, String conversationId) async {
+    // todo
   }
 }
