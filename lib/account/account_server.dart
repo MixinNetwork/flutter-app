@@ -482,7 +482,7 @@ class AccountServer {
             fullName: user.fullName,
             avatarUrl: user.avatarUrl,
             phone: user.phone,
-            isVerified: user.isVerified ? 1 : 0,
+            isVerified: user.isVerified,
             appId: user.app?.appId,
             biography: user.biography,
             muteUntil: DateTime.tryParse(user.muteUntil),

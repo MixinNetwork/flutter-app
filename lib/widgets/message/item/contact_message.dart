@@ -69,7 +69,7 @@ class ContactMessage extends StatelessWidget {
                         ),
                       ),
                       VerifiedOrBotWidget(
-                        verified: message.sharedUserIsVerified == 1,
+                        verified: message.sharedUserIsVerified,
                         isBot: message.sharedUserAppId != null,
                       ),
                     ],

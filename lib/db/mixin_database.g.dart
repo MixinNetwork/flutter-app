@@ -3880,7 +3880,7 @@ class User extends DataClass implements Insertable<User> {
   final String? fullName;
   final String? avatarUrl;
   final String? phone;
-  final int? isVerified;
+  final bool? isVerified;
   final DateTime? createdAt;
   final DateTime? muteUntil;
   final int? hasPin;
@@ -3905,6 +3905,7 @@ class User extends DataClass implements Insertable<User> {
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     final stringType = db.typeSystem.forDartType<String>();
+    final boolType = db.typeSystem.forDartType<bool>();
     final intType = db.typeSystem.forDartType<int>();
     return User(
       userId: stringType
@@ -3919,7 +3920,7 @@ class User extends DataClass implements Insertable<User> {
           .mapFromDatabaseResponse(data['${effectivePrefix}avatar_url']),
       phone:
           stringType.mapFromDatabaseResponse(data['${effectivePrefix}phone']),
-      isVerified: intType
+      isVerified: boolType
           .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
       createdAt: Users.$converter1.mapToDart(intType
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
@@ -3954,7 +3955,7 @@ class User extends DataClass implements Insertable<User> {
       map['phone'] = Variable<String?>(phone);
     }
     if (!nullToAbsent || isVerified != null) {
-      map['is_verified'] = Variable<int?>(isVerified);
+      map['is_verified'] = Variable<bool?>(isVerified);
     }
     if (!nullToAbsent || createdAt != null) {
       final converter = Users.$converter1;
@@ -4026,7 +4027,7 @@ class User extends DataClass implements Insertable<User> {
       fullName: serializer.fromJson<String?>(json['full_name']),
       avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
       phone: serializer.fromJson<String?>(json['phone']),
-      isVerified: serializer.fromJson<int?>(json['is_verified']),
+      isVerified: serializer.fromJson<bool?>(json['is_verified']),
       createdAt: serializer.fromJson<DateTime?>(json['created_at']),
       muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
       hasPin: serializer.fromJson<int?>(json['has_pin']),
@@ -4045,7 +4046,7 @@ class User extends DataClass implements Insertable<User> {
       'full_name': serializer.toJson<String?>(fullName),
       'avatar_url': serializer.toJson<String?>(avatarUrl),
       'phone': serializer.toJson<String?>(phone),
-      'is_verified': serializer.toJson<int?>(isVerified),
+      'is_verified': serializer.toJson<bool?>(isVerified),
       'created_at': serializer.toJson<DateTime?>(createdAt),
       'mute_until': serializer.toJson<DateTime?>(muteUntil),
       'has_pin': serializer.toJson<int?>(hasPin),
@@ -4062,7 +4063,7 @@ class User extends DataClass implements Insertable<User> {
           String? fullName,
           String? avatarUrl,
           String? phone,
-          int? isVerified,
+          bool? isVerified,
           DateTime? createdAt,
           DateTime? muteUntil,
           int? hasPin,
@@ -4155,7 +4156,7 @@ class UsersCompanion extends UpdateCompanion<User> {
   final Value<String?> fullName;
   final Value<String?> avatarUrl;
   final Value<String?> phone;
-  final Value<int?> isVerified;
+  final Value<bool?> isVerified;
   final Value<DateTime?> createdAt;
   final Value<DateTime?> muteUntil;
   final Value<int?> hasPin;
@@ -4200,7 +4201,7 @@ class UsersCompanion extends UpdateCompanion<User> {
     Expression<String?>? fullName,
     Expression<String?>? avatarUrl,
     Expression<String?>? phone,
-    Expression<int?>? isVerified,
+    Expression<bool?>? isVerified,
     Expression<DateTime?>? createdAt,
     Expression<DateTime?>? muteUntil,
     Expression<int?>? hasPin,
@@ -4232,7 +4233,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       Value<String?>? fullName,
       Value<String?>? avatarUrl,
       Value<String?>? phone,
-      Value<int?>? isVerified,
+      Value<bool?>? isVerified,
       Value<DateTime?>? createdAt,
       Value<DateTime?>? muteUntil,
       Value<int?>? hasPin,
@@ -4280,7 +4281,7 @@ class UsersCompanion extends UpdateCompanion<User> {
       map['phone'] = Variable<String?>(phone.value);
     }
     if (isVerified.present) {
-      map['is_verified'] = Variable<int?>(isVerified.value);
+      map['is_verified'] = Variable<bool?>(isVerified.value);
     }
     if (createdAt.present) {
       final converter = Users.$converter1;
@@ -4375,9 +4376,9 @@ class Users extends Table with TableInfo<Users, User> {
   }
 
   final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
-  late final GeneratedIntColumn isVerified = _constructIsVerified();
-  GeneratedIntColumn _constructIsVerified() {
-    return GeneratedIntColumn('is_verified', $tableName, true,
+  late final GeneratedBoolColumn isVerified = _constructIsVerified();
+  GeneratedBoolColumn _constructIsVerified() {
+    return GeneratedBoolColumn('is_verified', $tableName, true,
         $customConstraints: '');
   }
 
@@ -11146,7 +11147,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
         sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
         mentions: row.read<String?>('mentions'),
         mentionRead: row.read<int?>('mentionRead'),
@@ -11228,7 +11229,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
         sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
         mentions: row.read<String?>('mentions'),
         mentionRead: row.read<int?>('mentionRead'),
@@ -11355,7 +11356,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
         sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
         mentions: row.read<String?>('mentions'),
       );
@@ -11409,7 +11410,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
         sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
         mentions: row.read<String?>('mentions'),
       );
@@ -11546,7 +11547,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
         sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<int?>('sharedUserIsVerified'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
         mentions: row.read<String?>('mentions'),
         mentionRead: row.read<int?>('mentionRead'),
@@ -11649,7 +11650,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -11719,7 +11720,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -11789,7 +11790,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -11858,7 +11859,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -11928,7 +11929,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -11986,7 +11987,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -12044,7 +12045,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -12111,7 +12112,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -12156,7 +12157,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         userId: row.read<String?>('userId'),
         fullName: row.read<String?>('fullName'),
         avatarUrl: row.read<String?>('avatarUrl'),
-        isVerified: row.read<int?>('isVerified'),
+        isVerified: row.read<bool?>('isVerified'),
         appId: row.read<String?>('appId'),
       );
     });
@@ -12194,7 +12195,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         avatarUrl: row.read<String?>('avatarUrl'),
         name: row.read<String?>('name'),
-        ownerVerified: row.read<int?>('ownerVerified'),
+        ownerVerified: row.read<bool?>('ownerVerified'),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
@@ -12489,7 +12490,7 @@ class MessageItem {
   final String? sharedUserFullName;
   final String sharedUserIdentityNumber;
   final String? sharedUserAvatarUrl;
-  final int? sharedUserIsVerified;
+  final bool? sharedUserIsVerified;
   final String? sharedUserAppId;
   final String? mentions;
   final int? mentionRead;
@@ -12939,7 +12940,7 @@ class QuoteMessageItem {
   final String? sharedUserFullName;
   final String sharedUserIdentityNumber;
   final String? sharedUserAvatarUrl;
-  final int? sharedUserIsVerified;
+  final bool? sharedUserIsVerified;
   final String? sharedUserAppId;
   final String? mentions;
   QuoteMessageItem({
@@ -13284,7 +13285,7 @@ class ConversationItem {
   final DateTime? muteUntil;
   final String? avatarUrl;
   final String? name;
-  final int? ownerVerified;
+  final bool? ownerVerified;
   final String ownerIdentityNumber;
   final DateTime? ownerMuteUntil;
   final String? appId;
@@ -13464,7 +13465,7 @@ class SearchConversationItem {
   final String? userId;
   final String? fullName;
   final String? avatarUrl;
-  final int? isVerified;
+  final bool? isVerified;
   final String? appId;
   SearchConversationItem({
     required this.conversationId,

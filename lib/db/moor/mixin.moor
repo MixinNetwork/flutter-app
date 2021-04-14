@@ -59,7 +59,7 @@ CREATE TABLE sticker_relationships ( album_id TEXT NOT NULL, sticker_id TEXT NOT
 
 CREATE TABLE stickers ( sticker_id TEXT NOT NULL, album_id TEXT, name TEXT NOT NULL, asset_url TEXT NOT NULL, asset_type TEXT NOT NULL, asset_width INTEGER NOT NULL, asset_height INTEGER NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, last_use_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(sticker_id) );
 
-CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT MAPPED BY `const UserRelationshipConverter()`, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified INTEGER, created_at INTEGER MAPPED BY `const MillisDateConverter()`, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) );
+CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT MAPPED BY `const UserRelationshipConverter()`, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified BOOLEAN, created_at INTEGER MAPPED BY `const MillisDateConverter()`, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) );
 
 CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action");
 

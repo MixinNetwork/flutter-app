@@ -748,13 +748,7 @@ class _Item extends StatelessWidget {
                                 children: [
                                   Flexible(
                                     child: Text(
-                                      (conversation.groupName
-                                                      ?.trim()
-                                                      .isNotEmpty ==
-                                                  true
-                                              ? conversation.groupName
-                                              : conversation.name) ??
-                                          '',
+                                      conversation.validName,
                                       style: TextStyle(
                                         color: BrightnessData.themeOf(context)
                                             .text,
@@ -765,7 +759,7 @@ class _Item extends StatelessWidget {
                                     ),
                                   ),
                                   VerifiedOrBotWidget(
-                                    verified: conversation.ownerVerified == 1,
+                                    verified: conversation.ownerVerified,
                                     isBot: conversation.isBotConversation,
                                   ),
                                 ],
@@ -818,16 +812,17 @@ class VerifiedOrBotWidget extends StatelessWidget {
     required this.verified,
     required this.isBot,
   }) : super(key: key);
-  final bool verified;
+  final bool? verified;
   final bool isBot;
 
   @override
   Widget build(BuildContext context) {
+    final _verified = verified ?? false;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (verified || isBot) const SizedBox(width: 4),
-        if (verified)
+        if (_verified || isBot) const SizedBox(width: 4),
+        if (_verified)
           SvgPicture.asset(
             Resources.assetsImagesVerifiedSvg,
             width: 12,
@@ -839,7 +834,7 @@ class VerifiedOrBotWidget extends StatelessWidget {
             width: 12,
             height: 12,
           ),
-        if (verified || isBot) const SizedBox(width: 4),
+        if (_verified || isBot) const SizedBox(width: 4),
       ],
     );
   }
