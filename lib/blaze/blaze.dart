@@ -3,8 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -36,9 +34,13 @@ class Blaze {
   late IOWebSocketChannel channel;
 
   void connect() {
-    final token = signAuthTokenWithEdDSA(
-        userId, sessionId, privateKey, scp, 'GET', '/', '');
-    _connect(token);
+    try {
+      final token = signAuthTokenWithEdDSA(
+          userId, sessionId, privateKey, scp, 'GET', '/', '');
+      _connect(token);
+    } catch (e) {
+      connect();
+    }
   }
 
   void _connect(String token) {
@@ -72,7 +74,8 @@ class Blaze {
                 .then((value) {});
           }
         } else if (blazeMessage.action == acknowledgeMessageReceipt) {
-          await makeMessageStatus(data['message_id'],const MessageStatusTypeConverter().mapToDart(data['status'])!);
+          await makeMessageStatus(data['message_id'],
+              const MessageStatusTypeConverter().mapToDart(data['status'])!);
           updateRemoteMessageStatus(
               data['message_id'], MessageStatus.delivered);
         } else {
@@ -80,12 +83,8 @@ class Blaze {
               data['message_id'], MessageStatus.delivered);
         }
       },
-      onError: (error) {
-        debugPrint('onError');
-      },
-      onDone: () {
-        debugPrint('onDone');
-      },
+      onError: (error) => connect(),
+      onDone: connect,
       cancelOnError: true,
     );
     _sendListPending();
@@ -93,7 +92,8 @@ class Blaze {
 
   void updateRemoteMessageStatus(String messageId, MessageStatus status) {
     final blazeMessage = BlazeAckMessage(
-        messageId: messageId, status: EnumToString.convertToString(status)!.toUpperCase());
+        messageId: messageId,
+        status: EnumToString.convertToString(status)!.toUpperCase());
     database.jobsDao.insert(Job(
         jobId: const Uuid().v4(),
         action: acknowledgeMessageReceipts,
@@ -104,8 +104,9 @@ class Blaze {
   }
 
   Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
-    final currentStatus = await database.messagesDao.findMessageStatusById(messageId);
-    if(currentStatus.index < status.index){
+    final currentStatus =
+        await database.messagesDao.findMessageStatusById(messageId);
+    if (currentStatus.index < status.index) {
       await database.messagesDao.updateMessageStatusById(messageId, status);
     }
   }
