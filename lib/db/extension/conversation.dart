@@ -17,8 +17,10 @@ extension Conversation on ConversationItem {
       relationship == UserRelationship.stranger &&
       appId == null;
 
-  String get validName =>
-      groupName?.trim().isNotEmpty == true ? groupName! : name ?? '';
+  String get validName => conversationValidName(groupName, name);
 }
 
 void importConversationExtension() {}
+
+String conversationValidName(String? groupName, String? fullName) =>
+    groupName?.trim().isNotEmpty == true ? groupName! : fullName ?? '';

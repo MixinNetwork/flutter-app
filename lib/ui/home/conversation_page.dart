@@ -196,10 +196,10 @@ class _SearchList extends HookWidget {
                     category: conversation.category,
                     size: 50,
                   ),
-                  name: (conversation.groupName?.trim().isNotEmpty == true
-                          ? conversation.groupName
-                          : conversation.fullName) ??
-                      '',
+                  name: conversationValidName(
+                    conversation.groupName,
+                    conversation.fullName,
+                  ),
                   keyword: searchState.keyword,
                   onTap: () async {
                     _clear(context);
@@ -294,10 +294,10 @@ class _SearchMessageItem extends StatelessWidget {
         category: message.category,
         size: 50,
       ),
-      name: (message.groupName?.trim().isNotEmpty == true
-              ? message.groupName
-              : message.userFullName) ??
-          '',
+      name: conversationValidName(
+        message.groupName,
+        message.userFullName,
+      ),
       nameHighlight: false,
       keyword: keyword,
       descriptionIcon: icon,

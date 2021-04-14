@@ -1,6 +1,7 @@
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/local_notification_center.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
@@ -21,10 +22,9 @@ class ConversationCubit extends SimpleCubit<ConversationItem?>
               .conversationItem(event.host))
           .where((event) => event != null)
           .listen((event) {
-            emit(event);
-            responsiveNavigatorCubit
-                .pushPage(ResponsiveNavigatorCubit.chatPage);
-          }),
+        emit(event);
+        responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);
+      }),
     );
     addSubscription(
       accountServer.database.messagesDao.insertMessageStream
@@ -45,12 +45,13 @@ class ConversationCubit extends SimpleCubit<ConversationItem?>
           .listen(
         (event) {
           final conversation = event.item1;
-          final name = conversation.groupName?.trim().isNotEmpty == true
-              ? conversation.groupName
-              : conversation.userFullName ?? '';
+          final name = conversationValidName(
+            conversation.groupName,
+            conversation.userFullName,
+          );
 
           LocalNotificationCenter.showNotification(
-            title: name ?? '',
+            title: name,
             body: event.item2.item2 ?? '',
             uri: Uri(
               scheme:
