@@ -32,3 +32,6 @@ DELETE FROM circle_conversations WHERE circle_id = :circleId;
 
 deleteCircleById:
 DELETE FROM circles WHERE circle_id = :circleId;
+
+deleteByIds:
+DELETE FROM circle_conversations WHERE conversation_id = :conversationId AND circle_id = :circleId

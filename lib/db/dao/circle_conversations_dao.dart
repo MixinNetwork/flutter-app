@@ -19,4 +19,6 @@ class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
         ..where((tbl) => tbl.circleId.equals(circleId));
 
   Future<int> deleteByCircleId(String circleId) => db.deleteByCircleId(circleId);
+
+  Future<int> deleteByIds(String conversationId, String circleId) => db.deleteByIds(conversationId,circleId);
 }

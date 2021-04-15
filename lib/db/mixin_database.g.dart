@@ -10988,6 +10988,15 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
   }
 
+  Future<int> deleteByIds(String conversationId, String circleId) {
+    return customUpdate(
+      'DELETE FROM circle_conversations WHERE conversation_id = :conversationId AND circle_id = :circleId',
+      variables: [Variable<String>(conversationId), Variable<String>(circleId)],
+      updates: {circleConversations},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(

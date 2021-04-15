@@ -662,12 +662,47 @@ class AccountServer {
 
   Future<void> circleRemoveConversation(String circleId,
       String conversationId) async {
-    // todo
+    final response =
+    await client.circleApi.updateCircleConversations(circleId, [
+      CircleConversationRequest(
+          action: CircleConversationAction.REMOVE,
+          conversationId: conversationId,
+          userId: userId)
+    ]);
+    if (response.error != null) {
+      await database.circleConversationDao
+          .deleteByIds(conversationId, circleId);
+    } else {}
   }
 
   Future<void> circleAddConversation(String circleId,
-      String conversationId) async {
-    // todo
+      db.ConversationItem conversationItem) async {
+    String? userId;
+    if(conversationItem.category == ConversationCategory.contact){
+      userId = conversationItem.ownerId;
+    }
+    final response =
+    await client.circleApi.updateCircleConversations(circleId, [
+      CircleConversationRequest(
+          action: CircleConversationAction.ADD,
+          conversationId: conversationItem.conversationId,
+          userId: userId)
+    ]);
+    if (response.error != null) {
+      final list = response.data;
+      list!.forEach((cc) async {
+        await database.circleConversationDao.insert(db.CircleConversation(
+            conversationId: cc.conversationId,
+            circleId: cc.circleId,
+            createdAt: cc.createdAt));
+        if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
+          final u = await database.userDao.findUserById(cc.userId);
+          if (u == null) {
+            refreshUserIdSet.add(cc.userId);
+          }
+        }
+      });
+    } else {}
   }
 
   Future<void> deleteCircle(String circleId) async {
@@ -681,8 +716,29 @@ class AccountServer {
     }
   }
 
-  Future<void> report(String conversationId) async {
-    // todo
+  Future<void> report(String userId) async {
+    final response = await client.userApi.report(
+        RelationshipRequest(userId: userId, action: RelationshipAction.block));
+    if (response.error == null) {
+      final user = response.data!;
+      await database.userDao.insert(db.User(
+        userId: user.userId,
+        identityNumber: user.identityNumber,
+        relationship: user.relationship,
+        fullName: user.fullName,
+        avatarUrl: user.avatarUrl,
+        phone: user.phone,
+        isVerified: user.isVerified,
+        createdAt: user.createdAt,
+        muteUntil: DateTime.tryParse(user.muteUntil),
+        hasPin: user.hasPin == true ? 1 : 0,
+        appId: user.appId,
+        biography: user.biography,
+        isScam: user.isScam ? 1 : 0,
+      ));
+    } else {
+      // todo handle error
+    }
   }
 
   Future<void> unMuteUser(String userId) async {
@@ -729,7 +785,12 @@ class AccountServer {
   }
 
   Future<void> editGroupAnnouncement(String conversationId,
-      String result) async {
-    // todo
+      String announcement) async {
+    final response = await client.conversationApi.update(conversationId,
+        ConversationRequest(
+            conversationId: conversationId, announcement: announcement));
+    if (response.error != null) {
+      // handle error
+    }
   }
 }

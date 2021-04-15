@@ -662,7 +662,7 @@ class _CircleManagerItem extends StatelessWidget {
                 await runFutureWithToast(
                   context,
                   context.read<AccountServer>().circleAddConversation(
-                      circleId, conversation!.conversationId),
+                      circleId, conversation!),
                 );
               },
             ),
