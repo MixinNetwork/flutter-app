@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/search_cubit.dart';
+import 'package:flutter_app/bloc/keyword_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
@@ -32,18 +32,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/generated/l10n.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:tuple/tuple.dart';
 
-import 'bloc/search_message_bloc.dart';
-
 const _defaultLimit = 3;
 
 void _clear(BuildContext context) {
-  context.read<SearchCubit>().keyword = '';
+  context.read<KeywordCubit>().emit('');
   context.read<TextEditingController>().text = '';
   context.read<FocusNode>().unfocus();
 }
@@ -53,11 +51,10 @@ class ConversationPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasKeyword = useBlocState<SearchCubit, SearchState>(
-            bloc: context.read<SearchCubit>())
-        .keyword
-        .trim()
-        .isNotEmpty;
+    final hasKeyword =
+        useBlocState<KeywordCubit, String>(bloc: context.read<KeywordCubit>())
+            .trim()
+            .isNotEmpty;
 
     final textEditingController = useTextEditingController();
     final focusNode = useFocusNode();
@@ -110,22 +107,58 @@ class _SearchList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchState = useBlocState<SearchCubit, SearchState>(
-        bloc: context.read<SearchCubit>());
+    final keyword =
+        useBlocState<KeywordCubit, String>(bloc: context.read<KeywordCubit>());
+    final accountServer = context.read<AccountServer>();
+
+    final users = useStream<List<User>>(
+        useMemoized(
+            () => accountServer.database.userDao
+                .fuzzySearchUser(
+                    id: accountServer.userId,
+                    username: keyword,
+                    identityNumber: keyword)
+                .watch(),
+            [keyword]),
+        initialData: []).data!;
+
+    final messages = useStream<List<SearchMessageDetailItem>>(
+        useMemoized(() async* {
+          if (keyword.trim().isEmpty) {
+            yield [];
+          } else {
+            yield* accountServer.database.messagesDao
+                .fuzzySearchMessage(query: keyword, limit: 4)
+                .watch();
+          }
+        }, [keyword]),
+        initialData: []).data!;
+
+    final conversations = useStream<List<SearchConversationItem>>(
+        useMemoized(
+            () => accountServer.database.conversationDao
+                .fuzzySearchConversation(keyword)
+                .watch(),
+            [keyword]),
+        initialData: []).data!;
+
     final type = useState<_ShowMoreType?>(null);
-    if (searchState.isEmpty) return const _SearchEmpty();
+
+    if (users.isEmpty && conversations.isEmpty && messages.isEmpty)
+      return const SearchEmpty();
+
     if (type.value == _ShowMoreType.message)
       return _SearchMessageList(
-        keyword: searchState.keyword,
+        keyword: keyword,
         onTap: () => type.value = null,
       );
     return CustomScrollView(
       slivers: [
-        if (searchState.users.isNotEmpty)
+        if (users.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
               title: Localization.of(context).contact,
-              showMore: searchState.users.length > _defaultLimit,
+              showMore: users.length > _defaultLimit,
               more: type.value != _ShowMoreType.contact,
               onTap: () {
                 if (type.value != _ShowMoreType.contact)
@@ -135,11 +168,11 @@ class _SearchList extends HookWidget {
               },
             ),
           ),
-        if (searchState.users.isNotEmpty)
+        if (users.isNotEmpty)
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                final user = searchState.users[index];
+                final user = users[index];
                 return _SearchItem(
                   avatar: AvatarWidget(
                     name: user.fullName ?? '?',
@@ -148,10 +181,8 @@ class _SearchList extends HookWidget {
                     avatarUrl: user.avatarUrl,
                   ),
                   name: user.fullName ?? '?',
-                  keyword: searchState.keyword,
+                  keyword: keyword,
                   onTap: () async {
-                    _clear(context);
-
                     context.read<ConversationCubit>().emit(
                           await context
                               .read<AccountServer>()
@@ -161,21 +192,23 @@ class _SearchList extends HookWidget {
                         );
                     ResponsiveNavigatorCubit.of(context)
                         .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+                    _clear(context);
                   },
                 );
               },
               childCount: type.value == _ShowMoreType.contact
-                  ? searchState.users.length
-                  : min(searchState.users.length, _defaultLimit),
+                  ? users.length
+                  : min(users.length, _defaultLimit),
             ),
           ),
-        if (searchState.users.isNotEmpty)
+        if (users.isNotEmpty)
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
-        if (searchState.conversations.isNotEmpty)
+        if (conversations.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
               title: Localization.of(context).group,
-              showMore: searchState.conversations.length > _defaultLimit,
+              showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {
                 if (type.value != _ShowMoreType.conversation)
@@ -185,15 +218,18 @@ class _SearchList extends HookWidget {
               },
             ),
           ),
-        if (searchState.conversations.isNotEmpty)
+        if (conversations.isNotEmpty)
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                final conversation = searchState.conversations[index];
+                final conversation = conversations[index];
                 return _SearchItem(
                   avatar: ConversationAvatarWidget(
                     conversationId: conversation.conversationId,
-                    fullName: conversation.groupName ?? conversation.fullName,
+                    fullName: conversationValidName(
+                      conversation.groupName,
+                      conversation.fullName,
+                    ),
                     groupIconUrl: conversation.groupIconUrl,
                     avatarUrl: conversation.avatarUrl,
                     category: conversation.category,
@@ -203,10 +239,8 @@ class _SearchList extends HookWidget {
                     conversation.groupName,
                     conversation.fullName,
                   ),
-                  keyword: searchState.keyword,
+                  keyword: keyword,
                   onTap: () async {
-                    _clear(context);
-
                     context.read<ConversationCubit>().emit(
                           await context
                               .read<AccountServer>()
@@ -216,21 +250,23 @@ class _SearchList extends HookWidget {
                         );
                     ResponsiveNavigatorCubit.of(context)
                         .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+                    _clear(context);
                   },
                 );
               },
               childCount: type.value == _ShowMoreType.conversation
-                  ? searchState.conversations.length
-                  : min(searchState.conversations.length, _defaultLimit),
+                  ? conversations.length
+                  : min(conversations.length, _defaultLimit),
             ),
           ),
-        if (searchState.conversations.isNotEmpty)
+        if (conversations.isNotEmpty)
           const SliverToBoxAdapter(child: SizedBox(height: 10)),
-        if (searchState.messages.isNotEmpty)
+        if (messages.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
               title: Localization.of(context).messages,
-              showMore: searchState.messages.length > _defaultLimit,
+              showMore: messages.length > _defaultLimit,
               more: type.value != _ShowMoreType.message,
               onTap: () {
                 if (type.value != _ShowMoreType.message)
@@ -240,37 +276,61 @@ class _SearchList extends HookWidget {
               },
             ),
           ),
-        if (searchState.messages.isNotEmpty)
+        if (messages.isNotEmpty)
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                final message = searchState.messages[index];
-                return _SearchMessageItem(
+                final message = messages[index];
+                return SearchMessageItem(
                   message: message,
-                  keyword: searchState.keyword,
+                  keyword: keyword,
+                  onTap: _searchMessageItemOnTap(context, message),
                 );
               },
               childCount: type.value == _ShowMoreType.message
-                  ? searchState.messages.length
-                  : min(searchState.messages.length, _defaultLimit),
+                  ? messages.length
+                  : min(messages.length, _defaultLimit),
             ),
           ),
-        if (searchState.messages.isNotEmpty)
+        if (messages.isNotEmpty)
           const SliverToBoxAdapter(child: SizedBox(height: 10))
       ],
     );
   }
 }
 
-class _SearchMessageItem extends StatelessWidget {
-  const _SearchMessageItem({
+  Future Function() _searchMessageItemOnTap(BuildContext context, SearchMessageDetailItem message) => () async {
+    final conversation = await context
+        .read<AccountServer>()
+        .database
+        .conversationDao
+        .conversationItem(message.conversationId);
+
+    final index = await context
+        .read<AccountServer>()
+        .database
+        .messagesDao
+        .messageIndex(message.conversationId, message.messageId)
+        .getSingleOrNull();
+    context.read<ConversationCubit>().initIndex = index;
+    context.read<ConversationCubit>().emit(conversation);
+    ResponsiveNavigatorCubit.of(context)
+        .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+    _clear(context);
+  };
+
+class SearchMessageItem extends StatelessWidget {
+  const SearchMessageItem({
     Key? key,
     required this.message,
     required this.keyword,
+    required this.onTap,
   }) : super(key: key);
 
   final SearchMessageDetailItem message;
   final String keyword;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -285,13 +345,17 @@ class _SearchMessageItem extends StatelessWidget {
       icon = Resources.assetsImagesContactSvg;
       description = message.mediaName!;
     } else {
-      description = message.content!;
+      // todo content should not be null.
+      description = message.content ?? '';
     }
 
     return _SearchItem(
       avatar: ConversationAvatarWidget(
         conversationId: message.conversationId,
-        fullName: message.groupName ?? message.userFullName,
+        fullName: conversationValidName(
+          message.groupName,
+          message.userFullName,
+        ),
         groupIconUrl: message.groupIconUrl,
         avatarUrl: message.userAvatarUrl,
         category: message.category,
@@ -306,53 +370,33 @@ class _SearchMessageItem extends StatelessWidget {
       descriptionIcon: icon,
       description: description,
       date: message.createdAt,
-      onTap: () async {
-        _clear(context);
-
-        final conversation = await context
-            .read<AccountServer>()
-            .database
-            .conversationDao
-            .conversationItem(message.conversationId);
-
-        final index = await context
-            .read<AccountServer>()
-            .database
-            .messagesDao
-            .messageIndex(message.conversationId, message.messageId)
-            .getSingleOrNull();
-        context.read<ConversationCubit>().initIndex = index;
-        context.read<ConversationCubit>().emit(conversation);
-        ResponsiveNavigatorCubit.of(context)
-            .pushPage(ResponsiveNavigatorCubit.chatPage);
-      },
+      onTap: onTap,
     );
   }
 }
 
-class _SearchEmpty extends StatelessWidget {
-  const _SearchEmpty({
+class SearchEmpty extends StatelessWidget {
+  const SearchEmpty({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 43,
-        vertical: 86,
-      ),
-      width: double.infinity,
-      color: BrightnessData.themeOf(context).primary,
-      child: Text(
-        Localization.of(context).searchEmpty,
-        style: TextStyle(
-          fontSize: 14,
-          color: BrightnessData.themeOf(context).secondaryText,
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 43,
+          vertical: 86,
         ),
-      ),
-    );
-  }
+        width: double.infinity,
+        color: BrightnessData.themeOf(context).primary,
+        alignment: Alignment.topCenter,
+        child: Text(
+          Localization.of(context).searchEmpty,
+          style: TextStyle(
+            fontSize: 14,
+            color: BrightnessData.themeOf(context).secondaryText,
+          ),
+        ),
+      );
 }
 
 class _SearchMessageList extends HookWidget {
@@ -367,20 +411,45 @@ class _SearchMessageList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final searchMessageBloc = useBloc<SearchMessageBloc>(
-      () => SearchMessageBloc(
-        context.read<ConversationListBloc>().limit,
-        context.read<AccountServer>().database.messagesDao,
-        keyword,
+    final searchMessageBloc =
+        useBloc<AnonymousPagingBloc<SearchMessageDetailItem>>(
+      () => AnonymousPagingBloc<SearchMessageDetailItem>(
+        initState: const PagingState<SearchMessageDetailItem>(),
+        limit: context.read<ConversationListBloc>().limit,
+        queryCount: () => context
+            .read<AccountServer>()
+            .database
+            .messagesDao
+            .fuzzySearchMessageCount(keyword)
+            .getSingle(),
+        queryRange: (int limit, int offset) async {
+          if (keyword.isEmpty) return [];
+          return await context
+              .read<AccountServer>()
+              .database
+              .messagesDao
+              .fuzzySearchMessage(query: keyword, limit: limit, offset: offset)
+              .get();
+        },
       ),
       keys: [keyword],
+    );
+    useEffect(
+      () => context
+          .read<AccountServer>()
+          .database
+          .messagesDao
+          .searchMessageUpdateEvent
+          .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
+          .cancel,
+      [keyword],
     );
     final pageState = useBlocState<PagingBloc<SearchMessageDetailItem>,
         PagingState<SearchMessageDetailItem>>(bloc: searchMessageBloc);
 
     late Widget child;
     if (pageState.count <= 0)
-      child = const _SearchEmpty();
+      child = const SearchEmpty();
     else
       child = ScrollablePositionedList.builder(
         itemPositionsListener: searchMessageBloc.itemPositionsListener,
@@ -388,7 +457,11 @@ class _SearchMessageList extends HookWidget {
         itemBuilder: (context, index) {
           final message = pageState.map[index];
           if (message == null) return const SizedBox(height: 80);
-          return _SearchMessageItem(message: message, keyword: keyword);
+          return SearchMessageItem(
+            message: message,
+            keyword: keyword,
+            onTap: _searchMessageItemOnTap(context, message),
+          );
         },
       );
 

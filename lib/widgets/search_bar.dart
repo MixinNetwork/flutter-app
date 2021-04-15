@@ -1,8 +1,9 @@
 import 'dart:math';
+import 'package:flutter_app/bloc/keyword_cubit.dart';
+import 'package:flutter_app/widgets/search_text_field.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/search_cubit.dart';
 import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -12,7 +13,6 @@ import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -26,173 +26,122 @@ class SearchBar extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    const outlineInputBorder = OutlineInputBorder(
-      borderSide: BorderSide(
-        color: Colors.transparent,
-      ),
-      borderRadius: BorderRadius.all(
-        Radius.circular(20.0),
-      ),
-      gapPadding: 0,
-    );
-    final backgroundColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(245, 247, 250, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-    );
-    final hintColor = BrightnessData.themeOf(context).secondaryText;
-    return ColoredBox(
-      color: BrightnessData.themeOf(context).primary,
-      child: Row(
-        children: [
-          const SizedBox(width: 20),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              child: TextField(
+  Widget build(BuildContext context) => ColoredBox(
+        color: BrightnessData.themeOf(context).primary,
+        child: Row(
+          children: [
+            const SizedBox(width: 20),
+            Expanded(
+              child: SearchTextField(
                 focusNode: context.read<FocusNode>(),
                 controller: context.read<TextEditingController>(),
                 onChanged: (keyword) =>
-                    context.read<SearchCubit>().keyword = keyword,
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
-                  fontSize: 14,
+                    context.read<KeywordCubit>().emit(keyword),
+              ),
+            ),
+            const SizedBox(width: 8),
+            ContextMenuPortalEntry(
+              buildMenus: () => [
+                ContextMenu(
+                  title: Localization.of(context).createConversation,
+                  onTap: () async {
+                    final list = await showConversationSelector(
+                      context: context,
+                      singleSelect: true,
+                      title: Localization.of(context).createCircle,
+                      onlyContact: true,
+                    );
+                    if (list.isEmpty) return;
+                    final id = list[0].item1;
+
+                    await runFutureWithToast(
+                      context,
+                      context
+                          .read<AccountServer>()
+                          .createConversationByUserId(id),
+                    );
+                  },
                 ),
-                scrollPadding: EdgeInsets.zero,
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: outlineInputBorder,
-                  focusedBorder: outlineInputBorder,
-                  enabledBorder: outlineInputBorder,
-                  filled: true,
-                  fillColor: backgroundColor,
-                  hoverColor: Colors.transparent,
-                  focusColor: Colors.transparent,
-                  prefixIconConstraints:
-                      const BoxConstraints.expand(width: 40, height: 32),
-                  prefixIcon: Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 8),
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesIcSearchSvg,
-                      color: hintColor,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.only(right: 8),
-                  hintText: Localization.of(context).search,
-                  hintStyle: TextStyle(
-                    color: hintColor,
-                    fontSize: 14,
-                  ),
+                ContextMenu(
+                  title: Localization.of(context).createGroupConversation,
+                  onTap: () async {
+                    final result = await showConversationSelector(
+                      context: context,
+                      singleSelect: false,
+                      title: Localization.of(context).createGroupConversation,
+                      onlyContact: true,
+                    );
+                    if (result.isEmpty) return;
+                    final userIds = [
+                      context.read<AccountServer>().userId,
+                      ...result.map(
+                        (e) => e.item1,
+                      )
+                    ];
+
+                    final name = await showMixinDialog<String>(
+                      context: context,
+                      child: _NewConversationConfirm(userIds),
+                    );
+                    if (name?.isEmpty ?? true) return;
+
+                    await runFutureWithToast(
+                      context,
+                      context
+                          .read<AccountServer>()
+                          .createGroupConversation(name!, userIds),
+                    );
+                  },
+                ),
+                ContextMenu(
+                  title: Localization.of(context).createCircle,
+                  onTap: () async {
+                    final list = await showConversationSelector(
+                      context: context,
+                      singleSelect: false,
+                      title: Localization.of(context).createCircle,
+                      onlyContact: false,
+                    );
+
+                    if (list.isEmpty) return;
+
+                    final name = await showMixinDialog<String>(
+                      context: context,
+                      child: EditDialog(
+                        title: Text(Localization.of(context).circles),
+                        hintText: Localization.of(context).editCircleName,
+                      ),
+                    );
+
+                    if (name?.isEmpty ?? true) return;
+
+                    await runFutureWithToast(
+                      context,
+                      context.read<AccountServer>().createCircle(
+                          name!, list.map((e) => e.item1).toList()),
+                    );
+                  },
+                ),
+              ],
+              child: Builder(
+                builder: (context) => ActionButton(
+                  name: Resources.assetsImagesIcAddSvg,
+                  size: 16,
+                  onTapUp: (event) {
+                    context.read<OffsetCubit>().emit(event.globalPosition);
+                  },
+                  onTap: () async {
+                    return;
+                  },
+                  padding: const EdgeInsets.all(8),
+                  color: BrightnessData.themeOf(context).icon,
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-          ContextMenuPortalEntry(
-            buildMenus: () => [
-              ContextMenu(
-                title: Localization.of(context).createConversation,
-                onTap: () async {
-                  final list = await showConversationSelector(
-                    context: context,
-                    singleSelect: true,
-                    title: Localization.of(context).createCircle,
-                    onlyContact: true,
-                  );
-                  if (list.isEmpty) return;
-                  final id = list[0].item1;
-
-                  await runFutureWithToast(
-                    context,
-                    context
-                        .read<AccountServer>()
-                        .createConversationByUserId(id),
-                  );
-                },
-              ),
-              ContextMenu(
-                title: Localization.of(context).createGroupConversation,
-                onTap: () async {
-                  final result = await showConversationSelector(
-                    context: context,
-                    singleSelect: false,
-                    title: Localization.of(context).createGroupConversation,
-                    onlyContact: true,
-                  );
-                  if (result.isEmpty) return;
-                  final userIds = [
-                    context.read<AccountServer>().userId,
-                    ...result.map(
-                      (e) => e.item1,
-                    )
-                  ];
-
-                  final name = await showMixinDialog<String>(
-                    context: context,
-                    child: _NewConversationConfirm(userIds),
-                  );
-                  if (name?.isEmpty ?? true) return;
-
-                  await runFutureWithToast(
-                    context,
-                    context
-                        .read<AccountServer>()
-                        .createGroupConversation(name!, userIds),
-                  );
-                },
-              ),
-              ContextMenu(
-                title: Localization.of(context).createCircle,
-                onTap: () async {
-                  final list = await showConversationSelector(
-                    context: context,
-                    singleSelect: false,
-                    title: Localization.of(context).createCircle,
-                    onlyContact: false,
-                  );
-
-                  if (list.isEmpty) return;
-
-                  final name = await showMixinDialog<String>(
-                    context: context,
-                    child: EditDialog(
-                      title: Text(Localization.of(context).circles),
-                      hintText: Localization.of(context).editCircleName,
-                    ),
-                  );
-
-                  if (name?.isEmpty ?? true) return;
-
-                  await runFutureWithToast(
-                    context,
-                    context
-                        .read<AccountServer>()
-                        .createCircle(name!, list.map((e) => e.item1).toList()),
-                  );
-                },
-              ),
-            ],
-            child: Builder(
-              builder: (context) => ActionButton(
-                name: Resources.assetsImagesIcAddSvg,
-                size: 16,
-                onTapUp: (event) {
-                  context.read<OffsetCubit>().emit(event.globalPosition);
-                },
-                onTap: () async {
-                  return;
-                },
-                padding: const EdgeInsets.all(8),
-                color: BrightnessData.themeOf(context).icon,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-        ],
-      ),
-    );
-  }
+            const SizedBox(width: 12),
+          ],
+        ),
+      );
 }
 
 class _NewConversationConfirm extends HookWidget {

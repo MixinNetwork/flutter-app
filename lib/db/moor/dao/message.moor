@@ -188,3 +188,21 @@ FROM   messages m
               ON m.message_id = mm.message_id
 WHERE  m.message_id = :messageId
 ORDER  BY m.created_at DESC;
+
+fuzzySearchMessageCountByConversationId:
+SELECT count(*)
+    FROM messages m
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN users u ON m.user_id = u.user_id
+    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query);
+
+fuzzySearchMessageByConversationId AS SearchMessageDetailItem:
+SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
+    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName,
+    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId
+    FROM messages m
+    INNER JOIN conversations c ON c.conversation_id = m.conversation_id
+    INNER JOIN users u ON m.user_id = u.user_id
+    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)
+    ORDER BY m.created_at DESC
+    LIMIT :limit OFFSET :offset;

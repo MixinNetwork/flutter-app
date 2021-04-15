@@ -11647,6 +11647,56 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<int> fuzzySearchMessageCountByConversationId(
+      String conversationId, String query) {
+    return customSelect(
+        'SELECT count(*)\n    FROM messages m\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(query)
+        ],
+        readsFrom: {
+          messages,
+          conversations,
+          users,
+          messagesFts
+        }).map((QueryRow row) => row.read<int>('count(*)'));
+  }
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
+      String conversationId, String query, int limit, int offset) {
+    return customSelect(
+        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName,\n    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId\n    FROM messages m\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)\n    ORDER BY m.created_at DESC\n    LIMIT :limit OFFSET :offset',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(query),
+          Variable<int>(limit),
+          Variable<int>(offset)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
+  }
+
   Selectable<int> chatConversationCount() {
     return customSelect(
         'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category IN (\'CONTACT\', \'GROUP\') AND c.status = 2\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',

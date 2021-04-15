@@ -249,3 +249,28 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
 
   Future<List<T>> queryRange(int limit, int offset);
 }
+
+class AnonymousPagingBloc<T> extends PagingBloc<T> {
+  AnonymousPagingBloc({
+    required int limit,
+    required PagingState<T> initState,
+    required Future<int> Function() queryCount,
+    required Future<List<T>> Function(int limit, int offset) queryRange,
+  })   : _queryCount = queryCount,
+        _queryRange = queryRange,
+        super(
+          initState: initState,
+          itemPositionsListener: ItemPositionsListener.create(),
+          limit: limit,
+        );
+
+  final Future<int> Function() _queryCount;
+  final Future<List<T>> Function(int limit, int offset) _queryRange;
+
+  @override
+  Future<int> queryCount() => _queryCount();
+
+  @override
+  Future<List<T>> queryRange(int limit, int offset) =>
+      _queryRange(limit, offset);
+}

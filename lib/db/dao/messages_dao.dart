@@ -238,4 +238,17 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<int> fuzzySearchMessageCount(String keyword) =>
       db.fuzzySearchMessageCount(keyword);
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId({
+    required String conversationId,
+    required String query,
+    required int limit,
+    int offset = 0,
+  }) =>
+      db.fuzzySearchMessageByConversationId(
+          conversationId, query, limit, offset);
+
+  Selectable<int> fuzzySearchMessageCountByConversationId(
+          String keyword, String conversationId) =>
+      db.fuzzySearchMessageCountByConversationId(conversationId, keyword);
 }

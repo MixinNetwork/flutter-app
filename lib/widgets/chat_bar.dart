@@ -71,6 +71,9 @@ class ChatBar extends HookWidget {
         ActionButton(
           name: Resources.assetsImagesIcSearchSvg,
           color: actionColor,
+          onTap: () => context
+              .read<ChatSideCubit>()
+              .pushPage(ChatSideCubit.searchMessageHistory),
         ),
         const SizedBox(width: 14),
         ActionButton(

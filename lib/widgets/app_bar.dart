@@ -9,12 +9,11 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.actions = const [],
   }) : super(key: key);
 
-  final dynamic title;
+  final Widget? title;
   final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
-    assert(title is Widget || title is String);
     final actionTextStyle = TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w500,
@@ -22,18 +21,16 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
     );
     return AppBar(
       toolbarHeight: 64,
-      title: DefaultTextStyle(
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          color: BrightnessData.themeOf(context).text,
-        ),
-        child: title is Widget
-            ? title
-            : Text(
-                title,
+      title: title == null
+          ? null
+          : DefaultTextStyle(
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: BrightnessData.themeOf(context).text,
               ),
-      ),
+              child: title!,
+            ),
       actions: actions
           .map((e) => DefaultTextStyle(style: actionTextStyle, child: e))
           .toList(),

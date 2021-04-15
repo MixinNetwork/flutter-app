@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import 'account/account_server.dart';
-import 'bloc/search_cubit.dart';
+import 'bloc/keyword_cubit.dart';
 import 'constants/brightness_theme_data.dart';
 
 class App extends StatelessWidget {
@@ -114,12 +114,7 @@ class _Providers extends StatelessWidget {
                 ),
               ),
               BlocProvider(
-                create: (BuildContext context) => SearchCubit(
-                  userDao: accountServer.database.userDao,
-                  conversationDao: accountServer.database.conversationDao,
-                  messagesDao: accountServer.database.messagesDao,
-                  id: accountServer.userId,
-                ),
+                create: (BuildContext context) => KeywordCubit(),
               ),
             ],
             child: Builder(

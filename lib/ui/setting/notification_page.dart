@@ -9,7 +9,7 @@ class NotificationPage extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
-          title: Localization.of(context).notification,
+          title: Text(Localization.of(context).notification),
           actions: [],
         ),
       );

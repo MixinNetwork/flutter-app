@@ -10,25 +10,23 @@ import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/ui/home/chat_page.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/action_button.dart';
+import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/utils/list_utils.dart';
 import 'package:tuple/tuple.dart';
 
-import 'app_bar.dart';
-import 'brightness_observer.dart';
-import 'cell.dart';
-import 'chat_bar.dart';
-import 'toast.dart';
+import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/cell.dart';
+import '../../../widgets/chat_bar.dart';
+import '../../../widgets/toast.dart';
 
 class ChatInfoPage extends HookWidget {
   const ChatInfoPage({Key? key}) : super(key: key);
@@ -64,14 +62,13 @@ class ChatInfoPage extends HookWidget {
 
     return Column(
       children: [
-        Container(
-          height: 64,
-          alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 8),
-          child: ActionButton(
-            name: Resources.assetsImagesIcCloseSvg,
-            onTap: () => Navigator.pop(context),
-          ),
+        MixinAppBar(
+          actions: [
+            ActionButton(
+              name: Resources.assetsImagesIcCloseSvg,
+              onTap: () => Navigator.pop(context),
+            ),
+          ],
         ),
         Expanded(
           child: SingleChildScrollView(
@@ -125,9 +122,9 @@ class ChatInfoPage extends HookWidget {
                       ),
                       CellItem(
                         title: Localization.of(context).searchMessageHistory,
-                        onTap: () {
-                          // todo
-                        },
+                        onTap: () => context
+                            .read<ChatSideCubit>()
+                            .pushPage(ChatSideCubit.searchMessageHistory),
                       ),
                     ],
                   ),
@@ -238,15 +235,13 @@ class ChatInfoPage extends HookWidget {
                   child: CellItem(
                     title: Localization.of(context).circles,
                     description: const _CircleNames(),
-                    onTap: () {
-                      context.read<ChatSideCubit>().pushPage(
-                            ChatSideCubit.circles,
-                            arguments: Tuple2<String, String>(
-                              conversation.validName,
-                              conversation.conversationId,
-                            ),
-                          );
-                    },
+                    onTap: () => context.read<ChatSideCubit>().pushPage(
+                          ChatSideCubit.circles,
+                          arguments: Tuple2<String, String>(
+                            conversation.validName,
+                            conversation.conversationId,
+                          ),
+                        ),
                   ),
                 ),
                 CellGroup(
@@ -509,204 +504,4 @@ class ConversationBio extends HookWidget {
       ),
     );
   }
-}
-
-class CircleManagerPage extends HookWidget {
-  const CircleManagerPage({
-    Key? key,
-    required this.name,
-    required this.conversationId,
-  }) : super(key: key);
-
-  final String name;
-  final String conversationId;
-
-  @override
-  Widget build(BuildContext context) {
-    final circles = useStream<List<ConversationCircleManagerItem>>(
-      useMemoized(
-        () => context
-            .read<AccountServer>()
-            .database
-            .circlesDao
-            .circleByConversationId(conversationId)
-            .watch(),
-        [conversationId],
-      ),
-      initialData: [],
-    ).data as List<ConversationCircleManagerItem>;
-    final otherCircles = useStream<List<ConversationCircleManagerItem>>(
-      useMemoized(
-        () => context
-            .read<AccountServer>()
-            .database
-            .circlesDao
-            .otherCircleByConversationId(conversationId)
-            .watch(),
-        [conversationId],
-      ),
-      initialData: [],
-    ).data as List<ConversationCircleManagerItem>;
-
-    return Scaffold(
-      appBar: MixinAppBar(
-        title: Text(Localization.of(context).circleTitle(name)),
-        actions: [
-          MixinButton(
-            child: SvgPicture.asset(
-              Resources.assetsImagesIcAddSvg,
-              width: 16,
-              height: 16,
-            ),
-            backgroundTransparent: true,
-            onTap: () async {
-              final conversation = context.read<ConversationCubit>().state;
-              if (conversation?.conversationId.isEmpty ?? true) return;
-
-              final name = await showMixinDialog<String>(
-                context: context,
-                child: EditDialog(
-                  title: Text(Localization.of(context).circles),
-                  hintText: Localization.of(context).editCircleName,
-                ),
-              );
-
-              await runFutureWithToast(
-                context,
-                context
-                    .read<AccountServer>()
-                    .createCircle(name!, [conversation!.conversationId]),
-              );
-            },
-          ),
-        ],
-      ),
-      backgroundColor: BrightnessData.themeOf(context).background,
-      body: ListView(
-        children: <Widget>[
-          if (circles.isNotEmpty)
-            ...circles
-                .map(
-                  (e) => _CircleManagerItem(
-                    name: e.name,
-                    count: e.count,
-                    circleId: e.circleId,
-                    selected: true,
-                  ),
-                )
-                .toList(),
-          if (circles.isNotEmpty && otherCircles.isNotEmpty)
-            const SizedBox(height: 10),
-          if (otherCircles.isNotEmpty)
-            ...otherCircles
-                .map(
-                  (e) => _CircleManagerItem(
-                    name: e.name,
-                    count: e.count,
-                    circleId: e.circleId,
-                    selected: false,
-                  ),
-                )
-                .toList(),
-        ],
-      ),
-    );
-  }
-}
-
-class _CircleManagerItem extends StatelessWidget {
-  const _CircleManagerItem({
-    Key? key,
-    required this.name,
-    required this.count,
-    required this.circleId,
-    required this.selected,
-  }) : super(key: key);
-
-  final String name;
-  final int count;
-  final String circleId;
-  final bool selected;
-
-  @override
-  Widget build(BuildContext context) => Container(
-        height: 80,
-        color: BrightnessData.themeOf(context).primary,
-        child: Row(
-          children: [
-            GestureDetector(
-              child: Container(
-                height: 80,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SvgPicture.asset(
-                  selected
-                      ? Resources.assetsImagesCircleRemoveSvg
-                      : Resources.assetsImagesCircleAddSvg,
-                  height: 16,
-                  width: 16,
-                ),
-              ),
-              onTap: () async {
-                final conversation = context.read<ConversationCubit>().state;
-                if (conversation?.conversationId.isEmpty ?? true) return;
-
-                if (selected) {
-                  await runFutureWithToast(
-                    context,
-                    context.read<AccountServer>().circleRemoveConversation(
-                        circleId, conversation!.conversationId),
-                  );
-                  return;
-                }
-
-                await runFutureWithToast(
-                  context,
-                  context.read<AccountServer>().circleAddConversation(
-                      circleId, conversation!),
-                );
-              },
-            ),
-            const SizedBox(width: 4),
-            ClipOval(
-              child: Container(
-                color: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(246, 247, 250, 1),
-                  darkColor: const Color.fromRGBO(245, 247, 250, 1),
-                ),
-                height: 50,
-                width: 50,
-                alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  Resources.assetsImagesCircleSvg,
-                  width: 18,
-                  height: 18,
-                  color: getCircleColorById(circleId),
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  name,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  Localization.of(context).conversationCount(count),
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 14,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
 }

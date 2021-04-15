@@ -30,7 +30,7 @@ class EditProfilePage extends StatelessWidget {
       child: Scaffold(
         backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
-          title: Localization.of(context).editProfile,
+          title: Text(Localization.of(context).editProfile),
           actions: [
             MixinButton(
               onTap: () {},
