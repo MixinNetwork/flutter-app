@@ -109,5 +109,18 @@
   "people": "People",
   "chats": "Chats",
   "circleTitle": "{name}'s Circles",
-  "conversationCount": "{count} Conversations"
+  "conversationCount": "{count} Conversations",
+  "reportWarning": "Do you want to report and block this contact?",
+  "confirm": "OK",
+  "removeBot": "Remove Bot",
+  "unblock": "Unblock",
+  "deleteGroup": "Delete Group",
+  "muteTitle": "Mute notifications for…",
+  "mute1hour": "1 Hour",
+  "mute8hours": "8 Hours",
+  "mute1week": "1 Week",
+  "mute1year": "1 Year",
+  "searchMessageHistory": "Search Conversation",
+  "addAnnouncement":"Add group description",
+  "editAnnouncement":"Edit group description"
 }

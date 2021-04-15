@@ -23,23 +23,22 @@ class Toast {
   static void createView({
     required BuildContext context,
     required Widget child,
-    Duration duration = Toast.shortDuration,
-    bool autoDismiss = true,
+    Duration? duration = Toast.shortDuration,
   }) async {
-    await Toast.dismiss();
+    dismiss();
+    _isVisible = true;
 
     overlayState = Overlay.of(context, rootOverlay: true);
 
     _overlayEntry = OverlayEntry(builder: (BuildContext context) => child);
-    _isVisible = true;
     overlayState!.insert(_overlayEntry!);
 
-    if (!autoDismiss) return;
+    if (duration == null) return;
     await Future.delayed(duration);
-    await dismiss();
+    dismiss();
   }
 
-  static Future<void> dismiss() async {
+  static void dismiss() {
     if (!_isVisible) {
       return;
     }
@@ -104,7 +103,6 @@ class ToastWidget extends StatelessWidget {
 
 void showToastSuccessful(BuildContext context) => Toast.createView(
       context: context,
-      autoDismiss: true,
       child: ToastWidget(
         barrierColor: Colors.transparent,
         icon: const _Successful(),
@@ -114,7 +112,6 @@ void showToastSuccessful(BuildContext context) => Toast.createView(
 
 void showToastFailed(BuildContext context) => Toast.createView(
       context: context,
-      autoDismiss: true,
       child: ToastWidget(
         barrierColor: Colors.transparent,
         icon: const _Failed(),
@@ -125,7 +122,6 @@ void showToastFailed(BuildContext context) => Toast.createView(
 // must be show to toast or toast dismiss.
 void showToastLoading(BuildContext context) => Toast.createView(
       context: context,
-      autoDismiss: false,
       child: ToastWidget(
         icon: const _Loading(),
         text: Localization.of(context).loading,

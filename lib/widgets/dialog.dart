@@ -7,6 +7,7 @@ import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_app/generated/l10n.dart';
 
 import 'disable.dart';
 
@@ -267,4 +268,61 @@ class DialogTextField extends HookWidget {
           ),
         ),
       );
+}
+
+Future<bool> showConfirmMixinDialog(
+        BuildContext context, String content) async =>
+    await showMixinDialog(
+      context: context,
+      child: Builder(
+        builder: (context) => AlertDialogLayout(
+          content: Text(content),
+          actions: [
+            MixinButton(
+                backgroundTransparent: true,
+                child: Text(Localization.of(context).cancel),
+                onTap: () => Navigator.pop(context, false)),
+            MixinButton(
+              child: Text(Localization.of(context).confirm),
+              onTap: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      ),
+    ) ??
+    false;
+
+class EditDialog extends HookWidget {
+  const EditDialog({
+    Key? key,
+    required this.title,
+    this.editText = '',
+    this.hintText = '',
+  }) : super(key: key);
+
+  final Widget title;
+  final String editText;
+  final String hintText;
+
+  @override
+  Widget build(BuildContext context) {
+    final textEditingController = useTextEditingController.call(text: editText);
+    final textEditingValue = useValueListenable(textEditingController);
+    return AlertDialogLayout(
+      title: title,
+      content: DialogTextField(
+          textEditingController: textEditingController, hintText: hintText),
+      actions: [
+        MixinButton(
+            backgroundTransparent: true,
+            child: Text(Localization.of(context).cancel),
+            onTap: () => Navigator.pop(context)),
+        MixinButton(
+          child: Text(Localization.of(context).create),
+          disable: textEditingValue.text.isEmpty,
+          onTap: () => Navigator.pop(context, textEditingController.text),
+        ),
+      ],
+    );
+  }
 }

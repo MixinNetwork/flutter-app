@@ -12270,6 +12270,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<String?>('announcement'));
   }
 
+  Selectable<Participant> participantById(
+      String conversationId, String userId) {
+    return customSelect(
+        'SELECT * FROM participants WHERE conversation_id = :conversationId AND user_id = :userId',
+        variables: [Variable<String>(conversationId), Variable<String>(userId)],
+        readsFrom: {participants}).map(participants.mapFromRow);
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

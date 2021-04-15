@@ -371,4 +371,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   void scrollTo(String messageId) =>
       add(_MessageScrollEvent(messageId: messageId));
+
+  void reload() {
+    add(_MessageInitEvent());
+  }
 }

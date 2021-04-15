@@ -153,7 +153,11 @@ class _CircleList extends HookWidget {
                           onTap: () async {
                             final name = await showMixinDialog<String>(
                               context: context,
-                              child: EditCircleNameDialog(name: circle.name),
+                              child: EditDialog(
+                                editText: circle.name,
+                                title: Text(Localization.of(context).circles),
+                                hintText: Localization.of(context).editCircleName,
+                              ),
                             );
                             if (name?.isEmpty ?? true) return;
 
@@ -187,43 +191,32 @@ class _CircleList extends HookWidget {
                             context,
                             context
                                 .read<AccountServer>()
-                                .editCircleConversation(circle.circleId, result.map((e) => e.item1).toList()),
+                                .editCircleConversation(circle.circleId,
+                                    result.map((e) => e.item1).toList()),
                           );
                         },
                       ),
                       ContextMenu(
                         title: Localization.of(context).deleteCircle,
                         isDestructiveAction: true,
-                        onTap: () {
-                          showMixinDialog(
-                            context: context,
-                            child: AlertDialogLayout(
-                              content: Text(Localization.of(context)
-                                  .pageDeleteCircle(circle.name)),
-                              actions: [
-                                MixinButton(
-                                  backgroundTransparent: true,
-                                  child: Text(Localization.of(context).cancel),
-                                  onTap: () => Navigator.pop(context),
-                                ),
-                                MixinButton(
-                                  child: Text(Localization.of(context).delete),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    context
-                                        .read<AccountServer>()
-                                        .database
-                                        .circlesDao
-                                        .deleteCircle(circle.circleId);
-                                    BlocProvider.of<SlideCategoryCubit>(context)
-                                        .select(
-                                      SlideCategoryType.contacts,
-                                      Localization.of(context).contacts,
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
+                        onTap: () async {
+                          final result = await showConfirmMixinDialog(
+                              context,
+                              Localization.of(context)
+                                  .pageDeleteCircle(circle.name));
+                          if (!result) return;
+                          await runFutureWithToast(
+                            context,
+                            () async {
+                              await context
+                                  .read<AccountServer>()
+                                  .deleteCircle(circle.circleId);
+                              BlocProvider.of<SlideCategoryCubit>(context)
+                                  .select(
+                                SlideCategoryType.contacts,
+                                Localization.of(context).contacts,
+                              );
+                            }(),
                           );
                         },
                       ),
@@ -316,36 +309,4 @@ class _Title extends StatelessWidget {
           ],
         ),
       );
-}
-
-class EditCircleNameDialog extends HookWidget {
-  const EditCircleNameDialog({
-    Key? key,
-    this.name = '',
-  }) : super(key: key);
-
-  final String name;
-
-  @override
-  Widget build(BuildContext context) {
-    final textEditingController = useTextEditingController.call(text: name);
-    final textEditingValue = useValueListenable(textEditingController);
-    return AlertDialogLayout(
-      title: Text(Localization.of(context).circles),
-      content: DialogTextField(
-          textEditingController: textEditingController,
-          hintText: Localization.of(context).conversationName),
-      actions: [
-        MixinButton(
-            backgroundTransparent: true,
-            child: Text(Localization.of(context).cancel),
-            onTap: () => Navigator.pop(context)),
-        MixinButton(
-          child: Text(Localization.of(context).create),
-          disable: textEditingValue.text.isEmpty,
-          onTap: () => Navigator.pop(context, textEditingController.text),
-        ),
-      ],
-    );
-  }
 }

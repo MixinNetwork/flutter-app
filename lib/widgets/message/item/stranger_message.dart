@@ -6,6 +6,7 @@ import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/generated/l10n.dart';
@@ -58,7 +59,10 @@ class StrangerMessage extends StatelessWidget {
                   if (app == null) return;
                   await openUri(app.homeUri);
                 } else {
-                  await context.read<AccountServer>().blockUser(message.userId);
+                  await runFutureWithToast(
+                    context,
+                    context.read<AccountServer>().blockUser(message.userId),
+                  );
                 }
               },
             ),
@@ -73,10 +77,8 @@ class StrangerMessage extends StatelessWidget {
                 if (conversationItem == null) return;
                 if (conversationItem.isBotConversation)
                   Provider.of<AccountServer>(context, listen: false)
-                      .sendTextMessage(
-                    'Hi',
-                    conversationId: conversationItem.conversationId
-                  );
+                      .sendTextMessage('Hi',
+                          conversationId: conversationItem.conversationId);
                 else
                   context.read<AccountServer>().addUser(message.userId);
               },

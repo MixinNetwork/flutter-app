@@ -344,3 +344,6 @@ SELECT count(1) FROM participants WHERE conversation_id = :conversationId;
 
 announcement:
 SELECT announcement FROM conversations WHERE conversation_id = :conversationId;
+
+participantById:
+SELECT * FROM participants WHERE conversation_id = :conversationId AND user_id = :userId;

@@ -669,4 +669,24 @@ class AccountServer {
       String circleId, String conversationId) async {
     // todo
   }
+
+  Future<void> report(String conversationId) async {
+    // todo
+  }
+
+  Future<void> deleteCircle(String circleId) async {
+    // todo
+  }
+
+  Future<void> unMuteUser(String userId) async {
+    // todo
+  }
+
+  Future<void> muteUser(String userId, int duration) async {
+    // todo
+  }
+
+  Future<void> editGroupAnnouncement(String conversationId, String result) async {
+    // todo
+  }
 }

@@ -27,7 +27,8 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     db.conversations,
   ]));
 
-  late Stream<Null> searchMessageUpdateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
+  late Stream<Null> searchMessageUpdateEvent =
+      db.tableUpdates(TableUpdateQuery.onAllTables([
     db.messages,
     db.users,
     db.conversations,
@@ -69,6 +70,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
+
+  Future<void> deleteMessageByConversationId(String conversationId) =>
+      (delete(db.messages)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .go();
 
   Future<SendingMessage?> sendingMessage(String messageId) async {
     final sendingMessage = await db.sendingMessage(messageId).get();
@@ -230,5 +236,6 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   }) =>
       db.fuzzySearchMessage(query, limit, offset);
 
-  Selectable<int> fuzzySearchMessageCount(String keyword) => db.fuzzySearchMessageCount(keyword);
+  Selectable<int> fuzzySearchMessageCount(String keyword) =>
+      db.fuzzySearchMessageCount(keyword);
 }

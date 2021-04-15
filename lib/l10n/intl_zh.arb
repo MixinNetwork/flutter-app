@@ -106,5 +106,18 @@
   "people": "通讯录",
   "chats": "全部聊天",
   "circleTitle": "{name}的圈子",
-  "conversationCount": "{count} 个会话"
+  "conversationCount": "{count} 个会话",
+  "reportWarning": "确定要举报这个联系人？",
+  "confirm": "确定",
+  "removeBot": "删除机器人",
+  "unblock": "解除屏蔽",
+  "deleteGroup": "删除群组",
+  "muteTitle": "静音通知",
+  "mute1hour": "1 小时",
+  "mute8hours": "8 小时",
+  "mute1week": "1 星期",
+  "mute1year": "1 年",
+  "searchMessageHistory": "搜索聊天记录",
+  "addAnnouncement":"添加群公告",
+  "editAnnouncement":"编辑群公告"
 }

@@ -1156,6 +1156,136 @@ class Localization {
       args: [count],
     );
   }
+
+  /// `Do you want to report and block this contact?`
+  String get reportWarning {
+    return Intl.message(
+      'Do you want to report and block this contact?',
+      name: 'reportWarning',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `OK`
+  String get confirm {
+    return Intl.message(
+      'OK',
+      name: 'confirm',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove Bot`
+  String get removeBot {
+    return Intl.message(
+      'Remove Bot',
+      name: 'removeBot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unblock`
+  String get unblock {
+    return Intl.message(
+      'Unblock',
+      name: 'unblock',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete Group`
+  String get deleteGroup {
+    return Intl.message(
+      'Delete Group',
+      name: 'deleteGroup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mute notifications for…`
+  String get muteTitle {
+    return Intl.message(
+      'Mute notifications for…',
+      name: 'muteTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1 Hour`
+  String get mute1hour {
+    return Intl.message(
+      '1 Hour',
+      name: 'mute1hour',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `8 Hours`
+  String get mute8hours {
+    return Intl.message(
+      '8 Hours',
+      name: 'mute8hours',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1 Week`
+  String get mute1week {
+    return Intl.message(
+      '1 Week',
+      name: 'mute1week',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `1 Year`
+  String get mute1year {
+    return Intl.message(
+      '1 Year',
+      name: 'mute1year',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search Conversation`
+  String get searchMessageHistory {
+    return Intl.message(
+      'Search Conversation',
+      name: 'searchMessageHistory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add group description`
+  String get addAnnouncement {
+    return Intl.message(
+      'Add group description',
+      name: 'addAnnouncement',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Edit group description`
+  String get editAnnouncement {
+    return Intl.message(
+      'Edit group description',
+      name: 'editAnnouncement',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

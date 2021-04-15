@@ -18,7 +18,7 @@ class CellGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.only(right: 10, left: 10, bottom: 10),
         child: ClipRRect(
           borderRadius: borderRadius,
           child: child,

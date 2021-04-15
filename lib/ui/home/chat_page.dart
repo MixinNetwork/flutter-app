@@ -85,9 +85,18 @@ class ChatPage extends HookWidget {
       ),
     );
 
+    final windowHeight = MediaQuery.of(context).size.height;
+
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(value: chatSideCubit),
+        BlocProvider(
+          create: (context) => MessageBloc(
+            messagesDao: context.read<AccountServer>().database.messagesDao,
+            conversationCubit: BlocProvider.of<ConversationCubit>(context),
+            limit: windowHeight ~/ 20,
+          ),
+        ),
       ],
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -141,19 +150,8 @@ class ChatContainer extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final database = Provider.of<AccountServer>(context).database;
-    final messagesDao = database.messagesDao;
-    final windowHeight = MediaQuery.of(context).size.height;
-    return MultiBlocProvider(
+  Widget build(BuildContext context) => MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => MessageBloc(
-            messagesDao: messagesDao,
-            conversationCubit: BlocProvider.of<ConversationCubit>(context),
-            limit: windowHeight ~/ 20,
-          ),
-        ),
         BlocProvider(
           create: (context) => QuoteMessageCubit(),
         ),
@@ -234,7 +232,6 @@ class ChatContainer extends StatelessWidget {
         },
       ),
     );
-  }
 }
 
 class _List extends StatelessWidget {

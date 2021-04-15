@@ -138,4 +138,8 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<String?> announcement(String conversationId) =>
       db.announcement(conversationId);
+
+  Selectable<Participant> participantById(
+          String conversationId, String userId) =>
+      db.participantById(conversationId, userId);
 }

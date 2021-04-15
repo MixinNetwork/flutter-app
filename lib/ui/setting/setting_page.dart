@@ -29,7 +29,6 @@ class SettingPage extends StatelessWidget {
                     title: Localization.of(context).editProfile,
                   ),
                 ),
-                const SizedBox(height: 10),
                 CellGroup(
                   child: Column(
                     children: [
@@ -63,7 +62,6 @@ class SettingPage extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
             CellGroup(
               child: _Item(
                 assetName: Resources.assetsImagesIcSignOutSvg,
@@ -72,7 +70,6 @@ class SettingPage extends StatelessWidget {
                 color: BrightnessData.themeOf(context).red,
               ),
             ),
-            const SizedBox(height: 50),
           ],
         ),
       );

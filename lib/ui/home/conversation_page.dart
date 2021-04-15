@@ -19,11 +19,14 @@ import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/utils/message_optimize.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/high_light_text.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/message_status_icon.dart';
+import 'package:flutter_app/widgets/radio.dart';
 import 'package:flutter_app/widgets/search_bar.dart';
+import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -670,19 +673,49 @@ class _List extends HookWidget {
                     listen: false,
                   ).database.conversationDao.pin(conversation.conversationId),
                 ),
-              ContextMenu(
-                title: Localization.current.unMute,
-              ),
+              if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
+                ContextMenu(
+                  title: Localization.current.unMute,
+                  onTap: () => runFutureWithToast(
+                    context,
+                    context
+                        .read<AccountServer>()
+                        .unMuteUser(conversation.ownerId!),
+                  ),
+                )
+              else
+                ContextMenu(
+                  title: Localization.current.muted,
+                  onTap: () async {
+                    final result = await showMixinDialog<int?>(
+                        context: context, child: const MuteDialog());
+                    if (result == null) return;
+
+                    return runFutureWithToast(
+                      context,
+                      context
+                          .read<AccountServer>()
+                          .muteUser(conversation.ownerId!, result),
+                    );
+                  },
+                ),
               ContextMenu(
                 title: Localization.current.deleteChat,
                 isDestructiveAction: true,
-                onTap: () => Provider.of<AccountServer>(
-                  context,
-                  listen: false,
-                )
-                    .database
-                    .conversationDao
-                    .deleteConversation(conversation.conversationId),
+                onTap: () async {
+                  await context
+                      .read<AccountServer>()
+                      .database
+                      .conversationDao
+                      .deleteConversation(
+                        conversation.conversationId,
+                      );
+                  if (context.read<ConversationCubit>().state?.conversationId ==
+                      conversation.conversationId) {
+                    context.read<ConversationCubit>().emit(null);
+                    context.read<ResponsiveNavigatorCubit>().clear();
+                  }
+                },
               ),
             ],
           );
@@ -693,6 +726,50 @@ class _List extends HookWidget {
     return ColoredBox(
       color: BrightnessData.themeOf(context).primary,
       child: child,
+    );
+  }
+}
+
+class MuteDialog extends HookWidget {
+  const MuteDialog({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final result = useState<int?>(null);
+    return AlertDialogLayout(
+      title: Text(Localization.of(context).muteTitle),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Tuple2(Localization.of(context).mute1hour, 1 * 60 * 60),
+            Tuple2(Localization.of(context).mute8hours, 8 * 60 * 60),
+            Tuple2(Localization.of(context).mute1week, 7 * 24 * 60 * 60),
+            Tuple2(Localization.of(context).mute1year, 365 * 24 * 60 * 60),
+          ]
+              .map(
+                (e) => RadioItem<int>(
+                  title: Text(e.item1),
+                  groupValue: result.value,
+                  value: e.item2,
+                  onChanged: (int? value) => result.value = value,
+                ),
+              )
+              .toList(),
+        ),
+      ),
+      actions: [
+        MixinButton(
+            backgroundTransparent: true,
+            child: Text(Localization.of(context).cancel),
+            onTap: () => Navigator.pop(context)),
+        MixinButton(
+          child: Text(Localization.of(context).confirm),
+          onTap: () => Navigator.pop(context, result.value),
+        ),
+      ],
     );
   }
 }
@@ -930,6 +1007,8 @@ class _MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (conversation.contentType == null) return const SizedBox();
+
     final dynamicColor = BrightnessData.themeOf(context).secondaryText;
     return FutureBuilder<Tuple2<String?, String?>>(
       future: messageOptimize(
