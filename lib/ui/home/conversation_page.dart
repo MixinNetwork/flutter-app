@@ -660,18 +660,22 @@ class _List extends HookWidget {
               if (conversation.pinTime != null)
                 ContextMenu(
                   title: Localization.current.unPin,
-                  onTap: () => Provider.of<AccountServer>(
+                  onTap: () => runFutureWithToast(
                     context,
-                    listen: false,
-                  ).database.conversationDao.unpin(conversation.conversationId),
+                    context
+                        .read<AccountServer>()
+                        .unpin(conversation.conversationId),
+                  ),
                 ),
               if (conversation.pinTime == null)
                 ContextMenu(
                   title: Localization.current.pin,
-                  onTap: () => Provider.of<AccountServer>(
+                  onTap: () => runFutureWithToast(
                     context,
-                    listen: false,
-                  ).database.conversationDao.pin(conversation.conversationId),
+                    context
+                        .read<AccountServer>()
+                        .pin(conversation.conversationId),
+                  ),
                 ),
               if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
                 ContextMenu(

@@ -660,8 +660,8 @@ class AccountServer {
     // todo
   }
 
-  Future<void> circleRemoveConversation(String circleId,
-      String conversationId) async {
+  Future<void> circleRemoveConversation(
+      String circleId, String conversationId) async {
     final response =
     await client.circleApi.updateCircleConversations(circleId, [
       CircleConversationRequest(
@@ -675,8 +675,8 @@ class AccountServer {
     } else {}
   }
 
-  Future<void> circleAddConversation(String circleId,
-      db.ConversationItem conversationItem) async {
+  Future<void> circleAddConversation(
+      String circleId,db.ConversationItem conversationItem) async {
     String? userId;
     if(conversationItem.category == ConversationCategory.contact){
       userId = conversationItem.ownerId;
@@ -793,4 +793,14 @@ class AccountServer {
       // handle error
     }
   }
+
+  Future<void> unpin(String conversationId) async {
+    // todo
+  }
+
+  Future<void> pin(String conversationId) async {
+    // todo
+  }
 }
+
+
