@@ -10970,6 +10970,24 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<String>('name'));
   }
 
+  Future<int> deleteByCircleId(String circleId) {
+    return customUpdate(
+      'DELETE FROM circle_conversations WHERE circle_id = :circleId',
+      variables: [Variable<String>(circleId)],
+      updates: {circleConversations},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
+  Future<int> deleteCircleById(String circleId) {
+    return customUpdate(
+      'DELETE FROM circles WHERE circle_id = :circleId',
+      variables: [Variable<String>(circleId)],
+      updates: {circles},
+      updateKind: UpdateKind.delete,
+    );
+  }
+
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(

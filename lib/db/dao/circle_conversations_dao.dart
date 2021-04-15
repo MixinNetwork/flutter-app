@@ -17,4 +17,6 @@ class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
   SimpleSelectStatement<CircleConversations, CircleConversation>
       allCircleConversations(String circleId) => select(db.circleConversations)
         ..where((tbl) => tbl.circleId.equals(circleId));
+
+  Future<int> deleteByCircleId(String circleId) => db.deleteByCircleId(circleId);
 }

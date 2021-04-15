@@ -660,33 +660,76 @@ class AccountServer {
     // todo
   }
 
-  Future<void> circleRemoveConversation(
-      String circleId, String conversationId) async {
+  Future<void> circleRemoveConversation(String circleId,
+      String conversationId) async {
     // todo
   }
 
-  Future<void> circleAddConversation(
-      String circleId, String conversationId) async {
+  Future<void> circleAddConversation(String circleId,
+      String conversationId) async {
     // todo
+  }
+
+  Future<void> deleteCircle(String circleId) async {
+    final response = await client.circleApi.deleteCircle(circleId);
+    if (response.error != null) {
+      await database.circlesDao.deleteCircleById(circleId);
+      await database.circleConversationDao.deleteByCircleId(circleId);
+      // todo select current circle
+    } else {
+      // todo handle error
+    }
   }
 
   Future<void> report(String conversationId) async {
     // todo
   }
 
-  Future<void> deleteCircle(String circleId) async {
-    // todo
-  }
-
   Future<void> unMuteUser(String userId) async {
-    // todo
+    await _mute(0, userId: userId);
   }
 
   Future<void> muteUser(String userId, int duration) async {
-    // todo
+    await _mute(duration, userId: userId);
   }
 
-  Future<void> editGroupAnnouncement(String conversationId, String result) async {
+  Future<void> unMuteGroup(String conversationId) async {
+    await _mute(0, conversationId: conversationId);
+  }
+
+  Future<void> muteGroup(String conversationId, int duration) async {
+    await _mute(duration, conversationId: conversationId);
+  }
+
+  Future<void> _mute(int duration,
+      {String? conversationId, String? userId}) async {
+    MixinResponse<ConversationResponse> response;
+    if (conversationId != null) {
+      response = await client.conversationApi.mute(
+          conversationId,
+          ConversationRequest(
+              conversationId: conversationId,
+              category: ConversationCategory.group,
+              duration: duration));
+    } else if (userId != null) {
+      final cid = generateConversationId(userId, this.userId);
+      response = await client.conversationApi.mute(
+          cid,
+          ConversationRequest(
+              conversationId: cid,
+              category: ConversationCategory.contact,
+              duration: duration,
+              participants: [ParticipantRequest(userId: userId)]));
+    } else {
+      throw Exception('Parameter error');
+    }
+    if (response.error != null) {
+      // handle error
+    }
+  }
+
+  Future<void> editGroupAnnouncement(String conversationId,
+      String result) async {
     // todo
   }
 }
