@@ -1,5 +1,7 @@
 import 'package:moor/moor.dart';
+import 'package:objectbox/objectbox.dart';
 
+@Entity()
 class Session {
   late int id;
   late String address;
