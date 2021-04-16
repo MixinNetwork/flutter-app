@@ -150,7 +150,7 @@ class _StickerAlbumPageItem extends StatelessWidget {
             final accountServer =
                 Provider.of<AccountServer>(context, listen: false);
             final conversationItem =
-                BlocProvider.of<ConversationCubit>(context).state;
+                context.read<ConversationCubit>().state;
             if (conversationItem == null) return;
 
             await Future.wait([

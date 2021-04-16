@@ -31,4 +31,4 @@ ORDER  BY full_name = :username COLLATE nocase
            OR identity_number = :identityNumber COLLATE nocase DESC;
 
 biographyByIdentityNumber:
-SELECT biography FROM users WHERE identity_number = :identityNumber;
+SELECT biography FROM users WHERE user_id = :user_id;

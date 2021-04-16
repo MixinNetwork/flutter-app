@@ -11,6 +11,7 @@ import 'package:flutter_app/db/dao/messages_dao.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 
 abstract class _MessageEvent extends Equatable {
@@ -115,19 +116,21 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.messagesDao,
     required this.limit,
   }) : super(const MessageState()) {
-    var conversationId = conversationCubit.state?.conversationId;
-
     add(_MessageInitEvent());
     addSubscription(
-      conversationCubit.stream.listen(
-        (state) {
-          if (state?.conversationId != null &&
-              conversationId != state?.conversationId) {
-            conversationId = state?.conversationId;
-            add(_MessageInitEvent());
-          }
-        },
-      ),
+      conversationCubit.stream
+          .where((event) => event?.conversationId != null)
+          .map((event) =>
+              Tuple2(event?.conversationId, event?.initIndexMessageId))
+          .distinct()
+          .asyncMap((event) async {
+        int? index;
+        if (event.item1 != null && event.item2 != null)
+          index = await messagesDao
+              .messageIndex(event.item1!, event.item2!)
+              .getSingle();
+        return _MessageInitEvent(centerOffset: index);
+      }).listen(add),
     );
 
     addSubscription(
@@ -158,7 +161,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         finalLimit,
         event.centerOffset,
       );
-      conversationCubit.initIndex = null;
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
@@ -241,8 +243,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     int? centerOffset,
   ]) async {
     final _centerOffset = centerOffset ??
-        conversationCubit.initIndex ??
-        (conversationCubit.state?.unseenMessageCount ?? 0) - 1;
+        (conversationCubit.state?.conversation?.unseenMessageCount ?? 0) - 1;
 
     final state = await _messagesByConversationId(
       conversationId,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/simple_cubit.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/bloc/subscribe_mixin.dart';
 import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
@@ -72,8 +72,17 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
 
 const sidePageWidth = 300.0;
 
-class SearchConversationKeywordCubit extends SimpleCubit<String> {
-  SearchConversationKeywordCubit() : super('');
+class SearchConversationKeywordCubit extends SimpleCubit<String>
+    with SubscribeMixin {
+  SearchConversationKeywordCubit({required ChatSideCubit chatSideCubit})
+      : super('') {
+    addSubscription(chatSideCubit.stream
+        .map((event) => event.pages.any(
+            (element) => element.name == ChatSideCubit.searchMessageHistory))
+        .distinct()
+        .where((event) => !event)
+        .listen((event) => emit('')));
+  }
 }
 
 class ChatPage extends HookWidget {
@@ -83,7 +92,9 @@ class ChatPage extends HookWidget {
   Widget build(BuildContext context) {
     final chatContainerPageKey = useMemoized(() => GlobalKey());
     final conversationId =
-        useBlocState<ConversationCubit, ConversationItem?>()?.conversationId;
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+    );
     final chatSideCubit = useBloc(() => ChatSideCubit(), keys: [
       conversationId,
     ]);
@@ -103,14 +114,16 @@ class ChatPage extends HookWidget {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          create: (context) => SearchConversationKeywordCubit(),
-        ),
         BlocProvider.value(value: chatSideCubit),
+        BlocProvider(
+          create: (context) => SearchConversationKeywordCubit(
+            chatSideCubit: chatSideCubit,
+          ),
+        ),
         BlocProvider(
           create: (context) => MessageBloc(
             messagesDao: context.read<AccountServer>().database.messagesDao,
-            conversationCubit: BlocProvider.of<ConversationCubit>(context),
+            conversationCubit: context.read<ConversationCubit>(),
             limit: windowHeight ~/ 20,
           ),
         ),

@@ -3,14 +3,12 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
 
 import '../../interacter_decorated_box.dart';
 
@@ -24,9 +22,7 @@ class StrangerMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBotConversation =
-        BlocProvider.of<ConversationCubit>(context).state?.isBotConversation ??
-            false;
+    final isBotConversation = message.appId != null;
     return Column(
       children: [
         Text(
@@ -47,15 +43,12 @@ class StrangerMessage extends StatelessWidget {
                   ? Localization.of(context).botInteractOpen
                   : Localization.of(context).block,
               onTap: () async {
-                final conversationItem =
-                    BlocProvider.of<ConversationCubit>(context).state;
-                if (conversationItem == null) return;
-                if (conversationItem.isBotConversation) {
+                if (isBotConversation) {
                   final app = await context
                       .read<AccountServer>()
                       .database
                       .appsDao
-                      .findUserById(conversationItem.appId!);
+                      .findUserById(message.appId!);
                   if (app == null) return;
                   await openUri(app.homeUri);
                 } else {
@@ -72,13 +65,10 @@ class StrangerMessage extends StatelessWidget {
                   ? Localization.of(context).botInteractHi
                   : Localization.of(context).addContact,
               onTap: () {
-                final conversationItem =
-                    BlocProvider.of<ConversationCubit>(context).state;
-                if (conversationItem == null) return;
-                if (conversationItem.isBotConversation)
+                if (isBotConversation)
                   Provider.of<AccountServer>(context, listen: false)
                       .sendTextMessage('Hi',
-                          conversationId: conversationItem.conversationId);
+                          conversationId: message.conversationId);
                 else
                   context.read<AccountServer>().addUser(message.userId);
               },

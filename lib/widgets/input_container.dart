@@ -123,7 +123,7 @@ void _sendMessage(BuildContext context) {
   if (text.trim().isEmpty) return;
 
   textEditingController.text = '';
-  final conversationItem = BlocProvider.of<ConversationCubit>(context).state;
+  final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
   context.read<AccountServer>().sendTextMessage(
@@ -302,7 +302,7 @@ class _FileButton extends StatelessWidget {
         if (file == null) return;
 
         final conversationItem =
-            BlocProvider.of<ConversationCubit>(context).state;
+            context.read<ConversationCubit>().state;
         if (conversationItem == null) return;
         if (file.isImage) {
           if ((await _PreviewImage.push(context, file)) != true) return;
@@ -342,7 +342,7 @@ class _PreviewImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationItem?, String?>(
+      BlocConverter<ConversationCubit, ConversationState?, String?>(
         converter: (state) => state?.conversationId,
         when: (a, b) => a != b,
         listener: (context, switched) => Navigator.pop(context, false),

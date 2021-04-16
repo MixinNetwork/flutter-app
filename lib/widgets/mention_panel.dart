@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset;
-import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/mention_cubit.dart';
+import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:flutter_app/utils/text_utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:provider/provider.dart';
 
@@ -19,7 +19,7 @@ import 'brightness_observer.dart';
 import 'high_light_text.dart';
 import 'interacter_decorated_box.dart';
 
-class MentionPanelPortalEntry extends StatelessWidget {
+class MentionPanelPortalEntry extends HookWidget {
   const MentionPanelPortalEntry({
     Key? key,
     required this.constraints,
@@ -30,86 +30,86 @@ class MentionPanelPortalEntry extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConverter<MentionCubit, MentionState, bool>(
-        converter: (state) => state.users.isNotEmpty,
-        builder: (context, visible) => Selector<TextEditingController, bool>(
-          selector: (context, controller) =>
-              visible && controller.value.composing.composed,
-          builder: (context, selectable, child) => FocusableActionDetector(
-            shortcuts: selectable
-                ? {
-                    LogicalKeySet(LogicalKeyboardKey.arrowDown):
-                        const _ListSelectionNextIntent(),
-                    LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                        const _ListSelectionPrevIntent(),
-                    LogicalKeySet(LogicalKeyboardKey.tab):
-                        const _ListSelectionNextIntent(),
-                    LogicalKeySet(LogicalKeyboardKey.enter):
-                        const _ListSelectionSelectedIntent(),
-                    if (Platform.isMacOS) ...{
-                      LogicalKeySet(LogicalKeyboardKey.control,
-                              LogicalKeyboardKey.keyN):
-                          const _ListSelectionNextIntent(),
-                      LogicalKeySet(LogicalKeyboardKey.control,
-                              LogicalKeyboardKey.keyP):
-                          const _ListSelectionPrevIntent(),
-                    }
-                  }
-                : const {},
-            actions: {
-              _ListSelectionNextIntent: CallbackAction<Intent>(
-                onInvoke: (Intent intent) =>
-                    context.read<MentionCubit>().next(),
-              ),
-              _ListSelectionPrevIntent: CallbackAction<Intent>(
-                onInvoke: (Intent intent) =>
-                    context.read<MentionCubit>().prev(),
-              ),
-              _ListSelectionSelectedIntent: CallbackAction<Intent>(
-                onInvoke: (Intent intent) {
-                  final state = context.read<MentionCubit>().state;
-                  _select(context, state.users[state.index]);
-                },
-              ),
-            },
-            child: child!,
+  Widget build(BuildContext context) {
+    final visible = useBlocStateConverter<MentionCubit, MentionState, bool>(
+      converter: (state) => state.users.isNotEmpty,
+    );
+
+    final selectable = useValueListenable(context.read<TextEditingController>())
+            .composing
+            .composed &&
+        visible;
+
+    final isGroup =
+        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
+            converter: (state) => state?.isGroup ?? false);
+
+    return FocusableActionDetector(
+      shortcuts: selectable
+          ? {
+              LogicalKeySet(LogicalKeyboardKey.arrowDown):
+                  const _ListSelectionNextIntent(),
+              LogicalKeySet(LogicalKeyboardKey.arrowUp):
+                  const _ListSelectionPrevIntent(),
+              LogicalKeySet(LogicalKeyboardKey.tab):
+                  const _ListSelectionNextIntent(),
+              LogicalKeySet(LogicalKeyboardKey.enter):
+                  const _ListSelectionSelectedIntent(),
+              if (Platform.isMacOS) ...{
+                LogicalKeySet(
+                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyN):
+                    const _ListSelectionNextIntent(),
+                LogicalKeySet(
+                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
+                    const _ListSelectionPrevIntent(),
+              }
+            }
+          : const {},
+      actions: {
+        _ListSelectionNextIntent: CallbackAction<Intent>(
+          onInvoke: (Intent intent) => context.read<MentionCubit>().next(),
+        ),
+        _ListSelectionPrevIntent: CallbackAction<Intent>(
+          onInvoke: (Intent intent) => context.read<MentionCubit>().prev(),
+        ),
+        _ListSelectionSelectedIntent: CallbackAction<Intent>(
+          onInvoke: (Intent intent) {
+            final state = context.read<MentionCubit>().state;
+            _select(context, state.users[state.index]);
+          },
+        ),
+      },
+      child: PortalEntry(
+        visible: visible && isGroup,
+        childAnchor: Alignment.topCenter,
+        portalAnchor: Alignment.bottomCenter,
+        closeDuration: const Duration(milliseconds: 150),
+        portal: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: 168,
+            minWidth: constraints.maxWidth,
+            maxWidth: constraints.maxWidth,
           ),
-          child: PortalEntry(
-            visible: visible &&
-                BlocProvider.of<ConversationCubit>(context)
-                        .state
-                        ?.isGroupConversation ==
-                    true,
-            childAnchor: Alignment.topCenter,
-            portalAnchor: Alignment.bottomCenter,
-            closeDuration: const Duration(milliseconds: 150),
-            portal: ConstrainedBox(
-              constraints: BoxConstraints(
-                maxHeight: 168,
-                minWidth: constraints.maxWidth,
-                maxWidth: constraints.maxWidth,
+          child: ClipRRect(
+            child: TweenAnimationBuilder<double>(
+              duration: const Duration(milliseconds: 150),
+              curve: Curves.easeOut,
+              tween: Tween(begin: 0, end: visible ? 1 : 0),
+              builder: (context, progress, child) => FractionalTranslation(
+                translation: Offset(0, 1 - progress),
+                child: child,
               ),
-              child: ClipRRect(
-                child: TweenAnimationBuilder<double>(
-                  duration: const Duration(milliseconds: 150),
-                  curve: Curves.easeOut,
-                  tween: Tween(begin: 0, end: visible ? 1 : 0),
-                  builder: (context, progress, child) => FractionalTranslation(
-                    translation: Offset(0, 1 - progress),
-                    child: child,
-                  ),
-                  child: _MentionPanel(
-                    mentionCubit: BlocProvider.of<MentionCubit>(context),
-                    onSelect: (User user) => _select(context, user),
-                  ),
-                ),
+              child: _MentionPanel(
+                mentionCubit: BlocProvider.of<MentionCubit>(context),
+                onSelect: (User user) => _select(context, user),
               ),
             ),
-            child: child,
           ),
         ),
-      );
+        child: child,
+      ),
+    );
+  }
 
   void _select(BuildContext context, User user) {
     final textEditingController = context.read<TextEditingController>();

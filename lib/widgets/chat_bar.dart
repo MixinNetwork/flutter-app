@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/chat_page.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
@@ -12,7 +11,6 @@ import 'package:flutter_app/widgets/back_button.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'avatar_view/avatar_view.dart';
 
@@ -44,10 +42,7 @@ class ChatBar extends HookWidget {
           builder: (context) => navigationMode
               ? MixinBackButton(
                   color: actionColor,
-                  onTap: () {
-                    BlocProvider.of<ConversationCubit>(context).emit(null);
-                    context.read<ResponsiveNavigatorCubit>().clear();
-                  },
+                  onTap: () => context.read<ConversationCubit>().unselected(),
                 )
               : const SizedBox(width: 16),
         ),
@@ -98,18 +93,17 @@ class ConversationIDOrCount extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversation = useBlocState<ConversationCubit, ConversationItem?>(
-        when: (state) => state != null)!;
-    final isGroupConversation = conversation.isGroupConversation;
+    final conversation = useBlocState<ConversationCubit, ConversationState?>(
+        when: (state) => state?.isLoaded ?? false);
 
     final countStream = useMemoized(
       () => context
           .read<AccountServer>()
           .database
           .conversationDao
-          .conversationParticipantsCount(conversation.conversationId)
+          .conversationParticipantsCount(conversation!.conversationId)
           .watchSingle(),
-      [conversation.conversationId],
+      [conversation?.conversationId],
     );
 
     final textStyle = TextStyle(
@@ -117,10 +111,11 @@ class ConversationIDOrCount extends HookWidget {
       fontSize: fontSize,
     );
 
-    if (!isGroupConversation)
+    final isGroup = conversation?.isGroup ?? false;
+
+    if (!isGroup)
       return Text(
-        Localization.of(context)
-            .conversationID(conversation.ownerIdentityNumber),
+        conversation?.identityNumber ?? '',
         style: textStyle,
       );
 
@@ -145,11 +140,11 @@ class ConversationName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationItem?, String?>(
-        converter: (state) => state?.validName,
+      BlocConverter<ConversationCubit, ConversationState?, String?>(
+        converter: (state) => state?.name,
         when: (a, b) => b != null,
         builder: (context, name) => Text(
-          name!,
+          name ?? '',
           style: TextStyle(
             color: BrightnessData.themeOf(context).text,
             fontSize: fontSize,
@@ -161,18 +156,33 @@ class ConversationName extends StatelessWidget {
 class ConversationAvatar extends StatelessWidget {
   const ConversationAvatar({
     Key? key,
-    this.size = 50,
+    this.size = 36,
   }) : super(key: key);
 
   final double size;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<ConversationCubit, ConversationItem?>(
-        buildWhen: (a, b) => b != null,
-        builder: (context, conversation) => ConversationAvatarWidget(
-          size: size,
-          conversation: conversation!,
+  Widget build(BuildContext context) => SizedBox.fromSize(
+        size: Size.square(size),
+        child: BlocBuilder<ConversationCubit, ConversationState?>(
+          buildWhen: (a, b) => b?.isLoaded ?? false,
+          builder: (context, state) {
+            if (state?.conversation != null)
+              return ConversationAvatarWidget(
+                size: size,
+                conversation: state!.conversation!,
+              );
+
+            if (state?.user != null)
+              return AvatarWidget(
+                size: size,
+                userId: state!.userId!,
+                avatarUrl: state.user!.avatarUrl,
+                name: state.name!,
+              );
+
+            return const SizedBox();
+          },
         ),
       );
 }

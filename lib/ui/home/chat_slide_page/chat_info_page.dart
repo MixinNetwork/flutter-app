@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/ui/home/chat_page.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
@@ -33,11 +31,9 @@ class ChatInfoPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversation = useBlocState<ConversationCubit, ConversationItem?>(
-        when: (state) => state != null)!;
-
-    final isGroupConversation = conversation.isGroupConversation;
-    final muting = conversation.muteUntil?.isAfter(DateTime.now()) == true;
+    final conversation = useBlocState<ConversationCubit, ConversationState?>(
+      when: (state) => state?.isLoaded ?? false,
+    )!;
 
     final accountServer = context.read<AccountServer>();
     final userParticipant = useStream<Participant?>(
@@ -59,6 +55,11 @@ class ChatInfoPage extends HookWidget {
                 .watchSingle()),
             initialData: null)
         .data;
+    if (!conversation.isLoaded) return const SizedBox();
+
+    final isGroupConversation = conversation.isGroup!;
+    final muting =
+        conversation.conversation?.muteUntil?.isAfter(DateTime.now()) == true;
 
     return Column(
       children: [
@@ -86,7 +87,7 @@ class ChatInfoPage extends HookWidget {
                   child: const ConversationBio(fontSize: 14),
                 ),
                 const SizedBox(height: 32),
-                if (!isGroupConversation)
+                if (isGroupConversation)
                   CellGroup(
                     child: CellItem(
                       title: Localization.of(context).shareContact,
@@ -102,8 +103,8 @@ class ChatInfoPage extends HookWidget {
                         final conversationId = result[0].item1;
 
                         await accountServer.sendContactMessage(
-                          conversation.ownerId!,
-                          conversation.name ?? '',
+                          conversation.userId!,
+                          conversation.name!,
                           conversationId: conversationId,
                           recipientId: conversationId,
                         );
@@ -129,7 +130,7 @@ class ChatInfoPage extends HookWidget {
                     ],
                   ),
                 ),
-                if (conversation.isGroupConversation &&
+                if (isGroupConversation &&
                     (userParticipant?.role == ParticipantRole.owner ||
                         userParticipant?.role == ParticipantRole.admin))
                   CellGroup(
@@ -183,7 +184,7 @@ class ChatInfoPage extends HookWidget {
                               await runFutureWithToast(
                                 context,
                                 accountServer.editContactName(
-                                    conversation.ownerId!, name!),
+                                    conversation.userId!, name!),
                               );
                             },
                           ),
@@ -199,8 +200,8 @@ class ChatInfoPage extends HookWidget {
                             : Localization.of(context).muted,
                         description: muting
                             ? Text(
-                                DateFormat('yyyy/MM/dd, hh:mm a')
-                                    .format(conversation.muteUntil!),
+                                DateFormat('yyyy/MM/dd, hh:mm a').format(
+                                    conversation.conversation!.muteUntil!),
                                 style: TextStyle(
                                   color: BrightnessData.themeOf(context)
                                       .secondaryText,
@@ -215,7 +216,7 @@ class ChatInfoPage extends HookWidget {
                                 context,
                                 context
                                     .read<AccountServer>()
-                                    .unMuteUser(conversation.ownerId!));
+                                    .unMuteUser(conversation.userId!));
 
                           final result = await showMixinDialog<int?>(
                               context: context, child: const MuteDialog());
@@ -225,7 +226,7 @@ class ChatInfoPage extends HookWidget {
                               context,
                               context
                                   .read<AccountServer>()
-                                  .muteUser(conversation.ownerId!, result));
+                                  .muteUser(conversation.userId!, result));
                         },
                       ),
                     ],
@@ -238,7 +239,7 @@ class ChatInfoPage extends HookWidget {
                     onTap: () => context.read<ChatSideCubit>().pushPage(
                           ChatSideCubit.circles,
                           arguments: Tuple2<String, String>(
-                            conversation.validName,
+                            conversation.name!,
                             conversation.conversationId,
                           ),
                         ),
@@ -263,13 +264,13 @@ class ChatInfoPage extends HookWidget {
 
                             await runFutureWithToast(
                               context,
-                              accountServer.unblockUser(conversation.ownerId!),
+                              accountServer.unblockUser(conversation.userId!),
                             );
                           },
                         ),
                       if (conversation.relationship == UserRelationship.friend)
                         Builder(builder: (context) {
-                          final title = conversation.isBotConversation
+                          final title = conversation.isBot!
                               ? Localization.of(context).removeBot
                               : Localization.of(context).removeContact;
                           return CellItem(
@@ -285,12 +286,12 @@ class ChatInfoPage extends HookWidget {
 
                               await runFutureWithToast(
                                 context,
-                                accountServer.removeUser(conversation.ownerId!),
+                                accountServer.removeUser(conversation.userId!),
                               );
                             },
                           );
                         }),
-                      if (conversation.isStrangerConversation)
+                      if (conversation.isStranger!)
                         CellItem(
                           title: Localization.of(context).block,
                           color: BrightnessData.themeOf(context).red,
@@ -304,7 +305,7 @@ class ChatInfoPage extends HookWidget {
 
                             await runFutureWithToast(
                               context,
-                              accountServer.blockUser(conversation.ownerId!),
+                              accountServer.blockUser(conversation.userId!),
                             );
                           },
                         ),
@@ -325,7 +326,7 @@ class ChatInfoPage extends HookWidget {
                           context.read<MessageBloc>().reload();
                         },
                       ),
-                      if (conversation.isGroupConversation)
+                      if (conversation.isGroup!)
                         if (userParticipant != null)
                           CellItem(
                             title: Localization.of(context).exitGroup,
@@ -375,10 +376,7 @@ class ChatInfoPage extends HookWidget {
                                       .state
                                       ?.conversationId ==
                                   conversation.conversationId) {
-                                context.read<ConversationCubit>().emit(null);
-                                context
-                                    .read<ResponsiveNavigatorCubit>()
-                                    .clear();
+                                context.read<ConversationCubit>().unselected();
                               }
                             },
                           ),
@@ -420,7 +418,7 @@ class _CircleNames extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationItem?, String?>(
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
       converter: (state) => state?.conversationId,
       when: (conversationId) => conversationId != null,
     );
@@ -479,19 +477,26 @@ class ConversationBio extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversation = useBlocState<ConversationCubit, ConversationItem?>(
-        when: (state) => state != null)!;
+    final conversation = useBlocState<ConversationCubit, ConversationState?>(
+      when: (state) => state?.isLoaded ?? false,
+    )!;
 
     final textStream = useMemoized(() {
       final database = context.read<AccountServer>().database;
-      if (conversation.isGroupConversation)
+      if (conversation.isLoaded)
+        return () async* {
+          yield '';
+        }();
+      if (conversation.isGroup!)
         return database.conversationDao
             .announcement(conversation.conversationId)
             .watchSingle();
-      return database.userDao
-          .biography(conversation.ownerIdentityNumber)
-          .watchSingle();
-    });
+      return database.userDao.biography(conversation.userId!).watchSingle();
+    }, [
+      conversation.isLoaded,
+      conversation.conversationId,
+      conversation.userId,
+    ]);
 
     final snapshot = useStream(textStream, initialData: '');
     if (snapshot.data?.isEmpty == true) return const SizedBox();

@@ -11051,15 +11051,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
-  Selectable<String?> biographyByIdentityNumber(String identityNumber) {
-    return customSelect(
-        'SELECT biography FROM users WHERE identity_number = :identityNumber',
-        variables: [
-          Variable<String>(identityNumber)
-        ],
-        readsFrom: {
-          users
-        }).map((QueryRow row) => row.read<String?>('biography'));
+  Selectable<String?> biographyByIdentityNumber(String user_id) {
+    return customSelect('SELECT biography FROM users WHERE user_id = :user_id',
+            variables: [Variable<String>(user_id)], readsFrom: {users})
+        .map((QueryRow row) => row.read<String?>('biography'));
   }
 
   Selectable<StickerAlbum> systemAlbums() {

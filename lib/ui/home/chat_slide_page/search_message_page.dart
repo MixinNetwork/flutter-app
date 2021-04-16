@@ -8,7 +8,6 @@ import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
 import 'package:flutter_app/ui/home/chat_page.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
@@ -29,7 +28,7 @@ class SearchMessagePage extends HookWidget {
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
 
     final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationItem?, String?>(
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
       converter: (state) => state?.conversationId,
       when: (conversationId) => conversationId != null,
     );
@@ -79,7 +78,7 @@ class SearchMessagePage extends HookWidget {
 
     late Widget child;
     if (pageState.count <= 0)
-      child = const SearchEmpty();
+      child = const SizedBox();
     else
       child = ScrollablePositionedList.builder(
         itemPositionsListener: searchMessageBloc.itemPositionsListener,
@@ -90,24 +89,11 @@ class SearchMessagePage extends HookWidget {
           return SearchMessageItem(
             message: message,
             keyword: keyword,
-            onTap: () async {
-              final conversation = await context
-                  .read<AccountServer>()
-                  .database
-                  .conversationDao
-                  .conversationItem(message.conversationId);
-
-              final index = await context
-                  .read<AccountServer>()
-                  .database
-                  .messagesDao
-                  .messageIndex(message.conversationId, message.messageId)
-                  .getSingleOrNull();
-              context.read<ConversationCubit>().initIndex = index;
-              context.read<ConversationCubit>().emit(conversation);
-              ResponsiveNavigatorCubit.of(context)
-                  .pushPage(ResponsiveNavigatorCubit.chatPage);
-            },
+            onTap: () async =>
+                context.read<ConversationCubit>().selectConversation(
+                      message.conversationId,
+                      message.messageId,
+                    ),
           );
         },
       );

@@ -183,16 +183,7 @@ class _SearchList extends HookWidget {
                   name: user.fullName ?? '?',
                   keyword: keyword,
                   onTap: () async {
-                    context.read<ConversationCubit>().emit(
-                          await context
-                              .read<AccountServer>()
-                              .database
-                              .conversationDao
-                              .conversationByUserId(user.userId),
-                        );
-                    ResponsiveNavigatorCubit.of(context)
-                        .pushPage(ResponsiveNavigatorCubit.chatPage);
-
+                    context.read<ConversationCubit>().selectUser(user.userId);
                     _clear(context);
                   },
                 );
@@ -241,15 +232,9 @@ class _SearchList extends HookWidget {
                   ),
                   keyword: keyword,
                   onTap: () async {
-                    context.read<ConversationCubit>().emit(
-                          await context
-                              .read<AccountServer>()
-                              .database
-                              .conversationDao
-                              .conversationItem(conversation.conversationId),
-                        );
-                    ResponsiveNavigatorCubit.of(context)
-                        .pushPage(ResponsiveNavigatorCubit.chatPage);
+                    context
+                        .read<ConversationCubit>()
+                        .selectConversation(conversation.conversationId);
 
                     _clear(context);
                   },
@@ -299,26 +284,16 @@ class _SearchList extends HookWidget {
   }
 }
 
-  Future Function() _searchMessageItemOnTap(BuildContext context, SearchMessageDetailItem message) => () async {
-    final conversation = await context
-        .read<AccountServer>()
-        .database
-        .conversationDao
-        .conversationItem(message.conversationId);
+Future Function() _searchMessageItemOnTap(
+        BuildContext context, SearchMessageDetailItem message) =>
+    () async {
+      context.read<ConversationCubit>().selectConversation(
+            message.conversationId,
+            message.messageId,
+          );
 
-    final index = await context
-        .read<AccountServer>()
-        .database
-        .messagesDao
-        .messageIndex(message.conversationId, message.messageId)
-        .getSingleOrNull();
-    context.read<ConversationCubit>().initIndex = index;
-    context.read<ConversationCubit>().emit(conversation);
-    ResponsiveNavigatorCubit.of(context)
-        .pushPage(ResponsiveNavigatorCubit.chatPage);
-
-    _clear(context);
-  };
+      _clear(context);
+    };
 
 class SearchMessageItem extends StatelessWidget {
   const SearchMessageItem({
@@ -695,8 +670,10 @@ class _List extends HookWidget {
         useBlocState<ConversationListBloc, PagingState<ConversationItem>>(
       bloc: conversationListBloc,
     );
-    final conversationItem =
-        useBlocState<ConversationCubit, ConversationItem?>();
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+    );
 
     final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
         ResponsiveNavigatorState, bool>(
@@ -716,18 +693,16 @@ class _List extends HookWidget {
           final conversation = pagingState.map[index];
           if (conversation == null) return const SizedBox(height: 80);
           final selected =
-              conversation.conversationId == conversationItem?.conversationId &&
-                  !navigationMode;
+              conversation.conversationId == conversationId && !navigationMode;
 
           return ContextMenuPortalEntry(
             child: _Item(
               selected: selected,
               conversation: conversation,
-              onTap: () {
-                BlocProvider.of<ConversationCubit>(context).emit(conversation);
-                ResponsiveNavigatorCubit.of(context)
-                    .pushPage(ResponsiveNavigatorCubit.chatPage);
-              },
+              onTap: () => context.read<ConversationCubit>().selectConversation(
+                    conversation.conversationId,
+                    conversation.lastReadMessageId,
+                  ),
             ),
             buildMenus: () => [
               if (conversation.pinTime != null)
@@ -789,8 +764,7 @@ class _List extends HookWidget {
                       );
                   if (context.read<ConversationCubit>().state?.conversationId ==
                       conversation.conversationId) {
-                    context.read<ConversationCubit>().emit(null);
-                    context.read<ResponsiveNavigatorCubit>().clear();
+                    context.read<ConversationCubit>().unselected();
                   }
                 },
               ),

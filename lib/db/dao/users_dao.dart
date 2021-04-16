@@ -15,9 +15,8 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
 
   Future deleteUser(User user) => delete(db.users).delete(user);
 
-  Future<User?> findUserById(userId) async =>
-      (select(db.users)..where((tbl) => tbl.userId.equals(userId)))
-          .getSingleOrNull();
+  SimpleSelectStatement<Users, User> findUserById(String userId) =>
+      select(db.users)..where((tbl) => tbl.userId.equals(userId));
 
   Selectable<User> fuzzySearchGroupUser({
     required String id,
@@ -52,5 +51,6 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   }) =>
       db.fuzzySearchUser(id, username, identityNumber);
 
-  Selectable<String?> biography(String identityNumber)=> db.biographyByIdentityNumber(identityNumber);
+  Selectable<String?> biography(String userId) =>
+      db.biographyByIdentityNumber(userId);
 }

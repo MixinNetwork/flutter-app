@@ -398,7 +398,8 @@ class AccountServer {
           circleId: cc.circleId,
           createdAt: cc.createdAt));
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-        final u = await database.userDao.findUserById(cc.userId);
+        final u =
+            await database.userDao.findUserById(cc.userId!).getSingleOrNull();
         if (u == null) {
           refreshUserIdSet.add(cc.userId);
         }
