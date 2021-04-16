@@ -29,7 +29,7 @@ class CircleManagerPage extends HookWidget {
   Widget build(BuildContext context) {
     final circles = useStream<List<ConversationCircleManagerItem>>(
       useMemoized(
-            () => context
+        () => context
             .read<AccountServer>()
             .database
             .circlesDao
@@ -41,7 +41,7 @@ class CircleManagerPage extends HookWidget {
     ).data as List<ConversationCircleManagerItem>;
     final otherCircles = useStream<List<ConversationCircleManagerItem>>(
       useMemoized(
-            () => context
+        () => context
             .read<AccountServer>()
             .database
             .circlesDao
@@ -92,12 +92,12 @@ class CircleManagerPage extends HookWidget {
             ...circles
                 .map(
                   (e) => _CircleManagerItem(
-                name: e.name,
-                count: e.count,
-                circleId: e.circleId,
-                selected: true,
-              ),
-            )
+                    name: e.name,
+                    count: e.count,
+                    circleId: e.circleId,
+                    selected: true,
+                  ),
+                )
                 .toList(),
           if (circles.isNotEmpty && otherCircles.isNotEmpty)
             const SizedBox(height: 10),
@@ -105,12 +105,12 @@ class CircleManagerPage extends HookWidget {
             ...otherCircles
                 .map(
                   (e) => _CircleManagerItem(
-                name: e.name,
-                count: e.count,
-                circleId: e.circleId,
-                selected: false,
-              ),
-            )
+                    name: e.name,
+                    count: e.count,
+                    circleId: e.circleId,
+                    selected: false,
+                  ),
+                )
                 .toList(),
         ],
       ),
@@ -134,83 +134,86 @@ class _CircleManagerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 80,
-    color: BrightnessData.themeOf(context).primary,
-    child: Row(
-      children: [
-        GestureDetector(
-          child: Container(
-            height: 80,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SvgPicture.asset(
-              selected
-                  ? Resources.assetsImagesCircleRemoveSvg
-                  : Resources.assetsImagesCircleAddSvg,
-              height: 16,
-              width: 16,
-            ),
-          ),
-          onTap: () async {
-            final conversation = context.read<ConversationCubit>().state;
-            if (conversation?.conversationId.isEmpty ?? true) return;
-
-            if (selected) {
-              await runFutureWithToast(
-                context,
-                context.read<AccountServer>().circleRemoveConversation(
-                    circleId, conversation!.conversationId),
-              );
-              return;
-            }
-
-            await runFutureWithToast(
-              context,
-              context.read<AccountServer>().circleAddConversation(
-                  circleId, conversation!.conversationId),
-            );
-          },
-        ),
-        const SizedBox(width: 4),
-        ClipOval(
-          child: Container(
-            color: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(246, 247, 250, 1),
-              darkColor: const Color.fromRGBO(245, 247, 250, 1),
-            ),
-            height: 50,
-            width: 50,
-            alignment: Alignment.center,
-            child: SvgPicture.asset(
-              Resources.assetsImagesCircleSvg,
-              width: 18,
-              height: 18,
-              color: getCircleColorById(circleId),
-            ),
-          ),
-        ),
-        const SizedBox(width: 16),
-        Column(
-          mainAxisSize: MainAxisSize.min,
+        height: 80,
+        color: BrightnessData.themeOf(context).primary,
+        child: Row(
           children: [
-            Text(
-              name,
-              style: TextStyle(
-                color: BrightnessData.themeOf(context).text,
-                fontSize: 16,
+            GestureDetector(
+              child: Container(
+                height: 80,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SvgPicture.asset(
+                  selected
+                      ? Resources.assetsImagesCircleRemoveSvg
+                      : Resources.assetsImagesCircleAddSvg,
+                  height: 16,
+                  width: 16,
+                ),
+              ),
+              onTap: () async {
+                final conversation = context.read<ConversationCubit>().state;
+                if (conversation?.conversationId.isEmpty ?? true) return;
+
+                if (selected) {
+                  await runFutureWithToast(
+                    context,
+                    context.read<AccountServer>().circleRemoveConversation(
+                        circleId, conversation!.conversationId),
+                  );
+                  return;
+                }
+
+                await runFutureWithToast(
+                  context,
+                  context.read<AccountServer>().circleAddConversation(
+                        circleId,
+                        conversation!.conversationId,
+                        conversation.userId,
+                      ),
+                );
+              },
+            ),
+            const SizedBox(width: 4),
+            ClipOval(
+              child: Container(
+                color: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(246, 247, 250, 1),
+                  darkColor: const Color.fromRGBO(245, 247, 250, 1),
+                ),
+                height: 50,
+                width: 50,
+                alignment: Alignment.center,
+                child: SvgPicture.asset(
+                  Resources.assetsImagesCircleSvg,
+                  width: 18,
+                  height: 18,
+                  color: getCircleColorById(circleId),
+                ),
               ),
             ),
-            const SizedBox(height: 6),
-            Text(
-              Localization.of(context).conversationCount(count),
-              style: TextStyle(
-                color: BrightnessData.themeOf(context).secondaryText,
-                fontSize: 14,
-              ),
+            const SizedBox(width: 16),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  name,
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).text,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  Localization.of(context).conversationCount(count),
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).secondaryText,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ],
-    ),
-  );
+      );
 }

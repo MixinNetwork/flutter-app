@@ -664,7 +664,7 @@ class AccountServer {
   Future<void> circleRemoveConversation(
       String circleId, String conversationId) async {
     final response =
-    await client.circleApi.updateCircleConversations(circleId, [
+        await client.circleApi.updateCircleConversations(circleId, [
       CircleConversationRequest(
           action: CircleConversationAction.REMOVE,
           conversationId: conversationId,
@@ -677,32 +677,29 @@ class AccountServer {
   }
 
   Future<void> circleAddConversation(
-      String circleId,db.ConversationItem conversationItem) async {
-    String? userId;
-    if(conversationItem.category == ConversationCategory.contact){
-      userId = conversationItem.ownerId;
-    }
+      String circleId, String conversationId, String? userId) async {
     final response =
-    await client.circleApi.updateCircleConversations(circleId, [
+        await client.circleApi.updateCircleConversations(circleId, [
       CircleConversationRequest(
           action: CircleConversationAction.ADD,
-          conversationId: conversationItem.conversationId,
+          conversationId: conversationId,
           userId: userId)
     ]);
     if (response.error != null) {
       final list = response.data;
-      list!.forEach((cc) async {
+      for (final cc in list!) {
         await database.circleConversationDao.insert(db.CircleConversation(
             conversationId: cc.conversationId,
             circleId: cc.circleId,
             createdAt: cc.createdAt));
         if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-          final u = await database.userDao.findUserById(cc.userId);
+          final u =
+              await database.userDao.findUserById(cc.userId!).getSingleOrNull();
           if (u == null) {
             refreshUserIdSet.add(cc.userId);
           }
         }
-      });
+      }
     } else {}
   }
 
@@ -785,9 +782,10 @@ class AccountServer {
     }
   }
 
-  Future<void> editGroupAnnouncement(String conversationId,
-      String announcement) async {
-    final response = await client.conversationApi.update(conversationId,
+  Future<void> editGroupAnnouncement(
+      String conversationId, String announcement) async {
+    final response = await client.conversationApi.update(
+        conversationId,
         ConversationRequest(
             conversationId: conversationId, announcement: announcement));
     if (response.error != null) {
@@ -803,5 +801,3 @@ class AccountServer {
     // todo
   }
 }
-
-
