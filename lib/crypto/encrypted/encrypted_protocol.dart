@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_app/utils/crypted_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -10,10 +9,10 @@ import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 class EncryptedProtocol {
   List<int> encryptMessage(ed.PrivateKey privateKey, List<int> plainText,
       List<int> otherPublicKey, String otherSessionId) {
-    final aesGcmKey = aesGcm.newSecretKeySync(length: 16);
-    final encryptedMessageData = aesGcmEncrypt(plainText, aesGcmKey);
-    final messageKey = _encryptCipherMessageKey(
-        privateKey, otherPublicKey, aesGcmKey.extractSync());
+    final key = generateRandomKey(16);
+    final encryptedMessageData = aesGcmEncrypt(key, plainText);
+    final messageKey =
+        _encryptCipherMessageKey(privateKey, otherPublicKey, key);
     final messageKeyWithSession = [
       ...Uuid.parse(otherSessionId),
       ...messageKey
@@ -71,6 +70,7 @@ class EncryptedProtocol {
     final decodedMessageKey = _decryptCipherMessageKey(privateKey,
         senderPublicKey, messageKey.sublist(16, messageKey.length), iv);
 
-    return aesGcmDecrypt(message, SecretKey(decodedMessageKey));
+    return aesGcmDecrypt(decodedMessageKey, message.sublist(0, 12),
+        message.sublist(12, message.length));
   }
 }

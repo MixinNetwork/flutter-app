@@ -1,39 +1,36 @@
+import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:cryptography/cryptography.dart';
 import 'package:pointycastle/api.dart';
 import 'package:pointycastle/block/aes_fast.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
+import 'package:pointycastle/block/modes/gcm.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
+import 'package:x25519/x25519.dart' as x25519;
 
-import 'package:cryptography/cryptography.dart' as crypto;
-
-List<int> aesGcmEncrypt(List<int> plainText, SecretKey aesKey) {
-  final nonce = aesGcm.newNonce();
-
-  final encrypted =
-      aesGcm.encryptSync(plainText, secretKey: aesKey, nonce: nonce);
-
-  final result = [...nonce.bytes, ...encrypted];
+List<int> aesGcmEncrypt(List<int> key, List<int> plainText) {
+  final iv = generateRandomKey(12);
+  final params = ParametersWithIV<KeyParameter>(
+      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
+  final gcmCipher = GCMBlockCipher(AESFastEngine())..init(true, params);
+  final encrypted = gcmCipher.process(Uint8List.fromList(plainText));
+  final result = [...iv, ...encrypted];
   return result;
 }
 
-Uint8List aesGcmDecrypt(List<int> cipherText, SecretKey aesKey) {
-  final nonce = Nonce(cipherText.sublist(0, 12));
-  final decrypted = aesGcm.decryptSync(
-      Uint8List.fromList(cipherText.sublist(12, cipherText.length)),
-      secretKey: aesKey,
-      nonce: nonce);
-  return decrypted;
+Uint8List aesGcmDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
+  final params = ParametersWithIV<KeyParameter>(
+      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
+  final gcmCipher = GCMBlockCipher(AESFastEngine())..init(false, params);
+  return gcmCipher.process(Uint8List.fromList(cipherText));
 }
 
 List<int> aesEncrypt(List<int> key, List<int> plainText, [List<int>? iv]) {
   final cbcCipher = CBCBlockCipher(AESFastEngine());
-  final nonce = iv ?? Nonce.randomBytes(16).bytes;
+  final nonce = iv ?? generateRandomKey(16);
   final ivParams = ParametersWithIV<KeyParameter>(
-      KeyParameter(Uint8List.fromList(key)),
-      Uint8List.fromList(nonce));
+      KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(nonce));
   final paddingParams =
       PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
           ivParams, null);
@@ -69,11 +66,7 @@ List<int> calculateAgreement(List<int>? publicKey, List<int>? privateKey) {
   if (privateKey == null) {
     throw Exception('privateKey value is null');
   }
-
-  final secretKey = x25519.sharedSecretSync(
-      localPrivateKey: crypto.PrivateKey(privateKey),
-      remotePublicKey: crypto.PublicKey(publicKey));
-  return secretKey.extractSync();
+  return x25519.X25519(privateKey, publicKey);
 }
 
 Uint8List toLeByteArray(int v) {
@@ -85,4 +78,10 @@ Uint8List toLeByteArray(int v) {
 
 int leByteArrayToInt(List<int> array) {
   return array[0] + array[1];
+}
+
+final Random _random = Random.secure();
+
+List<int> generateRandomKey([int length = 32]) {
+  return List<int>.generate(length, (i) => _random.nextInt(256));
 }
