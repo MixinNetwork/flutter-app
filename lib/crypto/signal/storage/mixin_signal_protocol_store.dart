@@ -1,116 +1,112 @@
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
 class MixinSignalProtocolStore extends SignalProtocolStore {
+  MixinSignalProtocolStore(this.preKeyStore, this.signedPreKeyStore,
+      this.identityKeyStore, this.sessionStore);
+
+  final PreKeyStore preKeyStore;
+  final SignedPreKeyStore signedPreKeyStore;
+  final IdentityKeyStore identityKeyStore;
+  final SessionStore sessionStore;
+
   @override
   bool containsPreKey(int preKeyId) {
-    // TODO: implement containsPreKey
-    throw UnimplementedError();
+    return preKeyStore.containsPreKey(preKeyId);
   }
 
   @override
   bool containsSession(SignalProtocolAddress address) {
-    // TODO: implement containsSession
-    throw UnimplementedError();
+    return sessionStore.containsSession(address);
   }
 
   @override
   bool containsSignedPreKey(int signedPreKeyId) {
-    // TODO: implement containsSignedPreKey
-    throw UnimplementedError();
+    return signedPreKeyStore.containsSignedPreKey(signedPreKeyId);
   }
 
   @override
   void deleteAllSessions(String name) {
-    // TODO: implement deleteAllSessions
+    sessionStore.deleteAllSessions(name);
   }
 
   @override
   void deleteSession(SignalProtocolAddress address) {
-    // TODO: implement deleteSession
+    sessionStore.deleteSession(address);
   }
 
   @override
   IdentityKey getIdentity(SignalProtocolAddress address) {
-    // TODO: implement getIdentity
-    throw UnimplementedError();
+    return identityKeyStore.getIdentity(address);
   }
 
   @override
   IdentityKeyPair getIdentityKeyPair() {
-    // TODO: implement getIdentityKeyPair
-    throw UnimplementedError();
+    return identityKeyStore.getIdentityKeyPair();
   }
 
   @override
   int getLocalRegistrationId() {
-    // TODO: implement getLocalRegistrationId
-    throw UnimplementedError();
+    return identityKeyStore.getLocalRegistrationId();
   }
 
   @override
   List<int> getSubDeviceSessions(String name) {
-    // TODO: implement getSubDeviceSessions
-    throw UnimplementedError();
+    return sessionStore.getSubDeviceSessions(name);
   }
 
   @override
   PreKeyRecord loadPreKey(int preKeyId) {
-    // TODO: implement loadPreKey
-    throw UnimplementedError();
+    return preKeyStore.loadPreKey(preKeyId);
   }
 
   @override
   SessionRecord loadSession(SignalProtocolAddress address) {
-    // TODO: implement loadSession
-    throw UnimplementedError();
+    return sessionStore.loadSession(address);
   }
 
   @override
   SignedPreKeyRecord loadSignedPreKey(int signedPreKeyId) {
-    // TODO: implement loadSignedPreKey
-    throw UnimplementedError();
+    return signedPreKeyStore.loadSignedPreKey(signedPreKeyId);
   }
 
   @override
   List<SignedPreKeyRecord> loadSignedPreKeys() {
-    // TODO: implement loadSignedPreKeys
-    throw UnimplementedError();
+    return signedPreKeyStore.loadSignedPreKeys();
   }
 
   @override
   void removePreKey(int preKeyId) {
-    // TODO: implement removePreKey
+    preKeyStore.removePreKey(preKeyId);
   }
 
   @override
   void removeSignedPreKey(int signedPreKeyId) {
-    // TODO: implement removeSignedPreKey
+    signedPreKeyStore.removeSignedPreKey(signedPreKeyId);
   }
 
   @override
   void storePreKey(int preKeyId, PreKeyRecord record) {
-    // TODO: implement storePreKey
+    preKeyStore.storePreKey(preKeyId, record);
   }
 
   @override
   void storeSession(SignalProtocolAddress address, SessionRecord record) {
-    // TODO: implement storeSession
+    sessionStore.storeSession(address, record);
   }
 
   @override
   void storeSignedPreKey(int signedPreKeyId, SignedPreKeyRecord record) {
-    // TODO: implement storeSignedPreKey
+    signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);
   }
 
   @override
-  bool isTrustedIdentity(SignalProtocolAddress address, IdentityKey? identityKey, Direction direction) {
-    // TODO: implement isTrustedIdentity
-    throw UnimplementedError();
+  bool isTrustedIdentity(SignalProtocolAddress address,
+      IdentityKey? identityKey, Direction direction) {
+    return identityKeyStore.isTrustedIdentity(address, identityKey, direction);
   }
 
   @override
   bool saveIdentity(SignalProtocolAddress address, IdentityKey? identityKey) {
-    // TODO: implement saveIdentity
-    throw UnimplementedError();
+    return identityKeyStore.saveIdentity(address, identityKey);
   }
 }

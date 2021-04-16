@@ -12,6 +12,7 @@ import 'package:objectbox/objectbox.dart';
 
 import 'crypto/signal/vo/Identity.dart';
 import 'crypto/signal/vo/PreKey.dart';
+import 'crypto/signal/vo/SenderKey.dart';
 import 'crypto/signal/vo/Session.dart';
 import 'crypto/signal/vo/SignedPreKey.dart';
 
@@ -72,13 +73,12 @@ ModelDefinition getObjectBoxModel() {
         "relations": [],
         "backlinks": [],
         "constructorParams": [
-          "id positional",
           "address positional",
-          "registration_id positional",
           "public_key positional",
-          "private_key positional",
-          "next_prekey_id positional",
-          "date positional"
+          "date positional",
+          "registration_id named",
+          "private_key named",
+          "next_prekey_id named"
         ],
         "nullSafetyEnabled": true
       },
@@ -189,9 +189,49 @@ ModelDefinition getObjectBoxModel() {
         "backlinks": [],
         "constructorParams": [],
         "nullSafetyEnabled": true
+      },
+      {
+        "id": "5:7389426397347176584",
+        "lastPropertyId": "4:5476360411632178006",
+        "name": "SenderKey",
+        "properties": [
+          {
+            "id": "1:2161129945215296810",
+            "name": "id",
+            "type": 6,
+            "flags": 1,
+            "dartFieldType": "int"
+          },
+          {
+            "id": "2:1002426951589442728",
+            "name": "groupId",
+            "type": 9,
+            "dartFieldType": "String"
+          },
+          {
+            "id": "3:6402232570517008596",
+            "name": "senderId",
+            "type": 9,
+            "dartFieldType": "String"
+          },
+          {
+            "id": "4:5476360411632178006",
+            "name": "record",
+            "type": 23,
+            "dartFieldType": "Uint8List"
+          }
+        ],
+        "relations": [],
+        "backlinks": [],
+        "constructorParams": [
+          "groupId positional",
+          "senderId positional",
+          "record positional"
+        ],
+        "nullSafetyEnabled": true
       }
     ],
-    "lastEntityId": "4:3688591859747244472",
+    "lastEntityId": "5:7389426397347176584",
     "lastIndexId": "0:0",
     "lastRelationId": "0:0",
     "lastSequenceId": "0:0",
@@ -230,17 +270,19 @@ ModelDefinition getObjectBoxModel() {
         final private_keyValue = const fb.ListReader<int>(fb.Int8Reader())
             .vTableGetNullable(buffer, rootOffset, 12);
         final object = Identity(
-            const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0),
             const fb.StringReader().vTableGet(buffer, rootOffset, 6, ''),
-            const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 8),
             Uint8List.fromList(const fb.ListReader<int>(fb.Int8Reader())
                 .vTableGet(buffer, rootOffset, 10, [])),
-            private_keyValue == null
+            DateTime.fromMillisecondsSinceEpoch(
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)),
+            registration_id:
+                const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 8),
+            private_key: private_keyValue == null
                 ? null
                 : Uint8List.fromList(private_keyValue),
-            const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 14),
-            DateTime.fromMillisecondsSinceEpoch(
-                const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)));
+            next_prekey_id: const fb.Int64Reader()
+                .vTableGetNullable(buffer, rootOffset, 14))
+          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
         return object;
       });
@@ -346,6 +388,39 @@ ModelDefinition getObjectBoxModel() {
 
         return object;
       });
+  bindings[SenderKey] = EntityDefinition<SenderKey>(
+      model: model.getEntityByUid(7389426397347176584),
+      toOneRelations: (SenderKey object) => [],
+      toManyRelations: (SenderKey object) => {},
+      getId: (SenderKey object) => object.id,
+      setId: (SenderKey object, int id) {
+        object.id = id;
+      },
+      objectToFB: (SenderKey object, fb.Builder fbb) {
+        final groupIdOffset = fbb.writeString(object.groupId);
+        final senderIdOffset = fbb.writeString(object.senderId);
+        final recordOffset = fbb.writeListInt8(object.record);
+        fbb.startTable(5);
+        fbb.addInt64(0, object.id);
+        fbb.addOffset(1, groupIdOffset);
+        fbb.addOffset(2, senderIdOffset);
+        fbb.addOffset(3, recordOffset);
+        fbb.finish(fbb.endTable());
+        return object.id;
+      },
+      objectFromFB: (Store store, Uint8List fbData) {
+        final buffer = fb.BufferContext.fromBytes(fbData);
+        final rootOffset = buffer.derefObject(0);
+
+        final object = SenderKey(
+            const fb.StringReader().vTableGet(buffer, rootOffset, 6, ''),
+            const fb.StringReader().vTableGet(buffer, rootOffset, 8, ''),
+            Uint8List.fromList(const fb.ListReader<int>(fb.Int8Reader())
+                .vTableGet(buffer, rootOffset, 10, [])))
+          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
+
+        return object;
+      });
 
   return ModelDefinition(model, bindings);
 }
@@ -398,4 +473,15 @@ class SignedPreKey_ {
       QueryByteVectorProperty(entityId: 4, propertyId: 3, obxType: 23);
   static final timestamp =
       QueryIntegerProperty(entityId: 4, propertyId: 4, obxType: 10);
+}
+
+class SenderKey_ {
+  static final id =
+      QueryIntegerProperty(entityId: 5, propertyId: 1, obxType: 6);
+  static final groupId =
+      QueryStringProperty(entityId: 5, propertyId: 2, obxType: 9);
+  static final senderId =
+      QueryStringProperty(entityId: 5, propertyId: 3, obxType: 9);
+  static final record =
+      QueryByteVectorProperty(entityId: 5, propertyId: 4, obxType: 23);
 }

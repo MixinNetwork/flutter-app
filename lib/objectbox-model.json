@@ -133,9 +133,38 @@
         }
       ],
       "relations": []
+    },
+    {
+      "id": "5:7389426397347176584",
+      "lastPropertyId": "4:5476360411632178006",
+      "name": "SenderKey",
+      "properties": [
+        {
+          "id": "1:2161129945215296810",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1002426951589442728",
+          "name": "groupId",
+          "type": 9
+        },
+        {
+          "id": "3:6402232570517008596",
+          "name": "senderId",
+          "type": 9
+        },
+        {
+          "id": "4:5476360411632178006",
+          "name": "record",
+          "type": 23
+        }
+      ],
+      "relations": []
     }
   ],
-  "lastEntityId": "4:3688591859747244472",
+  "lastEntityId": "5:7389426397347176584",
   "lastIndexId": "0:0",
   "lastRelationId": "0:0",
   "lastSequenceId": "0:0",

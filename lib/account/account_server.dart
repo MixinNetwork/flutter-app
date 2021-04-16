@@ -13,6 +13,7 @@ import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
+import 'package:flutter_app/crypto/signal/dao/signal_database.dart';
 import 'package:flutter_app/crypto/uuid/uuid.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
@@ -72,6 +73,9 @@ class AccountServer {
 
     _decryptMessage = DecryptMessage(
         userId, database, client, sessionId, this.privateKey, _attachmentUtil);
+
+    signalDatabase = SignalDatabase(sessionId);
+    await signalDatabase.initStore();
   }
 
   late String userId;
@@ -85,6 +89,8 @@ class AccountServer {
   late DecryptMessage _decryptMessage;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil _attachmentUtil;
+
+  late SignalDatabase signalDatabase;
 
   final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();
 
