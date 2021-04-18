@@ -109,7 +109,7 @@ ModelDefinition getObjectBoxModel() {
         ],
         "relations": [],
         "backlinks": [],
-        "constructorParams": [],
+        "constructorParams": ["preKeyId positional", "record positional"],
         "nullSafetyEnabled": true
       },
       {
@@ -151,7 +151,12 @@ ModelDefinition getObjectBoxModel() {
         ],
         "relations": [],
         "backlinks": [],
-        "constructorParams": [],
+        "constructorParams": [
+          "address positional",
+          "device positional",
+          "record positional",
+          "date positional"
+        ],
         "nullSafetyEnabled": true
       },
       {
@@ -187,7 +192,11 @@ ModelDefinition getObjectBoxModel() {
         ],
         "relations": [],
         "backlinks": [],
-        "constructorParams": [],
+        "constructorParams": [
+          "preKeyId positional",
+          "record positional",
+          "timestamp positional"
+        ],
         "nullSafetyEnabled": true
       },
       {
@@ -307,13 +316,11 @@ ModelDefinition getObjectBoxModel() {
         final buffer = fb.BufferContext.fromBytes(fbData);
         final rootOffset = buffer.derefObject(0);
 
-        final object = PreKey()
-          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
-          ..preKeyId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0)
-          ..record = Uint8List.fromList(
-              const fb.ListReader<int>(fb.Int8Reader())
-                  .vTableGet(buffer, rootOffset, 8, []));
+        final object = PreKey(
+            const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0),
+            Uint8List.fromList(const fb.ListReader<int>(fb.Int8Reader())
+                .vTableGet(buffer, rootOffset, 8, [])))
+          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
         return object;
       });
@@ -341,16 +348,14 @@ ModelDefinition getObjectBoxModel() {
         final buffer = fb.BufferContext.fromBytes(fbData);
         final rootOffset = buffer.derefObject(0);
 
-        final object = Session()
-          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
-          ..address =
-              const fb.StringReader().vTableGet(buffer, rootOffset, 6, '')
-          ..device = const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0)
-          ..record = Uint8List.fromList(
-              const fb.ListReader<int>(fb.Int8Reader())
-                  .vTableGet(buffer, rootOffset, 10, []))
-          ..date = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0));
+        final object = Session(
+            const fb.StringReader().vTableGet(buffer, rootOffset, 6, ''),
+            const fb.Int64Reader().vTableGet(buffer, rootOffset, 8, 0),
+            Uint8List.fromList(const fb.ListReader<int>(fb.Int8Reader())
+                .vTableGet(buffer, rootOffset, 10, [])),
+            DateTime.fromMillisecondsSinceEpoch(
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 12, 0)))
+          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
         return object;
       });
@@ -376,15 +381,13 @@ ModelDefinition getObjectBoxModel() {
         final buffer = fb.BufferContext.fromBytes(fbData);
         final rootOffset = buffer.derefObject(0);
 
-        final object = SignedPreKey()
-          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0)
-          ..preKeyId =
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0)
-          ..record = Uint8List.fromList(
-              const fb.ListReader<int>(fb.Int8Reader())
-                  .vTableGet(buffer, rootOffset, 8, []))
-          ..timestamp = DateTime.fromMillisecondsSinceEpoch(
-              const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0));
+        final object = SignedPreKey(
+            const fb.Int64Reader().vTableGet(buffer, rootOffset, 6, 0),
+            Uint8List.fromList(const fb.ListReader<int>(fb.Int8Reader())
+                .vTableGet(buffer, rootOffset, 8, [])),
+            DateTime.fromMillisecondsSinceEpoch(
+                const fb.Int64Reader().vTableGet(buffer, rootOffset, 10, 0)))
+          ..id = const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0);
 
         return object;
       });

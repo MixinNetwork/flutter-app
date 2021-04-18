@@ -3,7 +3,9 @@ import 'package:objectbox/objectbox.dart';
 
 @Entity()
 class Session {
-  late int id;
+  Session(this.address, this.device, this.record, this.date);
+
+  late int id = 0;
   late String address;
   late int device;
   late Uint8List record;

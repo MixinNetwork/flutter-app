@@ -21,4 +21,8 @@ class PreKeyDao {
     query.close();
     return count;
   }
+
+  void insert(PreKey preKey) {
+    preKeyBox.put(preKey);
+  }
 }

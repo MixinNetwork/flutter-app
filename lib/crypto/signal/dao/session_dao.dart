@@ -49,4 +49,12 @@ class SessionDao {
     query.close();
     return sessions;
   }
+
+  void delete(Session session) {
+    sessionBox.remove(session.id);
+  }
+
+  void insert(Session session) {
+    sessionBox.put(session);
+  }
 }

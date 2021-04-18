@@ -13,7 +13,7 @@ import 'package:flutter_app/blaze/vo/contact_message.dart';
 import 'package:flutter_app/blaze/vo/sticker_message.dart';
 import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
-import 'package:flutter_app/crypto/signal/dao/signal_database.dart';
+import 'package:flutter_app/crypto/signal/signal_database.dart';
 import 'package:flutter_app/crypto/uuid/uuid.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';

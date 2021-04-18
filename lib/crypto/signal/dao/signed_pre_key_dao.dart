@@ -32,4 +32,8 @@ class SignedPreKeyDao {
     query.close();
     return count;
   }
+
+  void insert(SignedPreKey signedPreKey) {
+    signedPreKeyBox.put(signedPreKey);
+  }
 }

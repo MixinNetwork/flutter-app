@@ -36,4 +36,8 @@ class SenderKeyDao {
     query.close();
     return senderKeys;
   }
+
+  void insert(SenderKey senderKey) {
+    senderKeyBox.put(senderKey);
+  }
 }

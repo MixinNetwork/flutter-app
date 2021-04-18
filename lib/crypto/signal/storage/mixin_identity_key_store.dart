@@ -5,34 +5,48 @@ import 'package:flutter/foundation.dart';
 import 'package:objectbox/objectbox.dart';
 
 class MixinIdentityKeyStore extends IdentityKeyStore {
-  MixinIdentityKeyStore(Store store) {
+  MixinIdentityKeyStore(Store store, this._sessionId) {
     identityDao = IdentityDao(store);
   }
 
   late IdentityDao identityDao;
+  late final String? _sessionId;
 
   @override
   IdentityKey getIdentity(SignalProtocolAddress address) {
-    return identityDao
-        .getIdentityByAddress(address.toString())!
-        .identityKey; // TODO !
+    return identityDao.getIdentityByAddress(address.toString())!.identityKey;
   }
 
   @override
   IdentityKeyPair getIdentityKeyPair() {
-    return identityDao.getIdentityByAddress('-1')!.identityKeyPair; // TODO !
+    return identityDao.getIdentityByAddress('-1')!.identityKeyPair;
   }
 
   @override
   int getLocalRegistrationId() {
-    return identityDao.getIdentityByAddress('-1')!.registration_id!; // TODO !
+    return identityDao.getIdentityByAddress('-1')!.registration_id!;
   }
 
   @override
   bool isTrustedIdentity(SignalProtocolAddress address,
       IdentityKey? identityKey, Direction direction) {
-    // TODO
-    return true;
+    final ourNumber = _sessionId;
+    if (ourNumber == null) {
+      return false;
+    }
+    final theirAddress = address.getName();
+    if (ourNumber == address.getName()) {
+      return identityKey == identityDao.getIdentityByAddress('-1')!.identityKey;
+    }
+    switch (direction) {
+      case Direction.SENDING:
+        return isTrustedForSending(
+            identityKey!, identityDao.getIdentityByAddress(theirAddress));
+      case Direction.RECEIVING:
+        return true;
+      default:
+        throw AssertionError('Unknown direction: $direction');
+    }
   }
 
   @override
@@ -49,6 +63,18 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
       identityDao.insert(
           Identity(signalAddress, identityKey!.serialize(), DateTime.now()));
       return true;
+    }
+    return false;
+  }
+
+  bool isTrustedForSending(IdentityKey identityKey, Identity? identity) {
+    if (identity == null) {
+      debugPrint('Nothing here, returning true...');
+      return true;
+    }
+    if (identityKey != identity.identityKey) {
+      debugPrint('Identity keys don\'t match...');
+      return false;
     }
     return false;
   }
