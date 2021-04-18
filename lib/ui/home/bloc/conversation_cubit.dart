@@ -84,7 +84,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .map((event) => event?.conversationId)
           .where((event) => event != null)
           .distinct()
-          .flatMap((event) => accountServer.database.conversationDao
+          .switchMap((event) => accountServer.database.conversationDao
               .conversationItem(event!)
               .watchSingleOrNull())
           .listen((event) {
@@ -105,7 +105,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .map((event) => event?.userId)
           .where((event) => event != null)
           .distinct()
-          .flatMap((event) => accountServer.database.userDao
+          .switchMap((event) => accountServer.database.userDao
               .findUserById(event!)
               .watchSingleOrNull())
           .listen((event) => emit(

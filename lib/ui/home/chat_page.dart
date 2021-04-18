@@ -213,7 +213,7 @@ class ChatContainer extends StatelessWidget {
                                         (ScrollNotification notification) {
                                       final dimension = notification
                                               .metrics.viewportDimension /
-                                          3;
+                                          2;
 
                                       if (notification
                                           is ScrollUpdateNotification) {
