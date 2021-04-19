@@ -176,7 +176,7 @@ class ConversationAvatar extends StatelessWidget {
             if (state?.user != null)
               return AvatarWidget(
                 size: size,
-                userId: state!.userId!,
+                userId: state!.user!.userId,
                 avatarUrl: state.user!.avatarUrl,
                 name: state.name!,
               );
