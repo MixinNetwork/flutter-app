@@ -70,8 +70,8 @@ class LoadMorePagingBloc<T>
       if (index == -1) {
         list = [event.item, ...state.list];
       } else {
-        state.list[index] = event.item;
-        list = [...state.list];
+        list = state.list.toList();
+        list[index] = event.item;
       }
       yield state.copyWith(
         list: list,

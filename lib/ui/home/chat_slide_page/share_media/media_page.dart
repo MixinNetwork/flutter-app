@@ -97,7 +97,8 @@ class MediaPage extends HookWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(Resources.assetsImagesEmptyImageSvg,
+            SvgPicture.asset(
+              Resources.assetsImagesEmptyImageSvg,
               color: BrightnessData.themeOf(context).secondaryText,
             ),
             const SizedBox(height: 24),
