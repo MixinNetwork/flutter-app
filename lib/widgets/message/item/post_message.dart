@@ -85,25 +85,39 @@ class PostMessage extends StatelessWidget {
                 ],
               ),
             ),
-            portalBuilder: (BuildContext context) => InteractableDecoratedBox(
-              decoration: BoxDecoration(
-                color: BrightnessData.themeOf(context).background,
-              ),
-              onTap: () {
-                FullScreenPortal.of(context).emit(false);
-              },
-              child: Padding(
-                padding: const EdgeInsets.only(top: 32),
-                child: Markdown(
-                  data: message.thumbImage ?? message.content!,
-                  extensionSet: ExtensionSet.gitHubWeb,
-                  styleSheet: markdownStyleSheet(context),
-                  onTapLink: (String text, String? href, String title) =>
-                      openUri(href!),
-                ),
-              ),
-            ),
+            portalBuilder: (BuildContext context) => PostPreview(message: message),
           ),
         ),
       );
+}
+
+class PostPreview extends StatelessWidget {
+  const PostPreview({
+    Key? key,
+    required this.message,
+  }) : super(key: key);
+
+  final MessageItem message;
+
+  @override
+  Widget build(BuildContext context) {
+    return InteractableDecoratedBox(
+      decoration: BoxDecoration(
+        color: BrightnessData.themeOf(context).background,
+      ),
+      onTap: () {
+        FullScreenPortal.of(context).emit(false);
+      },
+      child: Padding(
+        padding: const EdgeInsets.only(top: 32),
+        child: Markdown(
+          data: message.thumbImage ?? message.content!,
+          extensionSet: ExtensionSet.gitHubWeb,
+          styleSheet: markdownStyleSheet(context),
+          onTapLink: (String text, String? href, String title) =>
+              openUri(href!),
+        ),
+      ),
+    );
+  }
 }

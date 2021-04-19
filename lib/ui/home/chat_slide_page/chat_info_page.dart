@@ -117,9 +117,9 @@ class ChatInfoPage extends HookWidget {
                     children: [
                       CellItem(
                         title: Localization.of(context).sharedMedia,
-                        onTap: () {
-                          // todo
-                        },
+                        onTap: () => context
+                            .read<ChatSideCubit>()
+                            .pushPage(ChatSideCubit.sharedMedia),
                       ),
                       CellItem(
                         title: Localization.of(context).searchMessageHistory,

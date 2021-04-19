@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -7,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/media_status.dart';
+import 'package:flutter_app/widgets/image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
@@ -85,26 +85,26 @@ class _ImageMessage extends StatelessWidget {
           showNip: false,
           isCurrentUser: isCurrentUser,
           padding: const EdgeInsets.all(2),
-          child: InteractableDecoratedBox(
-            onTap: () {
-              switch (message.mediaStatus) {
-                case MediaStatus.done:
-                  FullScreenPortal.of(context).emit(true);
-                  break;
-                case MediaStatus.canceled:
-                  if (message.relationship == UserRelationship.me &&
-                      message.mediaUrl?.isNotEmpty == true) {
-                    context.read<AccountServer>().reUploadAttachment(message);
-                  } else {
-                    context.read<AccountServer>().downloadAttachment(message);
-                  }
-                  break;
-                default:
-                  break;
-              }
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: InteractableDecoratedBox(
+              onTap: () {
+                switch (message.mediaStatus) {
+                  case MediaStatus.done:
+                    FullScreenPortal.of(context).emit(true);
+                    break;
+                  case MediaStatus.canceled:
+                    if (message.relationship == UserRelationship.me &&
+                        message.mediaUrl?.isNotEmpty == true) {
+                      context.read<AccountServer>().reUploadAttachment(message);
+                    } else {
+                      context.read<AccountServer>().downloadAttachment(message);
+                    }
+                    break;
+                  default:
+                    break;
+                }
+              },
               child: SizedBox(
                 height: height,
                 width: width,
@@ -114,18 +114,15 @@ class _ImageMessage extends StatelessWidget {
                     Image.file(
                       File(message.mediaUrl ?? ''),
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Image.memory(
-                        base64Decode(message.thumbImage!),
-                        fit: BoxFit.cover,
-                      ),
+                      errorBuilder: (_, __, ___) =>
+                          ImageByBase64(message.thumbImage!),
                     ),
                     Center(
                       child: Builder(
                         builder: (BuildContext context) {
                           switch (message.mediaStatus) {
                             case MediaStatus.canceled:
-                              if (message.relationship ==
-                                      UserRelationship.me &&
+                              if (message.relationship == UserRelationship.me &&
                                   message.mediaUrl?.isNotEmpty == true)
                                 return const StatusUpload();
                               else

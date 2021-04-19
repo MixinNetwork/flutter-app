@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 
 import '../../brightness_observer.dart';
 import '../../cache_image.dart';
+import '../../image.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
 
@@ -63,10 +64,7 @@ class QuoteMessage extends StatelessWidget {
           image: Image.file(
             File(quote.mediaUrl ?? ''),
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Image.memory(
-              base64Decode(quote.thumbImage!),
-              fit: BoxFit.cover,
-            ),
+            errorBuilder: (_, __, ___) => ImageByBase64(quote.thumbImage!),
           ),
           icon: SvgPicture.asset(Resources.assetsImagesImageSvg),
           description: Localization.of(context).image,
@@ -77,10 +75,7 @@ class QuoteMessage extends StatelessWidget {
           messageId: id!,
           userId: quote.userId,
           name: quote.userFullName,
-          image: Image.memory(
-            base64Decode(quote.thumbImage!),
-            fit: BoxFit.cover,
-          ),
+          image: ImageByBase64(quote.thumbImage!),
           icon: SvgPicture.asset(Resources.assetsImagesVideoSvg),
           description: Localization.of(context).video,
           inputMode: inputMode,
@@ -91,10 +86,7 @@ class QuoteMessage extends StatelessWidget {
           messageId: id!,
           userId: quote.userId,
           name: quote.userFullName,
-          image: Image.memory(
-            base64Decode(quote.thumbImage!),
-            fit: BoxFit.cover,
-          ),
+          image: ImageByBase64(quote.thumbImage!),
           icon: SvgPicture.asset(Resources.assetsImagesLiveSvg),
           description: Localization.of(context).live,
           inputMode: inputMode,

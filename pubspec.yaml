@@ -25,9 +25,14 @@ dependencies:
   mixin_bot_sdk_dart:
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: 14d242d31769f8d830e0f669f0686cc296a7f169
+      ref: 88a8b48f6e0d59e829f90706611634aa6125b64c
 #         local path
 #    path: ../mixin_bot_sdk_dart
+  window_size:
+    git:
+      url: git://github.com/google/flutter-desktop-embedding.git
+      path: plugins/window_size
+      ref: 57a2cd88486105d3d813583339eb0e23c9bfd6d2
   http: ^0.13.0
   qr_flutter: ^4.0.0
   uuid: ^3.0.0
@@ -41,7 +46,7 @@ dependencies:
   hive_flutter: ^1.0.0
   cached_network_image: ^3.0.0-nullsafety
   very_good_analysis: ^2.0.0-nullsafety.0
-  desktop_window: ^0.4.0
+#  desktop_window: ^0.4.0
   bloc: ^7.0.0
   flutter_bloc: ^7.0.0
   equatable: ^2.0.0-nullsafety.3
@@ -97,6 +102,7 @@ dependency_overrides:
   quiver: ^3.0.0
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   sliver_tools: ^0.2.0
+  collection: ^1.15.0
 
 dev_dependencies:
   hive_generator: ^1.0.1

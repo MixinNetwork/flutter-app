@@ -164,6 +164,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
   void unselected() {
     emit(null);
+    accountServer.selectConversation(null);
     responsiveNavigatorCubit.clear();
   }
 
@@ -172,6 +173,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       conversationId: conversationId,
       initIndexMessageId: initIndexMessageId,
     ));
+    accountServer.selectConversation(conversationId);
     responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);
   }
 
@@ -181,6 +183,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       conversationId: conversationId,
       userId: userId,
     ));
+    accountServer.selectConversation(conversationId);
     responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);
   }
 }

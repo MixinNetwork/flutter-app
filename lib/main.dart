@@ -1,4 +1,3 @@
-import 'package:desktop_window/desktop_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/app.dart';
@@ -9,14 +8,21 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
+import 'package:window_size/window_size.dart';
 
 import 'bloc/custom_bloc_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await DesktopWindow.setWindowSize(const Size(1280, 750));
-  await DesktopWindow.setMinWindowSize(
+  final currentScreen = await getCurrentScreen();
+  if (currentScreen != null)
+    setWindowFrame(Rect.fromCenter(
+      center: currentScreen.visibleFrame.center,
+      width: 1280,
+      height: 750,
+    ));
+  setWindowMinSize(
       const Size(slidePageMinWidth + responsiveNavigationMinWidth, 480));
 
   LoadBalancerUtils.loadBalancer =

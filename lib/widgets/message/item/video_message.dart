@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -14,6 +13,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
 import '../../brightness_observer.dart';
+import '../../image.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
 import '../message_bubble.dart';
@@ -69,10 +69,7 @@ class VideoMessageWidget extends StatelessWidget {
                     fit: StackFit.expand,
                     children: [
                       if (message.thumbImage != null)
-                        Image.memory(
-                          base64Decode(message.thumbImage!),
-                          fit: BoxFit.cover,
-                        ),
+                        ImageByBase64(message.thumbImage!),
                       Center(
                         child: Builder(
                           builder: (BuildContext context) {

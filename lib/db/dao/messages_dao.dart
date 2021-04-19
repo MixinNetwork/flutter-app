@@ -251,4 +251,38 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Selectable<int> fuzzySearchMessageCountByConversationId(
           String keyword, String conversationId) =>
       db.fuzzySearchMessageCountByConversationId(conversationId, keyword);
+
+  Selectable<MessageItem> mediaMessagesBefore(
+          int rowid, String conversationId, int limit) =>
+      db.mediaMessagesBefore(
+        rowid,
+        conversationId,
+        limit,
+      );
+
+  Selectable<MessageItem> postMessages(
+      String conversationId, int limit, int offset) =>
+      db.postMessages(conversationId, offset, limit);
+
+  Selectable<MessageItem> postMessagesBefore(
+      int rowid, String conversationId, int limit) =>
+      db.postMessagesBefore(
+        rowid,
+        conversationId,
+        limit,
+      );
+
+  Selectable<MessageItem> fileMessages(
+      String conversationId, int limit, int offset) =>
+      db.fileMessages(conversationId, offset, limit);
+
+  Selectable<MessageItem> fileMessagesBefore(
+      int rowid, String conversationId, int limit) =>
+      db.fileMessagesBefore(
+        rowid,
+        conversationId,
+        limit,
+      );
+
+  Selectable<int> messageRowId(String messageId) => db.messageRowId(messageId);
 }

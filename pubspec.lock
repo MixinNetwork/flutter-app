@@ -163,7 +163,7 @@ packages:
     source: hosted
     version: "3.6.0"
   collection:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
       name: collection
       url: "https://pub.dartlang.org"
@@ -211,13 +211,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
-  desktop_window:
-    dependency: "direct main"
-    description:
-      name: desktop_window
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.0"
   dio:
     dependency: "direct main"
     description:
@@ -585,8 +578,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "14d242d31769f8d830e0f669f0686cc296a7f169"
-      resolved-ref: "14d242d31769f8d830e0f669f0686cc296a7f169"
+      ref: "88a8b48f6e0d59e829f90706611634aa6125b64c"
+      resolved-ref: "88a8b48f6e0d59e829f90706611634aa6125b64c"
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"
@@ -1064,6 +1057,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.0"
+  window_size:
+    dependency: "direct main"
+    description:
+      path: "plugins/window_size"
+      ref: "57a2cd88486105d3d813583339eb0e23c9bfd6d2"
+      resolved-ref: "57a2cd88486105d3d813583339eb0e23c9bfd6d2"
+      url: "git://github.com/google/flutter-desktop-embedding.git"
+    source: git
+    version: "0.1.0"
   x25519:
     dependency: transitive
     description:

@@ -119,5 +119,12 @@
   "mute1year": "1 年",
   "searchMessageHistory": "搜索聊天记录",
   "addAnnouncement":"添加群公告",
-  "editAnnouncement":"编辑群公告"
+  "editAnnouncement":"编辑群公告",
+  "media": "媒体",
+  "links": "链接",
+  "noMedia": "没有媒体",
+  "noAudio": "没有音频",
+  "noPost": "没有文章",
+  "noFile": "没有文件",
+  "noLink": "没有链接"
 }

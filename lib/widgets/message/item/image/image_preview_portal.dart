@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
@@ -20,6 +19,7 @@ import 'package:provider/provider.dart';
 import '../../../action_button.dart';
 import '../../../brightness_observer.dart';
 import '../../../full_screen_portal.dart';
+import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 
 class ImagePreviewPortal extends StatelessWidget {
@@ -242,8 +242,8 @@ class _Item extends StatelessWidget {
         child: Image.file(
           File(message.mediaUrl ?? ''),
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => Image.memory(
-            base64Decode(message.thumbImage!),
+          errorBuilder: (_, __, ___) => ImageByBase64(
+            message.thumbImage!,
             fit: BoxFit.contain,
           ),
         ),

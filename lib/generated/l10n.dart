@@ -507,10 +507,10 @@ class Localization {
     );
   }
 
-  /// `post`
+  /// `Post`
   String get post {
     return Intl.message(
-      'post',
+      'Post',
       name: 'post',
       desc: '',
       args: [],
@@ -1282,6 +1282,76 @@ class Localization {
     return Intl.message(
       'Edit group description',
       name: 'editAnnouncement',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Media`
+  String get media {
+    return Intl.message(
+      'Media',
+      name: 'media',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Links`
+  String get links {
+    return Intl.message(
+      'Links',
+      name: 'links',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `NO MEDIA`
+  String get noMedia {
+    return Intl.message(
+      'NO MEDIA',
+      name: 'noMedia',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `NO AUDIO`
+  String get noAudio {
+    return Intl.message(
+      'NO AUDIO',
+      name: 'noAudio',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `NO POST`
+  String get noPost {
+    return Intl.message(
+      'NO POST',
+      name: 'noPost',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `NO FILE`
+  String get noFile {
+    return Intl.message(
+      'NO FILE',
+      name: 'noFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `NO LINK`
+  String get noLink {
+    return Intl.message(
+      'NO LINK',
+      name: 'noLink',
       desc: '',
       args: [],
     );

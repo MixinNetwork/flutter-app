@@ -24,6 +24,7 @@ import 'package:tuple/tuple.dart';
 import 'bloc/quote_message_cubit.dart';
 import 'chat_slide_page/circle_manager_page.dart';
 import 'chat_slide_page/search_message_page.dart';
+import 'chat_slide_page/shared_media_page.dart';
 
 class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   ChatSideCubit() : super(const ResponsiveNavigatorState());
@@ -31,6 +32,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const infoPage = 'infoPage';
   static const circles = 'circles';
   static const searchMessageHistory = 'searchMessageHistory';
+  static const sharedMedia = 'sharedMedia';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -57,6 +59,12 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           key: ValueKey(searchMessageHistory),
           name: searchMessageHistory,
           child: SearchMessagePage(),
+        );
+      case sharedMedia:
+        return const MaterialPage(
+          key: ValueKey(sharedMedia),
+          name: sharedMedia,
+          child: SharedMediaPage(),
         );
       default:
         throw ArgumentError('Invalid route');

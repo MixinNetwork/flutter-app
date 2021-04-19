@@ -45,7 +45,7 @@
   "video": "Video",
   "live": "Live",
   "file": "File",
-  "post": "post",
+  "post": "Post",
   "location": "Location",
   "audio": "Audio",
   "contact": "Contact",
@@ -121,6 +121,13 @@
   "mute1week": "1 Week",
   "mute1year": "1 Year",
   "searchMessageHistory": "Search Conversation",
-  "addAnnouncement":"Add group description",
-  "editAnnouncement":"Edit group description"
+  "addAnnouncement": "Add group description",
+  "editAnnouncement": "Edit group description",
+  "media": "Media",
+  "links": "Links",
+  "noMedia": "NO MEDIA",
+  "noAudio": "NO AUDIO",
+  "noPost": "NO POST",
+  "noFile": "NO FILE",
+  "noLink": "NO LINK"
 }

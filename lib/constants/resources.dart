@@ -43,6 +43,11 @@ class Resources {
 
   static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
 
+  static const String assetsImagesEmptyFileSvg = 'assets/images/empty_file.svg';
+
+  static const String assetsImagesEmptyImageSvg =
+      'assets/images/empty_image.svg';
+
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 
   static const String assetsImagesFileSvg = 'assets/images/file.svg';
