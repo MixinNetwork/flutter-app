@@ -1,4 +1,7 @@
+import 'package:flutter_app/blaze/blaze_param.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:uuid/uuid.dart';
 
 part 'blaze_message.g.dart';
 
@@ -25,4 +28,9 @@ class BlazeMessage {
   Map<String, dynamic>? data;
 
   Map<String, dynamic> toJson() => _$BlazeMessageToJson(this);
+}
+
+BlazeMessage createParamBlazeMessage(BlazeMessageParam param) {
+  return BlazeMessage(
+      id: const Uuid().v4(), action: createMessage, params: param);
 }

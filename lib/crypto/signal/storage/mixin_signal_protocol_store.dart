@@ -1,3 +1,5 @@
+import 'package:flutter_app/crypto/signal/storage/mixin_identity_key_store.dart';
+import 'package:flutter_app/crypto/signal/storage/mixin_session_store.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
 class MixinSignalProtocolStore extends SignalProtocolStore {
@@ -6,8 +8,8 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
 
   final PreKeyStore preKeyStore;
   final SignedPreKeyStore signedPreKeyStore;
-  final IdentityKeyStore identityKeyStore;
-  final SessionStore sessionStore;
+  final MixinIdentityKeyStore identityKeyStore;
+  final MixinSessionStore sessionStore;
 
   @override
   bool containsPreKey(int preKeyId) {
@@ -108,5 +110,9 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   @override
   bool saveIdentity(SignalProtocolAddress address, IdentityKey? identityKey) {
     return identityKeyStore.saveIdentity(address, identityKey);
+  }
+
+  void removeIdentity(SignalProtocolAddress address) {
+    identityKeyStore.removeIdentity(address);
   }
 }

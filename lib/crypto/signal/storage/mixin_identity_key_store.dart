@@ -78,4 +78,8 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
     }
     return false;
   }
+
+  void removeIdentity(SignalProtocolAddress address) {
+    identityDao.delete(address.getName());
+  }
 }

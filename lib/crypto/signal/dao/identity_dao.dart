@@ -19,4 +19,12 @@ class IdentityDao {
   void insert(Identity identity) {
     identityBox.put(identity);
   }
+
+  int delete(String address) {
+    final query =
+        identityBox.query(Identity_.address.equals(address.toString())).build();
+    final count = query.remove();
+    query.close();
+    return count;
+  }
 }
