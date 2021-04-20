@@ -20,6 +20,7 @@ import 'package:tuple/tuple.dart';
 
 import 'account/account_server.dart';
 import 'bloc/keyword_cubit.dart';
+import 'bloc/minute_timer_cubit.dart';
 import 'constants/brightness_theme_data.dart';
 
 class App extends StatelessWidget {
@@ -115,6 +116,9 @@ class _Providers extends StatelessWidget {
               ),
               BlocProvider(
                 create: (BuildContext context) => KeywordCubit(),
+              ),
+              BlocProvider(
+                create: (BuildContext context) => MinuteTimerCubit(),
               ),
             ],
             child: Builder(

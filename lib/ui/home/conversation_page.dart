@@ -2,7 +2,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/bloc/keyword_cubit.dart';
+import 'package:flutter_app/bloc/minute_timer_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
@@ -524,12 +526,15 @@ class _SearchItem extends StatelessWidget {
                           ),
                         ),
                         if (date != null)
-                          Text(
-                            convertStringTime(date!),
-                            style: TextStyle(
-                              color:
-                                  BrightnessData.themeOf(context).secondaryText,
-                              fontSize: 12,
+                          BlocConverter<MinuteTimerCubit, DateTime, String>(
+                            converter: (_) => convertStringTime(date!),
+                            builder: (context, text) => Text(
+                              text,
+                              style: TextStyle(
+                                color: BrightnessData.themeOf(context)
+                                    .secondaryText,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                       ],
@@ -893,13 +898,16 @@ class _Item extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            Text(
-                              convertStringTime(
+                            BlocConverter<MinuteTimerCubit, DateTime, String>(
+                              converter: (_) => convertStringTime(
                                   conversation.lastMessageCreatedAt ??
                                       conversation.createdAt),
-                              style: TextStyle(
-                                color: messageColor,
-                                fontSize: 12,
+                              builder: (context, text) => Text(
+                                text,
+                                style: TextStyle(
+                                  color: messageColor,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           ],

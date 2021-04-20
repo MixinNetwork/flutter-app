@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/bloc/minute_timer_cubit.dart';
+import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
-class MessageDatetime extends StatelessWidget {
+class MessageDatetime extends HookWidget {
   const MessageDatetime({
     Key? key,
     required this.dateTime,
@@ -15,8 +18,11 @@ class MessageDatetime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final text = useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
+      converter: (_) => DateFormat.jm().format(dateTime),
+    );
     return Text(
-      DateFormat.jm().format(dateTime),
+      text,
       style: TextStyle(
         fontSize: 10,
         color: color ??
