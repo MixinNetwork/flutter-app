@@ -90,7 +90,7 @@ class ChatInfoPage extends HookWidget {
                 if (isGroupConversation)
                   CellGroup(
                     child: CellItem(
-                      title: Localization.of(context).shareContact,
+                      title: Text(Localization.of(context).shareContact),
                       onTap: () async {
                         final result = await showConversationSelector(
                           context: context,
@@ -116,13 +116,13 @@ class ChatInfoPage extends HookWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       CellItem(
-                        title: Localization.of(context).sharedMedia,
+                        title: Text(Localization.of(context).sharedMedia),
                         onTap: () => context
                             .read<ChatSideCubit>()
                             .pushPage(ChatSideCubit.sharedMedia),
                       ),
                       CellItem(
-                        title: Localization.of(context).searchMessageHistory,
+                        title: Text(Localization.of(context).searchMessageHistory),
                         onTap: () => context
                             .read<ChatSideCubit>()
                             .pushPage(ChatSideCubit.searchMessageHistory),
@@ -143,7 +143,7 @@ class ChatInfoPage extends HookWidget {
                                   ? Localization.of(context).addAnnouncement
                                   : Localization.of(context).editAnnouncement;
                           return CellItem(
-                            title: announcementTitle,
+                            title: Text(announcementTitle),
                             onTap: () async {
                               final result = await showMixinDialog<String>(
                                 context: context,
@@ -167,7 +167,7 @@ class ChatInfoPage extends HookWidget {
                         }),
                         if (!isGroupConversation)
                           CellItem(
-                            title: Localization.of(context).editName,
+                            title: Text(Localization.of(context).editName),
                             onTap: () async {
                               final name = await showMixinDialog<String>(
                                 context: context,
@@ -195,9 +195,9 @@ class ChatInfoPage extends HookWidget {
                   child: Column(
                     children: [
                       CellItem(
-                        title: muting
+                        title: Text(muting
                             ? Localization.of(context).unMute
-                            : Localization.of(context).muted,
+                            : Localization.of(context).muted),
                         description: muting
                             ? Text(
                                 DateFormat('yyyy/MM/dd, hh:mm a').format(
@@ -234,7 +234,7 @@ class ChatInfoPage extends HookWidget {
                 ),
                 CellGroup(
                   child: CellItem(
-                    title: Localization.of(context).circles,
+                    title: Text(Localization.of(context).circles),
                     description: const _CircleNames(),
                     onTap: () => context.read<ChatSideCubit>().pushPage(
                           ChatSideCubit.circles,
@@ -252,7 +252,7 @@ class ChatInfoPage extends HookWidget {
                       if (conversation.relationship ==
                           UserRelationship.blocking)
                         CellItem(
-                          title: Localization.of(context).unblock,
+                          title: Text(Localization.of(context).unblock),
                           color: BrightnessData.themeOf(context).red,
                           trailing: null,
                           onTap: () async {
@@ -274,7 +274,7 @@ class ChatInfoPage extends HookWidget {
                               ? Localization.of(context).removeBot
                               : Localization.of(context).removeContact;
                           return CellItem(
-                            title: title,
+                            title: Text(title),
                             color: BrightnessData.themeOf(context).red,
                             trailing: null,
                             onTap: () async {
@@ -293,7 +293,7 @@ class ChatInfoPage extends HookWidget {
                         }),
                       if (conversation.isStranger!)
                         CellItem(
-                          title: Localization.of(context).block,
+                          title: Text(Localization.of(context).block),
                           color: BrightnessData.themeOf(context).red,
                           trailing: null,
                           onTap: () async {
@@ -310,7 +310,7 @@ class ChatInfoPage extends HookWidget {
                           },
                         ),
                       CellItem(
-                        title: Localization.of(context).clearChat,
+                        title: Text(Localization.of(context).clearChat),
                         color: BrightnessData.themeOf(context).red,
                         trailing: null,
                         onTap: () async {
@@ -329,7 +329,7 @@ class ChatInfoPage extends HookWidget {
                       if (conversation.isGroup!)
                         if (userParticipant != null)
                           CellItem(
-                            title: Localization.of(context).exitGroup,
+                            title: Text(Localization.of(context).exitGroup),
                             color: BrightnessData.themeOf(context).red,
                             trailing: null,
                             onTap: () async {
@@ -348,7 +348,7 @@ class ChatInfoPage extends HookWidget {
                           )
                         else
                           CellItem(
-                            title: Localization.of(context).deleteGroup,
+                            title: Text(Localization.of(context).deleteGroup),
                             color: BrightnessData.themeOf(context).red,
                             trailing: null,
                             onTap: () async {
@@ -386,7 +386,7 @@ class ChatInfoPage extends HookWidget {
                 if (!isGroupConversation)
                   CellGroup(
                     child: CellItem(
-                      title: Localization.of(context).report,
+                      title: Text(Localization.of(context).report),
                       color: BrightnessData.themeOf(context).red,
                       trailing: null,
                       onTap: () async {

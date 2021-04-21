@@ -46,7 +46,7 @@ class BackupPage extends HookWidget {
             const SizedBox(height: 30),
             CellGroup(
               child: CellItem(
-                title: Localization.of(context).backup,
+                title: Text(Localization.of(context).backup),
               ),
             ),
             Container(
@@ -64,7 +64,7 @@ class BackupPage extends HookWidget {
               child: Column(
                 children: [
                   CellItem(
-                    title: Localization.of(context).autoBackup,
+                    title: Text(Localization.of(context).autoBackup),
                     trailing: CupertinoSwitch(
                       activeColor: BrightnessData.themeOf(context).accent,
                       value: true,
@@ -72,7 +72,7 @@ class BackupPage extends HookWidget {
                     ),
                   ),
                   CellItem(
-                    title: Localization.of(context).includeFiles,
+                    title: Text(Localization.of(context).includeFiles),
                     trailing: CupertinoSwitch(
                       activeColor: BrightnessData.themeOf(context).accent,
                       value: true,
@@ -80,7 +80,7 @@ class BackupPage extends HookWidget {
                     ),
                   ),
                   CellItem(
-                    title: Localization.of(context).includeVideos,
+                    title: Text(Localization.of(context).includeVideos),
                     trailing: CupertinoSwitch(
                       activeColor: BrightnessData.themeOf(context).accent,
                       value: true,

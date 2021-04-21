@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:mime/mime.dart';
 
@@ -28,4 +30,25 @@ extension XFileExtension on file_selector.XFile {
             'video/webm',
           ].contains(mimeType?.toLowerCase()) ||
           {'mkv', 'avi'}.contains(extensionFromMime(mimeType!)));
+}
+
+Future<int> getTotalSizeOfFile(String path) async {
+  final file = File(path);
+  if (await file.exists())
+    return await file.length();
+  final directory = Directory(path);
+  if (await directory.exists()) {
+    List<FileSystemEntity> children;
+    try {
+      children = await directory.list().toList();
+    } catch (e) {
+      children = [];
+    }
+    var total = 0;
+    for (final child in children) {
+      total += await getTotalSizeOfFile(child.path);
+    }
+    return total;
+  }
+  return 0;
 }

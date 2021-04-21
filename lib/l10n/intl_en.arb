@@ -140,6 +140,7 @@
   "privacyPolicy": "Privacy Policy",
   "photos": "Photos",
   "videos": "Videos",
+  "audios": "Audios",
   "files": "Files",
   "storageUsage": "Storage Usage",
   "storageAutoDownloadDescription": "Change auto-download settings for medias. ",
@@ -147,5 +148,6 @@
   "backup": "Backup",
   "autoBackup": "Auto Backup",
   "includeFiles": "Include Files",
-  "includeVideos": "Include Videos"
+  "includeVideos": "Include Videos",
+  "clear": "Clear"
 }

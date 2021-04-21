@@ -12,17 +12,22 @@ class CellGroup extends StatelessWidget {
     Key? key,
     this.borderRadius = const BorderRadius.all(Radius.circular(8)),
     required this.child,
+    this.padding = const EdgeInsets.only(right: 10, left: 10, bottom: 10),
   }) : super(key: key);
 
   final BorderRadius borderRadius;
   final Widget child;
+  final EdgeInsetsGeometry padding;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(right: 10, left: 10, bottom: 10),
-        child: ClipRRect(
-          borderRadius: borderRadius,
-          child: child,
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 600),
+        child: Padding(
+          padding: padding,
+          child: ClipRRect(
+            borderRadius: borderRadius,
+            child: child,
+          ),
         ),
       );
 }
@@ -30,7 +35,7 @@ class CellGroup extends StatelessWidget {
 class CellItem extends StatelessWidget {
   const CellItem({
     Key? key,
-    this.assetName,
+    this.leading,
     required this.title,
     this.color,
     this.onTap,
@@ -39,8 +44,8 @@ class CellItem extends StatelessWidget {
     this.description,
   }) : super(key: key);
 
-  final String? assetName;
-  final String title;
+  final Widget? leading;
+  final Widget title;
   final Color? color;
   final VoidCallback? onTap;
   final bool selected;
@@ -63,45 +68,43 @@ class CellItem extends StatelessWidget {
         backgroundColor,
       );
     }
-    return ConstrainedBox(
-      constraints: const BoxConstraints(maxWidth: 600),
-      child: InteractableDecoratedBox(
-        decoration: BoxDecoration(
-          color: selectedBackgroundColor,
+    return InteractableDecoratedBox(
+      decoration: BoxDecoration(
+        color: selectedBackgroundColor,
+      ),
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          top: 17,
+          bottom: 17,
+          left: 16,
+          right: 10,
         ),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.only(
-            top: 17,
-            bottom: 17,
-            left: 16,
-            right: 10,
-          ),
-          child: Row(
-            children: [
-              if (assetName != null)
-                SvgPicture.asset(
-                  assetName!,
-                  width: 24,
-                  height: 24,
+        child: Row(
+          children: [
+            if (leading != null) leading!,
+            if (leading != null) const SizedBox(width: 8),
+            Expanded(
+              child: DefaultTextStyle(
+                style: TextStyle(
+                  fontSize: 16,
                   color: dynamicColor,
                 ),
-              if (assetName != null) const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: dynamicColor,
-                  ),
-                ),
+                child: title,
               ),
-              if (description != null) const SizedBox(width: 4),
-              if (description != null) description!,
-              if (trailing != null) const SizedBox(width: 4),
-              if (trailing != null) trailing!,
-            ],
-          ),
+            ),
+            if (description != null) const SizedBox(width: 4),
+            if (description != null)
+              DefaultTextStyle(
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).secondaryText,
+                  fontSize: 14,
+                ),
+                child: description!,
+              ),
+            if (trailing != null) const SizedBox(width: 4),
+            if (trailing != null) trailing!,
+          ],
         ),
       ),
     );

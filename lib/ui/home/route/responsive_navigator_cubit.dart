@@ -7,6 +7,8 @@ import 'package:flutter_app/ui/setting/backup_page.dart';
 import 'package:flutter_app/ui/setting/edit_profile_page.dart';
 import 'package:flutter_app/ui/setting/notification_page.dart';
 import 'package:flutter_app/ui/setting/storage_page.dart';
+import 'package:flutter_app/ui/setting/storage_usage_detail_page.dart';
+import 'package:flutter_app/ui/setting/storage_usage_list_page.dart';
 import 'package:tuple/tuple.dart';
 
 part 'responsive_navigator_state.dart';
@@ -23,6 +25,8 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
   static const dataAndStorageUsagePage = 'dataAndStorageUsagePage';
   static const appearancePage = 'appearancePage';
   static const aboutPage = 'aboutPage';
+  static const storageUsage = 'storageUsage';
+  static const storageUsageDetail = 'storageUsageDetail';
 
   static const settingTitlePageSet = {
     editProfilePage,
@@ -82,6 +86,27 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
           name: aboutPage,
           child: AboutPage(
             key: ValueKey(aboutPage),
+          ),
+        );
+      case storageUsage:
+        return const MaterialPage(
+          key: ValueKey(storageUsage),
+          name: storageUsage,
+          child: StorageUsageListPage(
+            key: ValueKey(storageUsage),
+          ),
+        );
+      case storageUsageDetail:
+        if (arguments == null || !(arguments is Tuple2<String, String>))
+          throw ArgumentError('Invalid route');
+
+        return MaterialPage(
+          key: const ValueKey(storageUsageDetail),
+          name: storageUsageDetail,
+          child: StorageUsageDetailPage(
+            key: const ValueKey(storageUsageDetail),
+            name: arguments.item1,
+            conversationId: arguments.item2,
           ),
         );
       default:

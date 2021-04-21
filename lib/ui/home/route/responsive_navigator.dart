@@ -40,9 +40,19 @@ abstract class AbstractResponsiveNavigatorCubit
     ));
   }
 
-  void popWhere(bool Function(MaterialPage page) test) => emit(state.copyWith(
-        pages: state.pages.toList()..removeWhere(test),
-      ));
+  void popUntil(bool Function(MaterialPage page) test) {
+    final index = state.pages.indexWhere(test);
+    if (index == -1) return;
+
+    List<MaterialPage>? list;
+    if (index == 0)
+      list = [];
+    else
+      list = state.pages.toList()..sublist(0, index);
+    emit(state.copyWith(
+      pages: list,
+    ));
+  }
 
   void clear() => emit(state.copyWith(pages: []));
 }

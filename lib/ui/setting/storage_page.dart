@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
@@ -35,7 +36,7 @@ class StoragePage extends HookWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CellItem(
-                      title: Localization.of(context).photos,
+                      title: Text(Localization.of(context).photos),
                       trailing: CupertinoSwitch(
                         activeColor: BrightnessData.themeOf(context).accent,
                         value: authState.currentPhotoAutoDownload,
@@ -45,7 +46,7 @@ class StoragePage extends HookWidget {
                       ),
                     ),
                     CellItem(
-                      title: Localization.of(context).videos,
+                      title: Text(Localization.of(context).videos),
                       trailing: CupertinoSwitch(
                         activeColor: BrightnessData.themeOf(context).accent,
                         value: authState.currentVideoAutoDownload,
@@ -55,7 +56,7 @@ class StoragePage extends HookWidget {
                       ),
                     ),
                     CellItem(
-                      title: Localization.of(context).files,
+                      title: Text(Localization.of(context).files),
                       trailing: CupertinoSwitch(
                         activeColor: BrightnessData.themeOf(context).accent,
                         value: authState.currentFileAutoDownload,
@@ -79,8 +80,10 @@ class StoragePage extends HookWidget {
               ),
               CellGroup(
                 child: CellItem(
-                  title: Localization.of(context).storageUsage,
-                  onTap: () {},
+                  title: Text(Localization.of(context).storageUsage),
+                  onTap: () => context
+                      .read<ResponsiveNavigatorCubit>()
+                      .pushPage(ResponsiveNavigatorCubit.storageUsage),
                 ),
               )
             ],

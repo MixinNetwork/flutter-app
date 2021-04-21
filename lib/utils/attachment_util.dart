@@ -11,14 +11,14 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 class AttachmentUtil {
-  AttachmentUtil(this._client, this._messagesDao, this._mediaPath) {
+  AttachmentUtil(this._client, this._messagesDao, this.mediaPath) {
     _attachmentClient = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10)
       ..badCertificateCallback =
       ((X509Certificate cert, String host, int port) => true);
   }
 
-  final String _mediaPath;
+  final String mediaPath;
   final MessagesDao _messagesDao;
   final Client _client;
   late final HttpClient _attachmentClient;
@@ -128,13 +128,13 @@ class AttachmentUtil {
     assert(category.isAttachment);
     String? path;
     if (category.isImage) {
-      path = _getImagesPath(conversationId);
+      path = getImagesPath(conversationId);
     } else if (category.isVideo) {
-      path = _getVideosPath(conversationId);
+      path = getVideosPath(conversationId);
     } else if (category.isAudio) {
-      path = _getAudiosPath(conversationId);
+      path = getAudiosPath(conversationId);
     } else {
-      path = _getFilesPath(conversationId);
+      path = getFilesPath(conversationId);
     }
     return File(p.join(path, messageId));
   }
@@ -146,20 +146,20 @@ class AttachmentUtil {
   }) =>
       getAttachmentFile(category, conversationId, messageId);
 
-  String _getImagesPath(String conversationId) {
-    return p.join(_mediaPath, 'Images', conversationId);
+  String getImagesPath(String conversationId) {
+    return p.join(mediaPath, 'Images', conversationId);
   }
 
-  String _getVideosPath(String conversationId) {
-    return p.join(_mediaPath, 'Videos', conversationId);
+  String getVideosPath(String conversationId) {
+    return p.join(mediaPath, 'Videos', conversationId);
   }
 
-  String _getAudiosPath(String conversationId) {
-    return p.join(_mediaPath, 'Audios', conversationId);
+  String getAudiosPath(String conversationId) {
+    return p.join(mediaPath, 'Audios', conversationId);
   }
 
-  String _getFilesPath(String conversationId) {
-    return p.join(_mediaPath, 'Files', conversationId);
+  String getFilesPath(String conversationId) {
+    return p.join(mediaPath, 'Files', conversationId);
   }
 
   static Future<AttachmentUtil> init(Client client, MessagesDao messagesDao,

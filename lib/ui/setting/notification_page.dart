@@ -33,7 +33,7 @@ class NotificationPage extends HookWidget {
           children: [
             CellGroup(
               child: CellItem(
-                title: Localization.of(context).messagePreview,
+                title: Text(Localization.of(context).messagePreview),
                 trailing: CupertinoSwitch(
                   activeColor: BrightnessData.themeOf(context).accent,
                   value: currentMessagePreview,

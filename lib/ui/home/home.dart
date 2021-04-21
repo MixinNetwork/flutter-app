@@ -76,7 +76,7 @@ class _CenterPage extends StatelessWidget {
         listener: (context, isSetting) {
           final responsiveNavigatorCubit = context.read<ResponsiveNavigatorCubit>();
 
-          responsiveNavigatorCubit.popWhere((page) {
+          responsiveNavigatorCubit.popUntil((page) {
             if (responsiveNavigatorCubit.state.navigationMode) return true;
 
             return ResponsiveNavigatorCubit.settingTitlePageSet

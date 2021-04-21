@@ -8,6 +8,7 @@ import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/cell.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class SettingPage extends StatelessWidget {
@@ -99,14 +100,19 @@ class _Item extends StatelessWidget {
             !state.navigationMode &&
             state.pages.any((element) => pageName == element.name),
         builder: (context, selected) => CellItem(
-          assetName: assetName,
-          title: title,
+          leading: SvgPicture.asset(
+            assetName,
+            width: 24,
+            height: 24,
+            color: BrightnessData.themeOf(context).text,
+          ),
+          title: Text(title),
           color: color,
           selected: selected,
           onTap: () {
             if (onTap == null && pageName != null) {
               context.read<ResponsiveNavigatorCubit>()
-                ..popWhere((page) => ResponsiveNavigatorCubit
+                ..popUntil((page) => ResponsiveNavigatorCubit
                     .settingTitlePageSet
                     .contains(page.name))
                 ..pushPage(pageName!);

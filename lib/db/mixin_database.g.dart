@@ -12767,6 +12767,26 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {participants}).map(participants.mapFromRow);
   }
 
+  Selectable<ConversationStorageUsage> conversationStorageUsage() {
+    return customSelect(
+        'SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,u.full_name, u.avatar_url, u.is_verified\n        FROM conversations c INNER JOIN users u ON u.user_id = c.owner_id WHERE c.category IS NOT NULL',
+        variables: [],
+        readsFrom: {conversations, users}).map((QueryRow row) {
+      return ConversationStorageUsage(
+        conversationId: row.read<String>('conversation_id'),
+        ownerId: row.read<String?>('owner_id'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        iconUrl: row.read<String?>('icon_url'),
+        name: row.read<String?>('name'),
+        identityNumber: row.read<String>('identity_number'),
+        fullName: row.read<String?>('full_name'),
+        avatarUrl: row.read<String?>('avatar_url'),
+        isVerified: row.read<bool?>('is_verified'),
+      );
+    });
+  }
+
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
@@ -14032,6 +14052,74 @@ class SearchConversationItem {
           ..write('avatarUrl: $avatarUrl, ')
           ..write('isVerified: $isVerified, ')
           ..write('appId: $appId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ConversationStorageUsage {
+  final String conversationId;
+  final String? ownerId;
+  final ConversationCategory? category;
+  final String? iconUrl;
+  final String? name;
+  final String identityNumber;
+  final String? fullName;
+  final String? avatarUrl;
+  final bool? isVerified;
+  ConversationStorageUsage({
+    required this.conversationId,
+    this.ownerId,
+    this.category,
+    this.iconUrl,
+    this.name,
+    required this.identityNumber,
+    this.fullName,
+    this.avatarUrl,
+    this.isVerified,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      conversationId.hashCode,
+      $mrjc(
+          ownerId.hashCode,
+          $mrjc(
+              category.hashCode,
+              $mrjc(
+                  iconUrl.hashCode,
+                  $mrjc(
+                      name.hashCode,
+                      $mrjc(
+                          identityNumber.hashCode,
+                          $mrjc(
+                              fullName.hashCode,
+                              $mrjc(avatarUrl.hashCode,
+                                  isVerified.hashCode)))))))));
+  @override
+  bool operator ==(dynamic other) =>
+      identical(this, other) ||
+      (other is ConversationStorageUsage &&
+          other.conversationId == this.conversationId &&
+          other.ownerId == this.ownerId &&
+          other.category == this.category &&
+          other.iconUrl == this.iconUrl &&
+          other.name == this.name &&
+          other.identityNumber == this.identityNumber &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.isVerified == this.isVerified);
+  @override
+  String toString() {
+    return (StringBuffer('ConversationStorageUsage(')
+          ..write('conversationId: $conversationId, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('category: $category, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('name: $name, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('isVerified: $isVerified')
           ..write(')'))
         .toString();
   }

@@ -136,11 +136,13 @@
   "privacyPolicy": "隐私政策",
   "photos": "照片",
   "videos": "视频",
+  "audios": "音频",
   "files": "文档",
   "storageUsage": "储存空间",
   "storageAutoDownloadDescription": "更改媒体的自动下载设置。",
   "backup": "备份",
   "autoBackup": "自动备份",
   "includeFiles": "包含文件",
-  "includeVideos": "包括视频"
+  "includeVideos": "包括视频",
+  "clear": "清除"
 }

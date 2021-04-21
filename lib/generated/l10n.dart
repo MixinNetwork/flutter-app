@@ -1457,6 +1457,16 @@ class Localization {
     );
   }
 
+  /// `Audios`
+  String get audios {
+    return Intl.message(
+      'Audios',
+      name: 'audios',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Files`
   String get files {
     return Intl.message(
@@ -1532,6 +1542,16 @@ class Localization {
     return Intl.message(
       'Include Videos',
       name: 'includeVideos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear`
+  String get clear {
+    return Intl.message(
+      'Clear',
+      name: 'clear',
       desc: '',
       args: [],
     );

@@ -22,6 +22,7 @@ import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
+import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/utils/stream_extension.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
@@ -810,4 +811,27 @@ class AccountServer {
   Future<void> pin(String conversationId) async {
     // todo
   }
+
+  Future<int> getConversationMediaSize(String conversationId) async =>
+      (await getTotalSizeOfFile(
+          _attachmentUtil.getImagesPath(conversationId))) +
+      (await getTotalSizeOfFile(
+          _attachmentUtil.getVideosPath(conversationId))) +
+      (await getTotalSizeOfFile(
+          _attachmentUtil.getAudiosPath(conversationId))) +
+      (await getTotalSizeOfFile(_attachmentUtil.getFilesPath(conversationId)));
+
+  String getImagesPath(String conversationId) =>
+      _attachmentUtil.getImagesPath(conversationId);
+
+  String getVideosPath(String conversationId) =>
+      _attachmentUtil.getVideosPath(conversationId);
+
+  String getAudiosPath(String conversationId) =>
+      _attachmentUtil.getAudiosPath(conversationId);
+
+  String getFilesPath(String conversationId) =>
+      _attachmentUtil.getFilesPath(conversationId);
+
+  String getMediaFilePath() => _attachmentUtil.mediaPath;
 }
