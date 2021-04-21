@@ -1,3 +1,5 @@
+import 'package:uuid/uuid.dart';
+
 extension StringExtension on String {
   String fts5ContentFilter() {
     final text = trim();
@@ -20,6 +22,15 @@ extension StringExtension on String {
   }
 
   static final regExp = RegExp('[a-zA-Z0-9]');
+}
+
+extension NullableStringExtension on String? {
+  int getDeviceId() {
+    if (this == null || this?.isEmpty == true) {
+      return 1;
+    }
+    return const Uuid().v4().hashCode;
+  }
 }
 
 String minOf(String a, String b) {

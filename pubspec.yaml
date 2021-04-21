@@ -39,7 +39,10 @@ dependencies:
   web_socket_channel: ^2.1.0
   moor: ^4.2.1
   sqlite3_flutter_libs: ^0.4.1
-  libsignal_protocol_dart: ^0.3.0-nullsafety.0
+  libsignal_protocol_dart:
+    git:
+        url: https://github.com/MixinNetwork/libsignal_protocol_dart.git
+        ref: 4a8426dbd620463202d8b6049b968116af7e8548
   path_provider: ^2.0.1
   path: ^1.8.0
   hive: ^2.0.4
@@ -77,7 +80,6 @@ dependencies:
   flutter_local_notifications: ^5.0.0+4
   flutter_app_icon_badge: ^2.0.0
   flutter_hooks: ^0.16.0
-  objectbox: ^0.14.0
   package_info: ^2.0.0
   sliver_tools: ^0.2.2
   photo_view: ^0.11.1

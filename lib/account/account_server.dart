@@ -6,6 +6,28 @@ import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_app/account/send_message_helper.dart';
+import 'package:flutter_app/blaze/blaze.dart';
+import 'package:flutter_app/blaze/blaze_message.dart';
+import 'package:flutter_app/blaze/blaze_param.dart';
+import 'package:flutter_app/blaze/vo/contact_message.dart';
+import 'package:flutter_app/blaze/vo/sticker_message.dart';
+import 'package:flutter_app/constants/constants.dart';
+import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
+import 'package:flutter_app/crypto/signal/signal_protocol.dart';
+import 'package:flutter_app/crypto/uuid/uuid.dart';
+import 'package:flutter_app/db/database.dart';
+import 'package:flutter_app/db/extension/message_category.dart';
+import 'package:flutter_app/db/mixin_database.dart' as db;
+import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
+import 'package:flutter_app/utils/attachment_util.dart';
+import 'package:flutter_app/utils/file.dart';
+import 'package:flutter_app/utils/load_Balancer_utils.dart';
+import 'package:flutter_app/utils/stream_extension.dart';
+import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -106,6 +128,9 @@ class AccountServer {
       _attachmentUtil,
       multiAuthCubit,
     );
+
+    signalProtocol = SignalProtocol(sessionId);
+    await signalProtocol.init();
   }
 
   late String userId;
@@ -119,6 +144,8 @@ class AccountServer {
   late DecryptMessage _decryptMessage;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil _attachmentUtil;
+
+  late SignalProtocol signalProtocol;
 
   final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();
 

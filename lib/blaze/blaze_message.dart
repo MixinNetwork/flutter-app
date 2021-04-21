@@ -1,5 +1,8 @@
+import 'package:flutter_app/blaze/blaze_param.dart';
+import 'package:flutter_app/constants/constants.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:uuid/uuid.dart';
 
 part 'blaze_message.g.dart';
 
@@ -28,4 +31,9 @@ class BlazeMessage {
   MixinError? error;
 
   Map<String, dynamic> toJson() => _$BlazeMessageToJson(this);
+}
+
+BlazeMessage createParamBlazeMessage(BlazeMessageParam param) {
+  return BlazeMessage(
+      id: const Uuid().v4(), action: createMessage, params: param);
 }

@@ -521,9 +521,11 @@ packages:
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
-      name: libsignal_protocol_dart
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "4a8426dbd620463202d8b6049b968116af7e8548"
+      resolved-ref: "4a8426dbd620463202d8b6049b968116af7e8548"
+      url: "https://github.com/MixinNetwork/libsignal_protocol_dart.git"
+    source: git
     version: "0.3.0-nullsafety.0"
   logging:
     dependency: transitive
@@ -604,20 +606,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0"
-  objectbox:
-    dependency: "direct main"
-    description:
-      name: objectbox
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.14.0"
-  objectbox_generator:
-    dependency: "direct dev"
-    description:
-      name: objectbox_generator
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.14.0"
   octo_image:
     dependency: transitive
     description:
@@ -874,7 +862,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.1"
+    version: "1.8.0"
   sprintf:
     dependency: transitive
     description:

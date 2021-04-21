@@ -1,39 +1,100 @@
-// import 'package:flutter_app/crypto/db/signal_database_helper.dart';
-// import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
-// import '../vo/identity.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_app/crypto/signal/dao/identity_dao.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
-// TODO
-// class MixinIdentityKeyStore extends IdentityKeyStore {
-//   var identityDao = SignalDatabaseHelper.instance.database;
-//
-//   @override
-//   IdentityKey getIdentity(SignalProtocolAddress address) {
-//     var identity = identityDao.getIdentity(address.toString()).getSingle();
-//     // return await identity.getIdentityKey();
-//   }
-//
-//   @override
-//   IdentityKeyPair getIdentityKeyPair() {
-//     // TODO: implement getIdentityKeyPair
-//     throw UnimplementedError();
-//   }
-//
-//   @override
-//   int getLocalRegistrationId() {
-//     // TODO: implement getLocalRegistrationId
-//     throw UnimplementedError();
-//   }
-//
-//   @override
-//   bool isTrustedIdentity(SignalProtocolAddress address, IdentityKey identityKey,
-//       Direction direction) {
-//     // TODO: implement isTrustedIdentity
-//     throw UnimplementedError();
-//   }
-//
-//   @override
-//   bool saveIdentity(SignalProtocolAddress address, IdentityKey identityKey) {
-//     // TODO: implement saveIdentity
-//     throw UnimplementedError();
-//   }
-// }
+import '../signal_database.dart';
+import '../signal_vo_extension.dart';
+
+class MixinIdentityKeyStore extends IdentityKeyStore {
+  MixinIdentityKeyStore(SignalDatabase db, this._sessionId) {
+    identityDao = IdentityDao(db);
+  }
+
+  late IdentityDao identityDao;
+  late final String? _sessionId;
+
+  @override
+  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async {
+    return identityDao
+        .getIdentityByAddress(address.toString())
+        .then((value) => value!.getIdentityKey());
+  }
+
+  @override
+  Future<IdentityKeyPair> getIdentityKeyPair() async {
+    return identityDao
+        .getIdentityByAddress('-1')
+        .then((value) => value!.getIdentityKeyPair());
+  }
+
+  @override
+  Future<int> getLocalRegistrationId() async {
+    return identityDao
+        .getIdentityByAddress('-1')
+        .then((value) => value!.registrationId!);
+  }
+
+  @override
+  Future<bool> isTrustedIdentity(SignalProtocolAddress address,
+      IdentityKey? identityKey, Direction direction) async {
+    final ourNumber = _sessionId;
+    if (ourNumber == null) {
+      return false;
+    }
+    final theirAddress = address.getName();
+    if (ourNumber == address.getName()) {
+      return identityKey ==
+          await identityDao
+              .getIdentityByAddress('-1')
+              .then((value) => value?.getIdentityKey());
+    }
+    switch (direction) {
+      case Direction.SENDING:
+        return isTrustedForSending(
+            identityKey!, await identityDao.getIdentityByAddress(theirAddress));
+      case Direction.RECEIVING:
+        return true;
+      default:
+        throw AssertionError('Unknown direction: $direction');
+    }
+  }
+
+  @override
+  Future<bool> saveIdentity(
+      SignalProtocolAddress address, IdentityKey? identityKey) async {
+    final signalAddress = address.getName();
+    final identity = await identityDao.getIdentityByAddress(address.toString());
+    if (identity == null) {
+      debugPrint('Saving new identity...$address');
+      await identityDao.insert(IdentitiesCompanion.insert(
+          address: signalAddress,
+          publicKey: identityKey!.serialize(),
+          timestamp: DateTime.now().millisecondsSinceEpoch));
+      return true;
+    } else if (identity.getIdentityKey() != identityKey) {
+      debugPrint('Replacing existing identity...$address');
+      await identityDao.insert(IdentitiesCompanion.insert(
+          address: signalAddress,
+          publicKey: identityKey!.serialize(),
+          timestamp: DateTime.now().millisecondsSinceEpoch));
+      return true;
+    }
+    return false;
+  }
+
+  bool isTrustedForSending(IdentityKey identityKey, Identitie? identity) {
+    if (identity == null) {
+      debugPrint('Nothing here, returning true...');
+      return true;
+    }
+    if (identityKey != identity.getIdentityKey()) {
+      debugPrint('Identity keys don\'t match...');
+      return false;
+    }
+    return false;
+  }
+
+  void removeIdentity(SignalProtocolAddress address) {
+    identityDao.deleteByAddress(address.getName());
+  }
+}
