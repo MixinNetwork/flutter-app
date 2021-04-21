@@ -3,6 +3,7 @@ import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 import 'interacter_decorated_box.dart';
 
@@ -52,7 +53,7 @@ class CellItem extends StatelessWidget {
     final backgroundColor = BrightnessData.themeOf(context).listSelected;
     var selectedBackgroundColor = backgroundColor;
     if (selected &&
-        !ResponsiveNavigatorCubit.of(context).state.navigationMode) {
+        !context.read<ResponsiveNavigatorCubit>().state.navigationMode) {
       selectedBackgroundColor = Color.alphaBlend(
         BrightnessData.dynamicColor(
           context,
@@ -62,42 +63,45 @@ class CellItem extends StatelessWidget {
         backgroundColor,
       );
     }
-    return InteractableDecoratedBox(
-      decoration: BoxDecoration(
-        color: selectedBackgroundColor,
-      ),
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.only(
-          top: 17,
-          bottom: 17,
-          left: 16,
-          right: 10,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 600),
+      child: InteractableDecoratedBox(
+        decoration: BoxDecoration(
+          color: selectedBackgroundColor,
         ),
-        child: Row(
-          children: [
-            if (assetName != null)
-              SvgPicture.asset(
-                assetName!,
-                width: 24,
-                height: 24,
-                color: dynamicColor,
-              ),
-            if (assetName != null) const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.only(
+            top: 17,
+            bottom: 17,
+            left: 16,
+            right: 10,
+          ),
+          child: Row(
+            children: [
+              if (assetName != null)
+                SvgPicture.asset(
+                  assetName!,
+                  width: 24,
+                  height: 24,
                   color: dynamicColor,
                 ),
+              if (assetName != null) const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: dynamicColor,
+                  ),
+                ),
               ),
-            ),
-            if (description != null) const SizedBox(width: 4),
-            if (description != null) description!,
-            if (trailing != null) const SizedBox(width: 4),
-            if (trailing != null) trailing!,
-          ],
+              if (description != null) const SizedBox(width: 4),
+              if (description != null) description!,
+              if (trailing != null) const SizedBox(width: 4),
+              if (trailing != null) trailing!,
+            ],
+          ),
         ),
       ),
     );

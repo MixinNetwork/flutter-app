@@ -43,4 +43,27 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
       BlocProvider.of<MultiAuthCubit>(context);
 
   String? get currentUserId => state.current?.account.userId;
+
+  void setCurrentSetting({
+    bool? messagePreview,
+    bool? photoAutoDownload,
+    bool? videoAutoDownload,
+    bool? fileAutoDownload,
+  }) {
+    final current = state.current;
+    assert(current != null);
+
+    final auths = state.auths.toSet()
+      ..remove(current)
+      ..add(current!.copyWith(
+        messagePreview: messagePreview,
+        photoAutoDownload: photoAutoDownload,
+        videoAutoDownload: videoAutoDownload,
+        fileAutoDownload: fileAutoDownload,
+      ));
+
+    emit(MultiAuthState(
+      auths: auths,
+    ));
+  }
 }

@@ -19,6 +19,7 @@ import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import 'account/account_server.dart';
+import 'account/notification_service.dart';
 import 'bloc/keyword_cubit.dart';
 import 'bloc/minute_timer_cubit.dart';
 import 'constants/brightness_theme_data.dart';
@@ -51,6 +52,7 @@ class App extends StatelessWidget {
                   authState.account.sessionId,
                   authState.account.identityNumber,
                   authState.privateKey,
+                  () => context.read<MultiAuthCubit>().state.current!,
                 );
                 return accountServer;
               },
@@ -109,8 +111,7 @@ class _Providers extends StatelessWidget {
               BlocProvider(
                 create: (BuildContext context) => ParticipantsCubit(
                   userDao: accountServer.database.userDao,
-                  conversationCubit:
-                      context.read<ConversationCubit>(),
+                  conversationCubit: context.read<ConversationCubit>(),
                   userId: accountServer.userId,
                 ),
               ),
@@ -120,19 +121,19 @@ class _Providers extends StatelessWidget {
               BlocProvider(
                 create: (BuildContext context) => MinuteTimerCubit(),
               ),
-            ],
-            child: Builder(
-              builder: (context) => MultiBlocProvider(
-                providers: [
-                  BlocProvider(
-                    create: (BuildContext context) => ConversationListBloc(
-                      context.read<SlideCategoryCubit>(),
-                      accountServer.database,
-                    ),
-                  ),
-                ],
-                child: app,
+              BlocProvider(
+                create: (BuildContext context) => ConversationListBloc(
+                  context.read<SlideCategoryCubit>(),
+                  accountServer.database,
+                ),
               ),
+            ],
+            child: Provider<NotificationService>(
+              create: (BuildContext context) =>
+                  NotificationService(context: context),
+              lazy: false,
+              dispose: (_, notificationService) => notificationService.close(),
+              child: app,
             ),
           ),
         ),

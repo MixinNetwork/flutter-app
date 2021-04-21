@@ -4,6 +4,8 @@
 // **************************************************************************
 class Resources {
   const Resources._();
+  static const String assetsImagesAboutLogoPng = 'assets/images/about_logo.png';
+
   static const String assetsImagesAppButtonSvg = 'assets/images/app_button.svg';
 
   static const String assetsImagesAttachmentDownloadSvg =
@@ -16,6 +18,9 @@ class Resources {
   static const String assetsImagesBotFillSvg = 'assets/images/bot_fill.svg';
 
   static const String assetsImagesChatSvg = 'assets/images/chat.svg';
+
+  static const String assetsImagesChatBackupSvg =
+      'assets/images/chat_backup.svg';
 
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
 

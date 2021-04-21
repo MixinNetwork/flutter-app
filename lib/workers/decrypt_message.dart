@@ -28,6 +28,7 @@ import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/enum/system_circle_action.dart';
 import 'package:flutter_app/enum/system_user_action.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -39,10 +40,15 @@ import '../db/extension/message.dart' show QueteMessage;
 import 'injector.dart';
 
 class DecryptMessage extends Injector {
-  DecryptMessage(String userId, Database database, Client client,
-      this._sessionId,
-      this._privateKey, this._attachmentUtil)
-      : super(userId, database, client) {
+  DecryptMessage(
+    String userId,
+    Database database,
+    Client client,
+    this._sessionId,
+    this._privateKey,
+    this._attachmentUtil,
+    this.getAuthState,
+  ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
 
@@ -51,8 +57,14 @@ class DecryptMessage extends Injector {
   late final PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
 
-  // ignore: unused_field
   final AttachmentUtil _attachmentUtil;
+  final AuthState Function() getAuthState;
+
+  bool get _photoAutoDownload => getAuthState().photoAutoDownload ?? true;
+
+  bool get _videoAutoDownload => getAuthState().videoAutoDownload ?? true;
+
+  bool get _fileAutoDownload => getAuthState().fileAutoDownload ?? true;
 
   void setConversationId(String? conversationId) {
     _conversationId = conversationId;
@@ -79,7 +91,8 @@ class DecryptMessage extends Injector {
     } else if (category == MessageCategory.messageRecall) {
       await _processRecallMessage(data);
     }
-    await _updateRemoteMessageStatus(floodMessage.messageId, MessageStatus.delivered);
+    await _updateRemoteMessageStatus(
+        floodMessage.messageId, MessageStatus.delivered);
     await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
 
@@ -91,7 +104,8 @@ class DecryptMessage extends Injector {
   Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
       final plain = utf8.decode(base64.decode(data.data));
-      final plainJsonMessage = PlainJsonMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
+      final plainJsonMessage =
+          PlainJsonMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
       if (plainJsonMessage.action == acknowledgeMessageReceipts &&
           plainJsonMessage.ackMessages?.isNotEmpty == true) {
         await _markMessageStatus(plainJsonMessage.ackMessages!);
@@ -141,23 +155,28 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(
+              utf8.decode(base64.decode(data.data))));
       await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
       final systemMessage = SystemUserMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(
+              utf8.decode(base64.decode(data.data))));
       await _processSystemUserMessage(systemMessage);
     } else if (data.category == MessageCategory.systemCircle) {
       final systemMessage = SystemCircleMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(
+              utf8.decode(base64.decode(data.data))));
       await _processSystemCircleMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
       final systemSnapshot = SnapshotMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(
+              utf8.decode(base64.decode(data.data))));
       await _processSystemSnapshotMessage(data, systemSnapshot);
     } else if (data.category == MessageCategory.systemSession) {
       final systemSession = SystemSessionMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
+          await LoadBalancerUtils.jsonDecode(
+              utf8.decode(base64.decode(data.data))));
       await _processSystemSessionMessage(systemSession);
     }
     await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
@@ -196,7 +215,8 @@ class DecryptMessage extends Injector {
 
   Future<void> _processAppCard(BlazeMessageData data) async {
     final content = utf8.decode(base64.decode(data.data));
-    final appCard = AppCard.fromJson(await LoadBalancerUtils.jsonDecode(content));
+    final appCard =
+        AppCard.fromJson(await LoadBalancerUtils.jsonDecode(content));
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId!,
@@ -217,7 +237,8 @@ class DecryptMessage extends Injector {
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
     final recallMessage = RecallMessage.fromJson(
-        await LoadBalancerUtils.jsonDecode(utf8.decode(base64.decode(data.data))));
+        await LoadBalancerUtils.jsonDecode(
+            utf8.decode(base64.decode(data.data))));
     await database.messagesDao.recallMessage(recallMessage.messageId);
     await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
   }
@@ -299,12 +320,13 @@ class DecryptMessage extends Injector {
             quoteContent: quoteContent);
       });
       await database.messagesDao.insert(message, accountId);
-      await _attachmentUtil.downloadAttachment(
-        messageId: message.messageId,
-        conversationId: message.conversationId,
-        category: message.category,
-        content: message.content!,
-      );
+      if (_photoAutoDownload)
+        await _attachmentUtil.downloadAttachment(
+          messageId: message.messageId,
+          conversationId: message.conversationId,
+          category: message.category,
+          content: message.content!,
+        );
     } else if (data.category.isVideo) {
       String plain;
       if (data.category == MessageCategory.signalVideo) {
@@ -338,7 +360,8 @@ class DecryptMessage extends Injector {
             quoteContent: quoteContent);
       });
       await database.messagesDao.insert(message, accountId);
-      await _attachmentUtil.downloadAttachment(
+      if (_videoAutoDownload)
+        await _attachmentUtil.downloadAttachment(
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.category,
@@ -373,7 +396,8 @@ class DecryptMessage extends Injector {
             quoteContent: quoteContent);
       });
       await database.messagesDao.insert(message, accountId);
-      await _attachmentUtil.downloadAttachment(
+      if (_fileAutoDownload)
+        await _attachmentUtil.downloadAttachment(
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.category,
@@ -550,7 +574,8 @@ class DecryptMessage extends Injector {
     }
     final userId = systemMessage.userId ?? data.userId;
     if (userId == systemUser &&
-        (await database.userDao.findUserById(userId).getSingleOrNull()) == null) {
+        (await database.userDao.findUserById(userId).getSingleOrNull()) ==
+            null) {
       // todo UserRelationship
       await database.userDao.insert(db.User(
           userId: systemUser,
@@ -628,7 +653,8 @@ class DecryptMessage extends Injector {
     // todo process snapshot message
   }
 
-  Future<void> _processSystemSessionMessage(SystemSessionMessage systemSession) async{
+  Future<void> _processSystemSessionMessage(
+      SystemSessionMessage systemSession) async {
     // todo only run mobile client
   }
 
@@ -638,7 +664,8 @@ class DecryptMessage extends Injector {
       return;
     }
     final blazeMessage = BlazeAckMessage(
-        messageId: messageId, status: EnumToString.convertToString(status)!.toUpperCase());
+        messageId: messageId,
+        status: EnumToString.convertToString(status)!.toUpperCase());
     await database.jobsDao.insert(Job(
         jobId: const Uuid().v4(),
         action: acknowledgeMessageReceipts,

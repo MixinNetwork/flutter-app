@@ -126,5 +126,21 @@
   "noAudio": "没有音频",
   "noPost": "没有文章",
   "noFile": "没有文件",
-  "noLink": "没有链接"
+  "noLink": "没有链接",
+  "messagePreview" : "消息预览",
+  "messagePreviewDescription": "预览新消息通知中的消息文本。",
+  "followTwitter": "关注我们的 Twitter",
+  "followFacebook": "关注我们的 Facebook",
+  "helpCenter": "帮助中心",
+  "termsService": "服务条款",
+  "privacyPolicy": "隐私政策",
+  "photos": "照片",
+  "videos": "视频",
+  "files": "文档",
+  "storageUsage": "储存空间",
+  "storageAutoDownloadDescription": "更改媒体的自动下载设置。",
+  "backup": "备份",
+  "autoBackup": "自动备份",
+  "includeFiles": "包含文件",
+  "includeVideos": "包括视频"
 }

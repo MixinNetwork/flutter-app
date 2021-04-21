@@ -106,7 +106,7 @@ class Blaze {
   Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messagesDao.findMessageStatusById(messageId);
-    if (currentStatus.index < status.index) {
+    if (currentStatus != null && currentStatus.index < status.index) {
       await database.messagesDao.updateMessageStatusById(messageId, status);
     }
   }

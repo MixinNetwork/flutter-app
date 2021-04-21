@@ -35,13 +35,12 @@ class LocalNotificationCenter {
 
   static Stream<Uri> notificationSelectEvent(
           NotificationScheme notificationScheme) =>
-      _payloadStreamController.stream.where((e) =>
-          e.scheme.toUpperCase() ==
-          EnumToString.convertToString(notificationScheme));
+      _payloadStreamController.stream.where(
+          (e) => e.scheme == EnumToString.convertToString(notificationScheme));
 
   static Future<void> showNotification({
     required String title,
-    required String body,
+    String? body,
     required Uri uri,
   }) async {
     await _requestPermission();

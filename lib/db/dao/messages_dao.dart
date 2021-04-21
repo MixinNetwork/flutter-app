@@ -42,7 +42,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       )
       .distinct();
 
-  late Stream<NotificationMessage> insertMessageStream = db.eventBus
+  late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.insert)
       .asyncMap((event) => db.notificationMessage(event).getSingleOrNull())
       .where((event) => event != null)
@@ -90,8 +90,8 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<MessageStatus> findMessageStatusById(String messageId) =>
-      db.findMessageStatusById(messageId).getSingle();
+  Future<MessageStatus?> findMessageStatusById(String messageId) =>
+      db.findMessageStatusById(messageId).getSingleOrNull();
 
   Future<int> updateMediaMessageUrl(String path, String messageId) async {
     final result = await (db.update(db.messages)
@@ -261,11 +261,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Selectable<MessageItem> postMessages(
-      String conversationId, int limit, int offset) =>
+          String conversationId, int limit, int offset) =>
       db.postMessages(conversationId, offset, limit);
 
   Selectable<MessageItem> postMessagesBefore(
-      int rowid, String conversationId, int limit) =>
+          int rowid, String conversationId, int limit) =>
       db.postMessagesBefore(
         rowid,
         conversationId,
@@ -273,11 +273,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Selectable<MessageItem> fileMessages(
-      String conversationId, int limit, int offset) =>
+          String conversationId, int limit, int offset) =>
       db.fileMessages(conversationId, offset, limit);
 
   Selectable<MessageItem> fileMessagesBefore(
-      int rowid, String conversationId, int limit) =>
+          int rowid, String conversationId, int limit) =>
       db.fileMessagesBefore(
         rowid,
         conversationId,

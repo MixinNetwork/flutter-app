@@ -47,6 +47,16 @@ class Localization {
     return Localizations.of<Localization>(context, Localization);
   }
 
+  /// `Mixin Messenger`
+  String get mixinMessenger {
+    return Intl.message(
+      'Mixin Messenger',
+      name: 'mixinMessenger',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Initializing`
   String get initializing {
     return Intl.message(
@@ -1352,6 +1362,176 @@ class Localization {
     return Intl.message(
       'NO LINK',
       name: 'noLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Message Preview`
+  String get messagePreview {
+    return Intl.message(
+      'Message Preview',
+      name: 'messagePreview',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preview message text inside new message notifications.`
+  String get messagePreviewDescription {
+    return Intl.message(
+      'Preview message text inside new message notifications.',
+      name: 'messagePreviewDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Follow us on Twitter`
+  String get followTwitter {
+    return Intl.message(
+      'Follow us on Twitter',
+      name: 'followTwitter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Follow us on Facebook`
+  String get followFacebook {
+    return Intl.message(
+      'Follow us on Facebook',
+      name: 'followFacebook',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Help center`
+  String get helpCenter {
+    return Intl.message(
+      'Help center',
+      name: 'helpCenter',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Terms of Service`
+  String get termsService {
+    return Intl.message(
+      'Terms of Service',
+      name: 'termsService',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Privacy Policy`
+  String get privacyPolicy {
+    return Intl.message(
+      'Privacy Policy',
+      name: 'privacyPolicy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Photos`
+  String get photos {
+    return Intl.message(
+      'Photos',
+      name: 'photos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Videos`
+  String get videos {
+    return Intl.message(
+      'Videos',
+      name: 'videos',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Files`
+  String get files {
+    return Intl.message(
+      'Files',
+      name: 'files',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Storage Usage`
+  String get storageUsage {
+    return Intl.message(
+      'Storage Usage',
+      name: 'storageUsage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Change auto-download settings for medias. `
+  String get storageAutoDownloadDescription {
+    return Intl.message(
+      'Change auto-download settings for medias. ',
+      name: 'storageAutoDownloadDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Back up your chat history to iCloud so if you lose your iPhone or switch to a new one, your chat history is safe. You can restore your chat history when you reinstall MixinMessenger. messenger you back up are encryption while in icloud.`
+  String get chatBackupDescription {
+    return Intl.message(
+      'Back up your chat history to iCloud so if you lose your iPhone or switch to a new one, your chat history is safe. You can restore your chat history when you reinstall MixinMessenger. messenger you back up are encryption while in icloud.',
+      name: 'chatBackupDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Backup`
+  String get backup {
+    return Intl.message(
+      'Backup',
+      name: 'backup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Auto Backup`
+  String get autoBackup {
+    return Intl.message(
+      'Auto Backup',
+      name: 'autoBackup',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Include Files`
+  String get includeFiles {
+    return Intl.message(
+      'Include Files',
+      name: 'includeFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Include Videos`
+  String get includeVideos {
+    return Intl.message(
+      'Include Videos',
+      name: 'includeVideos',
       desc: '',
       args: [],
     );

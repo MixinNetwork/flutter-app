@@ -20,6 +20,7 @@ import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/utils/attachment_util.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:flutter_app/utils/stream_extension.dart';
@@ -39,6 +40,7 @@ class AccountServer {
     String sessionId,
     String identityNumber,
     String privateKey,
+    AuthState Function() getAuthState,
   ) async {
     if (sid == sessionId) return;
     sid = sessionId;
@@ -57,11 +59,12 @@ class AccountServer {
     (client.dio.transformer as DefaultTransformer).jsonDecodeCallback =
         LoadBalancerUtils.jsonDecode;
 
-    await _initDatabase(privateKey);
+    await _initDatabase(privateKey, getAuthState);
     start();
   }
 
-  Future _initDatabase(String privateKey) async {
+  Future _initDatabase(
+      String privateKey, AuthState Function() getAuthState) async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
@@ -71,7 +74,14 @@ class AccountServer {
     blaze = Blaze(userId, sessionId, privateKey, database, client);
 
     _decryptMessage = DecryptMessage(
-        userId, database, client, sessionId, this.privateKey, _attachmentUtil);
+      userId,
+      database,
+      client,
+      sessionId,
+      this.privateKey,
+      _attachmentUtil,
+      getAuthState,
+    );
   }
 
   late String userId;

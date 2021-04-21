@@ -12,6 +12,7 @@ import 'package:tuple/tuple.dart';
 import 'package:flutter_app/generated/l10n.dart';
 
 class EditProfilePage extends StatelessWidget {
+  const EditProfilePage({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final nameTextEditingController = TextEditingController();
@@ -35,7 +36,7 @@ class EditProfilePage extends StatelessWidget {
             MixinButton(
               onTap: () {},
               backgroundTransparent: true,
-              child: Text(Localization.of(context).save),
+              child: Center(child: Text(Localization.of(context).save)),
               value: 'TODO',
             ),
           ],

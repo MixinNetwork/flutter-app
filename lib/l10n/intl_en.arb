@@ -1,4 +1,5 @@
 {
+  "mixinMessenger": "Mixin Messenger",
   "initializing": "Initializing",
   "provisioning": "Provisioning",
   "pleaseWait": "Please wait a moment",
@@ -129,5 +130,22 @@
   "noAudio": "NO AUDIO",
   "noPost": "NO POST",
   "noFile": "NO FILE",
-  "noLink": "NO LINK"
+  "noLink": "NO LINK",
+  "messagePreview": "Message Preview",
+  "messagePreviewDescription": "Preview message text inside new message notifications.",
+  "followTwitter": "Follow us on Twitter",
+  "followFacebook": "Follow us on Facebook",
+  "helpCenter": "Help center",
+  "termsService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy",
+  "photos": "Photos",
+  "videos": "Videos",
+  "files": "Files",
+  "storageUsage": "Storage Usage",
+  "storageAutoDownloadDescription": "Change auto-download settings for medias. ",
+  "chatBackupDescription": "Back up your chat history to iCloud so if you lose your iPhone or switch to a new one, your chat history is safe. You can restore your chat history when you reinstall MixinMessenger. messenger you back up are encryption while in icloud.",
+  "backup": "Backup",
+  "autoBackup": "Auto Backup",
+  "includeFiles": "Include Files",
+  "includeVideos": "Include Videos"
 }

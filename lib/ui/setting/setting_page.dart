@@ -44,14 +44,15 @@ class SettingPage extends StatelessWidget {
                       ),
                       _Item(
                         assetName: Resources.assetsImagesIcStorageUsageSvg,
-                        pageName: ResponsiveNavigatorCubit.dataAndStorageUsagePage,
+                        pageName:
+                            ResponsiveNavigatorCubit.dataAndStorageUsagePage,
                         title: Localization.of(context).dataAndStorageUsage,
                       ),
-                      _Item(
-                        assetName: Resources.assetsImagesIcAppearanceSvg,
-                        pageName: ResponsiveNavigatorCubit.appearancePage,
-                        title: Localization.of(context).appearance,
-                      ),
+                      // _Item(
+                      //   assetName: Resources.assetsImagesIcAppearanceSvg,
+                      //   pageName: ResponsiveNavigatorCubit.appearancePage,
+                      //   title: Localization.of(context).appearance,
+                      // ),
                       _Item(
                         assetName: Resources.assetsImagesIcAboutSvg,
                         pageName: ResponsiveNavigatorCubit.aboutPage,
@@ -104,7 +105,11 @@ class _Item extends StatelessWidget {
           selected: selected,
           onTap: () {
             if (onTap == null && pageName != null) {
-              ResponsiveNavigatorCubit.of(context).pushPage(pageName!);
+              context.read<ResponsiveNavigatorCubit>()
+                ..popWhere((page) => ResponsiveNavigatorCubit
+                    .settingTitlePageSet
+                    .contains(page.name))
+                ..pushPage(pageName!);
               return;
             }
 
