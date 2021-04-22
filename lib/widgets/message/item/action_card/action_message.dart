@@ -6,6 +6,7 @@ import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_app/utils/action_utils.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../brightness_observer.dart';
 import '../../../interacter_decorated_box.dart';
@@ -14,7 +15,7 @@ import '../../message_datetime.dart';
 import '../../message_status.dart';
 import 'action_card_data.dart';
 
-class ActionCardMessage extends StatelessWidget {
+class ActionCardMessage extends HookWidget {
   const ActionCardMessage({
     Key? key,
     required this.message,
@@ -28,7 +29,10 @@ class ActionCardMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appCardData = AppCardData.fromJson(jsonDecode(message.content!));
+    final appCardData = useMemoized(
+      () => AppCardData.fromJson(jsonDecode(message.content!)),
+      [message.content],
+    );
     return MessageBubble(
       showNip: showNip,
       isCurrentUser: isCurrentUser,

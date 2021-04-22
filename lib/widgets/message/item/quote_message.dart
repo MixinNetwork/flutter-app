@@ -11,6 +11,7 @@ import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/utils/markdown.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +22,7 @@ import '../../image.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
 
-class QuoteMessage extends StatelessWidget {
+class QuoteMessage extends HookWidget {
   const QuoteMessage({
     Key? key,
     this.content,
@@ -35,6 +36,11 @@ class QuoteMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final decodeMap = useMemoized(() {
+      if (content == null) return null;
+      return jsonDecode(content!);
+    }, [content]);
+
     if (id?.isEmpty ?? true) return const SizedBox();
     var inputMode = false;
 
@@ -44,8 +50,7 @@ class QuoteMessage extends StatelessWidget {
         quote = message;
         inputMode = true;
       } else {
-        final map = jsonDecode(content!);
-        quote = mapToQuoteMessage(map);
+        quote = mapToQuoteMessage(decodeMap);
       }
       final MessageCategory type = quote.type;
       if (type.isText)
@@ -161,14 +166,13 @@ class QuoteMessage extends StatelessWidget {
         String? description;
         switch (type) {
           case MessageCategory.appButtonGroup:
-            description = jsonDecode(quote.content!)
+            description = decodeMap
                 .map((e) => ActionData.fromJson(e))
                 .map((e) => '[${e.label}]')
                 .join();
             break;
           case MessageCategory.appCard:
-            description =
-                AppCardData.fromJson(jsonDecode(quote.content!)).title;
+            description = AppCardData.fromJson(decodeMap).title;
             break;
           default:
             break;
