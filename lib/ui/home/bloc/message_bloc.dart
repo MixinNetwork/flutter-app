@@ -1,10 +1,10 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/bloc/subscribe_mixin.dart';
+import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/enum/message_status.dart';
 import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/db/dao/messages_dao.dart';
@@ -20,12 +20,13 @@ abstract class _MessageEvent extends Equatable {
 }
 
 class _MessageInitEvent extends _MessageEvent {
-  _MessageInitEvent({this.centerOffset});
+  _MessageInitEvent({this.centerMessageId, this.isLatest = true});
 
-  final int? centerOffset;
+  final String? centerMessageId;
+  final bool? isLatest;
 
   @override
-  List<Object?> get props => [centerOffset];
+  List<Object?> get props => [centerMessageId, isLatest];
 }
 
 class _MessageScrollEvent extends _MessageEvent {
@@ -58,8 +59,7 @@ class MessageState extends Equatable {
     this.center,
     this.bottom = const [],
     this.conversationId,
-    this.bottomOffset = 0,
-    this.topOffset = 0,
+    this.isLatest = false,
     this.initUUID,
   });
 
@@ -67,8 +67,7 @@ class MessageState extends Equatable {
   final List<MessageItem> top;
   final MessageItem? center;
   final List<MessageItem> bottom;
-  final int bottomOffset;
-  final int topOffset;
+  final bool isLatest;
   final String? initUUID;
 
   @override
@@ -77,8 +76,7 @@ class MessageState extends Equatable {
         top,
         center,
         bottom,
-        bottomOffset,
-        topOffset,
+        isLatest,
         initUUID,
       ];
 
@@ -93,8 +91,7 @@ class MessageState extends Equatable {
     final List<MessageItem>? top,
     final MessageItem? center,
     final List<MessageItem>? bottom,
-    final int? bottomOffset,
-    final int? topOffset,
+    final bool? isLatest,
     final String? initUUID,
   }) {
     return MessageState(
@@ -102,8 +99,7 @@ class MessageState extends Equatable {
       top: top ?? this.top,
       center: center ?? this.center,
       bottom: bottom ?? this.bottom,
-      bottomOffset: bottomOffset ?? this.bottomOffset,
-      topOffset: topOffset ?? this.topOffset,
+      isLatest: isLatest ?? this.isLatest,
       initUUID: initUUID ?? this.initUUID,
     );
   }
@@ -113,8 +109,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     with SubscribeMixin {
   MessageBloc({
     required this.conversationCubit,
-    required this.messagesDao,
     required this.limit,
+    required this.database,
   }) : super(const MessageState()) {
     add(_MessageInitEvent());
     addSubscription(
@@ -123,14 +119,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .map((event) =>
               Tuple2(event?.conversationId, event?.initIndexMessageId))
           .distinct()
-          .asyncMap((event) async {
-        int? index;
-        if (event.item1 != null && event.item2 != null)
-          index = await messagesDao
-              .messageIndex(event.item1!, event.item2!)
-              .getSingle();
-        return _MessageInitEvent(centerOffset: index);
-      }).listen(add),
+          .asyncMap((event) async => _MessageInitEvent(
+              centerMessageId: event.item2, isLatest: event.item2 == null))
+          .listen(add),
     );
 
     addSubscription(
@@ -141,8 +132,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   final ScrollController scrollController = ScrollController();
   final ConversationCubit conversationCubit;
-  final MessagesDao messagesDao;
+  final Database database;
   int limit;
+
+  MessagesDao get messagesDao => database.messagesDao;
 
   @override
   Stream<MessageState> mapEventToState(_MessageEvent event) async* {
@@ -159,12 +152,12 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       yield await _resetMessageList(
         conversationId,
         finalLimit,
-        event.centerOffset,
+        event.centerMessageId,
       );
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
-          if (state.bottomOffset == 0) return;
+          if (state.isLatest) return;
           yield await _after(conversationId);
         } else if (event is _MessageLoadBeforeEvent) {
           yield await _before(conversationId);
@@ -173,10 +166,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         final result = _insertOrReplace(conversationId, event.data);
         if (result != null) yield result;
       } else if (event is _MessageScrollEvent) {
-        final index = await messagesDao
-            .messageIndex(conversationId, event.messageId)
-            .getSingleOrNull();
-        if (index != null) add(_MessageInitEvent(centerOffset: index));
+        add(_MessageInitEvent(
+          centerMessageId: event.messageId,
+          isLatest: false,
+        ));
       }
     }
   }
@@ -186,53 +179,39 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   void before() => add(_MessageLoadBeforeEvent());
 
   Future<MessageState> _before(String conversationId) async {
-    final iterator = (await messagesDao
-            .messagesByConversationId(
-              conversationId,
-              limit,
-              state.topOffset,
-            )
-            .get())
-        .reversed
-        .iterator;
-    final list = <MessageItem>[];
     final topMessageId = state.topMessage?.messageId;
-    while (iterator.moveNext()) {
-      if (iterator.current.messageId == topMessageId) break;
-      list.add(iterator.current);
-    }
+    assert(topMessageId != null);
+    final list = await database.transaction(() async {
+      final rowId = await messagesDao.messageRowId(topMessageId!).getSingle();
+      return await messagesDao
+          .beforeMessagesByConversationId(rowId, conversationId, limit)
+          .get();
+    });
     final result = state.copyWith(
       top: [
-        ...list,
+        ...list.reversed.toList(),
         ...state.top,
       ],
-      topOffset: state.topOffset + list.length,
     );
     return result;
   }
 
   Future<MessageState> _after(String conversationId) async {
-    final iterator = (await messagesDao
-            .messagesByConversationId(
-              conversationId,
-              limit,
-              state.bottomOffset - limit,
-            )
-            .get())
-        .iterator;
-    final list = <MessageItem>[];
-
     final bottomMessageId = state.bottomMessage?.messageId;
-    while (iterator.moveNext()) {
-      if (iterator.current.messageId == bottomMessageId) break;
-      list.add(iterator.current);
-    }
+    assert(bottomMessageId != null);
+    final list = await database.transaction(() async {
+      final rowId =
+          await messagesDao.messageRowId(bottomMessageId!).getSingle();
+      return await messagesDao
+          .afterMessagesByConversationId(rowId, conversationId, limit)
+          .get();
+    });
+
     final result = state.copyWith(
       bottom: [
         ...state.bottom,
-        ...list.reversed,
+        ...list,
       ],
-      bottomOffset: state.bottomOffset - list.length,
     );
     return result;
   }
@@ -240,15 +219,15 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _resetMessageList(
     String conversationId,
     int limit, [
-    int? centerOffset,
+    String? centerMessageId,
   ]) async {
-    final _centerOffset = centerOffset ??
-        (conversationCubit.state?.conversation?.unseenMessageCount ?? 0) - 1;
+    final _centerMessageId = centerMessageId ??
+        conversationCubit.state?.conversation?.lastReadMessageId;
 
     final state = await _messagesByConversationId(
       conversationId,
       limit,
-      centerOffset: _centerOffset,
+      centerMessageId: _centerMessageId,
     );
 
     final result = state.copyWith(
@@ -264,41 +243,39 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   Future<MessageState> _messagesByConversationId(
     String conversationId,
     int limit, {
-    int centerOffset = 0,
+    String? centerMessageId,
   }) async {
-    final bottomOffset = max(centerOffset - limit ~/ 2, 0);
-    final list = await messagesDao
-        .messagesByConversationId(
-          conversationId,
-          limit,
-          bottomOffset,
-        )
-        .get();
-    final topOffset = list.length + bottomOffset;
+    if (centerMessageId == null) {
+      final list = await messagesDao
+          .messagesByConversationId(
+            conversationId,
+            limit,
+            0,
+          )
+          .get();
 
-    MessageItem? centerMessage;
-    if (centerOffset >= 0)
-      centerMessage = list.getOrNull(max(centerOffset - bottomOffset, 0));
-
-    MessageItem? center;
-    final top = <MessageItem>[];
-    final bottom = <MessageItem>[];
-    for (final item in list.reversed) {
-      if (item.messageId == centerMessage?.messageId)
-        center = item;
-      else if (center == null)
-        top.add(item);
-      else
-        bottom.add(item);
+      return MessageState(
+        top: list.reversed.toList(),
+      );
     }
 
-    return MessageState(
-      top: top,
-      center: center,
-      bottom: bottom,
-      bottomOffset: bottomOffset,
-      topOffset: topOffset,
-    );
+    return await database.transaction(() async {
+      final rowId = await messagesDao.messageRowId(centerMessageId).getSingle();
+      return MessageState(
+        top: (await messagesDao
+                .beforeMessagesByConversationId(
+                    rowId, conversationId, limit ~/ 2)
+                .get())
+            .reversed
+            .toList(),
+        center: await messagesDao
+            .messageItemByMessageId(centerMessageId)
+            .getSingleOrNull(),
+        bottom: await messagesDao
+            .afterMessagesByConversationId(rowId, conversationId, limit ~/ 2)
+            .get(),
+      );
+    });
   }
 
   MessageState? _insertOrReplace(
@@ -335,13 +312,13 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       if (bottomMessage != null &&
           bottomMessage.createdAt.isAfter(item.createdAt)) continue;
 
-      if (state.bottomOffset == 0) {
+      if (state.isLatest) {
         bottom = [...bottom, item];
         newBottomMessage = true;
       } else {
         if (item.relationship == UserRelationship.me &&
             item.status == MessageStatus.sent) {
-          add(_MessageInitEvent(centerOffset: 0));
+          add(_MessageInitEvent());
           return null;
         }
       }

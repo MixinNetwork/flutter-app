@@ -130,7 +130,7 @@ class ChatPage extends HookWidget {
         ),
         BlocProvider(
           create: (context) => MessageBloc(
-            messagesDao: context.read<AccountServer>().database.messagesDao,
+            database: context.read<AccountServer>().database,
             conversationCubit: context.read<ConversationCubit>(),
             limit: windowHeight ~/ 20,
           ),
@@ -317,17 +317,14 @@ class _List extends StatelessWidget {
               ),
               SliverToBoxAdapter(
                 key: key,
-                child: Container(
-                  color: Colors.red,
-                  child: Builder(builder: (context) {
-                    if (center == null) return const SizedBox();
-                    return MessageItemWidget(
-                      prev: top.lastOrNull,
-                      message: center,
-                      next: bottom.firstOrNull,
-                    );
-                  }),
-                ),
+                child: Builder(builder: (context) {
+                  if (center == null) return const SizedBox();
+                  return MessageItemWidget(
+                    prev: top.lastOrNull,
+                    message: center,
+                    next: bottom.firstOrNull,
+                  );
+                }),
               ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(

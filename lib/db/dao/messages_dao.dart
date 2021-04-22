@@ -147,6 +147,17 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         limit,
       );
 
+  Selectable<MessageItem> beforeMessagesByConversationId(
+          int rowId, String conversationId, int limit) =>
+      db.beforeMessagesByConversationId(rowId, conversationId, limit);
+
+  Selectable<MessageItem> afterMessagesByConversationId(
+          int rowId, String conversationId, int limit) =>
+      db.afterMessagesByConversationId(rowId, conversationId, limit);
+
+  Selectable<MessageItem> messageItemByMessageId(String messageId) =>
+      db.messageItemByMessageId(messageId);
+
   Selectable<int> messageCountByConversationId(String conversationId) {
     final countExp = countAll();
     return (db.selectOnly(db.messages)

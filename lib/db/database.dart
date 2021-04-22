@@ -133,4 +133,7 @@ class Database {
     });
     debugPrint('mock end');
   }
+
+  Future<T> transaction<T>(Future<T> Function() action) =>
+      _database.transaction<T>(action);
 }
