@@ -35,7 +35,7 @@ class NotificationService extends WidgetsBindingObserver {
           })
           .where(
               (event) => event.userId != context.read<AccountServer>().userId)
-          // .where((event) => event.muteUntil?.isAfter(DateTime.now()) != true)
+          .where((event) => event.muteUntil?.isAfter(DateTime.now()) != true)
           .asyncMap((event) async {
             final name = conversationValidName(
               event.groupName,
