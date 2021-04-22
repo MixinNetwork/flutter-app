@@ -6,6 +6,7 @@ import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/cache_image.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:map/map.dart';
 import 'package:latlng/latlng.dart';
@@ -16,7 +17,7 @@ import '../../message_datetime.dart';
 import '../../message_status.dart';
 import 'location_payload.dart';
 
-class LocationMessage extends StatelessWidget {
+class LocationMessage extends HookWidget {
   const LocationMessage({
     Key? key,
     required this.message,
@@ -30,7 +31,10 @@ class LocationMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final location = LocationPayload.fromJson(jsonDecode(message.content!));
+    final location = useMemoized(
+      () => LocationPayload.fromJson(jsonDecode(message.content!)),
+      [message.content],
+    );
     return MessageBubble(
       showNip: false,
       isCurrentUser: isCurrentUser,
@@ -66,7 +70,7 @@ class LocationMessage extends StatelessWidget {
                     return CacheImage(url);
                   },
                   controller: MapController(
-                    location: LatLng(22.927549869780467, 112.02908957855249),
+                    location: LatLng(location.latitude, location.longitude),
                   ),
                 ),
                 Center(
