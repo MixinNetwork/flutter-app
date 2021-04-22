@@ -156,7 +156,8 @@ class _CircleList extends HookWidget {
                               child: EditDialog(
                                 editText: circle.name,
                                 title: Text(Localization.of(context).circles),
-                                hintText: Localization.of(context).editCircleName,
+                                hintText:
+                                    Localization.of(context).editCircleName,
                               ),
                             );
                             if (name?.isEmpty ?? true) return;
@@ -211,11 +212,9 @@ class _CircleList extends HookWidget {
                               await context
                                   .read<AccountServer>()
                                   .deleteCircle(circle.circleId);
-                              BlocProvider.of<SlideCategoryCubit>(context)
-                                  .select(
-                                SlideCategoryType.contacts,
-                                Localization.of(context).contacts,
-                              );
+                              context
+                                  .read<SlideCategoryCubit>()
+                                  .select(SlideCategoryType.chats);
                             }(),
                           );
                         },

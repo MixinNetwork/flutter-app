@@ -719,7 +719,6 @@ class AccountServer {
     if (response.error != null) {
       await database.circlesDao.deleteCircleById(circleId);
       await database.circleConversationDao.deleteByCircleId(circleId);
-      // todo select current circle
     } else {
       // todo handle error
     }

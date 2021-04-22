@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
+import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/local_notification_center.dart';
 import 'package:flutter_app/utils/message_optimize.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -34,7 +35,7 @@ class NotificationService extends WidgetsBindingObserver {
           })
           .where(
               (event) => event.userId != context.read<AccountServer>().userId)
-          .where((event) => event.muteUntil?.isAfter(DateTime.now()) != true)
+          // .where((event) => event.muteUntil?.isAfter(DateTime.now()) != true)
           .asyncMap((event) async {
             final name = conversationValidName(
               event.groupName,
@@ -67,9 +68,14 @@ class NotificationService extends WidgetsBindingObserver {
         LocalNotificationCenter.notificationSelectEvent(
                 NotificationScheme.conversation)
             .listen(
-          (event) => context
-              .read<ConversationCubit>()
-              .selectConversation(event.host, event.path),
+          (event) {
+            final slideCategoryCubit = context.read<SlideCategoryCubit>();
+            if (slideCategoryCubit.state.type == SlideCategoryType.setting)
+              slideCategoryCubit.select(SlideCategoryType.chats);
+            context
+                .read<ConversationCubit>()
+                .selectConversation(event.host, event.path);
+          },
         ),
       );
   }

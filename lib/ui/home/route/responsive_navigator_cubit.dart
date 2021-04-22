@@ -28,13 +28,15 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
   static const storageUsage = 'storageUsage';
   static const storageUsageDetail = 'storageUsageDetail';
 
-  static const settingTitlePageSet = {
+  static const settingPageNameSet = {
     editProfilePage,
     notificationPage,
     chatBackupPage,
     dataAndStorageUsagePage,
     appearancePage,
     aboutPage,
+    storageUsage,
+    storageUsageDetail,
   };
 
   @override

@@ -74,18 +74,19 @@ class _CenterPage extends StatelessWidget {
       BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
         converter: (state) => state.type == SlideCategoryType.setting,
         listener: (context, isSetting) {
-          final responsiveNavigatorCubit = context.read<ResponsiveNavigatorCubit>();
+          final responsiveNavigatorCubit =
+              context.read<ResponsiveNavigatorCubit>();
 
-          responsiveNavigatorCubit.popUntil((page) {
+          responsiveNavigatorCubit.popWhere((page) {
             if (responsiveNavigatorCubit.state.navigationMode) return true;
 
-            return ResponsiveNavigatorCubit.settingTitlePageSet
-                .any((element) => page.name == element);
+            return ResponsiveNavigatorCubit.settingPageNameSet
+                .contains(page.name);
           });
 
           if (isSetting && !responsiveNavigatorCubit.state.navigationMode)
-            responsiveNavigatorCubit.pushPage(
-                ResponsiveNavigatorCubit.settingTitlePageSet.first);
+            responsiveNavigatorCubit
+                .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);
         },
         child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
           converter: (state) => state.type == SlideCategoryType.setting,
