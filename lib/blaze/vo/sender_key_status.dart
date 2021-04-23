@@ -1,0 +1,3 @@
+enum SenderKeyStatus {
+  unknown, sent
+}

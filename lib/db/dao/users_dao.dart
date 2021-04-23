@@ -56,7 +56,12 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
       db.biographyByIdentityNumber(userId);
 
   Future updateMuteUntil(String userId, String muteUntil) async {
-    await (update(db.users)..where((tbl) => tbl.userId.equals(userId)))
+    await (update(db.users)
+      ..where((tbl) => tbl.userId.equals(userId)))
         .write(UsersCompanion(muteUntil: Value(DateTime.tryParse(muteUntil))));
+  }
+
+  Future<List<String>> findMultiUserIdsByIdentityNumbers(Iterable<String> identityNumbers) async {
+    return (select(db.users)..where((tbl) => tbl.identityNumber.isIn(identityNumbers))).map((row) => row.userId).get();
   }
 }

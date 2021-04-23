@@ -27,7 +27,11 @@ part 'signal_database.g.dart';
   SignedPreKeyDao,
 ])
 class SignalDatabase extends _$SignalDatabase {
-  SignalDatabase() : super(_openConnection());
+  SignalDatabase._() : super(_openConnection());
+
+  static SignalDatabase? _instance;
+
+  static SignalDatabase get get => _instance ??= SignalDatabase._();
 
   @override
   int get schemaVersion => 1;

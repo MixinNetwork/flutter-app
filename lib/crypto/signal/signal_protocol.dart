@@ -32,8 +32,12 @@ class SignalProtocol {
   late MixinSignalProtocolStore mixinSignalProtocolStore;
   late MixinSenderKeyStore senderKeyStore;
 
+  static Future initSignal() async {
+    await IdentityKeyUtil.generateIdentityKeyPair(SignalDatabase.get);
+  }
+
   Future init() async {
-    db = SignalDatabase();
+    db = SignalDatabase.get;
     final preKeyStore = MixinPreKeyStore(db);
     final signedPreKeyStore = MixinPreKeyStore(db);
     final identityKeyStore = MixinIdentityKeyStore(db, _sessionId);
@@ -41,10 +45,6 @@ class SignalProtocol {
     mixinSignalProtocolStore = MixinSignalProtocolStore(
         preKeyStore, signedPreKeyStore, identityKeyStore, sessionStore);
     senderKeyStore = MixinSenderKeyStore(db);
-  }
-
-  Future initSignal() async {
-    await IdentityKeyUtil.generateIdentityKeyPair(db);
   }
 
   Future<Uint8List?> getSenderKeyPublic(String groupId, String userId,
@@ -209,7 +209,7 @@ class SignalProtocol {
   }
 
   Future<BlazeMessage> encryptGroupMessage(
-      Message message, List<String>? mentionData) async {
+      SendingMessage message, List<String>? mentionData) async {
     final address = SignalProtocolAddress(message.userId, defaultDeviceId);
     final senderKeyName = SenderKeyName(message.conversationId, address);
     final groupCipher = GroupCipher(senderKeyStore, senderKeyName);

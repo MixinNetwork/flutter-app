@@ -4,6 +4,7 @@ import 'dao/circles_dao.dart';
 import 'dao/conversations_dao.dart';
 import 'dao/flood_messages_dao.dart';
 import 'dao/jobs_dao.dart';
+import 'dao/message_mentions_dao.dart';
 import 'dao/messages_dao.dart';
 import 'dao/participant_session_dao.dart';
 import 'dao/participants_dao.dart';
@@ -21,6 +22,7 @@ class Database {
     circleConversationDao = CircleConversationDao(_database);
     floodMessagesDao = FloodMessagesDao(_database);
     messagesDao = MessagesDao(_database);
+    messageMentionsDao = MessageMentionsDao(_database);
     jobsDao = JobsDao(_database);
     participantsDao = ParticipantsDao(_database);
     userDao = UserDao(_database);
@@ -40,6 +42,8 @@ class Database {
   late final AppsDao appsDao;
 
   late final MessagesDao messagesDao;
+
+  late final MessageMentionsDao messageMentionsDao;
 
   late final ConversationsDao conversationDao;
 

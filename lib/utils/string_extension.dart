@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:uuid/uuid.dart';
+import 'package:crypto/crypto.dart' as crypto;
 
 extension StringExtension on String {
   String fts5ContentFilter() {
@@ -22,6 +25,8 @@ extension StringExtension on String {
   }
 
   static final regExp = RegExp('[a-zA-Z0-9]');
+
+  String md5() => crypto.md5.convert(utf8.encode(this)).toString();
 }
 
 extension NullableStringExtension on String? {

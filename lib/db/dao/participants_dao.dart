@@ -33,6 +33,7 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
   Selectable<User> participantsAvatar(String conversationId) =>
       db.participantsAvatar(conversationId);
 
+<<<<<<< HEAD
   Future<int> updateParticipantRole(
           String conversationId, String participantId, ParticipantRole role) =>
       db.customUpdate(
@@ -45,4 +46,32 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
         updates: {db.participants},
         updateKind: UpdateKind.update,
       );
+=======
+  void updateParticipantRole(
+      String conversationId, String participantId, ParticipantRole role) async {
+    await db.customUpdate(
+      'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
+      variables: [
+        Variable<ParticipantRole>(role),
+        Variable.withString(conversationId),
+        Variable.withString(participantId)
+      ],
+      updates: {db.participants},
+      updateKind: UpdateKind.update,
+    );
+  }
+
+  void replaceAll(String conversationId, List<Participant> list) async {
+    return transaction(() async {
+      await deleteByConversationId(conversationId);
+      insertAll(list);
+    });
+  }
+
+  Future deleteByConversationId(String conversationId) async {
+    await (delete(db.participants)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .go();
+  }
+>>>>>>> 1ca4e8d... Send signal message
 }

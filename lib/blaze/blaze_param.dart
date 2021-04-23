@@ -4,6 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 import '../enum/message_category.dart';
 import 'blaze_message_param_session.dart';
+import 'blaze_signal_key_message.dart';
 
 part 'blaze_param.g.dart';
 
@@ -74,3 +75,6 @@ class BlazeMessageParam {
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamToJson(this);
 }
+
+BlazeMessageParam createSignalKeyMessageParam(String conversationId, List<BlazeSignalKeyMessage> messages, String conversationChecksum) =>
+    BlazeMessageParam(conversationId: conversationId, messages: messages, conversationChecksum: conversationChecksum);

@@ -11,6 +11,8 @@ const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
 const resendKey = 'RESEND_KEY';
 const errorAction = 'ERROR';
+const consumeSessionSignalKeys = 'CONSUME_SESSION_SIGNAL_KEYS';
+const createSignalKeyMessages = 'CREATE_SIGNAL_KEY_MESSAGES';
 
 const mixinScheme = 'mixin';
 enum MixinSchemeHost {

@@ -11111,6 +11111,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<ParticipantSessionData> getNotSendSessionParticipants(
+      String conversationId, String sessionId) {
+    return customSelect(
+        'SELECT p.* FROM participant_session p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(sessionId)
+        ],
+        readsFrom: {
+          participantSession,
+          users
+        }).map(participantSession.mapFromRow);
+  }
+
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(

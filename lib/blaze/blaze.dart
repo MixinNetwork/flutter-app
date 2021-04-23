@@ -4,7 +4,10 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/blaze/vo/message_result.dart';
+import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -43,6 +46,8 @@ class Blaze {
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
 
+  final transactions = <String, WebSocketTransaction>{};
+
   void connect() {
     debugPrint('ws connect');
     token ??= signAuthTokenWithEdDSA(
@@ -58,8 +63,9 @@ class Blaze {
       headers: {'Authorization': 'Bearer $token'},
       pingInterval: const Duration(seconds: 15),
     );
-    subscription =
-        channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
+    subscription = channel?.stream
+        .asyncMap((message) async => parseBlazeMessage(message, transactions))
+        .listen(
       (blazeMessage) async {
         debugPrint('blazeMessage: ${blazeMessage.toJson()}');
 
@@ -167,6 +173,28 @@ class Blaze {
     channel = null;
   }
 
+  Future<MessageResult> deliverNoThrow(BlazeMessage blazeMessage) async {
+    final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
+    transactions[blazeMessage.id] = transaction;
+    final bm = await transaction.run(() => channel?.sink.add(GZipEncoder()
+        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))));
+    if (bm == null) {
+      return await deliverNoThrow(blazeMessage);
+    } else if (bm.error != null) {
+      // TODO
+      return MessageResult(false, true);
+    } else {
+      return MessageResult(true, false);
+    }
+  }
+
+  Future<BlazeMessage?> deliverAndWait(BlazeMessage blazeMessage) {
+    final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
+    transactions[blazeMessage.id] = transaction;
+    return transaction.run(() => channel?.sink.add(GZipEncoder()
+        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))));
+  }
+
   Future<void> _reconnect() async {
     debugPrint(
         '_reconnect reconnecting: $reconnecting start: ${StackTrace.current}');
@@ -199,11 +227,47 @@ class Blaze {
   }
 }
 
-Future<BlazeMessage> parseBlazeMessage(List<int> message) =>
-    runLoadBalancer(_parseBlazeMessageInternal, message);
+Future<BlazeMessage> parseBlazeMessage(List<int> message, Map<String, WebSocketTransaction> transactions) =>
+    runLoadBalancer(_parseBlazeMessageInternal, Tuple2(message, transactions));
 
-BlazeMessage _parseBlazeMessageInternal(List<int> message) {
+BlazeMessage _parseBlazeMessageInternal(Tuple2<List<int>, Map<String, WebSocketTransaction>> tuple2) {
+  final message = tuple2.item1;
+  final transactions = tuple2.item2;
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
   final blazeMessage = BlazeMessage.fromJson(jsonDecode(content));
+  if (blazeMessage.error == null) {
+    final transaction = transactions[blazeMessage.id];
+    if (transaction != null) {
+      transaction.success(blazeMessage);
+      transactions.removeWhere((key, value) => key == blazeMessage.id);
+    }
+  } else {
+    final transaction = transactions[blazeMessage.id];
+    if (transaction != null) {
+      transaction.error(blazeMessage);
+      transactions.removeWhere((key, value) => key == blazeMessage.id);
+    }
+  }
   return blazeMessage;
+}
+
+class WebSocketTransaction<T> {
+  WebSocketTransaction(this.tid);
+
+  final String tid;
+
+  final Completer<T?> _completer = Completer();
+
+  Future<T?> run(Function() fun) {
+    fun.call();
+    return _completer.future.timeout(const Duration(seconds: 5));
+  }
+
+  void success(T? data) {
+    _completer.complete(data);
+  }
+
+  void error(T? data) {
+    _completer.completeError(error);
+  }
 }
