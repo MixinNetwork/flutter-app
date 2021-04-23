@@ -16,6 +16,9 @@ import '../utils/load_Balancer_utils.dart';
 import 'blaze_message.dart';
 import 'vo/blaze_message_data.dart';
 
+const String _wsHost1 = 'wss://blaze.mixin.one';
+const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
+
 class Blaze {
   Blaze(
     this.userId,
@@ -31,24 +34,23 @@ class Blaze {
   final Database database;
   final Client client; // todo delete
 
-  late IOWebSocketChannel channel;
+  String host = _wsHost1;
+  bool reconnecting = false;
 
-  void connect() {
-    try {
-      final token = signAuthTokenWithEdDSA(
-          userId, sessionId, privateKey, scp, 'GET', '/', '');
-      _connect(token);
-    } catch (e) {
-      connect();
-    }
+  IOWebSocketChannel? channel;
+
+  Future<void> connect() async {
+    final token = signAuthTokenWithEdDSA(
+        userId, sessionId, privateKey, scp, 'GET', '/', '');
+    _connect(token);
   }
 
   void _connect(String token) {
-    channel = IOWebSocketChannel.connect('wss://blaze.mixin.one',
+    channel = IOWebSocketChannel.connect(host,
         protocols: ['Mixin-Blaze-1'],
         headers: {'Authorization': 'Bearer $token'},
         pingInterval: const Duration(seconds: 15));
-    channel.stream
+    channel?.stream
         .asyncMap((message) async => await parseBlazeMessage(message))
         .listen(
       (blazeMessage) async {
@@ -83,7 +85,7 @@ class Blaze {
               data['message_id'], MessageStatus.delivered);
         }
       },
-      onError: (error) => connect(),
+      onError: (error, s) => _reconnect(),
       onDone: connect,
       cancelOnError: true,
     );
@@ -119,26 +121,37 @@ class Blaze {
     if (offset != null) {
       params = '{"offset":"${offset.toUtc()}"}';
     }
-    _sendGZip(
-        BlazeMessage(
+    _sendGZip(BlazeMessage(
         id: const Uuid().v4(),
         params: params,
         action: 'LIST_PENDING_MESSAGES'));
   }
 
   void _sendGZip(BlazeMessage msg) {
-    channel.sink.add(
+    channel?.sink.add(
         GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
   }
 
   void deliver(BlazeMessage blazeMessage) {
     // todo check send callback
-    channel.sink.add(GZipEncoder()
+    channel?.sink.add(GZipEncoder()
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
   }
 
   Future<void> disconnect() async {
-    await channel.sink.close();
+    await channel?.sink.close();
+  }
+
+  Future<void> _reconnect() async {
+    if (reconnecting) return;
+    reconnecting = true;
+    host = _wsHost2;
+
+    await disconnect();
+    await Future.delayed(const Duration(seconds: 2));
+    await connect();
+
+    reconnecting = false;
   }
 }
 
