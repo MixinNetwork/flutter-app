@@ -256,25 +256,27 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
       return MessageState(
         top: list.reversed.toList(),
+        isLatest: true,
       );
     }
 
     return await database.transaction(() async {
       final rowId = await messagesDao.messageRowId(centerMessageId).getSingle();
+      final _limit = limit ~/ 2;
+      final bottomList = await messagesDao
+          .afterMessagesByConversationId(rowId, conversationId, _limit)
+          .get();
       return MessageState(
-        top: (await messagesDao
-                .beforeMessagesByConversationId(
-                    rowId, conversationId, limit ~/ 2)
-                .get())
-            .reversed
-            .toList(),
-        center: await messagesDao
-            .messageItemByMessageId(centerMessageId)
-            .getSingleOrNull(),
-        bottom: await messagesDao
-            .afterMessagesByConversationId(rowId, conversationId, limit ~/ 2)
-            .get(),
-      );
+          top: (await messagesDao
+                  .beforeMessagesByConversationId(rowId, conversationId, _limit)
+                  .get())
+              .reversed
+              .toList(),
+          center: await messagesDao
+              .messageItemByMessageId(centerMessageId)
+              .getSingleOrNull(),
+          bottom: bottomList,
+          isLatest: bottomList.length < _limit);
     });
   }
 
