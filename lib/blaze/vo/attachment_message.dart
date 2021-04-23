@@ -42,7 +42,7 @@ class AttachmentMessage {
   @JsonKey(name: 'duration')
   int? duration;
   @JsonKey(name: 'waveform')
-  dynamic? waveform;
+  dynamic waveform;
   @JsonKey(name: 'caption')
   String? caption;
 

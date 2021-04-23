@@ -498,7 +498,7 @@ class SendMessageHelper {
       int? mediaHeight,
       String? thumbImage,
       String? mediaDuration,
-      dynamic? mediaWaveform) async {
+      dynamic mediaWaveform) async {
     await _attachmentUtil
         .uploadAttachment(file, messageId)
         .then((attachmentId) async {

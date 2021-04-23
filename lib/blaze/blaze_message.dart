@@ -20,7 +20,7 @@ class BlazeMessage {
   @JsonKey(name: 'action')
   String action;
   @JsonKey(name: 'params')
-  dynamic? params;
+  dynamic params;
   @JsonKey(name: 'data')
   Map<String, dynamic>? data;
 
