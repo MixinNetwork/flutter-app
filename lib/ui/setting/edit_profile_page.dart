@@ -13,6 +13,7 @@ import 'package:flutter_app/generated/l10n.dart';
 
 class EditProfilePage extends StatelessWidget {
   const EditProfilePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final nameTextEditingController = TextEditingController();
@@ -23,6 +24,7 @@ class EditProfilePage extends StatelessWidget {
         state.current?.account.fullName,
         state.current?.account.biography,
       ),
+      when: (a, b) => b?.item1 != null && b?.item2 != null,
       immediatelyCallListener: true,
       listener: (context, state) {
         nameTextEditingController.text = state.item1!;

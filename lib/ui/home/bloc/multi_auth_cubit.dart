@@ -1,8 +1,6 @@
 import 'dart:convert';
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -38,9 +36,6 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
 
   @override
   Map<String, dynamic> toJson(MultiAuthState state) => state.toMap();
-
-  static MultiAuthCubit of(BuildContext context) =>
-      BlocProvider.of<MultiAuthCubit>(context);
 
   String? get currentUserId => state.current?.account.userId;
 

@@ -65,9 +65,9 @@ class SlidePage extends StatelessWidget {
             const Spacer(),
             Builder(
               builder: (context) => BlocConverter<MultiAuthCubit,
-                  MultiAuthState, Tuple2<String, String>>(
-                converter: (state) => Tuple2(state.current!.account.fullName!,
-                    state.current!.account.avatarUrl!),
+                  MultiAuthState, Tuple2<String?, String?>>(
+                converter: (state) => Tuple2(state.current?.account.fullName,
+                    state.current?.account.avatarUrl),
                 when: (a, b) => b?.item1 != null && b?.item2 != null,
                 builder: (context, tuple) =>
                     BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
@@ -75,12 +75,12 @@ class SlidePage extends StatelessWidget {
                   builder: (context, selected) => SelectItem(
                     icon: ClipOval(
                       child: CachedNetworkImage(
-                        imageUrl: tuple.item2,
+                        imageUrl: tuple.item2!,
                         width: 30,
                         height: 30,
                       ),
                     ),
-                    title: tuple.item1,
+                    title: tuple.item1!,
                     selected: selected,
                     onTap: () => BlocProvider.of<SlideCategoryCubit>(context)
                         .select(SlideCategoryType.setting),

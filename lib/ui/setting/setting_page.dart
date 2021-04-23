@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
@@ -8,6 +9,7 @@ import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/cell.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -68,7 +70,13 @@ class SettingPage extends StatelessWidget {
               child: _Item(
                 assetName: Resources.assetsImagesIcSignOutSvg,
                 title: Localization.of(context).signOut,
-                onTap: () => MultiAuthCubit.of(context).signOut(),
+                onTap: () async {
+                  await runFutureWithToast(
+                    context,
+                    context.read<AccountServer>().client.accountApi.logout(),
+                  );
+                  context.read<MultiAuthCubit>().signOut();
+                },
                 color: BrightnessData.themeOf(context).red,
               ),
             ),
@@ -112,8 +120,7 @@ class _Item extends StatelessWidget {
           onTap: () {
             if (onTap == null && pageName != null) {
               context.read<ResponsiveNavigatorCubit>()
-                ..popUntil((page) => ResponsiveNavigatorCubit
-                    .settingPageNameSet
+                ..popUntil((page) => ResponsiveNavigatorCubit.settingPageNameSet
                     .contains(page.name))
                 ..pushPage(pageName!);
               return;

@@ -16,40 +16,40 @@ class LandingPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = Localizations.localeOf(context);
     return BlocProvider(
-        create: (context) => LandingCubit(
-          MultiAuthCubit.of(context),
-          locale,
-        ),
-        child: Builder(
-          builder: (BuildContext context) => Scaffold(
-            backgroundColor: BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(255, 255, 255, 1),
-              darkColor: const Color.fromRGBO(35, 39, 43, 1),
-            ),
-            body: Center(
-              child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
-                converter: (state) => state.status,
-                builder: (context, status) {
-                  if (status == LandingStatus.init)
-                    return _Loading(
-                      title: Localization.of(context).initializing,
-                      message: Localization.of(context).pleaseWait,
-                    );
+      create: (context) => LandingCubit(
+        context.read<MultiAuthCubit>(),
+        locale,
+      ),
+      child: Builder(
+        builder: (BuildContext context) => Scaffold(
+          backgroundColor: BrightnessData.dynamicColor(
+            context,
+            const Color.fromRGBO(255, 255, 255, 1),
+            darkColor: const Color.fromRGBO(35, 39, 43, 1),
+          ),
+          body: Center(
+            child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
+              converter: (state) => state.status,
+              builder: (context, status) {
+                if (status == LandingStatus.init)
+                  return _Loading(
+                    title: Localization.of(context).initializing,
+                    message: Localization.of(context).pleaseWait,
+                  );
 
-                  if (status == LandingStatus.provisioning)
-                    return _Loading(
-                      title: Localization.of(context).provisioning,
-                      message: Localization.current.pleaseWait,
-                    );
+                if (status == LandingStatus.provisioning)
+                  return _Loading(
+                    title: Localization.of(context).provisioning,
+                    message: Localization.current.pleaseWait,
+                  );
 
-                  return const _QrCode();
-                },
-              ),
+                return const _QrCode();
+              },
             ),
           ),
         ),
-      );
+      ),
+    );
   }
 }
 

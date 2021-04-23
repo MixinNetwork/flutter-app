@@ -1111,7 +1111,7 @@ class _MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (MultiAuthCubit.of(context).state.current?.account.userId ==
+    if (context.read<MultiAuthCubit>().state.current?.account.userId ==
             conversation.senderId &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&
