@@ -207,11 +207,13 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .get();
     });
 
+    final isLatest = list.length < limit ? true : null;
     final result = state.copyWith(
       bottom: [
         ...state.bottom,
         ...list,
       ],
+      isLatest: isLatest,
     );
     return result;
   }
