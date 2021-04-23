@@ -52,7 +52,7 @@ class App extends StatelessWidget {
                   authState.account.sessionId,
                   authState.account.identityNumber,
                   authState.privateKey,
-                  () => context.read<MultiAuthCubit>().state.current!,
+                  context.read<MultiAuthCubit>(),
                 );
                 return accountServer;
               },

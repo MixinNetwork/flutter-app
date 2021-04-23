@@ -41,7 +41,7 @@ class AccountServer {
     String sessionId,
     String identityNumber,
     String privateKey,
-    AuthState Function() getAuthState,
+    MultiAuthCubit multiAuthCubit,
   ) async {
     if (sid == sessionId) return;
     sid = sessionId;
@@ -56,23 +56,37 @@ class AccountServer {
       sessionId: sessionId,
       privateKey: privateKey,
       scp: scp,
+      jsonDecodeCallback: LoadBalancerUtils.jsonDecode,
+      interceptors: [
+        InterceptorsWrapper(
+          onResponse: (Response response, ResponseInterceptorHandler handler) {
+            if (response.data['error']?['code'] == 401) {
+              multiAuthCubit.signOut();
+            }
+            handler.resolve(response);
+          },
+        ),
+      ],
     );
-    (client.dio.transformer as DefaultTransformer).jsonDecodeCallback =
-        LoadBalancerUtils.jsonDecode;
-
-    await _initDatabase(privateKey, getAuthState);
+    await _initDatabase(privateKey, multiAuthCubit);
     start();
   }
 
-  Future _initDatabase(
-      String privateKey, AuthState Function() getAuthState) async {
+  Future<void> _initDatabase(
+      String privateKey, MultiAuthCubit multiAuthCubit) async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
         await AttachmentUtil.init(client, database.messagesDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
         database.messagesDao, database.jobsDao, _attachmentUtil);
-    blaze = Blaze(userId, sessionId, privateKey, database, client);
+    blaze = Blaze(
+      userId,
+      sessionId,
+      privateKey,
+      database,
+      client,
+    );
 
     _decryptMessage = DecryptMessage(
       userId,
@@ -81,7 +95,7 @@ class AccountServer {
       sessionId,
       this.privateKey,
       _attachmentUtil,
-      getAuthState,
+      multiAuthCubit,
     );
   }
 

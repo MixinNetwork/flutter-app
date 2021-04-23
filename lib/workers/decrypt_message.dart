@@ -47,7 +47,7 @@ class DecryptMessage extends Injector {
     this._sessionId,
     this._privateKey,
     this._attachmentUtil,
-    this.getAuthState,
+    this.multiAuthCubit,
   ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
@@ -58,13 +58,13 @@ class DecryptMessage extends Injector {
   late EncryptedProtocol _encryptedProtocol;
 
   final AttachmentUtil _attachmentUtil;
-  final AuthState Function() getAuthState;
+  final MultiAuthCubit multiAuthCubit;
 
-  bool get _photoAutoDownload => getAuthState().photoAutoDownload ?? true;
+  bool get _photoAutoDownload => multiAuthCubit.state.current?.photoAutoDownload ?? true;
 
-  bool get _videoAutoDownload => getAuthState().videoAutoDownload ?? true;
+  bool get _videoAutoDownload => multiAuthCubit.state.current?.videoAutoDownload ?? true;
 
-  bool get _fileAutoDownload => getAuthState().fileAutoDownload ?? true;
+  bool get _fileAutoDownload => multiAuthCubit.state.current?.fileAutoDownload ?? true;
 
   void setConversationId(String? conversationId) {
     _conversationId = conversationId;

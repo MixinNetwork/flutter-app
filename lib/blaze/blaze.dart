@@ -7,6 +7,7 @@ import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../constants/constants.dart';
 import '../db/database.dart';
@@ -68,12 +69,10 @@ class Blaze {
             updateRemoteMessageStatus(
                 messageData.messageId, MessageStatus.delivered);
           } else {
-            await database.floodMessagesDao
-                .insert(FloodMessage(
-                    messageId: messageData.messageId,
-                    data: jsonEncode(data),
-                    createdAt: messageData.createdAt))
-                .then((value) {});
+            await database.floodMessagesDao.insert(FloodMessage(
+                messageId: messageData.messageId,
+                data: jsonEncode(data),
+                createdAt: messageData.createdAt));
           }
         } else if (blazeMessage.action == acknowledgeMessageReceipt) {
           await makeMessageStatus(data['message_id'],
@@ -85,8 +84,10 @@ class Blaze {
               data['message_id'], MessageStatus.delivered);
         }
       },
-      onError: (error, s) => _reconnect(),
-      onDone: connect,
+      onError: (error, s) {
+        if (error is WebSocketChannelException) _reconnect();
+      },
+      onDone: () {},
       cancelOnError: true,
     );
     _sendListPending();

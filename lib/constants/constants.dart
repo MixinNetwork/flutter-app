@@ -11,6 +11,7 @@ const recallMessage = 'RECALL_MESSAGE';
 const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
 const resendKey = 'RESEND_KEY';
+const errorAction = 'ERROR';
 
 const mixinScheme = 'mixin';
 enum MixinSchemeHost {

@@ -12,6 +12,9 @@ BlazeMessage _$BlazeMessageFromJson(Map<String, dynamic> json) {
     action: json['action'] as String,
     data: json['data'] as Map<String, dynamic>?,
     params: json['params'],
+    error: json['error'] == null
+        ? null
+        : MixinError.fromJson(json['error'] as Map<String, dynamic>),
   );
 }
 
@@ -21,4 +24,5 @@ Map<String, dynamic> _$BlazeMessageToJson(BlazeMessage instance) =>
       'action': instance.action,
       'params': instance.params,
       'data': instance.data,
+      'error': instance.error,
     };

@@ -22,7 +22,7 @@ ModelDefinition getObjectBoxModel() {
     "entities": [
       {
         "id": "1:7719677999600064814",
-        "lastPropertyId": "7:3664078409729265392",
+        "lastPropertyId": "11:5875009563582787561",
         "name": "Identity",
         "properties": [
           {
@@ -39,34 +39,34 @@ ModelDefinition getObjectBoxModel() {
             "dartFieldType": "String"
           },
           {
-            "id": "3:960808382367841437",
-            "name": "registration_id",
-            "type": 6,
-            "dartFieldType": "int?"
-          },
-          {
-            "id": "4:6387182472869229612",
-            "name": "public_key",
-            "type": 23,
-            "dartFieldType": "Uint8List"
-          },
-          {
-            "id": "5:827547181159261866",
-            "name": "private_key",
-            "type": 23,
-            "dartFieldType": "Uint8List?"
-          },
-          {
-            "id": "6:6450251074243179355",
-            "name": "next_prekey_id",
-            "type": 6,
-            "dartFieldType": "int?"
-          },
-          {
             "id": "7:3664078409729265392",
             "name": "date",
             "type": 10,
             "dartFieldType": "DateTime"
+          },
+          {
+            "id": "8:264386146107629068",
+            "name": "registrationId",
+            "type": 6,
+            "dartFieldType": "int?"
+          },
+          {
+            "id": "9:4263106212670713918",
+            "name": "publicKey",
+            "type": 23,
+            "dartFieldType": "Uint8List"
+          },
+          {
+            "id": "10:5682832767094154745",
+            "name": "privateKey",
+            "type": 23,
+            "dartFieldType": "Uint8List?"
+          },
+          {
+            "id": "11:5875009563582787561",
+            "name": "nextPrekeyId",
+            "type": 6,
+            "dartFieldType": "int?"
           }
         ],
         "relations": [],
@@ -74,10 +74,10 @@ ModelDefinition getObjectBoxModel() {
         "constructorParams": [
           "id positional",
           "address positional",
-          "registration_id positional",
-          "public_key positional",
-          "private_key positional",
-          "next_prekey_id positional",
+          "registrationId positional",
+          "publicKey positional",
+          "privateKey positional",
+          "nextPrekeyId positional",
           "date positional"
         ],
         "nullSafetyEnabled": true
@@ -209,36 +209,36 @@ ModelDefinition getObjectBoxModel() {
       },
       objectToFB: (Identity object, fb.Builder fbb) {
         final addressOffset = fbb.writeString(object.address);
-        final public_keyOffset = fbb.writeListInt8(object.public_key);
-        final private_keyOffset = object.private_key == null
+        final publicKeyOffset = fbb.writeListInt8(object.publicKey);
+        final privateKeyOffset = object.privateKey == null
             ? null
-            : fbb.writeListInt8(object.private_key!);
-        fbb.startTable(8);
+            : fbb.writeListInt8(object.privateKey!);
+        fbb.startTable(12);
         fbb.addInt64(0, object.id);
         fbb.addOffset(1, addressOffset);
-        fbb.addInt64(2, object.registration_id);
-        fbb.addOffset(3, public_keyOffset);
-        fbb.addOffset(4, private_keyOffset);
-        fbb.addInt64(5, object.next_prekey_id);
         fbb.addInt64(6, object.date.millisecondsSinceEpoch);
+        fbb.addInt64(7, object.registrationId);
+        fbb.addOffset(8, publicKeyOffset);
+        fbb.addOffset(9, privateKeyOffset);
+        fbb.addInt64(10, object.nextPrekeyId);
         fbb.finish(fbb.endTable());
         return object.id;
       },
       objectFromFB: (Store store, Uint8List fbData) {
         final buffer = fb.BufferContext.fromBytes(fbData);
         final rootOffset = buffer.derefObject(0);
-        final private_keyValue = const fb.ListReader<int>(fb.Int8Reader())
-            .vTableGetNullable(buffer, rootOffset, 12);
+        final privateKeyValue = const fb.ListReader<int>(fb.Int8Reader())
+            .vTableGetNullable(buffer, rootOffset, 22);
         final object = Identity(
             const fb.Int64Reader().vTableGet(buffer, rootOffset, 4, 0),
             const fb.StringReader().vTableGet(buffer, rootOffset, 6, ''),
-            const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 8),
+            const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 18),
             Uint8List.fromList(const fb.ListReader<int>(fb.Int8Reader())
-                .vTableGet(buffer, rootOffset, 10, [])),
-            private_keyValue == null
+                .vTableGet(buffer, rootOffset, 20, [])),
+            privateKeyValue == null
                 ? null
-                : Uint8List.fromList(private_keyValue),
-            const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 14),
+                : Uint8List.fromList(privateKeyValue),
+            const fb.Int64Reader().vTableGetNullable(buffer, rootOffset, 24),
             DateTime.fromMillisecondsSinceEpoch(
                 const fb.Int64Reader().vTableGet(buffer, rootOffset, 16, 0)));
 
@@ -355,16 +355,16 @@ class Identity_ {
       QueryIntegerProperty(entityId: 1, propertyId: 1, obxType: 6);
   static final address =
       QueryStringProperty(entityId: 1, propertyId: 2, obxType: 9);
-  static final registration_id =
-      QueryIntegerProperty(entityId: 1, propertyId: 3, obxType: 6);
-  static final public_key =
-      QueryByteVectorProperty(entityId: 1, propertyId: 4, obxType: 23);
-  static final private_key =
-      QueryByteVectorProperty(entityId: 1, propertyId: 5, obxType: 23);
-  static final next_prekey_id =
-      QueryIntegerProperty(entityId: 1, propertyId: 6, obxType: 6);
   static final date =
       QueryIntegerProperty(entityId: 1, propertyId: 7, obxType: 10);
+  static final registrationId =
+      QueryIntegerProperty(entityId: 1, propertyId: 8, obxType: 6);
+  static final publicKey =
+      QueryByteVectorProperty(entityId: 1, propertyId: 9, obxType: 23);
+  static final privateKey =
+      QueryByteVectorProperty(entityId: 1, propertyId: 10, obxType: 23);
+  static final nextPrekeyId =
+      QueryIntegerProperty(entityId: 1, propertyId: 11, obxType: 6);
 }
 
 class PreKey_ {
