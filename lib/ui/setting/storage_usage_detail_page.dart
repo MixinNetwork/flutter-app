@@ -31,31 +31,35 @@ class StorageUsageDetailPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final refreshKey = useState(Object());
+    final watchEvent = useStream(
+      useMemoized(() => File(context.read<AccountServer>().getMediaFilePath())
+          .watch(recursive: true)),
+      initialData: null,
+    ).data;
 
     final photosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
           context.read<AccountServer>().getImagesPath(conversationId))),
       '0 B',
-      keys: [refreshKey.value],
+      keys: [watchEvent],
     );
     final videosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
           context.read<AccountServer>().getVideosPath(conversationId))),
       '0 B',
-      keys: [refreshKey.value],
+      keys: [watchEvent],
     );
     final audiosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
           context.read<AccountServer>().getAudiosPath(conversationId))),
       '0 B',
-      keys: [refreshKey.value],
+      keys: [watchEvent],
     );
     final filesSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
           context.read<AccountServer>().getFilesPath(conversationId))),
       '0 B',
-      keys: [refreshKey.value],
+      keys: [watchEvent],
     );
 
     final selected = useState(const Tuple4(false, false, false, false));
@@ -74,21 +78,20 @@ class StorageUsageDetailPage extends HookWidget {
                   Localization.of(context).clear,
                 ),
               ),
-              onTap: () async {
-                showToastLoading(context);
-                final accountServer = context.read<AccountServer>();
-                if (selected.value.item1)
-                  _clear(accountServer.getImagesPath(conversationId));
-                if (selected.value.item2)
-                  _clear(accountServer.getVideosPath(conversationId));
-                if (selected.value.item3)
-                  _clear(accountServer.getAudiosPath(conversationId));
-                if (selected.value.item4)
-                  _clear(accountServer.getFilesPath(conversationId));
-
-                refreshKey.value = Object();
-                showToastSuccessful(context);
-              },
+              onTap: () => runFutureWithToast(
+                context,
+                () async {
+                  final accountServer = context.read<AccountServer>();
+                  if (selected.value.item1)
+                    await _clear(accountServer.getImagesPath(conversationId));
+                  if (selected.value.item2)
+                    await _clear(accountServer.getVideosPath(conversationId));
+                  if (selected.value.item3)
+                    await _clear(accountServer.getAudiosPath(conversationId));
+                  if (selected.value.item4)
+                    await _clear(accountServer.getFilesPath(conversationId));
+                }(),
+              ),
             ),
           ),
         ],
@@ -175,7 +178,7 @@ class StorageUsageDetailPage extends HookWidget {
     );
   }
 
-  void _clear(String path) async {
+  Future<void> _clear(String path) async {
     final directory = Directory(path);
     if (!(await directory.exists())) return;
     final list = await directory.list().toList();
