@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -55,6 +56,11 @@ class Blaze {
         .asyncMap((message) async => await parseBlazeMessage(message))
         .listen(
       (blazeMessage) async {
+        if (blazeMessage.action == errorAction &&
+            blazeMessage.error?.code == 401) {
+          await client.accountApi.getMe();
+        }
+
         final data = blazeMessage.data;
         if (data == null) {
           return;
@@ -85,9 +91,13 @@ class Blaze {
         }
       },
       onError: (error, s) {
+        debugPrint('fuck ws error: $error, s: $s');
         if (error is WebSocketChannelException) _reconnect();
       },
-      onDone: () {},
+      onDone: () {
+        debugPrint('web socket done');
+        _reconnect();
+      },
       cancelOnError: true,
     );
     _sendListPending();
@@ -149,6 +159,15 @@ class Blaze {
     host = _wsHost2;
 
     await disconnect();
+
+    try {
+      final mixinResponse = await client.accountApi.getMe();
+      if (mixinResponse.error?.code == 401) {
+        reconnecting = false;
+        return;
+      }
+    } catch (_) {}
+
     await Future.delayed(const Duration(seconds: 2));
     await connect();
 

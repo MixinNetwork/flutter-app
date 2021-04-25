@@ -23,6 +23,7 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
   }
 
   void signOut() {
+    if (state.auths.isEmpty) return;
     emit(
       MultiAuthState(
         auths: state.auths.toSet()..remove(state.auths.last),

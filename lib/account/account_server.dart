@@ -63,7 +63,6 @@ class AccountServer {
             if (response.data['error']?['code'] == 401) {
               multiAuthCubit.signOut();
             }
-            handler.resolve(response);
           },
         ),
       ],
