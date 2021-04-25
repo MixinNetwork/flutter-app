@@ -120,7 +120,7 @@ class _Item extends StatelessWidget {
           onTap: () {
             if (onTap == null && pageName != null) {
               context.read<ResponsiveNavigatorCubit>()
-                ..popUntil((page) => ResponsiveNavigatorCubit.settingPageNameSet
+                ..popWhere((page) => ResponsiveNavigatorCubit.settingPageNameSet
                     .contains(page.name))
                 ..pushPage(pageName!);
               return;
