@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/message/item/quote_message.dart';
+import 'package:provider/provider.dart';
 
 import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
@@ -39,16 +41,15 @@ class ContactMessage extends StatelessWidget {
           ],
         ),
         child: InteractableDecoratedBox(
-          onTap: () {
-            // TODO
-          },
+          onTap: () =>
+              context.read<ConversationCubit>().selectUser(message.sharedUserId!),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               AvatarWidget(
                 size: 40,
                 avatarUrl: message.sharedUserAvatarUrl,
-                userId: message.userId,
+                userId: message.sharedUserId!,
                 name: message.sharedUserFullName!,
               ),
               const SizedBox(width: 8),
