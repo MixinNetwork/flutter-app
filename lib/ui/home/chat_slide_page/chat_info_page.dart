@@ -122,7 +122,8 @@ class ChatInfoPage extends HookWidget {
                             .pushPage(ChatSideCubit.sharedMedia),
                       ),
                       CellItem(
-                        title: Text(Localization.of(context).searchMessageHistory),
+                        title:
+                            Text(Localization.of(context).searchMessageHistory),
                         onTap: () => context
                             .read<ChatSideCubit>()
                             .pushPage(ChatSideCubit.searchMessageHistory),
@@ -483,7 +484,7 @@ class ConversationBio extends HookWidget {
 
     final textStream = useMemoized(() {
       final database = context.read<AccountServer>().database;
-      if (conversation.isLoaded)
+      if (!conversation.isLoaded)
         return () async* {
           yield '';
         }();
@@ -498,11 +499,11 @@ class ConversationBio extends HookWidget {
       conversation.userId,
     ]);
 
-    final snapshot = useStream(textStream, initialData: '');
-    if (snapshot.data?.isEmpty == true) return const SizedBox();
+    final text = useStream(textStream, initialData: '').data;
+    if (text?.isEmpty == true) return const SizedBox();
 
     return Text(
-      snapshot.data!,
+      text!,
       style: TextStyle(
         color: BrightnessData.themeOf(context).text,
         fontSize: fontSize,
