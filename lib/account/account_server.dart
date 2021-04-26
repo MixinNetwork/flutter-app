@@ -62,7 +62,13 @@ class AccountServer {
           onResponse: (Response response, ResponseInterceptorHandler handler) {
             if (response.data['error']?['code'] == 401) {
               multiAuthCubit.signOut();
+              return handler.reject(DioError(
+                requestOptions: response.requestOptions,
+                response: response,
+              ));
             }
+
+            return handler.resolve(response);
           },
         ),
       ],

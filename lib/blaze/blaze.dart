@@ -58,7 +58,7 @@ class Blaze {
       (blazeMessage) async {
         if (blazeMessage.action == errorAction &&
             blazeMessage.error?.code == 401) {
-          await client.accountApi.getMe();
+          await _reconnect();
         }
 
         final data = blazeMessage.data;
