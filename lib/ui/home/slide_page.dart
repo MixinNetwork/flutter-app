@@ -4,20 +4,21 @@ import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/menu.dart';
 import 'package:flutter_app/widgets/select_item.dart';
+import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
 class SlidePage extends StatelessWidget {
   @override
@@ -172,28 +173,55 @@ class _CircleList extends HookWidget {
                       ContextMenu(
                         title: Localization.of(context).editConversations,
                         onTap: () async {
-                          final initSelectIds = (await context
+                          final initSelected = (await context
                                   .read<AccountServer>()
                                   .database
                                   .circleConversationDao
                                   .allCircleConversations(circle.circleId)
                                   .get())
-                              .map((e) => e.userId ?? e.conversationId)
+                              .map((e) => ConversationSelector(
+                                    conversationId: e.conversationId,
+                                    userId: e.userId,
+                                    isBot: false,
+                                    isGroup: false,
+                                  ))
                               .toList();
+
                           final result = await showConversationSelector(
                             context: context,
                             singleSelect: false,
                             title: circle.name,
                             onlyContact: false,
-                            initSelectIds: initSelectIds,
+                            initSelected: initSelected,
                           );
 
+                          final add = result.where((element) => !initSelected
+                              .map((e) => e.conversationId)
+                              .contains(element.conversationId));
+                          final remove = initSelected.where((element) => !result
+                              .map((e) => e.conversationId)
+                              .contains(element.conversationId));
+
+                          final requests = [
+                            ...add.map((e) => CircleConversationRequest(
+                                  action: CircleConversationAction.ADD,
+                                  conversationId: e.conversationId,
+                                  userId: e.userId,
+                                )),
+                            ...remove.map((e) => CircleConversationRequest(
+                                  action: CircleConversationAction.REMOVE,
+                                  conversationId: e.conversationId,
+                                  userId: e.userId,
+                                ))
+                          ];
                           await runFutureWithToast(
                             context,
                             context
                                 .read<AccountServer>()
-                                .editCircleConversation(circle.circleId,
-                                    result.map((e) => e.item1).toList()),
+                                .editCircleConversation(
+                                  circle.circleId,
+                                  requests,
+                                ),
                           );
                         },
                       ),

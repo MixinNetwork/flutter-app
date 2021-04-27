@@ -1,20 +1,22 @@
 import 'dart:math';
-import 'package:flutter_app/bloc/keyword_cubit.dart';
-import 'package:flutter_app/widgets/search_text_field.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/bloc/keyword_cubit.dart';
 import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/toast.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
+import 'package:flutter_app/utils/hook.dart';
+import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/menu.dart';
+import 'package:flutter_app/widgets/search_text_field.dart';
+import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
+import 'package:provider/provider.dart';
 
 import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
@@ -51,15 +53,11 @@ class SearchBar extends StatelessWidget {
                       title: Localization.of(context).createCircle,
                       onlyContact: true,
                     );
-                    if (list.isEmpty) return;
-                    final id = list[0].item1;
+                    if (list.isEmpty || (list.first.userId?.isEmpty ?? true))
+                      return;
+                    final userId = list.first.userId!;
 
-                    await runFutureWithToast(
-                      context,
-                      context
-                          .read<AccountServer>()
-                          .createConversationByUserId(id),
-                    );
+                    context.read<ConversationCubit>().selectUser(userId);
                   },
                 ),
                 ContextMenu(
@@ -74,9 +72,9 @@ class SearchBar extends StatelessWidget {
                     if (result.isEmpty) return;
                     final userIds = [
                       context.read<AccountServer>().userId,
-                      ...result.map(
-                        (e) => e.item1,
-                      )
+                      ...result.where((e) => e.userId != null).map(
+                            (e) => e.userId!,
+                          )
                     ];
 
                     final name = await showMixinDialog<String>(
@@ -118,7 +116,17 @@ class SearchBar extends StatelessWidget {
                     await runFutureWithToast(
                       context,
                       context.read<AccountServer>().createCircle(
-                          name!, list.map((e) => e.item1).toList()),
+                            name!,
+                            list
+                                .map(
+                                  (e) => CircleConversationRequest(
+                                    action: CircleConversationAction.ADD,
+                                    conversationId: e.conversationId,
+                                    userId: e.userId,
+                                  ),
+                                )
+                                .toList(),
+                          ),
                     );
                   },
                 ),

@@ -100,7 +100,7 @@ class ChatInfoPage extends HookWidget {
                         );
 
                         if (result.isEmpty) return;
-                        final conversationId = result[0].item1;
+                        final conversationId = result[0].conversationId;
 
                         await accountServer.sendContactMessage(
                           conversation.userId!,

@@ -579,8 +579,8 @@ class AccountServer {
     }
   }
 
-  // todo ids not use
-  Future<void> createCircle(String name, List<String> ids) async {
+  Future<void> createCircle(
+      String name, List<CircleConversationRequest> list) async {
     final response =
         await client.circleApi.createCircle(CircleName(name: name));
 
@@ -591,15 +591,23 @@ class AccountServer {
         createdAt: response.data.createdAt,
       ),
     );
+
+    await editCircleConversation(
+      response.data.circleId,
+      list,
+    );
   }
 
   Future<void> updateCircle(String circleId, String name) async {
-    final response =
-        await client.circleApi.updateCircle(circleId, CircleName(name: name));
+    final response = await client.circleApi.updateCircle(
+      circleId,
+      CircleName(name: name),
+    );
     await database.circlesDao.insertUpdate(db.Circle(
-        circleId: response.data.circleId,
-        name: response.data.name,
-        createdAt: response.data.createdAt));
+      circleId: response.data.circleId,
+      name: response.data.name,
+      createdAt: response.data.createdAt,
+    ));
   }
 
   Future<String> _initConversation(String? cid, String? recipientId) async {
@@ -635,15 +643,6 @@ class AccountServer {
     // todo
   }
 
-  // id == userId || id = conversationId
-  Future<void> editCircleConversation(String circleId, List<String> ids) async {
-    // todo
-  }
-
-  Future<void> createConversationByUserId(String userId) async {
-    // todo
-  }
-
   Future<void> circleRemoveConversation(
     String circleId,
     String conversationId,
@@ -657,33 +656,44 @@ class AccountServer {
     await database.circleConversationDao.deleteByIds(conversationId, circleId);
   }
 
-  Future<void> circleAddConversation(
-      String circleId, String conversationId, String? userId) async {
-    final response =
-        await client.circleApi.updateCircleConversations(circleId, [
-      CircleConversationRequest(
-          action: CircleConversationAction.ADD,
-          conversationId: conversationId,
-          userId: userId)
-    ]);
-    final list = response.data;
-    for (final cc in list) {
-      await database.circleConversationDao.insert(db.CircleConversation(
-          conversationId: cc.conversationId,
-          circleId: cc.circleId,
-          createdAt: cc.createdAt));
-      if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-        final u =
-            await database.userDao.findUserById(cc.userId!).getSingleOrNull();
-        if (u == null) {
-          refreshUserIdSet.add(cc.userId);
-        }
-      }
-    }
+  Future<void> editCircleConversation(
+    String circleId,
+    List<CircleConversationRequest> list,
+  ) async {
+    final response = await client.circleApi.updateCircleConversations(
+      circleId,
+      list,
+    );
+    await database.transaction(() => Future.wait(
+          response.data.map(
+            (cc) async {
+              await database.circleConversationDao.insert(
+                db.CircleConversation(
+                  conversationId: cc.conversationId,
+                  circleId: cc.circleId,
+                  createdAt: cc.createdAt,
+                ),
+              );
+              if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
+                final u = await database.userDao
+                    .findUserById(cc.userId!)
+                    .getSingleOrNull();
+                if (u == null) {
+                  refreshUserIdSet.add(cc.userId);
+                }
+              }
+            },
+          ),
+        ));
   }
 
   Future<void> deleteCircle(String circleId) async {
-    await client.circleApi.deleteCircle(circleId);
+    try {
+      await client.circleApi.deleteCircle(circleId);
+    } catch (e) {
+      if (e is! MixinApiError || e.error.code != 404) rethrow;
+    }
+
     await database.transaction(() async {
       await database.circlesDao.deleteCircleById(circleId);
       await database.circleConversationDao.deleteByCircleId(circleId);

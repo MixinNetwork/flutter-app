@@ -1,8 +1,10 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/crypto/uuid/uuid.dart';
 import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/db/extension/user.dart';
 import 'package:flutter_app/db/mixin_database.dart';
@@ -10,10 +12,9 @@ import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:tuple/tuple.dart';
 
 import '../action_button.dart';
 import '../brightness_observer.dart';
@@ -27,15 +28,31 @@ String _getConversationName(dynamic item) {
   throw ArgumentError('must be ConversationItem or User');
 }
 
-String _getConversationId(dynamic item) {
+String _getConversationId(dynamic item, BuildContext context) {
   if (item is ConversationItem) return item.conversationId;
-  if (item is User) return item.userId;
+  if (item is User)
+    return generateConversationId(
+      item.userId,
+      context.read<AccountServer>().userId,
+    );
   throw ArgumentError('must be ConversationItem or User');
+}
+
+String? _getUserId(dynamic item) {
+  if (item is ConversationItem && !item.isGroupConversation)
+    return item.ownerId;
+  if (item is User) return item.userId;
 }
 
 bool _isBot(dynamic item) {
   if (item is ConversationItem) return false;
   if (item is User) return item.isBot;
+  throw ArgumentError('must be ConversationItem or User');
+}
+
+bool _isGroup(dynamic item) {
+  if (item is ConversationItem) return item.isGroupConversation;
+  if (item is User) return false;
   throw ArgumentError('must be ConversationItem or User');
 }
 
@@ -61,35 +78,66 @@ extension _AvatarConversationItem on ConversationItem {
       );
 }
 
-Future<List<Tuple2<String, bool>>> showConversationSelector({
+Future<List<ConversationSelector>> showConversationSelector({
   required BuildContext context,
   required bool singleSelect,
   required String title,
   required bool onlyContact,
-  List<String> initSelectIds = const [],
-}) async => await showMixinDialog<List<Tuple2<String, bool>>>(
-        context: context,
-        child: _ConversationSelector(
-          title: title,
-          singleSelect: singleSelect,
-          onlyContact: onlyContact,
-          initSelectIds: initSelectIds,
-        ),
-      ) ??
-      [];
+  List<ConversationSelector> initSelected = const [],
+}) async =>
+    await showMixinDialog<List<ConversationSelector>>(
+      context: context,
+      child: _ConversationSelector(
+        title: title,
+        singleSelect: singleSelect,
+        onlyContact: onlyContact,
+        initSelected: initSelected,
+      ),
+    ) ??
+    [];
+
+class ConversationSelector with EquatableMixin {
+  const ConversationSelector({
+    required this.conversationId,
+    required this.userId,
+    required this.isBot,
+    required this.isGroup,
+  });
+
+  final String conversationId;
+  final String? userId;
+  final bool isBot;
+  final bool isGroup;
+
+  @override
+  List<Object?> get props => [
+        conversationId,
+        userId,
+        isBot,
+        isGroup,
+      ];
+
+  static ConversationSelector init(dynamic item, BuildContext context) =>
+      ConversationSelector(
+        conversationId: _getConversationId(item, context),
+        userId: _getUserId(item),
+        isBot: _isBot(item),
+        isGroup: _isGroup(item),
+      );
+}
 
 class _ConversationSelector extends HookWidget {
   const _ConversationSelector({
     required this.singleSelect,
     required this.title,
     required this.onlyContact,
-    this.initSelectIds = const [],
+    this.initSelected = const [],
   });
 
   final String title;
   final bool singleSelect;
   final bool onlyContact;
-  final List<String> initSelectIds;
+  final List<ConversationSelector> initSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -106,15 +154,19 @@ class _ConversationSelector extends HookWidget {
     final conversationFilterCubit = useBloc(() => ConversationFilterCubit(
             useContext().read<AccountServer>(), onlyContact, (state) {
           state.recentConversations.forEach((element) {
-            if (!initSelectIds.contains(element.conversationId)) return;
+            if (!initSelected
+                .map((e) => e.conversationId)
+                .contains(element.conversationId)) return;
             selectItem(element);
           });
+
+          final userIds = initSelected.map((e) => e.userId);
           state.friends.forEach((element) {
-            if (!initSelectIds.contains(element.userId)) return;
+            if (!userIds.contains(element.userId)) return;
             selectItem(element);
           });
           state.bots.forEach((element) {
-            if (!initSelectIds.contains(element.userId)) return;
+            if (!userIds.contains(element.userId)) return;
             selectItem(element);
           });
         }));
@@ -127,8 +179,7 @@ class _ConversationSelector extends HookWidget {
       () => selector.stream.listen((event) {
         if (event.isNotEmpty && singleSelect) {
           final item = event.first;
-          Navigator.pop(
-              context, [Tuple2(_getConversationId(item), _isBot(item))]);
+          Navigator.pop(context, [ConversationSelector.init(item, context)]);
         }
       }).cancel,
     );
@@ -195,10 +246,8 @@ class _ConversationSelector extends HookWidget {
                                 context,
                                 selected
                                     .map(
-                                      (item) => Tuple2(
-                                        _getConversationId(item),
-                                        _isBot(item),
-                                      ),
+                                      (item) => ConversationSelector.init(
+                                          item, context),
                                     )
                                     .toList(),
                               ),
@@ -339,8 +388,8 @@ class _ConversationSelector extends HookWidget {
                               avatar: item.avatarWidget,
                               title: item.validName,
                               selected: selected.any((element) =>
-                                  _getConversationId(element) ==
-                                  item.conversationId),
+                                  _getConversationId(element, context) ==
+                                  _getConversationId(item, context)),
                               showSelector: !singleSelect,
                             ),
                           );
@@ -361,7 +410,8 @@ class _ConversationSelector extends HookWidget {
                               title: item.fullName ?? '',
                               showSelector: !singleSelect,
                               selected: selected.any((element) =>
-                                  _getConversationId(element) == item.userId),
+                                  _getConversationId(element, context) ==
+                                  _getConversationId(item, context)),
                             ),
                           );
                         },
@@ -381,7 +431,8 @@ class _ConversationSelector extends HookWidget {
                               title: item.fullName!,
                               showSelector: !singleSelect,
                               selected: selected.any((element) =>
-                                  _getConversationId(element) == item.userId),
+                                  _getConversationId(element, context) ==
+                                  _getConversationId(item, context)),
                             ),
                           );
                         },

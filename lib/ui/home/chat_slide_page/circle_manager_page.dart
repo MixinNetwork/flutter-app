@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
@@ -12,8 +13,8 @@ import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
 class CircleManagerPage extends HookWidget {
   const CircleManagerPage({
@@ -78,9 +79,13 @@ class CircleManagerPage extends HookWidget {
 
               await runFutureWithToast(
                 context,
-                context
-                    .read<AccountServer>()
-                    .createCircle(name!, [conversation!.conversationId]),
+                context.read<AccountServer>().createCircle(name!, [
+                  CircleConversationRequest(
+                    action: CircleConversationAction.ADD,
+                    conversationId: conversation!.conversationId,
+                    userId: conversation.userId,
+                  ),
+                ]),
               );
             },
           ),
@@ -165,11 +170,16 @@ class _CircleManagerItem extends StatelessWidget {
 
                 await runFutureWithToast(
                   context,
-                  context.read<AccountServer>().circleAddConversation(
-                        circleId,
-                        conversation!.conversationId,
-                        conversation.userId,
+                  context.read<AccountServer>().editCircleConversation(
+                    circleId,
+                    [
+                      CircleConversationRequest(
+                        action: CircleConversationAction.ADD,
+                        conversationId: conversation!.conversationId,
+                        userId: conversation.userId,
                       ),
+                    ],
+                  ),
                 );
               },
             ),

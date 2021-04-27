@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/enum/message_category.dart';
 import 'package:flutter_app/enum/message_status.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/quote_message_cubit.dart';
 import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/message/item/sticker_message.dart';
@@ -15,8 +17,6 @@ import 'package:flutter_app/widgets/message/message_day_time.dart';
 import 'package:flutter_app/widgets/message/message_name.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:provider/provider.dart';
 
 import '../menu.dart';
@@ -125,9 +125,10 @@ class MessageItemWidget extends StatelessWidget {
                       );
                       if (result.isEmpty) return;
                       await context.read<AccountServer>().forwardMessage(
-                          message.messageId,
-                          conversationId: result.first.item1,
-                          isPlain: result.first.item2);
+                            message.messageId,
+                            conversationId: result.first.conversationId,
+                            isPlain: result.first.isBot,
+                          );
                     },
                   ),
                 if (message.type.isText)
