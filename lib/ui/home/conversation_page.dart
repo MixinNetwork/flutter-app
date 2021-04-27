@@ -5,13 +5,15 @@ import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/bloc/keyword_cubit.dart';
 import 'package:flutter_app/bloc/minute_timer_cubit.dart';
+import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/db/extension/message_category.dart';
+import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
-import 'package:flutter_app/bloc/paging/paging_bloc.dart';
 import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
@@ -33,11 +35,9 @@ import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_app/generated/l10n.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:tuple/tuple.dart';
 
 const _defaultLimit = 3;
@@ -733,12 +733,21 @@ class _List extends HookWidget {
               if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
                 ContextMenu(
                   title: Localization.current.unMute,
-                  onTap: () => runFutureWithToast(
-                    context,
-                    context
-                        .read<AccountServer>()
-                        .unMuteUser(conversation.ownerId!),
-                  ),
+                  onTap: () async {
+                    final isGroupConversation =
+                        conversation.isGroupConversation;
+                    return runFutureWithToast(
+                      context,
+                      context.read<AccountServer>().unMuteConversation(
+                            conversationId: isGroupConversation
+                                ? conversation.conversationId
+                                : null,
+                            userId: isGroupConversation
+                                ? null
+                                : conversation.ownerId,
+                          ),
+                    );
+                  },
                 )
               else
                 ContextMenu(
@@ -748,11 +757,20 @@ class _List extends HookWidget {
                         context: context, child: const MuteDialog());
                     if (result == null) return;
 
+                    final isGroupConversation =
+                        conversation.isGroupConversation;
+
                     return runFutureWithToast(
                       context,
-                      context
-                          .read<AccountServer>()
-                          .muteUser(conversation.ownerId!, result),
+                      context.read<AccountServer>().muteConversation(
+                            result,
+                            conversationId: isGroupConversation
+                                ? conversation.conversationId
+                                : null,
+                            userId: isGroupConversation
+                                ? null
+                                : conversation.ownerId,
+                          ),
                     );
                   },
                 ),

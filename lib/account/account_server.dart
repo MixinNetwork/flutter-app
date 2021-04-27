@@ -63,7 +63,8 @@ class AccountServer {
             DioError e,
             ErrorInterceptorHandler handler,
           ) {
-            if (e is MixinApiError) multiAuthCubit.signOut();
+            if (e is MixinApiError && e.error.code == 401)
+              multiAuthCubit.signOut();
             handler.next(e);
           },
         ),
@@ -533,8 +534,10 @@ class AccountServer {
     }
   }
 
-  Future<void> exitGroup(String conversationId) =>
-      client.conversationApi.exit(conversationId);
+  Future<void> exitGroup(String conversationId) async {
+    final response = await client.conversationApi.exit(conversationId);
+    await database.conversationDao.updateConversation(response.data);
+  }
 
   Future<void> addParticipant(
     String conversationId,
@@ -708,46 +711,57 @@ class AccountServer {
     ));
   }
 
-  Future<void> unMuteUser(String userId) async {
-    await _mute(0, userId: userId);
+  Future<void> unMuteConversation({
+    String? conversationId,
+    String? userId,
+  }) async {
+    await _mute(
+      0,
+      conversationId: conversationId,
+      userId: userId,
+    );
   }
 
-  Future<void> muteUser(String userId, int duration) async {
-    await _mute(duration, userId: userId);
+  Future<void> muteConversation(
+    int duration, {
+    String? conversationId,
+    String? userId,
+  }) async {
+    await _mute(
+      duration,
+      conversationId: conversationId,
+      userId: userId,
+    );
   }
 
-  Future<void> unMuteGroup(String conversationId) async {
-    await _mute(0, conversationId: conversationId);
-  }
-
-  Future<void> muteGroup(String conversationId, int duration) async {
-    await _mute(duration, conversationId: conversationId);
-  }
-
-  Future<void> _mute(int duration,
-      {String? conversationId, String? userId}) async {
-    MixinResponse<ConversationResponse> response;
+  Future<void> _mute(
+    int duration, {
+    String? conversationId,
+    String? userId,
+  }) async {
+    assert([conversationId, userId].any((element) => element != null));
+    assert(![conversationId, userId].every((element) => element != null));
     if (conversationId != null) {
-      response = await client.conversationApi.mute(
-          conversationId,
-          ConversationRequest(
-              conversationId: conversationId,
-              category: ConversationCategory.group,
-              duration: duration));
-    } else if (userId != null) {
-      final cid = generateConversationId(userId, this.userId);
-      response = await client.conversationApi.mute(
-          cid,
-          ConversationRequest(
-              conversationId: cid,
-              category: ConversationCategory.contact,
-              duration: duration,
-              participants: [ParticipantRequest(userId: userId)]));
+      await client.conversationApi.mute(
+        conversationId,
+        ConversationRequest(
+          conversationId: conversationId,
+          category: ConversationCategory.group,
+          duration: duration,
+        ),
+      );
     } else {
-      throw Exception('Parameter error');
+      final cid = generateConversationId(userId!, this.userId);
+      await client.conversationApi.mute(
+        cid,
+        ConversationRequest(
+          conversationId: cid,
+          category: ConversationCategory.contact,
+          duration: duration,
+          participants: [ParticipantRequest(userId: this.userId)],
+        ),
+      );
     }
-
-    // todo
   }
 
   Future<void> editGroupAnnouncement(

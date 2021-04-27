@@ -56,6 +56,8 @@ class Blaze {
         .asyncMap((message) async => await parseBlazeMessage(message))
         .listen(
       (blazeMessage) async {
+        debugPrint('blazeMessage: ${blazeMessage.toJson()}');
+
         if (blazeMessage.action == errorAction &&
             blazeMessage.error?.code == 401) {
           await _reconnect();

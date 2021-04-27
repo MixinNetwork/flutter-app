@@ -213,12 +213,19 @@ class ChatInfoPage extends HookWidget {
                             : null,
                         trailing: null,
                         onTap: () async {
+                          final isGroup = conversation.isGroup ?? false;
                           if (muting)
                             return await runFutureWithToast(
                                 context,
                                 context
                                     .read<AccountServer>()
-                                    .unMuteUser(conversation.userId!));
+                                    .unMuteConversation(
+                                      conversationId: isGroup
+                                          ? conversation.conversationId
+                                          : null,
+                                      userId:
+                                          isGroup ? null : conversation.userId,
+                                    ));
 
                           final result = await showMixinDialog<int?>(
                               context: context, child: const MuteDialog());
@@ -226,9 +233,14 @@ class ChatInfoPage extends HookWidget {
 
                           await runFutureWithToast(
                               context,
-                              context
-                                  .read<AccountServer>()
-                                  .muteUser(conversation.userId!, result));
+                              context.read<AccountServer>().muteConversation(
+                                    result,
+                                    conversationId: isGroup
+                                        ? conversation.conversationId
+                                        : null,
+                                    userId:
+                                        isGroup ? null : conversation.userId,
+                                  ));
                         },
                       ),
                     ],
