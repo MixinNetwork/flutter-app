@@ -35,9 +35,14 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
   Future<int> deleteSessionsByAddress(String address) =>
       (delete(db.sessions)..where((tbl) => tbl.address.equals(address))).go();
 
-  Future<List<Session>> getSessionAddress() async => select(db.sessions).get();
+  Future<List<Session>> getSessionAddress() async =>
+      (select(db.sessions)..where((tbl) => tbl.device.equals(1))).get();
 
   Future deleteSession(Session session) => delete(db.sessions).delete(session);
 
-  Future insert(Session session) => into(db.sessions).insert(session);
+  Future insertSession(SessionsCompanion session) async =>
+      into(db.sessions).insert(session);
+
+  Future insertList(List<SessionsCompanion> list) async =>
+      batch((batch) => batch.insertAll(db.sessions, list));
 }

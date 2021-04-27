@@ -16,4 +16,7 @@ class PreKeyDao extends DatabaseAccessor<SignalDatabase> with _$PreKeyDaoMixin {
       (delete(db.prekeys)..where((tbl) => tbl.prekeyId.equals(preKeyId))).go();
 
   Future insert(Prekey preKey) => into(db.prekeys).insert(preKey);
+
+  Future insertList(List<PrekeysCompanion> list) async =>
+      batch((batch) => batch.insertAll(db.prekeys, list));
 }

@@ -192,6 +192,8 @@ class _Home extends HookWidget {
     useEffect(() {
       if (signed) {
         accountServer!
+          ..pushSignalKeys()
+          ..syncSession()
           ..initSticker()
           ..initCircles();
       }

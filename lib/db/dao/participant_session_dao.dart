@@ -23,15 +23,15 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteByStatus(String conversationId) async {
     await (delete(db.participantSession)
-      ..where((tbl) =>
-      tbl.conversationId.equals(conversationId) &
-      tbl.sentToServer.equals(1).not()))
+          ..where((tbl) =>
+              tbl.conversationId.equals(conversationId) &
+              tbl.sentToServer.equals(1).not()))
         .go();
   }
 
   Future deleteByConversationId(String conversationId) async {
     await (delete(db.participantSession)
-      ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
         .go();
   }
 

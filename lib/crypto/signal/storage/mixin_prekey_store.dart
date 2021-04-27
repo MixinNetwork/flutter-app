@@ -70,16 +70,21 @@ class MixinPreKeyStore implements PreKeyStore, SignedPreKeyStore {
   }
 
   @override
-  void removeSignedPreKey(int signedPreKeyId) {
-    signedPreKeyDao.deleteByPreKeyId(signedPreKeyId);
+  Future removeSignedPreKey(int signedPreKeyId) async {
+    await signedPreKeyDao.deleteByPreKeyId(signedPreKeyId);
   }
 
   @override
-  void storeSignedPreKey(int signedPreKeyId, SignedPreKeyRecord record) {
-    signedPreKeyDao.insert(SignedPrekey(
+  Future storeSignedPreKey(
+      int signedPreKeyId, SignedPreKeyRecord record) async {
+    await signedPreKeyDao.insert(SignedPrekey(
         id: 0,
         prekeyId: signedPreKeyId,
         record: record.serialize(),
         timestamp: DateTime.now().millisecondsSinceEpoch));
+  }
+
+  Future storePreKeyList(List<PrekeysCompanion> list) async {
+    await preKeyDao.insertList(list);
   }
 }

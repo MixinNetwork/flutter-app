@@ -41,8 +41,8 @@ BlazeMessage createConsumeSessionSignalKeys(BlazeMessageParam param) =>
     BlazeMessage(
         id: const Uuid().v4(), action: consumeSessionSignalKeys, params: param);
 
-BlazeMessage createSignalKeyMessage(BlazeMessageParam param) =>
-    BlazeMessage(id: const Uuid().v4(), action: createSignalKeyMessages, params: param);
+BlazeMessage createSignalKeyMessage(BlazeMessageParam param) => BlazeMessage(
+    id: const Uuid().v4(), action: createSignalKeyMessages, params: param);
 
 BlazeMessageParam createConsumeSignalKeysParam(
         List<BlazeMessageParamSession> recipients) =>

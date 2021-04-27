@@ -1,3 +1,1 @@
-enum SenderKeyStatus {
-  unknown, sent
-}
+enum SenderKeyStatus { unknown, sent }

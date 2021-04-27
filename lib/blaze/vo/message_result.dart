@@ -1,4 +1,3 @@
-
 class MessageResult {
   MessageResult(this.success, this.retry);
 

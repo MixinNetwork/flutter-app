@@ -16,6 +16,8 @@ class MessageMentionsDao extends DatabaseAccessor<MixinDatabase>
       delete(db.messageMentions).delete(messageMention);
 
   Future<String?> getMentionData(String messageId) =>
-    (select(db.messageMentions)
-      ..where((tbl) => tbl.messageId.equals(messageId))).map((row) => row.mentions).getSingleOrNull();
+      (select(db.messageMentions)
+            ..where((tbl) => tbl.messageId.equals(messageId)))
+          .map((row) => row.mentions)
+          .getSingleOrNull();
 }

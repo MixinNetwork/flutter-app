@@ -84,3 +84,5 @@ final Random _random = Random.secure();
 
 List<int> generateRandomKey([int length = 32]) =>
     List<int>.generate(length, (i) => _random.nextInt(256));
+
+int generateRandomInt(int max) => _random.nextInt(max);

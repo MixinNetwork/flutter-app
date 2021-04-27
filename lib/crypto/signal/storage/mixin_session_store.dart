@@ -65,8 +65,7 @@ class MixinSessionStore extends SessionStore {
     final session =
         await sessionDao.getSession(address.getName(), address.getDeviceId());
     if ((session == null) || !listEquals(session.record, record.serialize())) {
-      await sessionDao.insert(Session(
-          id: 0,
+      await sessionDao.insertSession(SessionsCompanion.insert(
           address: address.getName(),
           device: address.getDeviceId(),
           record: record.serialize(),

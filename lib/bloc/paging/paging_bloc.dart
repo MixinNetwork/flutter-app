@@ -255,7 +255,7 @@ class AnonymousPagingBloc<T> extends PagingBloc<T> {
     required PagingState<T> initState,
     required Future<int> Function() queryCount,
     required Future<List<T>> Function(int limit, int offset) queryRange,
-  })  : _queryCount = queryCount,
+  })   : _queryCount = queryCount,
         _queryRange = queryRange,
         super(
           initState: initState,

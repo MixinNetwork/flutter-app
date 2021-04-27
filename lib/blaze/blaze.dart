@@ -227,10 +227,13 @@ class Blaze {
   }
 }
 
-Future<BlazeMessage> parseBlazeMessage(List<int> message, Map<String, WebSocketTransaction> transactions) =>
-    runLoadBalancer(_parseBlazeMessageInternal, Tuple2(message, transactions));
+Future<BlazeMessage> parseBlazeMessage(
+        List<int> message, Map<String, WebSocketTransaction> transactions) =>
+    runLoadBalancer(
+        _parseBlazeMessageInternal, Tuple2(message, transactions));
 
-BlazeMessage _parseBlazeMessageInternal(Tuple2<List<int>, Map<String, WebSocketTransaction>> tuple2) {
+BlazeMessage _parseBlazeMessageInternal(
+    Tuple2<List<int>, Map<String, WebSocketTransaction>> tuple2) {
   final message = tuple2.item1;
   final transactions = tuple2.item2;
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));

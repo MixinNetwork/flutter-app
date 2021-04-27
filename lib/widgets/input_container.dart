@@ -174,10 +174,17 @@ void _sendMessage(BuildContext context) {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
+  // final bool isPlain;
+  // if (conversationItem.isGroup ?? false) {
+  //   isPlain = false;
+  // } else {
+  //   isPlain = conversationItem.isBot ?? false;
+  // }
   context.read<AccountServer>().sendTextMessage(
         text,
         conversationId: conversationItem.conversationId,
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
+        // isPlain: isPlain,
       );
 
   context.read<QuoteMessageCubit>().emit(null);
