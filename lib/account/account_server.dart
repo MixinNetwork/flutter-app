@@ -789,13 +789,11 @@ class AccountServer {
     await database.conversationDao.updateConversation(response.data);
   }
 
-  Future<void> unpin(String conversationId) async {
-    // todo
-  }
+  Future<void> unpin(String conversationId) =>
+      database.conversationDao.unpin(conversationId);
 
-  Future<void> pin(String conversationId) async {
-    // todo
-  }
+  Future<void> pin(String conversationId) =>
+      database.conversationDao.pin(conversationId);
 
   Future<int> getConversationMediaSize(String conversationId) async =>
       (await getTotalSizeOfFile(
