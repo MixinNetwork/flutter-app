@@ -513,7 +513,9 @@ class AccountServer {
   }
 
   Future<void> createGroupConversation(
-      String name, List<String> userIds) async {
+    String name,
+    List<String> userIds,
+  ) async {
     final conversationId = const Uuid().v4();
 
     final response = await client.conversationApi.createConversation(
@@ -525,40 +527,7 @@ class AccountServer {
             userIds.map((e) => ParticipantRequest(userId: e)).toList(),
       ),
     );
-    final conversation = response.data;
-    await database.transaction(() async {
-      await database.conversationDao.insert(
-        db.Conversation(
-          conversationId: conversation.conversationId,
-          ownerId: conversation.creatorId,
-          category: conversation.category,
-          name: conversation.name,
-          iconUrl: conversation.iconUrl,
-          announcement: conversation.announcement,
-          codeUrl: conversation.codeUrl,
-          payType: null,
-          createdAt: conversation.createdAt,
-          pinTime: null,
-          lastMessageId: null,
-          lastMessageCreatedAt: null,
-          lastReadMessageId: null,
-          unseenMessageCount: 0,
-          status: ConversationStatus.success,
-          draft: null,
-          muteUntil: DateTime.tryParse(conversation.muteUntil),
-        ),
-      );
-      for (final participant in conversation.participants) {
-        await database.participantsDao.insert(
-          db.Participant(
-            conversationId: conversation.conversationId,
-            userId: participant.userId,
-            createdAt: participant.createdAt ?? DateTime.now(),
-            role: participant.role,
-          ),
-        );
-      }
-    });
+    await database.conversationDao.updateConversation(response.data);
     for (final userId in userIds) {
       await addParticipant(conversationId, userId);
     }
@@ -572,8 +541,10 @@ class AccountServer {
     String userId,
   ) async {
     try {
-      await client.conversationApi.participants(
+      final response = await client.conversationApi.participants(
           conversationId, 'ADD', [ParticipantRequest(userId: userId)]);
+
+      await database.conversationDao.updateConversation(response.data);
     } catch (e) {
       debugPrint('$e');
       // throw error??
@@ -780,13 +751,18 @@ class AccountServer {
   }
 
   Future<void> editGroupAnnouncement(
-      String conversationId, String announcement) async {
+    String conversationId,
+    String announcement,
+  ) async {
     final response = await client.conversationApi.update(
-        conversationId,
-        ConversationRequest(
-            conversationId: conversationId, announcement: announcement));
+      conversationId,
+      ConversationRequest(
+        conversationId: conversationId,
+        announcement: announcement,
+      ),
+    );
 
-    // todo
+    await database.conversationDao.updateConversation(response.data);
   }
 
   Future<void> unpin(String conversationId) async {

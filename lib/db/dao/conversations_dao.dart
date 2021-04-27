@@ -145,4 +145,41 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<ConversationStorageUsage> conversationStorageUsage() =>
       db.conversationStorageUsage();
+
+  Future<void> updateConversation(ConversationResponse conversation) async =>
+      await db.transaction(() async {
+        await insert(
+          Conversation(
+            conversationId: conversation.conversationId,
+            ownerId: conversation.creatorId,
+            category: conversation.category,
+            name: conversation.name,
+            iconUrl: conversation.iconUrl,
+            announcement: conversation.announcement,
+            codeUrl: conversation.codeUrl,
+            payType: null,
+            createdAt: conversation.createdAt,
+            pinTime: null,
+            lastMessageId: null,
+            lastMessageCreatedAt: null,
+            lastReadMessageId: null,
+            unseenMessageCount: 0,
+            status: ConversationStatus.success,
+            draft: null,
+            muteUntil: DateTime.tryParse(conversation.muteUntil),
+          ),
+        );
+        await Future.wait(
+          conversation.participants.map(
+            (participant) => db.participantsDao.insert(
+              Participant(
+                conversationId: conversation.conversationId,
+                userId: participant.userId,
+                createdAt: participant.createdAt ?? DateTime.now(),
+                role: participant.role,
+              ),
+            ),
+          ),
+        );
+      });
 }

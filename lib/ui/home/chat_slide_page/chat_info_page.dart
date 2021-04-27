@@ -9,6 +9,7 @@ import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
 import 'package:flutter_app/ui/home/chat_page.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/utils/hook.dart';
+import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/action_button.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/dialog.dart';
@@ -18,7 +19,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/utils/list_utils.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../widgets/brightness_observer.dart';
@@ -150,6 +150,7 @@ class ChatInfoPage extends HookWidget {
                                 context: context,
                                 child: EditDialog(
                                   title: Text(announcementTitle),
+                                  editText: announcement ?? '',
                                 ),
                               );
                               if (result == null) return;
