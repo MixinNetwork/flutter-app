@@ -3,6 +3,7 @@ import 'package:flutter_app/constants/constants.dart';
 import 'package:flutter_app/db/database.dart';
 import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:very_good_analysis/very_good_analysis.dart';
 
 class Injector {
   Injector(this.accountId, this.database, this.client);
@@ -18,33 +19,42 @@ class Injector {
     final conversation =
         await database.conversationDao.getConversationById(conversationId);
     if (conversation == null) {
-      final response =
-          await client.conversationApi.getConversation(conversationId);
-      if (response.data != null) {
-        var ownerId = response.data!.creatorId;
-        if (response.data!.category == ConversationCategory.contact) {
-          response.data!.participants.forEach((item) {
-            if (item.userId != accountId) {
-              ownerId = item.userId;
-            }
-          });
-        }
+      unawaited(() async {
+        try {
+          final response =
+              await client.conversationApi.getConversation(conversationId);
+          var ownerId = response.data.creatorId;
+          if (response.data.category == ConversationCategory.contact) {
+            response.data.participants.forEach((item) {
+              if (item.userId != accountId) {
+                ownerId = item.userId;
+              }
+            });
+          }
 
-        await database.conversationDao.insert(
-          db.Conversation(
-            conversationId: response.data!.conversationId,
-            ownerId: ownerId,
-            category: response.data!.category,
-            name: response.data!.name,
-            announcement: response.data!.announcement,
-            createdAt: response.data!.createdAt,
-            status: ConversationStatus.success,
-            muteUntil: DateTime.parse(response.data!.muteUntil),
-          ),
-        );
-        await refreshParticipants(
-            response.data!.conversationId, response.data!.participants);
-      }
+          await database.transaction(() async {
+            await database.conversationDao.insert(
+              db.Conversation(
+                conversationId: response.data.conversationId,
+                ownerId: ownerId,
+                category: response.data.category,
+                name: response.data.name,
+                announcement: response.data.announcement,
+                createdAt: response.data.createdAt,
+                status: ConversationStatus.success,
+                muteUntil: DateTime.parse(response.data.muteUntil),
+              ),
+            );
+            await refreshParticipants(
+              response.data.conversationId,
+              response.data.participants,
+            );
+          });
+        } catch (e, s) {
+          debugPrint('$e');
+          debugPrint('$s');
+        }
+      }());
     }
   }
 
@@ -74,9 +84,9 @@ class Injector {
   }
 
   Future<void> fetchUsers(List<String> ids) async {
-    final response = await client.userApi.getUsers(ids);
-    if (response.data != null && response.data!.isNotEmpty) {
-      await database.userDao.insertAll(response.data!
+    try {
+      final response = await client.userApi.getUsers(ids);
+      await database.userDao.insertAll(response.data
           .map((e) => db.User(
                 userId: e.userId,
                 identityNumber: e.identityNumber,
@@ -92,8 +102,9 @@ class Injector {
                 isScam: e.isScam ? 1 : 0,
               ))
           .toList());
-    } else {
-      debugPrint(response.error!.toJson().toString());
+    } catch (e, s) {
+      debugPrint('$e');
+      debugPrint('$s');
     }
   }
 
@@ -101,65 +112,61 @@ class Injector {
     var user = await database.userDao.findUserById(userId).getSingleOrNull();
     if (user == null) {
       final response = await client.userApi.getUserById(userId);
-      if (response.data != null) {
-        final result = response.data!;
-        user = db.User(
-          userId: result.userId,
-          identityNumber: result.identityNumber,
-          relationship: result.relationship,
-          fullName: result.fullName,
-          avatarUrl: result.avatarUrl,
-          phone: result.phone,
-          isVerified: result.isVerified,
-          appId: result.app?.appId,
-          biography: result.biography,
-          muteUntil: DateTime.tryParse(result.muteUntil),
-          isScam: result.isScam ? 1 : 0,
-          createdAt: result.createdAt,
+      final result = response.data;
+      user = db.User(
+        userId: result.userId,
+        identityNumber: result.identityNumber,
+        relationship: result.relationship,
+        fullName: result.fullName,
+        avatarUrl: result.avatarUrl,
+        phone: result.phone,
+        isVerified: result.isVerified,
+        appId: result.app?.appId,
+        biography: result.biography,
+        muteUntil: DateTime.tryParse(result.muteUntil),
+        isScam: result.isScam ? 1 : 0,
+        createdAt: result.createdAt,
+      );
+      await database.userDao.insert(user);
+      final app = result.app;
+      if (app != null) {
+        await database.appsDao.insert(
+          db.App(
+            appId: app.appId,
+            appNumber: app.appNumber,
+            homeUri: app.homeUri,
+            redirectUri: app.redirectUri,
+            name: app.name,
+            iconUrl: app.iconUrl,
+            category: app.category,
+            description: app.description,
+            appSecret: app.category,
+            capabilities: app.capabilites.toString(),
+            creatorId: app.creatorId,
+            resourcePatterns: app.resourcePatterns.toString(),
+            updatedAt: app.updatedAt,
+          ),
         );
-        await database.userDao.insert(user);
-        final app = result.app;
-        if (app != null) {
-          await database.appsDao.insert(
-            db.App(
-              appId: app.appId,
-              appNumber: app.appNumber,
-              homeUri: app.homeUri,
-              redirectUri: app.redirectUri,
-              name: app.name,
-              iconUrl: app.iconUrl,
-              category: app.category,
-              description: app.description,
-              appSecret: app.category,
-              capabilities: app.capabilites.toString(),
-              creatorId: app.creatorId,
-              resourcePatterns: app.resourcePatterns.toString(),
-              updatedAt: app.updatedAt,
-            ),
-          );
-        }
       }
     }
-    return user!;
+    return user;
   }
 
-  void refreshSticker(String stickerId) {
-    client.accountApi.getStickerById(stickerId).then((value) {
-      final sticker = value.data;
-      if (sticker != null) {
-        database.stickerDao.insert(db.Sticker(
-          stickerId: sticker.stickerId,
-          albumId: sticker.albumId,
-          name: sticker.name,
-          assetUrl: sticker.assetUrl,
-          assetType: sticker.assetType,
-          assetWidth: sticker.assetWidth,
-          assetHeight: sticker.assetHeight,
-          createdAt: sticker.createdAt,
-        ));
-      }
-    }).catchError((e) {
-      debugPrint(e);
-    });
+  void refreshSticker(String stickerId) async {
+    try {
+      final sticker = (await client.accountApi.getStickerById(stickerId)).data;
+      await database.stickerDao.insert(db.Sticker(
+            stickerId: sticker.stickerId,
+            albumId: sticker.albumId,
+            name: sticker.name,
+            assetUrl: sticker.assetUrl,
+            assetType: sticker.assetType,
+            assetWidth: sticker.assetWidth,
+            assetHeight: sticker.assetHeight,
+            createdAt: sticker.createdAt,
+          ));
+    } catch (e) {
+      debugPrint('$e');
+    }
   }
 }

@@ -203,7 +203,7 @@ packages:
       name: dart_jsonwebtoken
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.0"
   dart_style:
     dependency: transitive
     description:
@@ -578,8 +578,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "48f69e5b78395a191789af9408af8809689725e6"
-      resolved-ref: "48f69e5b78395a191789af9408af8809689725e6"
+      ref: f01faa7ffcd5f44b8ef45ad9736ad333d2102e4c
+      resolved-ref: f01faa7ffcd5f44b8ef45ad9736ad333d2102e4c
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"

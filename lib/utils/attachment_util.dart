@@ -33,11 +33,11 @@ class AttachmentUtil {
 
     try {
       final response = await _client.attachmentApi.getAttachment(content);
-      debugPrint('download ${response.data?.viewUrl}');
+      debugPrint('download ${response.data.viewUrl}');
 
-      if (response.data != null && response.data!.viewUrl != null) {
+      if (response.data.viewUrl != null) {
         final request =
-        await _attachmentClient.getUrl(Uri.parse(response.data!.viewUrl!));
+        await _attachmentClient.getUrl(Uri.parse(response.data.viewUrl!));
 
         request.headers
             .add(HttpHeaders.contentTypeHeader, 'application/octet-stream');
@@ -73,13 +73,13 @@ class AttachmentUtil {
   Future<String?> uploadAttachment(File file, String messageId) async {
     try {
       final response = await _client.attachmentApi.postAttachment();
-      if (response.data != null && response.data?.uploadUrl != null) {
+      if (response.data.uploadUrl != null) {
         final fileStream = file.openRead();
 
         final totalBytes = await file.length();
 
         final request =
-        await _attachmentClient.putUrl(Uri.parse(response.data!.uploadUrl!));
+        await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
 
         request.headers..add(
             HttpHeaders.contentTypeHeader, 'application/octet-stream')..add(
@@ -107,7 +107,7 @@ class AttachmentUtil {
         final httpResponse = await request.close();
         if (httpResponse.statusCode == 200) {
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
-          return response.data!.attachmentId;
+          return response.data.attachmentId;
         } else {
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;

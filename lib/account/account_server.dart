@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/account/send_message_helper.dart';
@@ -28,7 +29,6 @@ import 'package:flutter_app/utils/stream_extension.dart';
 import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:ed25519_edwards/ed25519_edwards.dart';
 
 class AccountServer {
   static String? sid;
@@ -59,16 +59,12 @@ class AccountServer {
       jsonDecodeCallback: LoadBalancerUtils.jsonDecode,
       interceptors: [
         InterceptorsWrapper(
-          onResponse: (Response response, ResponseInterceptorHandler handler) {
-            if (response.data['error']?['code'] == 401) {
-              multiAuthCubit.signOut();
-              return handler.reject(DioError(
-                requestOptions: response.requestOptions,
-                response: response,
-              ));
-            }
-
-            return handler.resolve(response);
+          onError: (
+            DioError e,
+            ErrorInterceptorHandler handler,
+          ) {
+            if (e is MixinApiError) multiAuthCubit.signOut();
+            handler.next(e);
           },
         ),
       ],
@@ -383,20 +379,18 @@ class AccountServer {
 
   Future<void> initSticker() async {
     final res = await client.accountApi.getStickerAlbums();
-    if (res.data != null) {
-      res.data!.forEach((item) async {
-        await database.stickerAlbumsDao.insert(db.StickerAlbum(
-            albumId: item.albumId,
-            name: item.name,
-            iconUrl: item.iconUrl,
-            createdAt: item.createdAt,
-            updateAt: item.updateAt,
-            userId: item.userId,
-            category: item.category,
-            description: item.description));
-        _updateStickerAlbums(item.albumId);
-      });
-    }
+    res.data.forEach((item) async {
+      await database.stickerAlbumsDao.insert(db.StickerAlbum(
+          albumId: item.albumId,
+          name: item.name,
+          iconUrl: item.iconUrl,
+          createdAt: item.createdAt,
+          updateAt: item.updateAt,
+          userId: item.userId,
+          category: item.category,
+          description: item.description));
+      _updateStickerAlbums(item.albumId);
+    });
   }
 
   final refreshUserIdSet = <dynamic>{};
@@ -404,29 +398,25 @@ class AccountServer {
   Future<void> initCircles() async {
     refreshUserIdSet.clear();
     final res = await client.circleApi.getCircles();
-    if (res.data != null) {
-      res.data?.forEach((circle) async {
-        await database.circlesDao.insertUpdate(Circle(
-            circleId: circle.circleId,
-            name: circle.name,
-            createdAt: circle.createdAt,
-            orderedAt: null));
-        await handleCircle(circle);
-      });
-    }
+    res.data.forEach((circle) async {
+      await database.circlesDao.insertUpdate(Circle(
+          circleId: circle.circleId,
+          name: circle.name,
+          createdAt: circle.createdAt,
+          orderedAt: null));
+      await handleCircle(circle);
+    });
   }
 
   Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
     final ccList =
         (await client.circleApi.getCircleConversations(circle.circleId)).data;
-    if (ccList == null) {
-      return;
-    }
-    ccList.forEach((cc) async {
+    for (final cc in ccList) {
       await database.circleConversationDao.insert(db.CircleConversation(
-          conversationId: cc.conversationId,
-          circleId: cc.circleId,
-          createdAt: cc.createdAt));
+        conversationId: cc.conversationId,
+        circleId: cc.circleId,
+        createdAt: cc.createdAt,
+      ));
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
         final u =
             await database.userDao.findUserById(cc.userId!).getSingleOrNull();
@@ -434,7 +424,7 @@ class AccountServer {
           refreshUserIdSet.add(cc.userId);
         }
       }
-    });
+    }
     if (ccList.length >= 500) {
       await handleCircle(circle, offset: offset ?? 0 + 500);
     }
@@ -443,27 +433,26 @@ class AccountServer {
   void _updateStickerAlbums(String albumId) async {
     try {
       final response = await client.accountApi.getStickersByAlbumId(albumId);
-      if (response.data != null) {
-        final relationships = <StickerRelationship>[];
-        response.data!.forEach((sticker) {
-          relationships.add(StickerRelationship(
-              albumId: albumId, stickerId: sticker.stickerId));
-          database.stickerDao.insert(db.Sticker(
-            stickerId: sticker.stickerId,
-            albumId: albumId,
-            name: sticker.name,
-            assetUrl: sticker.assetUrl,
-            assetType: sticker.assetType,
-            assetWidth: sticker.assetWidth,
-            assetHeight: sticker.assetHeight,
-            createdAt: sticker.createdAt,
-          ));
-        });
+      final relationships = <StickerRelationship>[];
+      response.data.forEach((sticker) {
+        relationships.add(StickerRelationship(
+            albumId: albumId, stickerId: sticker.stickerId));
+        database.stickerDao.insert(db.Sticker(
+          stickerId: sticker.stickerId,
+          albumId: albumId,
+          name: sticker.name,
+          assetUrl: sticker.assetUrl,
+          assetType: sticker.assetType,
+          assetWidth: sticker.assetWidth,
+          assetHeight: sticker.assetHeight,
+          createdAt: sticker.createdAt,
+        ));
+      });
 
-        await database.stickerRelationshipsDao.insertAll(relationships);
-      }
-    } catch (e) {
+      await database.stickerRelationshipsDao.insertAll(relationships);
+    } catch (e, s) {
       debugPrint('$e');
+      debugPrint('$s');
     }
   }
 
@@ -505,21 +494,19 @@ class AccountServer {
     try {
       final response = await client.userApi.relationships(request);
       final user = response.data;
-      if (user != null) {
-        await database.userDao.insert(db.User(
-            userId: user.userId,
-            identityNumber: user.identityNumber,
-            relationship: user.relationship,
-            fullName: user.fullName,
-            avatarUrl: user.avatarUrl,
-            phone: user.phone,
-            isVerified: user.isVerified,
-            appId: user.app?.appId,
-            biography: user.biography,
-            muteUntil: DateTime.tryParse(user.muteUntil),
-            isScam: user.isScam ? 1 : 0,
-            createdAt: user.createdAt));
-      }
+      await database.userDao.insert(db.User(
+          userId: user.userId,
+          identityNumber: user.identityNumber,
+          relationship: user.relationship,
+          fullName: user.fullName,
+          avatarUrl: user.avatarUrl,
+          phone: user.phone,
+          isVerified: user.isVerified,
+          appId: user.app?.appId,
+          biography: user.biography,
+          muteUntil: DateTime.tryParse(user.muteUntil),
+          isScam: user.isScam ? 1 : 0,
+          createdAt: user.createdAt));
     } catch (e) {
       debugPrint('$e');
     }
@@ -538,8 +525,8 @@ class AccountServer {
             userIds.map((e) => ParticipantRequest(userId: e)).toList(),
       ),
     );
-    if (response.data != null) {
-      final conversation = response.data!;
+    final conversation = response.data;
+    await database.transaction(() async {
       await database.conversationDao.insert(
         db.Conversation(
           conversationId: conversation.conversationId,
@@ -571,9 +558,9 @@ class AccountServer {
           ),
         );
       }
-      for (final userId in userIds) {
-        await addParticipant(conversationId, userId);
-      }
+    });
+    for (final userId in userIds) {
+      await addParticipant(conversationId, userId);
     }
   }
 
@@ -623,30 +610,22 @@ class AccountServer {
     final response =
         await client.circleApi.createCircle(CircleName(name: name));
 
-    if (response.error != null) {
-      return await database.circlesDao.insertUpdate(
-        db.Circle(
-          circleId: response.data!.circleId,
-          name: response.data!.name,
-          createdAt: response.data!.createdAt,
-        ),
-      );
-    }
-
-    // todo throw error ???
+    await database.circlesDao.insertUpdate(
+      db.Circle(
+        circleId: response.data.circleId,
+        name: response.data.name,
+        createdAt: response.data.createdAt,
+      ),
+    );
   }
 
   Future<void> updateCircle(String circleId, String name) async {
     final response =
         await client.circleApi.updateCircle(circleId, CircleName(name: name));
-    if (response.error != null) {
-      await database.circlesDao.insertUpdate(db.Circle(
-          circleId: response.data!.circleId,
-          name: response.data!.name,
-          createdAt: response.data!.createdAt));
-    }
-
-    // todo throw error ???
+    await database.circlesDao.insertUpdate(db.Circle(
+        circleId: response.data.circleId,
+        name: response.data.name,
+        createdAt: response.data.createdAt));
   }
 
   Future<String> _initConversation(String? cid, String? recipientId) async {
@@ -692,18 +671,16 @@ class AccountServer {
   }
 
   Future<void> circleRemoveConversation(
-      String circleId, String conversationId) async {
-    final response =
-        await client.circleApi.updateCircleConversations(circleId, [
+    String circleId,
+    String conversationId,
+  ) async {
+    await client.circleApi.updateCircleConversations(circleId, [
       CircleConversationRequest(
           action: CircleConversationAction.REMOVE,
           conversationId: conversationId,
           userId: userId)
     ]);
-    if (response.error != null) {
-      await database.circleConversationDao
-          .deleteByIds(conversationId, circleId);
-    } else {}
+    await database.circleConversationDao.deleteByIds(conversationId, circleId);
   }
 
   Future<void> circleAddConversation(
@@ -715,57 +692,49 @@ class AccountServer {
           conversationId: conversationId,
           userId: userId)
     ]);
-    if (response.error != null) {
-      final list = response.data;
-      for (final cc in list!) {
-        await database.circleConversationDao.insert(db.CircleConversation(
-            conversationId: cc.conversationId,
-            circleId: cc.circleId,
-            createdAt: cc.createdAt));
-        if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-          final u =
-              await database.userDao.findUserById(cc.userId!).getSingleOrNull();
-          if (u == null) {
-            refreshUserIdSet.add(cc.userId);
-          }
+    final list = response.data;
+    for (final cc in list) {
+      await database.circleConversationDao.insert(db.CircleConversation(
+          conversationId: cc.conversationId,
+          circleId: cc.circleId,
+          createdAt: cc.createdAt));
+      if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
+        final u =
+            await database.userDao.findUserById(cc.userId!).getSingleOrNull();
+        if (u == null) {
+          refreshUserIdSet.add(cc.userId);
         }
       }
-    } else {}
+    }
   }
 
   Future<void> deleteCircle(String circleId) async {
-    final response = await client.circleApi.deleteCircle(circleId);
-    if (response.error != null) {
+    await client.circleApi.deleteCircle(circleId);
+    await database.transaction(() async {
       await database.circlesDao.deleteCircleById(circleId);
       await database.circleConversationDao.deleteByCircleId(circleId);
-    } else {
-      // todo handle error
-    }
+    });
   }
 
   Future<void> report(String userId) async {
     final response = await client.userApi.report(
         RelationshipRequest(userId: userId, action: RelationshipAction.block));
-    if (response.error == null) {
-      final user = response.data!;
-      await database.userDao.insert(db.User(
-        userId: user.userId,
-        identityNumber: user.identityNumber,
-        relationship: user.relationship,
-        fullName: user.fullName,
-        avatarUrl: user.avatarUrl,
-        phone: user.phone,
-        isVerified: user.isVerified,
-        createdAt: user.createdAt,
-        muteUntil: DateTime.tryParse(user.muteUntil),
-        hasPin: user.hasPin == true ? 1 : 0,
-        appId: user.appId,
-        biography: user.biography,
-        isScam: user.isScam ? 1 : 0,
-      ));
-    } else {
-      // todo handle error
-    }
+    final user = response.data;
+    await database.userDao.insert(db.User(
+      userId: user.userId,
+      identityNumber: user.identityNumber,
+      relationship: user.relationship,
+      fullName: user.fullName,
+      avatarUrl: user.avatarUrl,
+      phone: user.phone,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      muteUntil: DateTime.tryParse(user.muteUntil),
+      hasPin: user.hasPin == true ? 1 : 0,
+      appId: user.appId,
+      biography: user.biography,
+      isScam: user.isScam ? 1 : 0,
+    ));
   }
 
   Future<void> unMuteUser(String userId) async {
@@ -806,9 +775,8 @@ class AccountServer {
     } else {
       throw Exception('Parameter error');
     }
-    if (response.error != null) {
-      // handle error
-    }
+
+    // todo
   }
 
   Future<void> editGroupAnnouncement(
@@ -817,9 +785,8 @@ class AccountServer {
         conversationId,
         ConversationRequest(
             conversationId: conversationId, announcement: announcement));
-    if (response.error != null) {
-      // handle error
-    }
+
+    // todo
   }
 
   Future<void> unpin(String conversationId) async {

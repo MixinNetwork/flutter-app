@@ -159,15 +159,7 @@ class Blaze {
     host = _wsHost2;
 
     await disconnect();
-
-    try {
-      final mixinResponse = await client.accountApi.getMe();
-      if (mixinResponse.error?.code == 401) {
-        reconnecting = false;
-        return;
-      }
-    } catch (_) {}
-
+    await client.accountApi.getMe();
     await Future.delayed(const Duration(seconds: 2));
     await connect();
 
