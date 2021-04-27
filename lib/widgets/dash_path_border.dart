@@ -11,10 +11,10 @@ import 'package:flutter/painting.dart';
 ///
 /// Passing a `source` that is an empty path will return an empty path.
 Path dashPath(
-    Path source, {
-      required CircularIntervalList<double> dashArray,
-      DashOffset? dashOffset,
-    }) {
+  Path source, {
+  required CircularIntervalList<double> dashArray,
+  DashOffset? dashOffset,
+}) {
   assert(dashArray != null); // ignore: unnecessary_null_comparison
 
   dashOffset = dashOffset ?? const DashOffset.absolute(0.0);
@@ -99,11 +99,11 @@ class DashPathBorder extends Border {
     BorderSide right = BorderSide.none,
     BorderSide bottom = BorderSide.none,
   }) : super(
-    top: top,
-    left: left,
-    right: right,
-    bottom: bottom,
-  );
+          top: top,
+          left: left,
+          right: right,
+          bottom: bottom,
+        );
 
   factory DashPathBorder.all({
     BorderSide borderSide = const BorderSide(),
@@ -121,12 +121,12 @@ class DashPathBorder extends Border {
 
   @override
   void paint(
-      Canvas canvas,
-      Rect rect, {
-        TextDirection? textDirection,
-        BoxShape shape = BoxShape.rectangle,
-        BorderRadius? borderRadius,
-      }) {
+    Canvas canvas,
+    Rect rect, {
+    TextDirection? textDirection,
+    BoxShape shape = BoxShape.rectangle,
+    BorderRadius? borderRadius,
+  }) {
     if (isUniform) {
       switch (top.style) {
         case BorderStyle.none:
@@ -135,7 +135,7 @@ class DashPathBorder extends Border {
           switch (shape) {
             case BoxShape.circle:
               assert(borderRadius == null,
-              'A borderRadius can only be given for rectangular boxes.');
+                  'A borderRadius can only be given for rectangular boxes.');
               canvas.drawPath(
                 dashPath(Path()..addOval(rect), dashArray: dashArray),
                 top.toPaint(),
@@ -144,7 +144,7 @@ class DashPathBorder extends Border {
             case BoxShape.rectangle:
               if (borderRadius != null) {
                 final rrect =
-                RRect.fromRectAndRadius(rect, borderRadius.topLeft);
+                    RRect.fromRectAndRadius(rect, borderRadius.topLeft);
                 canvas.drawPath(
                   dashPath(Path()..addRRect(rrect), dashArray: dashArray),
                   top.toPaint(),
@@ -163,9 +163,9 @@ class DashPathBorder extends Border {
     }
 
     assert(borderRadius == null,
-    'A borderRadius can only be given for uniform borders.');
+        'A borderRadius can only be given for uniform borders.');
     assert(shape == BoxShape.rectangle,
-    'A border can only be drawn as a circle if it is uniform.');
+        'A border can only be drawn as a circle if it is uniform.');
 
     // TODO(dnfield): implement when borders are not uniform.
   }

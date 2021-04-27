@@ -156,15 +156,15 @@ class Injector {
     try {
       final sticker = (await client.accountApi.getStickerById(stickerId)).data;
       await database.stickerDao.insert(db.Sticker(
-            stickerId: sticker.stickerId,
-            albumId: sticker.albumId,
-            name: sticker.name,
-            assetUrl: sticker.assetUrl,
-            assetType: sticker.assetType,
-            assetWidth: sticker.assetWidth,
-            assetHeight: sticker.assetHeight,
-            createdAt: sticker.createdAt,
-          ));
+        stickerId: sticker.stickerId,
+        albumId: sticker.albumId,
+        name: sticker.name,
+        assetUrl: sticker.assetUrl,
+        assetType: sticker.assetType,
+        assetWidth: sticker.assetWidth,
+        assetHeight: sticker.assetHeight,
+        createdAt: sticker.createdAt,
+      ));
     } catch (e) {
       debugPrint('$e');
     }

@@ -286,8 +286,8 @@ class ClampingRenderViewport extends RenderViewport {
         growthDirection: GrowthDirection.reverse,
         advance: childBefore,
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
-        cacheOrigin:
-            (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent!, 0.0),
+        cacheOrigin: (mainAxisExtent - centerOffset)
+            .clamp(-_calculatedCacheExtent!, 0.0),
       );
       if (result != 0.0) return -result;
     }

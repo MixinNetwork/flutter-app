@@ -37,5 +37,6 @@ class CirclesDao extends DatabaseAccessor<MixinDatabase>
   Selectable<String> circlesNameByConversationId(String conversationId) =>
       db.circlesNameByConversationId(conversationId);
 
-  Future<int> deleteCircleById(String circleId) => db.deleteCircleById(circleId);
+  Future<int> deleteCircleById(String circleId) =>
+      db.deleteCircleById(circleId);
 }

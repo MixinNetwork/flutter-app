@@ -15,7 +15,7 @@ class AttachmentUtil {
     _attachmentClient = HttpClient()
       ..connectionTimeout = const Duration(seconds: 10)
       ..badCertificateCallback =
-      ((X509Certificate cert, String host, int port) => true);
+          ((X509Certificate cert, String host, int port) => true);
   }
 
   final String mediaPath;
@@ -23,7 +23,7 @@ class AttachmentUtil {
   final Client _client;
   late final HttpClient _attachmentClient;
 
-   Future<String?> downloadAttachment({
+  Future<String?> downloadAttachment({
     required String messageId,
     required String content,
     required String conversationId,
@@ -37,7 +37,7 @@ class AttachmentUtil {
 
       if (response.data.viewUrl != null) {
         final request =
-        await _attachmentClient.getUrl(Uri.parse(response.data.viewUrl!));
+            await _attachmentClient.getUrl(Uri.parse(response.data.viewUrl!));
 
         request.headers
             .add(HttpHeaders.contentTypeHeader, 'application/octet-stream');
@@ -79,13 +79,13 @@ class AttachmentUtil {
         final totalBytes = await file.length();
 
         final request =
-        await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
+            await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
 
-        request.headers..add(
-            HttpHeaders.contentTypeHeader, 'application/octet-stream')..add(
-            HttpHeaders.connectionHeader, 'close')..add(
-            HttpHeaders.contentLengthHeader, totalBytes)..add(
-            'x-amz-acl', 'public-read');
+        request.headers
+          ..add(HttpHeaders.contentTypeHeader, 'application/octet-stream')
+          ..add(HttpHeaders.connectionHeader, 'close')
+          ..add(HttpHeaders.contentLengthHeader, totalBytes)
+          ..add('x-amz-acl', 'public-read');
 
         var byteCount = 0;
 
@@ -123,8 +123,8 @@ class AttachmentUtil {
     }
   }
 
-  File getAttachmentFile(MessageCategory category, String conversationId,
-      String messageId) {
+  File getAttachmentFile(
+      MessageCategory category, String conversationId, String messageId) {
     assert(category.isAttachment);
     String? path;
     if (category.isImage) {
@@ -162,11 +162,11 @@ class AttachmentUtil {
     return p.join(mediaPath, 'Files', conversationId);
   }
 
-  static Future<AttachmentUtil> init(Client client, MessagesDao messagesDao,
-      String identityNumber) async {
+  static Future<AttachmentUtil> init(
+      Client client, MessagesDao messagesDao, String identityNumber) async {
     final documentDirectory = await getApplicationDocumentsDirectory();
     final mediaDirectory =
-    File(p.join(documentDirectory.path, identityNumber, 'Media'));
+        File(p.join(documentDirectory.path, identityNumber, 'Media'));
     return AttachmentUtil(client, messagesDao, mediaDirectory.path);
   }
 }

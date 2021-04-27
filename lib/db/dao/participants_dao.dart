@@ -9,7 +9,7 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantsDaoMixin {
   ParticipantsDao(MixinDatabase db) : super(db);
 
-    Future<int> insert(Participant participant)  =>
+  Future<int> insert(Participant participant) =>
       into(db.participants).insertOnConflictUpdate(participant);
 
   void deleteParticipant(Participant participant) async =>
@@ -31,16 +31,17 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
     remove.forEach(deleteParticipant);
   }
 
-   Selectable<User> participantsAvatar(String conversationId) =>
+  Selectable<User> participantsAvatar(String conversationId) =>
       db.participantsAvatar(conversationId);
 
-  void updateParticipantRole(String conversationId, String participantId, ParticipantRole role) async{
-    await db.customUpdate('UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
+  void updateParticipantRole(
+      String conversationId, String participantId, ParticipantRole role) async {
+    await db.customUpdate(
+        'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
         variables: [
           Variable<ParticipantRole>(role),
           Variable.withString(conversationId),
           Variable.withString(participantId)
         ]);
-
   }
 }

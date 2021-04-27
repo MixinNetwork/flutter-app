@@ -149,8 +149,7 @@ class _StickerAlbumPageItem extends StatelessWidget {
           onTap: () async {
             final accountServer =
                 Provider.of<AccountServer>(context, listen: false);
-            final conversationItem =
-                context.read<ConversationCubit>().state;
+            final conversationItem = context.read<ConversationCubit>().state;
             if (conversationItem == null) return;
 
             await Future.wait([

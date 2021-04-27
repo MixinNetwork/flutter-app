@@ -115,32 +115,32 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
   FutureOr<Tuple2<Account, String>?> _verify(secret) async {
     try {
       final result =
-              signal.decrypt(base64.encode(keyPair.privateKey.serialize()), secret);
+          signal.decrypt(base64.encode(keyPair.privateKey.serialize()), secret);
       final msg = json.decode(String.fromCharCodes(result));
 
       final edKeyPair = ed.generateKey();
       final registrationId = signal.KeyHelper.generateRegistrationId(false);
 
       final rsp = await client.provisioningApi.verifyProvisioning(
-            ProvisioningRequest(
-              code: msg['provisioning_code'],
-              userId: msg['user_id'],
-              sessionId: msg['session_id'],
-              platform: 'Desktop',
-              purpose: 'SESSION',
-              sessionSecret: base64.encode(edKeyPair.publicKey!.bytes),
-              appVersion: '0.0.1',
-              registrationId: registrationId,
-              platformVersion: 'OS X 10.15.6',
-            ),
-          );
+        ProvisioningRequest(
+          code: msg['provisioning_code'],
+          userId: msg['user_id'],
+          sessionId: msg['session_id'],
+          platform: 'Desktop',
+          purpose: 'SESSION',
+          sessionSecret: base64.encode(edKeyPair.publicKey!.bytes),
+          appVersion: '0.0.1',
+          registrationId: registrationId,
+          platformVersion: 'OS X 10.15.6',
+        ),
+      );
 
       final privateKey = base64.encode(edKeyPair.privateKey!.bytes);
 
       return Tuple2(
-            rsp.data,
-            privateKey,
-          );
+        rsp.data,
+        privateKey,
+      );
     } catch (e) {
       return null;
     }

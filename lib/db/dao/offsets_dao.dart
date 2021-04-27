@@ -8,7 +8,8 @@ class OffsetsDao extends DatabaseAccessor<MixinDatabase>
     with _$OffsetsDaoMixin {
   OffsetsDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(Offset offset) => into(db.offsets).insertOnConflictUpdate(offset);
+  Future<int> insert(Offset offset) =>
+      into(db.offsets).insertOnConflictUpdate(offset);
 
   Future deleteOffset(Offset offset) => delete(db.offsets).delete(offset);
 }

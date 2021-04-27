@@ -10,8 +10,7 @@ enum MessageAction {
   role,
 }
 
-class MessageActionJsonConverter
-    extends EnumJsonConverter<MessageAction> {
+class MessageActionJsonConverter extends EnumJsonConverter<MessageAction> {
   const MessageActionJsonConverter();
 
   @override

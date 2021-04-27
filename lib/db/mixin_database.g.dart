@@ -252,7 +252,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
     this.conversationId = const Value.absent(),
     this.resendMessageId = const Value.absent(),
     required int runCount,
-  })   : jobId = Value(jobId),
+  })  : jobId = Value(jobId),
         action = Value(action),
         createdAt = Value(createdAt),
         priority = Value(priority),
@@ -3151,7 +3151,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     required String userId,
     this.role = const Value.absent(),
     required DateTime createdAt,
-  })   : conversationId = Value(conversationId),
+  })  : conversationId = Value(conversationId),
         userId = Value(userId),
         createdAt = Value(createdAt);
   static Insertable<Participant> custom({
@@ -7117,7 +7117,7 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
     required String messageId,
     required String data,
     required DateTime createdAt,
-  })   : messageId = Value(messageId),
+  })  : messageId = Value(messageId),
         data = Value(data),
         createdAt = Value(createdAt);
   static Insertable<FloodMessage> custom({
@@ -7728,7 +7728,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
     required String userId,
     required String reservedInt,
     required String reservedText,
-  })   : messageId = Value(messageId),
+  })  : messageId = Value(messageId),
         conversationId = Value(conversationId),
         content = Value(content),
         createdAt = Value(createdAt),
@@ -8201,7 +8201,7 @@ class OffsetsCompanion extends UpdateCompanion<Offset> {
   OffsetsCompanion.insert({
     required String key,
     required String timestamp,
-  })   : key = Value(key),
+  })  : key = Value(key),
         timestamp = Value(timestamp);
   static Insertable<Offset> custom({
     Expression<String>? key,
@@ -8817,7 +8817,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     required String status,
     this.messageId = const Value.absent(),
     required DateTime createdAt,
-  })   : groupId = Value(groupId),
+  })  : groupId = Value(groupId),
         senderId = Value(senderId),
         status = Value(status),
         createdAt = Value(createdAt);
@@ -9130,7 +9130,7 @@ class ResendSessionMessagesCompanion
     required String sessionId,
     required int status,
     required DateTime createdAt,
-  })   : messageId = Value(messageId),
+  })  : messageId = Value(messageId),
         userId = Value(userId),
         sessionId = Value(sessionId),
         status = Value(status),
@@ -9864,7 +9864,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     required String userId,
     required String category,
     required String description,
-  })   : albumId = Value(albumId),
+  })  : albumId = Value(albumId),
         name = Value(name),
         iconUrl = Value(iconUrl),
         createdAt = Value(createdAt),
@@ -10194,7 +10194,7 @@ class StickerRelationshipsCompanion
   StickerRelationshipsCompanion.insert({
     required String albumId,
     required String stickerId,
-  })   : albumId = Value(albumId),
+  })  : albumId = Value(albumId),
         stickerId = Value(stickerId);
   static Insertable<StickerRelationship> custom({
     Expression<String>? albumId,

@@ -4,8 +4,7 @@ part 'live_message.g.dart';
 
 @JsonSerializable()
 class LiveMessage {
-  LiveMessage(
-      this.width, this.height, this.thumbUrl,this.url);
+  LiveMessage(this.width, this.height, this.thumbUrl, this.url);
 
   factory LiveMessage.fromJson(Map<String, dynamic> json) =>
       _$LiveMessageFromJson(json);
@@ -21,4 +20,3 @@ class LiveMessage {
 
   Map<String, dynamic> toJson() => _$LiveMessageToJson(this);
 }
-

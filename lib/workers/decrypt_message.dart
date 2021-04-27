@@ -60,11 +60,14 @@ class DecryptMessage extends Injector {
   final AttachmentUtil _attachmentUtil;
   final MultiAuthCubit multiAuthCubit;
 
-  bool get _photoAutoDownload => multiAuthCubit.state.current?.photoAutoDownload ?? true;
+  bool get _photoAutoDownload =>
+      multiAuthCubit.state.current?.photoAutoDownload ?? true;
 
-  bool get _videoAutoDownload => multiAuthCubit.state.current?.videoAutoDownload ?? true;
+  bool get _videoAutoDownload =>
+      multiAuthCubit.state.current?.videoAutoDownload ?? true;
 
-  bool get _fileAutoDownload => multiAuthCubit.state.current?.fileAutoDownload ?? true;
+  bool get _fileAutoDownload =>
+      multiAuthCubit.state.current?.fileAutoDownload ?? true;
 
   void setConversationId(String? conversationId) {
     _conversationId = conversationId;
@@ -362,11 +365,11 @@ class DecryptMessage extends Injector {
       await database.messagesDao.insert(message, accountId);
       if (_videoAutoDownload)
         await _attachmentUtil.downloadAttachment(
-        messageId: message.messageId,
-        conversationId: message.conversationId,
-        category: message.category,
-        content: message.content!,
-      );
+          messageId: message.messageId,
+          conversationId: message.conversationId,
+          category: message.category,
+          content: message.content!,
+        );
     } else if (data.category.isData) {
       String plain;
       if (data.category == MessageCategory.signalData) {
@@ -398,11 +401,11 @@ class DecryptMessage extends Injector {
       await database.messagesDao.insert(message, accountId);
       if (_fileAutoDownload)
         await _attachmentUtil.downloadAttachment(
-        messageId: message.messageId,
-        conversationId: message.conversationId,
-        category: message.category,
-        content: message.content!,
-      );
+          messageId: message.messageId,
+          conversationId: message.conversationId,
+          category: message.category,
+          content: message.content!,
+        );
     } else if (data.category.isAudio) {
       String plain;
       if (data.category == MessageCategory.signalAudio) {

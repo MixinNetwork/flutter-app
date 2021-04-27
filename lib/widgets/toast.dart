@@ -154,7 +154,8 @@ class _Successful extends StatelessWidget {
       SvgPicture.asset(Resources.assetsImagesSuccessfulSvg);
 }
 
-Future<void> runFutureWithToast(BuildContext context, Future<dynamic> future) async {
+Future<void> runFutureWithToast(
+    BuildContext context, Future<dynamic> future) async {
   showToastLoading(context);
   try {
     await future;

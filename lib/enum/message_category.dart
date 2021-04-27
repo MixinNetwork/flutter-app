@@ -63,8 +63,7 @@ enum MessageCategory {
   encryptedLocation,
 }
 
-class MessageCategoryJsonConverter
-    extends EnumJsonConverter<MessageCategory> {
+class MessageCategoryJsonConverter extends EnumJsonConverter<MessageCategory> {
   const MessageCategoryJsonConverter();
   @override
   List<MessageCategory> enumValues() => MessageCategory.values;

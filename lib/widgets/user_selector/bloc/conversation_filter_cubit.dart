@@ -9,7 +9,7 @@ import 'package:flutter_app/utils/sort.dart';
 part 'conversation_filter_state.dart';
 
 class ConversationFilterCubit extends Cubit<ConversationFilterState> {
-  ConversationFilterCubit(this.accountServer, this.onlyContact,this.afterInit)
+  ConversationFilterCubit(this.accountServer, this.onlyContact, this.afterInit)
       : super(const ConversationFilterState()) {
     _init();
   }

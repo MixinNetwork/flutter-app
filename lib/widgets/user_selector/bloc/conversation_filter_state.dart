@@ -1,6 +1,5 @@
 part of 'conversation_filter_cubit.dart';
 
-
 class ConversationFilterState extends Equatable {
   const ConversationFilterState({
     this.recentConversations = const [],

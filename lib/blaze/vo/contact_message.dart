@@ -5,8 +5,8 @@ part 'contact_message.g.dart';
 @JsonSerializable()
 class ContactMessage {
   ContactMessage(
-      this.userId,
-     );
+    this.userId,
+  );
 
   factory ContactMessage.fromJson(Map<String, dynamic> json) =>
       _$ContactMessageFromJson(json);

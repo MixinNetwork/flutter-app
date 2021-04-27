@@ -6,9 +6,9 @@ class MouseRegionSpan extends WidgetSpan {
     required MouseCursor mouseCursor,
     required Widget child,
   }) : super(
-    child: MouseRegion(
-      cursor: mouseCursor,
-      child: child,
-    ),
-  );
+          child: MouseRegion(
+            cursor: mouseCursor,
+            child: child,
+          ),
+        );
 }

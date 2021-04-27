@@ -41,8 +41,9 @@ class ContactMessage extends StatelessWidget {
           ],
         ),
         child: InteractableDecoratedBox(
-          onTap: () =>
-              context.read<ConversationCubit>().selectUser(message.sharedUserId!),
+          onTap: () => context
+              .read<ConversationCubit>()
+              .selectUser(message.sharedUserId!),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

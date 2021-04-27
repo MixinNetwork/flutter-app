@@ -20,7 +20,10 @@ extension MarkdownExtension on String {
   String get postOptimizeMarkdown {
     final lines = const LineSplitter().convert(postOptimize());
     final astNodes = Document().parseLines(lines);
-    return astNodes.map((e) => e.textContent).join().replaceAll(RegExp(r'\s+'), ' ');
+    return astNodes
+        .map((e) => e.textContent)
+        .join()
+        .replaceAll(RegExp(r'\s+'), ' ');
   }
 }
 

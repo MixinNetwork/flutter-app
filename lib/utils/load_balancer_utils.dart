@@ -21,6 +21,6 @@ class LoadBalancerUtils {
 
   static String _jsonEncode(Object? object) => convert.jsonEncode(object);
 
-  static Future<String> jsonEncode(Object? object)  => runLoadBalancer(_jsonEncode, object);
-
+  static Future<String> jsonEncode(Object? object) =>
+      runLoadBalancer(_jsonEncode, object);
 }

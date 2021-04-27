@@ -52,7 +52,7 @@ class SizePolicyData {
   SizePolicyData({
     required this.minWidth,
     this.maxWidth,
-    this. sizePolicyOrder,
+    this.sizePolicyOrder,
     required this.child,
   });
 

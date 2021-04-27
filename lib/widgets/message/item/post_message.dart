@@ -85,7 +85,8 @@ class PostMessage extends StatelessWidget {
                 ],
               ),
             ),
-            portalBuilder: (BuildContext context) => PostPreview(message: message),
+            portalBuilder: (BuildContext context) =>
+                PostPreview(message: message),
           ),
         ),
       );

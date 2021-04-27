@@ -8,8 +8,7 @@ class AvatarCubit extends Cubit<List<User>> with SubscribeMixin {
     ParticipantsDao participantsDao,
     String conversationId,
   ) : super(const []) {
-    final selectable =
-        participantsDao.participantsAvatar(conversationId);
+    final selectable = participantsDao.participantsAvatar(conversationId);
 
     selectable.get().then(emit);
     addSubscription(selectable.watch().listen(emit));

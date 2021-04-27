@@ -40,10 +40,9 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       case SlideCategoryType.chats:
         _map[state] ??= _ConversationListBloc(
           limit,
-              () => database.conversationDao.chatConversationCount().getSingle(),
-              (limit, offset) => database.conversationDao
-              .chatConversations(limit, offset)
-              .get(),
+          () => database.conversationDao.chatConversationCount().getSingle(),
+          (limit, offset) =>
+              database.conversationDao.chatConversations(limit, offset).get(),
           database.conversationDao.updateEvent,
         );
         break;

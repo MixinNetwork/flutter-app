@@ -92,7 +92,8 @@ class PostPage extends HookWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SvgPicture.asset(Resources.assetsImagesEmptyFileSvg,
+            SvgPicture.asset(
+              Resources.assetsImagesEmptyFileSvg,
               color: BrightnessData.themeOf(context).secondaryText,
             ),
             const SizedBox(height: 24),

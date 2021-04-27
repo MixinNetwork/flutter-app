@@ -71,7 +71,8 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
                 )
                 .toList()
                   ..sort(compareValuesBy((e) {
-                    final indexOf = e.fullName?.toLowerCase().indexOf(keyword) ?? -1;
+                    final indexOf =
+                        e.fullName?.toLowerCase().indexOf(keyword) ?? -1;
                     if (indexOf != -1) return indexOf;
                     return e.identityNumber.indexOf(a);
                   }));

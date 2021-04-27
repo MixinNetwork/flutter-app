@@ -12,13 +12,12 @@ class MessageBubbleMargin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: EdgeInsets.only(
-      left: isCurrentUser ? 65 : 16,
-      right: !isCurrentUser ? 65 : 16,
-      top: 2,
-      bottom: 2,
-    ),
-    child: child,
-  );
+        padding: EdgeInsets.only(
+          left: isCurrentUser ? 65 : 16,
+          right: !isCurrentUser ? 65 : 16,
+          top: 2,
+          bottom: 2,
+        ),
+        child: child,
+      );
 }
-

@@ -103,7 +103,8 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  bool isTrustedIdentity(SignalProtocolAddress address, IdentityKey? identityKey, Direction direction) {
+  bool isTrustedIdentity(SignalProtocolAddress address,
+      IdentityKey? identityKey, Direction direction) {
     // TODO: implement isTrustedIdentity
     throw UnimplementedError();
   }

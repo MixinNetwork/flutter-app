@@ -9,7 +9,7 @@ class AppButton {
   factory AppButton.fromJson(Map<String, dynamic> json) =>
       _$AppButtonFromJson(json);
 
-  @JsonKey(name: 'label',disallowNullValue: false)
+  @JsonKey(name: 'label', disallowNullValue: false)
   String label;
   @JsonKey(name: 'color')
   String color;

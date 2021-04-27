@@ -13,20 +13,19 @@ class MessageDayTime extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-    height: 60,
-    alignment: Alignment.center,
-    child: Container(
-      height: 22,
-      width: 90,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: BrightnessData.themeOf(context).dateTime,
-      ),
-      alignment: Alignment.center,
-      child: Text(
-        DateFormat.MEd().format(dateTime),
-      ),
-    ),
-  );
+        height: 60,
+        alignment: Alignment.center,
+        child: Container(
+          height: 22,
+          width: 90,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: BrightnessData.themeOf(context).dateTime,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            DateFormat.MEd().format(dateTime),
+          ),
+        ),
+      );
 }
-

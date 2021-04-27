@@ -40,4 +40,3 @@ class MessageStatusWidget extends StatelessWidget {
     );
   }
 }
-

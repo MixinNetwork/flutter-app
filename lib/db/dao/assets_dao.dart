@@ -7,7 +7,8 @@ part 'assets_dao.g.dart';
 class AssetsDao extends DatabaseAccessor<MixinDatabase> with _$AssetsDaoMixin {
   AssetsDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(Asset asset) => into(db.assets).insertOnConflictUpdate(asset);
+  Future<int> insert(Asset asset) =>
+      into(db.assets).insertOnConflictUpdate(asset);
 
   Future deleteAsset(Asset asset) => delete(db.assets).delete(asset);
 }

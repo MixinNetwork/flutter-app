@@ -128,7 +128,7 @@ void _sendMessage(BuildContext context) {
 
   context.read<AccountServer>().sendTextMessage(
         text,
-    conversationId: conversationItem.conversationId,
+        conversationId: conversationItem.conversationId,
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
       );
 
@@ -301,8 +301,7 @@ class _FileButton extends StatelessWidget {
         final file = await selectFile();
         if (file == null) return;
 
-        final conversationItem =
-            context.read<ConversationCubit>().state;
+        final conversationItem = context.read<ConversationCubit>().state;
         if (conversationItem == null) return;
         if (file.isImage) {
           if ((await _PreviewImage.push(context, file)) != true) return;
