@@ -5,12 +5,11 @@ class MultiAuthState extends Equatable {
     this.auths = const {},
   });
 
-  factory MultiAuthState.fromMap(Map<String, dynamic> map) {
-    return MultiAuthState(
-      auths:
-          Set<AuthState>.from(map['auths']?.map((x) => AuthState.fromMap(x))),
-    );
-  }
+  factory MultiAuthState.fromMap(Map<String, dynamic> map) => MultiAuthState(
+        auths:
+            // ignore: avoid_dynamic_calls
+            Set<AuthState>.from(map['auths']?.map((x) => AuthState.fromMap(x))),
+      );
 
   factory MultiAuthState.fromJson(String source) =>
       MultiAuthState.fromMap(json.decode(source));
@@ -20,8 +19,11 @@ class MultiAuthState extends Equatable {
   AuthState? get current => auths.isNotEmpty ? auths.last : null;
 
   bool get currentMessagePreview => current?.messagePreview ?? true;
+
   bool get currentPhotoAutoDownload => current?.photoAutoDownload ?? true;
+
   bool get currentVideoAutoDownload => current?.videoAutoDownload ?? true;
+
   bool get currentFileAutoDownload => current?.fileAutoDownload ?? true;
 
   @override
