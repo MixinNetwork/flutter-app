@@ -66,7 +66,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   void insertFts(String messageId, String conversationId, String content,
       DateTime createdAt, String userId) async {
     await db.customInsert(
-        'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'$content\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')');
+      'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'$content\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')',
+      updates: {db.messagesFts},
+    );
   }
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
@@ -119,12 +121,15 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> _takeUnseen(String userId, String conversationId) {
     return db.customUpdate(
-        'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
-        variables: [
-          Variable.withString(conversationId),
-          Variable.withString(userId),
-          Variable.withString(conversationId)
-        ]);
+      'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
+      variables: [
+        Variable.withString(conversationId),
+        Variable.withString(userId),
+        Variable.withString(conversationId)
+      ],
+      updates: {db.conversations},
+      updateKind: UpdateKind.update,
+    );
   }
 
   Future<void> markMessageRead(List<String> messageIds) async =>
@@ -182,11 +187,14 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
           .map((row) => row.readString('message_id'))
           .get();
       await db.customUpdate(
-          'UPDATE messages SET status = \'READ\' WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\')',
-          variables: [
-            Variable.withString(conversationId),
-            Variable.withString(userId)
-          ]);
+        'UPDATE messages SET status = \'READ\' WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\')',
+        variables: [
+          Variable.withString(conversationId),
+          Variable.withString(userId)
+        ],
+        updates: {db.messages},
+        updateKind: UpdateKind.update,
+      );
       await _takeUnseen(userId, conversationId);
       return list;
     });
@@ -211,11 +219,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   void updateMessageContent(String messageId, String encoded) async {
     await db.customUpdate(
-        'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
-        variables: [
-          Variable.withString(encoded),
-          Variable.withString(messageId)
-        ]);
+      'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
+      variables: [Variable.withString(encoded), Variable.withString(messageId)],
+      updates: {db.messages},
+      updateKind: UpdateKind.update,
+    );
   }
 
   Selectable<int> mediaMessageRowIdByConversationId(

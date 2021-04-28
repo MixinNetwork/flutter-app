@@ -37,11 +37,14 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
   void updateParticipantRole(
       String conversationId, String participantId, ParticipantRole role) async {
     await db.customUpdate(
-        'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
-        variables: [
-          Variable<ParticipantRole>(role),
-          Variable.withString(conversationId),
-          Variable.withString(participantId)
-        ]);
+      'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
+      variables: [
+        Variable<ParticipantRole>(role),
+        Variable.withString(conversationId),
+        Variable.withString(participantId)
+      ],
+      updates: {db.participants},
+      updateKind: UpdateKind.update,
+    );
   }
 }

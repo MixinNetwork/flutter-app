@@ -109,11 +109,14 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Future<int> updateConversationStatusById(
           String conversationId, ConversationStatus status) async =>
       await db.customUpdate(
-          'UPDATE conversations SET status = ? WHERE conversation_id = ?',
-          variables: [
-            Variable.withString(conversationId),
-            Variable<ConversationStatus>(status)
-          ]);
+        'UPDATE conversations SET status = ? WHERE conversation_id = ?',
+        variables: [
+          Variable.withString(conversationId),
+          Variable<ConversationStatus>(status)
+        ],
+        updates: {db.conversations},
+        updateKind: UpdateKind.update,
+      );
 
   Selectable<ConversationItem> conversationItem(String conversationId) =>
       db.conversationItem(conversationId);
