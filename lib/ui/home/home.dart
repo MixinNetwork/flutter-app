@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app/ui/home/conversation_page.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
 import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/ui/setting/setting_page.dart';
 import 'package:flutter_app/ui/home/slide_page.dart';
+import 'package:flutter_app/ui/setting/setting_page.dart';
 import 'package:flutter_app/widgets/automatic_keep_alive_client_widget.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/empty.dart';
 import 'package:flutter_app/widgets/size_policy_row.dart';
-import 'package:flutter_app/generated/l10n.dart';
 import 'package:provider/provider.dart';
 
 const slidePageMinWidth = 98.0;
@@ -20,13 +20,15 @@ const responsiveNavigationMinWidth = 460.0;
 final _conversationPageKey = GlobalKey();
 
 class HomePage extends StatelessWidget {
+  const HomePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => Scaffold(
         backgroundColor: BrightnessData.themeOf(context).primary,
         body: SizePolicyRow(
           children: [
             SizePolicyData(
-              child: SlidePage(),
+              child: const SlidePage(),
               minWidth: slidePageMinWidth,
               maxWidth: slidePageMaxWidth,
               sizePolicyOrder: 0,
@@ -34,8 +36,6 @@ class HomePage extends StatelessWidget {
             SizePolicyData(
               minWidth: responsiveNavigationMinWidth,
               child: ResponsiveNavigator(
-                responsiveNavigatorCubit:
-                    context.read<ResponsiveNavigatorCubit>(),
                 switchWidth: responsiveNavigationMinWidth + 260,
                 leftPage: MaterialPage(
                   key: const ValueKey('center'),
@@ -50,11 +50,11 @@ class HomePage extends StatelessWidget {
                   key: const ValueKey('empty'),
                   name: 'empty',
                   child: DecoratedBox(
-                    child: Empty(
-                        text: Localization.of(context).pageRightEmptyMessage),
                     decoration: BoxDecoration(
                       color: BrightnessData.themeOf(context).chatBackground,
                     ),
+                    child: Empty(
+                        text: Localization.of(context).pageRightEmptyMessage),
                   ),
                 ),
               ),

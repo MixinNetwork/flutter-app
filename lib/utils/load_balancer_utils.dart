@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert' as convert;
 
 import 'package:flutter/foundation.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:isolate/isolate.dart';
 
 class LoadBalancerUtils {

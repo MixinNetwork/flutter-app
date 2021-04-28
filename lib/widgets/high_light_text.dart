@@ -33,7 +33,7 @@ List<InlineSpan> _buildSpan(
     [TextStyle? style]) {
   final map = Map<String, HighlightTextSpan>.fromIterable(
     highlightTextSpans.where((element) => element.text.isNotEmpty == true),
-    key: (item) => item.text.toLowerCase(),
+    key: (item) => (item as HighlightTextSpan).text.toLowerCase(),
   );
   final pattern = "(${map.keys.map(RegExp.escape).join('|')})";
 

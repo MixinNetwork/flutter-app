@@ -17,7 +17,7 @@ extension ListExtension<T> on List<T> {
     return buffer;
   }
 
-  T? getOrNull(index) {
+  T? getOrNull(int index) {
     if (index < 0) return null;
     if (isEmpty) return null;
     if (length < index + 1) return null;

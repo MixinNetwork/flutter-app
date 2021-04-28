@@ -260,12 +260,6 @@ class _StickerButton extends StatelessWidget {
                     opacity: progress,
                     child: child,
                   ),
-                  child: InteractableDecoratedBox(
-                    child: ActionButton(
-                      name: Resources.assetsImagesIcStickerSvg,
-                      color: BrightnessData.themeOf(context).icon,
-                    ),
-                  ),
                   childAnchor: Alignment.topCenter,
                   portalAnchor: Alignment.bottomCenter,
                   portal: Padding(
@@ -274,6 +268,12 @@ class _StickerButton extends StatelessWidget {
                       stickerAlbumsCubit:
                           BlocProvider.of<StickerAlbumsCubit>(context),
                       tabController: DefaultTabController.of(context),
+                    ),
+                  ),
+                  child: InteractableDecoratedBox(
+                    child: ActionButton(
+                      name: Resources.assetsImagesIcStickerSvg,
+                      color: BrightnessData.themeOf(context).icon,
                     ),
                   ),
                 ),

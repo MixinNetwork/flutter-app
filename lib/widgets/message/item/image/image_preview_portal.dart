@@ -89,9 +89,9 @@ class ImagePreviewPortal extends StatelessWidget {
                                 decoration: const BoxDecoration(
                                   color: Color.fromRGBO(62, 65, 72, 0.9),
                                 ),
-                                child: const SizedBox(),
                                 onTap: () =>
                                     FullScreenPortal.of(context).emit(false),
+                                child: const SizedBox(),
                               ),
                               BlocConverter<IntCubit, int, MessageItem?>(
                                 converter: (index) =>
@@ -110,22 +110,22 @@ class ImagePreviewPortal extends StatelessWidget {
                                       children: [
                                         if (index < state.count - 1)
                                           InteractableDecoratedBox(
-                                            child: SvgPicture.asset(
-                                                Resources.assetsImagesNextSvg),
                                             onTap: () => context
                                                 .read<IntCubit>()
                                                 .emit((index + 1)
                                                     .clamp(0, state.count - 1)),
+                                            child: SvgPicture.asset(
+                                                Resources.assetsImagesNextSvg),
                                           ),
                                         const Spacer(),
                                         if (index > 0)
                                           InteractableDecoratedBox(
-                                            child: SvgPicture.asset(
-                                                Resources.assetsImagesPrevSvg),
                                             onTap: () => context
                                                 .read<IntCubit>()
                                                 .emit((index - 1)
                                                     .clamp(0, state.count - 1)),
+                                            child: SvgPicture.asset(
+                                                Resources.assetsImagesPrevSvg),
                                           ),
                                       ],
                                     ),
@@ -239,6 +239,7 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
+        onTap: () => FullScreenPortal.of(context).emit(false),
         child: Image.file(
           File(message.mediaUrl ?? ''),
           fit: BoxFit.contain,
@@ -247,6 +248,5 @@ class _Item extends StatelessWidget {
             fit: BoxFit.contain,
           ),
         ),
-        onTap: () => FullScreenPortal.of(context).emit(false),
       );
 }

@@ -174,7 +174,6 @@ class InteractableDecoratedBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteracterBuilder(
-        child: child,
         onTap: onTap,
         onDoubleTap: onDoubleTap,
         onLongPress: onLongPress,
@@ -203,12 +202,13 @@ class InteractableDecoratedBox extends StatelessWidget {
                   : outDuration) ??
               Duration.zero,
           curve: Curves.decelerate,
-          child: child,
           builder: (BuildContext context, Decoration value, Widget? child) =>
               DecoratedBox(
             decoration: value,
             child: child,
           ),
+          child: child,
         ),
+        child: child,
       );
 }

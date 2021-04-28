@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:filesize/filesize.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';

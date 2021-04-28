@@ -67,18 +67,19 @@ class ResponsiveNavigator extends HookWidget {
     required this.leftPage,
     required this.rightEmptyPage,
     required this.switchWidth,
-    required this.responsiveNavigatorCubit,
   }) : super(key: key);
 
   final MaterialPage leftPage;
   final MaterialPage rightEmptyPage;
   final double switchWidth;
-  final AbstractResponsiveNavigatorCubit responsiveNavigatorCubit;
 
   @override
   Widget build(BuildContext context) {
+    final responsiveNavigatorCubit = context.read<ResponsiveNavigatorCubit>();
     final responsiveNavigatorState =
-        useBlocState(bloc: responsiveNavigatorCubit);
+        useBlocState<ResponsiveNavigatorCubit, ResponsiveNavigatorState>(
+      bloc: responsiveNavigatorCubit,
+    );
     return LayoutBuilder(builder: (context, boxConstraints) {
       final navigationMode = boxConstraints.maxWidth < switchWidth;
       responsiveNavigatorCubit.updateNavigationMode(navigationMode);

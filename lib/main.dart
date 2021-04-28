@@ -5,6 +5,7 @@ import 'package:flutter_app/ui/home/home.dart';
 import 'package:flutter_app/ui/home/local_notification_center.dart';
 import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:isolate/isolate.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';

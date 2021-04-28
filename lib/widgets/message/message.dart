@@ -75,7 +75,8 @@ class MessageItemWidget extends StatelessWidget {
                 message: message,
               );
 
-            if (message.type == MessageCategory.secret) return SecretMessage();
+            if (message.type == MessageCategory.secret)
+              return const SecretMessage();
 
             if (message.type == MessageCategory.stranger)
               return StrangerMessage(

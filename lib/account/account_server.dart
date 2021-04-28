@@ -152,7 +152,7 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final map = await LoadBalancerUtils.jsonDecode(e.blazeMessage!);
+          final Map map = await LoadBalancerUtils.jsonDecode(e.blazeMessage!);
           return BlazeAckMessage(
               messageId: map['message_id'], status: map['status']);
         },

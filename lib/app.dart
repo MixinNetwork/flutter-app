@@ -25,6 +25,8 @@ import 'bloc/minute_timer_cubit.dart';
 import 'constants/brightness_theme_data.dart';
 
 class App extends StatelessWidget {
+  App({Key? key}) : super(key: key);
+
   final accountServer = AccountServer();
 
   @override
@@ -164,9 +166,9 @@ class _App extends StatelessWidget {
                 Localizations.localeOf(context).languageCode;
           } catch (_) {}
           return BrightnessObserver(
-            child: child!,
             lightThemeData: lightBrightnessThemeData,
             darkThemeData: darkBrightnessThemeData,
+            child: child!,
           );
         },
         home: const _Home(),
@@ -199,7 +201,7 @@ class _Home extends HookWidget {
       BlocProvider.of<ConversationListBloc>(context)
         ..limit = MediaQuery.of(context).size.height ~/ 40
         ..init();
-      return HomePage();
+      return const HomePage();
     }
     return const LandingPage();
   }

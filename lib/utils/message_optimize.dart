@@ -54,8 +54,10 @@ Future<Tuple2<String?, String?>> messageOptimize(
   } else if (messageCategory == MessageCategory.appButtonGroup) {
     _content = 'APP_BUTTON_GROUP';
     if (content != null)
+      // ignore: avoid_dynamic_calls
       _content = (await LoadBalancerUtils.jsonDecode(content))
           .map((e) => ActionData.fromJson(e))
+          // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')
           .join();
     icon = Resources.assetsImagesAppButtonSvg;

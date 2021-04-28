@@ -22,6 +22,7 @@ import '../../image.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
 
+// ignore_for_file: avoid_dynamic_calls
 class QuoteMessage extends HookWidget {
   const QuoteMessage({
     Key? key,

@@ -1,15 +1,16 @@
 import 'dart:io';
 
+// ignore: import_of_legacy_library_into_null_safe
 import 'package:filesize/filesize.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/utils/file.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/app_bar.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/cell.dart';
 import 'package:flutter_app/widgets/dialog.dart';
 import 'package:flutter_app/widgets/disable.dart';
@@ -62,7 +63,8 @@ class StorageUsageDetailPage extends HookWidget {
       keys: [watchEvent],
     );
 
-    final selected = useState(const Tuple4(false, false, false, false));
+    final selected = useState<Tuple4<bool, bool, bool, bool>>(
+        const Tuple4(false, false, false, false));
 
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).background,
@@ -70,14 +72,12 @@ class StorageUsageDetailPage extends HookWidget {
         title: Text(name),
         actions: [
           Disable(
-            disable: selected.value.toList().every((element) => !element),
+            disable: selected.value
+                .toList()
+                .cast<bool>()
+                .every((element) => !element),
             child: MixinButton(
               backgroundTransparent: true,
-              child: Center(
-                child: Text(
-                  Localization.of(context).clear,
-                ),
-              ),
               onTap: () => runFutureWithToast(
                 context,
                 () async {
@@ -91,6 +91,11 @@ class StorageUsageDetailPage extends HookWidget {
                   if (selected.value.item4)
                     await _clear(accountServer.getFilesPath(conversationId));
                 }(),
+              ),
+              child: Center(
+                child: Text(
+                  Localization.of(context).clear,
+                ),
               ),
             ),
           ),

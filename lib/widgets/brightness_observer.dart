@@ -33,7 +33,6 @@ class BrightnessObserver extends StatelessWidget {
             Brightness.dark: 1.0,
           }[forceBrightness ?? MediaQuery.platformBrightnessOf(context)],
         ),
-        child: child,
         builder: (BuildContext context, double value, Widget? child) =>
             BrightnessData(
           value: value,
@@ -41,6 +40,7 @@ class BrightnessObserver extends StatelessWidget {
               BrightnessThemeData.lerp(lightThemeData, darkThemeData, value),
           child: child!,
         ),
+        child: child,
       );
 }
 

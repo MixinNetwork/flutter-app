@@ -205,12 +205,12 @@ class _NewConversationConfirm extends HookWidget {
       actions: [
         MixinButton(
             backgroundTransparent: true,
-            child: Text(Localization.of(context).cancel),
-            onTap: () => Navigator.pop(context)),
+            onTap: () => Navigator.pop(context),
+            child: Text(Localization.of(context).cancel)),
         MixinButton(
-          child: Text(Localization.of(context).create),
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
+          child: Text(Localization.of(context).create),
         ),
       ],
     );

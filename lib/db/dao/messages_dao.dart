@@ -184,7 +184,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
                 Variable.withString(conversationId),
                 Variable.withString(userId)
               ])
-          .map((row) => row.readString('message_id'))
+          .map((row) => row.read<String>('message_id'))
           .get();
       await db.customUpdate(
         'UPDATE messages SET status = \'READ\' WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\')',

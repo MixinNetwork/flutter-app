@@ -11,7 +11,8 @@ class SelectItem extends StatelessWidget {
     this.count = 0,
     required this.onTap,
     this.selected = false,
-  });
+    Key? key,
+  }) : super(key: key);
 
   final Widget icon;
   final String title;

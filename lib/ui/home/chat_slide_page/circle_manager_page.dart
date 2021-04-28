@@ -59,11 +59,6 @@ class CircleManagerPage extends HookWidget {
         title: Text(Localization.of(context).circleTitle(name)),
         actions: [
           MixinButton(
-            child: SvgPicture.asset(
-              Resources.assetsImagesIcAddSvg,
-              width: 16,
-              height: 16,
-            ),
             backgroundTransparent: true,
             onTap: () async {
               final conversation = context.read<ConversationCubit>().state;
@@ -88,6 +83,11 @@ class CircleManagerPage extends HookWidget {
                 ]),
               );
             },
+            child: SvgPicture.asset(
+              Resources.assetsImagesIcAddSvg,
+              width: 16,
+              height: 16,
+            ),
           ),
         ],
       ),
@@ -144,17 +144,6 @@ class _CircleManagerItem extends StatelessWidget {
         child: Row(
           children: [
             GestureDetector(
-              child: Container(
-                height: 80,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SvgPicture.asset(
-                  selected
-                      ? Resources.assetsImagesCircleRemoveSvg
-                      : Resources.assetsImagesCircleAddSvg,
-                  height: 16,
-                  width: 16,
-                ),
-              ),
               onTap: () async {
                 final conversation = context.read<ConversationCubit>().state;
                 if (conversation?.conversationId.isEmpty ?? true) return;
@@ -182,6 +171,17 @@ class _CircleManagerItem extends StatelessWidget {
                   ),
                 );
               },
+              child: Container(
+                height: 80,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SvgPicture.asset(
+                  selected
+                      ? Resources.assetsImagesCircleRemoveSvg
+                      : Resources.assetsImagesCircleAddSvg,
+                  height: 16,
+                  width: 16,
+                ),
+              ),
             ),
             const SizedBox(width: 4),
             ClipOval(

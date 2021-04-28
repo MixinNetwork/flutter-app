@@ -21,6 +21,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
 
 class SlidePage extends StatelessWidget {
+  const SlidePage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => SizedBox(
         width: 200,
@@ -132,22 +134,6 @@ class _CircleList extends HookWidget {
                 builder: (BuildContext context, bool selected) {
                   final circle = circles.data![index];
                   return ContextMenuPortalEntry(
-                    child: SelectItem(
-                      icon: SvgPicture.asset(
-                        Resources.assetsImagesCircleSvg,
-                        width: 24,
-                        height: 24,
-                        color: getCircleColorById(circle.circleId),
-                      ),
-                      title: circle.name,
-                      onTap: () =>
-                          BlocProvider.of<SlideCategoryCubit>(context).select(
-                        SlideCategoryType.circle,
-                        circle.circleId,
-                      ),
-                      selected: selected,
-                      count: circle.unseenMessageCount ?? 0,
-                    ),
                     buildMenus: () => [
                       ContextMenu(
                           title: Localization.of(context).editCircleName,
@@ -248,6 +234,22 @@ class _CircleList extends HookWidget {
                         },
                       ),
                     ],
+                    child: SelectItem(
+                      icon: SvgPicture.asset(
+                        Resources.assetsImagesCircleSvg,
+                        width: 24,
+                        height: 24,
+                        color: getCircleColorById(circle.circleId),
+                      ),
+                      title: circle.name,
+                      onTap: () =>
+                          BlocProvider.of<SlideCategoryCubit>(context).select(
+                        SlideCategoryType.circle,
+                        circle.circleId,
+                      ),
+                      selected: selected,
+                      count: circle.unseenMessageCount ?? 0,
+                    ),
                   );
                 },
               ),

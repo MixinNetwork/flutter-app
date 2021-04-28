@@ -6,6 +6,8 @@ import 'package:flutter_app/utils/uri_utils.dart';
 import '../../brightness_observer.dart';
 
 class SecretMessage extends StatelessWidget {
+  const SecretMessage({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => Center(
         child: Padding(

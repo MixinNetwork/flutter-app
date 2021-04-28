@@ -25,13 +25,13 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
             Variable.withString(stickerId),
           ])
           .map((QueryRow row) => Sticker(
-              stickerId: row.readString('sticker_id'),
-              name: row.readString('name'),
-              assetUrl: row.readString('asset_url'),
-              assetType: row.readString('asset_type'),
-              assetWidth: row.readInt('asset_width'),
-              assetHeight: row.readInt('asset_height'),
-              createdAt: row.readDateTime('last_use_at')))
+              stickerId: row.read<String>('sticker_id'),
+              name: row.read<String>('name'),
+              assetUrl: row.read<String>('asset_url'),
+              assetType: row.read<String>('asset_type'),
+              assetWidth: row.read<int>('asset_width'),
+              assetHeight: row.read<int>('asset_height'),
+              createdAt: row.read<DateTime>('last_use_at')))
           .getSingleOrNull();
 
   Selectable<Sticker> stickerByAlbumId(String albumId) => select(db.stickers)
@@ -62,13 +62,13 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
           Variable.withString(name)
         ])
         .map((QueryRow row) => Sticker(
-            stickerId: row.readString('sticker_id'),
-            name: row.readString('name'),
-            assetUrl: row.readString('asset_url'),
-            assetType: row.readString('asset_type'),
-            assetWidth: row.readInt('asset_width'),
-            assetHeight: row.readInt('asset_height'),
-            createdAt: row.readDateTime('last_use_at')))
+            stickerId: row.read<String>('sticker_id'),
+            name: row.read<String>('name'),
+            assetUrl: row.read<String>('asset_url'),
+            assetType: row.read<String>('asset_type'),
+            assetWidth: row.read<int>('asset_width'),
+            assetHeight: row.read<int>('asset_height'),
+            createdAt: row.read<DateTime>('last_use_at')))
         .getSingle();
   }
 }

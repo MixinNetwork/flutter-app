@@ -3,11 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/utils/list_utils.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
 import 'disable.dart';
 
@@ -280,11 +280,11 @@ Future<bool> showConfirmMixinDialog(
           actions: [
             MixinButton(
                 backgroundTransparent: true,
-                child: Text(Localization.of(context).cancel),
-                onTap: () => Navigator.pop(context, false)),
+                onTap: () => Navigator.pop(context, false),
+                child: Text(Localization.of(context).cancel)),
             MixinButton(
-              child: Text(Localization.of(context).confirm),
               onTap: () => Navigator.pop(context, true),
+              child: Text(Localization.of(context).confirm),
             ),
           ],
         ),
@@ -315,12 +315,12 @@ class EditDialog extends HookWidget {
       actions: [
         MixinButton(
             backgroundTransparent: true,
-            child: Text(Localization.of(context).cancel),
-            onTap: () => Navigator.pop(context)),
+            onTap: () => Navigator.pop(context),
+            child: Text(Localization.of(context).cancel)),
         MixinButton(
-          child: Text(Localization.of(context).create),
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
+          child: Text(Localization.of(context).create),
         ),
       ],
     );

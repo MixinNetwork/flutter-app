@@ -38,8 +38,8 @@ class EditProfilePage extends StatelessWidget {
             MixinButton(
               onTap: () {},
               backgroundTransparent: true,
-              child: Center(child: Text(Localization.of(context).save)),
               value: 'TODO',
+              child: Center(child: Text(Localization.of(context).save)),
             ),
           ],
         ),

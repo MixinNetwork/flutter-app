@@ -33,35 +33,35 @@ dependencies:
       url: git://github.com/google/flutter-desktop-embedding.git
       path: plugins/window_size
       ref: 57a2cd88486105d3d813583339eb0e23c9bfd6d2
-  http: ^0.13.0
+  http: ^0.13.1
   qr_flutter: ^4.0.0
-  uuid: ^3.0.0
+  uuid: ^3.0.4
   web_socket_channel: ^2.0.0
-  moor: ^4.1.0
+  moor: ^4.2.1
   sqlite3_flutter_libs: ^0.4.1
   libsignal_protocol_dart: ^0.3.0-nullsafety.0
   path_provider: ^2.0.1
   path: ^1.8.0
-  hive: ^2.0.2
+  hive: ^2.0.4
   hive_flutter: ^1.0.0
   cached_network_image: ^3.0.0-nullsafety
-  very_good_analysis: ^2.0.0-nullsafety.0
+  very_good_analysis: ^2.0.3
 #  desktop_window: ^0.4.0
   bloc: ^7.0.0
   flutter_bloc: ^7.0.0
-  equatable: ^2.0.0-nullsafety.3
+  equatable: ^2.0.0
   intl: ^0.17.0
-  flutter_svg: ^0.21.0-nullsafety.0
+  flutter_svg: ^0.22.0
   tuple: ^2.0.0
-  archive: ^3.0.0
-  hydrated_bloc: ^7.0.0-nullsafety.1
-  rxdart: ^0.26.0-nullsafety.1
-  json_annotation: ^4.0.0
-  provider: ^5.0.0-nullsafety.5
+  archive: ^3.1.2
+  hydrated_bloc: ^7.0.0
+  rxdart: ^0.26.0
+  json_annotation: ^4.0.1
+  provider: ^5.0.0
   isolate: ^2.0.3
-  dio: ^4.0.0-beta7
+  dio: ^4.0.0
   scrollable_positioned_list: ^0.2.0-nullsafety.0
-  recase: ^4.0.0-nullsafety.0
+  recase: ^4.0.0
   file_selector: ^0.8.2
   # file_selector_platform_interface: ^1.0.3+1
   file_selector_macos: ^0.0.4
@@ -70,47 +70,26 @@ dependencies:
   mime: ^1.0.0
   url_launcher: ^6.0.1
   filesize: ^1.0.4
-  flutter_portal: ^0.4.0-nullsafety.0
-  flutter_markdown: ^0.6.0
+  flutter_portal: ^0.4.0
+  flutter_markdown: ^0.6.1
   markdown: ^4.0.0
   map: ^0.3.0
-  flutter_local_notifications: ^5.0.0-nullsafety.1
+  flutter_local_notifications: ^5.0.0+3
   flutter_app_icon_badge: ^2.0.0
   flutter_hooks: ^0.16.0
   objectbox: ^0.14.0
   package_info: ^2.0.0
+  sliver_tools: ^0.2.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-dependency_overrides:
-  build_runner: ^1.11.5
-  web_socket_channel: ^2.0.0
-  tuple: ^2.0.0-nullsafety.0
-  dio: ^4.0.0-beta7
-  fixnum: ^1.0.0-nullsafety.0
-  crypto: ^3.0.0-nullsafety.0
-  convert: ^3.0.0
-  http_parser: ^4.0.0
-  uuid: ^3.0.0
-  recase: ^4.0.0-nullsafety.0
-  json_annotation: ^4.0.0
-  equatable: ^2.0.0-nullsafety.3
-  flutter_cache_manager: ^3.0.0-nullsafety.0
-  http: ^0.13.0
-  sqflite_common: ^2.0.0
-  synchronized: ^3.0.0
-  quiver: ^3.0.0
-  scrollable_positioned_list: ^0.2.0-nullsafety.0
-  sliver_tools: ^0.2.0
-  collection: ^1.15.0
 
 dev_dependencies:
-  hive_generator: ^1.0.1
+  hive_generator: ^1.1.0
   objectbox_generator: ^0.14.0
-  moor_generator: ^4.1.0
-  build_runner: ^1.11.5
-  json_serializable: ^4.0.1
+  moor_generator: ^4.2.2
+  json_serializable: ^4.1.1
   flutter_test:
     sdk: flutter
 

@@ -65,16 +65,16 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
         'SELECT * FROM jobs WHERE `action` = \'CREATE_MESSAGE\' ORDER BY created_at ASC LIMIT 100',
         readsFrom: {db.jobs}).map((QueryRow row) {
       return Job(
-          jobId: row.readString('jobId'),
-          action: row.readString('action'),
-          orderId: row.readInt('orderId'),
-          priority: row.readInt('priority'),
-          userId: row.readString('userId'),
-          blazeMessage: row.readString('jobId'),
-          conversationId: row.readString('jobId'),
-          resendMessageId: row.readString('resendMessageId'),
-          runCount: row.readInt('runCount'),
-          createdAt: row.readDateTime('createdAt'));
+          jobId: row.read<String>('jobId'),
+          action: row.read<String>('action'),
+          orderId: row.read<int>('orderId'),
+          priority: row.read<int>('priority'),
+          userId: row.read<String>('userId'),
+          blazeMessage: row.read<String>('jobId'),
+          conversationId: row.read<String>('jobId'),
+          resendMessageId: row.read<String>('resendMessageId'),
+          runCount: row.read<int>('runCount'),
+          createdAt: row.read<DateTime>('createdAt'));
     }).get();
   }
 

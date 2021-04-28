@@ -16,7 +16,8 @@ class ActionButton extends StatelessWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
-  });
+    Key? key,
+  }) : super(key: key);
 
   final String name;
   final VoidCallback? onTap;

@@ -701,14 +701,6 @@ class _List extends HookWidget {
               conversation.conversationId == conversationId && !navigationMode;
 
           return ContextMenuPortalEntry(
-            child: _Item(
-              selected: selected,
-              conversation: conversation,
-              onTap: () => context.read<ConversationCubit>().selectConversation(
-                    conversation.conversationId,
-                    conversation.lastReadMessageId,
-                  ),
-            ),
             buildMenus: () => [
               if (conversation.pinTime != null)
                 ContextMenu(
@@ -792,6 +784,14 @@ class _List extends HookWidget {
                 },
               ),
             ],
+            child: _Item(
+              selected: selected,
+              conversation: conversation,
+              onTap: () => context.read<ConversationCubit>().selectConversation(
+                    conversation.conversationId,
+                    conversation.lastReadMessageId,
+                  ),
+            ),
           );
         },
       );
@@ -837,11 +837,11 @@ class MuteDialog extends HookWidget {
       actions: [
         MixinButton(
             backgroundTransparent: true,
-            child: Text(Localization.of(context).cancel),
-            onTap: () => Navigator.pop(context)),
+            onTap: () => Navigator.pop(context),
+            child: Text(Localization.of(context).cancel)),
         MixinButton(
-          child: Text(Localization.of(context).confirm),
           onTap: () => Navigator.pop(context, result.value),
+          child: Text(Localization.of(context).confirm),
         ),
       ],
     );

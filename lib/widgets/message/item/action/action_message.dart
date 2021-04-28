@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/db/mixin_database.dart';
+import 'package:flutter_app/utils/action_utils.dart';
 import 'package:flutter_app/utils/color_utils.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/message/item/action/action_data.dart';
-import 'package:flutter_app/utils/action_utils.dart';
 
 import '../../../brightness_observer.dart';
 import '../../../interacter_decorated_box.dart';
@@ -31,8 +31,10 @@ class ActionMessage extends StatelessWidget {
           spacing: 10,
           runSpacing: 8,
           children: List<Widget>.from(
-            jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
-                  (e) => InteractableDecoratedBox.color(
+            (jsonDecode(message.content!) as List<Map<String, dynamic>>)
+                .map((Map<String, dynamic> e) => ActionData.fromJson(e))
+                .map(
+                  (ActionData e) => InteractableDecoratedBox.color(
                     onTap: () {
                       if (context.openAction(e.action)) return;
                       openUri(e.action);

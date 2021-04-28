@@ -50,11 +50,11 @@ class ContextMenuPortalEntry extends StatelessWidget {
                   ),
                 ),
                 child: InteractableDecoratedBox(
-                  child: child,
                   onRightClick: (PointerUpEvent pointerUpEvent) {
                     BlocProvider.of<OffsetCubit>(context)
                         .emit(pointerUpEvent.position);
                   },
+                  child: child,
                 ),
               ),
             ),

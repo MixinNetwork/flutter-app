@@ -123,8 +123,11 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
 
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
+          // ignore: avoid_dynamic_calls
           code: msg['provisioning_code'],
+          // ignore: avoid_dynamic_calls
           userId: msg['user_id'],
+          // ignore: avoid_dynamic_calls
           sessionId: msg['session_id'],
           platform: 'Desktop',
           purpose: 'SESSION',

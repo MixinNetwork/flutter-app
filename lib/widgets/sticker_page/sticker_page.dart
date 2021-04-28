@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/constants/resources.dart';
 
 import '../brightness_observer.dart';
 import '../cache_image.dart';
@@ -145,7 +145,6 @@ class _StickerAlbumPageItem extends StatelessWidget {
         converter: (state) => state[index],
         builder: (BuildContext context, Sticker sticker) =>
             InteractableDecoratedBox(
-          child: CacheImage(sticker.assetUrl),
           onTap: () async {
             final accountServer =
                 Provider.of<AccountServer>(context, listen: false);
@@ -166,6 +165,7 @@ class _StickerAlbumPageItem extends StatelessWidget {
             if (!rightClickDelete) return;
             // todo use native context menu.
           },
+          child: CacheImage(sticker.assetUrl),
         ),
       );
 }
