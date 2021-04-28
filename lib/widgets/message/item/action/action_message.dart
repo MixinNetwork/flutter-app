@@ -31,10 +31,9 @@ class ActionMessage extends StatelessWidget {
           spacing: 10,
           runSpacing: 8,
           children: List<Widget>.from(
-            (jsonDecode(message.content!) as List<Map<String, dynamic>>)
-                .map((Map<String, dynamic> e) => ActionData.fromJson(e))
-                .map(
-                  (ActionData e) => InteractableDecoratedBox.color(
+            // ignore: avoid_dynamic_calls
+            jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
+                  (e) => InteractableDecoratedBox.color(
                     onTap: () {
                       if (context.openAction(e.action)) return;
                       openUri(e.action);

@@ -27,8 +27,8 @@ class MentionBuilder extends StatelessWidget {
     if (mentionString == null) return {};
     _mentionCache[mentionString] ??= <String, String>{
       for (var item in List<MentionData>.of(
-          ((await LoadBalancerUtils.jsonDecode(mentionString))
-                  as List<Map<String, dynamic>>)
+          // ignore: avoid_dynamic_calls
+          (await LoadBalancerUtils.jsonDecode(mentionString))
               .map((e) => MentionData.fromJson(e))))
         item.identityNumber: item.fullName
     };
