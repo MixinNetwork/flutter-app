@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/db/extension/conversation.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
@@ -58,8 +59,7 @@ class ChatInfoPage extends HookWidget {
     if (!conversation.isLoaded) return const SizedBox();
 
     final isGroupConversation = conversation.isGroup!;
-    final muting =
-        conversation.conversation?.muteUntil?.isAfter(DateTime.now()) == true;
+    final muting = conversation.conversation?.isMute == true;
 
     return Column(
       children: [
@@ -203,7 +203,7 @@ class ChatInfoPage extends HookWidget {
                         description: muting
                             ? Text(
                                 DateFormat('yyyy/MM/dd, hh:mm a').format(
-                                    conversation.conversation!.muteUntil!),
+                                    conversation.conversation!.validMuteUntil!),
                                 style: TextStyle(
                                   color: BrightnessData.themeOf(context)
                                       .secondaryText,

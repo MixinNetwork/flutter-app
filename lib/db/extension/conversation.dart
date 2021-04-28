@@ -23,6 +23,9 @@ extension Conversation on ConversationItem {
       ((isGroupConversation && muteUntil?.isAfter(DateTime.now()) == true) ||
           (!isGroupConversation &&
               ownerMuteUntil?.isAfter(DateTime.now()) == true));
+
+  DateTime? get validMuteUntil =>
+      isGroupConversation ? muteUntil : ownerMuteUntil;
 }
 
 void importConversationExtension() {}
