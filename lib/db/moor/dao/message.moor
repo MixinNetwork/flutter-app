@@ -178,7 +178,8 @@ SELECT m.message_id      AS messageId,
        m.status          AS status,
        c.name            AS groupName,
        u.relationship    AS relationship,
-       c.mute_until      AS muteUntil
+       c.mute_until      AS muteUntil,
+       m.created_at      AS createdAt
 FROM   messages m
        INNER JOIN users u
                ON m.user_id = u.user_id

@@ -252,7 +252,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
     this.conversationId = const Value.absent(),
     this.resendMessageId = const Value.absent(),
     required int runCount,
-  })  : jobId = Value(jobId),
+  })   : jobId = Value(jobId),
         action = Value(action),
         createdAt = Value(createdAt),
         priority = Value(priority),
@@ -3151,7 +3151,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     required String userId,
     this.role = const Value.absent(),
     required DateTime createdAt,
-  })  : conversationId = Value(conversationId),
+  })   : conversationId = Value(conversationId),
         userId = Value(userId),
         createdAt = Value(createdAt);
   static Insertable<Participant> custom({
@@ -7117,7 +7117,7 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
     required String messageId,
     required String data,
     required DateTime createdAt,
-  })  : messageId = Value(messageId),
+  })   : messageId = Value(messageId),
         data = Value(data),
         createdAt = Value(createdAt);
   static Insertable<FloodMessage> custom({
@@ -7728,7 +7728,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
     required String userId,
     required String reservedInt,
     required String reservedText,
-  })  : messageId = Value(messageId),
+  })   : messageId = Value(messageId),
         conversationId = Value(conversationId),
         content = Value(content),
         createdAt = Value(createdAt),
@@ -8201,7 +8201,7 @@ class OffsetsCompanion extends UpdateCompanion<Offset> {
   OffsetsCompanion.insert({
     required String key,
     required String timestamp,
-  })  : key = Value(key),
+  })   : key = Value(key),
         timestamp = Value(timestamp);
   static Insertable<Offset> custom({
     Expression<String>? key,
@@ -8817,7 +8817,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     required String status,
     this.messageId = const Value.absent(),
     required DateTime createdAt,
-  })  : groupId = Value(groupId),
+  })   : groupId = Value(groupId),
         senderId = Value(senderId),
         status = Value(status),
         createdAt = Value(createdAt);
@@ -9130,7 +9130,7 @@ class ResendSessionMessagesCompanion
     required String sessionId,
     required int status,
     required DateTime createdAt,
-  })  : messageId = Value(messageId),
+  })   : messageId = Value(messageId),
         userId = Value(userId),
         sessionId = Value(sessionId),
         status = Value(status),
@@ -9864,7 +9864,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     required String userId,
     required String category,
     required String description,
-  })  : albumId = Value(albumId),
+  })   : albumId = Value(albumId),
         name = Value(name),
         iconUrl = Value(iconUrl),
         createdAt = Value(createdAt),
@@ -10194,7 +10194,7 @@ class StickerRelationshipsCompanion
   StickerRelationshipsCompanion.insert({
     required String albumId,
     required String stickerId,
-  })  : albumId = Value(albumId),
+  })   : albumId = Value(albumId),
         stickerId = Value(stickerId);
   static Insertable<StickerRelationship> custom({
     Expression<String>? albumId,
@@ -11615,7 +11615,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.full_name       AS userFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.full_name       AS userFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil,\n       m.created_at      AS createdAt\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11638,6 +11638,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
         muteUntil:
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
       );
     });
   }
@@ -13979,6 +13980,7 @@ class NotificationMessage {
   final String? groupName;
   final UserRelationship? relationship;
   final DateTime? muteUntil;
+  final DateTime createdAt;
   NotificationMessage({
     required this.messageId,
     required this.conversationId,
@@ -13990,6 +13992,7 @@ class NotificationMessage {
     this.groupName,
     this.relationship,
     this.muteUntil,
+    required this.createdAt,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -14008,8 +14011,10 @@ class NotificationMessage {
                               status.hashCode,
                               $mrjc(
                                   groupName.hashCode,
-                                  $mrjc(relationship.hashCode,
-                                      muteUntil.hashCode))))))))));
+                                  $mrjc(
+                                      relationship.hashCode,
+                                      $mrjc(muteUntil.hashCode,
+                                          createdAt.hashCode)))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -14023,7 +14028,8 @@ class NotificationMessage {
           other.status == this.status &&
           other.groupName == this.groupName &&
           other.relationship == this.relationship &&
-          other.muteUntil == this.muteUntil);
+          other.muteUntil == this.muteUntil &&
+          other.createdAt == this.createdAt);
   @override
   String toString() {
     return (StringBuffer('NotificationMessage(')
@@ -14036,7 +14042,8 @@ class NotificationMessage {
           ..write('status: $status, ')
           ..write('groupName: $groupName, ')
           ..write('relationship: $relationship, ')
-          ..write('muteUntil: $muteUntil')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
