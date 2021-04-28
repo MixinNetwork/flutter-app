@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
 import 'package:flutter_app/utils/markdown.dart';
 import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:markdown/markdown.dart';
-import 'package:flutter_app/constants/resources.dart';
+import 'package:provider/provider.dart';
 
 import '../../brightness_observer.dart';
 import '../../full_screen_portal.dart';
@@ -34,9 +35,7 @@ class PostMessage extends StatelessWidget {
           isCurrentUser: isCurrentUser,
           child: FullScreenPortal(
             builder: (context) => InteractableDecoratedBox(
-              onTap: () {
-                FullScreenPortal.of(context).emit(true);
-              },
+              onTap: () => context.read<FullScreenVisibleCubit>().emit(true),
               child: Stack(
                 children: [
                   Builder(
@@ -107,7 +106,7 @@ class PostPreview extends StatelessWidget {
         color: BrightnessData.themeOf(context).background,
       ),
       onTap: () {
-        FullScreenPortal.of(context).emit(false);
+        context.read<FullScreenVisibleCubit>().emit(false);
       },
       child: Padding(
         padding: const EdgeInsets.only(top: 32),

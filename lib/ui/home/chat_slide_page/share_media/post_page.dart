@@ -175,7 +175,7 @@ class _Item extends StatelessWidget {
           portalBuilder: (BuildContext context) =>
               PostPreview(message: message),
           builder: (BuildContext context) => InteractableDecoratedBox(
-            onTap: () => FullScreenPortal.of(context).emit(true),
+            onTap: () => context.read<FullScreenVisibleCubit>().emit(true),
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(

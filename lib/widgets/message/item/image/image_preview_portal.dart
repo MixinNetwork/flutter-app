@@ -90,7 +90,7 @@ class ImagePreviewPortal extends StatelessWidget {
                                   color: Color.fromRGBO(62, 65, 72, 0.9),
                                 ),
                                 onTap: () =>
-                                    FullScreenPortal.of(context).emit(false),
+                                    context.read<FullScreenVisibleCubit>().emit(false),
                                 child: const SizedBox(),
                               ),
                               BlocConverter<IntCubit, int, MessageItem?>(
@@ -239,7 +239,7 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
-        onTap: () => FullScreenPortal.of(context).emit(false),
+        onTap: () => context.read<FullScreenVisibleCubit>().emit(false),
         child: Image.file(
           File(message.mediaUrl ?? ''),
           fit: BoxFit.contain,

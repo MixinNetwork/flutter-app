@@ -206,7 +206,7 @@ class _Item extends StatelessWidget {
           onTap: () {
             switch (message.mediaStatus) {
               case MediaStatus.done:
-                FullScreenPortal.of(context).emit(true);
+                context.read<FullScreenVisibleCubit>().emit(true);
                 break;
               case MediaStatus.canceled:
                 if (message.relationship == UserRelationship.me &&
@@ -215,7 +215,7 @@ class _Item extends StatelessWidget {
                 } else {
                   context.read<AccountServer>().downloadAttachment(message);
                 }
-                FullScreenPortal.of(context).emit(true);
+                context.read<FullScreenVisibleCubit>().emit(true);
                 break;
               default:
                 break;

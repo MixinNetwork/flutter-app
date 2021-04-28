@@ -91,7 +91,7 @@ class _ImageMessage extends StatelessWidget {
               onTap: () {
                 switch (message.mediaStatus) {
                   case MediaStatus.done:
-                    FullScreenPortal.of(context).emit(true);
+                    context.read<FullScreenVisibleCubit>().emit(true);
                     break;
                   case MediaStatus.canceled:
                     if (message.relationship == UserRelationship.me &&

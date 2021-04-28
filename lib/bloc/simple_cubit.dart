@@ -13,14 +13,6 @@ class IntCubit extends SimpleCubit<int> {
   IntCubit(int state) : super(state);
 }
 
-class BoolCubit extends SimpleCubit<bool> {
-  BoolCubit(bool state) : super(state);
-}
-
-class DoubleCubit extends SimpleCubit<double> {
-  DoubleCubit(double state) : super(state);
-}
-
 class OffsetCubit extends SimpleCubit<Offset?> {
   OffsetCubit(Offset? state) : super(state);
 }
