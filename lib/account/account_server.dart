@@ -160,8 +160,12 @@ class AccountServer {
     );
 
     final jobIds = jobs.map((e) => e.jobId).toList();
-    await client.messageApi.acknowledgements(ack);
-    await database.jobsDao.deleteJobs(jobIds);
+    try {
+      await client.messageApi.acknowledgements(ack);
+      await database.jobsDao.deleteJobs(jobIds);
+    } catch (e, s) {
+      debugPrint('Send ack error: $e, stack: $s');
+    }
   }
 
   Future<void> _runRecallJob(List<db.Job> jobs) async {
