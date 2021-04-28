@@ -11615,7 +11615,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.full_name       AS userFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil,\n       m.created_at      AS createdAt\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.full_name       AS userFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil,\n       u.mute_until      AS ownerMuteUntil,\n       m.created_at      AS createdAt\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11638,6 +11638,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
         muteUntil:
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
         createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
       );
     });
@@ -13980,6 +13982,7 @@ class NotificationMessage {
   final String? groupName;
   final UserRelationship? relationship;
   final DateTime? muteUntil;
+  final DateTime? ownerMuteUntil;
   final DateTime createdAt;
   NotificationMessage({
     required this.messageId,
@@ -13992,6 +13995,7 @@ class NotificationMessage {
     this.groupName,
     this.relationship,
     this.muteUntil,
+    this.ownerMuteUntil,
     required this.createdAt,
   });
   @override
@@ -14013,8 +14017,10 @@ class NotificationMessage {
                                   groupName.hashCode,
                                   $mrjc(
                                       relationship.hashCode,
-                                      $mrjc(muteUntil.hashCode,
-                                          createdAt.hashCode)))))))))));
+                                      $mrjc(
+                                          muteUntil.hashCode,
+                                          $mrjc(ownerMuteUntil.hashCode,
+                                              createdAt.hashCode))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -14029,6 +14035,7 @@ class NotificationMessage {
           other.groupName == this.groupName &&
           other.relationship == this.relationship &&
           other.muteUntil == this.muteUntil &&
+          other.ownerMuteUntil == this.ownerMuteUntil &&
           other.createdAt == this.createdAt);
   @override
   String toString() {
@@ -14043,6 +14050,7 @@ class NotificationMessage {
           ..write('groupName: $groupName, ')
           ..write('relationship: $relationship, ')
           ..write('muteUntil: $muteUntil, ')
+          ..write('ownerMuteUntil: $ownerMuteUntil, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();

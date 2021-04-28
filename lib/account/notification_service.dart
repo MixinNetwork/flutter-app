@@ -35,7 +35,12 @@ class NotificationService extends WidgetsBindingObserver {
           })
           .where(
               (event) => event.userId != context.read<AccountServer>().userId)
-          .where((event) => event.muteUntil?.isAfter(DateTime.now()) != true)
+          .where((event) {
+            final muteUntil = event.groupName?.isNotEmpty == true
+                ? event.muteUntil
+                : event.ownerMuteUntil;
+            return muteUntil?.isAfter(DateTime.now()) != true;
+          })
           .where((event) => event.createdAt
               .isAfter(DateTime.now().subtract(const Duration(minutes: 2))))
           .asyncMap((event) async {
