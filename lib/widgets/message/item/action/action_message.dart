@@ -35,7 +35,9 @@ class ActionMessage extends StatelessWidget {
             jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
                   (e) => InteractableDecoratedBox.color(
                     onTap: () {
+                      // ignore: avoid_dynamic_calls
                       if (context.openAction(e.action)) return;
+                      // ignore: avoid_dynamic_calls
                       openUri(e.action);
                     },
                     decoration: BoxDecoration(
@@ -45,9 +47,11 @@ class ActionMessage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.all(10),
                       child: Text(
+                        // ignore: avoid_dynamic_calls
                         e.label,
                         style: TextStyle(
                           fontSize: 15,
+                          // ignore: avoid_dynamic_calls
                           color: colorHex(e.color) ?? Colors.black,
                         ),
                       ),
