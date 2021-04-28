@@ -12,13 +12,14 @@ class Injector {
   Database database;
   Client client;
 
-  Future<void> syncConversion(String? conversationId) async {
+  Future<void> syncConversion(String? conversationId,
+      {bool force = false}) async {
     if (conversationId == null || conversationId == systemUser) {
       return;
     }
     final conversation =
         await database.conversationDao.getConversationById(conversationId);
-    if (conversation == null) {
+    if (conversation == null || force) {
       unawaited(() async {
         try {
           final response =
@@ -108,9 +109,9 @@ class Injector {
     }
   }
 
-  Future<db.User> syncUser(userId) async {
+  Future<db.User> syncUser(userId, {bool force = false}) async {
     var user = await database.userDao.findUserById(userId).getSingleOrNull();
-    if (user == null) {
+    if (user == null || force) {
       final response = await client.userApi.getUserById(userId);
       final result = response.data;
       user = db.User(

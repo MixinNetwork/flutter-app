@@ -614,10 +614,11 @@ class DecryptMessage extends Injector {
       }
       // todo remove signal key
     } else if (systemMessage.action == MessageAction.update) {
-      if (systemMessage.participantId != null) {
-        await syncUser(systemMessage.userId);
+      final participantId = systemMessage.participantId;
+      if (participantId != null && participantId.isNotEmpty) {
+        await syncUser(systemMessage.participantId, force: true);
       } else {
-        await syncConversion(data.conversationId);
+        await syncConversion(data.conversationId, force: true);
       }
       return;
     } else if (systemMessage.action == MessageAction.create) {
