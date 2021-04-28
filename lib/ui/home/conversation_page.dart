@@ -730,7 +730,7 @@ class _List extends HookWidget {
                         .pin(conversation.conversationId),
                   ),
                 ),
-              if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
+              if (conversation.isMute)
                 ContextMenu(
                   title: Localization.current.unMute,
                   onTap: () async {
@@ -1011,7 +1011,7 @@ class _StatusRow extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        if (conversation.muteUntil?.isAfter(DateTime.now()) == true)
+        if (conversation.isMute)
           SvgPicture.asset(
             Resources.assetsImagesMuteSvg,
             color: dynamicColor,

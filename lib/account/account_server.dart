@@ -751,8 +751,9 @@ class AccountServer {
   }) async {
     assert([conversationId, userId].any((element) => element != null));
     assert(![conversationId, userId].every((element) => element != null));
+    MixinResponse<ConversationResponse> response;
     if (conversationId != null) {
-      await client.conversationApi.mute(
+      response = await client.conversationApi.mute(
         conversationId,
         ConversationRequest(
           conversationId: conversationId,
@@ -762,7 +763,7 @@ class AccountServer {
       );
     } else {
       final cid = generateConversationId(userId!, this.userId);
-      await client.conversationApi.mute(
+      response = await client.conversationApi.mute(
         cid,
         ConversationRequest(
           conversationId: cid,
@@ -771,6 +772,17 @@ class AccountServer {
           participants: [ParticipantRequest(userId: this.userId)],
         ),
       );
+    }
+    final cr = response.data;
+    if (cr.category == ConversationCategory.contact) {
+      if (userId != null) {
+        await database.userDao.updateMuteUntil(userId, cr.muteUntil);
+      }
+    } else {
+      if (conversationId != null) {
+        await database.conversationDao
+            .updateMuteUntil(conversationId, cr.muteUntil);
+      }
     }
   }
 

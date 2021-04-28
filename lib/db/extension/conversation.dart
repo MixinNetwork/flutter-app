@@ -18,6 +18,11 @@ extension Conversation on ConversationItem {
       appId == null;
 
   String get validName => conversationValidName(groupName, name);
+
+  bool get isMute =>
+      ((isGroupConversation && muteUntil?.isAfter(DateTime.now()) == true) ||
+          (!isGroupConversation &&
+              ownerMuteUntil?.isAfter(DateTime.now()) == true));
 }
 
 void importConversationExtension() {}
