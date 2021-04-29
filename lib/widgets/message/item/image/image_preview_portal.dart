@@ -62,6 +62,10 @@ class ImagePreviewPage extends HookWidget {
     final next = useState<MessageItem?>(null);
 
     useEffect(() {
+      controller.scaleState = PhotoViewScaleState.initial;
+    }, [_messageId.value]);
+
+    useEffect(() {
       if (prev.value?.messageId == _messageId.value) {
         current.value = prev.value;
       } else if (next.value?.messageId == _messageId.value) {
@@ -265,11 +269,12 @@ class _Bar extends StatelessWidget {
             },
           ),
           const SizedBox(width: 12),
-          ActionButton(
-            name: Resources.assetsImagesCopySvg,
-            size: 20,
-            onTap: () {},
-          ),
+          // todo
+          // ActionButton(
+          //   name: Resources.assetsImagesCopySvg,
+          //   size: 20,
+          //   onTap: () {},
+          // ),
           const SizedBox(width: 12),
           ActionButton(
             name: Resources.assetsImagesAttachmentDownloadSvg,
@@ -320,7 +325,6 @@ class _Item extends HookWidget {
                   ? SystemMouseCursors.zoomIn
                   : SystemMouseCursors.zoomOut,
               child: PhotoView(
-                key: Key(message.messageId),
                 tightMode: true,
                 imageProvider: FileImage(File(message.mediaUrl ?? '')),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
