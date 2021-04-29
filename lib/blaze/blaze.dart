@@ -38,6 +38,7 @@ class Blaze {
 
   String host = _wsHost1;
   bool reconnecting = false;
+  bool disposed = false;
 
   IOWebSocketChannel? channel;
 
@@ -48,6 +49,7 @@ class Blaze {
   }
 
   void _connect(String token) {
+    if (disposed) return;
     channel = IOWebSocketChannel.connect(host,
         protocols: ['Mixin-Blaze-1'],
         headers: {'Authorization': 'Bearer $token'},
@@ -151,7 +153,7 @@ class Blaze {
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
   }
 
-  Future<void> disconnect() async {
+  Future<void> _disconnect() async {
     await channel?.sink.close();
   }
 
@@ -160,12 +162,24 @@ class Blaze {
     reconnecting = true;
     host = _wsHost2;
 
-    await disconnect();
-    await client.accountApi.getMe();
+    await _disconnect();
+    try {
+      await client.accountApi.getMe();
+    } catch (e) {
+      if (e is MixinApiError && e.error.code == 401) return;
+      await Future.delayed(const Duration(seconds: 2));
+      reconnecting = false;
+      return await _reconnect();
+    }
     await Future.delayed(const Duration(seconds: 2));
     await connect();
 
     reconnecting = false;
+  }
+
+  Future<void> dispose() async {
+    disposed = true;
+    await _disconnect();
   }
 }
 

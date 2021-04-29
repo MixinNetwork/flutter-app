@@ -373,7 +373,7 @@ class AccountServer {
 
   Future<void> stop() async {
     await Future.wait([
-      blaze.disconnect(),
+      blaze.dispose(),
       database.dispose(),
     ]);
   }
