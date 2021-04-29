@@ -11,7 +11,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
-import '../../../full_screen_portal.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../status.dart';
 import '../../message_bubble.dart';
@@ -22,44 +21,6 @@ import 'image_preview_portal.dart';
 
 class ImageMessageWidget extends StatelessWidget {
   const ImageMessageWidget({
-    Key? key,
-    required this.message,
-    required this.isCurrentUser,
-  }) : super(key: key);
-
-  final MessageItem message;
-  final bool isCurrentUser;
-
-  @override
-  Widget build(BuildContext context) => FullScreenPortal(
-        builder: (BuildContext context) => _ImageMessage(
-          message: message,
-          isCurrentUser: isCurrentUser,
-        ),
-        portalBuilder: (BuildContext context) => FutureBuilder<int>(
-          future: context
-              .read<AccountServer>()
-              .database
-              .messagesDao
-              .mediaMessageRowIdByConversationId(
-                message.conversationId,
-                message.messageId,
-              )
-              .getSingle(),
-          builder: (context, snapshot) {
-            if (snapshot.data == null) return const SizedBox();
-            return ImagePreviewPortal(
-              conversationId: message.conversationId,
-              messagesDao: context.read<AccountServer>().database.messagesDao,
-              index: snapshot.data!,
-            );
-          },
-        ),
-      );
-}
-
-class _ImageMessage extends StatelessWidget {
-  const _ImageMessage({
     Key? key,
     required this.message,
     required this.isCurrentUser,
@@ -91,7 +52,11 @@ class _ImageMessage extends StatelessWidget {
               onTap: () {
                 switch (message.mediaStatus) {
                   case MediaStatus.done:
-                    context.read<FullScreenVisibleCubit>().emit(true);
+                    ImagePreviewPage.push(
+                      context,
+                      conversationId: message.conversationId,
+                      messageId: message.messageId,
+                    );
                     break;
                   case MediaStatus.canceled:
                     if (message.relationship == UserRelationship.me &&

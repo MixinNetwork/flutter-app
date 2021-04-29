@@ -9,10 +9,6 @@ class SimpleCubit<State> extends Cubit<State> {
   void emit(State state) => super.emit(state);
 }
 
-class IntCubit extends SimpleCubit<int> {
-  IntCubit(int state) : super(state);
-}
-
 class OffsetCubit extends SimpleCubit<Offset?> {
   OffsetCubit(Offset? state) : super(state);
 }

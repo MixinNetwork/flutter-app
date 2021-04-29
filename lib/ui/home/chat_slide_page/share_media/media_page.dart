@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
 import 'package:flutter_app/bloc/paging/load_more_paging.dart';
@@ -7,10 +8,10 @@ import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter_app/enum/media_status.dart';
 import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/full_screen_portal.dart';
 import 'package:flutter_app/widgets/image.dart';
 import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_app/widgets/message/item/image/image_preview_portal.dart';
@@ -20,9 +21,7 @@ import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:collection/collection.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
 import '../../chat_page.dart';
 
@@ -182,50 +181,37 @@ class _Item extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => FullScreenPortal(
-        portalBuilder: (BuildContext context) => FutureBuilder<int>(
-          future: context
-              .read<AccountServer>()
-              .database
-              .messagesDao
-              .mediaMessageRowIdByConversationId(
-                message.conversationId,
-                message.messageId,
-              )
-              .getSingle(),
-          builder: (context, snapshot) {
-            if (snapshot.data == null) return const SizedBox();
-            return ImagePreviewPortal(
-              conversationId: message.conversationId,
-              messagesDao: context.read<AccountServer>().database.messagesDao,
-              index: snapshot.data!,
-            );
-          },
-        ),
-        builder: (BuildContext context) => InteractableDecoratedBox(
-          onTap: () {
-            switch (message.mediaStatus) {
-              case MediaStatus.done:
-                context.read<FullScreenVisibleCubit>().emit(true);
-                break;
-              case MediaStatus.canceled:
-                if (message.relationship == UserRelationship.me &&
-                    message.mediaUrl?.isNotEmpty == true) {
-                  context.read<AccountServer>().reUploadAttachment(message);
-                } else {
-                  context.read<AccountServer>().downloadAttachment(message);
-                }
-                context.read<FullScreenVisibleCubit>().emit(true);
-                break;
-              default:
-                break;
-            }
-          },
-          child: Image.file(
-            File(message.mediaUrl ?? ''),
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => ImageByBase64(message.thumbImage!),
-          ),
+  Widget build(BuildContext context) => InteractableDecoratedBox(
+        onTap: () {
+          switch (message.mediaStatus) {
+            case MediaStatus.done:
+              ImagePreviewPage.push(
+                context,
+                conversationId: message.conversationId,
+                messageId: message.messageId,
+              );
+              break;
+            case MediaStatus.canceled:
+              if (message.relationship == UserRelationship.me &&
+                  message.mediaUrl?.isNotEmpty == true) {
+                context.read<AccountServer>().reUploadAttachment(message);
+              } else {
+                context.read<AccountServer>().downloadAttachment(message);
+              }
+              ImagePreviewPage.push(
+                context,
+                conversationId: message.conversationId,
+                messageId: message.messageId,
+              );
+              break;
+            default:
+              break;
+          }
+        },
+        child: Image.file(
+          File(message.mediaUrl ?? ''),
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => ImageByBase64(message.thumbImage!),
         ),
       );
 }

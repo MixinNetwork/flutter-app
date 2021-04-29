@@ -279,6 +279,14 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         limit,
       );
 
+  Selectable<MessageItem> mediaMessagesAfter(
+          int rowid, String conversationId, int limit) =>
+      db.mediaMessagesAfter(
+        rowid,
+        conversationId,
+        limit,
+      );
+
   Selectable<MessageItem> postMessages(
           String conversationId, int limit, int offset) =>
       db.postMessages(conversationId, offset, limit);

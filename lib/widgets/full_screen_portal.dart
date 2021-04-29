@@ -48,7 +48,7 @@ class FullScreenPortal extends HookWidget {
               opacity: progress,
               child: child,
             ),
-            child: Builder(builder: portalBuilder),
+            child: visible ? Builder(builder: portalBuilder) : const SizedBox(),
           ),
           child: Builder(builder: builder),
         ),
