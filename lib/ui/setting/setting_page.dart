@@ -1,16 +1,17 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_app/constants/resources.dart';
+import 'package:flutter_app/generated/l10n.dart';
+import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
+import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_app/widgets/cell.dart';
-import 'package:flutter_app/generated/l10n.dart';
 import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
 class SettingPage extends StatelessWidget {
@@ -73,7 +74,17 @@ class SettingPage extends StatelessWidget {
                 onTap: () async {
                   await runFutureWithToast(
                     context,
-                    context.read<AccountServer>().client.accountApi.logout(),
+                    () async {
+                      try {
+                        await context
+                            .read<AccountServer>()
+                            .client
+                            .accountApi
+                            .logout();
+                      } catch (e) {
+                        if (e is! MixinApiError) rethrow;
+                      }
+                    }(),
                   );
                   context.read<MultiAuthCubit>().signOut();
                 },
