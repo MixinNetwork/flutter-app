@@ -267,7 +267,7 @@ class DecryptMessage extends Injector {
     final user = await syncUser(data.userId);
 
     var messageStatus = MessageStatus.delivered;
-    if (_conversationId != null && data.conversationId == _conversationId) {
+    if (data.conversationId == _conversationId) {
       messageStatus = MessageStatus.read;
     }
 
@@ -616,7 +616,7 @@ class DecryptMessage extends Injector {
     } else if (systemMessage.action == MessageAction.update) {
       final participantId = systemMessage.participantId;
       if (participantId != null && participantId.isNotEmpty) {
-        await syncUser(systemMessage.participantId, force: true);
+        await syncUser(systemMessage.participantId!, force: true);
       } else {
         await syncConversion(data.conversationId, force: true);
       }

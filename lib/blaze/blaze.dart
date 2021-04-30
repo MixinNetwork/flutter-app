@@ -160,21 +160,20 @@ class Blaze {
   Future<void> _reconnect() async {
     if (reconnecting) return;
     reconnecting = true;
-    host = _wsHost2;
+    host = host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     await _disconnect();
     try {
       await client.accountApi.getMe();
+      await Future.delayed(const Duration(seconds: 2));
+      await connect();
     } catch (e) {
       if (e is MixinApiError && e.error.code == 401) return;
       await Future.delayed(const Duration(seconds: 2));
-      reconnecting = false;
       return await _reconnect();
+    } finally {
+      reconnecting = false;
     }
-    await Future.delayed(const Duration(seconds: 2));
-    await connect();
-
-    reconnecting = false;
   }
 
   Future<void> dispose() async {

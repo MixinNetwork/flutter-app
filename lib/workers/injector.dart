@@ -109,7 +109,7 @@ class Injector {
     }
   }
 
-  Future<db.User> syncUser(userId, {bool force = false}) async {
+  Future<db.User> syncUser(String userId, {bool force = false}) async {
     var user = await database.userDao.findUserById(userId).getSingleOrNull();
     if (user == null || force) {
       final response = await client.userApi.getUserById(userId);
