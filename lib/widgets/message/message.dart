@@ -12,7 +12,6 @@ import 'package:flutter_app/utils/datetime_format_utils.dart';
 import 'package:flutter_app/widgets/message/item/sticker_message.dart';
 import 'package:flutter_app/widgets/message/item/stranger_message.dart';
 import 'package:flutter_app/widgets/message/item/text/text_message.dart';
-import 'package:flutter_app/widgets/message/message_bubble_margin.dart';
 import 'package:flutter_app/widgets/message/message_day_time.dart';
 import 'package:flutter_app/widgets/message/message_name.dart';
 import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
@@ -263,8 +262,13 @@ class _MessageBubbleMargin extends StatelessWidget {
   final List<ContextMenu> Function() buildMenus;
 
   @override
-  Widget build(BuildContext context) => MessageBubbleMargin(
-        isCurrentUser: isCurrentUser,
+  Widget build(BuildContext context) => Padding(
+        padding: EdgeInsets.only(
+          left: isCurrentUser ? 65 : 16,
+          right: !isCurrentUser ? 65 : 16,
+          top: 2,
+          bottom: 2,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

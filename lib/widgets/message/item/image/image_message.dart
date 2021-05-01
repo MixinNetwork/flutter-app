@@ -43,9 +43,9 @@ class ImageMessageWidget extends StatelessWidget {
             id: message.quoteId,
             content: message.quoteContent,
           ),
-          showNip: false,
           isCurrentUser: isCurrentUser,
-          padding: const EdgeInsets.all(2),
+          padding: EdgeInsets.zero,
+          includeNip: true,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: InteractableDecoratedBox(
@@ -104,7 +104,7 @@ class ImageMessageWidget extends StatelessWidget {
                     ),
                     Positioned(
                       bottom: 4,
-                      right: 4,
+                      right: 12,
                       child: DecoratedBox(
                         decoration: const ShapeDecoration(
                           color: Color.fromRGBO(0, 0, 0, 0.3),

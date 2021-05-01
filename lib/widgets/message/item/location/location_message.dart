@@ -8,8 +8,8 @@ import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:map/map.dart';
 import 'package:latlng/latlng.dart';
+import 'package:map/map.dart';
 
 import '../../../interacter_decorated_box.dart';
 import '../../message_bubble.dart';
@@ -36,7 +36,6 @@ class LocationMessage extends HookWidget {
       [message.content],
     );
     return MessageBubble(
-      showNip: false,
       isCurrentUser: isCurrentUser,
       padding: const EdgeInsets.all(0),
       outerTimeAndStatusWidget: Row(
@@ -46,6 +45,7 @@ class LocationMessage extends HookWidget {
           if (isCurrentUser) MessageStatusWidget(status: message.status),
         ],
       ),
+      includeNip: true,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: SizedBox(

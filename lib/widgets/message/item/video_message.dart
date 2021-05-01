@@ -43,9 +43,9 @@ class VideoMessageWidget extends StatelessWidget {
               id: message.quoteId,
               content: message.quoteContent,
             ),
-            showNip: false,
             isCurrentUser: isCurrentUser,
-            padding: const EdgeInsets.all(2),
+            padding: EdgeInsets.zero,
+            includeNip: true,
             child: InteractableDecoratedBox(
               onTap: () {
                 if (message.mediaStatus == MediaStatus.canceled) {
@@ -125,7 +125,7 @@ class VideoMessageWidget extends StatelessWidget {
                       }),
                       Positioned(
                         bottom: 4,
-                        right: 4,
+                        right: 12,
                         child: DecoratedBox(
                           decoration: const ShapeDecoration(
                             color: Color.fromRGBO(0, 0, 0, 0.3),
