@@ -8,7 +8,6 @@ import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../constants/constants.dart';
 import '../db/database.dart';
@@ -95,14 +94,14 @@ class Blaze {
         }
       },
       onError: (error, s) {
-        debugPrint('fuck ws error: $error, s: $s');
-        if (error is WebSocketChannelException) _reconnect();
+        debugPrint('ws error: $error, s: $s');
+        _reconnect();
       },
       onDone: () {
         debugPrint('web socket done');
         _reconnect();
       },
-      cancelOnError: true,
+      cancelOnError: false,
     );
     _sendListPending();
   }
@@ -154,25 +153,33 @@ class Blaze {
   }
 
   Future<void> _disconnect() async {
-    await channel?.sink.close();
+    debugPrint('ws _disconnect');
+    final socketChannel = channel;
+    channel = null;
+    if (socketChannel == null) return;
+    await socketChannel.sink.close();
   }
 
   Future<void> _reconnect() async {
+    debugPrint(
+        '_reconnect reconnecting: $reconnecting start: ${StackTrace.current}');
+
     if (reconnecting) return;
     reconnecting = true;
     host = host == _wsHost1 ? _wsHost2 : _wsHost1;
 
-    await _disconnect();
     try {
+      await _disconnect();
       await client.accountApi.getMe();
       await Future.delayed(const Duration(seconds: 2));
+      reconnecting = false;
       await connect();
     } catch (e) {
+      debugPrint('ws ping error: $e');
       if (e is MixinApiError && e.error.code == 401) return;
       await Future.delayed(const Duration(seconds: 2));
-      return await _reconnect();
-    } finally {
       reconnecting = false;
+      return await _reconnect();
     }
   }
 
