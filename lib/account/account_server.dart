@@ -372,10 +372,8 @@ class AccountServer {
   }
 
   Future<void> stop() async {
-    await Future.wait([
-      blaze.dispose(),
-      database.dispose(),
-    ]);
+    blaze.dispose();
+    await database.dispose();
   }
 
   void release() {

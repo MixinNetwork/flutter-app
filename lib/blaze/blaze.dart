@@ -40,8 +40,9 @@ class Blaze {
   bool disposed = false;
 
   IOWebSocketChannel? channel;
+  StreamSubscription? subscription;
 
-  Future<void> connect() async {
+  void connect() {
     final token = signAuthTokenWithEdDSA(
         userId, sessionId, privateKey, scp, 'GET', '/', '');
     _connect(token);
@@ -49,11 +50,13 @@ class Blaze {
 
   void _connect(String token) {
     if (disposed) return;
-    channel = IOWebSocketChannel.connect(host,
-        protocols: ['Mixin-Blaze-1'],
-        headers: {'Authorization': 'Bearer $token'},
-        pingInterval: const Duration(seconds: 15));
-    channel?.stream
+    channel = IOWebSocketChannel.connect(
+      host,
+      protocols: ['Mixin-Blaze-1'],
+      headers: {'Authorization': 'Bearer $token'},
+      pingInterval: const Duration(seconds: 15),
+    );
+    subscription = channel?.stream
         .asyncMap((message) async => await parseBlazeMessage(message))
         .listen(
       (blazeMessage) async {
@@ -101,7 +104,7 @@ class Blaze {
         debugPrint('web socket done');
         _reconnect();
       },
-      cancelOnError: false,
+      cancelOnError: true,
     );
     _sendListPending();
   }
@@ -152,12 +155,12 @@ class Blaze {
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
   }
 
-  Future<void> _disconnect() async {
+  void _disconnect() {
     debugPrint('ws _disconnect');
-    final socketChannel = channel;
+    subscription?.cancel();
+    channel?.sink.close();
+    subscription = null;
     channel = null;
-    if (socketChannel == null) return;
-    await socketChannel.sink.close();
   }
 
   Future<void> _reconnect() async {
@@ -169,23 +172,26 @@ class Blaze {
     host = host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
-      await _disconnect();
+      _disconnect();
       await client.accountApi.getMe();
+      debugPrint('http ping');
       await Future.delayed(const Duration(seconds: 2));
       reconnecting = false;
-      await connect();
+      debugPrint('reconnecting set false, ${StackTrace.current}');
+      connect();
     } catch (e) {
       debugPrint('ws ping error: $e');
       if (e is MixinApiError && e.error.code == 401) return;
       await Future.delayed(const Duration(seconds: 2));
       reconnecting = false;
+      debugPrint('reconnecting set false, ${StackTrace.current}');
       return await _reconnect();
     }
   }
 
-  Future<void> dispose() async {
+  void dispose() {
     disposed = true;
-    await _disconnect();
+    _disconnect();
   }
 }
 
