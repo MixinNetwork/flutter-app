@@ -10,7 +10,7 @@ import 'intl/messages_all.dart';
 
 // ignore_for_file: non_constant_identifier_names, lines_longer_than_80_chars
 // ignore_for_file: join_return_with_assignment, prefer_final_in_for_each
-// ignore_for_file: avoid_redundant_argument_values
+// ignore_for_file: avoid_redundant_argument_values, avoid_escaping_inner_quotes
 
 class Localization {
   Localization();
@@ -18,28 +18,31 @@ class Localization {
   static Localization? _current;
 
   static Localization get current {
-    assert(_current != null, 'No instance of Localization was loaded. Try to initialize the Localization delegate before accessing Localization.current.');
+    assert(_current != null,
+        'No instance of Localization was loaded. Try to initialize the Localization delegate before accessing Localization.current.');
     return _current!;
   }
 
-  static const AppLocalizationDelegate delegate =
-    AppLocalizationDelegate();
+  static const AppLocalizationDelegate delegate = AppLocalizationDelegate();
 
   static Future<Localization> load(Locale locale) {
-    final name = (locale.countryCode?.isEmpty ?? false) ? locale.languageCode : locale.toString();
-    final localeName = Intl.canonicalizedLocale(name); 
+    final name = (locale.countryCode?.isEmpty ?? false)
+        ? locale.languageCode
+        : locale.toString();
+    final localeName = Intl.canonicalizedLocale(name);
     return initializeMessages(localeName).then((_) {
       Intl.defaultLocale = localeName;
       final instance = Localization();
       Localization._current = instance;
- 
+
       return instance;
     });
-  } 
+  }
 
   static Localization of(BuildContext context) {
     final instance = Localization.maybeOf(context);
-    assert(instance != null, 'No instance of Localization present in the widget tree. Did you add Localization.delegate in localizationsDelegates?');
+    assert(instance != null,
+        'No instance of Localization present in the widget tree. Did you add Localization.delegate in localizationsDelegates?');
     return instance!;
   }
 
