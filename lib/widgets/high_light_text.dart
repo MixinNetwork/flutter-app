@@ -84,6 +84,7 @@ class HighlightSelectableText extends StatelessWidget {
           children: _buildSpan(text, highlightTextSpans, style),
         ),
         maxLines: maxLines,
+        textWidthBasis: TextWidthBasis.longestLine,
       );
 }
 

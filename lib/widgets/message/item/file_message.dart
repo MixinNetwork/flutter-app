@@ -20,7 +20,6 @@ import '../../status.dart';
 import '../message_bubble.dart';
 import '../message_datetime.dart';
 import '../message_status.dart';
-import 'quote_message.dart';
 
 class FileMessage extends StatelessWidget {
   const FileMessage({
@@ -36,10 +35,8 @@ class FileMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MessageBubble(
-        quoteMessage: QuoteMessage(
-          id: message.quoteId,
-          content: message.quoteContent,
-        ),
+    quoteMessageId: message.quoteId,
+    quoteMessageContent: message.quoteContent,
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: Row(

@@ -291,7 +291,6 @@ class _ConversationSelector extends HookWidget {
             ),
             AnimatedSize(
               duration: const Duration(milliseconds: 200),
-              vsync: useSingleTickerProvider(keys: [singleSelect]),
               child: singleSelect || selected.isEmpty
                   ? const SizedBox(height: 8)
                   : SizedBox(

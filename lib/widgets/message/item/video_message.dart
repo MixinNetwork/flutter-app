@@ -18,7 +18,6 @@ import '../../status.dart';
 import '../message_bubble.dart';
 import '../message_datetime.dart';
 import '../message_status.dart';
-import 'quote_message.dart';
 
 class VideoMessageWidget extends StatelessWidget {
   const VideoMessageWidget({
@@ -39,10 +38,8 @@ class VideoMessageWidget extends StatelessWidget {
           final height = width / scale;
 
           return MessageBubble(
-            quoteMessage: QuoteMessage(
-              id: message.quoteId,
-              content: message.quoteContent,
-            ),
+            quoteMessageId: message.quoteId,
+            quoteMessageContent: message.quoteContent,
             isCurrentUser: isCurrentUser,
             padding: EdgeInsets.zero,
             includeNip: true,

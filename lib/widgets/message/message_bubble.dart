@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
 import '../brightness_observer.dart';
+import 'item/quote_message.dart';
 
 const _nipWidth = 9.0;
 const _lightCurrentBubble = Color.fromRGBO(197, 237, 253, 1);
@@ -19,7 +21,8 @@ class MessageBubble extends StatelessWidget {
     this.includeNip = false,
     this.padding = const EdgeInsets.all(10),
     this.outerTimeAndStatusWidget,
-    this.quoteMessage,
+    this.quoteMessageId,
+    this.quoteMessageContent,
   }) : super(key: key);
 
   final Widget child;
@@ -29,7 +32,8 @@ class MessageBubble extends StatelessWidget {
   final bool includeNip;
   final EdgeInsetsGeometry padding;
   final Widget? outerTimeAndStatusWidget;
-  final Widget? quoteMessage;
+  final String? quoteMessageContent;
+  final String? quoteMessageId;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +56,7 @@ class MessageBubble extends StatelessWidget {
       child: _child,
     );
 
-    if (quoteMessage != null)
+    if (quoteMessageId != null && quoteMessageContent?.isNotEmpty == true)
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -60,7 +64,10 @@ class MessageBubble extends StatelessWidget {
           children: [
             MessageBubbleNipPadding(
               currentUser: isCurrentUser,
-              child: quoteMessage!,
+              child: QuoteMessage(
+                id: quoteMessageId,
+                content: quoteMessageContent,
+              ),
             ),
             _child,
           ],

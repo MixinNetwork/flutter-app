@@ -13,7 +13,6 @@ import '../../../high_light_text.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime.dart';
 import '../../message_status.dart';
-import '../quote_message.dart';
 import 'mention_builder.dart';
 
 class TextMessage extends HookWidget {
@@ -70,10 +69,8 @@ class TextMessage extends HookWidget {
     );
 
     return MessageBubble(
-      quoteMessage: QuoteMessage(
-        id: message.quoteId,
-        content: message.quoteContent,
-      ),
+      quoteMessageId: message.quoteId,
+      quoteMessageContent: message.quoteContent,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       child: Wrap(
