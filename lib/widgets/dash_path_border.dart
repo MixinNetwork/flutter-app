@@ -17,12 +17,12 @@ Path dashPath(
 }) {
   assert(dashArray != null); // ignore: unnecessary_null_comparison
 
-  dashOffset = dashOffset ?? const DashOffset.absolute(0.0);
+  final _dashOffset = dashOffset ?? const DashOffset.absolute(0.0);
   // TODO: Is there some way to determine how much of a path would be visible today?
 
   final dest = Path();
   for (final metric in source.computeMetrics()) {
-    var distance = dashOffset._calculate(metric.length);
+    var distance = _dashOffset._calculate(metric.length);
     var draw = true;
     while (distance < metric.length) {
       final len = dashArray.next;
@@ -61,11 +61,8 @@ class DashOffset {
   final double _rawVal;
   final _DashOffsetType _dashOffsetType;
 
-  double _calculate(double length) {
-    return _dashOffsetType == _DashOffsetType.absolute
-        ? _rawVal
-        : length * _rawVal;
-  }
+  double _calculate(double length) =>
+      _dashOffsetType == _DashOffsetType.absolute ? _rawVal : length * _rawVal;
 }
 
 /// A circular array of dash offsets and lengths.
@@ -108,15 +105,15 @@ class DashPathBorder extends Border {
   factory DashPathBorder.all({
     BorderSide borderSide = const BorderSide(),
     required CircularIntervalList<double> dashArray,
-  }) {
-    return DashPathBorder(
-      dashArray: dashArray,
-      top: borderSide,
-      right: borderSide,
-      left: borderSide,
-      bottom: borderSide,
-    );
-  }
+  }) =>
+      DashPathBorder(
+        dashArray: dashArray,
+        top: borderSide,
+        right: borderSide,
+        left: borderSide,
+        bottom: borderSide,
+      );
+
   final CircularIntervalList<double> dashArray;
 
   @override

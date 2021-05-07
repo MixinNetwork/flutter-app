@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter_app/db/converter/media_status_type_converter.dart';
-import 'package:flutter_app/db/converter/message_category_type_converter.dart';
-import 'package:flutter_app/db/converter/message_status_type_converter.dart';
-import 'package:flutter_app/db/converter/millis_date_converter.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import '../converter/media_status_type_converter.dart';
+import '../converter/message_category_type_converter.dart';
+import '../converter/message_status_type_converter.dart';
+import '../converter/millis_date_converter.dart';
+import '../mixin_database.dart';
 
 extension Message on MessageItem {
   bool get isLottie => assetType?.toLowerCase() == 'json';

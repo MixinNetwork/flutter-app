@@ -1,6 +1,7 @@
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import '../../enum/message_category.dart';
+import '../../enum/message_status.dart';
 
 part 'blaze_message_data.g.dart';
 

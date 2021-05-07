@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:tuple/tuple.dart';
+
+import '../bloc/bloc_converter.dart';
 
 class _HoverOverlayCubit extends Cubit<Tuple2<bool, bool>> {
   _HoverOverlayCubit() : super(const Tuple2(false, false));
@@ -51,7 +52,7 @@ class HoverOverlay extends StatelessWidget {
             converter: (state) => state.item1 || state.item2,
             builder: (context, visible) {
               final wait = closeWaitDuration.inMicroseconds;
-              final totalClose = (wait + closeDuration.inMicroseconds);
+              final totalClose = wait + closeDuration.inMicroseconds;
               return PortalEntry(
                 visible: visible,
                 childAnchor: childAnchor,

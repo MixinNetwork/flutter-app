@@ -1,7 +1,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/utils/uri_utils.dart';
+import '../../../generated/l10n.dart';
+import '../../../utils/uri_utils.dart';
 
 import '../../brightness_observer.dart';
 

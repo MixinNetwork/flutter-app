@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/db/dao/messages_dao.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/enum/media_status.dart';
-import 'package:flutter_app/enum/message_category.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+
+import '../db/dao/messages_dao.dart';
+import '../db/extension/message_category.dart';
+import '../enum/media_status.dart';
+import '../enum/message_category.dart';
 
 class AttachmentUtil {
   AttachmentUtil(this._client, this._messagesDao, this.mediaPath) {
@@ -146,21 +147,17 @@ class AttachmentUtil {
   }) =>
       getAttachmentFile(category, conversationId, messageId);
 
-  String getImagesPath(String conversationId) {
-    return p.join(mediaPath, 'Images', conversationId);
-  }
+  String getImagesPath(String conversationId) =>
+      p.join(mediaPath, 'Images', conversationId);
 
-  String getVideosPath(String conversationId) {
-    return p.join(mediaPath, 'Videos', conversationId);
-  }
+  String getVideosPath(String conversationId) =>
+      p.join(mediaPath, 'Videos', conversationId);
 
-  String getAudiosPath(String conversationId) {
-    return p.join(mediaPath, 'Audios', conversationId);
-  }
+  String getAudiosPath(String conversationId) =>
+      p.join(mediaPath, 'Audios', conversationId);
 
-  String getFilesPath(String conversationId) {
-    return p.join(mediaPath, 'Files', conversationId);
-  }
+  String getFilesPath(String conversationId) =>
+      p.join(mediaPath, 'Files', conversationId);
 
   static Future<AttachmentUtil> init(
       Client client, MessagesDao messagesDao, String identityNumber) async {

@@ -1,16 +1,16 @@
-import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/utils/uri_utils.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/toast.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
+import '../../../account/account_server.dart';
+import '../../../db/mixin_database.dart';
+import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../generated/l10n.dart';
+import '../../../utils/uri_utils.dart';
+import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
+import '../../toast.dart';
 
 class StrangerMessage extends StatelessWidget {
   const StrangerMessage({

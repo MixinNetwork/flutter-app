@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../constants/resources.dart';
 import 'brightness_observer.dart';
 
 class StatusPending extends StatelessWidget {

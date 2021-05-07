@@ -1,15 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/widgets/cell.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
+
+import '../../generated/l10n.dart';
+import '../../utils/hook.dart';
+import '../../widgets/app_bar.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/cell.dart';
+import '../home/bloc/multi_auth_cubit.dart';
+import '../home/route/responsive_navigator_cubit.dart';
 
 class StoragePage extends HookWidget {
   const StoragePage({Key? key}) : super(key: key);
@@ -22,7 +23,7 @@ class StoragePage extends HookWidget {
       backgroundColor: BrightnessData.themeOf(context).background,
       appBar: MixinAppBar(
         title: Text(Localization.of(context).dataAndStorageUsage),
-        actions: [],
+        actions: const [],
       ),
       body: SingleChildScrollView(
         child: Container(

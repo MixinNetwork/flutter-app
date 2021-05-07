@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/db/dao/users_dao.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 
+import '../../../bloc/subscribe_mixin.dart';
+import '../../../db/dao/users_dao.dart';
+import '../../../db/mixin_database.dart';
 import 'conversation_cubit.dart';
 
 class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
@@ -14,7 +14,7 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
     required String userId,
   }) : super(const []) {
     StreamSubscription<List<User>>? streamSubscription;
-    final resetConversationId = (String? conversationId) async {
+    Future<void> resetConversationId(String? conversationId) async {
       if (conversationId?.isEmpty ?? true) return;
 
       await streamSubscription?.cancel();
@@ -25,7 +25,8 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
       final stream = selectable.watch();
       streamSubscription = stream.listen(emit);
       addSubscription(streamSubscription);
-    };
+    }
+
     resetConversationId(conversationCubit.state?.conversationId);
     addSubscription(
       conversationCubit.stream

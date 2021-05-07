@@ -4,7 +4,7 @@ import 'package:flutter/painting.dart';
 
 Future<ImageInfo> getImageInfo(ImageProvider imageProvider) {
   final completer = Completer<ImageInfo>();
-  final imageStream = imageProvider.resolve(const ImageConfiguration());
+  final imageStream = imageProvider.resolve(ImageConfiguration.empty);
   late ImageStreamListener imageStreamListener;
   imageStreamListener =
       ImageStreamListener((ImageInfo image, bool synchronousCall) {

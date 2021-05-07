@@ -1,20 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
-import 'package:flutter_app/ui/home/chat_page.dart';
-import 'package:flutter_app/ui/home/conversation_page.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/utils/list_utils.dart';
-import 'package:flutter_app/widgets/action_button.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/widgets/dialog.dart';
-import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
@@ -22,10 +7,25 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../account/account_server.dart';
+import '../../../constants/resources.dart';
+import '../../../db/extension/conversation.dart';
+import '../../../db/mixin_database.dart';
+import '../../../generated/l10n.dart';
+import '../../../utils/hook.dart';
+import '../../../utils/list_utils.dart';
+import '../../../widgets/action_button.dart';
+import '../../../widgets/app_bar.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/cell.dart';
 import '../../../widgets/chat_bar.dart';
+import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
+import '../../../widgets/user_selector/conversation_selector.dart';
+import '../bloc/conversation_cubit.dart';
+import '../bloc/message_bloc.dart';
+import '../chat_page.dart';
+import '../conversation_page.dart';
 
 class ChatInfoPage extends HookWidget {
   const ChatInfoPage({Key? key}) : super(key: key);
@@ -215,7 +215,7 @@ class ChatInfoPage extends HookWidget {
                         onTap: () async {
                           final isGroup = conversation.isGroup ?? false;
                           if (muting)
-                            return await runFutureWithToast(
+                            return runFutureWithToast(
                                 context,
                                 context
                                     .read<AccountServer>()
@@ -438,18 +438,19 @@ class _CircleNames extends HookWidget {
     );
 
     final circleNames = useStream<List<String>>(
-      useMemoized(
-        () => context
-            .read<AccountServer>()
-            .database
-            .circlesDao
-            .circlesNameByConversationId(conversationId ?? '')
-            .watch()
-            .where((event) => event.isNotEmpty),
-        [conversationId],
-      ),
-      initialData: [],
-    ).data as List<String>;
+          useMemoized(
+            () => context
+                .read<AccountServer>()
+                .database
+                .circlesDao
+                .circlesNameByConversationId(conversationId ?? '')
+                .watch()
+                .where((event) => event.isNotEmpty),
+            [conversationId],
+          ),
+          initialData: [],
+        ).data ??
+        [];
 
     if (circleNames.isEmpty) return const SizedBox();
 

@@ -13,7 +13,7 @@ extension StreamExtension<T> on Stream<T> {
       final subscription = listen(null,
           onError: controller.addError, // Avoid Zone error replacement.
           onDone: controller.close);
-      FutureOr<Null> add(E value) {
+      FutureOr<void> add(E value) {
         controller.add(value);
       }
 

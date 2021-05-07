@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_svg/svg.dart';
+
+import '../../constants/resources.dart';
+import '../../enum/message_status.dart';
+import '../brightness_observer.dart';
 
 class MessageStatusWidget extends StatelessWidget {
   const MessageStatusWidget({

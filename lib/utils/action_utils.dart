@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+
+import '../account/account_server.dart';
+import '../ui/home/bloc/conversation_cubit.dart';
 
 extension ActionUtils on BuildContext {
   bool openAction(String actionText) {

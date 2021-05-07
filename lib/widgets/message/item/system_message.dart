@@ -1,10 +1,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/enum/message_action.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../db/mixin_database.dart';
+import '../../../enum/message_action.dart';
+import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
 
 class SystemMessage extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
+import '../widgets/brightness_observer.dart';
 
 const lightBrightnessThemeData = BrightnessThemeData(
   primary: Color.fromRGBO(255, 255, 255, 1),

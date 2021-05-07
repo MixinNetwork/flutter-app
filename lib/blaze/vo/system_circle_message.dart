@@ -1,5 +1,7 @@
-import 'package:flutter_app/enum/system_circle_action.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import '../../enum/system_circle_action.dart';
+
 part 'system_circle_message.g.dart';
 
 @JsonSerializable()

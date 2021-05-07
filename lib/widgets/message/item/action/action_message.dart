@@ -2,15 +2,15 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/utils/action_utils.dart';
-import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/utils/uri_utils.dart';
-import 'package:flutter_app/widgets/message/item/action/action_data.dart';
 
+import '../../../../db/mixin_database.dart';
+import '../../../../utils/action_utils.dart';
+import '../../../../utils/color_utils.dart';
+import '../../../../utils/uri_utils.dart';
 import '../../../brightness_observer.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../message_bubble.dart';
+import 'action_data.dart';
 
 class ActionMessage extends StatelessWidget {
   const ActionMessage({

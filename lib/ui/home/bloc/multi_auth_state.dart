@@ -31,11 +31,9 @@ class MultiAuthState extends Equatable {
         auths,
       ];
 
-  Map<String, dynamic> toMap() {
-    return {
-      'auths': auths.map((x) => x.toMap()).toList(),
-    };
-  }
+  Map<String, dynamic> toMap() => {
+        'auths': auths.map((x) => x.toMap()).toList(),
+      };
 
   String toJson() => json.encode(toMap());
 }
@@ -86,27 +84,24 @@ class AuthState extends Equatable {
     bool? photoAutoDownload,
     bool? videoAutoDownload,
     bool? fileAutoDownload,
-  }) {
-    return AuthState(
-      account: account ?? this.account,
-      privateKey: privateKey ?? this.privateKey,
-      messagePreview: messagePreview ?? this.messagePreview,
-      photoAutoDownload: photoAutoDownload ?? this.photoAutoDownload,
-      videoAutoDownload: videoAutoDownload ?? this.videoAutoDownload,
-      fileAutoDownload: fileAutoDownload ?? this.fileAutoDownload,
-    );
-  }
+  }) =>
+      AuthState(
+        account: account ?? this.account,
+        privateKey: privateKey ?? this.privateKey,
+        messagePreview: messagePreview ?? this.messagePreview,
+        photoAutoDownload: photoAutoDownload ?? this.photoAutoDownload,
+        videoAutoDownload: videoAutoDownload ?? this.videoAutoDownload,
+        fileAutoDownload: fileAutoDownload ?? this.fileAutoDownload,
+      );
 
-  Map<String, dynamic> toMap() {
-    return {
-      'account': account.toJson(),
-      'privateKey': privateKey,
-      'messagePreview': messagePreview,
-      'photoAutoDownload': photoAutoDownload,
-      'videoAutoDownload': videoAutoDownload,
-      'fileAutoDownload': fileAutoDownload,
-    };
-  }
+  Map<String, dynamic> toMap() => {
+        'account': account.toJson(),
+        'privateKey': privateKey,
+        'messagePreview': messagePreview,
+        'photoAutoDownload': photoAutoDownload,
+        'videoAutoDownload': videoAutoDownload,
+        'fileAutoDownload': fileAutoDownload,
+      };
 
   String toJson() => json.encode(toMap());
 }

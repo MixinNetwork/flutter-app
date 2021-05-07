@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/unread_text.dart';
 
+import 'brightness_observer.dart';
 import 'interacter_decorated_box.dart';
+import 'unread_text.dart';
 
 class SelectItem extends StatelessWidget {
   const SelectItem({

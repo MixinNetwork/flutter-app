@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/utils/uri_utils.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
+import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../generated/l10n.dart';
+import '../../../utils/uri_utils.dart';
+import '../../brightness_observer.dart';
 import '../../mouse_region_span.dart';
 import '../message_bubble.dart';
 import '../message_datetime.dart';

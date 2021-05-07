@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/landing/bloc/landing_cubit.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:flutter_app/generated/l10n.dart';
+
+import '../../bloc/bloc_converter.dart';
+import '../../constants/resources.dart';
+import '../../generated/l10n.dart';
+import '../../widgets/brightness_observer.dart';
+import '../home/bloc/multi_auth_cubit.dart';
+import 'bloc/landing_cubit.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({Key? key}) : super(key: key);

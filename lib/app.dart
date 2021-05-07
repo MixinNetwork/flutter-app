@@ -1,16 +1,4 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
-import 'package:flutter_app/ui/home/home.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/ui/landing/landing.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -20,9 +8,21 @@ import 'package:tuple/tuple.dart';
 
 import 'account/account_server.dart';
 import 'account/notification_service.dart';
+import 'bloc/bloc_converter.dart';
 import 'bloc/keyword_cubit.dart';
 import 'bloc/minute_timer_cubit.dart';
 import 'constants/brightness_theme_data.dart';
+import 'generated/l10n.dart';
+import 'ui/home/bloc/conversation_cubit.dart';
+import 'ui/home/bloc/conversation_list_bloc.dart';
+import 'ui/home/bloc/multi_auth_cubit.dart';
+import 'ui/home/bloc/participants_cubit.dart';
+import 'ui/home/bloc/slide_category_cubit.dart';
+import 'ui/home/home.dart';
+import 'ui/home/route/responsive_navigator_cubit.dart';
+import 'ui/landing/landing.dart';
+import 'utils/hook.dart';
+import 'widgets/brightness_observer.dart';
 
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);

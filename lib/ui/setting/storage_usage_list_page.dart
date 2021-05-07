@@ -4,19 +4,20 @@ import 'dart:io';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/cell.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
-import 'package:flutter_app/generated/l10n.dart';
+
+import '../../account/account_server.dart';
+import '../../db/extension/conversation.dart';
+import '../../db/mixin_database.dart';
+import '../../generated/l10n.dart';
+import '../../utils/hook.dart';
+import '../../widgets/app_bar.dart';
+import '../../widgets/avatar_view/avatar_view.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/cell.dart';
+import '../home/route/responsive_navigator_cubit.dart';
 
 class StorageUsageListPage extends HookWidget {
   const StorageUsageListPage({Key? key}) : super(key: key);
@@ -26,7 +27,7 @@ class StorageUsageListPage extends HookWidget {
         backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
           title: Text(Localization.of(context).storageUsage),
-          actions: [],
+          actions: const [],
         ),
         body: const _Content(),
       );

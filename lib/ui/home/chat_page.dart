@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/simple_cubit.dart';
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/ui/home/home.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/utils/list_utils.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/chat_bar.dart';
-import 'package:flutter_app/ui/home/chat_slide_page/chat_info_page.dart';
-import 'package:flutter_app/widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
-import 'package:flutter_app/widgets/input_container.dart';
-import 'package:flutter_app/widgets/message/message.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../account/account_server.dart';
+import '../../bloc/simple_cubit.dart';
+import '../../bloc/subscribe_mixin.dart';
+import '../../utils/hook.dart';
+import '../../utils/list_utils.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/chat_bar.dart';
+import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
+import '../../widgets/input_container.dart';
+import '../../widgets/message/message.dart';
+import 'bloc/conversation_cubit.dart';
+import 'bloc/message_bloc.dart';
 import 'bloc/quote_message_cubit.dart';
+import 'chat_slide_page/chat_info_page.dart';
 import 'chat_slide_page/circle_manager_page.dart';
 import 'chat_slide_page/search_message_page.dart';
 import 'chat_slide_page/shared_media_page.dart';
+import 'home.dart';
+import 'route/responsive_navigator.dart';
+import 'route/responsive_navigator_cubit.dart';
 
 class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   ChatSideCubit() : super(const ResponsiveNavigatorState());
@@ -44,7 +44,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           child: ChatInfoPage(),
         );
       case circles:
-        if (arguments == null || !(arguments is Tuple2<String, String>))
+        if (arguments == null || arguments is! Tuple2<String, String>)
           throw ArgumentError('Invalid route');
         return MaterialPage(
           key: const ValueKey(circles),

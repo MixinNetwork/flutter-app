@@ -1,4 +1,4 @@
-import 'package:flutter_app/enum/message_category.dart';
+import '../../enum/message_category.dart';
 
 extension MessageCategoryExtension on MessageCategory? {
   bool get isPlain => {

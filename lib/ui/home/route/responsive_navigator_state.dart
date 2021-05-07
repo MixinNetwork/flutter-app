@@ -23,10 +23,9 @@ class ResponsiveNavigatorState extends Equatable {
   ResponsiveNavigatorState copyWith({
     final List<MaterialPage>? pages,
     final bool? navigationMode,
-  }) {
-    return ResponsiveNavigatorState(
-      pages: pages ?? this.pages,
-      navigationMode: navigationMode ?? this.navigationMode,
-    );
-  }
+  }) =>
+      ResponsiveNavigatorState(
+        pages: pages ?? this.pages,
+        navigationMode: navigationMode ?? this.navigationMode,
+      );
 }

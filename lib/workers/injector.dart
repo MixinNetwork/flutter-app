@@ -1,9 +1,10 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/constants.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/mixin_database.dart' as db;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
+
+import '../constants/constants.dart';
+import '../db/database.dart';
+import '../db/mixin_database.dart' as db;
 
 class Injector {
   Injector(this.accountId, this.database, this.client);
@@ -76,7 +77,7 @@ class Injector {
     final remove =
         local.where((item) => !online.any((e) => e.userId == item.userId));
     if (add.isNotEmpty) {
-      database.participantsDao.insertAll(add.toList());
+      await database.participantsDao.insertAll(add.toList());
       await fetchUsers(add.map((e) => e.userId).toList());
     }
     if (remove.isNotEmpty) {
@@ -153,7 +154,7 @@ class Injector {
     return user;
   }
 
-  void refreshSticker(String stickerId) async {
+  Future<void> refreshSticker(String stickerId) async {
     try {
       final sticker = (await client.accountApi.getStickerById(stickerId)).data;
       await database.stickerDao.insert(db.Sticker(

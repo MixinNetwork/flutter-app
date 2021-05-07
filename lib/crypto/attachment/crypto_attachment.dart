@@ -1,7 +1,8 @@
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/utils/crypted_util.dart';
 import 'package:tuple/tuple.dart';
+
+import '../../utils/crypted_util.dart';
 
 class CryptoAttachment {
   List<int> decryptAttachment(

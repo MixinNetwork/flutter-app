@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
+import '../../account/account_server.dart';
+import '../../bloc/bloc_converter.dart';
+import '../../constants/resources.dart';
+import '../../db/mixin_database.dart';
+import '../../ui/home/bloc/conversation_cubit.dart';
 import '../brightness_observer.dart';
 import '../cache_image.dart';
+import '../interacter_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
 

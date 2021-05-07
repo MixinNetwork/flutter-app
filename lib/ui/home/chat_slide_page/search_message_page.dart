@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/paging/paging_bloc.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
-import 'package:flutter_app/ui/home/chat_page.dart';
-import 'package:flutter_app/ui/home/conversation_page.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/action_button.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/search_text_field.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+
+import '../../../account/account_server.dart';
+import '../../../bloc/paging/paging_bloc.dart';
+import '../../../constants/resources.dart';
+import '../../../db/mixin_database.dart';
+import '../../../generated/l10n.dart';
+import '../../../utils/hook.dart';
+import '../../../widgets/action_button.dart';
+import '../../../widgets/app_bar.dart';
+import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/search_text_field.dart';
+import '../bloc/conversation_cubit.dart';
+import '../bloc/conversation_list_bloc.dart';
+import '../chat_page.dart';
+import '../conversation_page.dart';
 
 class SearchMessagePage extends HookWidget {
   const SearchMessagePage({
@@ -39,7 +40,7 @@ class SearchMessagePage extends HookWidget {
         limit: context.read<ConversationListBloc>().limit,
         queryCount: () async {
           if (keyword.trim().isEmpty) return 0;
-          return await context
+          return context
               .read<AccountServer>()
               .database
               .messagesDao
@@ -48,7 +49,7 @@ class SearchMessagePage extends HookWidget {
         },
         queryRange: (int limit, int offset) async {
           if (keyword.trim().isEmpty) return [];
-          return await context
+          return context
               .read<AccountServer>()
               .database
               .messagesDao

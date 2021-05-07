@@ -1,8 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
+import '../constants/resources.dart';
+import '../enum/message_status.dart';
+import 'brightness_observer.dart';
 
 class MessageStatusIcon extends StatelessWidget {
   const MessageStatusIcon({

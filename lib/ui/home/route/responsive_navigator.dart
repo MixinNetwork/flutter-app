@@ -3,10 +3,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+
+import '../../../utils/hook.dart';
+import 'responsive_navigator_cubit.dart';
 
 abstract class AbstractResponsiveNavigatorCubit
     extends Cubit<ResponsiveNavigatorState> {

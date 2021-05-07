@@ -22,10 +22,9 @@ class LandingState extends Equatable {
   LandingState copyWith({
     final String? authUrl,
     final LandingStatus? status,
-  }) {
-    return LandingState(
-      authUrl: authUrl ?? this.authUrl,
-      status: status ?? this.status,
-    );
-  }
+  }) =>
+      LandingState(
+        authUrl: authUrl ?? this.authUrl,
+        status: status ?? this.status,
+      );
 }

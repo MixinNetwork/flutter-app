@@ -2,24 +2,24 @@ extension StringExtension on String {
   String fts5ContentFilter() {
     final text = trim();
     var i = 0;
-    var content = '';
+    final content = StringBuffer();
     var lastFlag = false;
     while (i < text.length) {
       final spFlag = regExp.hasMatch(text[i]);
       if (lastFlag && !spFlag) {
-        content += ' ';
+        content.write(' ');
       }
-      content += text[i];
+      content.write(text[i]);
       if (!spFlag) {
-        content += ' ';
+        content.write(' ');
       }
       lastFlag = spFlag;
       i++;
     }
-    return content;
+    return content.toString();
   }
 
-  static final regExp = RegExp(r'[a-zA-Z0-9]');
+  static final regExp = RegExp('[a-zA-Z0-9]');
 }
 
 String minOf(String a, String b) {

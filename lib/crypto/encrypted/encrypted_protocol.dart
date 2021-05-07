@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
+import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/utils/crypted_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
+
+import '../../utils/crypted_util.dart';
 
 class EncryptedProtocol {
   List<int> encryptMessage(ed.PrivateKey privateKey, List<int> plainText,

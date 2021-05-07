@@ -1,9 +1,10 @@
 import 'dart:async';
 
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
 import 'package:moor/moor.dart';
+
+import '../mixin_database.dart';
 
 part 'conversations_dao.g.dart';
 
@@ -12,7 +13,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationsDaoMixin {
   ConversationsDao(MixinDatabase db) : super(db);
 
-  late Stream<Null> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
+  late Stream<void> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
     db.conversations,
     db.users,
     db.messages,
@@ -107,8 +108,8 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
           .go();
 
   Future<int> updateConversationStatusById(
-          String conversationId, ConversationStatus status) async =>
-      await db.customUpdate(
+          String conversationId, ConversationStatus status) =>
+      db.customUpdate(
         'UPDATE conversations SET status = ? WHERE conversation_id = ?',
         variables: [
           Variable.withString(conversationId),
@@ -149,8 +150,8 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationStorageUsage> conversationStorageUsage() =>
       db.conversationStorageUsage();
 
-  Future<void> updateConversation(ConversationResponse conversation) async =>
-      await db.transaction(() async {
+  Future<void> updateConversation(ConversationResponse conversation) =>
+      db.transaction(() async {
         await insert(
           Conversation(
             conversationId: conversation.conversationId,

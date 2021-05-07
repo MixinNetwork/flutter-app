@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/constants/resources.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
+import '../constants/resources.dart';
+import '../generated/l10n.dart';
 import 'brightness_observer.dart';
 
 class SearchTextField extends StatelessWidget {

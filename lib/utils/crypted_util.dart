@@ -32,6 +32,7 @@ List<int> aesEncrypt(List<int> key, List<int> plainText, [List<int>? iv]) {
   final ivParams = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(nonce));
   final paddingParams =
+      // ignore: prefer_void_to_null
       PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
           ivParams, null);
 
@@ -51,6 +52,7 @@ List<int> aesDecrypt(List<int> key, List<int> iv, List<int> cipherText) {
   final ivParams = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
   final paddingParams =
+      // ignore: prefer_void_to_null
       PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
           ivParams, null);
   final paddedCipher = PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
@@ -76,12 +78,9 @@ Uint8List toLeByteArray(int v) {
   return result;
 }
 
-int leByteArrayToInt(List<int> array) {
-  return array[0] + array[1];
-}
+int leByteArrayToInt(List<int> array) => array[0] + array[1];
 
 final Random _random = Random.secure();
 
-List<int> generateRandomKey([int length = 32]) {
-  return List<int>.generate(length, (i) => _random.nextInt(256));
-}
+List<int> generateRandomKey([int length = 32]) =>
+    List<int>.generate(length, (i) => _random.nextInt(256));

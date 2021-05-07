@@ -5,32 +5,32 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/mention_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/quote_message_cubit.dart';
-import 'package:flutter_app/utils/file.dart';
-import 'package:flutter_app/utils/reg_exp_utils.dart';
-import 'package:flutter_app/utils/text_utils.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/hoer_overlay.dart';
-import 'package:flutter_app/widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
-import 'package:flutter_app/widgets/sticker_page/sticker_page.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset;
 
+import '../account/account_server.dart';
+import '../bloc/bloc_converter.dart';
+import '../constants/resources.dart';
+import '../db/mixin_database.dart' hide Offset;
+import '../generated/l10n.dart';
+import '../ui/home/bloc/conversation_cubit.dart';
+import '../ui/home/bloc/mention_cubit.dart';
+import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../ui/home/bloc/participants_cubit.dart';
+import '../ui/home/bloc/quote_message_cubit.dart';
+import '../utils/file.dart';
+import '../utils/reg_exp_utils.dart';
+import '../utils/text_utils.dart';
 import 'action_button.dart';
+import 'brightness_observer.dart';
 import 'dash_path_border.dart';
+import 'hoer_overlay.dart';
 import 'interacter_decorated_box.dart';
 import 'mention_panel.dart';
 import 'message/item/quote_message.dart';
+import 'sticker_page/bloc/cubit/sticker_albums_cubit.dart';
+import 'sticker_page/sticker_page.dart';
 
 class InputContainer extends StatelessWidget {
   const InputContainer({
@@ -188,7 +188,7 @@ class _QuoteMessage extends StatelessWidget {
           builder: (BuildContext context, double progress, Widget? child) =>
               ClipRect(
             child: Align(
-              alignment: const AlignmentDirectional(1.0, -1.0),
+              alignment: AlignmentDirectional.topEnd,
               heightFactor: progress,
               child: child,
             ),
@@ -293,32 +293,30 @@ class _FileButton extends StatelessWidget {
   final Color actionColor;
 
   @override
-  Widget build(BuildContext context) {
-    return ActionButton(
-      name: Resources.assetsImagesIcFileSvg,
-      color: actionColor,
-      onTap: () async {
-        final file = await selectFile();
-        if (file == null) return;
+  Widget build(BuildContext context) => ActionButton(
+        name: Resources.assetsImagesIcFileSvg,
+        color: actionColor,
+        onTap: () async {
+          final file = await selectFile();
+          if (file == null) return;
 
-        final conversationItem = context.read<ConversationCubit>().state;
-        if (conversationItem == null) return;
-        if (file.isImage) {
-          if ((await _PreviewImage.push(context, file)) != true) return;
-          return await Provider.of<AccountServer>(context, listen: false)
-              .sendImageMessage(file,
+          final conversationItem = context.read<ConversationCubit>().state;
+          if (conversationItem == null) return;
+          if (file.isImage) {
+            if ((await _PreviewImage.push(context, file)) != true) return;
+            return Provider.of<AccountServer>(context, listen: false)
+                .sendImageMessage(file,
+                    conversationId: conversationItem.conversationId);
+          } else if (file.isVideo) {
+            return Provider.of<AccountServer>(context, listen: false)
+                .sendVideoMessage(file,
+                    conversationId: conversationItem.conversationId);
+          }
+          await Provider.of<AccountServer>(context, listen: false)
+              .sendDataMessage(file,
                   conversationId: conversationItem.conversationId);
-        } else if (file.isVideo) {
-          return Provider.of<AccountServer>(context, listen: false)
-              .sendVideoMessage(file,
-                  conversationId: conversationItem.conversationId);
-        }
-        await Provider.of<AccountServer>(context, listen: false)
-            .sendDataMessage(file,
-                conversationId: conversationItem.conversationId);
-      },
-    );
-  }
+        },
+      );
 }
 
 class _PreviewImage extends StatelessWidget {
@@ -329,15 +327,14 @@ class _PreviewImage extends StatelessWidget {
 
   final XFile xFile;
 
-  static Future<bool?> push(BuildContext context, XFile xFile) {
-    return Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => _PreviewImage(xFile: xFile),
-        fullscreenDialog: true,
-      ),
-    );
-  }
+  static Future<bool?> push(BuildContext context, XFile xFile) =>
+      Navigator.push<bool>(
+        context,
+        MaterialPageRoute(
+          builder: (context) => _PreviewImage(xFile: xFile),
+          fullscreenDialog: true,
+        ),
+      );
 
   @override
   Widget build(BuildContext context) =>

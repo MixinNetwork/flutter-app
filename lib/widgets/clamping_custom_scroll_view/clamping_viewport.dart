@@ -34,16 +34,15 @@ class ClampingViewport extends Viewport {
   double get anchor => _anchor;
 
   @override
-  RenderViewport createRenderObject(BuildContext context) {
-    return ClampingRenderViewport(
-      axisDirection: axisDirection,
-      crossAxisDirection: crossAxisDirection ??
-          Viewport.getDefaultCrossAxisDirection(context, axisDirection),
-      anchor: anchor,
-      offset: offset,
-      cacheExtent: cacheExtent,
-    );
-  }
+  RenderViewport createRenderObject(BuildContext context) =>
+      ClampingRenderViewport(
+        axisDirection: axisDirection,
+        crossAxisDirection: crossAxisDirection ??
+            Viewport.getDefaultCrossAxisDirection(context, axisDirection),
+        anchor: anchor,
+        offset: offset,
+        cacheExtent: cacheExtent,
+      );
 }
 
 // Differences from [RenderViewport] are marked with a //***** Differences
@@ -89,6 +88,7 @@ class ClampingRenderViewport extends RenderViewport {
   // *** Difference from [RenderViewport].
   double correctedOffset = 0.0;
   bool isLessMainAxisExtent = false;
+
   // *** End of difference from [RenderViewport].
 
   @override

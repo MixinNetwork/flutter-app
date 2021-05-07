@@ -3,16 +3,17 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/utils/list_utils.dart';
-import 'package:flutter_app/db/dao/messages_dao.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../../bloc/subscribe_mixin.dart';
+import '../../../db/dao/messages_dao.dart';
+import '../../../db/database.dart';
+import '../../../db/mixin_database.dart';
+import '../../../enum/message_status.dart';
+import '../../../utils/list_utils.dart';
+import 'conversation_cubit.dart';
 
 abstract class _MessageEvent extends Equatable {
   @override
@@ -93,16 +94,15 @@ class MessageState extends Equatable {
     final List<MessageItem>? bottom,
     final bool? isLatest,
     final String? initUUID,
-  }) {
-    return MessageState(
-      conversationId: conversationId ?? this.conversationId,
-      top: top ?? this.top,
-      center: center ?? this.center,
-      bottom: bottom ?? this.bottom,
-      isLatest: isLatest ?? this.isLatest,
-      initUUID: initUUID ?? this.initUUID,
-    );
-  }
+  }) =>
+      MessageState(
+        conversationId: conversationId ?? this.conversationId,
+        top: top ?? this.top,
+        center: center ?? this.center,
+        bottom: bottom ?? this.bottom,
+        isLatest: isLatest ?? this.isLatest,
+        initUUID: initUUID ?? this.initUUID,
+      );
 }
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
@@ -145,7 +145,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final conversationId = conversationCubit.state?.conversationId;
     if (conversationId == null) return;
     // If the conversationId has changed, then events other than init are ignored
-    if (!(event is _MessageInitEvent) && state.conversationId != conversationId)
+    if (event is! _MessageInitEvent && state.conversationId != conversationId)
       return;
 
     if (event is _MessageInitEvent) {
@@ -183,7 +183,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     assert(topMessageId != null);
     final list = await database.transaction(() async {
       final rowId = await messagesDao.messageRowId(topMessageId!).getSingle();
-      return await messagesDao
+      return messagesDao
           .beforeMessagesByConversationId(rowId, conversationId, limit)
           .get();
     });
@@ -202,7 +202,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final list = await database.transaction(() async {
       final rowId =
           await messagesDao.messageRowId(bottomMessageId!).getSingle();
-      return await messagesDao
+      return messagesDao
           .afterMessagesByConversationId(rowId, conversationId, limit)
           .get();
     });
@@ -262,7 +262,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       );
     }
 
-    return await database.transaction(() async {
+    return database.transaction(() async {
       final rowId = await messagesDao.messageRowId(centerMessageId).getSingle();
       final _limit = limit ~/ 2;
       final bottomList = await messagesDao

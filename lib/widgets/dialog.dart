@@ -3,13 +3,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/utils/list_utils.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/interacter_decorated_box.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../generated/l10n.dart';
+import '../utils/list_utils.dart';
+import 'brightness_observer.dart';
 import 'disable.dart';
+import 'interacter_decorated_box.dart';
 
 Future<T?> _showDialog<T>({
   required BuildContext context,
@@ -259,7 +259,7 @@ class DialogTextField extends HookWidget {
           ),
           scrollPadding: EdgeInsets.zero,
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.all(0),
+            contentPadding: EdgeInsets.zero,
             isDense: true,
             hintText: hintText,
             hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),

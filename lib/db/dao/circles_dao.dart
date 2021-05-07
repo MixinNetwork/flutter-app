@@ -1,5 +1,6 @@
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
+
+import '../mixin_database.dart';
 
 part 'circles_dao.g.dart';
 
@@ -10,9 +11,9 @@ class CirclesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> insertUpdate(Circle circle) async {
     await transaction(() async {
-      final c = await ((select(db.circles)
+      final c = await (select(db.circles)
             ..where((tbl) => tbl.circleId.equals(circle.circleId)))
-          .getSingleOrNull());
+          .getSingleOrNull();
       if (null == c) {
         return into(db.circles).insert(circle);
       } else {

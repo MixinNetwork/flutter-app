@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/quote_message_cubit.dart';
-import 'package:flutter_app/utils/datetime_format_utils.dart';
-import 'package:flutter_app/widgets/message/item/sticker_message.dart';
-import 'package:flutter_app/widgets/message/item/stranger_message.dart';
-import 'package:flutter_app/widgets/message/item/text/text_message.dart';
-import 'package:flutter_app/widgets/message/message_day_time.dart';
-import 'package:flutter_app/widgets/message/message_name.dart';
-import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
+import '../../account/account_server.dart';
+import '../../db/extension/message_category.dart';
+import '../../db/mixin_database.dart' hide Offset, Message;
+import '../../enum/message_category.dart';
+import '../../enum/message_status.dart';
+import '../../generated/l10n.dart';
+import '../../ui/home/bloc/quote_message_cubit.dart';
+import '../../utils/datetime_format_utils.dart';
 import '../menu.dart';
+import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
 import 'item/action_card/action_message.dart';
 import 'item/contact_message.dart';
@@ -28,11 +23,16 @@ import 'item/location/location_message.dart';
 import 'item/post_message.dart';
 import 'item/recall_message.dart';
 import 'item/secret_message.dart';
+import 'item/sticker_message.dart';
+import 'item/stranger_message.dart';
 import 'item/system_message.dart';
+import 'item/text/text_message.dart';
 import 'item/transfer_message.dart';
 import 'item/unknown_message.dart';
 import 'item/video_message.dart';
 import 'item/waiting_message.dart';
+import 'message_day_time.dart';
+import 'message_name.dart';
 
 class MessageItemWidget extends StatelessWidget {
   const MessageItemWidget({

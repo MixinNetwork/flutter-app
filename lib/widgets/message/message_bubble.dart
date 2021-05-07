@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
+import '../brightness_observer.dart';
 
 const _nipWidth = 9.0;
 const _lightCurrentBubble = Color.fromRGBO(197, 237, 253, 1);
@@ -102,7 +102,7 @@ class MessageBubble extends StatelessWidget {
           if (outerTimeAndStatusWidget != null)
             Padding(
               padding: EdgeInsets.only(right: isCurrentUser ? 20 : 10),
-              child: outerTimeAndStatusWidget!,
+              child: outerTimeAndStatusWidget,
             ),
         ],
       ),
@@ -146,7 +146,7 @@ class _BubbleClipper extends CustomClipper<Path> with EquatableMixin {
 
     if (!showNip) return bubblePath;
 
-    var nipPath = currentUser ? _rightNipPath(size) : _leftNipPath(size);
+    final nipPath = currentUser ? _rightNipPath(size) : _leftNipPath(size);
     return Path.combine(PathOperation.union, bubblePath, nipPath);
   }
 
@@ -154,7 +154,7 @@ class _BubbleClipper extends CustomClipper<Path> with EquatableMixin {
       Path()..addRRect(BorderRadius.circular(8).toRRect(Offset.zero & size));
 
   Path _leftNipPath(Size bubbleSize) {
-    final size = const Size(_nipWidth, 12);
+    const size = Size(_nipWidth, 12);
     final path = Path()
       ..lineTo(size.width * 1.04, size.height)
       ..cubicTo(size.width * 1.04, size.height, size.width * 1.04, 0,
@@ -178,7 +178,7 @@ class _BubbleClipper extends CustomClipper<Path> with EquatableMixin {
   }
 
   Path _rightNipPath(Size bubbleSize) {
-    final size = const Size(_nipWidth, 12);
+    const size = Size(_nipWidth, 12);
     final path = Path()
       ..lineTo(0, size.height)
       ..cubicTo(0, size.height, 0, 0, 0, 0)

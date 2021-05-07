@@ -7,7 +7,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
+import '../subscribe_mixin.dart';
 
 class PagingState<T> extends Equatable {
   const PagingState({
@@ -39,18 +39,17 @@ class PagingState<T> extends Equatable {
     bool? initialized,
     int? index,
     double? alignment,
-  }) {
-    return PagingState(
-      map: map ?? this.map,
-      count: count ?? this.count,
-      initialized: initialized ?? this.initialized,
-      index: index ?? this.index,
-      alignment: alignment ?? this.alignment,
-    );
-  }
+  }) =>
+      PagingState(
+        map: map ?? this.map,
+        count: count ?? this.count,
+        initialized: initialized ?? this.initialized,
+        index: index ?? this.index,
+        alignment: alignment ?? this.alignment,
+      );
 
   @override
-  final stringify = true;
+  bool get stringify => true;
 }
 
 abstract class PagingEvent extends Equatable {}

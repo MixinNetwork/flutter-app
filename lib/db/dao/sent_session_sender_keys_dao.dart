@@ -1,5 +1,6 @@
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
+
+import '../mixin_database.dart';
 
 part 'sent_session_sender_keys_dao.g.dart';
 

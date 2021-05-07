@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/widgets/avatar_view/bloc/cubit/avatar_cubit.dart';
-import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
+
+import '../../account/account_server.dart';
+import '../../bloc/bloc_converter.dart';
+import '../../db/mixin_database.dart';
+import '../../utils/color_utils.dart';
+import '../cache_image.dart';
+import 'bloc/cubit/avatar_cubit.dart';
 
 class ConversationAvatarWidget extends StatelessWidget {
   const ConversationAvatarWidget({
@@ -43,40 +44,37 @@ class ConversationAvatarWidget extends StatelessWidget {
       size: Size.square(size),
       child: ClipOval(
         child: Builder(
-          builder: (context) {
-            return BlocProvider(
-              key: Key(_conversationId!),
-              create: (context) => AvatarCubit(
-                Provider.of<AccountServer>(context, listen: false)
-                    .database
-                    .participantsDao,
-                _conversationId,
-              ),
-              child: Builder(
-                builder: (context) {
-                  if (!(_category == ConversationCategory.group)) {
-                    return AvatarWidget(
-                      userId: _conversationId,
-                      name: _name ?? '',
-                      avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
-                      size: size,
-                    );
-                  }
-                  return BlocConverter<AvatarCubit, List<User>, List<User>>(
-                    converter: (state) =>
-                        _category == ConversationCategory.contact
-                            ? state
-                                .where((element) =>
-                                    element.relationship != UserRelationship.me)
-                                .toList()
-                            : state,
-                    builder: (context, state) =>
-                        AvatarPuzzlesWidget(state, size),
+          builder: (context) => BlocProvider(
+            key: Key(_conversationId!),
+            create: (context) => AvatarCubit(
+              Provider.of<AccountServer>(context, listen: false)
+                  .database
+                  .participantsDao,
+              _conversationId,
+            ),
+            child: Builder(
+              builder: (context) {
+                if (!(_category == ConversationCategory.group)) {
+                  return AvatarWidget(
+                    userId: _conversationId,
+                    name: _name ?? '',
+                    avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
+                    size: size,
                   );
-                },
-              ),
-            );
-          },
+                }
+                return BlocConverter<AvatarCubit, List<User>, List<User>>(
+                  converter: (state) =>
+                      _category == ConversationCategory.contact
+                          ? state
+                              .where((element) =>
+                                  element.relationship != UserRelationship.me)
+                              .toList()
+                          : state,
+                  builder: (context, state) => AvatarPuzzlesWidget(state, size),
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

@@ -1,8 +1,8 @@
 import 'dart:core';
 
-import 'package:flutter_app/enum/message_category.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../enum/message_category.dart';
 import 'blaze_message_param_session.dart';
 
 part 'blaze_param.g.dart';

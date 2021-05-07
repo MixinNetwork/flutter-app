@@ -2,10 +2,10 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/bloc/simple_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
+import '../bloc/simple_cubit.dart';
 import 'brightness_observer.dart';
 import 'interacter_decorated_box.dart';
 

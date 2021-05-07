@@ -1,10 +1,10 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/bloc/simple_cubit.dart';
-import 'package:flutter_app/utils/hook.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
+import '../bloc/simple_cubit.dart';
+import '../utils/hook.dart';
 import 'menu.dart';
 
 class FullScreenVisibleCubit extends SimpleCubit<bool> {

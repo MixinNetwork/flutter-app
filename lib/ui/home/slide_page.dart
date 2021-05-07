@@ -1,24 +1,25 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
-import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/dialog.dart';
-import 'package:flutter_app/widgets/menu.dart';
-import 'package:flutter_app/widgets/select_item.dart';
-import 'package:flutter_app/widgets/toast.dart';
-import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
+
+import '../../account/account_server.dart';
+import '../../bloc/bloc_converter.dart';
+import '../../constants/resources.dart';
+import '../../db/mixin_database.dart';
+import '../../generated/l10n.dart';
+import '../../utils/color_utils.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/dialog.dart';
+import '../../widgets/menu.dart';
+import '../../widgets/select_item.dart';
+import '../../widgets/toast.dart';
+import '../../widgets/user_selector/conversation_selector.dart';
+import 'bloc/multi_auth_cubit.dart';
+import 'bloc/slide_category_cubit.dart';
 
 class SlidePage extends StatelessWidget {
   const SlidePage({Key? key}) : super(key: key);

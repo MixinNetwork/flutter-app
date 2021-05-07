@@ -1,22 +1,22 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/simple_cubit.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/crypto/uuid/uuid.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
-import 'package:flutter_app/db/extension/user.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
+import '../../account/account_server.dart';
+import '../../bloc/simple_cubit.dart';
+import '../../constants/resources.dart';
+import '../../crypto/uuid/uuid.dart';
+import '../../db/extension/conversation.dart';
+import '../../db/extension/user.dart';
+import '../../db/mixin_database.dart';
+import '../../generated/l10n.dart';
+import '../../utils/hook.dart';
 import '../action_button.dart';
+import '../avatar_view/avatar_view.dart';
 import '../brightness_observer.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
@@ -142,14 +142,14 @@ class _ConversationSelector extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final selector = useBloc(() => SimpleCubit<List<dynamic>>(const []));
-    final selectItem = (dynamic item) {
+    void selectItem(dynamic item) {
       final list = [...selector.state];
       if (list.contains(item))
         list.remove(item);
       else
         list.add(item);
       selector.emit(list);
-    };
+    }
 
     final conversationFilterCubit = useBloc(() => ConversationFilterCubit(
             useContext().read<AccountServer>(), onlyContact, (state) {
@@ -280,7 +280,7 @@ class _ConversationSelector extends HookWidget {
                     Resources.assetsImagesIcSearchSvg,
                     width: 20,
                   ),
-                  contentPadding: const EdgeInsets.all(0),
+                  contentPadding: EdgeInsets.zero,
                   isDense: true,
                   hintText: 'Search',
                   hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),

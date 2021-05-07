@@ -1,5 +1,6 @@
-import 'package:flutter_app/enum/message_category.dart';
 import 'package:moor/moor.dart';
+
+import '../../enum/message_category.dart';
 
 class MessageCategoryTypeConverter
     extends TypeConverter<MessageCategory, String> {

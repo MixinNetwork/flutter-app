@@ -1,20 +1,21 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/dialog.dart';
-import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
+
+import '../../../account/account_server.dart';
+import '../../../constants/resources.dart';
+import '../../../db/mixin_database.dart';
+import '../../../generated/l10n.dart';
+import '../../../utils/color_utils.dart';
+import '../../../widgets/app_bar.dart';
+import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/dialog.dart';
+import '../../../widgets/toast.dart';
+import '../bloc/conversation_cubit.dart';
 
 class CircleManagerPage extends HookWidget {
   const CircleManagerPage({
@@ -29,29 +30,31 @@ class CircleManagerPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useStream<List<ConversationCircleManagerItem>>(
-      useMemoized(
-        () => context
-            .read<AccountServer>()
-            .database
-            .circlesDao
-            .circleByConversationId(conversationId)
-            .watch(),
-        [conversationId],
-      ),
-      initialData: [],
-    ).data as List<ConversationCircleManagerItem>;
+          useMemoized(
+            () => context
+                .read<AccountServer>()
+                .database
+                .circlesDao
+                .circleByConversationId(conversationId)
+                .watch(),
+            [conversationId],
+          ),
+          initialData: [],
+        ).data ??
+        [];
     final otherCircles = useStream<List<ConversationCircleManagerItem>>(
-      useMemoized(
-        () => context
-            .read<AccountServer>()
-            .database
-            .circlesDao
-            .otherCircleByConversationId(conversationId)
-            .watch(),
-        [conversationId],
-      ),
-      initialData: [],
-    ).data as List<ConversationCircleManagerItem>;
+          useMemoized(
+            () => context
+                .read<AccountServer>()
+                .database
+                .circlesDao
+                .otherCircleByConversationId(conversationId)
+                .watch(),
+            [conversationId],
+          ),
+          initialData: [],
+        ).data ??
+        [];
 
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).background,

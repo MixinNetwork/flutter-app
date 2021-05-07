@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
-import 'package:flutter_app/ui/home/local_notification_center.dart';
-import 'package:flutter_app/utils/message_optimize.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
+import '../db/extension/conversation.dart';
+import '../ui/home/bloc/conversation_cubit.dart';
+import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../ui/home/bloc/slide_category_cubit.dart';
+import '../ui/home/local_notification_center.dart';
+import '../utils/message_optimize.dart';
 import 'account_server.dart';
 
 class NotificationService extends WidgetsBindingObserver {
@@ -59,7 +59,7 @@ class NotificationService extends WidgetsBindingObserver {
               ))
                   .item2;
 
-            await LocalNotificationCenter.showNotification(
+            await showNotification(
               title: name,
               body: body,
               uri: Uri(
@@ -72,9 +72,7 @@ class NotificationService extends WidgetsBindingObserver {
           })
           .listen((_) {}))
       ..add(
-        LocalNotificationCenter.notificationSelectEvent(
-                NotificationScheme.conversation)
-            .listen(
+        notificationSelectEvent(NotificationScheme.conversation).listen(
           (event) {
             final slideCategoryCubit = context.read<SlideCategoryCubit>();
             if (slideCategoryCubit.state.type == SlideCategoryType.setting)

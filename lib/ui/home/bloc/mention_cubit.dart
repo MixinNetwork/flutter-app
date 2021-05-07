@@ -4,14 +4,14 @@ import 'dart:math' as math;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/db/dao/users_dao.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/bloc/participants_cubit.dart';
-import 'package:flutter_app/utils/sort.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../bloc/subscribe_mixin.dart';
+import '../../../db/dao/users_dao.dart';
+import '../../../db/mixin_database.dart';
+import '../../../utils/sort.dart';
 import 'multi_auth_cubit.dart';
+import 'participants_cubit.dart';
 
 class MentionState extends Equatable {
   const MentionState({
@@ -31,13 +31,12 @@ class MentionState extends Equatable {
     final String? text,
     final List<User>? users,
     final int? index,
-  }) {
-    return MentionState(
-      text: text ?? this.text,
-      users: users ?? this.users,
-      index: index ?? this.index,
-    );
-  }
+  }) =>
+      MentionState(
+        text: text ?? this.text,
+        users: users ?? this.users,
+        index: index ?? this.index,
+      );
 }
 
 class MentionCubit extends Cubit<MentionState> with SubscribeMixin {

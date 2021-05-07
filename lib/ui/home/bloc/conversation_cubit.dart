@@ -1,14 +1,15 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/simple_cubit.dart';
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/crypto/uuid/uuid.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
-import 'package:flutter_app/db/extension/user.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
+
+import '../../../account/account_server.dart';
+import '../../../bloc/simple_cubit.dart';
+import '../../../bloc/subscribe_mixin.dart';
+import '../../../crypto/uuid/uuid.dart';
+import '../../../db/extension/conversation.dart';
+import '../../../db/extension/user.dart';
+import '../../../db/mixin_database.dart';
+import '../route/responsive_navigator_cubit.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({
@@ -59,15 +60,14 @@ class ConversationState extends Equatable {
     final int? unseenMessageCount,
     final ConversationItem? conversation,
     final User? user,
-  }) {
-    return ConversationState(
-      conversationId: conversationId ?? this.conversationId,
-      userId: userId ?? this.userId,
-      initIndexMessageId: initIndexMessageId ?? this.initIndexMessageId,
-      conversation: conversation ?? this.conversation,
-      user: user ?? this.user,
-    );
-  }
+  }) =>
+      ConversationState(
+        conversationId: conversationId ?? this.conversationId,
+        userId: userId ?? this.userId,
+        initIndexMessageId: initIndexMessageId ?? this.initIndexMessageId,
+        conversation: conversation ?? this.conversation,
+        user: user ?? this.user,
+      );
 }
 
 class ConversationCubit extends SimpleCubit<ConversationState?>

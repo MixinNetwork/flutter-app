@@ -1,5 +1,6 @@
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
+
+import '../mixin_database.dart';
 
 part 'snapshots_dao.g.dart';
 

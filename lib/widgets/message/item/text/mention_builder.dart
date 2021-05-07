@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/utils/load_balancer_utils.dart';
+import '../../../../utils/load_balancer_utils.dart';
 
 import 'mention_data.dart';
 
@@ -28,7 +28,7 @@ class MentionBuilder extends StatelessWidget {
     _mentionCache[mentionString] ??= <String, String>{
       for (var item in List<MentionData>.of(
           // ignore: avoid_dynamic_calls
-          (await LoadBalancerUtils.jsonDecode(mentionString))
+          (await jsonDecodeWithIsolate(mentionString))
               .map((e) => MentionData.fromJson(e))))
         item.identityNumber: item.fullName
     };

@@ -1,16 +1,5 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/paging/load_more_paging.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/utils/markdown.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/full_screen_portal.dart';
-import 'package:flutter_app/widgets/interacter_decorated_box.dart';
-import 'package:flutter_app/widgets/message/item/post_message.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
@@ -18,9 +7,21 @@ import 'package:intl/intl.dart';
 import 'package:markdown/markdown.dart' hide Text;
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:collection/collection.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:flutter_app/generated/l10n.dart';
+
+import '../../../../account/account_server.dart';
+import '../../../../bloc/paging/load_more_paging.dart';
+import '../../../../constants/resources.dart';
+import '../../../../db/mixin_database.dart';
+import '../../../../enum/message_category.dart';
+import '../../../../generated/l10n.dart';
+import '../../../../utils/hook.dart';
+import '../../../../utils/markdown.dart';
+import '../../../../widgets/brightness_observer.dart';
+import '../../../../widgets/full_screen_portal.dart';
+import '../../../../widgets/interacter_decorated_box.dart';
+import '../../../../widgets/message/item/post_message.dart';
+import '../../bloc/conversation_cubit.dart';
 
 class PostPage extends HookWidget {
   const PostPage({

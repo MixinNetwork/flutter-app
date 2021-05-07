@@ -2,9 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart';
+
+import '../widgets/brightness_observer.dart';
 
 extension MarkdownExtension on String {
   String postLengthOptimize() {

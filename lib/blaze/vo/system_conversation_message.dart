@@ -1,6 +1,7 @@
-import 'package:flutter_app/enum/message_action.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
+import '../../enum/message_action.dart';
 
 part 'system_conversation_message.g.dart';
 

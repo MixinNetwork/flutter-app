@@ -1,5 +1,6 @@
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
+
+import '../mixin_database.dart';
 
 part 'participant_session_dao.g.dart';
 
@@ -15,9 +16,8 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
       delete(db.participantSession).delete(participantSession);
 
   Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
-      String conversationId, String userId) {
-    return db
-        .getParticipantSessionKeyWithoutSelf(conversationId, userId)
-        .getSingle();
-  }
+          String conversationId, String userId) =>
+      db
+          .getParticipantSessionKeyWithoutSelf(conversationId, userId)
+          .getSingle();
 }

@@ -1,15 +1,16 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/ui/home/chat_page.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
-import 'package:flutter_app/ui/setting/about_page.dart';
-import 'package:flutter_app/ui/setting/backup_page.dart';
-import 'package:flutter_app/ui/setting/edit_profile_page.dart';
-import 'package:flutter_app/ui/setting/notification_page.dart';
-import 'package:flutter_app/ui/setting/storage_page.dart';
-import 'package:flutter_app/ui/setting/storage_usage_detail_page.dart';
-import 'package:flutter_app/ui/setting/storage_usage_list_page.dart';
 import 'package:tuple/tuple.dart';
+
+import '../../setting/about_page.dart';
+import '../../setting/backup_page.dart';
+import '../../setting/edit_profile_page.dart';
+import '../../setting/notification_page.dart';
+import '../../setting/storage_page.dart';
+import '../../setting/storage_usage_detail_page.dart';
+import '../../setting/storage_usage_list_page.dart';
+import '../chat_page.dart';
+import 'responsive_navigator.dart';
 
 part 'responsive_navigator_state.dart';
 
@@ -99,7 +100,7 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
           ),
         );
       case storageUsageDetail:
-        if (arguments == null || !(arguments is Tuple2<String, String>))
+        if (arguments == null || arguments is! Tuple2<String, String>)
           throw ArgumentError('Invalid route');
 
         return MaterialPage(

@@ -6,29 +6,30 @@ import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_app/account/send_message_helper.dart';
-import 'package:flutter_app/blaze/blaze.dart';
-import 'package:flutter_app/blaze/blaze_message.dart';
-import 'package:flutter_app/blaze/blaze_param.dart';
-import 'package:flutter_app/blaze/vo/contact_message.dart';
-import 'package:flutter_app/blaze/vo/sticker_message.dart';
-import 'package:flutter_app/constants/constants.dart';
-import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
-import 'package:flutter_app/crypto/uuid/uuid.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/db/mixin_database.dart' as db;
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/utils/attachment_util.dart';
-import 'package:flutter_app/utils/file.dart';
-import 'package:flutter_app/utils/load_Balancer_utils.dart';
-import 'package:flutter_app/utils/stream_extension.dart';
-import 'package:flutter_app/workers/decrypt_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
+
+import '../blaze/blaze.dart';
+import '../blaze/blaze_message.dart';
+import '../blaze/blaze_param.dart';
+import '../blaze/vo/contact_message.dart';
+import '../blaze/vo/sticker_message.dart';
+import '../constants/constants.dart';
+import '../crypto/encrypted/encrypted_protocol.dart';
+import '../crypto/uuid/uuid.dart';
+import '../db/database.dart';
+import '../db/extension/message_category.dart';
+import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
+import '../enum/message_category.dart';
+import '../enum/message_status.dart';
+import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../utils/attachment_util.dart';
+import '../utils/file.dart';
+import '../utils/load_balancer_utils.dart';
+import '../utils/stream_extension.dart';
+import '../workers/decrypt_message.dart';
+import 'send_message_helper.dart';
 
 class AccountServer {
   static String? sid;
@@ -56,7 +57,7 @@ class AccountServer {
       sessionId: sessionId,
       privateKey: privateKey,
       scp: scp,
-      jsonDecodeCallback: LoadBalancerUtils.jsonDecode,
+      jsonDecodeCallback: jsonDecode,
       interceptors: [
         InterceptorsWrapper(
           onError: (
@@ -152,7 +153,7 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final Map map = await LoadBalancerUtils.jsonDecode(e.blazeMessage!);
+          final Map map = await jsonDecodeWithIsolate(e.blazeMessage!);
           return BlazeAckMessage(
               messageId: map['message_id'], status: map['status']);
         },
@@ -169,19 +170,25 @@ class AccountServer {
   }
 
   Future<void> _runRecallJob(List<db.Job> jobs) async {
-    jobs.where((element) => element.blazeMessage != null).forEach(
+    final map = jobs.where((element) => element.blazeMessage != null).map(
       (e) async {
+        final list = await utf8EncodeWithIsolate(e.blazeMessage!);
+        final data = await base64EncodeWithIsolate(list);
+
         final blazeParam = BlazeMessageParam(
-            conversationId: e.conversationId,
-            messageId: const Uuid().v4(),
-            category: MessageCategory.messageRecall,
-            data: base64.encode(utf8.encode(e.blazeMessage!)));
+          conversationId: e.conversationId,
+          messageId: const Uuid().v4(),
+          category: MessageCategory.messageRecall,
+          data: data,
+        );
         final blazeMessage = BlazeMessage(
             id: const Uuid().v4(), action: createMessage, params: blazeParam);
-        blaze.deliver(blazeMessage);
+        await blaze.deliver(blazeMessage);
         await database.jobsDao.deleteJobById(e.jobId);
       },
     );
+
+    await Future.wait(map);
   }
 
   Future<void> _runSendJob(List<db.Job> jobs) async {
@@ -197,10 +204,11 @@ class AccountServer {
           if (message.category == MessageCategory.appCard ||
               message.category == MessageCategory.plainPost ||
               message.category == MessageCategory.plainText) {
-            content = base64.encode(utf8.encode(content!));
+            final list = await utf8EncodeWithIsolate(content!);
+            content = await base64EncodeWithIsolate(list);
           }
           final blazeMessage = _createBlazeMessage(message, content!);
-          blaze.deliver(blazeMessage);
+          await blaze.deliver(blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
@@ -216,13 +224,14 @@ class AccountServer {
             return;
           }
           final content = _encryptedProtocol.encryptMessage(
-              privateKey,
-              utf8.encode(message.content!),
-              base64.decode(participantSessionKey.publicKey!),
-              participantSessionKey.sessionId);
-          final blazeMessage =
-              _createBlazeMessage(message, base64Encode(content));
-          blaze.deliver(blazeMessage);
+            privateKey,
+            await utf8EncodeWithIsolate(message.content!),
+            await base64DecodeWithIsolate(participantSessionKey.publicKey!),
+            participantSessionKey.sessionId,
+          );
+          final blazeMessage = _createBlazeMessage(
+              message, await base64EncodeWithIsolate(content));
+          await blaze.deliver(blazeMessage);
           await database.messagesDao
               .updateMessageStatusById(message.messageId, MessageStatus.sent);
           await database.jobsDao.deleteJobById(job.jobId);
@@ -245,18 +254,21 @@ class AccountServer {
         id: const Uuid().v4(), action: createMessage, params: blazeParam);
   }
 
-  Future<void> sendTextMessage(String content,
-      {String? conversationId,
-      String? recipientId,
-      String? quoteMessageId,
-      bool isPlain = true}) async {
+  Future<void> sendTextMessage(
+    String content, {
+    String? conversationId,
+    String? recipientId,
+    String? quoteMessageId,
+    bool isPlain = true,
+  }) async {
     if (content.isEmpty) return;
     await _sendMessageHelper.sendTextMessage(
-        await _initConversation(conversationId, recipientId),
-        userId,
-        content,
-        isPlain,
-        quoteMessageId);
+      await _initConversation(conversationId, recipientId),
+      userId,
+      content,
+      isPlain: isPlain,
+      quoteMessageId: quoteMessageId,
+    );
   }
 
   Future<void> sendImageMessage(XFile image,
@@ -325,12 +337,13 @@ class AccountServer {
           bool isPlain = true,
           String? quoteMessageId}) async =>
       _sendMessageHelper.sendContactMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          ContactMessage(shareUserId),
-          shareUserFullName,
-          isPlain,
-          quoteMessageId);
+        await _initConversation(conversationId, recipientId),
+        userId,
+        ContactMessage(shareUserId),
+        shareUserFullName,
+        isPlain: isPlain,
+        quoteMessageId: quoteMessageId,
+      );
 
   Future<void> sendRecallMessage(List<String> messageIds,
           {String? conversationId, String? recipientId}) async =>
@@ -342,17 +355,18 @@ class AccountServer {
           String? recipientId,
           bool isPlain = true}) async =>
       _sendMessageHelper.forwardMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          forwardMessageId,
-          isPlain);
+        await _initConversation(conversationId, recipientId),
+        userId,
+        forwardMessageId,
+        isPlain: isPlain,
+      );
 
   void selectConversation(String? conversationId) {
-    _decryptMessage.setConversationId(conversationId);
+    _decryptMessage.conversationId = conversationId;
     _markRead(conversationId);
   }
 
-  void _markRead(conversationId) async {
+  Future<void> _markRead(conversationId) async {
     final ids =
         await database.messagesDao.getUnreadMessageIds(conversationId, userId);
     final status =
@@ -368,7 +382,7 @@ class AccountServer {
             createdAt: now,
             runCount: 0))
         .toList();
-    database.jobsDao.insertAll(jobs);
+    await database.jobsDao.insertAll(jobs);
   }
 
   Future<void> stop() async {
@@ -392,7 +406,7 @@ class AccountServer {
           userId: item.userId,
           category: item.category,
           description: item.description));
-      _updateStickerAlbums(item.albumId);
+      await _updateStickerAlbums(item.albumId);
     });
   }
 
@@ -433,7 +447,7 @@ class AccountServer {
     }
   }
 
-  void _updateStickerAlbums(String albumId) async {
+  Future<void> _updateStickerAlbums(String albumId) async {
     try {
       final response = await client.accountApi.getStickersByAlbumId(albumId);
       final relationships = <StickerRelationship>[];

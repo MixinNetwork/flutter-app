@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/chat_page.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/action_button.dart';
-import 'package:flutter_app/widgets/back_button.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:flutter_app/generated/l10n.dart';
+
+import '../account/account_server.dart';
+import '../bloc/bloc_converter.dart';
+import '../constants/resources.dart';
+import '../generated/l10n.dart';
+import '../ui/home/bloc/conversation_cubit.dart';
+import '../ui/home/chat_page.dart';
+import '../ui/home/route/responsive_navigator_cubit.dart';
+import '../utils/hook.dart';
+import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
+import 'back_button.dart';
+import 'brightness_observer.dart';
 
 class ChatBar extends HookWidget {
   const ChatBar({
@@ -55,9 +56,9 @@ class ChatBar extends HookWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const ConversationName(),
-                  const ConversationIDOrCount(),
+                children: const [
+                  ConversationName(),
+                  ConversationIDOrCount(),
                 ],
               ),
             ],
@@ -170,7 +171,7 @@ class ConversationAvatar extends StatelessWidget {
             if (state?.conversation != null)
               return ConversationAvatarWidget(
                 size: size,
-                conversation: state!.conversation!,
+                conversation: state!.conversation,
               );
 
             if (state?.user != null)

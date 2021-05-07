@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/ui/home/chat_page.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/utils/reg_exp_utils.dart';
-import 'package:flutter_app/utils/uri_utils.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/message/item/quote_message.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../../ui/home/chat_page.dart';
+import '../../../../utils/hook.dart';
+import '../../../../utils/reg_exp_utils.dart';
+import '../../../../utils/uri_utils.dart';
+import '../../../brightness_observer.dart';
 import '../../../high_light_text.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime.dart';
 import '../../message_status.dart';
+import '../quote_message.dart';
 import 'mention_builder.dart';
 
 class TextMessage extends HookWidget {

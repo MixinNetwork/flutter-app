@@ -5,22 +5,22 @@ import 'package:file_selector/file_selector.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/enum/media_status.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/message/item/quote_message.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_app/generated/l10n.dart';
 
+import '../../../account/account_server.dart';
+import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../enum/media_status.dart';
+import '../../../generated/l10n.dart';
+import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
 import '../message_bubble.dart';
 import '../message_datetime.dart';
 import '../message_status.dart';
+import 'quote_message.dart';
 
 class FileMessage extends StatelessWidget {
   const FileMessage({

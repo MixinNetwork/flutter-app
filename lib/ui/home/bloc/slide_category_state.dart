@@ -25,10 +25,9 @@ class SlideCategoryState extends Equatable {
   SlideCategoryState copyWith({
     final SlideCategoryType? type,
     final String? id,
-  }) {
-    return SlideCategoryState(
-      type: type ?? this.type,
-      id: id ?? this.id,
-    );
-  }
+  }) =>
+      SlideCategoryState(
+        type: type ?? this.type,
+        id: id ?? this.id,
+      );
 }

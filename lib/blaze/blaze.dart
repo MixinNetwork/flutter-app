@@ -4,16 +4,16 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../constants/constants.dart';
+import '../db/converter/message_status_type_converter.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
-import '../utils/load_Balancer_utils.dart';
+import '../utils/load_balancer_utils.dart';
 import 'blaze_message.dart';
 import 'vo/blaze_message_data.dart';
 
@@ -56,9 +56,8 @@ class Blaze {
       headers: {'Authorization': 'Bearer $token'},
       pingInterval: const Duration(seconds: 15),
     );
-    subscription = channel?.stream
-        .asyncMap((message) async => await parseBlazeMessage(message))
-        .listen(
+    subscription =
+        channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
         debugPrint('blazeMessage: ${blazeMessage.toJson()}');
 
@@ -73,26 +72,26 @@ class Blaze {
         }
         if (blazeMessage.action == acknowledgeMessageReceipts) {
           // makeMessageStatus
-          updateRemoteMessageStatus(
+          await updateRemoteMessageStatus(
               data['message_id'], MessageStatus.delivered);
         } else if (blazeMessage.action == createMessage) {
           final messageData = BlazeMessageData.fromJson(data);
           if (messageData.userId == userId && messageData.category == null) {
-            updateRemoteMessageStatus(
+            await updateRemoteMessageStatus(
                 messageData.messageId, MessageStatus.delivered);
           } else {
             await database.floodMessagesDao.insert(FloodMessage(
                 messageId: messageData.messageId,
-                data: jsonEncode(data),
+                data: await jsonEncodeWithIsolate(data),
                 createdAt: messageData.createdAt));
           }
         } else if (blazeMessage.action == acknowledgeMessageReceipt) {
           await makeMessageStatus(data['message_id'],
               const MessageStatusTypeConverter().mapToDart(data['status'])!);
-          updateRemoteMessageStatus(
+          await updateRemoteMessageStatus(
               data['message_id'], MessageStatus.delivered);
         } else {
-          updateRemoteMessageStatus(
+          await updateRemoteMessageStatus(
               data['message_id'], MessageStatus.delivered);
         }
       },
@@ -109,15 +108,16 @@ class Blaze {
     _sendListPending();
   }
 
-  void updateRemoteMessageStatus(String messageId, MessageStatus status) {
+  Future<void> updateRemoteMessageStatus(
+      String messageId, MessageStatus status) async {
     final blazeMessage = BlazeAckMessage(
         messageId: messageId,
         status: EnumToString.convertToString(status)!.toUpperCase());
-    database.jobsDao.insert(Job(
+    await database.jobsDao.insert(Job(
         jobId: const Uuid().v4(),
         action: acknowledgeMessageReceipts,
         priority: 5,
-        blazeMessage: jsonEncode(blazeMessage),
+        blazeMessage: await jsonEncodeWithIsolate(blazeMessage),
         createdAt: DateTime.now(),
         runCount: 0));
   }
@@ -130,7 +130,7 @@ class Blaze {
     }
   }
 
-  void _sendListPending() async {
+  Future<void> _sendListPending() async {
     final offset =
         await database.floodMessagesDao.getLastBlazeMessageCreatedAt();
     // ignore: prefer_typing_uninitialized_variables
@@ -138,21 +138,23 @@ class Blaze {
     if (offset != null) {
       params = '{"offset":"${offset.toUtc()}"}';
     }
-    _sendGZip(BlazeMessage(
-        id: const Uuid().v4(),
-        params: params,
-        action: 'LIST_PENDING_MESSAGES'));
+    await _sendGZip(
+      BlazeMessage(
+          id: const Uuid().v4(),
+          params: params,
+          action: 'LIST_PENDING_MESSAGES'),
+    );
   }
 
-  void _sendGZip(BlazeMessage msg) {
-    channel?.sink.add(
-        GZipEncoder().encode(Uint8List.fromList(jsonEncode(msg).codeUnits)));
+  Future<void> _sendGZip(BlazeMessage msg) async {
+    channel?.sink.add(GZipEncoder().encode(
+        Uint8List.fromList((await jsonEncodeWithIsolate(msg)).codeUnits)));
   }
 
-  void deliver(BlazeMessage blazeMessage) {
+  Future<void> deliver(BlazeMessage blazeMessage) async {
     // todo check send callback
-    channel?.sink.add(GZipEncoder()
-        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits)));
+    channel?.sink.add(GZipEncoder().encode(Uint8List.fromList(
+        (await jsonEncodeWithIsolate(blazeMessage)).codeUnits)));
   }
 
   void _disconnect() {
@@ -185,7 +187,7 @@ class Blaze {
       await Future.delayed(const Duration(seconds: 2));
       reconnecting = false;
       debugPrint('reconnecting set false, ${StackTrace.current}');
-      return await _reconnect();
+      return _reconnect();
     }
   }
 
@@ -196,7 +198,7 @@ class Blaze {
 }
 
 Future<BlazeMessage> parseBlazeMessage(List<int> message) =>
-    LoadBalancerUtils.runLoadBalancer(_parseBlazeMessageInternal, message);
+    runLoadBalancer(_parseBlazeMessageInternal, message);
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));

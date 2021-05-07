@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/utils/dp_utils.dart';
-import 'package:flutter_app/widgets/cache_image.dart';
+import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../utils/dp_utils.dart';
+import '../../cache_image.dart';
 
 import '../message_bubble.dart';
 import '../message_datetime.dart';

@@ -1,18 +1,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/cell.dart';
-import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
+
+import '../../account/account_server.dart';
+import '../../bloc/bloc_converter.dart';
+import '../../constants/resources.dart';
+import '../../generated/l10n.dart';
+import '../../widgets/avatar_view/avatar_view.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/cell.dart';
+import '../../widgets/toast.dart';
+import '../home/bloc/multi_auth_cubit.dart';
+import '../home/route/responsive_navigator_cubit.dart';
 
 class SettingPage extends StatelessWidget {
   const SettingPage({Key? key}) : super(key: key);
@@ -149,49 +150,48 @@ class _UserProfile extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Builder(builder: (context) {
-          final account = context.read<MultiAuthCubit>().state.current!.account;
-          return AvatarWidget(
-            userId: account.userId,
-            name: account.fullName!,
-            avatarUrl: account.avatarUrl,
-            size: 90,
-          );
-        }),
-        const SizedBox(height: 10),
-        BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
-          converter: (state) => state.current?.account.fullName,
-          when: (a, b) => b != null,
-          builder: (context, fullName) => Text(
-            fullName ?? '',
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 18,
-              color: BrightnessData.themeOf(context).text,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
-          converter: (state) => state.current?.account.identityNumber,
-          when: (a, b) => b != null,
-          builder: (context, identityNumber) => Text(
-            'Mixin ID: $identityNumber',
-            style: TextStyle(
-              fontSize: 14,
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(188, 190, 195, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Builder(builder: (context) {
+            final account =
+                context.read<MultiAuthCubit>().state.current!.account;
+            return AvatarWidget(
+              userId: account.userId,
+              name: account.fullName!,
+              avatarUrl: account.avatarUrl,
+              size: 90,
+            );
+          }),
+          const SizedBox(height: 10),
+          BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+            converter: (state) => state.current?.account.fullName,
+            when: (a, b) => b != null,
+            builder: (context, fullName) => Text(
+              fullName ?? '',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+                color: BrightnessData.themeOf(context).text,
               ),
             ),
           ),
-        ),
-      ],
-    );
-  }
+          const SizedBox(height: 4),
+          BlocConverter<MultiAuthCubit, MultiAuthState, String?>(
+            converter: (state) => state.current?.account.identityNumber,
+            when: (a, b) => b != null,
+            builder: (context, identityNumber) => Text(
+              'Mixin ID: $identityNumber',
+              style: TextStyle(
+                fontSize: 14,
+                color: BrightnessData.dynamicColor(
+                  context,
+                  const Color.fromRGBO(188, 190, 195, 1),
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
 }

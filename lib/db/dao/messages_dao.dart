@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter_app/db/database_event_bus.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/media_status.dart';
-import 'package:flutter_app/enum/message_status.dart';
 import 'package:moor/moor.dart';
 
+import '../../enum/media_status.dart';
+import '../../enum/message_status.dart';
 import '../../utils/string_extension.dart';
+import '../database_event_bus.dart';
 import '../extension/message_category.dart';
+import '../mixin_database.dart';
 
 part 'messages_dao.g.dart';
 
@@ -16,7 +16,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     with _$MessagesDaoMixin {
   MessagesDao(MixinDatabase db) : super(db);
 
-  late Stream<Null> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
+  late Stream<void> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
     db.messages,
     db.users,
     db.snapshots,
@@ -27,7 +27,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     db.conversations,
   ]));
 
-  late Stream<Null> searchMessageUpdateEvent =
+  late Stream<void> searchMessageUpdateEvent =
       db.tableUpdates(TableUpdateQuery.onAllTables([
     db.messages,
     db.users,
@@ -52,7 +52,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     final result = await into(db.messages).insertOnConflictUpdate(message);
     if (message.category.isText) {
       final content = message.content!.fts5ContentFilter();
-      insertFts(message.messageId, message.conversationId, content,
+      await insertFts(message.messageId, message.conversationId, content,
           message.createdAt, message.userId);
     }
     await db.conversationsDao
@@ -63,13 +63,12 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  void insertFts(String messageId, String conversationId, String content,
-      DateTime createdAt, String userId) async {
-    await db.customInsert(
-      'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'$content\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')',
-      updates: {db.messagesFts},
-    );
-  }
+  Future<int> insertFts(String messageId, String conversationId, String content,
+          DateTime createdAt, String userId) =>
+      db.customInsert(
+        'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'$content\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')',
+        updates: {db.messagesFts},
+      );
 
   Future deleteMessage(Message message) => delete(db.messages).delete(message);
 
@@ -119,21 +118,20 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<int> _takeUnseen(String userId, String conversationId) {
-    return db.customUpdate(
-      'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
-      variables: [
-        Variable.withString(conversationId),
-        Variable.withString(userId),
-        Variable.withString(conversationId)
-      ],
-      updates: {db.conversations},
-      updateKind: UpdateKind.update,
-    );
-  }
+  Future<int> _takeUnseen(String userId, String conversationId) =>
+      db.customUpdate(
+        'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
+        variables: [
+          Variable.withString(conversationId),
+          Variable.withString(userId),
+          Variable.withString(conversationId)
+        ],
+        updates: {db.conversations},
+        updateKind: UpdateKind.update,
+      );
 
-  Future<void> markMessageRead(List<String> messageIds) async =>
-      await transaction(() async {
+  Future<void> markMessageRead(List<String> messageIds) =>
+      transaction(() async {
         for (final id in messageIds) {
           await (update(db.messages)..where((e) => e.messageId.equals(id)))
               .write(const MessagesCompanion(
@@ -172,59 +170,56 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-      String conversationId, String userId) async {
-    return await db.transaction(() async {
-      final list = await db
-          .customSelect(
-              'SELECT message_id FROM messages WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\') ORDER BY created_at ASC',
-              readsFrom: {
-                db.messages
-              },
-              variables: [
-                Variable.withString(conversationId),
-                Variable.withString(userId)
-              ])
-          .map((row) => row.read<String>('message_id'))
-          .get();
-      await db.customUpdate(
-        'UPDATE messages SET status = \'READ\' WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\')',
-        variables: [
-          Variable.withString(conversationId),
-          Variable.withString(userId)
-        ],
-        updates: {db.messages},
-        updateKind: UpdateKind.update,
-      );
-      await _takeUnseen(userId, conversationId);
-      return list;
-    });
-  }
+          String conversationId, String userId) =>
+      db.transaction(() async {
+        final list = await db
+            .customSelect(
+                'SELECT message_id FROM messages WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\') ORDER BY created_at ASC',
+                readsFrom: {
+                  db.messages
+                },
+                variables: [
+                  Variable.withString(conversationId),
+                  Variable.withString(userId)
+                ])
+            .map((row) => row.read<String>('message_id'))
+            .get();
+        await db.customUpdate(
+          'UPDATE messages SET status = \'READ\' WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\')',
+          variables: [
+            Variable.withString(conversationId),
+            Variable.withString(userId)
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        );
+        await _takeUnseen(userId, conversationId);
+        return list;
+      });
 
   Future<QuoteMessageItem?> findMessageItemById(
-      String conversationId, String messageId) async {
-    return await db
-        .findMessageItemById(conversationId, messageId)
-        .getSingleOrNull();
-  }
+          String conversationId, String messageId) =>
+      db.findMessageItemById(conversationId, messageId).getSingleOrNull();
 
   Future<QuoteMessageItem?> findMessageItemByMessageId(
       String? messageId) async {
     if (messageId == null) return null;
-    return await db.findMessageItemByMessageId(messageId).getSingleOrNull();
+    return db.findMessageItemByMessageId(messageId).getSingleOrNull();
   }
 
-  Future<Message?> findMessageByMessageId(String messageId) async {
-    return await db.findMessageByMessageId(messageId).getSingleOrNull();
-  }
+  Future<Message?> findMessageByMessageId(String messageId) =>
+      db.findMessageByMessageId(messageId).getSingleOrNull();
 
-  void updateMessageContent(String messageId, String encoded) async {
-    await db.customUpdate(
-      'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
-      variables: [Variable.withString(encoded), Variable.withString(messageId)],
-      updates: {db.messages},
-      updateKind: UpdateKind.update,
-    );
-  }
+  Future<int> updateMessageContent(String messageId, String encoded) =>
+      db.customUpdate(
+        'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
+        variables: [
+          Variable.withString(encoded),
+          Variable.withString(messageId)
+        ],
+        updates: {db.messages},
+        updateKind: UpdateKind.update,
+      );
 
   Selectable<int> mediaMessageRowIdByConversationId(
     String conversationId,

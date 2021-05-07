@@ -1,13 +1,14 @@
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/utils/load_balancer_utils.dart';
-import 'package:flutter_app/widgets/message/item/action/action_data.dart';
-import 'package:flutter_app/widgets/message/item/action_card/action_card_data.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/utils/markdown.dart';
 import 'package:tuple/tuple.dart';
+
+import '../constants/resources.dart';
+import '../db/extension/message_category.dart';
+import '../enum/message_category.dart';
+import '../enum/message_status.dart';
+import '../generated/l10n.dart';
+import '../widgets/message/item/action/action_data.dart';
+import '../widgets/message/item/action_card/action_card_data.dart';
+import 'load_balancer_utils.dart';
+import 'markdown.dart';
 
 Future<Tuple2<String?, String?>> messageOptimize(
   MessageStatus? messageStatus,
@@ -55,7 +56,7 @@ Future<Tuple2<String?, String?>> messageOptimize(
     _content = 'APP_BUTTON_GROUP';
     if (content != null)
       // ignore: avoid_dynamic_calls
-      _content = (await LoadBalancerUtils.jsonDecode(content))
+      _content = (await jsonDecodeWithIsolate(content))
           .map((e) => ActionData.fromJson(e))
           // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')
@@ -65,8 +66,7 @@ Future<Tuple2<String?, String?>> messageOptimize(
     _content = 'APP_CARD';
     if (content != null)
       _content =
-          AppCardData.fromJson((await LoadBalancerUtils.jsonDecode(content)))
-              .title;
+          AppCardData.fromJson(await jsonDecodeWithIsolate(content)).title;
     icon = Resources.assetsImagesAppButtonSvg;
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';

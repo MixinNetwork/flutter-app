@@ -1,37 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/bloc/keyword_cubit.dart';
-import 'package:flutter_app/bloc/minute_timer_cubit.dart';
-import 'package:flutter_app/bloc/paging/paging_bloc.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/conversation_list_bloc.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/utils/datetime_format_utils.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/utils/list_utils.dart';
-import 'package:flutter_app/utils/message_optimize.dart';
-import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/dialog.dart';
-import 'package:flutter_app/widgets/high_light_text.dart';
-import 'package:flutter_app/widgets/interacter_decorated_box.dart';
-import 'package:flutter_app/widgets/menu.dart';
-import 'package:flutter_app/widgets/message_status_icon.dart';
-import 'package:flutter_app/widgets/radio.dart';
-import 'package:flutter_app/widgets/search_bar.dart';
-import 'package:flutter_app/widgets/toast.dart';
-import 'package:flutter_app/widgets/unread_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -39,6 +8,38 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
+
+import '../../account/account_server.dart';
+import '../../bloc/bloc_converter.dart';
+import '../../bloc/keyword_cubit.dart';
+import '../../bloc/minute_timer_cubit.dart';
+import '../../bloc/paging/paging_bloc.dart';
+import '../../constants/resources.dart';
+import '../../db/extension/conversation.dart';
+import '../../db/extension/message_category.dart';
+import '../../db/mixin_database.dart';
+import '../../enum/message_category.dart';
+import '../../generated/l10n.dart';
+import '../../utils/datetime_format_utils.dart';
+import '../../utils/hook.dart';
+import '../../utils/list_utils.dart';
+import '../../utils/message_optimize.dart';
+import '../../widgets/avatar_view/avatar_view.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/dialog.dart';
+import '../../widgets/high_light_text.dart';
+import '../../widgets/interacter_decorated_box.dart';
+import '../../widgets/menu.dart';
+import '../../widgets/message_status_icon.dart';
+import '../../widgets/radio.dart';
+import '../../widgets/search_bar.dart';
+import '../../widgets/toast.dart';
+import '../../widgets/unread_text.dart';
+import 'bloc/conversation_cubit.dart';
+import 'bloc/conversation_list_bloc.dart';
+import 'bloc/multi_auth_cubit.dart';
+import 'bloc/slide_category_cubit.dart';
+import 'route/responsive_navigator_cubit.dart';
 
 const _defaultLimit = 3;
 
@@ -401,7 +402,7 @@ class _SearchMessageList extends HookWidget {
             .getSingle(),
         queryRange: (int limit, int offset) async {
           if (keyword.isEmpty) return [];
-          return await context
+          return context
               .read<AccountServer>()
               .database
               .messagesDao
@@ -662,13 +663,13 @@ class _Empty extends StatelessWidget {
 
 class _List extends HookWidget {
   const _List({
-    Key? key,
+    required Key key,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final slideCategoryState =
-        (key as PageStorageKey<SlideCategoryState>).value;
+        (key! as PageStorageKey<SlideCategoryState>).value;
 
     final conversationListBloc = context.read<ConversationListBloc>();
     final pagingState =
@@ -1035,21 +1036,19 @@ class _UnreadText extends StatelessWidget {
   final ConversationItem conversation;
 
   @override
-  Widget build(BuildContext context) {
-    return UnreadText(
-      count: conversation.unseenMessageCount ?? 0,
-      backgroundColor: conversation.pinTime?.isAfter(DateTime.now()) == true
-          ? BrightnessData.themeOf(context).accent
-          : BrightnessData.themeOf(context).secondaryText,
-      textColor: conversation.pinTime != null
-          ? BrightnessData.dynamicColor(
-              context,
-              const Color.fromRGBO(255, 255, 255, 1),
-              darkColor: const Color.fromRGBO(255, 255, 255, 1),
-            )
-          : BrightnessData.themeOf(context).primary,
-    );
-  }
+  Widget build(BuildContext context) => UnreadText(
+        count: conversation.unseenMessageCount ?? 0,
+        backgroundColor: conversation.pinTime?.isAfter(DateTime.now()) == true
+            ? BrightnessData.themeOf(context).accent
+            : BrightnessData.themeOf(context).secondaryText,
+        textColor: conversation.pinTime != null
+            ? BrightnessData.dynamicColor(
+                context,
+                const Color.fromRGBO(255, 255, 255, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 1),
+              )
+            : BrightnessData.themeOf(context).primary,
+      );
 }
 
 class _MessagePreview extends StatelessWidget {

@@ -5,20 +5,21 @@ import 'package:filesize/filesize.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/utils/file.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/cell.dart';
-import 'package:flutter_app/widgets/dialog.dart';
-import 'package:flutter_app/widgets/disable.dart';
-import 'package:flutter_app/widgets/radio.dart';
-import 'package:flutter_app/widgets/toast.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
+
+import '../../account/account_server.dart';
+import '../../generated/l10n.dart';
+import '../../utils/file.dart';
+import '../../utils/hook.dart';
+import '../../widgets/app_bar.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/cell.dart';
+import '../../widgets/dialog.dart';
+import '../../widgets/disable.dart';
+import '../../widgets/radio.dart';
+import '../../widgets/toast.dart';
 
 class StorageUsageDetailPage extends HookWidget {
   const StorageUsageDetailPage({

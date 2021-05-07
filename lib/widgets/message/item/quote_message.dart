@@ -2,20 +2,20 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/extension/message.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/message_bloc.dart';
-import 'package:flutter_app/utils/color_utils.dart';
-import 'package:flutter_app/utils/markdown.dart';
-import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
 import 'package:provider/provider.dart';
 
+import '../../../constants/resources.dart';
+import '../../../db/extension/message.dart';
+import '../../../db/extension/message_category.dart';
+import '../../../db/mixin_database.dart';
+import '../../../enum/message_category.dart';
+import '../../../generated/l10n.dart';
+import '../../../ui/home/bloc/message_bloc.dart';
+import '../../../utils/color_utils.dart';
+import '../../../utils/markdown.dart';
+import '../../avatar_view/avatar_view.dart';
 import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../../image.dart';
@@ -323,7 +323,7 @@ class _QuoteMessageBase extends StatelessWidget {
                   height: 48,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    child: image!,
+                    child: image,
                   ),
                 ),
             ],

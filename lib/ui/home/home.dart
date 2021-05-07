@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/bloc/bloc_converter.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
-import 'package:flutter_app/ui/home/conversation_page.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/ui/home/slide_page.dart';
-import 'package:flutter_app/ui/setting/setting_page.dart';
-import 'package:flutter_app/widgets/automatic_keep_alive_client_widget.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/empty.dart';
-import 'package:flutter_app/widgets/size_policy_row.dart';
 import 'package:provider/provider.dart';
+
+import '../../bloc/bloc_converter.dart';
+import '../../generated/l10n.dart';
+import '../../widgets/automatic_keep_alive_client_widget.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/empty.dart';
+import '../../widgets/size_policy_row.dart';
+import '../setting/setting_page.dart';
+import 'bloc/slide_category_cubit.dart';
+import 'conversation_page.dart';
+import 'route/responsive_navigator.dart';
+import 'route/responsive_navigator_cubit.dart';
+import 'slide_page.dart';
 
 const slidePageMinWidth = 98.0;
 const slidePageMaxWidth = 200.0;

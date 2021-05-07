@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/ui/home/chat_slide_page/share_media/file_page.dart';
-import 'package:flutter_app/ui/home/chat_slide_page/share_media/media_page.dart';
-import 'package:flutter_app/ui/home/chat_slide_page/share_media/post_page.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+
+import '../../../generated/l10n.dart';
+import '../../../widgets/app_bar.dart';
+import '../../../widgets/brightness_observer.dart';
+import 'share_media/file_page.dart';
+import 'share_media/media_page.dart';
+import 'share_media/post_page.dart';
 
 class SharedMediaPage extends HookWidget {
   const SharedMediaPage({Key? key}) : super(key: key);

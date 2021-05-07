@@ -1,5 +1,6 @@
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
+import '../mixin_database.dart';
 
 extension Conversation on ConversationItem {
   bool get isContactConversation =>
@@ -20,9 +21,8 @@ extension Conversation on ConversationItem {
   String get validName => conversationValidName(groupName, name);
 
   bool get isMute =>
-      ((isGroupConversation && muteUntil?.isAfter(DateTime.now()) == true) ||
-          (!isGroupConversation &&
-              ownerMuteUntil?.isAfter(DateTime.now()) == true));
+      (isGroupConversation && muteUntil?.isAfter(DateTime.now()) == true) ||
+      (!isGroupConversation && ownerMuteUntil?.isAfter(DateTime.now()) == true);
 
   DateTime? get validMuteUntil =>
       isGroupConversation ? muteUntil : ownerMuteUntil;

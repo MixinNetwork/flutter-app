@@ -34,7 +34,7 @@ extension XFileExtension on file_selector.XFile {
 
 Future<int> getTotalSizeOfFile(String path) async {
   final file = File(path);
-  if (await file.exists()) return await file.length();
+  if (await file.exists()) return file.length();
   final directory = Directory(path);
   if (await directory.exists()) {
     List<FileSystemEntity> children;

@@ -1,15 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/utils/uri_utils.dart';
-import 'package:flutter_app/widgets/app_bar.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/widgets/cell.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:package_info/package_info.dart';
+
+import '../../constants/resources.dart';
+import '../../generated/l10n.dart';
+import '../../utils/hook.dart';
+import '../../utils/uri_utils.dart';
+import '../../widgets/app_bar.dart';
+import '../../widgets/brightness_observer.dart';
+import '../../widgets/cell.dart';
 
 class AboutPage extends HookWidget {
   const AboutPage({Key? key}) : super(key: key);
@@ -22,7 +23,7 @@ class AboutPage extends HookWidget {
       backgroundColor: BrightnessData.themeOf(context).background,
       appBar: MixinAppBar(
         title: Text(Localization.of(context).about),
-        actions: [],
+        actions: const [],
       ),
       body: SingleChildScrollView(
         child: Container(

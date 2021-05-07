@@ -1,5 +1,6 @@
-import 'package:flutter_app/enum/system_user_action.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import '../../enum/system_user_action.dart';
 
 part 'system_user_message.g.dart';
 

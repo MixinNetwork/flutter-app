@@ -2,38 +2,28 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:flutter_app/db/converter/conversation_category_type_converter.dart';
-import 'package:flutter_app/db/converter/conversation_status_type_converter.dart';
-import 'package:flutter_app/db/converter/media_status_type_converter.dart';
-import 'package:flutter_app/db/converter/message_category_type_converter.dart';
-import 'package:flutter_app/db/converter/message_status_type_converter.dart';
-import 'package:flutter_app/db/converter/user_relationship_converter.dart';
-import 'package:flutter_app/db/converter/participant_role_converter.dart';
-import 'package:flutter_app/db/converter/millis_date_converter.dart';
-import 'package:flutter_app/db/converter/message_action_converter.dart';
-import 'package:flutter_app/db/dao/hyperlinks_dao.dart';
-import 'package:flutter_app/db/dao/jobs_dao.dart';
-import 'package:flutter_app/db/dao/message_mentions_dao.dart';
-import 'package:flutter_app/db/dao/messages_dao.dart';
-import 'package:flutter_app/db/dao/messages_history_dao.dart';
-import 'package:flutter_app/db/dao/participants_dao.dart';
-import 'package:flutter_app/db/dao/resend_session_messages_dao.dart';
-import 'package:flutter_app/db/dao/stickers_dao.dart';
-import 'package:flutter_app/db/dao/users_dao.dart';
-import 'package:flutter_app/db/database_event_bus.dart';
-import 'package:flutter_app/enum/media_status.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/enum/message_action.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:moor/isolate.dart';
-import 'package:moor/moor.dart';
 
 // These imports are only needed to open the database
 import 'package:moor/ffi.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:moor/isolate.dart';
+import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 
+import '../enum/media_status.dart';
+import '../enum/message_action.dart';
+import '../enum/message_category.dart';
+import '../enum/message_status.dart';
+import 'converter/conversation_category_type_converter.dart';
+import 'converter/conversation_status_type_converter.dart';
+import 'converter/media_status_type_converter.dart';
+import 'converter/message_action_converter.dart';
+import 'converter/message_category_type_converter.dart';
+import 'converter/message_status_type_converter.dart';
+import 'converter/millis_date_converter.dart';
+import 'converter/participant_role_converter.dart';
+import 'converter/user_relationship_converter.dart';
 import 'dao/addresses_dao.dart';
 import 'dao/apps_dao.dart';
 import 'dao/assets_dao.dart';
@@ -41,12 +31,22 @@ import 'dao/circle_conversations_dao.dart';
 import 'dao/circles_dao.dart';
 import 'dao/conversations_dao.dart';
 import 'dao/flood_messages_dao.dart';
+import 'dao/hyperlinks_dao.dart';
+import 'dao/jobs_dao.dart';
+import 'dao/message_mentions_dao.dart';
+import 'dao/messages_dao.dart';
+import 'dao/messages_history_dao.dart';
 import 'dao/offsets_dao.dart';
 import 'dao/participant_session_dao.dart';
+import 'dao/participants_dao.dart';
+import 'dao/resend_session_messages_dao.dart';
 import 'dao/sent_session_sender_keys_dao.dart';
 import 'dao/snapshots_dao.dart';
 import 'dao/sticker_albums_dao.dart';
 import 'dao/sticker_relationships_dao.dart';
+import 'dao/stickers_dao.dart';
+import 'dao/users_dao.dart';
+import 'database_event_bus.dart';
 
 part 'mixin_database.g.dart';
 
@@ -92,24 +92,19 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion {
-    return 1;
-  }
+  int get schemaVersion => 1;
 
   final eventBus = DataBaseEventBus();
 }
 
-LazyDatabase _openConnection(File dbFile) {
-  return LazyDatabase(() async {
-    return VmDatabase(dbFile);
-  });
-}
+LazyDatabase _openConnection(File dbFile) =>
+    LazyDatabase(() => VmDatabase(dbFile));
 
 Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
   final dbFolder = await getApplicationDocumentsDirectory();
   final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
   final moorIsolate = await _createMoorIsolate(dbFile);
-  final databaseConnection = await (moorIsolate.connect());
+  final databaseConnection = await moorIsolate.connect();
   return MixinDatabase.connect(databaseConnection);
 }
 
@@ -120,7 +115,7 @@ Future<MoorIsolate> _createMoorIsolate(File dbFile) async {
     _IsolateStartRequest(receivePort.sendPort, dbFile),
   );
 
-  return (await receivePort.first as MoorIsolate);
+  return await receivePort.first as MoorIsolate;
 }
 
 void _startBackground(_IsolateStartRequest request) {

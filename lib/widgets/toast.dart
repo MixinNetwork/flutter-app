@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/generated/l10n.dart';
+
+import '../constants/resources.dart';
+import '../generated/l10n.dart';
 
 class Toast {
-  Toast._internal();
+  factory Toast() => _singleton;
 
-  factory Toast() {
-    return _singleton;
-  }
+  Toast._internal();
 
   static final Toast _singleton = Toast._internal();
 
@@ -20,7 +19,7 @@ class Toast {
   static OverlayEntry? _overlayEntry;
   static bool _isVisible = false;
 
-  static void createView({
+  static Future<void> createView({
     required BuildContext context,
     required Widget child,
     Duration? duration = Toast.shortDuration,

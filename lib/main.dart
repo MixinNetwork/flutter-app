@@ -1,19 +1,20 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/app.dart';
-import 'package:flutter_app/ui/home/home.dart';
-import 'package:flutter_app/ui/home/local_notification_center.dart';
-import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:isolate/isolate.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 import 'package:window_size/window_size.dart';
 
+import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
+import 'ui/home/home.dart';
+import 'ui/home/local_notification_center.dart';
+import 'utils/load_balancer_utils.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final currentScreen = await getCurrentScreen();
@@ -26,8 +27,7 @@ void main() async {
   setWindowMinSize(
       const Size(slidePageMinWidth + responsiveNavigationMinWidth, 480));
 
-  LoadBalancerUtils.loadBalancer =
-      await LoadBalancer.create(16, IsolateRunner.spawn);
+  loadBalancer = await LoadBalancer.create(64, IsolateRunner.spawn);
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: await getApplicationDocumentsDirectory(),
   );
@@ -35,6 +35,6 @@ void main() async {
   debugHighlightDeprecatedWidgets = true;
 
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
-  unawaited(LocalNotificationCenter.initListener());
+  unawaited(initListener());
   runApp(App());
 }

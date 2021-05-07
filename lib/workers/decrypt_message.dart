@@ -1,42 +1,41 @@
 import 'dart:convert';
 
+import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/blaze/vo/app_button.dart';
-import 'package:flutter_app/blaze/vo/app_card.dart';
-import 'package:flutter_app/blaze/vo/attachment_message.dart';
-import 'package:flutter_app/blaze/vo/blaze_message_data.dart';
-import 'package:flutter_app/blaze/vo/contact_message.dart';
-import 'package:flutter_app/blaze/vo/live_message.dart';
-import 'package:flutter_app/blaze/vo/location_message.dart';
-import 'package:flutter_app/blaze/vo/plain_json_message.dart';
-import 'package:flutter_app/blaze/vo/recall_message.dart';
-import 'package:flutter_app/blaze/vo/snapshot_message.dart';
-import 'package:flutter_app/blaze/vo/sticker_message.dart';
-import 'package:flutter_app/blaze/vo/system_circle_message.dart';
-import 'package:flutter_app/blaze/vo/system_conversation_message.dart';
-import 'package:flutter_app/blaze/vo/system_session_message.dart';
-import 'package:flutter_app/blaze/vo/system_user_message.dart';
-import 'package:flutter_app/constants/constants.dart';
-import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/db/mixin_database.dart' as db;
-import 'package:flutter_app/enum/media_status.dart';
-import 'package:flutter_app/enum/message_action.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/enum/system_circle_action.dart';
-import 'package:flutter_app/enum/system_user_action.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/utils/attachment_util.dart';
-import 'package:flutter_app/utils/load_Balancer_utils.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
-import 'package:ed25519_edwards/ed25519_edwards.dart';
 
+import '../blaze/vo/app_card.dart';
+import '../blaze/vo/attachment_message.dart';
+import '../blaze/vo/blaze_message_data.dart';
+import '../blaze/vo/contact_message.dart';
+import '../blaze/vo/live_message.dart';
+import '../blaze/vo/location_message.dart';
+import '../blaze/vo/plain_json_message.dart';
+import '../blaze/vo/recall_message.dart';
+import '../blaze/vo/snapshot_message.dart';
+import '../blaze/vo/sticker_message.dart';
+import '../blaze/vo/system_circle_message.dart';
+import '../blaze/vo/system_conversation_message.dart';
+import '../blaze/vo/system_session_message.dart';
+import '../blaze/vo/system_user_message.dart';
+import '../constants/constants.dart';
+import '../crypto/encrypted/encrypted_protocol.dart';
+import '../db/database.dart';
 import '../db/extension/message.dart' show QueteMessage;
+import '../db/extension/message_category.dart';
+import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' as db;
+import '../enum/media_status.dart';
+import '../enum/message_action.dart';
+import '../enum/message_category.dart';
+import '../enum/message_status.dart';
+import '../enum/system_circle_action.dart';
+import '../enum/system_user_action.dart';
+import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../utils/attachment_util.dart';
+import '../utils/load_balancer_utils.dart';
 import 'injector.dart';
 
 class DecryptMessage extends Injector {
@@ -69,13 +68,13 @@ class DecryptMessage extends Injector {
   bool get _fileAutoDownload =>
       multiAuthCubit.state.current?.fileAutoDownload ?? true;
 
-  void setConversationId(String? conversationId) {
+  set conversationId(String? conversationId) {
     _conversationId = conversationId;
   }
 
   Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
-        await LoadBalancerUtils.jsonDecode(floodMessage.data));
+        await jsonDecodeWithIsolate(floodMessage.data));
     if (data.conversationId != null) {
       await syncConversion(data.conversationId);
     }
@@ -106,9 +105,8 @@ class DecryptMessage extends Injector {
 
   Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
-      final plain = utf8.decode(base64.decode(data.data));
       final plainJsonMessage =
-          PlainJsonMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
+          PlainJsonMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
       if (plainJsonMessage.action == acknowledgeMessageReceipts &&
           plainJsonMessage.ackMessages?.isNotEmpty == true) {
         await _markMessageStatus(plainJsonMessage.ackMessages!);
@@ -131,20 +129,20 @@ class DecryptMessage extends Injector {
       if (data.representativeId?.isNotEmpty == true) {
         data.userId = data.representativeId!;
       }
-      _processDecryptSuccess(data, data.data);
+      await _processDecryptSuccess(data, data.data);
     }
   }
 
   Future<void> _processEncryptedMessage(BlazeMessageData data) async {
     try {
-      final decryptedContent = _encryptedProtocol.decryptMessage(
-          _privateKey, Uuid.parse(_sessionId), base64Decode(data.data));
+      final decryptedContent = _encryptedProtocol.decryptMessage(_privateKey,
+          Uuid.parse(_sessionId), await base64DecodeWithIsolate(data.data));
       if (decryptedContent == null) {
         // todo
       } else {
-        final plainText = utf8.decode(decryptedContent);
+        final plainText = await utf8DecodeWithIsolate(decryptedContent);
         try {
-          _processDecryptSuccess(data, plainText);
+          await _processDecryptSuccess(data, plainText);
         } catch (e) {
           // todo insertInvalidMessage
         }
@@ -158,28 +156,23 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(
-              utf8.decode(base64.decode(data.data))));
+          await _jsonDecodeWithIsolate(data.data));
       await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
-      final systemMessage = SystemUserMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(
-              utf8.decode(base64.decode(data.data))));
+      final systemMessage =
+          SystemUserMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
       await _processSystemUserMessage(systemMessage);
     } else if (data.category == MessageCategory.systemCircle) {
-      final systemMessage = SystemCircleMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(
-              utf8.decode(base64.decode(data.data))));
+      final systemMessage =
+          SystemCircleMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
       await _processSystemCircleMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
-      final systemSnapshot = SnapshotMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(
-              utf8.decode(base64.decode(data.data))));
+      final systemSnapshot =
+          SnapshotMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
       await _processSystemSnapshotMessage(data, systemSnapshot);
     } else if (data.category == MessageCategory.systemSession) {
       final systemSession = SystemSessionMessage.fromJson(
-          await LoadBalancerUtils.jsonDecode(
-              utf8.decode(base64.decode(data.data))));
+          await _jsonDecodeWithIsolate(data.data));
       await _processSystemSessionMessage(systemSession);
     }
     await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
@@ -196,12 +189,11 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processAppButton(BlazeMessageData data) async {
-    final content = utf8.decode(base64.decode(data.data));
-    // ignore: unused_local_variable
-    final apps = (await LoadBalancerUtils.jsonDecode(content) as List)
-        .map((e) =>
-            e == null ? null : AppButton.fromJson(e as Map<String, dynamic>))
-        .toList();
+    final content = await _decodeWithIsolate(data.data);
+    // final apps = (await _decodeWithIsolate(data.data) as List)
+    //     .map((e) =>
+    //         e == null ? null : AppButton.fromJson(e as Map<String, dynamic>))
+    //     .toList();
     // todo check
     final message = Message(
       messageId: data.messageId,
@@ -217,9 +209,8 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processAppCard(BlazeMessageData data) async {
-    final content = utf8.decode(base64.decode(data.data));
-    final appCard =
-        AppCard.fromJson(await LoadBalancerUtils.jsonDecode(content));
+    final content = await _decodeWithIsolate(data.data);
+    final appCard = AppCard.fromJson(await jsonDecodeWithIsolate(content));
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId!,
@@ -239,9 +230,8 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
-    final recallMessage = RecallMessage.fromJson(
-        await LoadBalancerUtils.jsonDecode(
-            utf8.decode(base64.decode(data.data))));
+    final recallMessage =
+        RecallMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
     await database.messagesDao.recallMessage(recallMessage.messageId);
     await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
   }
@@ -261,7 +251,8 @@ class DecryptMessage extends Injector {
     }
   }
 
-  void _processDecryptSuccess(BlazeMessageData data, String plainText) async {
+  Future<void> _processDecryptSuccess(
+      BlazeMessageData data, String plainText) async {
     // todo
     // ignore: unused_local_variable
     final user = await syncUser(data.userId);
@@ -276,52 +267,47 @@ class DecryptMessage extends Injector {
       if (data.category == MessageCategory.signalText) {
         plain = 'SignalText';
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
-      final message = await _generateMessage(data, (String? quoteContent) {
-        return Message(
-            messageId: data.messageId,
-            conversationId: data.conversationId!,
-            userId: data.userId,
-            category: data.category!,
-            content: plain,
-            status: messageStatus,
-            createdAt: data.createdAt,
-            quoteMessageId: data.quoteMessageId,
-            quoteContent: quoteContent);
-      });
+      final message = await _generateMessage(
+          data,
+          (String? quoteContent) => Message(
+              messageId: data.messageId,
+              conversationId: data.conversationId!,
+              userId: data.userId,
+              category: data.category!,
+              content: plain,
+              status: messageStatus,
+              createdAt: data.createdAt,
+              quoteMessageId: data.quoteMessageId,
+              quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isImage) {
-      String plain;
-      if (data.category == MessageCategory.signalImage) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
-      } else {
-        plain = utf8.decode(base64.decode(plainText));
-      }
+      if (data.category == MessageCategory.signalImage)
+        return _updateRemoteMessageStatus(data.messageId, messageStatus);
       final attachment =
-          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String? quoteContent) {
-        return Message(
-            messageId: data.messageId,
-            conversationId: data.conversationId!,
-            userId: data.userId,
-            category: data.category!,
-            content: attachment.attachmentId,
-            mediaUrl: null,
-            mediaMimeType: attachment.mimeType,
-            mediaSize: attachment.size,
-            mediaWidth: attachment.width,
-            mediaHeight: attachment.height,
-            thumbImage: attachment.thumbnail,
-            mediaKey: attachment.key,
-            mediaDigest: attachment.digest,
-            status: messageStatus,
-            createdAt: data.createdAt,
-            mediaStatus: MediaStatus.canceled,
-            quoteMessageId: data.quoteMessageId,
-            quoteContent: quoteContent);
-      });
+          AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plainText));
+      final message = await _generateMessage(
+          data,
+          (String? quoteContent) => Message(
+              messageId: data.messageId,
+              conversationId: data.conversationId!,
+              userId: data.userId,
+              category: data.category!,
+              content: attachment.attachmentId,
+              mediaUrl: null,
+              mediaMimeType: attachment.mimeType,
+              mediaSize: attachment.size,
+              mediaWidth: attachment.width,
+              mediaHeight: attachment.height,
+              thumbImage: attachment.thumbnail,
+              mediaKey: attachment.key,
+              mediaDigest: attachment.digest,
+              status: messageStatus,
+              createdAt: data.createdAt,
+              mediaStatus: MediaStatus.canceled,
+              quoteMessageId: data.quoteMessageId,
+              quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
       if (_photoAutoDownload)
         await _attachmentUtil.downloadAttachment(
@@ -336,32 +322,32 @@ class DecryptMessage extends Injector {
         await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       final attachment =
-          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String? quoteContent) {
-        return Message(
-            messageId: data.messageId,
-            conversationId: data.conversationId!,
-            userId: data.userId,
-            category: data.category!,
-            content: attachment.attachmentId,
-            name: attachment.name,
-            mediaMimeType: attachment.mimeType,
-            mediaDuration: attachment.duration.toString(),
-            mediaSize: attachment.size,
-            mediaWidth: attachment.width,
-            mediaHeight: attachment.height,
-            thumbImage: attachment.thumbnail,
-            mediaKey: attachment.key,
-            mediaDigest: attachment.digest,
-            status: messageStatus,
-            createdAt: data.createdAt,
-            mediaStatus: MediaStatus.canceled,
-            quoteMessageId: data.quoteMessageId,
-            quoteContent: quoteContent);
-      });
+          AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final message = await _generateMessage(
+          data,
+          (String? quoteContent) => Message(
+              messageId: data.messageId,
+              conversationId: data.conversationId!,
+              userId: data.userId,
+              category: data.category!,
+              content: attachment.attachmentId,
+              name: attachment.name,
+              mediaMimeType: attachment.mimeType,
+              mediaDuration: attachment.duration.toString(),
+              mediaSize: attachment.size,
+              mediaWidth: attachment.width,
+              mediaHeight: attachment.height,
+              thumbImage: attachment.thumbnail,
+              mediaKey: attachment.key,
+              mediaDigest: attachment.digest,
+              status: messageStatus,
+              createdAt: data.createdAt,
+              mediaStatus: MediaStatus.canceled,
+              quoteMessageId: data.quoteMessageId,
+              quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
       if (_videoAutoDownload)
         await _attachmentUtil.downloadAttachment(
@@ -376,28 +362,28 @@ class DecryptMessage extends Injector {
         await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       final attachment =
-          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String? quoteContent) {
-        return Message(
-            messageId: data.messageId,
-            conversationId: data.conversationId!,
-            userId: data.userId,
-            category: data.category!,
-            content: attachment.attachmentId,
-            name: attachment.name,
-            mediaMimeType: attachment.mimeType,
-            mediaSize: attachment.size,
-            mediaKey: attachment.key,
-            mediaDigest: attachment.digest,
-            status: messageStatus,
-            createdAt: data.createdAt,
-            mediaStatus: MediaStatus.canceled,
-            quoteMessageId: data.quoteMessageId,
-            quoteContent: quoteContent);
-      });
+          AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final message = await _generateMessage(
+          data,
+          (String? quoteContent) => Message(
+              messageId: data.messageId,
+              conversationId: data.conversationId!,
+              userId: data.userId,
+              category: data.category!,
+              content: attachment.attachmentId,
+              name: attachment.name,
+              mediaMimeType: attachment.mimeType,
+              mediaSize: attachment.size,
+              mediaKey: attachment.key,
+              mediaDigest: attachment.digest,
+              status: messageStatus,
+              createdAt: data.createdAt,
+              mediaStatus: MediaStatus.canceled,
+              quoteMessageId: data.quoteMessageId,
+              quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
       if (_fileAutoDownload)
         await _attachmentUtil.downloadAttachment(
@@ -412,29 +398,29 @@ class DecryptMessage extends Injector {
         await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       final attachment =
-          AttachmentMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
-      final message = await _generateMessage(data, (String? quoteContent) {
-        return Message(
-            messageId: data.messageId,
-            conversationId: data.conversationId!,
-            userId: data.userId,
-            category: data.category!,
-            content: attachment.attachmentId,
-            name: attachment.name,
-            mediaMimeType: attachment.mimeType,
-            mediaSize: attachment.size,
-            mediaKey: attachment.key,
-            mediaDigest: attachment.digest,
-            mediaWaveform: attachment.waveform,
-            status: messageStatus,
-            createdAt: data.createdAt,
-            mediaStatus: MediaStatus.pending,
-            quoteMessageId: data.quoteMessageId,
-            quoteContent: quoteContent);
-      });
+          AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final message = await _generateMessage(
+          data,
+          (String? quoteContent) => Message(
+              messageId: data.messageId,
+              conversationId: data.conversationId!,
+              userId: data.userId,
+              category: data.category!,
+              content: attachment.attachmentId,
+              name: attachment.name,
+              mediaMimeType: attachment.mimeType,
+              mediaSize: attachment.size,
+              mediaKey: attachment.key,
+              mediaDigest: attachment.digest,
+              mediaWaveform: attachment.waveform,
+              status: messageStatus,
+              createdAt: data.createdAt,
+              mediaStatus: MediaStatus.pending,
+              quoteMessageId: data.quoteMessageId,
+              quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
       await _attachmentUtil.downloadAttachment(
         messageId: message.messageId,
@@ -448,14 +434,14 @@ class DecryptMessage extends Injector {
         await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       final stickerMessage =
-          StickerMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
+          StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final sticker = await database.stickerDao
           .getStickerByUnique(stickerMessage.stickerId);
       if (sticker == null) {
-        refreshSticker(stickerMessage.stickerId);
+        await refreshSticker(stickerMessage.stickerId);
       }
       final message = Message(
           messageId: data.messageId,
@@ -475,25 +461,25 @@ class DecryptMessage extends Injector {
         await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       final contactMessage =
-          ContactMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
+          ContactMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final user = await syncUser(contactMessage.userId);
-      final message = await _generateMessage(data, (String? quoteContent) {
-        return Message(
-            messageId: data.messageId,
-            conversationId: data.conversationId!,
-            userId: data.userId,
-            category: data.category!,
-            content: plainText,
-            name: user.fullName,
-            sharedUserId: contactMessage.userId,
-            status: messageStatus,
-            createdAt: data.createdAt,
-            quoteMessageId: data.quoteMessageId,
-            quoteContent: quoteContent);
-      });
+      final message = await _generateMessage(
+          data,
+          (String? quoteContent) => Message(
+              messageId: data.messageId,
+              conversationId: data.conversationId!,
+              userId: data.userId,
+              category: data.category!,
+              content: plainText,
+              name: user.fullName,
+              sharedUserId: contactMessage.userId,
+              status: messageStatus,
+              createdAt: data.createdAt,
+              quoteMessageId: data.quoteMessageId,
+              quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isLive) {
       String plain;
@@ -501,10 +487,10 @@ class DecryptMessage extends Injector {
         await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       final liveMessage =
-          LiveMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
+          LiveMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId!,
@@ -523,13 +509,13 @@ class DecryptMessage extends Injector {
         await _updateRemoteMessageStatus(data.messageId, messageStatus);
         return;
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       // ignore: unused_local_variable todo check location
       LocationMessage? locationMessage;
       try {
         locationMessage =
-            LocationMessage.fromJson(await LoadBalancerUtils.jsonDecode(plain));
+            LocationMessage.fromJson(await jsonDecodeWithIsolate(plain));
       } catch (e) {
         debugPrint(e.toString());
       }
@@ -553,7 +539,7 @@ class DecryptMessage extends Injector {
       if (data.category == MessageCategory.signalPost) {
         plain = 'SignalPost';
       } else {
-        plain = utf8.decode(base64.decode(plainText));
+        plain = await _decodeWithIsolate(plainText);
       }
       final message = Message(
         messageId: data.messageId,
@@ -623,7 +609,7 @@ class DecryptMessage extends Injector {
       return;
     } else if (systemMessage.action == MessageAction.create) {
     } else if (systemMessage.action == MessageAction.role) {
-      database.participantsDao.updateParticipantRole(
+      await database.participantsDao.updateParticipantRole(
         data.conversationId!,
         systemMessage.participantId!,
         systemMessage.role!,
@@ -698,5 +684,15 @@ class DecryptMessage extends Injector {
 
   void syncSession() {}
 }
+
+dynamic _jsonDecode(String encoded) => jsonDecode(_decode(encoded));
+
+String _decode(String encoded) => utf8.decode(base64Decode(encoded));
+
+Future<dynamic> _jsonDecodeWithIsolate(String encoded) =>
+    runLoadBalancer(_jsonDecode, encoded);
+
+Future<String> _decodeWithIsolate(String encoded) =>
+    runLoadBalancer(_decode, encoded);
 
 typedef MessageGenerator = Message Function(String? quoteContent);

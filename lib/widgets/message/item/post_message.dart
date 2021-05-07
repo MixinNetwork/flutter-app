@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/utils/markdown.dart';
-import 'package:flutter_app/utils/uri_utils.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:markdown/markdown.dart';
 import 'package:provider/provider.dart';
 
+import '../../../constants/resources.dart';
+import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../utils/markdown.dart';
+import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
 import '../../full_screen_portal.dart';
 import '../../interacter_decorated_box.dart';
@@ -100,24 +100,22 @@ class PostPreview extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) {
-    return InteractableDecoratedBox(
-      decoration: BoxDecoration(
-        color: BrightnessData.themeOf(context).background,
-      ),
-      onTap: () {
-        context.read<FullScreenVisibleCubit>().emit(false);
-      },
-      child: Padding(
-        padding: const EdgeInsets.only(top: 32),
-        child: Markdown(
-          data: message.thumbImage ?? message.content!,
-          extensionSet: ExtensionSet.gitHubWeb,
-          styleSheet: markdownStyleSheet(context),
-          onTapLink: (String text, String? href, String title) =>
-              openUri(href!),
+  Widget build(BuildContext context) => InteractableDecoratedBox(
+        decoration: BoxDecoration(
+          color: BrightnessData.themeOf(context).background,
         ),
-      ),
-    );
-  }
+        onTap: () {
+          context.read<FullScreenVisibleCubit>().emit(false);
+        },
+        child: Padding(
+          padding: const EdgeInsets.only(top: 32),
+          child: Markdown(
+            data: message.thumbImage ?? message.content!,
+            extensionSet: ExtensionSet.gitHubWeb,
+            styleSheet: markdownStyleSheet(context),
+            onTapLink: (String text, String? href, String title) =>
+                openUri(href!),
+          ),
+        ),
+      );
 }

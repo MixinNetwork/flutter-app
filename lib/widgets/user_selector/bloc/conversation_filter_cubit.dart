@@ -1,10 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/db/extension/conversation.dart';
-import 'package:flutter_app/db/extension/user.dart';
-import 'package:flutter_app/utils/sort.dart';
+
+import '../../../account/account_server.dart';
+import '../../../db/extension/conversation.dart';
+import '../../../db/extension/user.dart';
+import '../../../db/mixin_database.dart';
+import '../../../utils/sort.dart';
 
 part 'conversation_filter_state.dart';
 
@@ -86,7 +87,7 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
         return e.ownerIdentityNumber.indexOf(keyword);
       }));
 
-    final where = (User element) =>
+    bool where(User element) =>
         (element.fullName != null &&
             element.fullName!.toLowerCase().contains(keyword)) ||
         element.identityNumber.contains(keyword);

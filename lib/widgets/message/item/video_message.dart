@@ -2,16 +2,15 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart' hide Offset, Message;
-import 'package:flutter_app/enum/media_status.dart';
-import 'package:flutter_app/utils/uri_utils.dart';
-import 'package:flutter_app/widgets/message/item/quote_message.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
+import '../../../account/account_server.dart';
+import '../../../constants/resources.dart';
+import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../enum/media_status.dart';
+import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
 import '../../image.dart';
 import '../../interacter_decorated_box.dart';
@@ -19,6 +18,7 @@ import '../../status.dart';
 import '../message_bubble.dart';
 import '../message_datetime.dart';
 import '../message_status.dart';
+import 'quote_message.dart';
 
 class VideoMessageWidget extends StatelessWidget {
   const VideoMessageWidget({
@@ -110,7 +110,7 @@ class VideoMessageWidget extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.all(4),
                                 child: Text(
-                                  '${duration.inMinutes.remainder(60)}:${(duration.inSeconds.remainder(60))}',
+                                  '${duration.inMinutes.remainder(60)}:${duration.inSeconds.remainder(60)}',
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: BrightnessData.themeOf(context).text,

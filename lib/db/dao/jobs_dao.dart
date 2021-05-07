@@ -1,7 +1,8 @@
-import 'package:flutter_app/constants/constants.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../constants/constants.dart';
+import '../mixin_database.dart';
 
 part 'jobs_dao.g.dart';
 
@@ -23,64 +24,52 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 
-  Future<void> deleteJobs(List<String> jobIds) async {
-    return await batch(
-        (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds))});
-  }
+  Future<void> deleteJobs(List<String> jobIds) => batch(
+      (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.isIn(jobIds))});
 
-  Future<void> deleteJobById(String jobId) async {
-    return await batch(
-        (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
-  }
+  Future<void> deleteJobById(String jobId) => batch(
+      (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
 
   Stream<List<Job>> findAckJobs() {
     final query = select(db.jobs)
-      ..where((Jobs row) {
-        return row.action.equals(acknowledgeMessageReceipts);
-      })
+      ..where((Jobs row) => row.action.equals(acknowledgeMessageReceipts))
       ..limit(100);
     return query.watch();
   }
 
   Stream<List<Job>> findRecallMessageJobs() {
     final query = select(db.jobs)
-      ..where((Jobs row) {
-        return row.action.equals(recallMessage);
-      })
+      ..where((Jobs row) => row.action.equals(recallMessage))
       ..limit(100);
     return query.watch();
   }
 
   Stream<List<Job>> findSendingJobs() {
     final query = select(db.jobs)
-      ..where((Jobs row) {
-        return row.action.equals(sendingMessage);
-      })
+      ..where((Jobs row) => row.action.equals(sendingMessage))
       ..limit(100);
     return query.watch();
   }
 
-  Future<List<Job>> findCreateMessageJobs() {
-    return customSelect(
-        'SELECT * FROM jobs WHERE `action` = \'CREATE_MESSAGE\' ORDER BY created_at ASC LIMIT 100',
-        readsFrom: {db.jobs}).map((QueryRow row) {
-      return Job(
-          jobId: row.read<String>('jobId'),
-          action: row.read<String>('action'),
-          orderId: row.read<int>('orderId'),
-          priority: row.read<int>('priority'),
-          userId: row.read<String>('userId'),
-          blazeMessage: row.read<String>('jobId'),
-          conversationId: row.read<String>('jobId'),
-          resendMessageId: row.read<String>('resendMessageId'),
-          runCount: row.read<int>('runCount'),
-          createdAt: row.read<DateTime>('createdAt'));
-    }).get();
-  }
+  Future<List<Job>> findCreateMessageJobs() => customSelect(
+              'SELECT * FROM jobs WHERE `action` = \'CREATE_MESSAGE\' ORDER BY created_at ASC LIMIT 100',
+              readsFrom: {
+            db.jobs
+          })
+          .map((QueryRow row) => Job(
+              jobId: row.read<String>('jobId'),
+              action: row.read<String>('action'),
+              orderId: row.read<int>('orderId'),
+              priority: row.read<int>('priority'),
+              userId: row.read<String>('userId'),
+              blazeMessage: row.read<String>('jobId'),
+              conversationId: row.read<String>('jobId'),
+              resendMessageId: row.read<String>('resendMessageId'),
+              runCount: row.read<int>('runCount'),
+              createdAt: row.read<DateTime>('createdAt')))
+          .get();
 
-  void insertAll(List<Job> jobs) async {
-    await batch((batch) {
-      batch.insertAllOnConflictUpdate(db.jobs, jobs);
-    });
-  }
+  Future<void> insertAll(List<Job> jobs) => batch((batch) {
+        batch.insertAllOnConflictUpdate(db.jobs, jobs);
+      });
 }

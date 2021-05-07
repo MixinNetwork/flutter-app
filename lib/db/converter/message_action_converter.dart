@@ -1,5 +1,6 @@
-import 'package:flutter_app/enum/message_action.dart';
 import 'package:moor/moor.dart';
+
+import '../../enum/message_action.dart';
 
 class MessageActionConverter extends TypeConverter<MessageAction, String> {
   const MessageActionConverter();

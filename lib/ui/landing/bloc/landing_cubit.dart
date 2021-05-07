@@ -8,12 +8,13 @@ import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
+
+import '../../../bloc/subscribe_mixin.dart';
+import '../../home/bloc/multi_auth_cubit.dart';
 
 part 'landing_state.dart';
 
@@ -51,7 +52,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           .getProvisioningId(Platform.operatingSystem);
       keyPair = signal.Curve.generateKeyPair();
       final pubKey =
-          Uri.encodeComponent(base64.encode(keyPair.publicKey.serialize()));
+          Uri.encodeComponent(base64Encode(keyPair.publicKey.serialize()));
 
       emit(state.copyWith(
         authUrl: 'mixin://device/auth?id=${rsp.data.deviceId}&pub_key=$pubKey',
@@ -115,7 +116,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
   FutureOr<Tuple2<Account, String>?> _verify(secret) async {
     try {
       final result =
-          signal.decrypt(base64.encode(keyPair.privateKey.serialize()), secret);
+          signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
       final msg = json.decode(String.fromCharCodes(result));
 
       final edKeyPair = ed.generateKey();
@@ -131,14 +132,14 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           sessionId: msg['session_id'],
           platform: 'Desktop',
           purpose: 'SESSION',
-          sessionSecret: base64.encode(edKeyPair.publicKey!.bytes),
+          sessionSecret: base64Encode(edKeyPair.publicKey!.bytes),
           appVersion: '0.0.1',
           registrationId: registrationId,
           platformVersion: 'OS X 10.15.6',
         ),
       );
 
-      final privateKey = base64.encode(edKeyPair.privateKey!.bytes);
+      final privateKey = base64Encode(edKeyPair.privateKey!.bytes);
 
       return Tuple2(
         rsp.data,

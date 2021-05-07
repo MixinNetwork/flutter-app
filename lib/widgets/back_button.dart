@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/widgets/action_button.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
+import '../constants/resources.dart';
+import 'action_button.dart';
+import 'brightness_observer.dart';
 
 class MixinBackButton extends StatelessWidget {
   const MixinBackButton({

@@ -3,13 +3,6 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/widgets/avatar_view/avatar_view.dart';
-import 'package:flutter_app/widgets/user_selector/conversation_selector.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -18,11 +11,18 @@ import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../../account/account_server.dart';
+import '../../../../constants/resources.dart';
+import '../../../../db/mixin_database.dart';
+import '../../../../enum/message_category.dart';
+import '../../../../generated/l10n.dart';
 import '../../../action_button.dart';
+import '../../../avatar_view/avatar_view.dart';
 import '../../../brightness_observer.dart';
 import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../toast.dart';
+import '../../../user_selector/conversation_selector.dart';
 
 class ImagePreviewPage extends HookWidget {
   const ImagePreviewPage({
@@ -253,7 +253,7 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesShareSvg,
             size: 20,
             onTap: () async {
-              var accountServer = context.read<AccountServer>();
+              final accountServer = context.read<AccountServer>();
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: true,

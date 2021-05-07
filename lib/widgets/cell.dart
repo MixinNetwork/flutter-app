@@ -1,10 +1,10 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/ui/home/route/responsive_navigator_cubit.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
+import '../constants/resources.dart';
+import '../ui/home/route/responsive_navigator_cubit.dart';
+import 'brightness_observer.dart';
 import 'interacter_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
@@ -117,11 +117,9 @@ class _Arrow extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return SvgPicture.asset(
-      Resources.assetsImagesIcArrowRightSvg,
-      width: 30,
-      height: 30,
-    );
-  }
+  Widget build(BuildContext context) => SvgPicture.asset(
+        Resources.assetsImagesIcArrowRightSvg,
+        width: 30,
+        height: 30,
+      );
 }

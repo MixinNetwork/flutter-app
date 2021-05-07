@@ -1,13 +1,14 @@
 import 'dart:async';
 
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/bloc/paging/paging_bloc.dart';
-import 'package:flutter_app/ui/home/bloc/slide_category_cubit.dart';
 import 'package:flutter_app_icon_badge/flutter_app_icon_badge.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+
+import '../../../bloc/paging/paging_bloc.dart';
+import '../../../bloc/subscribe_mixin.dart';
+import '../../../db/database.dart';
+import '../../../db/mixin_database.dart';
+import 'slide_category_cubit.dart';
 
 class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     with SubscribeMixin {
@@ -98,7 +99,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
         );
         break;
       default:
-        return null;
+        return;
     }
     final bloc = _map[state];
     emit(bloc!.state);
@@ -113,10 +114,13 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
   }
 
   Future<void> _initBadge() async {
-    final updateBadge = (int? count) async {
-      if ((count ?? 0) == 0) return await FlutterAppIconBadge.removeBadge();
+    Future<void> updateBadge(int? count) async {
+      if ((count ?? 0) == 0) {
+        await FlutterAppIconBadge.removeBadge();
+        return;
+      }
       await FlutterAppIconBadge.updateBadge(count!);
-    };
+    }
 
     final count = await database.conversationDao.allUnseenMessageCount();
     await updateBadge(count);
@@ -130,7 +134,7 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
     int limit,
     Future<int> Function() queryCount,
     Future<List<ConversationItem>> Function(int limit, int offset) queryRange,
-    Stream<Null> updateEvent,
+    Stream<void> updateEvent,
   )   : _queryCount = queryCount,
         _queryRange = queryRange,
         super(

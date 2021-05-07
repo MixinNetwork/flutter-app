@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
-import 'package:flutter_app/bloc/subscribe_mixin.dart';
-import 'package:flutter_app/db/dao/participants_dao.dart';
-import 'package:flutter_app/db/mixin_database.dart';
+import '../../../../bloc/subscribe_mixin.dart';
+import '../../../../db/dao/participants_dao.dart';
+import '../../../../db/mixin_database.dart';
 
 class AvatarCubit extends Cubit<List<User>> with SubscribeMixin {
   AvatarCubit(

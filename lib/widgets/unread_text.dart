@@ -17,27 +17,25 @@ class UnreadText extends StatelessWidget {
   final int count;
 
   @override
-  Widget build(BuildContext context) {
-    return Visibility(
-      visible: count > 0,
-      child: Container(
-        height: 20,
-        width: 26,
-        decoration: BoxDecoration(
-          color: backgroundColor,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          '${min(count, 99)}',
-          style: TextStyle(
-            color: textColor,
-            fontSize: 12,
-            fontWeight: fontWeight,
+  Widget build(BuildContext context) => Visibility(
+        visible: count > 0,
+        child: Container(
+          height: 20,
+          width: 26,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(10),
           ),
-          textAlign: TextAlign.center,
+          alignment: Alignment.center,
+          child: Text(
+            '${min(count, 99)}',
+            style: TextStyle(
+              color: textColor,
+              fontSize: 12,
+              fontWeight: fontWeight,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ),
-      ),
-    );
-  }
+      );
 }

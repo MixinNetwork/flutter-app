@@ -25,12 +25,11 @@ class ConversationFilterState extends Equatable {
     List<User>? friends,
     List<User>? bots,
     String? keyword,
-  }) {
-    return ConversationFilterState(
-      recentConversations: recentConversations ?? this.recentConversations,
-      friends: friends ?? this.friends,
-      bots: bots ?? this.bots,
-      keyword: keyword ?? this.keyword,
-    );
-  }
+  }) =>
+      ConversationFilterState(
+        recentConversations: recentConversations ?? this.recentConversations,
+        friends: friends ?? this.friends,
+        bots: bots ?? this.bots,
+        keyword: keyword ?? this.keyword,
+      );
 }
