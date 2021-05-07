@@ -10,10 +10,10 @@ import 'package:objectbox/flatbuffers/flat_buffers.dart' as fb;
 import 'package:objectbox/internal.dart'; // generated code can access "internal" functionality
 import 'package:objectbox/objectbox.dart';
 
-import 'crypto/signal/vo/Identity.dart';
-import 'crypto/signal/vo/PreKey.dart';
-import 'crypto/signal/vo/Session.dart';
-import 'crypto/signal/vo/SignedPreKey.dart';
+import 'crypto/signal/vo/identity.dart';
+import 'crypto/signal/vo/pre_key.dart';
+import 'crypto/signal/vo/session.dart';
+import 'crypto/signal/vo/signed_pre_key.dart';
 
 export 'package:objectbox/objectbox.dart'; // so that callers only have to import this file
 

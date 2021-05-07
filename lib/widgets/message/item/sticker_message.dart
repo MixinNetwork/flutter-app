@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lottie/lottie.dart';
+
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/dp_utils.dart';
 import '../../cache_image.dart';
-
 import '../message_bubble.dart';
 import '../message_datetime.dart';
 import '../message_status.dart';
@@ -75,7 +76,14 @@ class StickerMessageWidget extends StatelessWidget {
               height: height,
               width: width,
             ),
-          if (message.assetUrl != null)
+          if (message.assetType == 'JSON')
+            Lottie.network(
+              message.assetUrl!,
+              height: height,
+              width: width,
+              fit: BoxFit.cover,
+            )
+          else if (message.assetUrl != null)
             CacheImage(
               message.assetUrl!,
               height: height,
