@@ -224,110 +224,115 @@ class _QuoteMessageBase extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: () {
-          if (onTap != null) {
-            onTap!();
-            return;
-          }
-          context.read<MessageBloc>().scrollTo(messageId);
-        },
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          height: 50,
-          color: inputMode ? null : const Color.fromRGBO(0, 0, 0, 0.04),
-          margin: inputMode ? null : const EdgeInsets.all(2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (inputMode)
-                      Container(
-                        width: 6,
-                        color: userId?.isNotEmpty == true
-                            ? getNameColorById(userId!)
-                            : BrightnessData.themeOf(context).accent,
+  Widget build(BuildContext context) {
+    final iterator = LineSplitter.split(description).iterator;
+    final _description =
+        '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
+    return GestureDetector(
+      onTap: () {
+        if (onTap != null) {
+          onTap!();
+          return;
+        }
+        context.read<MessageBloc>().scrollTo(messageId);
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        height: 50,
+        color: inputMode ? null : const Color.fromRGBO(0, 0, 0, 0.04),
+        margin: inputMode ? null : const EdgeInsets.all(2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (inputMode)
+                    Container(
+                      width: 6,
+                      color: userId?.isNotEmpty == true
+                          ? getNameColorById(userId!)
+                          : BrightnessData.themeOf(context).accent,
+                    ),
+                  if (!inputMode)
+                    SvgPicture.asset(
+                      Resources.assetsImagesQuoteBorderSvg,
+                      height: 50,
+                      width: 6,
+                      color: userId?.isNotEmpty == true
+                          ? getNameColorById(userId!)
+                          : BrightnessData.themeOf(context).accent,
+                    ),
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.only(
+                        top: 6,
+                        left: 6,
+                        bottom: 6,
                       ),
-                    if (!inputMode)
-                      SvgPicture.asset(
-                        Resources.assetsImagesQuoteBorderSvg,
-                        height: 50,
-                        width: 6,
-                        color: userId?.isNotEmpty == true
-                            ? getNameColorById(userId!)
-                            : BrightnessData.themeOf(context).accent,
-                      ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.only(
-                          top: 6,
-                          left: 6,
-                          bottom: 6,
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            if (name != null)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          if (name != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                name!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: BrightnessData.themeOf(context).accent,
+                                  height: 1,
+                                ),
+                                maxLines: 1,
+                              ),
+                            ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (icon != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 4),
+                                  child: icon,
+                                ),
+                              Flexible(
                                 child: Text(
-                                  name!,
+                                  _description,
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color:
-                                        BrightnessData.themeOf(context).accent,
+                                    fontSize: 12,
+                                    color: BrightnessData.themeOf(context)
+                                        .secondaryText,
                                     height: 1,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (icon != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 4),
-                                    child: icon,
-                                  ),
-                                Flexible(
-                                  child: Text(
-                                    description,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: BrightnessData.themeOf(context)
-                                          .secondaryText,
-                                      height: 1,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (image != null)
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(6),
+                  child: image,
                 ),
               ),
-              const SizedBox(width: 8),
-              if (image != null)
-                SizedBox(
-                  width: 48,
-                  height: 48,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: image,
-                  ),
-                ),
-            ],
-          ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
