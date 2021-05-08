@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -20,6 +21,7 @@ import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/participants_cubit.dart';
 import '../ui/home/bloc/quote_message_cubit.dart';
 import '../utils/file.dart';
+import '../utils/hook.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/text_utils.dart';
 import 'action_button.dart';
@@ -32,89 +34,135 @@ import 'message/item/quote_message.dart';
 import 'sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import 'sticker_page/sticker_page.dart';
 
-class InputContainer extends StatelessWidget {
+class InputContainer extends HookWidget {
   const InputContainer({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-        create: (context) => MentionCubit(
-          userDao: context.read<AccountServer>().database.userDao,
-          multiAuthCubit: BlocProvider.of<MultiAuthCubit>(context),
+  Widget build(BuildContext context) {
+    final mentionCubit = useBloc(
+      () => MentionCubit(
+        userDao: context.read<AccountServer>().database.userDao,
+        multiAuthCubit: BlocProvider.of<MultiAuthCubit>(context),
+        participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
+      ),
+    );
+
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) =>
+          (state?.isLoaded ?? false) ? state?.conversationId : null,
+    );
+
+    final draft =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversation?.draft,
+    );
+
+    final textEditingController = useMemoized(
+      () {
+        final textEditingController = HighlightTextEditingController(
+          initialText: draft,
+          highlightTextStyle: TextStyle(
+            color: BrightnessData.themeOf(context).accent,
+          ),
           participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
-        ),
-        child: Builder(
-          builder: (context) => ChangeNotifierProvider<TextEditingController>(
-            create: (BuildContext _) {
-              final textEditingController = HighlightTextEditingController(
-                highlightTextStyle: TextStyle(
-                  color: BrightnessData.themeOf(context).accent,
-                ),
-                participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
+        )..selection = TextSelection.fromPosition(
+            TextPosition(
+              affinity: TextAffinity.downstream,
+              offset: draft?.length ?? 0,
+            ),
+          );
+        return textEditingController;
+      },
+      [draft, conversationId],
+    );
+
+    useEffect(() {
+      var text = textEditingController.text;
+
+      void onListener() {
+        text = textEditingController.text;
+        final mention = mentionRegExp.stringMatch(text)?.replaceFirst('@', '');
+        mentionCubit.send(mention);
+      }
+
+      textEditingController.addListener(onListener);
+
+      return () {
+        textEditingController.removeListener(onListener);
+        if (conversationId != null) {
+          context.read<AccountServer>().database.conversationDao.updateDraft(
+                conversationId,
+                textEditingController.text,
               );
-              textEditingController.addListener(() {
-                final mention = mentionRegExp
-                    .stringMatch(textEditingController.text)
-                    ?.replaceFirst('@', '');
-                BlocProvider.of<MentionCubit>(context).send(mention);
-              });
-              return textEditingController;
-            },
-            child: LayoutBuilder(
-              builder: (context, BoxConstraints constraints) =>
-                  MentionPanelPortalEntry(
-                constraints: constraints,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const _QuoteMessage(),
-                    SizedBox(
-                      height: 56,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: BrightnessData.themeOf(context).primary,
+        }
+      };
+    }, [identityHashCode(textEditingController)]);
+
+    return BlocProvider.value(
+      value: mentionCubit,
+      child: Builder(
+        builder: (context) =>
+            ChangeNotifierProvider<TextEditingController>.value(
+          key: ValueKey(identityHashCode(textEditingController)),
+          value: textEditingController,
+          child: LayoutBuilder(
+            builder: (context, BoxConstraints constraints) =>
+                MentionPanelPortalEntry(
+              constraints: constraints,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const _QuoteMessage(),
+                  SizedBox(
+                    height: 56,
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: BrightnessData.themeOf(context).primary,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              _FileButton(
-                                  actionColor:
-                                      BrightnessData.themeOf(context).icon),
-                              const SizedBox(width: 6),
-                              const _StickerButton(),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: ConstrainedBox(
-                                  constraints: const BoxConstraints(
-                                    minHeight: 32,
-                                  ),
-                                  child: const _SendTextField(),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            _FileButton(
+                                actionColor:
+                                    BrightnessData.themeOf(context).icon),
+                            const SizedBox(width: 6),
+                            const _StickerButton(),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: ConstrainedBox(
+                                constraints: const BoxConstraints(
+                                  minHeight: 32,
                                 ),
+                                child: const _SendTextField(),
                               ),
-                              const SizedBox(width: 16),
-                              ActionButton(
-                                name: Resources.assetsImagesIcSendSvg,
-                                color: BrightnessData.themeOf(context).icon,
-                                onTap: () => _sendMessage(context),
-                              ),
-                            ],
-                          ),
+                            ),
+                            const SizedBox(width: 16),
+                            ActionButton(
+                              name: Resources.assetsImagesIcSendSvg,
+                              color: BrightnessData.themeOf(context).icon,
+                              onTap: () => _sendMessage(context),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 void _sendMessage(BuildContext context) {
@@ -153,8 +201,8 @@ class _SendTextField extends StatelessWidget {
               const SingleActivator(LogicalKeyboardKey.enter):
                   const SendMessageIntent(),
             // todo remove, flutter sdk error
-              const SingleActivator(LogicalKeyboardKey(0x100070028)):
-                  const SendMessageIntent(),
+            const SingleActivator(LogicalKeyboardKey(0x100070028)):
+                const SendMessageIntent(),
           },
           actions: {
             SendMessageIntent: CallbackAction<Intent>(
@@ -164,7 +212,7 @@ class _SendTextField extends StatelessWidget {
           child: TextField(
             maxLines: 5,
             minLines: 1,
-            controller: context.read<TextEditingController>(),
+            controller: context.watch<TextEditingController>(),
             style: TextStyle(
               color: BrightnessData.themeOf(context).text,
               fontSize: 14,
@@ -431,7 +479,8 @@ class HighlightTextEditingController extends TextEditingController {
   HighlightTextEditingController({
     required this.highlightTextStyle,
     required this.participantsCubit,
-  });
+    String? initialText,
+  }) : super(text: initialText);
 
   final TextStyle highlightTextStyle;
   final ParticipantsCubit participantsCubit;

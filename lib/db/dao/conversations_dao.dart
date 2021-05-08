@@ -187,10 +187,14 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
         );
       });
 
-  Future updateMuteUntil(String conversationId, String muteUntil) async {
-    await (update(db.conversations)
-          ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .write(ConversationsCompanion(
-            muteUntil: Value(DateTime.tryParse(muteUntil))));
-  }
+  Future<int> updateMuteUntil(String conversationId, String muteUntil) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(
+              muteUntil: Value(DateTime.tryParse(muteUntil))));
+
+  Future<int> updateDraft(String conversationId, String draft) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(draft: Value(draft)));
 }

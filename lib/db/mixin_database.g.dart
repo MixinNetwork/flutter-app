@@ -12450,7 +12450,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> chatConversations(int limit, int offset) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\') AND c.status = 2\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\') AND c.status = 2\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
         variables: [
           Variable<int>(limit),
           Variable<int>(offset)
@@ -12467,6 +12467,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12520,7 +12521,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> contactConversations(int limit, int offset) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
         variables: [
           Variable<int>(limit),
           Variable<int>(offset)
@@ -12537,6 +12538,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12590,7 +12592,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> strangerConversations(int limit, int offset) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
         variables: [
           Variable<int>(limit),
           Variable<int>(offset)
@@ -12607,6 +12609,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12659,7 +12662,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> groupConversations(int limit, int offset) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
         variables: [
           Variable<int>(limit),
           Variable<int>(offset)
@@ -12676,6 +12679,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12729,7 +12733,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> botConversations(int limit, int offset) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
         variables: [
           Variable<int>(limit),
           Variable<int>(offset)
@@ -12746,6 +12750,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12788,7 +12793,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> conversationItem(String id) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
         variables: [
           Variable<String>(id)
         ],
@@ -12804,6 +12809,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12846,7 +12852,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> conversationByOwnerId(String? id) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE ou.relationship = \'FRIEND\' AND c.owner_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE ou.relationship = \'FRIEND\' AND c.owner_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
         variables: [
           Variable<String?>(id)
         ],
@@ -12862,6 +12868,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12915,7 +12922,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationItem> conversationItems() {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\')\n                    AND c.status = 2\n                    ORDER BY c.pin_time DESC, c.last_message_created_at DESC',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\')\n                    AND c.status = 2\n                    ORDER BY c.pin_time DESC, c.last_message_created_at DESC',
         variables: [],
         readsFrom: {
           conversations,
@@ -12929,6 +12936,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -12993,7 +13001,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ConversationItem> conversationsByCircleId(
       String circle_id, int limit, int offset) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM circle_conversations cc\n            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE cc.circle_id = :circle_id\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            mm.mentions AS mentions,\n            ou.relationship AS relationship\n            FROM circle_conversations cc\n            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN message_mentions mm ON mm.message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE cc.circle_id = :circle_id\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
         variables: [
           Variable<String>(circle_id),
           Variable<int>(limit),
@@ -13012,6 +13020,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        draft: row.read<String?>('draft'),
         groupName: row.read<String?>('groupName'),
         status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
         lastReadMessageId: row.read<String?>('lastReadMessageId'),
@@ -14143,6 +14152,7 @@ class ConversationItem {
   final String conversationId;
   final String? groupIconUrl;
   final ConversationCategory? category;
+  final String? draft;
   final String? groupName;
   final ConversationStatus status;
   final String? lastReadMessageId;
@@ -14175,6 +14185,7 @@ class ConversationItem {
     required this.conversationId,
     this.groupIconUrl,
     this.category,
+    this.draft,
     this.groupName,
     required this.status,
     this.lastReadMessageId,
@@ -14212,43 +14223,43 @@ class ConversationItem {
           $mrjc(
               category.hashCode,
               $mrjc(
-                  groupName.hashCode,
+                  draft.hashCode,
                   $mrjc(
-                      status.hashCode,
+                      groupName.hashCode,
                       $mrjc(
-                          lastReadMessageId.hashCode,
+                          status.hashCode,
                           $mrjc(
-                              unseenMessageCount.hashCode,
+                              lastReadMessageId.hashCode,
                               $mrjc(
-                                  ownerId.hashCode,
+                                  unseenMessageCount.hashCode,
                                   $mrjc(
-                                      pinTime.hashCode,
+                                      ownerId.hashCode,
                                       $mrjc(
-                                          muteUntil.hashCode,
+                                          pinTime.hashCode,
                                           $mrjc(
-                                              avatarUrl.hashCode,
+                                              muteUntil.hashCode,
                                               $mrjc(
-                                                  name.hashCode,
+                                                  avatarUrl.hashCode,
                                                   $mrjc(
-                                                      ownerVerified.hashCode,
+                                                      name.hashCode,
                                                       $mrjc(
-                                                          ownerIdentityNumber
+                                                          ownerVerified
                                                               .hashCode,
                                                           $mrjc(
-                                                              ownerMuteUntil
+                                                              ownerIdentityNumber
                                                                   .hashCode,
                                                               $mrjc(
-                                                                  appId
+                                                                  ownerMuteUntil
                                                                       .hashCode,
                                                                   $mrjc(
-                                                                      content
+                                                                      appId
                                                                           .hashCode,
                                                                       $mrjc(
-                                                                          contentType
+                                                                          content
                                                                               .hashCode,
                                                                           $mrjc(
-                                                                              createdAt.hashCode,
-                                                                              $mrjc(lastMessageCreatedAt.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, $mrjc(mentions.hashCode, relationship.hashCode)))))))))))))))))))))))))))))));
+                                                                              contentType.hashCode,
+                                                                              $mrjc(createdAt.hashCode, $mrjc(lastMessageCreatedAt.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, $mrjc(mentions.hashCode, relationship.hashCode))))))))))))))))))))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -14256,6 +14267,7 @@ class ConversationItem {
           other.conversationId == this.conversationId &&
           other.groupIconUrl == this.groupIconUrl &&
           other.category == this.category &&
+          other.draft == this.draft &&
           other.groupName == this.groupName &&
           other.status == this.status &&
           other.lastReadMessageId == this.lastReadMessageId &&
@@ -14290,6 +14302,7 @@ class ConversationItem {
           ..write('conversationId: $conversationId, ')
           ..write('groupIconUrl: $groupIconUrl, ')
           ..write('category: $category, ')
+          ..write('draft: $draft, ')
           ..write('groupName: $groupName, ')
           ..write('status: $status, ')
           ..write('lastReadMessageId: $lastReadMessageId, ')

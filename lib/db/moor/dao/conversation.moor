@@ -11,7 +11,7 @@ WHERE  c.category IN ('CONTACT', 'GROUP') AND c.status = 2
 ORDER  BY c.pin_time DESC, c.last_message_created_at DESC;
 
 chatConversations AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -47,7 +47,7 @@ WHERE  c.category = 'CONTACT'
 ORDER  BY c.pin_time DESC, c.last_message_created_at DESC;
 
 contactConversations AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -86,7 +86,7 @@ ORDER  BY c.pin_time DESC,
           END DESC;
 
 strangerConversations AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -127,7 +127,7 @@ ORDER  BY c.pin_time DESC,
           END DESC;
 
 groupConversations AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -171,7 +171,7 @@ ORDER  BY c.pin_time DESC,
           END DESC;
 
 botConversations AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -200,7 +200,7 @@ botConversations AS ConversationItem:
             LIMIT :limit OFFSET :offset;
 
 conversationItem AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -228,7 +228,7 @@ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.catego
             DESC;
 
 conversationByOwnerId AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -260,7 +260,7 @@ allUnseenMessageCount:
 SELECT SUM(unseen_message_count) FROM conversations WHERE mute_until <= :now;
 
 conversationItems AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
@@ -303,7 +303,7 @@ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.catego
             m.created_at DESC;
 
 conversationsByCircleId AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+ SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
             c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
             c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
             ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
