@@ -147,9 +147,13 @@ class _SendTextField extends StatelessWidget {
             controller.value.composing.composed &&
             (mentionCubit.state.text?.isNotEmpty ?? true),
         builder: (context, sendable, child) => FocusableActionDetector(
+          autofocus: true,
           shortcuts: {
             if (sendable)
-              LogicalKeySet(LogicalKeyboardKey.enter):
+              const SingleActivator(LogicalKeyboardKey.enter):
+                  const SendMessageIntent(),
+            // todo remove, flutter sdk error
+              const SingleActivator(LogicalKeyboardKey(0x100070028)):
                   const SendMessageIntent(),
           },
           actions: {
