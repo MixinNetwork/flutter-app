@@ -36,7 +36,7 @@ class NotificationService extends WidgetsBindingObserver {
           .where(
               (event) => event.userId != context.read<AccountServer>().userId)
           .where((event) {
-            final muteUntil = event.groupName?.isNotEmpty == true
+            final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
                 : event.ownerMuteUntil;
             return muteUntil?.isAfter(DateTime.now()) != true;
@@ -46,7 +46,7 @@ class NotificationService extends WidgetsBindingObserver {
           .asyncMap((event) async {
             final name = conversationValidName(
               event.groupName,
-              event.userFullName,
+              event.senderFullName,
             );
 
             String? body;

@@ -11615,7 +11615,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.full_name       AS userFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil,\n       u.mute_until      AS ownerMuteUntil,\n       m.created_at      AS createdAt\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.user_id         AS senderId,\n       u.full_name       AS senderFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil,\n       ou.mute_until      AS ownerMuteUntil,\n       m.created_at      AS createdAt,\n       c.category        AS category\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users ou\n              ON c.owner_id = ou.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11629,7 +11629,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         messageId: row.read<String>('messageId'),
         conversationId: row.read<String>('conversationId'),
         userId: row.read<String>('userId'),
-        userFullName: row.read<String?>('userFullName'),
+        senderId: row.read<String>('senderId'),
+        senderFullName: row.read<String?>('senderFullName'),
         type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
         content: row.read<String?>('content'),
         status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
@@ -11641,6 +11642,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
         createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
       );
     });
   }
@@ -14066,7 +14069,8 @@ class NotificationMessage {
   final String messageId;
   final String conversationId;
   final String userId;
-  final String? userFullName;
+  final String senderId;
+  final String? senderFullName;
   final MessageCategory type;
   final String? content;
   final MessageStatus status;
@@ -14075,11 +14079,13 @@ class NotificationMessage {
   final DateTime? muteUntil;
   final DateTime? ownerMuteUntil;
   final DateTime createdAt;
+  final ConversationCategory? category;
   NotificationMessage({
     required this.messageId,
     required this.conversationId,
     required this.userId,
-    this.userFullName,
+    required this.senderId,
+    this.senderFullName,
     required this.type,
     this.content,
     required this.status,
@@ -14088,6 +14094,7 @@ class NotificationMessage {
     this.muteUntil,
     this.ownerMuteUntil,
     required this.createdAt,
+    this.category,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -14097,21 +14104,27 @@ class NotificationMessage {
           $mrjc(
               userId.hashCode,
               $mrjc(
-                  userFullName.hashCode,
+                  senderId.hashCode,
                   $mrjc(
-                      type.hashCode,
+                      senderFullName.hashCode,
                       $mrjc(
-                          content.hashCode,
+                          type.hashCode,
                           $mrjc(
-                              status.hashCode,
+                              content.hashCode,
                               $mrjc(
-                                  groupName.hashCode,
+                                  status.hashCode,
                                   $mrjc(
-                                      relationship.hashCode,
+                                      groupName.hashCode,
                                       $mrjc(
-                                          muteUntil.hashCode,
-                                          $mrjc(ownerMuteUntil.hashCode,
-                                              createdAt.hashCode))))))))))));
+                                          relationship.hashCode,
+                                          $mrjc(
+                                              muteUntil.hashCode,
+                                              $mrjc(
+                                                  ownerMuteUntil.hashCode,
+                                                  $mrjc(
+                                                      createdAt.hashCode,
+                                                      category
+                                                          .hashCode))))))))))))));
   @override
   bool operator ==(dynamic other) =>
       identical(this, other) ||
@@ -14119,7 +14132,8 @@ class NotificationMessage {
           other.messageId == this.messageId &&
           other.conversationId == this.conversationId &&
           other.userId == this.userId &&
-          other.userFullName == this.userFullName &&
+          other.senderId == this.senderId &&
+          other.senderFullName == this.senderFullName &&
           other.type == this.type &&
           other.content == this.content &&
           other.status == this.status &&
@@ -14127,14 +14141,16 @@ class NotificationMessage {
           other.relationship == this.relationship &&
           other.muteUntil == this.muteUntil &&
           other.ownerMuteUntil == this.ownerMuteUntil &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.category == this.category);
   @override
   String toString() {
     return (StringBuffer('NotificationMessage(')
           ..write('messageId: $messageId, ')
           ..write('conversationId: $conversationId, ')
           ..write('userId: $userId, ')
-          ..write('userFullName: $userFullName, ')
+          ..write('senderId: $senderId, ')
+          ..write('senderFullName: $senderFullName, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('status: $status, ')
@@ -14142,7 +14158,8 @@ class NotificationMessage {
           ..write('relationship: $relationship, ')
           ..write('muteUntil: $muteUntil, ')
           ..write('ownerMuteUntil: $ownerMuteUntil, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('category: $category')
           ..write(')'))
         .toString();
   }

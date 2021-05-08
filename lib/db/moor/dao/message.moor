@@ -172,20 +172,24 @@ notificationMessage AS NotificationMessage:
 SELECT m.message_id      AS messageId,
        m.conversation_id AS conversationId,
        u.user_id         AS userId,
-       u.full_name       AS userFullName,
+       u.user_id         AS senderId,
+       u.full_name       AS senderFullName,
        m.category        AS type,
        m.content         AS content,
        m.status          AS status,
        c.name            AS groupName,
        u.relationship    AS relationship,
        c.mute_until      AS muteUntil,
-       u.mute_until      AS ownerMuteUntil,
-       m.created_at      AS createdAt
+       ou.mute_until      AS ownerMuteUntil,
+       m.created_at      AS createdAt,
+       c.category        AS category
 FROM   messages m
        INNER JOIN users u
                ON m.user_id = u.user_id
        LEFT JOIN conversations c
               ON m.conversation_id = c.conversation_id
+       LEFT JOIN users ou
+              ON c.owner_id = ou.user_id
        LEFT JOIN message_mentions mm
               ON m.message_id = mm.message_id
 WHERE  m.message_id = :messageId
