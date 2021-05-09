@@ -52,11 +52,17 @@ class AccountServer {
     this.identityNumber = identityNumber;
     this.privateKey = PrivateKey(base64Decode(privateKey));
 
+    final tenSecond = const Duration(seconds: 10).inMilliseconds;
     client = Client(
       userId: userId,
       sessionId: sessionId,
       privateKey: privateKey,
       scp: scp,
+      dioOptions: BaseOptions(
+        connectTimeout: tenSecond,
+        receiveTimeout: tenSecond,
+        sendTimeout: tenSecond,
+      ),
       jsonDecodeCallback: jsonDecode,
       interceptors: [
         InterceptorsWrapper(

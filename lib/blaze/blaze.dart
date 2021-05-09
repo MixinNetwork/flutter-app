@@ -38,14 +38,16 @@ class Blaze {
   String host = _wsHost1;
   bool reconnecting = false;
   bool disposed = false;
+  String? token;
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
 
   void connect() {
-    final token = signAuthTokenWithEdDSA(
+    debugPrint('ws connect');
+    token ??= signAuthTokenWithEdDSA(
         userId, sessionId, privateKey, scp, 'GET', '/', '');
-    _connect(token);
+    _connect(token!);
   }
 
   void _connect(String token) {
