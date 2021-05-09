@@ -219,11 +219,13 @@ class MessageItemWidget extends StatelessWidget {
                   );
                 if (message.type.isImage)
                   return ImageMessageWidget(
+                    showNip: showNip,
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );
                 if (message.type.isVideo || message.type.isLive)
                   return VideoMessageWidget(
+                    showNip:showNip,
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );

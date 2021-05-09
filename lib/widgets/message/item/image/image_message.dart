@@ -21,10 +21,12 @@ import 'image_preview_portal.dart';
 class ImageMessageWidget extends StatelessWidget {
   const ImageMessageWidget({
     Key? key,
+    required this.showNip,
     required this.message,
     required this.isCurrentUser,
   }) : super(key: key);
 
+  final bool showNip;
   final MessageItem message;
   final bool isCurrentUser;
 
@@ -41,6 +43,7 @@ class ImageMessageWidget extends StatelessWidget {
             quoteMessageContent: message.quoteContent,
             isCurrentUser: isCurrentUser,
             padding: EdgeInsets.zero,
+            showNip: showNip,
             includeNip: true,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),

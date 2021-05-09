@@ -24,10 +24,12 @@ class VideoMessageWidget extends StatelessWidget {
     Key? key,
     required this.message,
     required this.isCurrentUser,
+    required this.showNip,
   }) : super(key: key);
 
   final MessageItem message;
   final bool isCurrentUser;
+  final bool showNip;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -42,6 +44,7 @@ class VideoMessageWidget extends StatelessWidget {
             quoteMessageContent: message.quoteContent,
             isCurrentUser: isCurrentUser,
             padding: EdgeInsets.zero,
+            showNip: showNip,
             includeNip: true,
             child: InteractableDecoratedBox(
               onTap: () {

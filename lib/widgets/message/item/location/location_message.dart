@@ -45,6 +45,7 @@ class LocationMessage extends HookWidget {
           if (isCurrentUser) MessageStatusWidget(status: message.status),
         ],
       ),
+      showNip: showNip,
       includeNip: true,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
