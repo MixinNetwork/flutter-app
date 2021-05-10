@@ -10,7 +10,7 @@ BlazeMessage _$BlazeMessageFromJson(Map<String, dynamic> json) {
   return BlazeMessage(
     id: json['id'] as String,
     action: json['action'] as String,
-    data: json['data'] as Map<String, dynamic>?,
+    data: json['data'],
     params: json['params'],
     error: json['error'] == null
         ? null

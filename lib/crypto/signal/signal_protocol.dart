@@ -82,9 +82,8 @@ class SignalProtocol {
       return EncryptResult(cipher, false);
     } on UntrustedIdentityException {
       final remoteAddress = SignalProtocolAddress(recipientId, deviceId);
-      mixinSignalProtocolStore
-        ..removeIdentity(remoteAddress)
-        ..deleteSession(remoteAddress);
+      mixinSignalProtocolStore.removeIdentity(remoteAddress);
+      await mixinSignalProtocolStore.deleteSession(remoteAddress);
       return EncryptResult(null, true);
     }
   }
@@ -155,7 +154,7 @@ class SignalProtocol {
   Future<bool> containsSession(String recipientId,
       {int deviceId = defaultDeviceId}) async {
     final signalProtocolAddress = SignalProtocolAddress(recipientId, deviceId);
-    return await mixinSignalProtocolStore
+    return mixinSignalProtocolStore
         .containsSession(signalProtocolAddress);
   }
 
@@ -170,16 +169,16 @@ class SignalProtocol {
         .deleteSessionsByAddress(userId);
   }
 
-  void processSession(String userId, PreKeyBundle preKeyBundle) {
+  Future processSession(String userId, PreKeyBundle preKeyBundle) async {
     final signalProtocolAddress =
         SignalProtocolAddress(userId, preKeyBundle.getDeviceId());
     final sessionBuilder = SessionBuilder.fromSignalStore(
         mixinSignalProtocolStore, signalProtocolAddress);
     try {
-      sessionBuilder.processPreKeyBundle(preKeyBundle);
+      await sessionBuilder.processPreKeyBundle(preKeyBundle);
     } on UntrustedIdentityException {
       mixinSignalProtocolStore.removeIdentity(signalProtocolAddress);
-      sessionBuilder.processPreKeyBundle(preKeyBundle);
+      await sessionBuilder.processPreKeyBundle(preKeyBundle);
     }
   }
 

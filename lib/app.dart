@@ -193,9 +193,9 @@ class _Home extends HookWidget {
       if (signed) {
         accountServer!
           ..pushSignalKeys()
-          ..syncSession()
-          ..initSticker()
-          ..initCircles();
+          ..syncSession();
+          // ..initSticker()
+          // ..initCircles();
       }
     }, [signed]);
 

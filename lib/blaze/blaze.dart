@@ -4,21 +4,18 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/blaze/vo/message_result.dart';
-import 'package:flutter_app/db/converter/message_status_type_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../constants/constants.dart';
-import '../db/converter/message_status_type_converter.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
 import '../utils/load_balancer_utils.dart';
 import 'blaze_message.dart';
 import 'vo/blaze_message_data.dart';
+import 'vo/message_result.dart';
 
 const String _wsHost1 = 'wss://blaze.mixin.one';
 const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
@@ -64,7 +61,7 @@ class Blaze {
       pingInterval: const Duration(seconds: 15),
     );
     subscription = channel?.stream
-        .asyncMap((message) async => parseBlazeMessage(message, transactions))
+        .asyncMap((message) async => parseBlazeMessage(message))
         .listen(
       (blazeMessage) async {
         debugPrint('blazeMessage: ${blazeMessage.toJson()}');
@@ -74,33 +71,51 @@ class Blaze {
           await _reconnect();
         }
 
-        final data = blazeMessage.data;
-        if (data == null) {
+        debugPrint('transactions size: ${transactions.length}');
+        if (blazeMessage.error == null) {
+          final transaction = transactions[blazeMessage.id];
+          if (transaction != null) {
+            debugPrint('transaction success id: ${transaction.tid}');
+            transaction.success(blazeMessage);
+            transactions.removeWhere((key, value) => key == blazeMessage.id);
+          }
+        } else {
+          final transaction = transactions[blazeMessage.id];
+          if (transaction != null) {
+            debugPrint('transaction error id: ${transaction.tid}');
+            transaction.error(blazeMessage);
+            transactions.removeWhere((key, value) => key == blazeMessage.id);
+          }
+        }
+
+        BlazeMessageData? data;
+        try {
+          data = BlazeMessageData.fromJson(blazeMessage.data);
+        } catch (e) {
+          debugPrint('blazeMessage not a BlazeMessageData');
           return;
         }
         if (blazeMessage.action == acknowledgeMessageReceipts) {
           // makeMessageStatus
           await updateRemoteMessageStatus(
-              data['message_id'], MessageStatus.delivered);
+              (data as Map<String, dynamic>)['message_id'], MessageStatus.delivered);
         } else if (blazeMessage.action == createMessage) {
-          final messageData = BlazeMessageData.fromJson(data);
-          if (messageData.userId == userId && messageData.category == null) {
+          if (data.userId == userId && data.category == null) {
             await updateRemoteMessageStatus(
-                messageData.messageId, MessageStatus.delivered);
+                data.messageId, MessageStatus.delivered);
           } else {
             await database.floodMessagesDao.insert(FloodMessage(
-                messageId: messageData.messageId,
+                messageId: data.messageId,
                 data: await jsonEncodeWithIsolate(data),
-                createdAt: messageData.createdAt));
+                createdAt: data.createdAt));
           }
         } else if (blazeMessage.action == acknowledgeMessageReceipt) {
-          await makeMessageStatus(data['message_id'],
-              const MessageStatusTypeConverter().mapToDart(data['status'])!);
+          await makeMessageStatus(data.messageId, data.status);
           await updateRemoteMessageStatus(
-              data['message_id'], MessageStatus.delivered);
+              data.messageId, MessageStatus.delivered);
         } else {
           await updateRemoteMessageStatus(
-              data['message_id'], MessageStatus.delivered);
+              data.messageId, MessageStatus.delivered);
         }
       },
       onError: (error, s) {
@@ -176,10 +191,11 @@ class Blaze {
   Future<MessageResult> deliverNoThrow(BlazeMessage blazeMessage) async {
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
+    debugPrint('deliverNoThrow transactions size: ${transactions.length}');
     final bm = await transaction.run(() => channel?.sink.add(GZipEncoder()
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))));
     if (bm == null) {
-      return await deliverNoThrow(blazeMessage);
+      return deliverNoThrow(blazeMessage);
     } else if (bm.error != null) {
       // TODO
       return MessageResult(false, true);
@@ -191,6 +207,7 @@ class Blaze {
   Future<BlazeMessage?> deliverAndWait(BlazeMessage blazeMessage) {
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
+    debugPrint('deliverAndWait transactions size: ${transactions.length}');
     return transaction.run(() => channel?.sink.add(GZipEncoder()
         .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))));
   }
@@ -227,30 +244,12 @@ class Blaze {
   }
 }
 
-Future<BlazeMessage> parseBlazeMessage(
-        List<int> message, Map<String, WebSocketTransaction> transactions) =>
-    runLoadBalancer(
-        _parseBlazeMessageInternal, Tuple2(message, transactions));
+Future<BlazeMessage> parseBlazeMessage(List<int> list) =>
+    runLoadBalancer(_parseBlazeMessageInternal, list);
 
-BlazeMessage _parseBlazeMessageInternal(
-    Tuple2<List<int>, Map<String, WebSocketTransaction>> tuple2) {
-  final message = tuple2.item1;
-  final transactions = tuple2.item2;
+BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
   final blazeMessage = BlazeMessage.fromJson(jsonDecode(content));
-  if (blazeMessage.error == null) {
-    final transaction = transactions[blazeMessage.id];
-    if (transaction != null) {
-      transaction.success(blazeMessage);
-      transactions.removeWhere((key, value) => key == blazeMessage.id);
-    }
-  } else {
-    final transaction = transactions[blazeMessage.id];
-    if (transaction != null) {
-      transaction.error(blazeMessage);
-      transactions.removeWhere((key, value) => key == blazeMessage.id);
-    }
-  }
   return blazeMessage;
 }
 

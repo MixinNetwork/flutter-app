@@ -6,48 +6,26 @@ import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_app/account/send_message_helper.dart';
-import 'package:flutter_app/blaze/blaze.dart';
-import 'package:flutter_app/blaze/blaze_message.dart';
-import 'package:flutter_app/blaze/blaze_message_param_session.dart';
-import 'package:flutter_app/blaze/blaze_param.dart';
-import 'package:flutter_app/blaze/blaze_signal_key_message.dart';
-import 'package:flutter_app/blaze/vo/contact_message.dart';
-import 'package:flutter_app/blaze/vo/mention_user.dart';
-import 'package:flutter_app/blaze/vo/sender_key_status.dart';
-import 'package:flutter_app/blaze/vo/signal_key.dart';
-import 'package:flutter_app/blaze/vo/sticker_message.dart';
-import 'package:flutter_app/constants/constants.dart';
-import 'package:flutter_app/crypto/crypto_key_value.dart';
-import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
-import 'package:flutter_app/crypto/privacy_key_value.dart';
-import 'package:flutter_app/crypto/signal/signal_key_util.dart';
-import 'package:flutter_app/crypto/signal/signal_database.dart';
-import 'package:flutter_app/crypto/signal/signal_protocol.dart';
-import 'package:flutter_app/crypto/uuid/uuid.dart';
-import 'package:flutter_app/db/database.dart';
-import 'package:flutter_app/db/extension/message_category.dart';
-import 'package:flutter_app/db/mixin_database.dart' as db;
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/enum/message_status.dart';
-import 'package:flutter_app/ui/home/bloc/multi_auth_cubit.dart';
-import 'package:flutter_app/utils/attachment_util.dart';
-import 'package:flutter_app/utils/file.dart';
-import 'package:flutter_app/utils/load_Balancer_utils.dart';
-import 'package:flutter_app/utils/stream_extension.dart';
-import 'package:flutter_app/workers/decrypt_message.dart';
-import 'package:flutter_app/utils/string_extension.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
+import '../blaze/blaze_message_param_session.dart';
 import '../blaze/blaze_param.dart';
+import '../blaze/blaze_signal_key_message.dart';
 import '../blaze/vo/contact_message.dart';
+import '../blaze/vo/mention_user.dart';
+import '../blaze/vo/sender_key_status.dart';
+import '../blaze/vo/signal_key.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
+import '../crypto/crypto_key_value.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
+import '../crypto/privacy_key_value.dart';
+import '../crypto/signal/signal_database.dart';
+import '../crypto/signal/signal_key_util.dart';
+import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/message_category.dart';
@@ -58,8 +36,9 @@ import '../enum/message_status.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/attachment_util.dart';
 import '../utils/file.dart';
-import '../utils/load_balancer_utils.dart';
+import '../utils/load_Balancer_utils.dart';
 import '../utils/stream_extension.dart';
+import '../utils/string_extension.dart';
 import '../workers/decrypt_message.dart';
 import 'send_message_helper.dart';
 
@@ -108,6 +87,7 @@ class AccountServer {
           },
         ),
       ],
+      level: Level.ALL,
     );
     await _initDatabase(privateKey, multiAuthCubit);
     start();
@@ -286,7 +266,7 @@ class AccountServer {
 
           if (!await signalProtocol.isExistSenderKey(
               message.conversationId, message.userId)) {
-            _checkConversation(message.conversationId);
+            await _checkConversation(message.conversationId);
           }
           await _checkSessionSenderKey(message.conversationId);
           await blaze.deliverNoThrow(await encryptNormalMessage(message));
@@ -348,12 +328,12 @@ class AccountServer {
       final data = (await blaze.deliverAndWait(blazeMessage))?.data;
       if (data != null) {
         final signalKeys =
-            List<SignalKey>.from(data.values.map((e) => SignalKey.fromJson(e)));
+            List<SignalKey>.from((data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
         final keys = <BlazeMessageParamSession>[];
         if (signalKeys.isNotEmpty) {
           for (final k in signalKeys) {
             final preKeyBundle = k.createPreKeyBundle();
-            signalProtocol.processSession(k.userId, preKeyBundle);
+            await signalProtocol.processSession(k.userId, preKeyBundle);
             final encryptedResult = await signalProtocol.encryptSenderKey(
                 conversationId, k.userId,
                 deviceId: preKeyBundle.getDeviceId());
@@ -418,20 +398,20 @@ class AccountServer {
     return d.md5();
   }
 
-  void _checkConversation(String conversationId) async {
+  Future _checkConversation(String conversationId) async {
     final conversation =
         await database.conversationDao.getConversationById(conversationId);
     if (conversation == null) {
       return;
     }
     if (conversation.category == ConversationCategory.group) {
-      _syncConversation(conversationId);
+      await _syncConversation(conversationId);
     } else {
-      _checkConversationExists(conversation);
+      await _checkConversationExists(conversation);
     }
   }
 
-  void _syncConversation(String conversationId) async {
+  Future _syncConversation(String conversationId) async {
     final res = await client.conversationApi.getConversation(conversationId);
     final conversation = res.data;
     final participants = <db.Participant>[];
@@ -439,21 +419,23 @@ class AccountServer {
         conversationId: conversationId,
         userId: c.userId,
         createdAt: c.createdAt!)));
-    database.participantsDao.replaceAll(conversationId, participants);
+    await database.participantsDao.replaceAll(conversationId, participants);
     if (conversation.participantSessions != null) {
-      _syncParticipantSession(
+      await _syncParticipantSession(
           conversationId, conversation.participantSessions!);
     }
   }
 
-  void _syncParticipantSession(
+  Future _syncParticipantSession(
       String conversationId, List<UserSession> data) async {
     await database.participantSessionDao.deleteByStatus(conversationId);
     final remote = <db.ParticipantSessionData>[];
-    data.map((s) => remote.add(db.ParticipantSessionData(
-        conversationId: conversationId,
-        userId: s.userId,
-        sessionId: s.sessionId)));
+    for (final s in data) {
+          remote.add(db.ParticipantSessionData(
+              conversationId: conversationId,
+              userId: s.userId,
+              sessionId: s.sessionId));
+    }
     if (remote.isEmpty) {
       await database.participantSessionDao
           .deleteByConversationId(conversationId);
@@ -499,7 +481,7 @@ class AccountServer {
         return false;
       }
       final keys =
-          List<SignalKey>.from(data.values.map((e) => SignalKey.fromJson(e)));
+          List<SignalKey>.from((data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
       if (keys.isNotEmpty) {
         final preKeyBundle = keys[0].createPreKeyBundle();
         signalProtocol.processSession(recipientId, preKeyBundle);
@@ -510,9 +492,9 @@ class AccountServer {
     return true;
   }
 
-  void _checkConversationExists(db.Conversation conversation) {
+  Future _checkConversationExists(db.Conversation conversation) async {
     if (conversation.status != ConversationStatus.success) {
-      _createConversation(conversation);
+      await _createConversation(conversation);
     }
   }
 
@@ -728,7 +710,7 @@ class AccountServer {
       }
     });
     if (sessionMap.isEmpty) {
-      return null;
+      return;
     }
     final newSessions = <SessionsCompanion>[];
     for (final s in sessions) {

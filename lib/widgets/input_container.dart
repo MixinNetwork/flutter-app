@@ -184,7 +184,7 @@ void _sendMessage(BuildContext context) {
         text,
         conversationId: conversationItem.conversationId,
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
-        // isPlain: isPlain,
+        isPlain: false,
       );
 
   context.read<QuoteMessageCubit>().emit(null);

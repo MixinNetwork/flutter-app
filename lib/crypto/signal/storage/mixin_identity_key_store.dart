@@ -63,7 +63,7 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
   Future<bool> saveIdentity(
       SignalProtocolAddress address, IdentityKey? identityKey) async {
     final signalAddress = address.getName();
-    final identity = await identityDao.getIdentityByAddress(address.toString());
+    final identity = await identityDao.getIdentityByAddress(signalAddress);
     if (identity == null) {
       debugPrint('Saving new identity...$address');
       await identityDao.insert(IdentitiesCompanion.insert(
@@ -91,7 +91,7 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
       debugPrint('Identity keys don\'t match...');
       return false;
     }
-    return false;
+    return true;
   }
 
   void removeIdentity(SignalProtocolAddress address) {

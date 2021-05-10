@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_app/crypto/signal/pre_key_util.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -14,8 +16,8 @@ Future checkSignalKey(Client client) async {
 }
 
 Future<MixinResponse<void>> refreshSignalKeys(Client client) async {
-  final keys = generateKeys();
-  return await client.accountApi.pushSignalKeys(keys.toString());
+  final keys = await generateKeys();
+  return await client.accountApi.pushSignalKeys(json.encode(keys.toJson()));
 }
 
 Future<SignalKeyRequest> generateKeys() async {

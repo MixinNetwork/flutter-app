@@ -1,9 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter_app/crypto/signal/dao/session_dao.dart';
-import 'package:flutter_app/crypto/signal/signal_protocol.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
+import '../dao/session_dao.dart';
 import '../signal_database.dart';
+import '../signal_protocol.dart';
 
 class MixinSessionStore extends SessionStore {
   MixinSessionStore(SignalDatabase db) : super() {
@@ -26,7 +25,7 @@ class MixinSessionStore extends SessionStore {
   }
 
   @override
-  void deleteAllSessions(String name) async {
+  Future deleteAllSessions(String name) async {
     final devices = await getSubDeviceSessions(name);
     await deleteSession(
         SignalProtocolAddress(name, SignalProtocol.defaultDeviceId));
@@ -64,7 +63,7 @@ class MixinSessionStore extends SessionStore {
       SignalProtocolAddress address, SessionRecord record) async {
     final session =
         await sessionDao.getSession(address.getName(), address.getDeviceId());
-    if ((session == null) || !listEquals(session.record, record.serialize())) {
+    if (session == null) { // TODO compare session.record and record.serialize()
       await sessionDao.insertSession(SessionsCompanion.insert(
           address: address.getName(),
           device: address.getDeviceId(),

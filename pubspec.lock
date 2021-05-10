@@ -522,8 +522,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "4a8426dbd620463202d8b6049b968116af7e8548"
-      resolved-ref: "4a8426dbd620463202d8b6049b968116af7e8548"
+      ref: "39bac863830da7d7ef33c03a5157da73512190be"
+      resolved-ref: "39bac863830da7d7ef33c03a5157da73512190be"
       url: "https://github.com/MixinNetwork/libsignal_protocol_dart.git"
     source: git
     version: "0.3.0-nullsafety.0"
@@ -862,7 +862,7 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0"
+    version: "1.8.1"
   sprintf:
     dependency: transitive
     description:

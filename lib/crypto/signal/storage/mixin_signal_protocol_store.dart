@@ -1,6 +1,7 @@
-import 'package:flutter_app/crypto/signal/storage/mixin_identity_key_store.dart';
-import 'package:flutter_app/crypto/signal/storage/mixin_session_store.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+
+import 'mixin_identity_key_store.dart';
+import 'mixin_session_store.dart';
 
 class MixinSignalProtocolStore extends SignalProtocolStore {
   MixinSignalProtocolStore(this.preKeyStore, this.signedPreKeyStore,
@@ -27,13 +28,13 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  void deleteAllSessions(String name) {
-    sessionStore.deleteAllSessions(name);
+  Future deleteAllSessions(String name) async {
+    await sessionStore.deleteAllSessions(name);
   }
 
   @override
-  void deleteSession(SignalProtocolAddress address) {
-    sessionStore.deleteSession(address);
+  Future deleteSession(SignalProtocolAddress address) async {
+    await sessionStore.deleteSession(address);
   }
 
   @override
@@ -92,8 +93,8 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  void storeSession(SignalProtocolAddress address, SessionRecord record) {
-    sessionStore.storeSession(address, record);
+  Future storeSession(SignalProtocolAddress address, SessionRecord record) async {
+    await sessionStore.storeSession(address, record);
   }
 
   @override
