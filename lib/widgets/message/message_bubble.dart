@@ -11,6 +11,14 @@ const _darkCurrentBubble = Color.fromRGBO(59, 79, 103, 1);
 const _lightOtherBubble = Color.fromRGBO(255, 255, 255, 1);
 const _darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
+extension BubbleColor on BuildContext {
+  Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
+        ? BrightnessData.dynamicColor(this, _lightCurrentBubble,
+            darkColor: _darkCurrentBubble)
+        : BrightnessData.dynamicColor(this, _lightOtherBubble,
+            darkColor: _darkOtherBubble);
+}
+
 class MessageBubble extends StatelessWidget {
   const MessageBubble({
     Key? key,
@@ -37,16 +45,12 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = isCurrentUser
-        ? BrightnessData.dynamicColor(context, _lightCurrentBubble,
-            darkColor: _darkCurrentBubble)
-        : BrightnessData.dynamicColor(context, _lightOtherBubble,
-            darkColor: _darkOtherBubble);
+    final bubbleColor = context.messageBubbleColor(isCurrentUser);
 
     var _child = child;
 
     if (!includeNip)
-      _child = MessageBubbleNipPadding(
+      _child = _MessageBubbleNipPadding(
         currentUser: isCurrentUser,
         child: child,
       );
@@ -62,7 +66,7 @@ class MessageBubble extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            MessageBubbleNipPadding(
+            _MessageBubbleNipPadding(
               currentUser: isCurrentUser,
               child: QuoteMessage(
                 id: quoteMessageId,
@@ -117,8 +121,8 @@ class MessageBubble extends StatelessWidget {
   }
 }
 
-class MessageBubbleNipPadding extends StatelessWidget {
-  const MessageBubbleNipPadding({
+class _MessageBubbleNipPadding extends StatelessWidget {
+  const _MessageBubbleNipPadding({
     Key? key,
     required this.currentUser,
     required this.child,

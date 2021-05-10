@@ -87,6 +87,8 @@ class MessageState extends Equatable {
   MessageItem? get topMessage =>
       top.firstOrNull ?? center ?? bottom.firstOrNull;
 
+  bool get isEmpty => top.isEmpty && center == null && bottom.isEmpty;
+
   MessageState copyWith({
     final String? conversationId,
     final List<MessageItem>? top,
@@ -356,5 +358,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   void reload() {
     add(_MessageInitEvent());
+  }
+
+  void jumpToCurrent() {
+    if (scrollController.hasClients && state.isLatest)
+      return scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    return add(_MessageInitEvent());
   }
 }

@@ -103,6 +103,9 @@ class Resources {
 
   static const String assetsImagesImageSvg = 'assets/images/image.svg';
 
+  static const String assetsImagesJumpCurrentArrowSvg =
+      'assets/images/jump_current_arrow.svg';
+
   static const String assetsImagesLightReceiverNipBubblePng =
       'assets/images/light_receiver_nip_bubble.png';
 

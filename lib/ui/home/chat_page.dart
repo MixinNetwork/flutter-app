@@ -2,19 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../account/account_server.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../bloc/subscribe_mixin.dart';
+import '../../constants/resources.dart';
 import '../../utils/hook.dart';
 import '../../utils/list_utils.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/chat_bar.dart';
 import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../widgets/input_container.dart';
+import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/message/message.dart';
+import '../../widgets/message/message_bubble.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/message_bloc.dart';
 import 'bloc/quote_message_cubit.dart';
@@ -214,50 +218,17 @@ class ChatContainer extends StatelessWidget {
                           child: Column(
                             children: [
                               Expanded(
-                                child: Builder(
-                                  builder: (context) =>
-                                      NotificationListener<ScrollNotification>(
-                                    onNotification:
-                                        (ScrollNotification notification) {
-                                      final dimension = notification
-                                              .metrics.viewportDimension /
-                                          2;
-
-                                      if (notification
-                                          is ScrollUpdateNotification) {
-                                        if (notification.scrollDelta == null)
-                                          return false;
-
-                                        if (notification.scrollDelta! > 0) {
-                                          // down
-                                          if (notification
-                                                      .metrics.maxScrollExtent -
-                                                  notification.metrics.pixels <
-                                              dimension) {
-                                            BlocProvider.of<MessageBloc>(
-                                                    context)
-                                                .after();
-                                          }
-                                        } else if (notification.scrollDelta! <
-                                            0) {
-                                          // up
-                                          if ((notification.metrics
-                                                          .minScrollExtent -
-                                                      notification
-                                                          .metrics.pixels)
-                                                  .abs() <
-                                              dimension) {
-                                            BlocProvider.of<MessageBloc>(
-                                                    context)
-                                                .before();
-                                          }
-                                        }
-                                      }
-
-                                      return false;
-                                    },
-                                    child: const _List(),
-                                  ),
+                                child: Stack(
+                                  children: const [
+                                    _NotificationListener(
+                                      child: _List(),
+                                    ),
+                                    Positioned(
+                                      bottom: 16,
+                                      right: 16,
+                                      child: _JumpCurrentButton(),
+                                    ),
+                                  ],
                                 ),
                               ),
                               const InputContainer()
@@ -272,6 +243,47 @@ class ChatContainer extends StatelessWidget {
             );
           },
         ),
+      );
+}
+
+class _NotificationListener extends StatelessWidget {
+  const _NotificationListener({
+    required this.child,
+    Key? key,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) =>
+      NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification notification) {
+          final dimension = notification.metrics.viewportDimension / 2;
+
+          if (notification is ScrollUpdateNotification) {
+            if (notification.scrollDelta == null) return false;
+
+            if (notification.scrollDelta! > 0) {
+              // down
+              if (notification.metrics.maxScrollExtent -
+                      notification.metrics.pixels <
+                  dimension) {
+                BlocProvider.of<MessageBloc>(context).after();
+              }
+            } else if (notification.scrollDelta! < 0) {
+              // up
+              if ((notification.metrics.minScrollExtent -
+                          notification.metrics.pixels)
+                      .abs() <
+                  dimension) {
+                BlocProvider.of<MessageBloc>(context).before();
+              }
+            }
+          }
+
+          return false;
+        },
+        child: child,
       );
 }
 
@@ -341,4 +353,69 @@ class _List extends StatelessWidget {
           );
         },
       );
+}
+
+class _JumpCurrentButton extends HookWidget {
+  const _JumpCurrentButton({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final messageBloc = context.read<MessageBloc>();
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (conversationId) => conversationId != null,
+    )!;
+    final state = useBlocState<MessageBloc, MessageState>();
+    final scrollController = useListenable(messageBloc.scrollController);
+
+    final listPositionIsLatest = useState(false);
+    useEffect(() {
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) =>
+          listPositionIsLatest.value = scrollController.hasClients &&
+              (scrollController.position.maxScrollExtent -
+                      scrollController.position.pixels) >
+                  40);
+    }, [
+      scrollController.hasClients,
+      scrollController.position.pixels,
+      conversationId
+    ]);
+
+    final enable =
+        (!state.isEmpty && !state.isLatest) || listPositionIsLatest.value;
+
+    return IgnorePointer(
+      ignoring: !enable,
+      child: AnimatedOpacity(
+        opacity: enable ? 1 : 0,
+        duration: const Duration(milliseconds: 200),
+        child: InteractableDecoratedBox(
+          onTap: messageBloc.jumpToCurrent,
+          child: ClipOval(
+            child: Container(
+              height: 38,
+              width: 38,
+              decoration: BoxDecoration(
+                color: context.messageBubbleColor(false),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color.fromRGBO(0, 0, 0, 0.15),
+                    offset: Offset(0, 2),
+                    blurRadius: 10,
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: SvgPicture.asset(
+                Resources.assetsImagesJumpCurrentArrowSvg,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

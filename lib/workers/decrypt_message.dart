@@ -186,6 +186,7 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processApp(BlazeMessageData data) async {
+    debugPrint('data.conversationId: ${data.conversationId}, _conversationId: $_conversationId');
     if (data.category == MessageCategory.appButtonGroup) {
       await _processAppButton(data);
     } else if (data.category == MessageCategory.appCard) {
