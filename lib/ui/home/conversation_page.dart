@@ -788,10 +788,12 @@ class _List extends HookWidget {
             child: _Item(
               selected: selected,
               conversation: conversation,
-              onTap: () => context.read<ConversationCubit>().selectConversation(
+              onTap: () {
+                context.read<ConversationCubit>().selectConversation(
                     conversation.conversationId,
                     conversation.lastReadMessageId,
-                  ),
+                  );
+              },
             ),
           );
         },

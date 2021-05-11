@@ -327,4 +327,21 @@ class ClampingRenderViewport extends RenderViewport {
     }
     if (childLayoutGeometry.hasVisualOverflow) _hasVisualOverflow = true;
   }
+
+  @override
+  void showOnScreen({
+    RenderObject? descendant,
+    Rect? rect,
+    Duration duration = Duration.zero,
+    Curve curve = Curves.ease,
+  }) {
+    if (parent is RenderObject) {
+      (parent! as RenderObject).showOnScreen(
+        descendant: descendant ?? this,
+        rect: rect,
+        duration: duration,
+        curve: curve,
+      );
+    }
+  }
 }

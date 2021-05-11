@@ -85,6 +85,7 @@ class HighlightSelectableText extends StatelessWidget {
         ),
         maxLines: maxLines,
         textWidthBasis: TextWidthBasis.longestLine,
+        toolbarOptions: const ToolbarOptions(),
       );
 }
 
