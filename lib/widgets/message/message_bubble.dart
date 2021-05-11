@@ -13,10 +13,10 @@ const _darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
 extension BubbleColor on BuildContext {
   Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
-        ? BrightnessData.dynamicColor(this, _lightCurrentBubble,
-            darkColor: _darkCurrentBubble)
-        : BrightnessData.dynamicColor(this, _lightOtherBubble,
-            darkColor: _darkOtherBubble);
+      ? BrightnessData.dynamicColor(this, _lightCurrentBubble,
+          darkColor: _darkCurrentBubble)
+      : BrightnessData.dynamicColor(this, _lightOtherBubble,
+          darkColor: _darkOtherBubble);
 }
 
 class MessageBubble extends StatelessWidget {

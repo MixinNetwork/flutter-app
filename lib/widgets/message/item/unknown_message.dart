@@ -9,6 +9,7 @@ import '../../brightness_observer.dart';
 import '../../mouse_region_span.dart';
 import '../message_bubble.dart';
 import '../message_datetime.dart';
+import '../message_layout.dart';
 import '../message_status.dart';
 
 class UnknownMessage extends StatelessWidget {
@@ -24,47 +25,46 @@ class UnknownMessage extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => MessageBubble(
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        child: Wrap(
-          alignment: WrapAlignment.end,
-          crossAxisAlignment: WrapCrossAlignment.end,
-          children: [
-            RichText(
-              text: TextSpan(
-                text: Localization.of(context).chatNotSupport,
+  Widget build(BuildContext context) {
+    final content = RichText(
+      text: TextSpan(
+        text: Localization.of(context).chatNotSupport,
+        style: TextStyle(
+          fontSize: 16,
+          color: BrightnessData.themeOf(context).text,
+        ),
+        children: [
+          MouseRegionSpan(
+            mouseCursor: SystemMouseCursors.click,
+            child: GestureDetector(
+              onTap: () => openUri(Localization.of(context).chatNotSupportUrl),
+              child: Text(
+                Localization.of(context).chatLearn,
                 style: TextStyle(
                   fontSize: 16,
-                  color: BrightnessData.themeOf(context).text,
+                  color: BrightnessData.themeOf(context).accent,
                 ),
-                children: [
-                  MouseRegionSpan(
-                    mouseCursor: SystemMouseCursors.click,
-                    child: GestureDetector(
-                      onTap: () =>
-                          openUri(Localization.of(context).chatNotSupportUrl),
-                      child: Text(
-                        Localization.of(context).chatLearn,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: BrightnessData.themeOf(context).accent,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
               ),
             ),
-            const SizedBox(width: 6),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MessageDatetime(dateTime: message.createdAt),
-                if (isCurrentUser) MessageStatusWidget(status: message.status),
-              ],
-            ),
-          ],
-        ),
-      );
+          ),
+        ],
+      ),
+    );
+    final dateAndStatus = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MessageDatetime(dateTime: message.createdAt),
+        if (isCurrentUser) MessageStatusWidget(status: message.status),
+      ],
+    );
+    return MessageBubble(
+      showNip: showNip,
+      isCurrentUser: isCurrentUser,
+      child: MessageLayout(
+        spacing: 6,
+        content: content,
+        dateAndStatus: dateAndStatus,
+      ),
+    );
+  }
 }

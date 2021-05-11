@@ -12,6 +12,7 @@ import '../../../brightness_observer.dart';
 import '../../../high_light_text.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime.dart';
+import '../../message_layout.dart';
 import '../../message_status.dart';
 import 'mention_builder.dart';
 
@@ -68,46 +69,47 @@ class TextMessage extends HookWidget {
       [message.content, mentionMap],
     );
 
+    final content = Builder(
+      builder: (context) => MentionBuilder(
+        mentionString: message.mentions,
+        builder: (context, mentionMapAsyncSnapshot) =>
+            // todo HighlightSelectableText
+            // call child.getMaxIntrinsicWidth is one pixel short
+            HighlightText(
+          message.content!,
+          highlightTextSpans: [
+            HighlightTextSpan(
+              keyword,
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).accent,
+              ),
+            ),
+            ...highlightTextSpans,
+          ],
+          style: TextStyle(
+            fontSize: 16,
+            color: BrightnessData.themeOf(context).text,
+          ),
+        ),
+      ),
+    );
+    final dateAndStatus = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MessageDatetime(dateTime: message.createdAt),
+        if (isCurrentUser) MessageStatusWidget(status: message.status),
+      ],
+    );
+
     return MessageBubble(
       quoteMessageId: message.quoteId,
       quoteMessageContent: message.quoteContent,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.end,
-        children: [
-          Builder(
-            builder: (context) => MentionBuilder(
-              mentionString: message.mentions,
-              builder: (context, mentionMapAsyncSnapshot) =>
-                  HighlightSelectableText(
-                message.content!,
-                highlightTextSpans: [
-                  HighlightTextSpan(
-                    keyword,
-                    style: TextStyle(
-                      color: BrightnessData.themeOf(context).accent,
-                    ),
-                  ),
-                  ...highlightTextSpans,
-                ],
-                style: TextStyle(
-                  fontSize: 16,
-                  color: BrightnessData.themeOf(context).text,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 6),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MessageDatetime(dateTime: message.createdAt),
-              if (isCurrentUser) MessageStatusWidget(status: message.status),
-            ],
-          ),
-        ],
+      child: MessageLayout(
+        spacing: 6,
+        content: content,
+        dateAndStatus: dateAndStatus,
       ),
     );
   }

@@ -9,6 +9,7 @@ import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
 import '../message_bubble.dart';
 import '../message_datetime.dart';
+import '../message_layout.dart';
 import '../message_status.dart';
 
 class RecallMessage extends StatelessWidget {
@@ -24,43 +25,43 @@ class RecallMessage extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => MessageBubble(
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        child: Wrap(
-          alignment: WrapAlignment.end,
-          crossAxisAlignment: WrapCrossAlignment.end,
-          children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SvgPicture.asset(
-                  Resources.assetsImagesRecallSvg,
-                  color: BrightnessData.themeOf(context).text,
-                  width: 16,
-                  height: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  isCurrentUser
-                      ? Localization.of(context).chatRecallMe
-                      : Localization.of(context).chatRecallDelete,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: BrightnessData.themeOf(context).text,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 6),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                MessageDatetime(dateTime: message.createdAt),
-                if (isCurrentUser) MessageStatusWidget(status: message.status),
-              ],
-            ),
-          ],
+  Widget build(BuildContext context) {
+    final content = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SvgPicture.asset(
+          Resources.assetsImagesRecallSvg,
+          color: BrightnessData.themeOf(context).text,
+          width: 16,
+          height: 16,
         ),
-      );
+        const SizedBox(width: 4),
+        Text(
+          isCurrentUser
+              ? Localization.of(context).chatRecallMe
+              : Localization.of(context).chatRecallDelete,
+          style: TextStyle(
+            fontSize: 16,
+            color: BrightnessData.themeOf(context).text,
+          ),
+        ),
+      ],
+    );
+    final dateAndStatus = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        MessageDatetime(dateTime: message.createdAt),
+        if (isCurrentUser) MessageStatusWidget(status: message.status),
+      ],
+    );
+    return MessageBubble(
+      showNip: showNip,
+      isCurrentUser: isCurrentUser,
+      child: MessageLayout(
+        spacing: 6,
+        content: content,
+        dateAndStatus: dateAndStatus,
+      ),
+    );
+  }
 }

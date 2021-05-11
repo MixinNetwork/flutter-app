@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
+
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
@@ -35,8 +36,8 @@ class FileMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MessageBubble(
-    quoteMessageId: message.quoteId,
-    quoteMessageContent: message.quoteContent,
+        quoteMessageId: message.quoteId,
+        quoteMessageContent: message.quoteContent,
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: Row(
@@ -66,80 +67,74 @@ class FileMessage extends StatelessWidget {
               await File(message.mediaUrl!).copy(path!);
             }
           },
-          child: Wrap(
-            alignment: WrapAlignment.end,
-            crossAxisAlignment: WrapCrossAlignment.end,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ClipOval(
-                    child: Builder(builder: (context) {
-                      switch (message.mediaStatus) {
-                        case MediaStatus.canceled:
-                          if (message.relationship == UserRelationship.me &&
-                              message.mediaUrl?.isNotEmpty == true)
-                            return const StatusUpload();
-                          else
-                            return const StatusDownload();
-                        case MediaStatus.pending:
-                          return const StatusPending();
-                        case MediaStatus.expired:
-                          return const StatusWarning();
-                        default:
-                          break;
-                      }
+              ClipOval(
+                child: Builder(builder: (context) {
+                  switch (message.mediaStatus) {
+                    case MediaStatus.canceled:
+                      if (message.relationship == UserRelationship.me &&
+                          message.mediaUrl?.isNotEmpty == true)
+                        return const StatusUpload();
+                      else
+                        return const StatusDownload();
+                    case MediaStatus.pending:
+                      return const StatusPending();
+                    case MediaStatus.expired:
+                      return const StatusWarning();
+                    default:
+                      break;
+                  }
 
-                      return DecoratedBox(
-                        decoration: BoxDecoration(
-                          color: BrightnessData.themeOf(context).listSelected,
-                        ),
-                        child: SizedBox.fromSize(
-                          size: const Size.square(38),
-                          child: Center(
-                            child: Builder(builder: (context) {
-                              var extension = 'FILE';
-                              if (message.mediaName != null) {
-                                final _lookupMimeType =
-                                    lookupMimeType(message.mediaName!);
-                                if (_lookupMimeType != null)
-                                  extension = extensionFromMime(_lookupMimeType)
-                                      .toUpperCase();
-                              }
-                              return Text(
-                                extension,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: BrightnessData.themeOf(context)
-                                      .secondaryText,
-                                ),
-                              );
-                            }),
-                          ),
-                        ),
-                      );
-                    }),
+                  return DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: BrightnessData.themeOf(context).listSelected,
+                    ),
+                    child: SizedBox.fromSize(
+                      size: const Size.square(38),
+                      child: Center(
+                        child: Builder(builder: (context) {
+                          var extension = 'FILE';
+                          if (message.mediaName != null) {
+                            final _lookupMimeType =
+                                lookupMimeType(message.mediaName!);
+                            if (_lookupMimeType != null)
+                              extension = extensionFromMime(_lookupMimeType)
+                                  .toUpperCase();
+                          }
+                          return Text(
+                            extension,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color:
+                                  BrightnessData.themeOf(context).secondaryText,
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message.mediaName ?? '',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: BrightnessData.themeOf(context).text,
+                    ),
                   ),
-                  const SizedBox(width: 8),
-                  Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        message.mediaName ?? '',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: BrightnessData.themeOf(context).text,
-                        ),
-                      ),
-                      Text(
-                        filesize(message.mediaSize),
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: BrightnessData.themeOf(context).secondaryText,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    filesize(message.mediaSize),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: BrightnessData.themeOf(context).secondaryText,
+                    ),
                   ),
                 ],
               ),

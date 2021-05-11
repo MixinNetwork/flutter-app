@@ -25,6 +25,7 @@ class HighlightText extends StatelessWidget {
         ),
         maxLines: maxLines,
         overflow: overflow,
+        textWidthBasis: TextWidthBasis.longestLine,
       );
 }
 
