@@ -6,10 +6,12 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import 'signal_key_request.dart';
 
+const int preKeyMinNum = 500;
+
 Future checkSignalKey(Client client) async {
   final response = await client.accountApi.getSignalKeyCount();
   final availableKeyCount = response.data.preKeyCount;
-  if (availableKeyCount > 500) {
+  if (availableKeyCount > preKeyMinNum) {
     return;
   }
   await refreshSignalKeys(client);
@@ -17,7 +19,7 @@ Future checkSignalKey(Client client) async {
 
 Future<MixinResponse<void>> refreshSignalKeys(Client client) async {
   final keys = await generateKeys();
-  return await client.accountApi.pushSignalKeys(json.encode(keys.toJson()));
+  return client.accountApi.pushSignalKeys(json.encode(keys.toJson()));
 }
 
 Future<SignalKeyRequest> generateKeys() async {

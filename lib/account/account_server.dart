@@ -109,18 +109,20 @@ class AccountServer {
       client,
     );
 
+    signalProtocol = SignalProtocol(sessionId);
+    await signalProtocol.init();
+
     _decryptMessage = DecryptMessage(
       userId,
       database,
+      signalProtocol,
+      blaze,
       client,
       sessionId,
       this.privateKey,
       _attachmentUtil,
       multiAuthCubit,
     );
-
-    signalProtocol = SignalProtocol(sessionId);
-    await signalProtocol.init();
 
     await PrivacyKeyValue.get.init();
     await CryptoKeyValue.get.init();
@@ -685,7 +687,7 @@ class AccountServer {
     if (hasPushSignalKeys) {
       return;
     }
-    await refreshSignalKeys(client);
+    final resp = await refreshSignalKeys(client);
     PrivacyKeyValue.get.setHasPushSignalKeys(true);
   }
 

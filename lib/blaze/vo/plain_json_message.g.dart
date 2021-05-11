@@ -10,9 +10,9 @@ PlainJsonMessage _$PlainJsonMessageFromJson(Map<String, dynamic> json) {
   return PlainJsonMessage(
     json['action'] as String,
     (json['messages'] as List<dynamic>?)?.map((e) => e as String).toList(),
-    json['user_id'] as String,
-    json['message_id'] as String,
-    json['session_id'] as String,
+    json['user_id'] as String?,
+    json['message_id'] as String?,
+    json['session_id'] as String?,
     (json['ack_messages'] as List<dynamic>?)
         ?.map((e) => BlazeAckMessage.fromJson(e as Map<String, dynamic>))
         .toList(),

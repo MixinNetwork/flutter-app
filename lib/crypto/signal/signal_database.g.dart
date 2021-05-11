@@ -1762,6 +1762,8 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   late final SessionDao sessionDao = SessionDao(this as SignalDatabase);
   late final SignedPreKeyDao signedPreKeyDao =
       SignedPreKeyDao(this as SignalDatabase);
+  late final RatchetSenderKeyDao ratchetSenderKeyDao =
+      RatchetSenderKeyDao(this as SignalDatabase);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override

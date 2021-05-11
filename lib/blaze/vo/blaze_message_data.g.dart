@@ -8,7 +8,7 @@ part of 'blaze_message_data.dart';
 
 BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
   return BlazeMessageData(
-    json['conversation_id'] as String?,
+    json['conversation_id'] as String,
     json['user_id'] as String,
     json['message_id'] as String,
     const MessageCategoryJsonConverter().fromJson(json['category'] as String?),

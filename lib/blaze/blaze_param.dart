@@ -2,6 +2,7 @@ import 'dart:core';
 
 import 'package:json_annotation/json_annotation.dart';
 
+import '../crypto/signal/signal_key_request.dart';
 import '../enum/message_category.dart';
 import 'blaze_message_param_session.dart';
 import 'blaze_signal_key_message.dart';
@@ -19,6 +20,7 @@ class BlazeMessageParam {
     this.data,
     this.status,
     this.recipients,
+    this.keys,
     this.messages,
     this.quoteMessageId,
     this.sessionId,
@@ -48,10 +50,8 @@ class BlazeMessageParam {
   String? status;
   @JsonKey(name: 'recipients')
   List<BlazeMessageParamSession>? recipients;
-
-  // todo
-  // @JsonKey(name: 'conversation_id')
-  // SignalKeyRequest keys;
+  @JsonKey(name: 'keys')
+  SignalKeyRequest? keys;
   @JsonKey(name: 'messages')
   List<dynamic>? messages;
   @JsonKey(name: 'quoteMessage_id')

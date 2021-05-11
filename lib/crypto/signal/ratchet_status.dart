@@ -1,0 +1,1 @@
+enum RatchetStatus { requesting }

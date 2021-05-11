@@ -45,8 +45,6 @@ CREATE TABLE participant_session (conversation_id TEXT NOT NULL, user_id TEXT NO
 
 CREATE TABLE participants ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, role TEXT MAPPED By `const ParticipantRoleConverter()`, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(conversation_id,user_id), FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE );
 
-CREATE TABLE ratchet_sender_keys ( group_id TEXT NOT NULL, sender_id TEXT NOT NULL, status TEXT NOT NULL, message_id TEXT, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(group_id, sender_id) );
-
 CREATE TABLE resend_session_messages ( message_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, status INTEGER NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(message_id, user_id, session_id) );
 
 CREATE TABLE sent_session_sender_keys ( conversation_id TEXT NOT NULL, user_id TEXT NOT NULL, session_id TEXT NOT NULL, sent_to_server INTEGER NOT NULL, sender_key_id INTEGER, created_at INTEGER MAPPED BY `const MillisDateConverter()`, PRIMARY KEY(conversation_id,user_id, session_id) );
