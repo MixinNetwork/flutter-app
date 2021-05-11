@@ -34,7 +34,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Future<int?> allUnseenMessageCount() =>
       db.allUnseenMessageCount(DateTime.now()).getSingleOrNull();
 
-  Future<int> insert(Conversation conversation) async {
+  Future<int> insert(Insertable<Conversation> conversation) async {
     final result =
         await into(db.conversations).insertOnConflictUpdate(conversation);
     return result;
@@ -153,24 +153,17 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Future<void> updateConversation(ConversationResponse conversation) =>
       db.transaction(() async {
         await insert(
-          Conversation(
-            conversationId: conversation.conversationId,
-            ownerId: conversation.creatorId,
-            category: conversation.category,
-            name: conversation.name,
-            iconUrl: conversation.iconUrl,
-            announcement: conversation.announcement,
-            codeUrl: conversation.codeUrl,
-            payType: null,
-            createdAt: conversation.createdAt,
-            pinTime: null,
-            lastMessageId: null,
-            lastMessageCreatedAt: null,
-            lastReadMessageId: null,
-            unseenMessageCount: 0,
-            status: ConversationStatus.success,
-            draft: null,
-            muteUntil: DateTime.tryParse(conversation.muteUntil),
+          ConversationsCompanion(
+            conversationId: Value(conversation.conversationId),
+            ownerId: Value(conversation.creatorId),
+            category: Value(conversation.category),
+            name: Value(conversation.name),
+            iconUrl: Value(conversation.iconUrl),
+            announcement: Value(conversation.announcement),
+            codeUrl: Value(conversation.codeUrl),
+            createdAt: Value(conversation.createdAt),
+            status: const Value(ConversationStatus.success),
+            muteUntil: Value(DateTime.tryParse(conversation.muteUntil)),
           ),
         );
         await Future.wait(

@@ -790,9 +790,9 @@ class _List extends HookWidget {
               conversation: conversation,
               onTap: () {
                 context.read<ConversationCubit>().selectConversation(
-                    conversation.conversationId,
-                    conversation.lastReadMessageId,
-                  );
+                      conversation.conversationId,
+                      conversation.lastReadMessageId,
+                    );
               },
             ),
           );
