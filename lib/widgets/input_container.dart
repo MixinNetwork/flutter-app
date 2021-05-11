@@ -201,8 +201,9 @@ class _SendTextField extends StatelessWidget {
               const SingleActivator(LogicalKeyboardKey.enter):
                   const SendMessageIntent(),
             // todo remove, flutter sdk error
-            const SingleActivator(LogicalKeyboardKey(0x100070028)):
-                const SendMessageIntent(),
+            if (sendable)
+              const SingleActivator(LogicalKeyboardKey(0x100070028)):
+                  const SendMessageIntent(),
           },
           actions: {
             SendMessageIntent: CallbackAction<Intent>(
