@@ -36,13 +36,14 @@ dependencies:
   http: ^0.13.3
   qr_flutter: ^4.0.0
   uuid: ^3.0.4
+  ulid: ^2.0.0
   web_socket_channel: ^2.1.0
   moor: ^4.2.1
   sqlite3_flutter_libs: ^0.4.1
   libsignal_protocol_dart:
     git:
         url: https://github.com/MixinNetwork/libsignal_protocol_dart.git
-        ref: 39bac863830da7d7ef33c03a5157da73512190be
+        ref: 18c18c611a5556031a03fe6fb7a61904c69d08ba
   path_provider: ^2.0.1
   path: ^1.8.0
   hive: ^2.0.4

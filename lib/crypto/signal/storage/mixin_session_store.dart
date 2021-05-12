@@ -68,7 +68,7 @@ class MixinSessionStore extends SessionStore {
           address: address.getName(),
           device: address.getDeviceId(),
           record: record.serialize(),
-          timestamp: DateTime.now().microsecond));
+          timestamp: DateTime.now().millisecondsSinceEpoch));
     }
   }
 }

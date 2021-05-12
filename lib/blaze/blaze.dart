@@ -193,7 +193,8 @@ class Blaze {
     transactions[blazeMessage.id] = transaction;
     debugPrint('deliverNoThrow transactions size: ${transactions.length}');
     final bm = await transaction.run(() => channel?.sink.add(GZipEncoder()
-        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))));
+        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
+        () => null);
     if (bm == null) {
       return deliverNoThrow(blazeMessage);
     } else if (bm.error != null) {
@@ -209,7 +210,8 @@ class Blaze {
     transactions[blazeMessage.id] = transaction;
     debugPrint('deliverAndWait transactions size: ${transactions.length}');
     return transaction.run(() => channel?.sink.add(GZipEncoder()
-        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))));
+        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
+        () => null);
   }
 
   Future<void> _reconnect() async {
@@ -260,9 +262,9 @@ class WebSocketTransaction<T> {
 
   final Completer<T?> _completer = Completer();
 
-  Future<T?> run(Function() fun) {
+  Future<T?> run(Function() fun, Function() onTimeout) {
     fun.call();
-    return _completer.future.timeout(const Duration(seconds: 5));
+    return _completer.future.timeout(const Duration(seconds: 5), onTimeout: onTimeout.call());
   }
 
   void success(T? data) {

@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:uuid/uuid.dart';
 import 'package:crypto/crypto.dart' as crypto;
+import 'package:ulid/ulid.dart';
 
 extension StringExtension on String {
   String fts5ContentFilter() {
@@ -34,7 +34,8 @@ extension NullableStringExtension on String? {
     if (this == null || this?.isEmpty == true) {
       return 1;
     }
-    return const Uuid().v4().hashCode;
+    // this must be a valid uuid
+    return Ulid.parse(this!).hashCode;
   }
 }
 

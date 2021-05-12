@@ -109,7 +109,7 @@ class AccountServer {
       client,
     );
 
-    signalProtocol = SignalProtocol(sessionId);
+    signalProtocol = SignalProtocol(userId);
     await signalProtocol.init();
 
     _decryptMessage = DecryptMessage(
@@ -297,8 +297,10 @@ class AccountServer {
   }
 
   Future _checkSessionSenderKey(String conversationId) async {
+    debugPrint('@@@ _checkSessionSenderKey');
     final participants = await database.participantSessionDao
-        .getNotSendSessionParticipants(conversationId, userId);
+        .getNotSendSessionParticipants(conversationId, sessionId);
+    debugPrint('@@@ participants size: ${participants.length}');
     if (participants.isEmpty) {
       return;
     }
@@ -310,9 +312,11 @@ class AccountServer {
         requestSignalKeyUsers.add(
             BlazeMessageParamSession(userId: p.userId, sessionId: p.sessionId));
       } else {
+        final deviceId = p.sessionId.getDeviceId();
+        debugPrint('@@@ deviceId: $deviceId');
         final encryptedResult = await signalProtocol.encryptSenderKey(
             conversationId, p.userId,
-            deviceId: p.sessionId.getDeviceId());
+            deviceId: deviceId);
         if (encryptedResult.err) {
           requestSignalKeyUsers.add(BlazeMessageParamSession(
               userId: p.userId, sessionId: p.sessionId));
@@ -324,21 +328,27 @@ class AccountServer {
       }
     }
 
+    debugPrint('@@@ requestSignalKeyUsers size: ${requestSignalKeyUsers.length}');
     if (requestSignalKeyUsers.isNotEmpty) {
       final blazeMessage = createConsumeSessionSignalKeys(
           createConsumeSignalKeysParam(requestSignalKeyUsers));
+      debugPrint('@@@ blazeMessage: ${blazeMessage.toJson()}');
       final data = (await blaze.deliverAndWait(blazeMessage))?.data;
+      debugPrint('@@@ data: $data');
       if (data != null) {
         final signalKeys =
             List<SignalKey>.from((data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
         final keys = <BlazeMessageParamSession>[];
+        debugPrint('@@@ signalKeys size: ${signalKeys.length}');
         if (signalKeys.isNotEmpty) {
           for (final k in signalKeys) {
             final preKeyBundle = k.createPreKeyBundle();
             await signalProtocol.processSession(k.userId, preKeyBundle);
+            final deviceId = preKeyBundle.getDeviceId();
             final encryptedResult = await signalProtocol.encryptSenderKey(
                 conversationId, k.userId,
-                deviceId: preKeyBundle.getDeviceId());
+                deviceId: deviceId);
+            debugPrint('@@@ encryptedResult: ${encryptedResult.result}, deviceId: $deviceId');
             signalKeyMessages.add(createBlazeSignalKeyMessage(
                 k.userId, encryptedResult.result!,
                 sessionId: k.sessionId));
@@ -351,24 +361,29 @@ class AccountServer {
         }
 
         final noKeyList = requestSignalKeyUsers.where((e) => !keys.contains(e));
+        debugPrint('@@@ noKeyList size: ${noKeyList.length}');
         if (noKeyList.isNotEmpty) {
           final sentSenderKeys = noKeyList
               .map((e) => db.ParticipantSessionData(
                   conversationId: conversationId,
                   userId: e.userId,
-                  sessionId: e.sessionId))
-              .toList();
+                  sessionId: e.sessionId,
+              )).toList();
+          debugPrint('@@@ sentSenderKeys size: ${sentSenderKeys.length}');
           await database.participantSessionDao.updateList(sentSenderKeys);
         }
       }
     }
+    debugPrint('@@@ signalKeyMessages size: ${signalKeyMessages.length}');
     if (signalKeyMessages.isEmpty) {
       return;
     }
     final checksum = await getCheckSum(conversationId);
+    debugPrint('@@@ checksum $checksum');
     final bm = createSignalKeyMessage(createSignalKeyMessageParam(
         conversationId, signalKeyMessages, checksum));
     final result = await blaze.deliverNoThrow(bm);
+    debugPrint('@@@ result retry: ${result.retry}, success: ${result.success}');
     if (result.retry) {
       return _checkSessionSenderKey(conversationId);
     }
@@ -403,9 +418,11 @@ class AccountServer {
   Future _checkConversation(String conversationId) async {
     final conversation =
         await database.conversationDao.getConversationById(conversationId);
+    debugPrint('_checkConversation conversationId: $conversationId');
     if (conversation == null) {
       return;
     }
+    debugPrint('category: ${conversation.category}');
     if (conversation.category == ConversationCategory.group) {
       await _syncConversation(conversationId);
     } else {
@@ -486,7 +503,7 @@ class AccountServer {
           List<SignalKey>.from((data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
       if (keys.isNotEmpty) {
         final preKeyBundle = keys[0].createPreKeyBundle();
-        signalProtocol.processSession(recipientId, preKeyBundle);
+        await signalProtocol.processSession(recipientId, preKeyBundle);
       } else {
         return false;
       }

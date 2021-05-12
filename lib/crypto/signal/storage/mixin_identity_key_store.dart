@@ -6,12 +6,12 @@ import '../signal_database.dart';
 import '../signal_vo_extension.dart';
 
 class MixinIdentityKeyStore extends IdentityKeyStore {
-  MixinIdentityKeyStore(SignalDatabase db, this._sessionId) {
+  MixinIdentityKeyStore(SignalDatabase db, this._accountId) {
     identityDao = IdentityDao(db);
   }
 
   late IdentityDao identityDao;
-  late final String? _sessionId;
+  late final String? _accountId;
 
   @override
   Future<IdentityKey> getIdentity(SignalProtocolAddress address) async {
@@ -37,17 +37,23 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
   @override
   Future<bool> isTrustedIdentity(SignalProtocolAddress address,
       IdentityKey? identityKey, Direction direction) async {
-    final ourNumber = _sessionId;
+    final ourNumber = _accountId;
+    debugPrint('@@@ isTrustedIdentity ourNumber: $ourNumber');
     if (ourNumber == null) {
       return false;
     }
     final theirAddress = address.getName();
+    debugPrint('@@@ theirAddress $theirAddress');
     if (ourNumber == address.getName()) {
-      return identityKey ==
-          await identityDao
-              .getIdentityByAddress('-1')
-              .then((value) => value?.getIdentityKey());
+      debugPrint('@@@ ${identityKey?.publicKey.serialize()}');
+      final local = await identityDao
+          .getIdentityByAddress('-1')
+          .then((value) => value?.getIdentityKey());
+      debugPrint('@@@ ${local?.publicKey.serialize()}');
+      return identityKey == local;
+
     }
+    debugPrint('@@@ direction: $direction');
     switch (direction) {
       case Direction.SENDING:
         return isTrustedForSending(

@@ -21,26 +21,26 @@ import 'package:moor/moor.dart';
 import 'identity_key_util.dart';
 
 class SignalProtocol {
-  SignalProtocol(this._sessionId);
+  SignalProtocol(this._accountId);
 
   static const int defaultDeviceId = 1;
 
-  final String _sessionId;
+  final String _accountId;
 
   late SignalDatabase db;
 
   late MixinSignalProtocolStore mixinSignalProtocolStore;
   late MixinSenderKeyStore senderKeyStore;
 
-  static Future initSignal() async {
-    await IdentityKeyUtil.generateIdentityKeyPair(SignalDatabase.get);
+  static Future initSignal(List<int> private) async {
+    await IdentityKeyUtil.generateIdentityKeyPair(SignalDatabase.get, private);
   }
 
   Future init() async {
     db = SignalDatabase.get;
     final preKeyStore = MixinPreKeyStore(db);
     final signedPreKeyStore = MixinPreKeyStore(db);
-    final identityKeyStore = MixinIdentityKeyStore(db, _sessionId);
+    final identityKeyStore = MixinIdentityKeyStore(db, _accountId);
     final sessionStore = MixinSessionStore(db);
     mixinSignalProtocolStore = MixinSignalProtocolStore(
         preKeyStore, signedPreKeyStore, identityKeyStore, sessionStore);
@@ -64,6 +64,7 @@ class SignalProtocol {
       String groupId, String senderId) async {
     final senderKeyName = SenderKeyName(
         groupId, SignalProtocolAddress(senderId, defaultDeviceId));
+    debugPrint('@@@ getSenderKeyDistribution senderKeyName: ${senderKeyName.serialize()}');
     final build = GroupSessionBuilder(senderKeyStore);
     return build.create(senderKeyName);
   }
@@ -71,14 +72,17 @@ class SignalProtocol {
   Future<EncryptResult> encryptSenderKey(
       String conversationId, String recipientId,
       {int deviceId = defaultDeviceId}) async {
+    debugPrint('@@@ encryptSenderKey');
     final senderKeyDistributionMessage =
-        await getSenderKeyDistribution(conversationId, _sessionId);
+        await getSenderKeyDistribution(conversationId, _accountId);
     try {
+      debugPrint('@@@ encryptSession');
       final cipherMessage = await encryptSession(
           senderKeyDistributionMessage.serialize(), recipientId, deviceId);
       final compose = ComposeMessageData(
           cipherMessage.getType(), cipherMessage.serialize());
       final cipher = encodeMessageData(compose);
+      debugPrint('@@@ cipher: $cipher');
       return EncryptResult(cipher, false);
     } on UntrustedIdentityException {
       final remoteAddress = SignalProtocolAddress(recipientId, deviceId);
@@ -105,6 +109,7 @@ class SignalProtocol {
       String? sessionId,
       DecryptionCallback callback) {
     final address = SignalProtocolAddress(senderId, sessionId.getDeviceId());
+    debugPrint('decrypt address: ${address.toString()}');
     final sessionCipher =
         SessionCipher.fromStore(mixinSignalProtocolStore, address);
     if (category == MessageCategory.signalKey.toString()) {
@@ -140,7 +145,7 @@ class SignalProtocol {
 
   Future<bool> isExistSenderKey(String groupId, String senderId) async {
     final senderKeyName = SenderKeyName(
-        groupId, SignalProtocolAddress(_sessionId, defaultDeviceId));
+        groupId, SignalProtocolAddress(senderId, defaultDeviceId));
     final senderKeyRecord = await senderKeyStore.loadSenderKey(senderKeyName);
     return !senderKeyRecord.isEmpty;
   }
@@ -214,6 +219,7 @@ class SignalProtocol {
     final groupCipher = GroupCipher(senderKeyStore, senderKeyName);
     var cipher = <int>[];
     try {
+      debugPrint('encryptGroupMessage');
       cipher = await groupCipher
           .encrypt(Uint8List.fromList(utf8.encode(message.content!)));
     } on NoSessionException catch (e) {
@@ -230,6 +236,7 @@ class SignalProtocol {
       quoteMessageId: message.quoteMessageId,
       mentions: mentionData,
     );
+    debugPrint('encryptGroupMessage blazeParam: ${blazeParam.toJson().toString()}');
     return createParamBlazeMessage(blazeParam);
   }
 
@@ -246,6 +253,7 @@ class SignalProtocol {
       Uint8List cipherText,
       DecryptionCallback callback) async {
     final senderKeyName = SenderKeyName(groupId, address);
+    debugPrint('senderKeyName: ${senderKeyName.serialize()}');
     final groupCipher = GroupCipher(senderKeyStore, senderKeyName);
     return groupCipher.decryptWithCallback(cipherText, callback);
   }
@@ -283,7 +291,7 @@ class SignalProtocol {
 
   ComposeMessageData decodeMessageData(String encoded) {
     final cipherText = base64.decode(encoded);
-    final header = cipherText.sublist(0, 7);
+    final header = cipherText.sublist(0, 8);
     final version = header[0].toInt();
     if (version != CiphertextMessage.CURRENT_VERSION) {
       throw InvalidMessageException('Unknown version: $version');
@@ -291,11 +299,11 @@ class SignalProtocol {
     final dataType = header[1].toInt();
     final isResendMessage = header[2].toInt() == 1;
     if (isResendMessage) {
-      final messageId = utf8.decode(cipherText.sublist(8, 43));
-      final data = cipherText.sublist(44, cipherText.length - 1);
+      final messageId = utf8.decode(cipherText.sublist(8, 44));
+      final data = cipherText.sublist(44, cipherText.length);
       return ComposeMessageData(dataType, data, resendMessageId: messageId);
     } else {
-      final data = cipherText.sublist(8, cipherText.length - 1);
+      final data = cipherText.sublist(8, cipherText.length);
       return ComposeMessageData(dataType, data);
     }
   }
