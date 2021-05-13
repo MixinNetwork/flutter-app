@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
 import '../dao/session_dao.dart';
@@ -63,7 +64,16 @@ class MixinSessionStore extends SessionStore {
       SignalProtocolAddress address, SessionRecord record) async {
     final session =
         await sessionDao.getSession(address.getName(), address.getDeviceId());
-    if (session == null) { // TODO compare session.record and record.serialize()
+    if (session == null) {
+      await sessionDao.insertSession(SessionsCompanion.insert(
+          address: address.getName(),
+          device: address.getDeviceId(),
+          record: record.serialize(),
+          timestamp: DateTime.now().millisecondsSinceEpoch));
+    }
+    final sessionRecord = session?.record;
+    debugPrint('sessionRecord: $sessionRecord');
+    if (sessionRecord != null && !listEquals(sessionRecord, record.serialize())) {
       await sessionDao.insertSession(SessionsCompanion.insert(
           address: address.getName(),
           device: address.getDeviceId(),

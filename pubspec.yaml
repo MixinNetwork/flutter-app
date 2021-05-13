@@ -43,7 +43,7 @@ dependencies:
   libsignal_protocol_dart:
     git:
         url: https://github.com/MixinNetwork/libsignal_protocol_dart.git
-        ref: 18c18c611a5556031a03fe6fb7a61904c69d08ba
+        ref: a568152726b205534aee60d2971b05f69bd8801d
   path_provider: ^2.0.1
   path: ^1.8.0
   hive: ^2.0.4

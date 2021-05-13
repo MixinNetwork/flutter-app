@@ -346,7 +346,7 @@ class DecryptMessage extends Injector {
     if (data.category.isText) {
       String plain;
       if (data.category == MessageCategory.signalText) {
-        plain = 'SignalText';
+        plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);
       }

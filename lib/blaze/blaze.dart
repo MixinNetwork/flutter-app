@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -95,6 +96,7 @@ class Blaze {
           debugPrint('blazeMessage not a BlazeMessageData');
           return;
         }
+        debugPrint('blazeMessage data: ${data.toJson()}');
         if (blazeMessage.action == acknowledgeMessageReceipts) {
           // makeMessageStatus
           await updateRemoteMessageStatus(
@@ -136,8 +138,14 @@ class Blaze {
     final blazeMessage = BlazeAckMessage(
         messageId: messageId,
         status: EnumToString.convertToString(status)!.toUpperCase());
+    final jobId = const Uuid().v4();
+    // final jobId = Ulid.fromBytes(utf8.encode('$messageId${blazeMessage.status}$acknowledgeMessageReceipts')).toString();
+    // final job = await database.jobsDao.findAckJobById(jobId);
+    // if (job != null) {
+    //   return;
+    // }
     await database.jobsDao.insert(Job(
-        jobId: const Uuid().v4(),
+        jobId: jobId,
         action: acknowledgeMessageReceipts,
         priority: 5,
         blazeMessage: await jsonEncodeWithIsolate(blazeMessage),
@@ -182,6 +190,7 @@ class Blaze {
 
   void _disconnect() {
     debugPrint('ws _disconnect');
+    transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
     subscription = null;

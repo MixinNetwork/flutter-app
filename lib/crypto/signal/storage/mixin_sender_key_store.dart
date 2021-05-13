@@ -17,10 +17,8 @@ class MixinSenderKeyStore extends SenderKeyStore {
 
   @override
   Future<SenderKeyRecord> loadSenderKey(SenderKeyName senderKeyName) async {
-    debugPrint('@@@ loadSenderKey ${senderKeyName.serialize()}');
     final senderKey = await senderKeyDao.getSenderKey(
         senderKeyName.groupId, senderKeyName.sender.toString());
-    debugPrint('@@@ senderKey ${senderKey?.toJson().toString()}');
     try {
       if (senderKey != null) {
         return SenderKeyRecord.fromSerialized(senderKey.record);

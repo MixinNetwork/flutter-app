@@ -266,12 +266,16 @@ class AccountServer {
         } else if (message.category.isSignal) {
           // TODO check resend data
 
+          debugPrint('message: ${message.toString()}');
           if (!await signalProtocol.isExistSenderKey(
               message.conversationId, message.userId)) {
             await _checkConversation(message.conversationId);
           }
           await _checkSessionSenderKey(message.conversationId);
           await blaze.deliverNoThrow(await encryptNormalMessage(message));
+          await database.messagesDao
+              .updateMessageStatusById(message.messageId, MessageStatus.sent);
+          await database.jobsDao.deleteJobById(job.jobId);
         } else {}
       }
     });
