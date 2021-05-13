@@ -65,34 +65,31 @@ class StickerMessageWidget extends StatelessWidget {
       showNip: true,
       isCurrentUser: isCurrentUser,
       showBubble: false,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (message.assetUrl == null)
-            SizedBox(
-              height: height,
-              width: width,
-            ),
+      outerTimeAndStatusWidget: MessageDatetimeAndStatus(
+        isCurrentUser: isCurrentUser,
+        createdAt: message.createdAt,
+        status: message.status,
+      ),
+      child: Builder(
+        builder: (context) {
           if (message.assetType == 'JSON')
-            Lottie.network(
+            return Lottie.network(
               message.assetUrl!,
               height: height,
               width: width,
               fit: BoxFit.cover,
-            )
+            );
           else if (message.assetUrl != null)
-            CacheImage(
+            return CacheImage(
               message.assetUrl!,
               height: height,
               width: width,
-            ),
-          MessageDatetimeAndStatus(
-            isCurrentUser: isCurrentUser,
-            createdAt: message.createdAt,
-            status: message.status,
-          ),
-        ],
+            );
+          return SizedBox(
+            height: height,
+            width: width,
+          );
+        },
       ),
     );
   }
