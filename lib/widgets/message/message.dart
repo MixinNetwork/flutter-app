@@ -137,8 +137,9 @@ class MessageItemWidget extends StatelessWidget {
                     onTap: () =>
                         Clipboard.setData(ClipboardData(text: message.content)),
                   ),
-                if (DateTime.now().isBefore(
-                    message.createdAt.add(const Duration(minutes: 30))))
+                if (isCurrentUser &&
+                    DateTime.now().isBefore(
+                        message.createdAt.add(const Duration(minutes: 30))))
                   ContextMenu(
                     title: Localization.of(context).deleteForEveryone,
                     isDestructiveAction: true,
@@ -225,7 +226,7 @@ class MessageItemWidget extends StatelessWidget {
                   );
                 if (message.type.isVideo || message.type.isLive)
                   return VideoMessageWidget(
-                    showNip:showNip,
+                    showNip: showNip,
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );
