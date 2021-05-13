@@ -55,7 +55,7 @@ dependencies:
   tuple: ^2.0.0
   archive: ^3.1.2
   hydrated_bloc: ^7.0.0
-  rxdart: ^0.26.0
+  rxdart: ^0.27.0
   json_annotation: ^4.0.1
   provider: ^5.0.0
   isolate: ^2.0.3
@@ -69,12 +69,12 @@ dependencies:
   file_selector_linux: ^0.0.2
   mime: ^1.0.0
   url_launcher: ^6.0.1
-  filesize: ^1.0.4
+  filesize: ^2.0.1
   flutter_portal: ^0.4.0
   flutter_markdown: ^0.6.1
   markdown: ^4.0.0
   map: ^0.3.0
-  flutter_local_notifications: ^5.0.0+3
+  flutter_local_notifications: ^5.0.0+4
   flutter_app_icon_badge: ^2.0.0
   flutter_hooks: ^0.16.0
   objectbox: ^0.14.0
