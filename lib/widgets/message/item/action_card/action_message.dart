@@ -11,8 +11,7 @@ import '../../../brightness_observer.dart';
 import '../../../cache_image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../message_bubble.dart';
-import '../../message_datetime.dart';
-import '../../message_status.dart';
+import '../../message_datetime_and_status.dart';
 import 'action_card_data.dart';
 
 class ActionCardMessage extends HookWidget {
@@ -36,12 +35,10 @@ class ActionCardMessage extends HookWidget {
     return MessageBubble(
       showNip: showNip,
       isCurrentUser: isCurrentUser,
-      outerTimeAndStatusWidget: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          MessageDatetime(dateTime: message.createdAt),
-          if (isCurrentUser) MessageStatusWidget(status: message.status),
-        ],
+      outerTimeAndStatusWidget: MessageDatetimeAndStatus(
+        isCurrentUser: isCurrentUser,
+        createdAt: message.createdAt,
+        status: message.status,
       ),
       child: InteractableDecoratedBox(
         onTap: () {

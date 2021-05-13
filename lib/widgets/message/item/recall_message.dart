@@ -8,9 +8,8 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
 import '../message_bubble.dart';
-import '../message_datetime.dart';
+import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
-import '../message_status.dart';
 
 class RecallMessage extends StatelessWidget {
   const RecallMessage({
@@ -47,12 +46,10 @@ class RecallMessage extends StatelessWidget {
         ),
       ],
     );
-    final dateAndStatus = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        MessageDatetime(dateTime: message.createdAt),
-        if (isCurrentUser) MessageStatusWidget(status: message.status),
-      ],
+    final dateAndStatus = MessageDatetimeAndStatus(
+      isCurrentUser: isCurrentUser,
+      createdAt: message.createdAt,
+      status: message.status,
     );
     return MessageBubble(
       showNip: showNip,

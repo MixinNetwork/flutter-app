@@ -27,7 +27,7 @@ class MessageBubble extends StatelessWidget {
     this.showNip = true,
     this.showBubble = true,
     this.includeNip = false,
-    this.padding = const EdgeInsets.all(10),
+    this.padding = const EdgeInsets.all(8),
     this.outerTimeAndStatusWidget,
     this.quoteMessageId,
     this.quoteMessageContent,
@@ -112,7 +112,7 @@ class MessageBubble extends StatelessWidget {
           ),
           if (outerTimeAndStatusWidget != null)
             Padding(
-              padding: EdgeInsets.only(right: isCurrentUser ? 20 : 10),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: outerTimeAndStatusWidget,
             ),
         ],

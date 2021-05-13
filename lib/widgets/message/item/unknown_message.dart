@@ -8,9 +8,8 @@ import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
 import '../../mouse_region_span.dart';
 import '../message_bubble.dart';
-import '../message_datetime.dart';
+import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
-import '../message_status.dart';
 
 class UnknownMessage extends StatelessWidget {
   const UnknownMessage({
@@ -50,12 +49,10 @@ class UnknownMessage extends StatelessWidget {
         ],
       ),
     );
-    final dateAndStatus = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        MessageDatetime(dateTime: message.createdAt),
-        if (isCurrentUser) MessageStatusWidget(status: message.status),
-      ],
+    final dateAndStatus = MessageDatetimeAndStatus(
+      isCurrentUser: isCurrentUser,
+      createdAt: message.createdAt,
+      status: message.status,
     );
     return MessageBubble(
       showNip: showNip,

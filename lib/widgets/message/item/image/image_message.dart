@@ -14,8 +14,7 @@ import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../status.dart';
 import '../../message_bubble.dart';
-import '../../message_datetime.dart';
-import '../../message_status.dart';
+import '../../message_datetime_and_status.dart';
 import 'image_preview_portal.dart';
 
 class ImageMessageWidget extends StatelessWidget {
@@ -119,12 +118,10 @@ class ImageMessageWidget extends StatelessWidget {
                               vertical: 3,
                               horizontal: 5,
                             ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                MessageDatetime(dateTime: message.createdAt),
-                                MessageStatusWidget(status: message.status),
-                              ],
+                            child: MessageDatetimeAndStatus(
+                              isCurrentUser: isCurrentUser,
+                              createdAt: message.createdAt,
+                              status: message.status,
                             ),
                           ),
                         ),

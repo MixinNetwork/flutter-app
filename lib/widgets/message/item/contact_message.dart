@@ -9,8 +9,7 @@ import '../../avatar_view/avatar_view.dart';
 import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../message_bubble.dart';
-import '../message_datetime.dart';
-import '../message_status.dart';
+import '../message_datetime_and_status.dart';
 
 class ContactMessage extends StatelessWidget {
   const ContactMessage({
@@ -26,16 +25,14 @@ class ContactMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MessageBubble(
-    quoteMessageId: message.quoteId,
-    quoteMessageContent: message.quoteContent,
+        quoteMessageId: message.quoteId,
+        quoteMessageContent: message.quoteContent,
         showNip: showNip,
         isCurrentUser: isCurrentUser,
-        outerTimeAndStatusWidget: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MessageDatetime(dateTime: message.createdAt),
-            if (isCurrentUser) MessageStatusWidget(status: message.status),
-          ],
+        outerTimeAndStatusWidget: MessageDatetimeAndStatus(
+          isCurrentUser: isCurrentUser,
+          createdAt: message.createdAt,
+          status: message.status,
         ),
         child: InteractableDecoratedBox(
           onTap: () => context

@@ -121,12 +121,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .map((event) =>
               Tuple2(event?.conversationId, event?.initIndexMessageId))
           .distinct()
-          .asyncMap((event) async {
-        print('fuck event.item2: ${event.item2}');
-
-        return _MessageInitEvent(
-              centerMessageId: event.item2, isLatest: event.item2 == null);
-          })
+          .asyncMap((event) async => _MessageInitEvent(
+              centerMessageId: event.item2, isLatest: event.item2 == null))
           .listen(add),
     );
 
@@ -155,7 +151,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       return;
 
     if (event is _MessageInitEvent) {
-      print('fuck message id: ${event.centerMessageId}');
       yield await _resetMessageList(
         conversationId,
         finalLimit,

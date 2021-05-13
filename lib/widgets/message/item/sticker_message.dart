@@ -6,8 +6,7 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/dp_utils.dart';
 import '../../cache_image.dart';
 import '../message_bubble.dart';
-import '../message_datetime.dart';
-import '../message_status.dart';
+import '../message_datetime_and_status.dart';
 
 class StickerMessageWidget extends StatelessWidget {
   const StickerMessageWidget({
@@ -68,8 +67,7 @@ class StickerMessageWidget extends StatelessWidget {
       showBubble: false,
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment:
-            isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (message.assetUrl == null)
             SizedBox(
@@ -89,12 +87,10 @@ class StickerMessageWidget extends StatelessWidget {
               height: height,
               width: width,
             ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              MessageDatetime(dateTime: message.createdAt),
-              MessageStatusWidget(status: message.status),
-            ],
+          MessageDatetimeAndStatus(
+            isCurrentUser: isCurrentUser,
+            createdAt: message.createdAt,
+            status: message.status,
           ),
         ],
       ),

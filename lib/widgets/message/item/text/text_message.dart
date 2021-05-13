@@ -11,9 +11,8 @@ import '../../../../utils/uri_utils.dart';
 import '../../../brightness_observer.dart';
 import '../../../high_light_text.dart';
 import '../../message_bubble.dart';
-import '../../message_datetime.dart';
+import '../../message_datetime_and_status.dart';
 import '../../message_layout.dart';
-import '../../message_status.dart';
 import 'mention_builder.dart';
 
 class TextMessage extends HookWidget {
@@ -93,12 +92,10 @@ class TextMessage extends HookWidget {
         ),
       ),
     );
-    final dateAndStatus = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        MessageDatetime(dateTime: message.createdAt),
-        if (isCurrentUser) MessageStatusWidget(status: message.status),
-      ],
+    final dateAndStatus = MessageDatetimeAndStatus(
+      isCurrentUser: isCurrentUser,
+      createdAt: message.createdAt,
+      status: message.status,
     );
 
     return MessageBubble(

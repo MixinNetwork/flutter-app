@@ -19,8 +19,7 @@ import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
 import '../message_bubble.dart';
-import '../message_datetime.dart';
-import '../message_status.dart';
+import '../message_datetime_and_status.dart';
 
 class FileMessage extends StatelessWidget {
   const FileMessage({
@@ -40,12 +39,10 @@ class FileMessage extends StatelessWidget {
         quoteMessageContent: message.quoteContent,
         showNip: showNip,
         isCurrentUser: isCurrentUser,
-        outerTimeAndStatusWidget: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            MessageDatetime(dateTime: message.createdAt),
-            if (isCurrentUser) MessageStatusWidget(status: message.status),
-          ],
+        outerTimeAndStatusWidget: MessageDatetimeAndStatus(
+          isCurrentUser: isCurrentUser,
+          createdAt: message.createdAt,
+          status: message.status,
         ),
         child: InteractableDecoratedBox(
           onTap: () async {

@@ -13,8 +13,7 @@ import '../../brightness_observer.dart';
 import '../../full_screen_portal.dart';
 import '../../interacter_decorated_box.dart';
 import '../message_bubble.dart';
-import '../message_datetime.dart';
-import '../message_status.dart';
+import '../message_datetime_and_status.dart';
 
 class PostMessage extends StatelessWidget {
   const PostMessage({
@@ -68,16 +67,11 @@ class PostMessage extends StatelessWidget {
                         horizontal: 6,
                         vertical: 2,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          MessageDatetime(
-                            dateTime: message.createdAt,
-                            color: const Color.fromRGBO(255, 255, 255, 1),
-                          ),
-                          if (isCurrentUser)
-                            MessageStatusWidget(status: message.status),
-                        ],
+                      child: MessageDatetimeAndStatus(
+                        isCurrentUser: isCurrentUser,
+                        createdAt: message.createdAt,
+                        color: const Color.fromRGBO(255, 255, 255, 1),
+                        status: message.status,
                       ),
                     ),
                   ),
