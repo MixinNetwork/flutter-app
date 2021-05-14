@@ -189,7 +189,7 @@ class IdentitiesCompanion extends UpdateCompanion<Identitie> {
     this.privateKey = const Value.absent(),
     this.nextPrekeyId = const Value.absent(),
     required int timestamp,
-  })   : address = Value(address),
+  })  : address = Value(address),
         publicKey = Value(publicKey),
         timestamp = Value(timestamp);
   static Insertable<Identitie> custom({
@@ -504,7 +504,7 @@ class PrekeysCompanion extends UpdateCompanion<Prekey> {
     this.id = const Value.absent(),
     required int prekeyId,
     required Uint8List record,
-  })   : prekeyId = Value(prekeyId),
+  })  : prekeyId = Value(prekeyId),
         record = Value(record);
   static Insertable<Prekey> custom({
     Expression<int>? id,
@@ -741,7 +741,7 @@ class SignedPrekeysCompanion extends UpdateCompanion<SignedPrekey> {
     required int prekeyId,
     required Uint8List record,
     required int timestamp,
-  })   : prekeyId = Value(prekeyId),
+  })  : prekeyId = Value(prekeyId),
         record = Value(record),
         timestamp = Value(timestamp);
   static Insertable<SignedPrekey> custom({
@@ -1023,7 +1023,7 @@ class SessionsCompanion extends UpdateCompanion<Session> {
     required int device,
     required Uint8List record,
     required int timestamp,
-  })   : address = Value(address),
+  })  : address = Value(address),
         device = Value(device),
         record = Value(record),
         timestamp = Value(timestamp);
@@ -1291,7 +1291,7 @@ class SenderKeysCompanion extends UpdateCompanion<SenderKey> {
     required String groupId,
     required String senderId,
     required Uint8List record,
-  })   : groupId = Value(groupId),
+  })  : groupId = Value(groupId),
         senderId = Value(senderId),
         record = Value(record);
   static Insertable<SenderKey> custom({
@@ -1563,7 +1563,7 @@ class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
     required String status,
     this.messageId = const Value.absent(),
     required String createdAt,
-  })   : groupId = Value(groupId),
+  })  : groupId = Value(groupId),
         senderId = Value(senderId),
         status = Value(status),
         createdAt = Value(createdAt);

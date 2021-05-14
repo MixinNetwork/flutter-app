@@ -16,10 +16,10 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
       delete(db.participantSession).delete(participantSession);
 
   Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
-      String conversationId, String userId) =>
-    db
-        .getParticipantSessionKeyWithoutSelf(conversationId, userId)
-        .getSingle();
+          String conversationId, String userId) =>
+      db
+          .getParticipantSessionKeyWithoutSelf(conversationId, userId)
+          .getSingle();
 
   Future deleteByStatus(String conversationId) async {
     await (delete(db.participantSession)
@@ -36,9 +36,10 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<ParticipantSessionData>> getParticipantSessionsByConversationId(
-      String conversationId) async => (select(db.participantSession)
-      ..where((tbl) => tbl.conversationId.equals(conversationId)))
-        .get();
+          String conversationId) async =>
+      (select(db.participantSession)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .get();
 
   Future insertAll(List<ParticipantSessionData> list) async {
     await batch((batch) => batch.insertAll(db.participantSession, list));
@@ -50,13 +51,16 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
     }
   }
 
-  Future replaceAll(String conversationId,
-      List<ParticipantSessionData> list) async => transaction(() async {
-      await deleteByConversationId(conversationId);
-      await insertAll(list);
-    });
+  Future replaceAll(
+          String conversationId, List<ParticipantSessionData> list) async =>
+      transaction(() async {
+        await deleteByConversationId(conversationId);
+        await insertAll(list);
+      });
 
-  Future<List<ParticipantSessionData>> getNotSendSessionParticipants(String conversationId, String sessionId) async => db.getNotSendSessionParticipants(conversationId, sessionId).get();
+  Future<List<ParticipantSessionData>> getNotSendSessionParticipants(
+          String conversationId, String sessionId) async =>
+      db.getNotSendSessionParticipants(conversationId, sessionId).get();
 
   Future updateList(List<ParticipantSessionData> list) async {
     for (final p in list) {

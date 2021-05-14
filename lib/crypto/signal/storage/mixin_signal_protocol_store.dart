@@ -93,7 +93,8 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  Future storeSession(SignalProtocolAddress address, SessionRecord record) async {
+  Future storeSession(
+      SignalProtocolAddress address, SessionRecord record) async {
     await sessionStore.storeSession(address, record);
   }
 

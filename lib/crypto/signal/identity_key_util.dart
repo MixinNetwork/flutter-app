@@ -5,10 +5,12 @@ import 'package:moor/moor.dart';
 import 'signal_vo_extension.dart';
 
 class IdentityKeyUtil {
-  static Future generateIdentityKeyPair(SignalDatabase db, List<int> privateKey) async {
+  static Future generateIdentityKeyPair(
+      SignalDatabase db, List<int> privateKey) async {
     final registrationId = KeyHelper.generateRegistrationId(false);
     CryptoKeyValue.get.setLocalRegistrationId(registrationId);
-    final identityKeyPair = KeyHelper.generateIdentityKeyPairFromPrivate(privateKey);
+    final identityKeyPair =
+        KeyHelper.generateIdentityKeyPairFromPrivate(privateKey);
     final identity = IdentitiesCompanion.insert(
         address: '-1',
         registrationId: Value(registrationId),

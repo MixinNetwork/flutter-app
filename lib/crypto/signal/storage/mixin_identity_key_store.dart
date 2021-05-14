@@ -47,7 +47,6 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
           .getIdentityByAddress('-1')
           .then((value) => value?.getIdentityKey());
       return identityKey == local;
-
     }
     switch (direction) {
       case Direction.SENDING:

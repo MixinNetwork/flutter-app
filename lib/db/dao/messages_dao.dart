@@ -64,7 +64,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<void> insertCompanion(MessagesCompanion messagesCompanion) async =>
-    into(db.messages).insert(messagesCompanion);
+      into(db.messages).insert(messagesCompanion);
 
   Future<int> insertFts(String messageId, String conversationId, String content,
           DateTime createdAt, String userId) =>
@@ -213,14 +213,17 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<Message?> findMessageByMessageId(String messageId) =>
       db.findMessageByMessageId(messageId).getSingleOrNull();
 
-  Future<List<String>> findFailedMessages(String conversationId, String userId) async =>
-      db.customSelect('SELECT id FROM messages WHERE conversation_id = ? AND user_id = ? AND status = \'FAILED\' ORDER BY created_at DESC LIMIT 1000',
-      variables: [
-        Variable.withString(conversationId),
-        Variable.withString(userId)
-      ])
-    .map((row) => row.read<String>('message_id'))
-    .get();
+  Future<List<String>> findFailedMessages(
+          String conversationId, String userId) async =>
+      db
+          .customSelect(
+              'SELECT id FROM messages WHERE conversation_id = ? AND user_id = ? AND status = \'FAILED\' ORDER BY created_at DESC LIMIT 1000',
+              variables: [
+                Variable.withString(conversationId),
+                Variable.withString(userId)
+              ])
+          .map((row) => row.read<String>('message_id'))
+          .get();
 
   Future<int> updateMessageContent(String messageId, String encoded) =>
       db.customUpdate(

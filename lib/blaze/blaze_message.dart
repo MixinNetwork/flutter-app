@@ -48,18 +48,27 @@ BlazeMessage createConsumeSessionSignalKeys(BlazeMessageParam param) =>
 BlazeMessage createSignalKeyMessage(BlazeMessageParam param) => BlazeMessage(
     id: const Uuid().v4(), action: createSignalKeyMessages, params: param);
 
-BlazeMessage createCountSignalKeys() => BlazeMessage(
-    id: const Uuid().v4(), action: countSignalKeys, params: null);
+BlazeMessage createCountSignalKeys() =>
+    BlazeMessage(id: const Uuid().v4(), action: countSignalKeys, params: null);
 
-BlazeMessage createSyncSignalKeys(BlazeMessageParam param) => BlazeMessage(
-    id: const Uuid().v4(), action: syncSignalKeys, params: param);
+BlazeMessage createSyncSignalKeys(BlazeMessageParam param) =>
+    BlazeMessage(id: const Uuid().v4(), action: syncSignalKeys, params: param);
 
 BlazeMessageParam createConsumeSignalKeysParam(
         List<BlazeMessageParamSession> recipients) =>
     BlazeMessageParam(recipients: recipients);
 
-BlazeMessageParam createPlainJsonParam(String conversationId, String userId, String encoded, { String? sessionId }) =>
-    BlazeMessageParam(conversationId: conversationId, recipientId: userId, messageId: const Uuid().v4(), candidate: MessageCategory.plainJson.toString(), data: encoded, status: MessageStatus.sending.toString(), sessionId: sessionId);
+BlazeMessageParam createPlainJsonParam(
+        String conversationId, String userId, String encoded,
+        {String? sessionId}) =>
+    BlazeMessageParam(
+        conversationId: conversationId,
+        recipientId: userId,
+        messageId: const Uuid().v4(),
+        candidate: MessageCategory.plainJson.toString(),
+        data: encoded,
+        status: MessageStatus.sending.toString(),
+        sessionId: sessionId);
 
 BlazeMessageParam createSyncSignalKeysParam(SignalKeyRequest? request) =>
     BlazeMessageParam(keys: request);

@@ -15,7 +15,8 @@ class PreKeyUtil {
     final records = KeyHelper.generatePreKeys(preKeyIdOffset, batchSize);
     final preKeys = <PrekeysCompanion>[];
     for (final r in records) {
-      preKeys.add(PrekeysCompanion.insert(prekeyId: r.id, record: r.serialize()));
+      preKeys
+          .add(PrekeysCompanion.insert(prekeyId: r.id, record: r.serialize()));
     }
     await preKeyStore.storePreKeyList(preKeys);
     CryptoKeyValue.get

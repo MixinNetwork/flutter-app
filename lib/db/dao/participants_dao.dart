@@ -49,10 +49,11 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
         updateKind: UpdateKind.update,
       );
 
-  Future replaceAll(String conversationId, List<Participant> list) async => transaction(() async {
-      await deleteByConversationId(conversationId);
-      await insertAll(list);
-    });
+  Future replaceAll(String conversationId, List<Participant> list) async =>
+      transaction(() async {
+        await deleteByConversationId(conversationId);
+        await insertAll(list);
+      });
 
   Future deleteByConversationId(String conversationId) async {
     await (delete(db.participants)

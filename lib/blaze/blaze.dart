@@ -96,7 +96,8 @@ class Blaze {
         if (blazeMessage.action == acknowledgeMessageReceipts) {
           // makeMessageStatus
           await updateRemoteMessageStatus(
-              (data as Map<String, dynamic>)['message_id'], MessageStatus.delivered);
+              (data as Map<String, dynamic>)['message_id'],
+              MessageStatus.delivered);
         } else if (blazeMessage.action == createMessage) {
           if (data.userId == userId && data.category == null) {
             await updateRemoteMessageStatus(
@@ -197,8 +198,9 @@ class Blaze {
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
     debugPrint('deliverNoThrow transactions size: ${transactions.length}');
-    final bm = await transaction.run(() => channel?.sink.add(GZipEncoder()
-        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
+    final bm = await transaction.run(
+        () => channel?.sink.add(GZipEncoder()
+            .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
         () => null);
     if (bm == null) {
       return deliverNoThrow(blazeMessage);
@@ -214,8 +216,9 @@ class Blaze {
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
     debugPrint('deliverAndWait transactions size: ${transactions.length}');
-    return transaction.run(() => channel?.sink.add(GZipEncoder()
-        .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
+    return transaction.run(
+        () => channel?.sink.add(GZipEncoder()
+            .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
         () => null);
   }
 
@@ -269,7 +272,8 @@ class WebSocketTransaction<T> {
 
   Future<T?> run(Function() fun, Function() onTimeout) {
     fun.call();
-    return _completer.future.timeout(const Duration(seconds: 5), onTimeout: onTimeout.call());
+    return _completer.future
+        .timeout(const Duration(seconds: 5), onTimeout: onTimeout.call());
   }
 
   void success(T? data) {

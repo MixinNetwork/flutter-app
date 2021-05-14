@@ -60,7 +60,8 @@ class Injector {
   }
 
   Future<void> refreshParticipants(
-      String conversationId, List<ParticipantRequest> participants,
+      String conversationId,
+      List<ParticipantRequest> participants,
       List<UserSession>? userSessions) async {
     final local =
         await database.participantsDao.getParticipants(conversationId);
@@ -83,7 +84,10 @@ class Injector {
 
     final participantSessions = <ParticipantSessionData>[];
     userSessions?.forEach((u) {
-      participantSessions.add(ParticipantSessionData(conversationId: conversationId, userId: u.userId, sessionId: u.sessionId));
+      participantSessions.add(ParticipantSessionData(
+          conversationId: conversationId,
+          userId: u.userId,
+          sessionId: u.sessionId));
     });
     await database.participantSessionDao.insertAll(participantSessions);
 

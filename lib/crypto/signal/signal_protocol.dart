@@ -154,8 +154,7 @@ class SignalProtocol {
   Future<bool> containsSession(String recipientId,
       {int deviceId = defaultDeviceId}) async {
     final signalProtocolAddress = SignalProtocolAddress(recipientId, deviceId);
-    return mixinSignalProtocolStore
-        .containsSession(signalProtocolAddress);
+    return mixinSignalProtocolStore.containsSession(signalProtocolAddress);
   }
 
   void clearSenderKey(String groupId, String senderId) {

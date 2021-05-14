@@ -16,7 +16,8 @@ class SenderKeyDao extends DatabaseAccessor<SignalDatabase> {
 
   Future<List<SenderKey>> getSenderKeys() async => select(db.senderKeys).get();
 
-  Future insert(SenderKey senderKey) => into(db.senderKeys).insertOnConflictUpdate(senderKey);
+  Future insert(SenderKey senderKey) =>
+      into(db.senderKeys).insertOnConflictUpdate(senderKey);
 
   Future deleteByGroupIdAndSenderId(String groupId, String senderId) async =>
       (delete(db.senderKeys)
