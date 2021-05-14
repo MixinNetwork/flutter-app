@@ -126,7 +126,6 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       await CryptoKeyValue.get.init();
       // ignore: avoid_dynamic_calls
       final private = base64.decode(msg['identity_key_private']);
-      debugPrint('private: $private');
       await SignalProtocol.initSignal(private);
       final registrationId = CryptoKeyValue.get.getLocalRegistrationId();
 

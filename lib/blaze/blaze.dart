@@ -61,9 +61,7 @@ class Blaze {
       headers: {'Authorization': 'Bearer $token'},
       pingInterval: const Duration(seconds: 15),
     );
-    subscription = channel?.stream
-        .asyncMap((message) async => parseBlazeMessage(message))
-        .listen(
+    channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
         debugPrint('blazeMessage: ${blazeMessage.toJson()}');
 
@@ -72,7 +70,6 @@ class Blaze {
           await _reconnect();
         }
 
-        debugPrint('transactions size: ${transactions.length}');
         if (blazeMessage.error == null) {
           final transaction = transactions[blazeMessage.id];
           if (transaction != null) {
@@ -96,7 +93,6 @@ class Blaze {
           debugPrint('blazeMessage not a BlazeMessageData');
           return;
         }
-        debugPrint('blazeMessage data: ${data.toJson()}');
         if (blazeMessage.action == acknowledgeMessageReceipts) {
           // makeMessageStatus
           await updateRemoteMessageStatus(

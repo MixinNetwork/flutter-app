@@ -122,7 +122,6 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processSignalMessage(BlazeMessageData data) async {
-    debugPrint('_processSignalMessage data: ${data.toJson().toString()}');
     if (data.category == MessageCategory.signalKey) {
       await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
       // TODO messageHistoryDao.insert
@@ -131,7 +130,6 @@ class DecryptMessage extends Injector {
     }
     final deviceId = data.sessionId.getDeviceId();
     final composeMessageData = _signalProtocol.decodeMessageData(data.data);
-    debugPrint('composeMessageData keyType: ${composeMessageData.keyType}, deviceId: $deviceId},  cipher: ${composeMessageData.cipher}');
     try {
       _signalProtocol.decrypt(data.conversationId, data.userId, composeMessageData.keyType, composeMessageData.cipher, data.category?.toString() ?? '', data.sessionId, (plaintext) async {
           if (data.category == MessageCategory.signalKey && data.userId != accountId) {
@@ -139,7 +137,6 @@ class DecryptMessage extends Injector {
           }
           if (data.category != MessageCategory.signalKey) {
             final plain = utf8.decode(plaintext);
-            debugPrint('plain: $plain');
             if (composeMessageData.resendMessageId != null) {
               // resent
             } else {

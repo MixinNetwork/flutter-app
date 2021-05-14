@@ -38,22 +38,17 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
   Future<bool> isTrustedIdentity(SignalProtocolAddress address,
       IdentityKey? identityKey, Direction direction) async {
     final ourNumber = _accountId;
-    debugPrint('@@@ isTrustedIdentity ourNumber: $ourNumber');
     if (ourNumber == null) {
       return false;
     }
     final theirAddress = address.getName();
-    debugPrint('@@@ theirAddress $theirAddress');
     if (ourNumber == address.getName()) {
-      debugPrint('@@@ ${identityKey?.publicKey.serialize()}');
       final local = await identityDao
           .getIdentityByAddress('-1')
           .then((value) => value?.getIdentityKey());
-      debugPrint('@@@ ${local?.publicKey.serialize()}');
       return identityKey == local;
 
     }
-    debugPrint('@@@ direction: $direction');
     switch (direction) {
       case Direction.SENDING:
         return isTrustedForSending(

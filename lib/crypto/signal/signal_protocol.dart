@@ -64,7 +64,6 @@ class SignalProtocol {
       String groupId, String senderId) async {
     final senderKeyName = SenderKeyName(
         groupId, SignalProtocolAddress(senderId, defaultDeviceId));
-    debugPrint('@@@ getSenderKeyDistribution senderKeyName: ${senderKeyName.serialize()}');
     final build = GroupSessionBuilder(senderKeyStore);
     return build.create(senderKeyName);
   }
@@ -72,17 +71,14 @@ class SignalProtocol {
   Future<EncryptResult> encryptSenderKey(
       String conversationId, String recipientId,
       {int deviceId = defaultDeviceId}) async {
-    debugPrint('@@@ encryptSenderKey');
     final senderKeyDistributionMessage =
         await getSenderKeyDistribution(conversationId, _accountId);
     try {
-      debugPrint('@@@ encryptSession');
       final cipherMessage = await encryptSession(
           senderKeyDistributionMessage.serialize(), recipientId, deviceId);
       final compose = ComposeMessageData(
           cipherMessage.getType(), cipherMessage.serialize());
       final cipher = encodeMessageData(compose);
-      debugPrint('@@@ cipher: $cipher');
       return EncryptResult(cipher, false);
     } on UntrustedIdentityException {
       final remoteAddress = SignalProtocolAddress(recipientId, deviceId);
@@ -109,7 +105,6 @@ class SignalProtocol {
       String? sessionId,
       DecryptionCallback callback) {
     final address = SignalProtocolAddress(senderId, sessionId.getDeviceId());
-    debugPrint('decrypt address: ${address.toString()}');
     final sessionCipher =
         SessionCipher.fromStore(mixinSignalProtocolStore, address);
     if (category == MessageCategory.signalKey.toString()) {
@@ -219,7 +214,6 @@ class SignalProtocol {
     final groupCipher = GroupCipher(senderKeyStore, senderKeyName);
     var cipher = <int>[];
     try {
-      debugPrint('encryptGroupMessage');
       cipher = await groupCipher
           .encrypt(Uint8List.fromList(utf8.encode(message.content!)));
     } on NoSessionException catch (e) {
@@ -236,7 +230,6 @@ class SignalProtocol {
       quoteMessageId: message.quoteMessageId,
       mentions: mentionData,
     );
-    debugPrint('encryptGroupMessage blazeParam: ${blazeParam.toJson().toString()}');
     return createParamBlazeMessage(blazeParam);
   }
 
@@ -253,7 +246,6 @@ class SignalProtocol {
       Uint8List cipherText,
       DecryptionCallback callback) async {
     final senderKeyName = SenderKeyName(groupId, address);
-    debugPrint('senderKeyName: ${senderKeyName.serialize()}');
     final groupCipher = GroupCipher(senderKeyStore, senderKeyName);
     return groupCipher.decryptWithCallback(cipherText, callback);
   }

@@ -32,7 +32,6 @@ class MixinSenderKeyStore extends SenderKeyStore {
   @override
   Future storeSenderKey(
       SenderKeyName senderKeyName, SenderKeyRecord record) async {
-    debugPrint('@@@ storeSenderKey groupId: ${senderKeyName.groupId}, senderId: ${senderKeyName.sender.toString()}');
     await senderKeyDao.insert(SenderKey(
         groupId: senderKeyName.groupId,
         senderId: senderKeyName.sender.toString(),

@@ -72,7 +72,6 @@ class MixinSessionStore extends SessionStore {
           timestamp: DateTime.now().millisecondsSinceEpoch));
     }
     final sessionRecord = session?.record;
-    debugPrint('sessionRecord: $sessionRecord');
     if (sessionRecord != null && !listEquals(sessionRecord, record.serialize())) {
       await sessionDao.insertSession(SessionsCompanion.insert(
           address: address.getName(),
