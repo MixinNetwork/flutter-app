@@ -5,7 +5,6 @@ import 'dart:typed_data';
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -61,7 +60,8 @@ class Blaze {
       headers: {'Authorization': 'Bearer $token'},
       pingInterval: const Duration(seconds: 15),
     );
-    channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
+    subscription =
+        channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
         debugPrint('blazeMessage: ${blazeMessage.toJson()}');
 

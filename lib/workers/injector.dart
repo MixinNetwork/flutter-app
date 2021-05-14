@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../constants/constants.dart';
 import '../db/database.dart';
+import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
 
 class Injector {
