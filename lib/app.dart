@@ -12,6 +12,7 @@ import 'bloc/bloc_converter.dart';
 import 'bloc/keyword_cubit.dart';
 import 'bloc/minute_timer_cubit.dart';
 import 'constants/brightness_theme_data.dart';
+import 'constants/resources.dart';
 import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
@@ -30,7 +31,9 @@ class App extends StatelessWidget {
   final accountServer = AccountServer();
 
   @override
-  Widget build(BuildContext context) => MultiBlocProvider(
+  Widget build(BuildContext context) {
+    precacheImage(AssetImage(Resources.assetsImagesChatBackgroundPng), context);
+    return MultiBlocProvider(
         providers: [
           BlocProvider(
             create: (context) => MultiAuthCubit(),
@@ -76,6 +79,7 @@ class App extends StatelessWidget {
           },
         ),
       );
+  }
 }
 
 class _Providers extends StatelessWidget {

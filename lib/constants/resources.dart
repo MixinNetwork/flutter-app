@@ -19,6 +19,9 @@ class Resources {
 
   static const String assetsImagesChatSvg = 'assets/images/chat.svg';
 
+  static const String assetsImagesChatBackgroundPng =
+      'assets/images/chat_background.png';
+
   static const String assetsImagesChatBackupSvg =
       'assets/images/chat_backup.svg';
 

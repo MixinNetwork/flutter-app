@@ -1,4 +1,4 @@
-include: package:very_good_analysis/analysis_options.yaml
+innclude: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   errors:
@@ -23,9 +23,9 @@ linter:
     #    - require_trailing_commas
     - prefer_final_locals
     - avoid_void_async
-#    - use_if_null_to_convert_nulls_to_bools
-#    - avoid_positional_boolean_parameters
-#    - always_put_required_named_parameters_first
+    #    - use_if_null_to_convert_nulls_to_bools
+    #    - avoid_positional_boolean_parameters
+    #    - always_put_required_named_parameters_first
     - unnecessary_await_in_return
     - prefer_expression_function_bodies
     - avoid_field_initializers_in_const_classes

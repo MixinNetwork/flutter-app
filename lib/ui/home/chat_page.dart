@@ -209,6 +209,18 @@ class ChatContainer extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: BrightnessData.themeOf(context).chatBackground,
+                      image: DecorationImage(
+                        image: ExactAssetImage(
+                          Resources.assetsImagesChatBackgroundPng,
+                        ),
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(
+                          BrightnessData.of(context) == 1.0
+                              ? Colors.white.withOpacity(0.02)
+                              : Colors.white.withOpacity(0.03),
+                          BlendMode.srcIn,
+                        ),
+                      ),
                     ),
                     child: Navigator(
                       onPopPage: (Route<dynamic> route, dynamic result) =>
