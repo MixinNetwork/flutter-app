@@ -217,7 +217,7 @@ class ChatContainer extends StatelessWidget {
                         colorFilter: ColorFilter.mode(
                           BrightnessData.of(context) == 1.0
                               ? Colors.white.withOpacity(0.02)
-                              : Colors.white.withOpacity(0.03),
+                              : Colors.black.withOpacity(0.03),
                           BlendMode.srcIn,
                         ),
                       ),
