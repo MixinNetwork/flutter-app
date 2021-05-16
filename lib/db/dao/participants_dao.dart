@@ -29,8 +29,10 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
   Future<List<Participant>> getAllParticipants() async =>
       select(db.participants).get();
 
-  void deleteAll(Iterable<Participant> remove) {
-    remove.forEach(deleteParticipant);
+  Future<void> deleteAll(Iterable<Participant> remove) async {
+    remove.forEach((element) async {
+      await deleteParticipant(element);
+    });
   }
 
   Selectable<User> participantsAvatar(String conversationId) =>

@@ -92,7 +92,7 @@ class Injector {
     await database.participantSessionDao.insertAll(participantSessions);
 
     if (remove.isNotEmpty) {
-      // database.participantsDao.deleteAll(remove);
+      await database.participantsDao.deleteAll(remove);
     }
   }
 
