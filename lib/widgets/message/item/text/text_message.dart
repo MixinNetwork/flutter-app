@@ -71,10 +71,7 @@ class TextMessage extends HookWidget {
     final content = Builder(
       builder: (context) => MentionBuilder(
         mentionString: message.mentions,
-        builder: (context, mentionMapAsyncSnapshot) =>
-            // todo HighlightSelectableText
-            // call child.getMaxIntrinsicWidth is one pixel short
-            HighlightText(
+        builder: (context, mentionMapAsyncSnapshot) => HighlightSelectableText(
           message.content!,
           highlightTextSpans: [
             HighlightTextSpan(
