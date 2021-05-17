@@ -290,6 +290,7 @@ class _ConversationSelector extends HookWidget {
               ),
             ),
             AnimatedSize(
+              alignment: Alignment.topCenter,
               duration: const Duration(milliseconds: 200),
               child: singleSelect || selected.isEmpty
                   ? const SizedBox(height: 8)

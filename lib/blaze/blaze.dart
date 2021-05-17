@@ -41,7 +41,7 @@ class Blaze {
   String? _token;
 
   StreamController<bool> connectedStateStreamController =
-      StreamController<bool>();
+      StreamController<bool>.broadcast();
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;

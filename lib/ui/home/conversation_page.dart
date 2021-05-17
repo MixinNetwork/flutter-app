@@ -1212,6 +1212,8 @@ class _NetworkNotConnect extends StatelessWidget {
       child = SizedBox();
 
     return AnimatedSize(
+      alignment: Alignment.topCenter,
+      curve: Curves.easeOut,
       child: child,
       duration: const Duration(milliseconds: 200),
     );
