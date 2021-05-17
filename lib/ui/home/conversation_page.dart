@@ -686,6 +686,16 @@ class _List extends HookWidget {
       converter: (state) => state.navigationMode,
     );
 
+    final connectedState = useStream(
+          context
+              .read<AccountServer>()
+              .blaze
+              .connectedStateStreamController
+              .stream,
+          initialData: true,
+        ).data ??
+        false;
+
     Widget child;
     if (pagingState.count <= 0)
       child = const _Empty();
@@ -802,7 +812,14 @@ class _List extends HookWidget {
 
     return ColoredBox(
       color: BrightnessData.themeOf(context).primary,
-      child: child,
+      child: Column(
+        children: [
+          _NetworkNotConnect(visible: !connectedState),
+          Expanded(
+            child: child,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1142,5 +1159,61 @@ class _MessageStatusIcon extends StatelessWidget {
       );
     }
     return const SizedBox();
+  }
+}
+
+class _NetworkNotConnect extends StatelessWidget {
+  const _NetworkNotConnect({
+    Key? key,
+    required this.visible,
+  }) : super(key: key);
+
+  final bool visible;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child;
+    if (visible)
+      child = Container(
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
+        color: BrightnessData.themeOf(context).warning.withOpacity(0.2),
+        child: Row(
+          children: [
+            ClipOval(
+              child: Container(
+                color: BrightnessData.themeOf(context).warning,
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: 2,
+                  height: 10,
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesExclamationMarkSvg,
+                    color: Colors.white,
+                    width: 2,
+                    height: 10,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              Localization.of(context).networkConnectionFailed,
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).text,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    else
+      child = SizedBox();
+
+    return AnimatedSize(
+      child: child,
+      duration: const Duration(milliseconds: 200),
+    );
   }
 }

@@ -142,6 +142,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "muteTitle": MessageLookupByLibrary.simpleMessage("静音通知"),
         "muted": MessageLookupByLibrary.simpleMessage("静音"),
         "name": MessageLookupByLibrary.simpleMessage("名字"),
+        "networkConnectionFailed":
+            MessageLookupByLibrary.simpleMessage("网络连接失败"),
         "next": MessageLookupByLibrary.simpleMessage("下一步"),
         "noAudio": MessageLookupByLibrary.simpleMessage("没有音频"),
         "noData": MessageLookupByLibrary.simpleMessage("没有数据"),

@@ -35,10 +35,13 @@ class Blaze {
   final Database database;
   final Client client; // todo delete
 
-  String host = _wsHost1;
-  bool reconnecting = false;
-  bool disposed = false;
-  String? token;
+  String _host = _wsHost1;
+  bool _reconnecting = false;
+  bool _disposed = false;
+  String? _token;
+
+  StreamController<bool> connectedStateStreamController =
+      StreamController<bool>();
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
@@ -47,22 +50,22 @@ class Blaze {
 
   void connect() {
     debugPrint('ws connect');
-    token ??= signAuthTokenWithEdDSA(
+    _token ??= signAuthTokenWithEdDSA(
         userId, sessionId, privateKey, scp, 'GET', '/', '');
     try {
-      _connect(token!);
+      _connect(_token!);
     } catch (_) {
       _reconnect();
     }
   }
 
   void _connect(String token) {
-    if (disposed) return;
+    if (_disposed) return;
     channel = IOWebSocketChannel.connect(
-      host,
+      _host,
       protocols: ['Mixin-Blaze-1'],
       headers: {'Authorization': 'Bearer $token'},
-      pingInterval: const Duration(seconds: 4),
+      pingInterval: const Duration(seconds: 2),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
@@ -132,6 +135,8 @@ class Blaze {
       cancelOnError: true,
     );
     _sendListPending();
+
+    connectedStateStreamController.add(true);
   }
 
   Future<void> updateRemoteMessageStatus(
@@ -228,33 +233,34 @@ class Blaze {
 
   Future<void> _reconnect() async {
     debugPrint(
-        '_reconnect reconnecting: $reconnecting start: ${StackTrace.current}');
-
-    if (reconnecting) return;
-    reconnecting = true;
-    host = host == _wsHost1 ? _wsHost2 : _wsHost1;
+        '_reconnect reconnecting: $_reconnecting start: ${StackTrace.current}');
+    if (_reconnecting) return;
+    connectedStateStreamController.add(false);
+    _reconnecting = true;
+    _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
     try {
       _disconnect();
       await client.accountApi.getMe();
       debugPrint('http ping');
       await Future.delayed(const Duration(seconds: 2));
-      reconnecting = false;
+      _reconnecting = false;
       debugPrint('reconnecting set false, ${StackTrace.current}');
       connect();
     } catch (e) {
       debugPrint('ws ping error: $e');
       if (e is MixinApiError && e.error.code == 401) return;
       await Future.delayed(const Duration(seconds: 2));
-      reconnecting = false;
+      _reconnecting = false;
       debugPrint('reconnecting set false, ${StackTrace.current}');
       return _reconnect();
     }
   }
 
   void dispose() {
-    disposed = true;
+    _disposed = true;
     _disconnect();
+    connectedStateStreamController.close();
   }
 }
 

@@ -1559,6 +1559,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Network connection failed`
+  String get networkConnectionFailed {
+    return Intl.message(
+      'Network connection failed',
+      name: 'networkConnectionFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

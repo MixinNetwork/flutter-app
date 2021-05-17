@@ -171,6 +171,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Mute notifications for…"),
         "muted": MessageLookupByLibrary.simpleMessage("Muted"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
+        "networkConnectionFailed":
+            MessageLookupByLibrary.simpleMessage("Network connection failed"),
         "next": MessageLookupByLibrary.simpleMessage("Next"),
         "noAudio": MessageLookupByLibrary.simpleMessage("NO AUDIO"),
         "noData": MessageLookupByLibrary.simpleMessage("NO DATA"),

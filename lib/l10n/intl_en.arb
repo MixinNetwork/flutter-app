@@ -149,5 +149,6 @@
   "autoBackup": "Auto Backup",
   "includeFiles": "Include Files",
   "includeVideos": "Include Videos",
-  "clear": "Clear"
+  "clear": "Clear",
+  "networkConnectionFailed": "Network connection failed"
 }

@@ -144,5 +144,6 @@
   "autoBackup": "自动备份",
   "includeFiles": "包含文件",
   "includeVideos": "包括视频",
-  "clear": "清除"
+  "clear": "清除",
+  "networkConnectionFailed": "网络连接失败"
 }

@@ -56,6 +56,9 @@ class Resources {
   static const String assetsImagesEmptyImageSvg =
       'assets/images/empty_image.svg';
 
+  static const String assetsImagesExclamationMarkSvg =
+      'assets/images/exclamation_mark.svg';
+
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 
   static const String assetsImagesFileSvg = 'assets/images/file.svg';
