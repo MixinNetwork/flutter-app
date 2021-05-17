@@ -138,6 +138,7 @@ class MessageItemWidget extends StatelessWidget {
                         Clipboard.setData(ClipboardData(text: message.content)),
                   ),
                 if (isCurrentUser &&
+                    !message.type.isRecall &&
                     DateTime.now().isBefore(
                         message.createdAt.add(const Duration(minutes: 30))))
                   ContextMenu(
