@@ -16,11 +16,11 @@ class PlainJsonMessage {
   @JsonKey(name: 'messages')
   List<String>? messages;
   @JsonKey(name: 'user_id')
-  String userId;
+  String? userId;
   @JsonKey(name: 'message_id')
-  String messageId;
+  String? messageId;
   @JsonKey(name: 'session_id')
-  String sessionId;
+  String? sessionId;
   @JsonKey(name: 'ack_messages')
   List<BlazeAckMessage>? ackMessages;
 

@@ -2,10 +2,15 @@ import 'dart:convert';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:flutter/foundation.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
+import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
+import '../blaze/blaze.dart';
+import '../blaze/blaze_message.dart';
 import '../blaze/vo/app_card.dart';
 import '../blaze/vo/attachment_message.dart';
 import '../blaze/vo/blaze_message_data.dart';
@@ -22,6 +27,10 @@ import '../blaze/vo/system_session_message.dart';
 import '../blaze/vo/system_user_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
+import '../crypto/signal/ratchet_status.dart';
+import '../crypto/signal/signal_database.dart';
+import '../crypto/signal/signal_key_util.dart';
+import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
 import '../db/extension/message.dart' show QueteMessage;
 import '../db/extension/message_category.dart';
@@ -36,12 +45,15 @@ import '../enum/system_user_action.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/attachment_util.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/string_extension.dart';
 import 'injector.dart';
 
 class DecryptMessage extends Injector {
   DecryptMessage(
     String userId,
     Database database,
+    this._signalProtocol,
+    this._blaze,
     Client client,
     this._sessionId,
     this._privateKey,
@@ -52,12 +64,16 @@ class DecryptMessage extends Injector {
   }
 
   String? _conversationId;
+  late final SignalProtocol _signalProtocol;
+  late final Blaze _blaze;
   late final String _sessionId;
   late final PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
 
   final AttachmentUtil _attachmentUtil;
   final MultiAuthCubit multiAuthCubit;
+
+  final refreshKeyMap = <String, int?>{};
 
   bool get _photoAutoDownload =>
       multiAuthCubit.state.current?.photoAutoDownload ?? true;
@@ -106,8 +122,69 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processSignalMessage(BlazeMessageData data) async {
-    // todo decrypt
-    await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+    if (data.category == MessageCategory.signalKey) {
+      await _updateRemoteMessageStatus(data.messageId, MessageStatus.read);
+      // TODO messageHistoryDao.insert
+    } else {
+      await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+    }
+    final deviceId = data.sessionId.getDeviceId();
+    final composeMessageData = _signalProtocol.decodeMessageData(data.data);
+    try {
+      _signalProtocol.decrypt(
+          data.conversationId,
+          data.userId,
+          composeMessageData.keyType,
+          composeMessageData.cipher,
+          data.category?.toString() ?? '',
+          data.sessionId, (plaintext) async {
+        if (data.category == MessageCategory.signalKey &&
+            data.userId != accountId) {
+          // publish sender key change
+        }
+        if (data.category != MessageCategory.signalKey) {
+          final plain = utf8.decode(plaintext);
+          if (composeMessageData.resendMessageId != null) {
+            // resent
+          } else {
+            try {
+              await _processDecryptSuccess(data, plain);
+            } on FormatException catch (e) {
+              debugPrint(
+                  'decrypt _processDecryptSuccess ${data.messageId}, $e');
+              await _insertInvalidMessage(data);
+            }
+          }
+        }
+
+        final address = SignalProtocolAddress(data.userId, deviceId);
+        final status = (await SignalDatabase.get.ratchetSenderKeyDao
+                .getRatchetSenderKey(data.conversationId, address.toString()))
+            ?.status;
+        if (status == RatchetStatus.requesting.toString()) {
+          await _requestResendMessage(
+              data.conversationId, data.userId, data.sessionId);
+        }
+      });
+    } on Exception catch (e) {
+      debugPrint('decrypt failed ${data.messageId}, $e');
+      await _refreshSignalKeys(data.conversationId);
+      if (data.category == MessageCategory.signalKey) {
+        await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
+            data.conversationId,
+            SignalProtocolAddress(data.userId, deviceId).toString());
+      } else {
+        await _insertFailedMessage(data);
+        final address = SignalProtocolAddress(data.userId, deviceId);
+        final status = (await SignalDatabase.get.ratchetSenderKeyDao
+                .getRatchetSenderKey(data.conversationId, address.toString()))
+            ?.status;
+        if (status == null) {
+          await _requestResendKey(
+              data.conversationId, data.userId, data.messageId, data.sessionId);
+        }
+      }
+    }
   }
 
   Future<void> _processPlainMessage(BlazeMessageData data) async {
@@ -206,7 +283,7 @@ class DecryptMessage extends Injector {
     // todo check
     final message = Message(
       messageId: data.messageId,
-      conversationId: data.conversationId!,
+      conversationId: data.conversationId,
       userId: data.userId,
       category: data.category!,
       content: content,
@@ -226,7 +303,7 @@ class DecryptMessage extends Injector {
     final appCard = AppCard.fromJson(await jsonDecodeWithIsolate(content));
     final message = Message(
       messageId: data.messageId,
-      conversationId: data.conversationId!,
+      conversationId: data.conversationId,
       userId: data.representativeId ?? data.userId,
       category: data.category!,
       content: content,
@@ -259,7 +336,7 @@ class DecryptMessage extends Injector {
       return generator(null);
 
     final quoteMessage = await database.messagesDao
-        .findMessageItemById(data.conversationId!, data.quoteMessageId!);
+        .findMessageItemById(data.conversationId, data.quoteMessageId!);
 
     if (quoteMessage != null) {
       return generator(quoteMessage.toJson());
@@ -282,7 +359,7 @@ class DecryptMessage extends Injector {
     if (data.category.isText) {
       String plain;
       if (data.category == MessageCategory.signalText) {
-        plain = 'SignalText';
+        plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);
       }
@@ -290,7 +367,7 @@ class DecryptMessage extends Injector {
           data,
           (String? quoteContent) => Message(
               messageId: data.messageId,
-              conversationId: data.conversationId!,
+              conversationId: data.conversationId,
               userId: data.userId,
               category: data.category!,
               content: plain,
@@ -308,7 +385,7 @@ class DecryptMessage extends Injector {
           data,
           (String? quoteContent) => Message(
               messageId: data.messageId,
-              conversationId: data.conversationId!,
+              conversationId: data.conversationId,
               userId: data.userId,
               category: data.category!,
               content: attachment.attachmentId,
@@ -347,7 +424,7 @@ class DecryptMessage extends Injector {
           data,
           (String? quoteContent) => Message(
               messageId: data.messageId,
-              conversationId: data.conversationId!,
+              conversationId: data.conversationId,
               userId: data.userId,
               category: data.category!,
               content: attachment.attachmentId,
@@ -387,7 +464,7 @@ class DecryptMessage extends Injector {
           data,
           (String? quoteContent) => Message(
               messageId: data.messageId,
-              conversationId: data.conversationId!,
+              conversationId: data.conversationId,
               userId: data.userId,
               category: data.category!,
               content: attachment.attachmentId,
@@ -423,7 +500,7 @@ class DecryptMessage extends Injector {
           data,
           (String? quoteContent) => Message(
               messageId: data.messageId,
-              conversationId: data.conversationId!,
+              conversationId: data.conversationId,
               userId: data.userId,
               category: data.category!,
               content: attachment.attachmentId,
@@ -462,7 +539,7 @@ class DecryptMessage extends Injector {
       }
       final message = Message(
           messageId: data.messageId,
-          conversationId: data.conversationId!,
+          conversationId: data.conversationId,
           userId: data.userId,
           category: data.category!,
           content: plainText,
@@ -487,7 +564,7 @@ class DecryptMessage extends Injector {
           data,
           (String? quoteContent) => Message(
               messageId: data.messageId,
-              conversationId: data.conversationId!,
+              conversationId: data.conversationId,
               userId: data.userId,
               category: data.category!,
               content: plainText,
@@ -510,7 +587,7 @@ class DecryptMessage extends Injector {
           LiveMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = Message(
           messageId: data.messageId,
-          conversationId: data.conversationId!,
+          conversationId: data.conversationId,
           userId: data.userId,
           category: data.category!,
           mediaWidth: liveMessage.width,
@@ -544,7 +621,7 @@ class DecryptMessage extends Injector {
       }
       final message = Message(
           messageId: data.messageId,
-          conversationId: data.conversationId!,
+          conversationId: data.conversationId,
           userId: data.userId,
           category: data.category!,
           content: plain,
@@ -560,7 +637,7 @@ class DecryptMessage extends Injector {
       }
       final message = Message(
         messageId: data.messageId,
-        conversationId: data.conversationId!,
+        conversationId: data.conversationId,
         userId: data.userId,
         category: data.category!,
         content: plain,
@@ -591,7 +668,7 @@ class DecryptMessage extends Injector {
     final message = db.Message(
         messageId: data.messageId,
         userId: userId,
-        conversationId: data.conversationId!,
+        conversationId: data.conversationId,
         category: data.category!,
         content: '',
         createdAt: data.createdAt,
@@ -613,7 +690,7 @@ class DecryptMessage extends Injector {
         systemMessage.action == MessageAction.exit) {
       if (systemMessage.participantId == accountId) {
         unawaited(database.conversationDao.updateConversationStatusById(
-            data.conversationId!, ConversationStatus.quit));
+            data.conversationId, ConversationStatus.quit));
       }
       // todo remove signal key
     } else if (systemMessage.action == MessageAction.update) {
@@ -627,7 +704,7 @@ class DecryptMessage extends Injector {
     } else if (systemMessage.action == MessageAction.create) {
     } else if (systemMessage.action == MessageAction.role) {
       await database.participantsDao.updateParticipantRole(
-        data.conversationId!,
+        data.conversationId,
         systemMessage.participantId!,
         systemMessage.role!,
       );
@@ -696,6 +773,105 @@ class DecryptMessage extends Injector {
     if (messageIds.isNotEmpty) {
       await database.messagesDao.markMessageRead(messageIds);
       // todo refresh conversion
+    }
+  }
+
+  Future<void> _insertInvalidMessage(BlazeMessageData data) async {
+    final message = MessagesCompanion.insert(
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.userId,
+        content: Value(data.data),
+        category: data.category!,
+        status: MessageStatus.unknown,
+        createdAt: data.createdAt);
+    await database.messagesDao.insertCompanion(message);
+  }
+
+  Future<void> _insertFailedMessage(BlazeMessageData data) async {
+    if (data.category == MessageCategory.signalText ||
+        data.category == MessageCategory.signalImage ||
+        data.category == MessageCategory.signalVideo ||
+        data.category == MessageCategory.signalData ||
+        data.category == MessageCategory.signalAudio ||
+        data.category == MessageCategory.signalSticker ||
+        data.category == MessageCategory.signalContact ||
+        data.category == MessageCategory.signalLocation ||
+        data.category == MessageCategory.signalPost) {
+      final message = Message(
+        messageId: const Uuid().v4(),
+        conversationId: data.conversationId,
+        userId: data.userId,
+        category: data.category!,
+        content: data.data,
+        status: MessageStatus.failed,
+        createdAt: data.createdAt,
+      );
+      await database.messagesDao.insert(message, data.userId);
+    }
+  }
+
+  Future<void> _requestResendKey(String conversationId, String recipientId,
+      String messageId, String? sessionId) async {
+    final plainText =
+        PlainJsonMessage(resendKey, null, null, messageId, null, null)
+            .toJson()
+            .toString();
+    final encoded = base64.encode(utf8.encode(plainText));
+    final bm = createParamBlazeMessage(createPlainJsonParam(
+        conversationId, recipientId, encoded,
+        sessionId: sessionId));
+    unawaited(_blaze.deliverNoThrow(bm));
+    final address = SignalProtocolAddress(recipientId, sessionId.getDeviceId());
+    final ratchet = RatchetSenderKeysCompanion.insert(
+        groupId: conversationId,
+        senderId: address.toString(),
+        status: RatchetStatus.requesting.toString(),
+        createdAt: DateTime.now().millisecondsSinceEpoch.toString());
+    await SignalDatabase.get.ratchetSenderKeyDao.insertSenderKey(ratchet);
+  }
+
+  Future<void> _requestResendMessage(
+      String conversationId, String userId, String? sessionId) async {
+    final messages =
+        await database.messagesDao.findFailedMessages(conversationId, userId);
+    if (messages.isEmpty) {
+      return;
+    }
+    final plainText = PlainJsonMessage(
+            resendMessages, messages.reversed.toList(), null, null, null, null)
+        .toJson()
+        .toString();
+    final bm = createParamBlazeMessage(createPlainJsonParam(
+        conversationId, userId, base64.encode(utf8.encode(plainText)),
+        sessionId: sessionId));
+    unawaited(_blaze.deliverNoThrow(bm));
+    await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
+        conversationId,
+        SignalProtocolAddress(userId, sessionId.getDeviceId()).toString());
+  }
+
+  Future<void> _refreshSignalKeys(String conversationId) async {
+    final start = refreshKeyMap[conversationId] ?? 0;
+    final current = DateTime.now().millisecondsSinceEpoch;
+    if (start == 0) {
+      refreshKeyMap[conversationId] = current;
+    }
+    if (current - start < 1000 * 60) {
+      return;
+    }
+    refreshKeyMap[conversationId] = current;
+    final blazeMessage = createCountSignalKeys();
+    final data = (await _blaze.deliverAndWait(blazeMessage))?.data;
+    final count = SignalKeyCount.fromJson(data);
+    if (count.preKeyCount >= preKeyMinNum) {
+      return;
+    }
+    final bm =
+        createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
+    final result = await _blaze.deliverAndWait(bm);
+    if (result == null) {
+      debugPrint('Registering new pre keys...');
     }
   }
 

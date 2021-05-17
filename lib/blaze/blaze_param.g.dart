@@ -19,6 +19,9 @@ BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) {
         ?.map(
             (e) => BlazeMessageParamSession.fromJson(e as Map<String, dynamic>))
         .toList(),
+    keys: json['keys'] == null
+        ? null
+        : SignalKeyRequest.fromJson(json['keys'] as Map<String, dynamic>),
     messages: json['messages'] as List<dynamic>?,
     quoteMessageId: json['quoteMessage_id'] as String?,
     sessionId: json['session_id'] as String?,
@@ -45,6 +48,7 @@ Map<String, dynamic> _$BlazeMessageParamToJson(BlazeMessageParam instance) =>
       'data': instance.data,
       'status': instance.status,
       'recipients': instance.recipients,
+      'keys': instance.keys,
       'messages': instance.messages,
       'quoteMessage_id': instance.quoteMessageId,
       'session_id': instance.sessionId,

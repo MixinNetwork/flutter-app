@@ -1,9 +1,9 @@
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../constants/constants.dart';
 import '../db/database.dart';
+import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
 
 class Injector {
@@ -21,47 +21,48 @@ class Injector {
     final conversation =
         await database.conversationDao.getConversationById(conversationId);
     if (conversation == null || force) {
-      unawaited(() async {
-        try {
-          final response =
-              await client.conversationApi.getConversation(conversationId);
-          var ownerId = response.data.creatorId;
-          if (response.data.category == ConversationCategory.contact) {
-            response.data.participants.forEach((item) {
-              if (item.userId != accountId) {
-                ownerId = item.userId;
-              }
-            });
-          }
-
-          await database.transaction(() async {
-            await database.conversationDao.insert(
-              db.Conversation(
-                conversationId: response.data.conversationId,
-                ownerId: ownerId,
-                category: response.data.category,
-                name: response.data.name,
-                announcement: response.data.announcement,
-                createdAt: response.data.createdAt,
-                status: ConversationStatus.success,
-                muteUntil: DateTime.parse(response.data.muteUntil),
-              ),
-            );
-            await refreshParticipants(
-              response.data.conversationId,
-              response.data.participants,
-            );
+      try {
+        final response =
+            await client.conversationApi.getConversation(conversationId);
+        var ownerId = response.data.creatorId;
+        if (response.data.category == ConversationCategory.contact) {
+          response.data.participants.forEach((item) {
+            if (item.userId != accountId) {
+              ownerId = item.userId;
+            }
           });
-        } catch (e, s) {
-          debugPrint('$e');
-          debugPrint('$s');
         }
-      }());
+
+        await database.transaction(() async {
+          await database.conversationDao.insert(
+            db.Conversation(
+              conversationId: response.data.conversationId,
+              ownerId: ownerId,
+              category: response.data.category,
+              name: response.data.name,
+              announcement: response.data.announcement,
+              createdAt: response.data.createdAt,
+              status: ConversationStatus.success,
+              muteUntil: DateTime.parse(response.data.muteUntil),
+            ),
+          );
+          await refreshParticipants(
+            response.data.conversationId,
+            response.data.participants,
+            response.data.participantSessions,
+          );
+        });
+      } catch (e, s) {
+        debugPrint('$e');
+        debugPrint('$s');
+      }
     }
   }
 
   Future<void> refreshParticipants(
-      String conversationId, List<ParticipantRequest> participants) async {
+      String conversationId,
+      List<ParticipantRequest> participants,
+      List<UserSession>? userSessions) async {
     final local =
         await database.participantsDao.getParticipants(conversationId);
     final localIds = local.map((e) => e.userId);
@@ -80,8 +81,18 @@ class Injector {
       await database.participantsDao.insertAll(add.toList());
       await fetchUsers(add.map((e) => e.userId).toList());
     }
+
+    final participantSessions = <ParticipantSessionData>[];
+    userSessions?.forEach((u) {
+      participantSessions.add(ParticipantSessionData(
+          conversationId: conversationId,
+          userId: u.userId,
+          sessionId: u.sessionId));
+    });
+    await database.participantSessionDao.insertAll(participantSessions);
+
     if (remove.isNotEmpty) {
-      // database.participantsDao.deleteAll(remove);
+      await database.participantsDao.deleteAll(remove);
     }
   }
 

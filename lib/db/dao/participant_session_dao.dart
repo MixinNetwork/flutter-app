@@ -20,4 +20,51 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
       db
           .getParticipantSessionKeyWithoutSelf(conversationId, userId)
           .getSingle();
+
+  Future deleteByStatus(String conversationId) async {
+    await (delete(db.participantSession)
+          ..where((tbl) =>
+              tbl.conversationId.equals(conversationId) &
+              tbl.sentToServer.equals(1).not()))
+        .go();
+  }
+
+  Future deleteByConversationId(String conversationId) async {
+    await (delete(db.participantSession)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .go();
+  }
+
+  Future<List<ParticipantSessionData>> getParticipantSessionsByConversationId(
+          String conversationId) async =>
+      (select(db.participantSession)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .get();
+
+  Future insertAll(List<ParticipantSessionData> list) async {
+    await batch((batch) => batch.insertAll(db.participantSession, list));
+  }
+
+  Future deleteList(List<ParticipantSessionData> list) async {
+    for (final p in list) {
+      await delete(db.participantSession).delete(p);
+    }
+  }
+
+  Future replaceAll(
+          String conversationId, List<ParticipantSessionData> list) async =>
+      transaction(() async {
+        await deleteByConversationId(conversationId);
+        await insertAll(list);
+      });
+
+  Future<List<ParticipantSessionData>> getNotSendSessionParticipants(
+          String conversationId, String sessionId) async =>
+      db.getNotSendSessionParticipants(conversationId, sessionId).get();
+
+  Future updateList(List<ParticipantSessionData> list) async {
+    for (final p in list) {
+      await update(db.participantSession).replace(p);
+    }
+  }
 }

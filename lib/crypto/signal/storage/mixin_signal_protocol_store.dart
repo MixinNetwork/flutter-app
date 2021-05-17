@@ -1,117 +1,121 @@
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
+import 'mixin_identity_key_store.dart';
+import 'mixin_session_store.dart';
+
 class MixinSignalProtocolStore extends SignalProtocolStore {
+  MixinSignalProtocolStore(this.preKeyStore, this.signedPreKeyStore,
+      this.identityKeyStore, this.sessionStore);
+
+  final PreKeyStore preKeyStore;
+  final SignedPreKeyStore signedPreKeyStore;
+  final MixinIdentityKeyStore identityKeyStore;
+  final MixinSessionStore sessionStore;
+
   @override
-  bool containsPreKey(int preKeyId) {
-    // TODO: implement containsPreKey
-    throw UnimplementedError();
+  Future<bool> containsPreKey(int preKeyId) async {
+    return preKeyStore.containsPreKey(preKeyId);
   }
 
   @override
-  bool containsSession(SignalProtocolAddress address) {
-    // TODO: implement containsSession
-    throw UnimplementedError();
+  Future<bool> containsSession(SignalProtocolAddress address) async {
+    return sessionStore.containsSession(address);
   }
 
   @override
-  bool containsSignedPreKey(int signedPreKeyId) {
-    // TODO: implement containsSignedPreKey
-    throw UnimplementedError();
+  Future<bool> containsSignedPreKey(int signedPreKeyId) async {
+    return signedPreKeyStore.containsSignedPreKey(signedPreKeyId);
   }
 
   @override
-  void deleteAllSessions(String name) {
-    // TODO: implement deleteAllSessions
+  Future deleteAllSessions(String name) async {
+    await sessionStore.deleteAllSessions(name);
   }
 
   @override
-  void deleteSession(SignalProtocolAddress address) {
-    // TODO: implement deleteSession
+  Future deleteSession(SignalProtocolAddress address) async {
+    await sessionStore.deleteSession(address);
   }
 
   @override
-  IdentityKey getIdentity(SignalProtocolAddress address) {
-    // TODO: implement getIdentity
-    throw UnimplementedError();
+  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async {
+    return identityKeyStore.getIdentity(address);
   }
 
   @override
-  IdentityKeyPair getIdentityKeyPair() {
-    // TODO: implement getIdentityKeyPair
-    throw UnimplementedError();
+  Future<IdentityKeyPair> getIdentityKeyPair() async {
+    return identityKeyStore.getIdentityKeyPair();
   }
 
   @override
-  int getLocalRegistrationId() {
-    // TODO: implement getLocalRegistrationId
-    throw UnimplementedError();
+  Future<int> getLocalRegistrationId() async {
+    return identityKeyStore.getLocalRegistrationId();
   }
 
   @override
-  List<int> getSubDeviceSessions(String name) {
-    // TODO: implement getSubDeviceSessions
-    throw UnimplementedError();
+  Future<List<int>> getSubDeviceSessions(String name) async {
+    return sessionStore.getSubDeviceSessions(name);
   }
 
   @override
-  PreKeyRecord loadPreKey(int preKeyId) {
-    // TODO: implement loadPreKey
-    throw UnimplementedError();
+  Future<PreKeyRecord> loadPreKey(int preKeyId) async {
+    return preKeyStore.loadPreKey(preKeyId);
   }
 
   @override
-  SessionRecord loadSession(SignalProtocolAddress address) {
-    // TODO: implement loadSession
-    throw UnimplementedError();
+  Future<SessionRecord> loadSession(SignalProtocolAddress address) async {
+    return sessionStore.loadSession(address);
   }
 
   @override
-  SignedPreKeyRecord loadSignedPreKey(int signedPreKeyId) {
-    // TODO: implement loadSignedPreKey
-    throw UnimplementedError();
+  Future<SignedPreKeyRecord> loadSignedPreKey(int signedPreKeyId) async {
+    return signedPreKeyStore.loadSignedPreKey(signedPreKeyId);
   }
 
   @override
-  List<SignedPreKeyRecord> loadSignedPreKeys() {
-    // TODO: implement loadSignedPreKeys
-    throw UnimplementedError();
+  Future<List<SignedPreKeyRecord>> loadSignedPreKeys() async {
+    return signedPreKeyStore.loadSignedPreKeys();
   }
 
   @override
   void removePreKey(int preKeyId) {
-    // TODO: implement removePreKey
+    preKeyStore.removePreKey(preKeyId);
   }
 
   @override
   void removeSignedPreKey(int signedPreKeyId) {
-    // TODO: implement removeSignedPreKey
+    signedPreKeyStore.removeSignedPreKey(signedPreKeyId);
   }
 
   @override
   void storePreKey(int preKeyId, PreKeyRecord record) {
-    // TODO: implement storePreKey
+    preKeyStore.storePreKey(preKeyId, record);
   }
 
   @override
-  void storeSession(SignalProtocolAddress address, SessionRecord record) {
-    // TODO: implement storeSession
+  Future storeSession(
+      SignalProtocolAddress address, SessionRecord record) async {
+    await sessionStore.storeSession(address, record);
   }
 
   @override
   void storeSignedPreKey(int signedPreKeyId, SignedPreKeyRecord record) {
-    // TODO: implement storeSignedPreKey
+    signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);
   }
 
   @override
-  bool isTrustedIdentity(SignalProtocolAddress address,
-      IdentityKey? identityKey, Direction direction) {
-    // TODO: implement isTrustedIdentity
-    throw UnimplementedError();
+  Future<bool> isTrustedIdentity(SignalProtocolAddress address,
+      IdentityKey? identityKey, Direction direction) async {
+    return identityKeyStore.isTrustedIdentity(address, identityKey, direction);
   }
 
   @override
-  bool saveIdentity(SignalProtocolAddress address, IdentityKey? identityKey) {
-    // TODO: implement saveIdentity
-    throw UnimplementedError();
+  Future<bool> saveIdentity(
+      SignalProtocolAddress address, IdentityKey? identityKey) async {
+    return identityKeyStore.saveIdentity(address, identityKey);
+  }
+
+  void removeIdentity(SignalProtocolAddress address) {
+    identityKeyStore.removeIdentity(address);
   }
 }

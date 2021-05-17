@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:ulid/ulid.dart';
+
 extension StringExtension on String {
   String fts5ContentFilter() {
     final text = trim();
@@ -20,6 +25,18 @@ extension StringExtension on String {
   }
 
   static final regExp = RegExp('[a-zA-Z0-9]');
+
+  String md5() => crypto.md5.convert(utf8.encode(this)).toString();
+}
+
+extension NullableStringExtension on String? {
+  int getDeviceId() {
+    if (this == null || this?.isEmpty == true) {
+      return 1;
+    }
+    // this must be a valid uuid
+    return Ulid.parse(this!).hashCode;
+  }
 }
 
 String minOf(String a, String b) {

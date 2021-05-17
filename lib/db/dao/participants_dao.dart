@@ -26,8 +26,13 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
         batch.insertAllOnConflictUpdate(db.participants, add);
       });
 
-  void deleteAll(Iterable<Participant> remove) {
-    remove.forEach(deleteParticipant);
+  Future<List<Participant>> getAllParticipants() async =>
+      select(db.participants).get();
+
+  Future<void> deleteAll(Iterable<Participant> remove) async {
+    remove.forEach((element) async {
+      await deleteParticipant(element);
+    });
   }
 
   Selectable<User> participantsAvatar(String conversationId) =>
@@ -45,4 +50,16 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
         updates: {db.participants},
         updateKind: UpdateKind.update,
       );
+
+  Future replaceAll(String conversationId, List<Participant> list) async =>
+      transaction(() async {
+        await deleteByConversationId(conversationId);
+        await insertAll(list);
+      });
+
+  Future deleteByConversationId(String conversationId) async {
+    await (delete(db.participants)
+          ..where((tbl) => tbl.conversationId.equals(conversationId)))
+        .go();
+  }
 }

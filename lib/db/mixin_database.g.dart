@@ -252,7 +252,7 @@ class JobsCompanion extends UpdateCompanion<Job> {
     this.conversationId = const Value.absent(),
     this.resendMessageId = const Value.absent(),
     required int runCount,
-  })   : jobId = Value(jobId),
+  })  : jobId = Value(jobId),
         action = Value(action),
         createdAt = Value(createdAt),
         priority = Value(priority),
@@ -3151,7 +3151,7 @@ class ParticipantsCompanion extends UpdateCompanion<Participant> {
     required String userId,
     this.role = const Value.absent(),
     required DateTime createdAt,
-  })   : conversationId = Value(conversationId),
+  })  : conversationId = Value(conversationId),
         userId = Value(userId),
         createdAt = Value(createdAt);
   static Insertable<Participant> custom({
@@ -7117,7 +7117,7 @@ class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
     required String messageId,
     required String data,
     required DateTime createdAt,
-  })   : messageId = Value(messageId),
+  })  : messageId = Value(messageId),
         data = Value(data),
         createdAt = Value(createdAt);
   static Insertable<FloodMessage> custom({
@@ -7728,7 +7728,7 @@ class MessagesFtsCompanion extends UpdateCompanion<MessagesFt> {
     required String userId,
     required String reservedInt,
     required String reservedText,
-  })   : messageId = Value(messageId),
+  })  : messageId = Value(messageId),
         conversationId = Value(conversationId),
         content = Value(content),
         createdAt = Value(createdAt),
@@ -8201,7 +8201,7 @@ class OffsetsCompanion extends UpdateCompanion<Offset> {
   OffsetsCompanion.insert({
     required String key,
     required String timestamp,
-  })   : key = Value(key),
+  })  : key = Value(key),
         timestamp = Value(timestamp);
   static Insertable<Offset> custom({
     Expression<String>? key,
@@ -8672,322 +8672,6 @@ class ParticipantSession extends Table
   bool get dontWriteConstraints => true;
 }
 
-class RatchetSenderKey extends DataClass
-    implements Insertable<RatchetSenderKey> {
-  final String groupId;
-  final String senderId;
-  final String status;
-  final String? messageId;
-  final DateTime createdAt;
-  RatchetSenderKey(
-      {required this.groupId,
-      required this.senderId,
-      required this.status,
-      this.messageId,
-      required this.createdAt});
-  factory RatchetSenderKey.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
-    return RatchetSenderKey(
-      groupId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}group_id'])!,
-      senderId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}sender_id'])!,
-      status:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
-      messageId: stringType
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
-      createdAt: RatchetSenderKeys.$converter0.mapToDart(intType
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['group_id'] = Variable<String>(groupId);
-    map['sender_id'] = Variable<String>(senderId);
-    map['status'] = Variable<String>(status);
-    if (!nullToAbsent || messageId != null) {
-      map['message_id'] = Variable<String?>(messageId);
-    }
-    {
-      final converter = RatchetSenderKeys.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
-    }
-    return map;
-  }
-
-  RatchetSenderKeysCompanion toCompanion(bool nullToAbsent) {
-    return RatchetSenderKeysCompanion(
-      groupId: Value(groupId),
-      senderId: Value(senderId),
-      status: Value(status),
-      messageId: messageId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(messageId),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory RatchetSenderKey.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return RatchetSenderKey(
-      groupId: serializer.fromJson<String>(json['group_id']),
-      senderId: serializer.fromJson<String>(json['sender_id']),
-      status: serializer.fromJson<String>(json['status']),
-      messageId: serializer.fromJson<String?>(json['message_id']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'group_id': serializer.toJson<String>(groupId),
-      'sender_id': serializer.toJson<String>(senderId),
-      'status': serializer.toJson<String>(status),
-      'message_id': serializer.toJson<String?>(messageId),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  RatchetSenderKey copyWith(
-          {String? groupId,
-          String? senderId,
-          String? status,
-          String? messageId,
-          DateTime? createdAt}) =>
-      RatchetSenderKey(
-        groupId: groupId ?? this.groupId,
-        senderId: senderId ?? this.senderId,
-        status: status ?? this.status,
-        messageId: messageId ?? this.messageId,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('RatchetSenderKey(')
-          ..write('groupId: $groupId, ')
-          ..write('senderId: $senderId, ')
-          ..write('status: $status, ')
-          ..write('messageId: $messageId, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf($mrjc(
-      groupId.hashCode,
-      $mrjc(
-          senderId.hashCode,
-          $mrjc(status.hashCode,
-              $mrjc(messageId.hashCode, createdAt.hashCode)))));
-  @override
-  bool operator ==(dynamic other) =>
-      identical(this, other) ||
-      (other is RatchetSenderKey &&
-          other.groupId == this.groupId &&
-          other.senderId == this.senderId &&
-          other.status == this.status &&
-          other.messageId == this.messageId &&
-          other.createdAt == this.createdAt);
-}
-
-class RatchetSenderKeysCompanion extends UpdateCompanion<RatchetSenderKey> {
-  final Value<String> groupId;
-  final Value<String> senderId;
-  final Value<String> status;
-  final Value<String?> messageId;
-  final Value<DateTime> createdAt;
-  const RatchetSenderKeysCompanion({
-    this.groupId = const Value.absent(),
-    this.senderId = const Value.absent(),
-    this.status = const Value.absent(),
-    this.messageId = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  RatchetSenderKeysCompanion.insert({
-    required String groupId,
-    required String senderId,
-    required String status,
-    this.messageId = const Value.absent(),
-    required DateTime createdAt,
-  })   : groupId = Value(groupId),
-        senderId = Value(senderId),
-        status = Value(status),
-        createdAt = Value(createdAt);
-  static Insertable<RatchetSenderKey> custom({
-    Expression<String>? groupId,
-    Expression<String>? senderId,
-    Expression<String>? status,
-    Expression<String?>? messageId,
-    Expression<DateTime>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (groupId != null) 'group_id': groupId,
-      if (senderId != null) 'sender_id': senderId,
-      if (status != null) 'status': status,
-      if (messageId != null) 'message_id': messageId,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  RatchetSenderKeysCompanion copyWith(
-      {Value<String>? groupId,
-      Value<String>? senderId,
-      Value<String>? status,
-      Value<String?>? messageId,
-      Value<DateTime>? createdAt}) {
-    return RatchetSenderKeysCompanion(
-      groupId: groupId ?? this.groupId,
-      senderId: senderId ?? this.senderId,
-      status: status ?? this.status,
-      messageId: messageId ?? this.messageId,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (groupId.present) {
-      map['group_id'] = Variable<String>(groupId.value);
-    }
-    if (senderId.present) {
-      map['sender_id'] = Variable<String>(senderId.value);
-    }
-    if (status.present) {
-      map['status'] = Variable<String>(status.value);
-    }
-    if (messageId.present) {
-      map['message_id'] = Variable<String?>(messageId.value);
-    }
-    if (createdAt.present) {
-      final converter = RatchetSenderKeys.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('RatchetSenderKeysCompanion(')
-          ..write('groupId: $groupId, ')
-          ..write('senderId: $senderId, ')
-          ..write('status: $status, ')
-          ..write('messageId: $messageId, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class RatchetSenderKeys extends Table
-    with TableInfo<RatchetSenderKeys, RatchetSenderKey> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  RatchetSenderKeys(this._db, [this._alias]);
-  final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
-  late final GeneratedTextColumn groupId = _constructGroupId();
-  GeneratedTextColumn _constructGroupId() {
-    return GeneratedTextColumn('group_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
-  final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
-  late final GeneratedTextColumn senderId = _constructSenderId();
-  GeneratedTextColumn _constructSenderId() {
-    return GeneratedTextColumn('sender_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
-  final VerificationMeta _statusMeta = const VerificationMeta('status');
-  late final GeneratedTextColumn status = _constructStatus();
-  GeneratedTextColumn _constructStatus() {
-    return GeneratedTextColumn('status', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
-  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, true,
-        $customConstraints: '');
-  }
-
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
-  @override
-  List<GeneratedColumn> get $columns =>
-      [groupId, senderId, status, messageId, createdAt];
-  @override
-  RatchetSenderKeys get asDslTable => this;
-  @override
-  String get $tableName => _alias ?? 'ratchet_sender_keys';
-  @override
-  final String actualTableName = 'ratchet_sender_keys';
-  @override
-  VerificationContext validateIntegrity(Insertable<RatchetSenderKey> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('group_id')) {
-      context.handle(_groupIdMeta,
-          groupId.isAcceptableOrUnknown(data['group_id']!, _groupIdMeta));
-    } else if (isInserting) {
-      context.missing(_groupIdMeta);
-    }
-    if (data.containsKey('sender_id')) {
-      context.handle(_senderIdMeta,
-          senderId.isAcceptableOrUnknown(data['sender_id']!, _senderIdMeta));
-    } else if (isInserting) {
-      context.missing(_senderIdMeta);
-    }
-    if (data.containsKey('status')) {
-      context.handle(_statusMeta,
-          status.isAcceptableOrUnknown(data['status']!, _statusMeta));
-    } else if (isInserting) {
-      context.missing(_statusMeta);
-    }
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
-  @override
-  RatchetSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return RatchetSenderKey.fromData(data, _db, prefix: effectivePrefix);
-  }
-
-  @override
-  RatchetSenderKeys createAlias(String alias) {
-    return RatchetSenderKeys(_db, alias);
-  }
-
-  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints =>
-      const ['PRIMARY KEY(group_id, sender_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class ResendSessionMessage extends DataClass
     implements Insertable<ResendSessionMessage> {
   final String messageId;
@@ -9130,7 +8814,7 @@ class ResendSessionMessagesCompanion
     required String sessionId,
     required int status,
     required DateTime createdAt,
-  })   : messageId = Value(messageId),
+  })  : messageId = Value(messageId),
         userId = Value(userId),
         sessionId = Value(sessionId),
         status = Value(status),
@@ -9864,7 +9548,7 @@ class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
     required String userId,
     required String category,
     required String description,
-  })   : albumId = Value(albumId),
+  })  : albumId = Value(albumId),
         name = Value(name),
         iconUrl = Value(iconUrl),
         createdAt = Value(createdAt),
@@ -10194,7 +9878,7 @@ class StickerRelationshipsCompanion
   StickerRelationshipsCompanion.insert({
     required String albumId,
     required String stickerId,
-  })   : albumId = Value(albumId),
+  })  : albumId = Value(albumId),
         stickerId = Value(stickerId);
   static Insertable<StickerRelationship> custom({
     Expression<String>? albumId,
@@ -10846,7 +10530,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final MessagesHistory messagesHistory = MessagesHistory(this);
   late final Offsets offsets = Offsets(this);
   late final ParticipantSession participantSession = ParticipantSession(this);
-  late final RatchetSenderKeys ratchetSenderKeys = RatchetSenderKeys(this);
   late final ResendSessionMessages resendSessionMessages =
       ResendSessionMessages(this);
   late final SentSessionSenderKeys sentSessionSenderKeys =
@@ -11109,6 +10792,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         publicKey: row.read<String?>('public_key'),
       );
     });
+  }
+
+  Selectable<ParticipantSessionData> getNotSendSessionParticipants(
+      String conversationId, String sessionId) {
+    return customSelect(
+        'SELECT p.* FROM participant_session p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(sessionId)
+        ],
+        readsFrom: {
+          participantSession,
+          users
+        }).map(participantSession.mapFromRow);
   }
 
   Selectable<MessageItem> messagesByConversationId(
@@ -13162,7 +12859,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         messagesHistory,
         offsets,
         participantSession,
-        ratchetSenderKeys,
         resendSessionMessages,
         sentSessionSenderKeys,
         stickerAlbums,
