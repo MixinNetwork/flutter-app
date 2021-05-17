@@ -8,6 +8,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
+import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
@@ -332,13 +333,18 @@ class AccountServer {
       }
     }
 
+    for (final r in requestSignalKeyUsers) {
+      debugPrint('requestSignalKeyUser ${r.toJson()}');
+    }
     if (requestSignalKeyUsers.isNotEmpty) {
       final blazeMessage = createConsumeSessionSignalKeys(
           createConsumeSignalKeysParam(requestSignalKeyUsers));
       final data = (await blaze.deliverAndWait(blazeMessage))?.data;
+      debugPrint('consumeSignalKeys data: $data');
       if (data != null) {
         final signalKeys = List<SignalKey>.from(
             (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
+        debugPrint('signalKeys size: ${signalKeys.length}');
         final keys = <BlazeMessageParamSession>[];
         if (signalKeys.isNotEmpty) {
           for (final k in signalKeys) {
@@ -371,13 +377,16 @@ class AccountServer {
         }
       }
     }
+    debugPrint('signalKeyMessages size: ${signalKeyMessages.length}');
     if (signalKeyMessages.isEmpty) {
       return;
     }
     final checksum = await getCheckSum(conversationId);
+    debugPrint('checksum: $checksum');
     final bm = createSignalKeyMessage(createSignalKeyMessageParam(
         conversationId, signalKeyMessages, checksum));
     final result = await blaze.deliverNoThrow(bm);
+    debugPrint('result retry:${result.retry}, success: ${result.success}');
     if (result.retry) {
       return _checkSessionSenderKey(conversationId);
     }
@@ -426,9 +435,10 @@ class AccountServer {
     final res = await client.conversationApi.getConversation(conversationId);
     final conversation = res.data;
     final participants = <db.Participant>[];
-    conversation.participants.map((c) => participants.add(db.Participant(
+    conversation.participants.forEach((c) => participants.add(db.Participant(
         conversationId: conversationId,
         userId: c.userId,
+        role: c.role,
         createdAt: c.createdAt!)));
     await database.participantsDao.replaceAll(conversationId, participants);
     if (conversation.participantSessions != null) {
@@ -696,13 +706,31 @@ class AccountServer {
     // todo release resource
   }
 
+  Future refreshSelf() async {
+    final me = (await client.userApi.getMe()).data;
+    await database.userDao.insert(db.User(
+      userId: me.userId,
+      identityNumber: me.identityNumber,
+      relationship: me.relationship,
+      fullName: me.fullName,
+      avatarUrl: me.avatarUrl,
+      phone: me.phone,
+      isVerified: me.isVerified,
+      createdAt: me.createdAt,
+      muteUntil: DateTime.tryParse(me.muteUntil),
+      appId: me.app?.appId,
+      biography: me.biography,
+      isScam: me.isScam ? 1 : 0,
+    ));
+  }
+
   Future pushSignalKeys() async {
     // TODO try 3 times at most
     final hasPushSignalKeys = PrivacyKeyValue.get.getHasPushSignalKeys();
     if (hasPushSignalKeys) {
       return;
     }
-    final resp = await refreshSignalKeys(client);
+    await refreshSignalKeys(client);
     PrivacyKeyValue.get.setHasPushSignalKeys(true);
   }
 

@@ -51,6 +51,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     arrayStartIndex += userIds.length;
     return customSelect(
       'SELECT user_id FROM users WHERE user_id IN ($expandedUserIds)',
+      variables: [for (var $ in userIds) Variable<String>($)],
     ).map((row) => row.read<String>('user_id'));
   }
 

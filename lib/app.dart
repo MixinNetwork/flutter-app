@@ -34,51 +34,51 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     precacheImage(AssetImage(Resources.assetsImagesChatBackgroundPng), context);
     return MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => MultiAuthCubit(),
-          ),
-        ],
-        child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
-          converter: (state) => state.current,
-          builder: (context, authState) {
-            const app = _App();
-            if (authState == null) return app;
-            return FutureProvider<AccountServer?>(
-              key: ValueKey(Tuple4(
+      providers: [
+        BlocProvider(
+          create: (context) => MultiAuthCubit(),
+        ),
+      ],
+      child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
+        converter: (state) => state.current,
+        builder: (context, authState) {
+          const app = _App();
+          if (authState == null) return app;
+          return FutureProvider<AccountServer?>(
+            key: ValueKey(Tuple4(
+              authState.account.userId,
+              authState.account.sessionId,
+              authState.account.identityNumber,
+              authState.privateKey,
+            )),
+            create: (BuildContext context) async {
+              await accountServer.initServer(
                 authState.account.userId,
                 authState.account.sessionId,
                 authState.account.identityNumber,
                 authState.privateKey,
-              )),
-              create: (BuildContext context) async {
-                await accountServer.initServer(
-                  authState.account.userId,
-                  authState.account.sessionId,
-                  authState.account.identityNumber,
-                  authState.privateKey,
-                  context.read<MultiAuthCubit>(),
-                );
-                return accountServer;
+                context.read<MultiAuthCubit>(),
+              );
+              return accountServer;
+            },
+            initialData: null,
+            builder: (BuildContext context, _) => Consumer<AccountServer?>(
+              builder: (context, accountServer, child) {
+                if (accountServer != null)
+                  return _Providers(
+                    app: Portal(
+                      child: child!,
+                    ),
+                    accountServer: accountServer,
+                  );
+                return child!;
               },
-              initialData: null,
-              builder: (BuildContext context, _) => Consumer<AccountServer?>(
-                builder: (context, accountServer, child) {
-                  if (accountServer != null)
-                    return _Providers(
-                      app: Portal(
-                        child: child!,
-                      ),
-                      accountServer: accountServer,
-                    );
-                  return child!;
-                },
-                child: app,
-              ),
-            );
-          },
-        ),
-      );
+              child: app,
+            ),
+          );
+        },
+      ),
+    );
   }
 }
 
@@ -197,6 +197,7 @@ class _Home extends HookWidget {
       if (signed) {
         accountServer!
           ..pushSignalKeys()
+          ..refreshSelf()
           ..initSticker()
           ..initCircles();
       }

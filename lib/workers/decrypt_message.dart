@@ -310,7 +310,7 @@ class DecryptMessage extends Injector {
     );
     await database.appsDao.findUserById(appCard.appId).then((app) {
       if (app == null || app.updatedAt != appCard.updatedAt) {
-        syncUser(appCard.appId);
+        refreshUsers(<String>[appCard.appId]);
       }
     });
     await database.messagesDao.insert(message, accountId);
@@ -346,8 +346,7 @@ class DecryptMessage extends Injector {
   Future<void> _processDecryptSuccess(
       BlazeMessageData data, String plainText) async {
     // todo
-    // ignore: unused_local_variable
-    final user = await syncUser(data.userId);
+    await refreshUsers(<String>[data.userId]);
 
     var messageStatus = MessageStatus.delivered;
     if (data.conversationId == _conversationId) {
@@ -557,7 +556,7 @@ class DecryptMessage extends Injector {
       }
       final contactMessage =
           ContactMessage.fromJson(await jsonDecodeWithIsolate(plain));
-      final user = await syncUser(contactMessage.userId);
+      final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
           data,
           (String? quoteContent) => Message(
@@ -566,7 +565,7 @@ class DecryptMessage extends Injector {
               userId: data.userId,
               category: data.category!,
               content: plainText,
-              name: user.fullName,
+              name: user?.fullName,
               sharedUserId: contactMessage.userId,
               status: messageStatus,
               createdAt: data.createdAt,
@@ -694,9 +693,9 @@ class DecryptMessage extends Injector {
     } else if (systemMessage.action == MessageAction.update) {
       final participantId = systemMessage.participantId;
       if (participantId != null && participantId.isNotEmpty) {
-        await syncUser(systemMessage.participantId!, force: true);
+        await refreshUsers(<String>[systemMessage.participantId!], force: true);
       } else {
-        await syncConversion(data.conversationId, force: true);
+        await syncConversion(data.conversationId, force: true, unWait: true);
       }
       return;
     } else if (systemMessage.action == MessageAction.create) {
@@ -716,7 +715,7 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemUserMessage(
       SystemUserMessage systemMessage) async {
     if (systemMessage.action == SystemUserAction.update) {
-      await syncUser(systemMessage.userId);
+      await refreshUsers(<String>[systemMessage.userId]);
     }
   }
 
