@@ -49,7 +49,11 @@ class Blaze {
     debugPrint('ws connect');
     token ??= signAuthTokenWithEdDSA(
         userId, sessionId, privateKey, scp, 'GET', '/', '');
-    _connect(token!);
+    try {
+      _connect(token!);
+    } catch (_) {
+      _reconnect();
+    }
   }
 
   void _connect(String token) {
@@ -58,7 +62,7 @@ class Blaze {
       host,
       protocols: ['Mixin-Blaze-1'],
       headers: {'Authorization': 'Bearer $token'},
-      pingInterval: const Duration(seconds: 15),
+      pingInterval: const Duration(seconds: 4),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
