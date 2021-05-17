@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:hive/hive.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -80,9 +81,11 @@ class AccountServer {
           onError: (
             DioError e,
             ErrorInterceptorHandler handler,
-          ) {
-            if (e is MixinApiError && e.error.code == 401)
+          ) async {
+            if (e is MixinApiError && e.error.code == 401) {
+              await signOutAndClear();
               multiAuthCubit.signOut();
+            }
             handler.next(e);
           },
         ),
@@ -90,6 +93,12 @@ class AccountServer {
       level: Level.ALL,
     );
     await _initDatabase(privateKey, multiAuthCubit);
+
+    Timer.periodic(const Duration(days: 1), (timer) {
+      debugPrint('refreshSignalKeys periodic');
+      refreshSignalKeys(client);
+    });
+
     start();
   }
 
@@ -542,6 +551,12 @@ class AccountServer {
 
     return BlazeMessage(
         id: const Uuid().v4(), action: createMessage, params: blazeParam);
+  }
+
+  Future<void> signOutAndClear() async {
+    await PrivacyKeyValue.get.delete();
+    await CryptoKeyValue.get.delete();
+    await SignalDatabase.get.clear();
   }
 
   Future<void> sendTextMessage(

@@ -1,10 +1,11 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/crypto/signal/dao/pre_key_dao.dart';
-import 'package:flutter_app/crypto/signal/dao/signed_pre_key_dao.dart';
-import 'package:flutter_app/crypto/signal/signal_database.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+
+import '../dao/pre_key_dao.dart';
+import '../dao/signed_pre_key_dao.dart';
+import '../signal_database.dart';
 
 class MixinPreKeyStore implements PreKeyStore, SignedPreKeyStore {
   MixinPreKeyStore(SignalDatabase db) {
@@ -42,9 +43,8 @@ class MixinPreKeyStore implements PreKeyStore, SignedPreKeyStore {
   }
 
   @override
-  Future<bool> containsSignedPreKey(int signedPreKeyId) async {
-    return await signedPreKeyDao.getSignedPreKey(signedPreKeyId) != null;
-  }
+  Future<bool> containsSignedPreKey(int signedPreKeyId) async =>
+      await signedPreKeyDao.getSignedPreKey(signedPreKeyId) != null;
 
   @override
   Future<SignedPreKeyRecord> loadSignedPreKey(int signedPreKeyId) async {
@@ -77,8 +77,7 @@ class MixinPreKeyStore implements PreKeyStore, SignedPreKeyStore {
   @override
   Future storeSignedPreKey(
       int signedPreKeyId, SignedPreKeyRecord record) async {
-    await signedPreKeyDao.insert(SignedPrekey(
-        id: 0,
+    await signedPreKeyDao.insert(SignedPrekeysCompanion.insert(
         prekeyId: signedPreKeyId,
         record: record.serialize(),
         timestamp: DateTime.now().millisecondsSinceEpoch));

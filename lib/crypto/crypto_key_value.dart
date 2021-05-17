@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import 'package:flutter_app/utils/crypto_util.dart';
-// ignore: implementation_imports
-import 'package:libsignal_protocol_dart/src/util/Medium.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
+// ignore: implementation_imports
+import 'package:libsignal_protocol_dart/src/util/Medium.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
+import '../utils/crypto_util.dart';
 
 class CryptoKeyValue {
   CryptoKeyValue._();
@@ -33,6 +34,14 @@ class CryptoKeyValue {
     await Hive.initFlutter(file.path);
     box = await Hive.openBox(hiveCrypto);
     hasInit = true;
+  }
+
+  Future delete() async {
+    if (!hasInit) {
+      return;
+    }
+    await Hive.deleteBoxFromDisk(hiveCrypto);
+    hasInit = false;
   }
 
   int getLocalRegistrationId() => box.get(localRegistrationId, defaultValue: 0);

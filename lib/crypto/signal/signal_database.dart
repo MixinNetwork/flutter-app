@@ -38,12 +38,16 @@ class SignalDatabase extends _$SignalDatabase {
 
   @override
   int get schemaVersion => 1;
+
+  Future<void> clear() => transaction(() async {
+        for (var table in allTables) {
+          await delete(table).go();
+        }
+      });
 }
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, 'signal.db'));
-    return VmDatabase(file);
-  });
-}
+LazyDatabase _openConnection() => LazyDatabase(() async {
+      final dbFolder = await getApplicationDocumentsDirectory();
+      final file = File(p.join(dbFolder.path, 'signal.db'));
+      return VmDatabase(file);
+    });
