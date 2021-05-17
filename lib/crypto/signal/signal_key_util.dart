@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:flutter_app/crypto/signal/pre_key_util.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import 'pre_key_util.dart';
 import 'signal_key_request.dart';
 
 const int preKeyMinNum = 500;

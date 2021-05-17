@@ -1,24 +1,23 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/blaze/blaze_message.dart';
-import 'package:flutter_app/blaze/blaze_param.dart';
-import 'package:flutter_app/crypto/signal/signal_database.dart';
-import 'package:flutter_app/crypto/signal/storage/mixin_identity_key_store.dart';
-import 'package:flutter_app/crypto/signal/storage/mixin_prekey_store.dart';
-import 'package:flutter_app/crypto/signal/storage/mixin_sender_key_store.dart';
-import 'package:flutter_app/crypto/signal/storage/mixin_session_store.dart';
-import 'package:flutter_app/crypto/signal/storage/mixin_signal_protocol_store.dart';
-import 'package:flutter_app/crypto/signal/encrypt_result.dart';
-import 'package:flutter_app/db/mixin_database.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/utils/string_extension.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
-// ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/InvalidMessageException.dart';
 import 'package:moor/moor.dart';
 
+import '../../blaze/blaze_message.dart';
+import '../../blaze/blaze_param.dart';
+import '../../db/mixin_database.dart';
+import '../../enum/message_category.dart';
+import '../../utils/string_extension.dart';
+import 'encrypt_result.dart';
 import 'identity_key_util.dart';
+import 'signal_database.dart';
+import 'storage/mixin_identity_key_store.dart';
+import 'storage/mixin_prekey_store.dart';
+import 'storage/mixin_sender_key_store.dart';
+import 'storage/mixin_session_store.dart';
+import 'storage/mixin_signal_protocol_store.dart';
 
 class SignalProtocol {
   SignalProtocol(this._accountId);

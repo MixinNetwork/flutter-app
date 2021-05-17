@@ -2,11 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_app/blaze/vo/one_time_pre_key.dart';
-import 'package:flutter_app/blaze/vo/signed_pre_key.dart';
-import 'package:flutter_app/utils/string_extension.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+
+import '../../utils/string_extension.dart';
+import 'one_time_pre_key.dart';
+import 'signed_pre_key.dart';
 
 part 'signal_key.g.dart';
 

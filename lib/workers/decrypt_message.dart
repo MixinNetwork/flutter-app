@@ -92,9 +92,7 @@ class DecryptMessage extends Injector {
     final data = BlazeMessageData.fromJson(
         await jsonDecodeWithIsolate(floodMessage.data));
     debugPrint('DecryptMessage process data: $data');
-    if (data.conversationId != null) {
-      await syncConversion(data.conversationId);
-    }
+    await syncConversion(data.conversationId);
     final category = data.category;
     if (category.isSignal) {
       debugPrint('DecryptMessage isSignal');

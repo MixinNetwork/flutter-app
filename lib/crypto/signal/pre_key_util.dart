@@ -1,9 +1,8 @@
-import 'package:flutter_app/crypto/crypto_key_value.dart';
-import 'package:flutter_app/crypto/signal/signal_database.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
-// ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/util/Medium.dart';
 
+import '../crypto_key_value.dart';
+import 'signal_database.dart';
 import 'storage/mixin_prekey_store.dart';
 
 class PreKeyUtil {

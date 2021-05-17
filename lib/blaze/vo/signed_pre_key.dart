@@ -1,5 +1,6 @@
-import 'package:flutter_app/blaze/vo/one_time_pre_key.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import 'one_time_pre_key.dart';
 
 part 'signed_pre_key.g.dart';
 

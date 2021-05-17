@@ -1,15 +1,16 @@
 import 'dart:io';
 
-import 'package:flutter_app/crypto/signal/dao/identity_dao.dart';
-import 'package:flutter_app/crypto/signal/dao/pre_key_dao.dart';
-import 'package:flutter_app/crypto/signal/dao/ratchet_sender_key_dao.dart';
-import 'package:flutter_app/crypto/signal/dao/sender_key_dao.dart';
-import 'package:flutter_app/crypto/signal/dao/session_dao.dart';
-import 'package:flutter_app/crypto/signal/dao/signed_pre_key_dao.dart';
 import 'package:moor/ffi.dart';
 import 'package:moor/moor.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
+
+import 'dao/identity_dao.dart';
+import 'dao/pre_key_dao.dart';
+import 'dao/ratchet_sender_key_dao.dart';
+import 'dao/sender_key_dao.dart';
+import 'dao/session_dao.dart';
+import 'dao/signed_pre_key_dao.dart';
 
 part 'signal_database.g.dart';
 

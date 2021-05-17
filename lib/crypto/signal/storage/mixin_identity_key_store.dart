@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/crypto/signal/dao/identity_dao.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
+import '../dao/identity_dao.dart';
 import '../signal_database.dart';
 import '../signal_vo_extension.dart';
 
@@ -14,25 +14,20 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
   late final String? _accountId;
 
   @override
-  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async {
-    return identityDao
-        .getIdentityByAddress(address.toString())
-        .then((value) => value!.getIdentityKey());
-  }
+  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async =>
+      identityDao
+          .getIdentityByAddress(address.toString())
+          .then((value) => value!.getIdentityKey());
 
   @override
-  Future<IdentityKeyPair> getIdentityKeyPair() async {
-    return identityDao
-        .getIdentityByAddress('-1')
-        .then((value) => value!.getIdentityKeyPair());
-  }
+  Future<IdentityKeyPair> getIdentityKeyPair() async => identityDao
+      .getIdentityByAddress('-1')
+      .then((value) => value!.getIdentityKeyPair());
 
   @override
-  Future<int> getLocalRegistrationId() async {
-    return identityDao
-        .getIdentityByAddress('-1')
-        .then((value) => value!.registrationId!);
-  }
+  Future<int> getLocalRegistrationId() async => identityDao
+      .getIdentityByAddress('-1')
+      .then((value) => value!.registrationId!);
 
   @override
   Future<bool> isTrustedIdentity(SignalProtocolAddress address,

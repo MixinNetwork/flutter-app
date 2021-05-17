@@ -1,7 +1,8 @@
-import 'package:flutter_app/crypto/crypto_key_value.dart';
-import 'package:flutter_app/crypto/signal/signal_database.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:moor/moor.dart';
+
+import '../crypto_key_value.dart';
+import 'signal_database.dart';
 import 'signal_vo_extension.dart';
 
 class IdentityKeyUtil {

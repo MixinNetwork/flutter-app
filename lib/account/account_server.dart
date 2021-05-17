@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:hive/hive.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -288,11 +287,9 @@ class AccountServer {
     });
   }
 
-  Future<BlazeMessage> encryptNormalMessage(db.SendingMessage message) async {
-    // TODO resend data
-    return signalProtocol.encryptGroupMessage(
-        message, await getMentionData(message.messageId));
-  }
+  Future<BlazeMessage> encryptNormalMessage(db.SendingMessage message) async =>
+      signalProtocol.encryptGroupMessage(
+          message, await getMentionData(message.messageId));
 
   Future<List<String>?> getMentionData(String messageId) async {
     final mentionData =

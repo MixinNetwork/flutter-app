@@ -13,11 +13,11 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
       .customSelect('SELECT * FROM sessions WHERE address = ? AND device = ?',
           variables: [Variable.withString(address), Variable.withInt(deviceId)])
       .map((row) => Session(
-            id: row.readInt('id'),
-            address: row.readString('address'),
-            device: row.readInt('device'),
-            record: row.readBlob('record'),
-            timestamp: row.readInt('timestamp'),
+            id: row.read<int>('id'),
+            address: row.read<String>('address'),
+            device: row.read<int>('device'),
+            record: row.read<Uint8List>('record'),
+            timestamp: row.read<int>('timestamp'),
           ))
       .getSingleOrNull();
 
@@ -26,7 +26,7 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
           variables: [
             Variable.withString(address),
           ])
-      .map((row) => row.readInt('device'))
+      .map((row) => row.read<int>('device'))
       .get();
 
   Future<List<Session>> getSessions(String address) async =>

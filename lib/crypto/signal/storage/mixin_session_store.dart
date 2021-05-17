@@ -45,9 +45,8 @@ class MixinSessionStore extends SessionStore {
   }
 
   @override
-  Future<List<int>> getSubDeviceSessions(String name) async {
-    return sessionDao.getSubDevice(name);
-  }
+  Future<List<int>> getSubDeviceSessions(String name) async =>
+      sessionDao.getSubDevice(name);
 
   @override
   Future<SessionRecord> loadSession(SignalProtocolAddress address) async {

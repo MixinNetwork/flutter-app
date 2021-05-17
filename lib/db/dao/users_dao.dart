@@ -61,10 +61,9 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   }
 
   Future<List<String>> findMultiUserIdsByIdentityNumbers(
-      Iterable<String> identityNumbers) async {
-    return (select(db.users)
-          ..where((tbl) => tbl.identityNumber.isIn(identityNumbers)))
-        .map((row) => row.userId)
-        .get();
-  }
+          Iterable<String> identityNumbers) async =>
+      (select(db.users)
+            ..where((tbl) => tbl.identityNumber.isIn(identityNumbers)))
+          .map((row) => row.userId)
+          .get();
 }

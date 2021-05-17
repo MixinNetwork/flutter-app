@@ -13,19 +13,16 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   final MixinSessionStore sessionStore;
 
   @override
-  Future<bool> containsPreKey(int preKeyId) async {
-    return preKeyStore.containsPreKey(preKeyId);
-  }
+  Future<bool> containsPreKey(int preKeyId) async =>
+      preKeyStore.containsPreKey(preKeyId);
 
   @override
-  Future<bool> containsSession(SignalProtocolAddress address) async {
-    return sessionStore.containsSession(address);
-  }
+  Future<bool> containsSession(SignalProtocolAddress address) async =>
+      sessionStore.containsSession(address);
 
   @override
-  Future<bool> containsSignedPreKey(int signedPreKeyId) async {
-    return signedPreKeyStore.containsSignedPreKey(signedPreKeyId);
-  }
+  Future<bool> containsSignedPreKey(int signedPreKeyId) async =>
+      signedPreKeyStore.containsSignedPreKey(signedPreKeyId);
 
   @override
   Future deleteAllSessions(String name) async {
@@ -38,44 +35,36 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async {
-    return identityKeyStore.getIdentity(address);
-  }
+  Future<IdentityKey> getIdentity(SignalProtocolAddress address) async =>
+      identityKeyStore.getIdentity(address);
 
   @override
-  Future<IdentityKeyPair> getIdentityKeyPair() async {
-    return identityKeyStore.getIdentityKeyPair();
-  }
+  Future<IdentityKeyPair> getIdentityKeyPair() async =>
+      identityKeyStore.getIdentityKeyPair();
 
   @override
-  Future<int> getLocalRegistrationId() async {
-    return identityKeyStore.getLocalRegistrationId();
-  }
+  Future<int> getLocalRegistrationId() async =>
+      identityKeyStore.getLocalRegistrationId();
 
   @override
-  Future<List<int>> getSubDeviceSessions(String name) async {
-    return sessionStore.getSubDeviceSessions(name);
-  }
+  Future<List<int>> getSubDeviceSessions(String name) async =>
+      sessionStore.getSubDeviceSessions(name);
 
   @override
-  Future<PreKeyRecord> loadPreKey(int preKeyId) async {
-    return preKeyStore.loadPreKey(preKeyId);
-  }
+  Future<PreKeyRecord> loadPreKey(int preKeyId) async =>
+      preKeyStore.loadPreKey(preKeyId);
 
   @override
-  Future<SessionRecord> loadSession(SignalProtocolAddress address) async {
-    return sessionStore.loadSession(address);
-  }
+  Future<SessionRecord> loadSession(SignalProtocolAddress address) async =>
+      sessionStore.loadSession(address);
 
   @override
-  Future<SignedPreKeyRecord> loadSignedPreKey(int signedPreKeyId) async {
-    return signedPreKeyStore.loadSignedPreKey(signedPreKeyId);
-  }
+  Future<SignedPreKeyRecord> loadSignedPreKey(int signedPreKeyId) async =>
+      signedPreKeyStore.loadSignedPreKey(signedPreKeyId);
 
   @override
-  Future<List<SignedPreKeyRecord>> loadSignedPreKeys() async {
-    return signedPreKeyStore.loadSignedPreKeys();
-  }
+  Future<List<SignedPreKeyRecord>> loadSignedPreKeys() async =>
+      signedPreKeyStore.loadSignedPreKeys();
 
   @override
   void removePreKey(int preKeyId) {
@@ -105,15 +94,13 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
 
   @override
   Future<bool> isTrustedIdentity(SignalProtocolAddress address,
-      IdentityKey? identityKey, Direction direction) async {
-    return identityKeyStore.isTrustedIdentity(address, identityKey, direction);
-  }
+          IdentityKey? identityKey, Direction direction) async =>
+      identityKeyStore.isTrustedIdentity(address, identityKey, direction);
 
   @override
   Future<bool> saveIdentity(
-      SignalProtocolAddress address, IdentityKey? identityKey) async {
-    return identityKeyStore.saveIdentity(address, identityKey);
-  }
+          SignalProtocolAddress address, IdentityKey? identityKey) async =>
+      identityKeyStore.saveIdentity(address, identityKey);
 
   void removeIdentity(SignalProtocolAddress address) {
     identityKeyStore.removeIdentity(address);
