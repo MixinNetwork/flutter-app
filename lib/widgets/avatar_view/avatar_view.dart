@@ -1,16 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
 
 import '../../account/account_server.dart';
-import '../../bloc/bloc_converter.dart';
 import '../../db/mixin_database.dart';
 import '../../utils/color_utils.dart';
 import '../cache_image.dart';
-import 'bloc/cubit/avatar_cubit.dart';
 
-class ConversationAvatarWidget extends StatelessWidget {
+class ConversationAvatarWidget extends HookWidget {
   const ConversationAvatarWidget({
     Key? key,
     this.conversation,
@@ -40,42 +41,45 @@ class ConversationAvatarWidget extends StatelessWidget {
     final _category = conversation?.category ?? category;
     assert(_category != null);
 
+    final list = useStream(
+          useMemoized(
+            () {
+              if (_category == ConversationCategory.group)
+                return context
+                    .read<AccountServer>()
+                    .database
+                    .participantsDao
+                    .participantsAvatar(_conversationId!)
+                    .watch()
+                    .map((event) => _category == ConversationCategory.contact
+                        ? event
+                            .where((element) =>
+                                element.relationship != UserRelationship.me)
+                            .toList()
+                        : event);
+              return Stream.empty();
+            },
+            [_conversationId, _category],
+          ),
+          initialData: <User>[],
+        ).data ??
+        <User>[];
+
+    Widget child;
+    if (!(_category == ConversationCategory.group))
+      child = AvatarWidget(
+        userId: _conversationId!,
+        name: _name ?? '',
+        avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
+        size: size,
+      );
+    else
+      child = AvatarPuzzlesWidget(list, size);
+
     return SizedBox.fromSize(
       size: Size.square(size),
       child: ClipOval(
-        child: Builder(
-          builder: (context) => BlocProvider(
-            key: Key(_conversationId!),
-            create: (context) => AvatarCubit(
-              Provider.of<AccountServer>(context, listen: false)
-                  .database
-                  .participantsDao,
-              _conversationId,
-            ),
-            child: Builder(
-              builder: (context) {
-                if (!(_category == ConversationCategory.group)) {
-                  return AvatarWidget(
-                    userId: _conversationId,
-                    name: _name ?? '',
-                    avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
-                    size: size,
-                  );
-                }
-                return BlocConverter<AvatarCubit, List<User>, List<User>>(
-                  converter: (state) =>
-                      _category == ConversationCategory.contact
-                          ? state
-                              .where((element) =>
-                                  element.relationship != UserRelationship.me)
-                              .toList()
-                          : state,
-                  builder: (context, state) => AvatarPuzzlesWidget(state, size),
-                );
-              },
-            ),
-          ),
-        ),
+        child: child,
       ),
     );
   }
