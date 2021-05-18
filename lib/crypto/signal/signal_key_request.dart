@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
@@ -9,7 +10,7 @@ import '../../blaze/vo/signed_pre_key.dart';
 part 'signal_key_request.g.dart';
 
 @JsonSerializable()
-class SignalKeyRequest {
+class SignalKeyRequest with EquatableMixin {
   SignalKeyRequest(this.identityKey, this.signedPreKey, this.oneTimePreKeys);
 
   SignalKeyRequest.from(IdentityKey ik, SignedPreKeyRecord spk,
@@ -36,4 +37,11 @@ class SignalKeyRequest {
   late List<OneTimePreKey> oneTimePreKeys;
 
   Map<String, dynamic> toJson() => _$SignalKeyRequestToJson(this);
+
+  @override
+  List<Object?> get props => [
+        identityKey,
+        signedPreKey,
+        oneTimePreKeys,
+      ];
 }

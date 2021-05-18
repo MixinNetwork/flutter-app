@@ -1,4 +1,7 @@
-import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+import 'dart:convert';
+
+import 'identity_key_util.dart';
+import 'signal_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import 'pre_key_util.dart';
@@ -21,7 +24,8 @@ Future<MixinResponse<void>> refreshSignalKeys(Client client) async {
 }
 
 Future<SignalKeyRequest> generateKeys() async {
-  final identityKeyPair = KeyHelper.generateIdentityKeyPair();
+  final identityKeyPair =
+      await IdentityKeyUtil.getIdentityKeyPair(SignalDatabase.get);
   final oneTimePreKeys = await PreKeyUtil.generatePreKeys();
   final signedPreKeyRecord =
       await PreKeyUtil.generateSignedPreKey(identityKeyPair, false);
