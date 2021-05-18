@@ -77,7 +77,7 @@ class TextMessage extends HookWidget {
             HighlightTextSpan(
               keyword,
               style: TextStyle(
-                color: BrightnessData.themeOf(context).accent,
+                backgroundColor: BrightnessData.themeOf(context).highlight,
               ),
             ),
             ...highlightTextSpans,
