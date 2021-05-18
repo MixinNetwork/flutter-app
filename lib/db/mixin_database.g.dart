@@ -32,29 +32,27 @@ class Job extends DataClass implements Insertable<Job> {
   factory Job.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Job(
-      jobId:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}job_id'])!,
-      action:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}action'])!,
-      createdAt: Jobs.$converter0.mapToDart(intType
+      jobId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}job_id'])!,
+      action: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}action'])!,
+      createdAt: Jobs.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      orderId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}order_id']),
-      priority:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}priority'])!,
-      userId:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      blazeMessage: stringType
+      orderId: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}order_id']),
+      priority: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}priority'])!,
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      blazeMessage: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}blaze_message']),
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
-      resendMessageId: stringType
+      resendMessageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}resend_message_id']),
-      runCount:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}run_count'])!,
+      runCount: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}run_count'])!,
     );
   }
   @override
@@ -203,7 +201,7 @@ class Job extends DataClass implements Insertable<Job> {
                                   $mrjc(resendMessageId.hashCode,
                                       runCount.hashCode))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Job &&
           other.jobId == this.jobId &&
@@ -577,42 +575,41 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   factory Conversation.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Conversation(
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      ownerId: stringType
+      ownerId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}owner_id']),
-      category: Conversations.$converter0.mapToDart(stringType
+      category: Conversations.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}category'])),
-      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
-      iconUrl: stringType
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name']),
+      iconUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url']),
-      announcement: stringType
+      announcement: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}announcement']),
-      codeUrl: stringType
+      codeUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}code_url']),
-      payType: stringType
+      payType: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}pay_type']),
-      createdAt: Conversations.$converter1.mapToDart(intType
+      createdAt: Conversations.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      pinTime: Conversations.$converter2.mapToDart(
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}pin_time'])),
-      lastMessageId: stringType
+      pinTime: Conversations.$converter2.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}pin_time'])),
+      lastMessageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}last_message_id']),
-      lastMessageCreatedAt: Conversations.$converter3.mapToDart(
-          intType.mapFromDatabaseResponse(
+      lastMessageCreatedAt: Conversations.$converter3.mapToDart(const IntType()
+          .mapFromDatabaseResponse(
               data['${effectivePrefix}last_message_created_at'])),
-      lastReadMessageId: stringType.mapFromDatabaseResponse(
+      lastReadMessageId: const StringType().mapFromDatabaseResponse(
           data['${effectivePrefix}last_read_message_id']),
-      unseenMessageCount: intType.mapFromDatabaseResponse(
+      unseenMessageCount: const IntType().mapFromDatabaseResponse(
           data['${effectivePrefix}unseen_message_count']),
-      status: Conversations.$converter4.mapToDart(
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
-      draft:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}draft']),
-      muteUntil: Conversations.$converter5.mapToDart(intType
+      status: Conversations.$converter4.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
+      draft: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}draft']),
+      muteUntil: Conversations.$converter5.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
     );
   }
@@ -876,7 +873,7 @@ class Conversation extends DataClass implements Insertable<Conversation> {
                                                                   muteUntil
                                                                       .hashCode)))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Conversation &&
           other.conversationId == this.conversationId &&
@@ -1396,17 +1393,15 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return MessageMention(
-      messageId: stringType
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      mentions: stringType
+      mentions: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}mentions'])!,
-      hasRead:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}has_read']),
+      hasRead: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}has_read']),
     );
   }
   @override
@@ -1481,7 +1476,7 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
       $mrjc(conversationId.hashCode,
           $mrjc(mentions.hashCode, hasRead.hashCode))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageMention &&
           other.messageId == this.messageId &&
@@ -1725,67 +1720,66 @@ class Message extends DataClass implements Insertable<Message> {
   factory Message.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Message(
-      messageId: stringType
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      category: Messages.$converter0.mapToDart(stringType
+      category: Messages.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}category']))!,
-      content:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}content']),
-      mediaUrl: stringType
+      content: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}content']),
+      mediaUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_url']),
-      mediaMimeType: stringType
+      mediaMimeType: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_mime_type']),
-      mediaSize:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}media_size']),
-      mediaDuration: stringType
+      mediaSize: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_size']),
+      mediaDuration: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_duration']),
-      mediaWidth: intType
+      mediaWidth: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_width']),
-      mediaHeight: intType
+      mediaHeight: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_height']),
-      mediaHash: stringType
+      mediaHash: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_hash']),
-      thumbImage: stringType
+      thumbImage: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}thumb_image']),
-      mediaKey: stringType
+      mediaKey: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_key']),
-      mediaDigest: stringType
+      mediaDigest: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_digest']),
-      mediaStatus: Messages.$converter1.mapToDart(stringType
+      mediaStatus: Messages.$converter1.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_status'])),
-      status: Messages.$converter2.mapToDart(stringType
+      status: Messages.$converter2.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
-      createdAt: Messages.$converter3.mapToDart(intType
+      createdAt: Messages.$converter3.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      action: Messages.$converter4.mapToDart(
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}action'])),
-      participantId: stringType
+      action: Messages.$converter4.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}action'])),
+      participantId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}participant_id']),
-      snapshotId: stringType
+      snapshotId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}snapshot_id']),
-      hyperlink: stringType
+      hyperlink: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}hyperlink']),
-      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name']),
-      albumId: stringType
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name']),
+      albumId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}album_id']),
-      stickerId: stringType
+      stickerId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sticker_id']),
-      sharedUserId: stringType
+      sharedUserId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}shared_user_id']),
-      mediaWaveform: stringType
+      mediaWaveform: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_waveform']),
-      quoteMessageId: stringType
+      quoteMessageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}quote_message_id']),
-      quoteContent: stringType
+      quoteContent: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}quote_content']),
-      thumbUrl: stringType
+      thumbUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}thumb_url']),
     );
   }
@@ -2182,7 +2176,7 @@ class Message extends DataClass implements Insertable<Message> {
                                                                               action.hashCode,
                                                                               $mrjc(participantId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(hyperlink.hashCode, $mrjc(name.hashCode, $mrjc(albumId.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mediaWaveform.hashCode, $mrjc(quoteMessageId.hashCode, $mrjc(quoteContent.hashCode, thumbUrl.hashCode))))))))))))))))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Message &&
           other.messageId == this.messageId &&
@@ -3041,16 +3035,14 @@ class Participant extends DataClass implements Insertable<Participant> {
   factory Participant.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Participant(
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      role: Participants.$converter0.mapToDart(
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}role'])),
-      createdAt: Participants.$converter1.mapToDart(intType
+      role: Participants.$converter0.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}role'])),
+      createdAt: Participants.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
     );
   }
@@ -3126,7 +3118,7 @@ class Participant extends DataClass implements Insertable<Participant> {
   int get hashCode => $mrjf($mrjc(conversationId.hashCode,
       $mrjc(userId.hashCode, $mrjc(role.hashCode, createdAt.hashCode))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Participant &&
           other.conversationId == this.conversationId &&
@@ -3331,28 +3323,28 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   factory Snapshot.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Snapshot(
-      snapshotId: stringType
+      snapshotId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}snapshot_id'])!,
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      assetId: stringType
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      assetId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_id'])!,
-      amount:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}amount'])!,
-      createdAt: Snapshots.$converter0.mapToDart(intType
+      amount: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}amount'])!,
+      createdAt: Snapshots.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      opponentId: stringType
+      opponentId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}opponent_id']),
-      transactionHash: stringType
+      transactionHash: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}transaction_hash']),
-      sender:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}sender']),
-      receiver: stringType
+      sender: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}sender']),
+      receiver: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}receiver']),
-      memo: stringType.mapFromDatabaseResponse(data['${effectivePrefix}memo']),
-      confirmations: intType
+      memo: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}memo']),
+      confirmations: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}confirmations']),
     );
   }
@@ -3513,7 +3505,7 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
                                       $mrjc(memo.hashCode,
                                           confirmations.hashCode)))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Snapshot &&
           other.snapshotId == this.snapshotId &&
@@ -3904,36 +3896,33 @@ class User extends DataClass implements Insertable<User> {
   factory User.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final boolType = db.typeSystem.forDartType<bool>();
-    final intType = db.typeSystem.forDartType<int>();
     return User(
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      identityNumber: stringType
+      identityNumber: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}identity_number'])!,
-      relationship: Users.$converter0.mapToDart(stringType
+      relationship: Users.$converter0.mapToDart(const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}relationship'])),
-      fullName: stringType
+      fullName: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
-      avatarUrl: stringType
+      avatarUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}avatar_url']),
-      phone:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}phone']),
-      isVerified: boolType
+      phone: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}phone']),
+      isVerified: const BoolType()
           .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
-      createdAt: Users.$converter1.mapToDart(intType
+      createdAt: Users.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
-      muteUntil: Users.$converter2.mapToDart(intType
+      muteUntil: Users.$converter2.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
-      hasPin:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
-      appId:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
-      biography: stringType
+      hasPin: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
+      appId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
+      biography: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}biography']),
-      isScam:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}is_scam']),
+      isScam: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_scam']),
     );
   }
   @override
@@ -4131,7 +4120,7 @@ class User extends DataClass implements Insertable<User> {
                                               $mrjc(biography.hashCode,
                                                   isScam.hashCode)))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is User &&
           other.userId == this.userId &&
@@ -4555,28 +4544,29 @@ class Addresse extends DataClass implements Insertable<Addresse> {
   factory Addresse.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Addresse(
-      addressId: stringType
+      addressId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}address_id'])!,
-      type: stringType.mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
-      assetId: stringType
+      type: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
+      assetId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_id'])!,
-      publicKey: stringType
+      publicKey: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}public_key']),
-      label:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}label']),
-      updatedAt: Addresses.$converter0.mapToDart(intType
+      label: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}label']),
+      updatedAt: Addresses.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']))!,
-      reserve: stringType
+      reserve: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reserve'])!,
-      fee: stringType.mapFromDatabaseResponse(data['${effectivePrefix}fee'])!,
-      accountName: stringType
+      fee: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}fee'])!,
+      accountName: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}account_name']),
-      accountTag: stringType
+      accountTag: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}account_tag']),
-      dust: stringType.mapFromDatabaseResponse(data['${effectivePrefix}dust']),
+      dust: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}dust']),
     );
   }
   @override
@@ -4732,7 +4722,7 @@ class Addresse extends DataClass implements Insertable<Addresse> {
                                       $mrjc(accountTag.hashCode,
                                           dust.hashCode)))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Addresse &&
           other.addressId == this.addressId &&
@@ -5121,33 +5111,32 @@ class App extends DataClass implements Insertable<App> {
   factory App.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return App(
-      appId:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}app_id'])!,
-      appNumber: stringType
+      appId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}app_id'])!,
+      appNumber: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}app_number'])!,
-      homeUri: stringType
+      homeUri: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}home_uri'])!,
-      redirectUri: stringType
+      redirectUri: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}redirect_uri'])!,
-      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      iconUrl: stringType
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+      iconUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url'])!,
-      category: stringType
+      category: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}category']),
-      description: stringType
+      description: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
-      appSecret: stringType
+      appSecret: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}app_secret'])!,
-      capabilities: stringType
+      capabilities: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}capabilities']),
-      creatorId: stringType
+      creatorId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}creator_id'])!,
-      resourcePatterns: stringType
+      resourcePatterns: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}resource_patterns']),
-      updatedAt: Apps.$converter0.mapToDart(intType
+      updatedAt: Apps.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at'])),
     );
   }
@@ -5321,7 +5310,7 @@ class App extends DataClass implements Insertable<App> {
                                                   updatedAt
                                                       .hashCode)))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is App &&
           other.appId == this.appId &&
@@ -5779,34 +5768,34 @@ class Asset extends DataClass implements Insertable<Asset> {
   factory Asset.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Asset(
-      assetId: stringType
+      assetId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_id'])!,
-      symbol:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}symbol'])!,
-      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      iconUrl: stringType
+      symbol: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}symbol'])!,
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+      iconUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url'])!,
-      balance: stringType
+      balance: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}balance'])!,
-      destination: stringType
+      destination: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}destination'])!,
-      tag: stringType.mapFromDatabaseResponse(data['${effectivePrefix}tag']),
-      priceBtc: stringType
+      tag: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}tag']),
+      priceBtc: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}price_btc'])!,
-      priceUsd: stringType
+      priceUsd: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}price_usd'])!,
-      chainId: stringType
+      chainId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}chain_id'])!,
-      changeUsd: stringType
+      changeUsd: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}change_usd'])!,
-      changeBtc: stringType
+      changeBtc: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}change_btc'])!,
-      confirmations: intType
+      confirmations: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}confirmations'])!,
-      assetKey: stringType
+      assetKey: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_key']),
     );
   }
@@ -5978,7 +5967,7 @@ class Asset extends DataClass implements Insertable<Asset> {
                                                       assetKey
                                                           .hashCode))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Asset &&
           other.assetId == this.assetId &&
@@ -6446,19 +6435,17 @@ class CircleConversation extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return CircleConversation(
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      circleId: stringType
+      circleId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}circle_id'])!,
-      userId:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      createdAt: CircleConversations.$converter0.mapToDart(intType
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      createdAt: CircleConversations.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      pinTime: CircleConversations.$converter1.mapToDart(
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}pin_time'])),
+      pinTime: CircleConversations.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}pin_time'])),
     );
   }
   @override
@@ -6549,7 +6536,7 @@ class CircleConversation extends DataClass
           $mrjc(
               userId.hashCode, $mrjc(createdAt.hashCode, pinTime.hashCode)))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is CircleConversation &&
           other.conversationId == this.conversationId &&
@@ -6761,15 +6748,14 @@ class Circle extends DataClass implements Insertable<Circle> {
   factory Circle.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Circle(
-      circleId: stringType
+      circleId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}circle_id'])!,
-      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      createdAt: Circles.$converter0.mapToDart(intType
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+      createdAt: Circles.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      orderedAt: Circles.$converter1.mapToDart(intType
+      orderedAt: Circles.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}ordered_at'])),
     );
   }
@@ -6847,7 +6833,7 @@ class Circle extends DataClass implements Insertable<Circle> {
   int get hashCode => $mrjf($mrjc(circleId.hashCode,
       $mrjc(name.hashCode, $mrjc(createdAt.hashCode, orderedAt.hashCode))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Circle &&
           other.circleId == this.circleId &&
@@ -7026,13 +7012,12 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
   factory FloodMessage.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return FloodMessage(
-      messageId: stringType
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      data: stringType.mapFromDatabaseResponse(data['${effectivePrefix}data'])!,
-      createdAt: FloodMessages.$converter0.mapToDart(intType
+      data: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}data'])!,
+      createdAt: FloodMessages.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
     );
   }
@@ -7096,7 +7081,7 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
   int get hashCode => $mrjf(
       $mrjc(messageId.hashCode, $mrjc(data.hashCode, createdAt.hashCode)));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FloodMessage &&
           other.messageId == this.messageId &&
@@ -7259,17 +7244,16 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
   factory Hyperlink.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
     return Hyperlink(
-      hyperlink: stringType
+      hyperlink: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}hyperlink'])!,
-      siteName: stringType
+      siteName: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}site_name'])!,
-      siteTitle: stringType
+      siteTitle: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}site_title'])!,
-      siteDescription: stringType
+      siteDescription: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}site_description']),
-      siteImage: stringType
+      siteImage: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}site_image']),
     );
   }
@@ -7358,7 +7342,7 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
           $mrjc(siteTitle.hashCode,
               $mrjc(siteDescription.hashCode, siteImage.hashCode)))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Hyperlink &&
           other.hyperlink == this.hyperlink &&
@@ -7578,21 +7562,20 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
   factory MessagesFt.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
     return MessagesFt(
-      messageId: stringType
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      content: stringType
+      content: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}content'])!,
-      createdAt: stringType
+      createdAt: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      reservedInt: stringType
+      reservedInt: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reserved_int'])!,
-      reservedText: stringType
+      reservedText: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reserved_text'])!,
     );
   }
@@ -7691,7 +7674,7 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
                   $mrjc(userId.hashCode,
                       $mrjc(reservedInt.hashCode, reservedText.hashCode)))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessagesFt &&
           other.messageId == this.messageId &&
@@ -7975,9 +7958,8 @@ class MessagesHistoryData extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
     return MessagesHistoryData(
-      messageId: stringType
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
     );
   }
@@ -8023,7 +8005,7 @@ class MessagesHistoryData extends DataClass
   @override
   int get hashCode => $mrjf(messageId.hashCode);
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessagesHistoryData && other.messageId == this.messageId);
 }
@@ -8129,10 +8111,10 @@ class Offset extends DataClass implements Insertable<Offset> {
   factory Offset.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
     return Offset(
-      key: stringType.mapFromDatabaseResponse(data['${effectivePrefix}key'])!,
-      timestamp: stringType
+      key: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}key'])!,
+      timestamp: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
     );
   }
@@ -8184,7 +8166,7 @@ class Offset extends DataClass implements Insertable<Offset> {
   @override
   int get hashCode => $mrjf($mrjc(key.hashCode, timestamp.hashCode));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Offset &&
           other.key == this.key &&
@@ -8326,20 +8308,18 @@ class ParticipantSessionData extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return ParticipantSessionData(
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      sessionId: stringType
+      sessionId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}session_id'])!,
-      sentToServer: intType
+      sentToServer: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sent_to_server']),
-      createdAt: ParticipantSession.$converter0.mapToDart(intType
+      createdAt: ParticipantSession.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
-      publicKey: stringType
+      publicKey: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}public_key']),
     );
   }
@@ -8442,7 +8422,7 @@ class ParticipantSessionData extends DataClass
               $mrjc(sentToServer.hashCode,
                   $mrjc(createdAt.hashCode, publicKey.hashCode))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ParticipantSessionData &&
           other.conversationId == this.conversationId &&
@@ -8689,18 +8669,16 @@ class ResendSessionMessage extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return ResendSessionMessage(
-      messageId: stringType
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      sessionId: stringType
+      sessionId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}session_id'])!,
-      status:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
-      createdAt: ResendSessionMessages.$converter0.mapToDart(intType
+      status: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
+      createdAt: ResendSessionMessages.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
     );
   }
@@ -8784,7 +8762,7 @@ class ResendSessionMessage extends DataClass
           $mrjc(sessionId.hashCode,
               $mrjc(status.hashCode, createdAt.hashCode)))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ResendSessionMessage &&
           other.messageId == this.messageId &&
@@ -9008,20 +8986,18 @@ class SentSessionSenderKey extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return SentSessionSenderKey(
-      conversationId: stringType
+      conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      sessionId: stringType
+      sessionId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}session_id'])!,
-      sentToServer: intType
+      sentToServer: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sent_to_server'])!,
-      senderKeyId: intType
+      senderKeyId: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sender_key_id']),
-      createdAt: SentSessionSenderKeys.$converter0.mapToDart(intType
+      createdAt: SentSessionSenderKeys.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
     );
   }
@@ -9120,7 +9096,7 @@ class SentSessionSenderKey extends DataClass
               $mrjc(sentToServer.hashCode,
                   $mrjc(senderKeyId.hashCode, createdAt.hashCode))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SentSessionSenderKey &&
           other.conversationId == this.conversationId &&
@@ -9377,23 +9353,22 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
   factory StickerAlbum.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return StickerAlbum(
-      albumId: stringType
+      albumId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}album_id'])!,
-      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      iconUrl: stringType
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+      iconUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}icon_url'])!,
-      createdAt: StickerAlbums.$converter0.mapToDart(intType
+      createdAt: StickerAlbums.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      updateAt: StickerAlbums.$converter1.mapToDart(intType
+      updateAt: StickerAlbums.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}update_at']))!,
-      userId: stringType
+      userId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      category: stringType
+      category: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}category'])!,
-      description: stringType
+      description: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
     );
   }
@@ -9507,7 +9482,7 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
                       $mrjc(userId.hashCode,
                           $mrjc(category.hashCode, description.hashCode))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is StickerAlbum &&
           other.albumId == this.albumId &&
@@ -9803,11 +9778,10 @@ class StickerRelationship extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
     return StickerRelationship(
-      albumId: stringType
+      albumId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}album_id'])!,
-      stickerId: stringType
+      stickerId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sticker_id'])!,
     );
   }
@@ -9860,7 +9834,7 @@ class StickerRelationship extends DataClass
   @override
   int get hashCode => $mrjf($mrjc(albumId.hashCode, stickerId.hashCode));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is StickerRelationship &&
           other.albumId == this.albumId &&
@@ -10011,25 +9985,24 @@ class Sticker extends DataClass implements Insertable<Sticker> {
   factory Sticker.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final intType = db.typeSystem.forDartType<int>();
     return Sticker(
-      stickerId: stringType
+      stickerId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sticker_id'])!,
-      albumId: stringType
+      albumId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}album_id']),
-      name: stringType.mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      assetUrl: stringType
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+      assetUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_url'])!,
-      assetType: stringType
+      assetType: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_type'])!,
-      assetWidth: intType
+      assetWidth: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_width'])!,
-      assetHeight: intType
+      assetHeight: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_height'])!,
-      createdAt: Stickers.$converter0.mapToDart(intType
+      createdAt: Stickers.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      lastUseAt: Stickers.$converter1.mapToDart(intType
+      lastUseAt: Stickers.$converter1.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}last_use_at'])),
     );
   }
@@ -10160,7 +10133,7 @@ class Sticker extends DataClass implements Insertable<Sticker> {
                               $mrjc(createdAt.hashCode,
                                   lastUseAt.hashCode)))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Sticker &&
           other.stickerId == this.stickerId &&
@@ -10683,7 +10656,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(
-        'SELECT u.* FROM participants p, users u\n        WHERE u.user_id != :id\n        AND p.conversation_id = :conversationId AND p.user_id = u.user_id\n        AND (u.full_name LIKE \'%\' || :username || \'%\'  ESCAPE \'\\\' OR u.identity_number like \'%\' || :identityNumber || \'%\'  ESCAPE \'\\\')\n        ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC',
+        'SELECT u.* FROM participants p, users u\n        WHERE u.user_id != :id\n        AND p.conversation_id = :conversationId AND p.user_id = u.user_id\n        AND (u.full_name LIKE \'%\' || :username || \'%\'  ESCAPE \'\\\\\' OR u.identity_number like \'%\' || :identityNumber || \'%\'  ESCAPE \'\\\\\')\n        ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(conversationId),
@@ -10720,10 +10693,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         readsFrom: {users}).map(users.mapFromRow);
   }
 
+  Selectable<String> userIdsByIn(List<String> userIds) {
+    var $arrayStartIndex = 1;
+    final expandeduserIds = $expandVar($arrayStartIndex, userIds.length);
+    $arrayStartIndex += userIds.length;
+    return customSelect(
+        'SELECT user_id FROM users WHERE user_id IN ($expandeduserIds)',
+        variables: [for (var $ in userIds) Variable<String>($)],
+        readsFrom: {users}).map((QueryRow row) => row.read<String>('user_id'));
+  }
+
   Selectable<User> fuzzySearchUser(
       String id, String username, String identityNumber) {
     return customSelect(
-        'SELECT *\nFROM   users\nWHERE  user_id != :id\n       AND relationship = \'FRIEND\'\n       AND ( full_name LIKE \'%\'\n                            || :username\n                            || \'%\' ESCAPE \'\\\'\n              OR identity_number LIKE \'%\'\n                                      || :identityNumber\n                                      || \'%\' ESCAPE \'\\\' )\nORDER  BY full_name = :username COLLATE nocase\n           OR identity_number = :identityNumber COLLATE nocase DESC',
+        'SELECT *\nFROM   users\nWHERE  user_id != :id\n       AND relationship = \'FRIEND\'\n       AND ( full_name LIKE \'%\'\n                            || :username\n                            || \'%\' ESCAPE \'\\\\\'\n              OR identity_number LIKE \'%\'\n                                      || :identityNumber\n                                      || \'%\' ESCAPE \'\\\\\' )\nORDER  BY full_name = :username COLLATE nocase\n           OR identity_number = :identityNumber COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
@@ -11312,7 +11295,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id      AS messageId,\n       m.conversation_id AS conversationId,\n       u.user_id         AS userId,\n       u.user_id         AS senderId,\n       u.full_name       AS senderFullName,\n       m.category        AS type,\n       m.content         AS content,\n       m.status          AS status,\n       c.name            AS groupName,\n       u.relationship    AS relationship,\n       c.mute_until      AS muteUntil,\n       ou.mute_until      AS ownerMuteUntil,\n       m.created_at      AS createdAt,\n       c.category        AS category\nFROM   messages m\n       INNER JOIN users u\n               ON m.user_id = u.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users ou\n              ON c.owner_id = ou.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        'SELECT m.message_id                 AS messageId,\n       m.conversation_id            AS conversationId,\n       sender.user_id               AS senderId,\n       sender.full_name             AS senderFullName,\n       m.category                   AS type,\n       m.content                    AS content,\n       m.status                     AS status,\n       c.name                       AS groupName,\n       c.mute_until                 AS muteUntil,\n       conversationOwner.mute_until AS ownerMuteUntil,\n       conversationOwner.user_id    AS ownerUserId,\n       conversationOwner.full_name  AS ownerFullName,\n       m.created_at                 AS createdAt,\n       c.category                   AS category\nFROM   messages m\n       INNER JOIN users sender\n               ON m.user_id = sender.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users conversationOwner\n              ON c.owner_id = conversationOwner.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11325,19 +11308,18 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return NotificationMessage(
         messageId: row.read<String>('messageId'),
         conversationId: row.read<String>('conversationId'),
-        userId: row.read<String>('userId'),
         senderId: row.read<String>('senderId'),
         senderFullName: row.read<String?>('senderFullName'),
         type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
         content: row.read<String?>('content'),
         status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
         groupName: row.read<String?>('groupName'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
         muteUntil:
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
+        ownerUserId: row.read<String>('ownerUserId'),
+        ownerFullName: row.read<String?>('ownerFullName'),
         createdAt: Messages.$converter3.mapToDart(row.read<int>('createdAt'))!,
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -12679,7 +12661,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName,\n        ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl,\n        ou.is_verified AS isVerified, ou.app_id AS appId\n        FROM conversations c\n        INNER JOIN users ou ON ou.user_id = c.owner_id\n        LEFT JOIN messages m ON c.last_message_id = m.message_id\n        WHERE (c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\')\n        OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n            AND (ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\'\n                OR ou.identity_number like \'%\' || :query || \'%\' ESCAPE \'\\\'))\n        ORDER BY\n            (c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)\n                OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n                    AND (ou.full_name = :query COLLATE NOCASE\n                        OR ou.identity_number = :query COLLATE NOCASE)) DESC,\n            c.pin_time DESC,\n            m.created_at DESC',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName,\n        ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl,\n        ou.is_verified AS isVerified, ou.app_id AS appId\n        FROM conversations c\n        INNER JOIN users ou ON ou.user_id = c.owner_id\n        LEFT JOIN messages m ON c.last_message_id = m.message_id\n        WHERE (c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\\\')\n        OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n            AND (ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\\\'\n                OR ou.identity_number like \'%\' || :query || \'%\' ESCAPE \'\\\\\'))\n        ORDER BY\n            (c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)\n                OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n                    AND (ou.full_name = :query COLLATE NOCASE\n                        OR ou.identity_number = :query COLLATE NOCASE)) DESC,\n            c.pin_time DESC,\n            m.created_at DESC',
         variables: [Variable<String>(query)],
         readsFrom: {conversations, users, messages}).map((QueryRow row) {
       return SearchConversationItem(
@@ -12921,7 +12903,7 @@ class ConversationCircleItem {
           $mrjc(createdAt.hashCode,
               $mrjc(count.hashCode, unseenMessageCount.hashCode)))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationCircleItem &&
           other.circleId == this.circleId &&
@@ -12955,7 +12937,7 @@ class ConversationCircleManagerItem {
   int get hashCode =>
       $mrjf($mrjc(circleId.hashCode, $mrjc(name.hashCode, count.hashCode)));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationCircleManagerItem &&
           other.circleId == this.circleId &&
@@ -12987,7 +12969,7 @@ class ParticipantSessionKey {
   int get hashCode => $mrjf($mrjc(conversationId.hashCode,
       $mrjc(userId.hashCode, $mrjc(sessionId.hashCode, publicKey.hashCode))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ParticipantSessionKey &&
           other.conversationId == this.conversationId &&
@@ -13163,7 +13145,7 @@ class MessageItem {
                                                                               thumbUrl.hashCode,
                                                                               $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(participantFullName.hashCode, $mrjc(actionName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetId.hashCode, $mrjc(assetIcon.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(mentions.hashCode, $mrjc(mentionRead.hashCode, $mrjc(groupName.hashCode, $mrjc(relationship.hashCode, $mrjc(participantRelationship.hashCode, avatarUrl.hashCode))))))))))))))))))))))))))))))))))))))))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageItem &&
           other.messageId == this.messageId &&
@@ -13394,7 +13376,7 @@ class SendingMessage {
                                                                               action.hashCode,
                                                                               $mrjc(participantId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(hyperlink.hashCode, $mrjc(name.hashCode, $mrjc(albumId.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mediaWaveform.hashCode, $mrjc(quoteMessageId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(resendStatus.hashCode, $mrjc(resendUserId.hashCode, resendSessionId.hashCode))))))))))))))))))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SendingMessage &&
           other.messageId == this.messageId &&
@@ -13590,7 +13572,7 @@ class QuoteMessageItem {
                                                                               thumbUrl.hashCode,
                                                                               $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, mentions.hashCode))))))))))))))))))))))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is QuoteMessageItem &&
           other.messageId == this.messageId &&
@@ -13726,7 +13708,7 @@ class SearchMessageDetailItem {
                                               conversationId
                                                   .hashCode))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SearchMessageDetailItem &&
           other.messageId == this.messageId &&
@@ -13764,31 +13746,31 @@ class SearchMessageDetailItem {
 class NotificationMessage {
   final String messageId;
   final String conversationId;
-  final String userId;
   final String senderId;
   final String? senderFullName;
   final MessageCategory type;
   final String? content;
   final MessageStatus status;
   final String? groupName;
-  final UserRelationship? relationship;
   final DateTime? muteUntil;
   final DateTime? ownerMuteUntil;
+  final String ownerUserId;
+  final String? ownerFullName;
   final DateTime createdAt;
   final ConversationCategory? category;
   NotificationMessage({
     required this.messageId,
     required this.conversationId,
-    required this.userId,
     required this.senderId,
     this.senderFullName,
     required this.type,
     this.content,
     required this.status,
     this.groupName,
-    this.relationship,
     this.muteUntil,
     this.ownerMuteUntil,
+    required this.ownerUserId,
+    this.ownerFullName,
     required this.createdAt,
     this.category,
   });
@@ -13798,45 +13780,45 @@ class NotificationMessage {
       $mrjc(
           conversationId.hashCode,
           $mrjc(
-              userId.hashCode,
+              senderId.hashCode,
               $mrjc(
-                  senderId.hashCode,
+                  senderFullName.hashCode,
                   $mrjc(
-                      senderFullName.hashCode,
+                      type.hashCode,
                       $mrjc(
-                          type.hashCode,
+                          content.hashCode,
                           $mrjc(
-                              content.hashCode,
+                              status.hashCode,
                               $mrjc(
-                                  status.hashCode,
+                                  groupName.hashCode,
                                   $mrjc(
-                                      groupName.hashCode,
+                                      muteUntil.hashCode,
                                       $mrjc(
-                                          relationship.hashCode,
+                                          ownerMuteUntil.hashCode,
                                           $mrjc(
-                                              muteUntil.hashCode,
+                                              ownerUserId.hashCode,
                                               $mrjc(
-                                                  ownerMuteUntil.hashCode,
+                                                  ownerFullName.hashCode,
                                                   $mrjc(
                                                       createdAt.hashCode,
                                                       category
                                                           .hashCode))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is NotificationMessage &&
           other.messageId == this.messageId &&
           other.conversationId == this.conversationId &&
-          other.userId == this.userId &&
           other.senderId == this.senderId &&
           other.senderFullName == this.senderFullName &&
           other.type == this.type &&
           other.content == this.content &&
           other.status == this.status &&
           other.groupName == this.groupName &&
-          other.relationship == this.relationship &&
           other.muteUntil == this.muteUntil &&
           other.ownerMuteUntil == this.ownerMuteUntil &&
+          other.ownerUserId == this.ownerUserId &&
+          other.ownerFullName == this.ownerFullName &&
           other.createdAt == this.createdAt &&
           other.category == this.category);
   @override
@@ -13844,16 +13826,16 @@ class NotificationMessage {
     return (StringBuffer('NotificationMessage(')
           ..write('messageId: $messageId, ')
           ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
           ..write('senderId: $senderId, ')
           ..write('senderFullName: $senderFullName, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('status: $status, ')
           ..write('groupName: $groupName, ')
-          ..write('relationship: $relationship, ')
           ..write('muteUntil: $muteUntil, ')
           ..write('ownerMuteUntil: $ownerMuteUntil, ')
+          ..write('ownerUserId: $ownerUserId, ')
+          ..write('ownerFullName: $ownerFullName, ')
           ..write('createdAt: $createdAt, ')
           ..write('category: $category')
           ..write(')'))
@@ -13974,7 +13956,7 @@ class ConversationItem {
                                                                               contentType.hashCode,
                                                                               $mrjc(createdAt.hashCode, $mrjc(lastMessageCreatedAt.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, $mrjc(mentions.hashCode, relationship.hashCode))))))))))))))))))))))))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationItem &&
           other.conversationId == this.conversationId &&
@@ -14092,7 +14074,7 @@ class SearchConversationItem {
                                   $mrjc(isVerified.hashCode,
                                       appId.hashCode))))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SearchConversationItem &&
           other.conversationId == this.conversationId &&
@@ -14162,7 +14144,7 @@ class ConversationStorageUsage {
                               $mrjc(avatarUrl.hashCode,
                                   isVerified.hashCode)))))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationStorageUsage &&
           other.conversationId == this.conversationId &&

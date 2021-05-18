@@ -169,27 +169,27 @@ SELECT count(*) FROM messages WHERE conversation_id = :conversationId
         ORDER BY created_at DESC, rowid DESC;
 
 notificationMessage AS NotificationMessage:
-SELECT m.message_id      AS messageId,
-       m.conversation_id AS conversationId,
-       u.user_id         AS userId,
-       u.user_id         AS senderId,
-       u.full_name       AS senderFullName,
-       m.category        AS type,
-       m.content         AS content,
-       m.status          AS status,
-       c.name            AS groupName,
-       u.relationship    AS relationship,
-       c.mute_until      AS muteUntil,
-       ou.mute_until      AS ownerMuteUntil,
-       m.created_at      AS createdAt,
-       c.category        AS category
+SELECT m.message_id                 AS messageId,
+       m.conversation_id            AS conversationId,
+       sender.user_id               AS senderId,
+       sender.full_name             AS senderFullName,
+       m.category                   AS type,
+       m.content                    AS content,
+       m.status                     AS status,
+       c.name                       AS groupName,
+       c.mute_until                 AS muteUntil,
+       conversationOwner.mute_until AS ownerMuteUntil,
+       conversationOwner.user_id    AS ownerUserId,
+       conversationOwner.full_name  AS ownerFullName,
+       m.created_at                 AS createdAt,
+       c.category                   AS category
 FROM   messages m
-       INNER JOIN users u
-               ON m.user_id = u.user_id
+       INNER JOIN users sender
+               ON m.user_id = sender.user_id
        LEFT JOIN conversations c
               ON m.conversation_id = c.conversation_id
-       LEFT JOIN users ou
-              ON c.owner_id = ou.user_id
+       LEFT JOIN users conversationOwner
+              ON c.owner_id = conversationOwner.user_id
        LEFT JOIN message_mentions mm
               ON m.message_id = mm.message_id
 WHERE  m.message_id = :messageId

@@ -34,7 +34,7 @@ class NotificationService extends WidgetsBindingObserver {
             return true;
           })
           .where(
-              (event) => event.userId != context.read<AccountServer>().userId)
+              (event) => event.senderId != context.read<AccountServer>().userId)
           .where((event) {
             final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
@@ -46,7 +46,7 @@ class NotificationService extends WidgetsBindingObserver {
           .asyncMap((event) async {
             final name = conversationValidName(
               event.groupName,
-              event.senderFullName,
+              event.ownerFullName,
             );
 
             String? body;
@@ -58,6 +58,10 @@ class NotificationService extends WidgetsBindingObserver {
                 false,
               ))
                   .item2;
+            if ((body?.isNotEmpty ?? false) &&
+                (event.category == ConversationCategory.group ||
+                    event.senderId != event.ownerUserId))
+              body = '${event.senderFullName} : $body';
 
             await showNotification(
               title: name,

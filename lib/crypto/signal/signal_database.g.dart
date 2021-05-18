@@ -26,23 +26,21 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   factory Identitie.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final intType = db.typeSystem.forDartType<int>();
-    final stringType = db.typeSystem.forDartType<String>();
-    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return Identitie(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      address: stringType
+      id: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      address: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}address'])!,
-      registrationId: intType
+      registrationId: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}registration_id']),
-      publicKey: uint8ListType
+      publicKey: const BlobType()
           .mapFromDatabaseResponse(data['${effectivePrefix}public_key'])!,
-      privateKey: uint8ListType
+      privateKey: const BlobType()
           .mapFromDatabaseResponse(data['${effectivePrefix}private_key']),
-      nextPrekeyId: intType
+      nextPrekeyId: const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}next_prekey_id']),
-      timestamp:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
+      timestamp: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
     );
   }
   @override
@@ -152,7 +150,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
                   $mrjc(privateKey.hashCode,
                       $mrjc(nextPrekeyId.hashCode, timestamp.hashCode)))))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Identitie &&
           other.id == this.id &&
@@ -418,13 +416,12 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   factory Prekey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final intType = db.typeSystem.forDartType<int>();
-    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return Prekey(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      prekeyId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id'])!,
-      record: uint8ListType
+      id: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      prekeyId: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}prekey_id'])!,
+      record: const BlobType()
           .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
     );
   }
@@ -483,7 +480,7 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   int get hashCode =>
       $mrjf($mrjc(id.hashCode, $mrjc(prekeyId.hashCode, record.hashCode)));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Prekey &&
           other.id == this.id &&
@@ -641,16 +638,15 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
   factory SignedPrekey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final intType = db.typeSystem.forDartType<int>();
-    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return SignedPrekey(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      prekeyId:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}prekey_id'])!,
-      record: uint8ListType
+      id: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      prekeyId: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}prekey_id'])!,
+      record: const BlobType()
           .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
-      timestamp:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
+      timestamp: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
     );
   }
   @override
@@ -716,7 +712,7 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
   int get hashCode => $mrjf($mrjc(id.hashCode,
       $mrjc(prekeyId.hashCode, $mrjc(record.hashCode, timestamp.hashCode))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SignedPrekey &&
           other.id == this.id &&
@@ -904,19 +900,17 @@ class Session extends DataClass implements Insertable<Session> {
   factory Session.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final intType = db.typeSystem.forDartType<int>();
-    final stringType = db.typeSystem.forDartType<String>();
-    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return Session(
-      id: intType.mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      address: stringType
+      id: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      address: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}address'])!,
-      device:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}device'])!,
-      record: uint8ListType
+      device: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}device'])!,
+      record: const BlobType()
           .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
-      timestamp:
-          intType.mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
+      timestamp: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}timestamp'])!,
     );
   }
   @override
@@ -994,7 +988,7 @@ class Session extends DataClass implements Insertable<Session> {
       $mrjc(address.hashCode,
           $mrjc(device.hashCode, $mrjc(record.hashCode, timestamp.hashCode)))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Session &&
           other.id == this.id &&
@@ -1203,14 +1197,12 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   factory SenderKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
-    final uint8ListType = db.typeSystem.forDartType<Uint8List>();
     return SenderKey(
-      groupId: stringType
+      groupId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}group_id'])!,
-      senderId: stringType
+      senderId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sender_id'])!,
-      record: uint8ListType
+      record: const BlobType()
           .mapFromDatabaseResponse(data['${effectivePrefix}record'])!,
     );
   }
@@ -1270,7 +1262,7 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   int get hashCode =>
       $mrjf($mrjc(groupId.hashCode, $mrjc(senderId.hashCode, record.hashCode)));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SenderKey &&
           other.groupId == this.groupId &&
@@ -1439,17 +1431,16 @@ class RatchetSenderKey extends DataClass
       Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    final stringType = db.typeSystem.forDartType<String>();
     return RatchetSenderKey(
-      groupId: stringType
+      groupId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}group_id'])!,
-      senderId: stringType
+      senderId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}sender_id'])!,
-      status:
-          stringType.mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
-      messageId: stringType
+      status: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}status'])!,
+      messageId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}message_id']),
-      createdAt: stringType
+      createdAt: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])!,
     );
   }
@@ -1534,7 +1525,7 @@ class RatchetSenderKey extends DataClass
           $mrjc(status.hashCode,
               $mrjc(messageId.hashCode, createdAt.hashCode)))));
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RatchetSenderKey &&
           other.groupId == this.groupId &&
