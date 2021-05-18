@@ -58,9 +58,12 @@ class MessageItemWidget extends StatelessWidget {
 
     final showNip = !(sameUserNext && sameDayNext);
     final datetime = sameDayPrev ? null : message.createdAt;
-    final user = !isCurrentUser && (!sameUserPrev || !sameDayPrev)
-        ? message.userFullName
-        : null;
+    String? userName;
+    String? userId;
+    if (!isCurrentUser && (!sameUserPrev || !sameDayPrev)) {
+      userName = message.userFullName;
+      userId = message.userId;
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -83,7 +86,8 @@ class MessageItemWidget extends StatelessWidget {
               );
 
             return _MessageBubbleMargin(
-              userName: user,
+              userName: userName,
+              userId: userId,
               isCurrentUser: isCurrentUser,
               buildMenus: () => [
                 if (message.type.isText ||
@@ -256,12 +260,14 @@ class _MessageBubbleMargin extends StatelessWidget {
     Key? key,
     required this.isCurrentUser,
     required this.userName,
+    required this.userId,
     required this.builder,
     required this.buildMenus,
   }) : super(key: key);
 
   final bool isCurrentUser;
   final String? userName;
+  final String? userId;
   final WidgetBuilder builder;
   final List<ContextMenu> Function() buildMenus;
 
@@ -276,7 +282,8 @@ class _MessageBubbleMargin extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (userName != null) MessageName(userName: userName!),
+            if (userName != null && userId != null)
+              MessageName(userName: userName!, userId: userId!),
             ContextMenuPortalEntry(
               buildMenus: buildMenus,
               child: Builder(builder: builder),
