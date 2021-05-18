@@ -20,7 +20,7 @@ class SignalKeyRequest {
     signedPreKey = SignedPreKey(spk.id, publicBase64, signatureBase64);
     if (preKeyRecords != null) {
       oneTimePreKeys = <OneTimePreKey>[];
-      preKeyRecords.map((e) => oneTimePreKeys.add(OneTimePreKey(
+      preKeyRecords.forEach((e) => oneTimePreKeys.add(OneTimePreKey(
           e.id, base64.encode(e.getKeyPair().publicKey.serialize()))));
     }
   }
