@@ -79,7 +79,6 @@ class SettingPage extends StatelessWidget {
                       try {
                         final accountServer = context.read<AccountServer>();
                         await accountServer.signOutAndClear();
-                        await accountServer.client.accountApi.logout();
                       } catch (e) {
                         if (e is! MixinApiError) rethrow;
                       }

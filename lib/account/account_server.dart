@@ -565,6 +565,7 @@ class AccountServer {
   }
 
   Future<void> signOutAndClear() async {
+    await client.accountApi.logout(LogoutRequest(sessionId));
     await PrivacyKeyValue.get.delete();
     await CryptoKeyValue.get.delete();
     await SignalDatabase.get.clear();

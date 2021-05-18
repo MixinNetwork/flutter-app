@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
@@ -19,7 +17,7 @@ Future checkSignalKey(Client client) async {
 
 Future<MixinResponse<void>> refreshSignalKeys(Client client) async {
   final keys = await generateKeys();
-  return client.accountApi.pushSignalKeys(json.encode(keys.toJson()));
+  return client.accountApi.pushSignalKeys(keys.toJson());
 }
 
 Future<SignalKeyRequest> generateKeys() async {

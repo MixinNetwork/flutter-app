@@ -106,6 +106,7 @@ class SignalProtocol {
     final address = SignalProtocolAddress(senderId, sessionId.getDeviceId());
     final sessionCipher =
         SessionCipher.fromStore(mixinSignalProtocolStore, address);
+    debugPrint('decrypt category: $category, dataType: $dataType');
     if (category == MessageCategory.signalKey.toString()) {
       if (dataType == CiphertextMessage.PREKEY_TYPE) {
         sessionCipher.decryptWithCallback(PreKeySignalMessage(cipherText),
