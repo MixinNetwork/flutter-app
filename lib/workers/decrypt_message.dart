@@ -213,9 +213,12 @@ class DecryptMessage extends Injector {
           plainJsonMessage.ackMessages?.isNotEmpty == true) {
         await _markMessageStatus(plainJsonMessage.ackMessages!);
       } else if (plainJsonMessage.action == resendMessages) {
-        // todo
+        await _processResendMessage(data, plainJsonMessage);
       } else if (plainJsonMessage.action == resendKey) {
-        // todo
+        if (await _signalProtocol.containsUserSession(data.userId)) {
+          unawaited(_sender.sendProcessSignalKey(
+              data, ProcessSignalKeyAction.resendKey));
+        }
       }
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
@@ -249,6 +252,51 @@ class DecryptMessage extends Injector {
     } catch (e) {
       // todo
       debugPrint(e.toString());
+    }
+  }
+
+  Future<void> _processResendMessage(
+      BlazeMessageData data, PlainJsonMessage plainData) async {
+    final messages = plainData.messages;
+    if (messages == null) {
+      return;
+    }
+    final p = await database.participantsDao
+        .findParticipantById(data.conversationId, data.userId);
+    if (p == null) {
+      return;
+    }
+    for (final id in messages) {
+      final resendMessage = await database.resendSessionMessagesDao
+          .findResendMessage(data.userId, data.sessionId, id);
+      if (resendMessage != null) {
+        continue;
+      }
+      final needResendMessage = await database.messagesDao
+          .findMessageByMessageIdAndUserId(id, accountId);
+      if (needResendMessage == null ||
+          needResendMessage.category == MessageCategory.messageRecall) {
+        await database.resendSessionMessagesDao.insert(ResendSessionMessage(
+            messageId: id,
+            userId: data.userId,
+            sessionId: data.sessionId,
+            status: 0,
+            createdAt: DateTime.now()));
+        continue;
+      }
+      if (p.createdAt.isAfter(needResendMessage.createdAt)) {
+        continue;
+      }
+      final newResendMessage =
+          needResendMessage.copyWith(messageId: const Uuid().v4());
+      await database.resendSessionMessagesDao.insert(ResendSessionMessage(
+          messageId: id,
+          userId: data.userId,
+          sessionId: data.sessionId,
+          status: 1,
+          createdAt: DateTime.now()));
+      await database.jobsDao
+          .insertSendingJob(newResendMessage.messageId, data.conversationId);
     }
   }
 

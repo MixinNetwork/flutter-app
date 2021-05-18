@@ -240,6 +240,13 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<Message?> findMessageByMessageId(String messageId) =>
       db.findMessageByMessageId(messageId).getSingleOrNull();
 
+  Future<Message?> findMessageByMessageIdAndUserId(
+          String messageId, String userId) =>
+      (select(db.messages)
+            ..where(
+                (r) => r.messageId.equals(messageId) & r.userId.equals(userId)))
+          .getSingleOrNull();
+
   Future<List<String>> findFailedMessages(
           String conversationId, String userId) async =>
       db

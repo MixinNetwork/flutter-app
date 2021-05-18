@@ -114,6 +114,30 @@ class Sender {
   Future<void> _sleep(int seconds) async =>
       Future.delayed(Duration(seconds: seconds));
 
+  Future<bool> checkSignalSession(String recipientId, String sessionId) async {
+    if (!await signalProtocol.containsSession(recipientId,
+        deviceId: sessionId.getDeviceId())) {
+      final requestKeys = <BlazeMessageParamSession>[
+        BlazeMessageParamSession(userId: recipientId, sessionId: sessionId)
+      ];
+      final blazeMessage = createConsumeSessionSignalKeys(
+          createConsumeSignalKeysParam(requestKeys));
+      final data = (await signalKeysChannel(blazeMessage))?.data;
+      if (data == null) {
+        return false;
+      }
+      final keys = List<SignalKey>.from(
+          (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
+      if (keys.isNotEmpty && keys.isNotEmpty) {
+        final preKeyBundle = keys[0].createPreKeyBundle();
+        await signalProtocol.processSession(recipientId, preKeyBundle);
+      } else {
+        return false;
+      }
+    }
+    return true;
+  }
+
   Future checkSessionSenderKey(String conversationId) async {
     final participants = await database.participantSessionDao
         .getNotSendSessionParticipants(conversationId, sessionId);

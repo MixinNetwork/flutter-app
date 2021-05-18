@@ -8,6 +8,7 @@ import 'dao/message_mentions_dao.dart';
 import 'dao/messages_dao.dart';
 import 'dao/participant_session_dao.dart';
 import 'dao/participants_dao.dart';
+import 'dao/resend_session_messages_dao.dart';
 import 'dao/sticker_albums_dao.dart';
 import 'dao/sticker_relationships_dao.dart';
 import 'dao/stickers_dao.dart';
@@ -30,6 +31,7 @@ class Database {
     stickerAlbumsDao = StickerAlbumsDao(mixinDatabase);
     stickerRelationshipsDao = StickerRelationshipsDao(mixinDatabase);
     participantSessionDao = ParticipantSessionDao(mixinDatabase);
+    resendSessionMessagesDao = ResendSessionMessagesDao(mixinDatabase);
   }
 
   // static MixinDatabase _database;
@@ -66,6 +68,8 @@ class Database {
   late final StickerAlbumsDao stickerAlbumsDao;
 
   late final StickerRelationshipsDao stickerRelationshipsDao;
+
+  late final ResendSessionMessagesDao resendSessionMessagesDao;
 
   Future<void> dispose() async {
     await mixinDatabase.eventBus.dispose();

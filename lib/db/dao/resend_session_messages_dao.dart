@@ -13,7 +13,17 @@ class ResendSessionMessagesDao extends DatabaseAccessor<MixinDatabase>
       into(db.resendSessionMessages)
           .insertOnConflictUpdate(resendSessionMessage);
 
-  Future deleteResendSessionMessage(
-          ResendSessionMessage resendSessionMessage) =>
-      delete(db.resendSessionMessages).delete(resendSessionMessage);
+  Future<int> deleteResendSessionMessageById(String messageId) =>
+      (delete(db.resendSessionMessages)
+            ..where((tbl) => tbl.messageId.equals(messageId)))
+          .go();
+
+  Future<ResendSessionMessage?> findResendMessage(
+          String userId, String sessionId, String messageId) async =>
+      (select(db.resendSessionMessages)
+            ..where((tbl) =>
+                tbl.userId.equals(userId) &
+                tbl.sessionId.equals(sessionId) &
+                tbl.messageId.equals(messageId)))
+          .getSingleOrNull();
 }

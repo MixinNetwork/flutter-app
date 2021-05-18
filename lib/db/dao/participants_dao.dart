@@ -25,6 +25,14 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
   Stream<List<ParticipantUser>> watchParticipants(String conversationId) =>
       db.getGroupParticipants(conversationId).watch();
 
+  Future<Participant?> findParticipantById(
+          String conversationId, String userId) async =>
+      (select(db.participants)
+            ..where((tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.userId.equals(userId)))
+          .getSingleOrNull();
+
   Future<void> insertAll(List<Participant> add) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.participants, add);
       });

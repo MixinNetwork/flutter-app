@@ -285,14 +285,7 @@ class AccountServer {
             message, await base64EncodeWithIsolate(content));
         result = await _sender.deliverNoThrow(blazeMessage);
       } else if (message.category.isSignal) {
-        // TODO check resend data
-        if (!await signalProtocol.isExistSenderKey(
-            message.conversationId, message.userId)) {
-          await _sender.checkConversation(message.conversationId);
-        }
-        await _sender.checkSessionSenderKey(message.conversationId);
-        result =
-            await _sender.deliverNoThrow(await encryptNormalMessage(message));
+        result = await _sendSignalMessage(message);
       } else {}
 
       if (result?.success ?? false) {
@@ -305,6 +298,30 @@ class AccountServer {
     });
 
     await Future.wait(futures);
+  }
+
+  Future<MessageResult?> _sendSignalMessage(db.SendingMessage message) async {
+    MessageResult? result;
+    if (message.resendStatus != null) {
+      if (message.resendStatus == 1) {
+        if (await _sender.checkSignalSession(
+            message.resendUserId!, message.resendSessionId!)) {
+          result =
+              await _sender.deliverNoThrow(await encryptNormalMessage(message));
+          if (result.success) {
+            await database.resendSessionMessagesDao
+                .deleteResendSessionMessageById(message.messageId);
+          }
+        }
+      }
+      return result;
+    }
+    if (!await signalProtocol.isExistSenderKey(
+        message.conversationId, message.userId)) {
+      await _sender.checkConversation(message.conversationId);
+    }
+    await _sender.checkSessionSenderKey(message.conversationId);
+    return _sender.deliverNoThrow(await encryptNormalMessage(message));
   }
 
   Future<BlazeMessage> encryptNormalMessage(db.SendingMessage message) async =>
