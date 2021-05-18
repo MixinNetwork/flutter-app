@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -89,7 +90,7 @@ class AccountServer {
           },
         ),
       ],
-      level: Level.ALL,
+      httpLogLevel: kReleaseMode ? HttpLogLevel.none : HttpLogLevel.all,
     );
     await _initDatabase(privateKey, multiAuthCubit);
 
