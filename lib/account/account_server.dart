@@ -8,7 +8,6 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
@@ -489,8 +488,13 @@ class AccountServer {
     }
   }
 
-  Future<bool> _checkSignalSession(String recipientId,
-      {String? senderId}) async {
+  // todo
+  // ignore: unused_element
+  Future<bool> _checkSignalSession(
+    String recipientId, {
+    // ignore: unused_element
+    String? senderId,
+  }) async {
     if (!await signalProtocol.containsSession(recipientId,
         deviceId: sessionId.getDeviceId())) {
       final blazeMessage = createConsumeSessionSignalKeys(
