@@ -65,7 +65,7 @@ class Blaze {
       _host,
       protocols: ['Mixin-Blaze-1'],
       headers: {'Authorization': 'Bearer $token'},
-      pingInterval: const Duration(seconds: 2),
+      pingInterval: const Duration(seconds: 4),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
@@ -243,7 +243,6 @@ class Blaze {
       _disconnect();
       await client.accountApi.getMe();
       debugPrint('http ping');
-      await Future.delayed(const Duration(seconds: 2));
       _reconnecting = false;
       debugPrint('reconnecting set false, ${StackTrace.current}');
       connect();
