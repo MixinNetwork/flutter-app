@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
@@ -130,8 +131,8 @@ class MessageItemWidget extends StatelessWidget {
                       if (result.isEmpty) return;
                       await context.read<AccountServer>().forwardMessage(
                             message.messageId,
+                            isPlain(result.first.isGroup, result.first.isBot),
                             conversationId: result.first.conversationId,
-                            isPlain: result.first.isBot,
                           );
                     },
                   ),

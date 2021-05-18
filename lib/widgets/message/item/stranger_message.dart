@@ -67,7 +67,7 @@ class StrangerMessage extends StatelessWidget {
               onTap: () {
                 if (isBotConversation)
                   Provider.of<AccountServer>(context, listen: false)
-                      .sendTextMessage('Hi',
+                      .sendTextMessage('Hi', true,
                           conversationId: message.conversationId);
                 else
                   context.read<AccountServer>().addUser(message.userId);

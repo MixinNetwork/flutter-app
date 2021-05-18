@@ -174,17 +174,11 @@ void _sendMessage(BuildContext context) {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
-  final bool isPlain;
-  if (conversationItem.isGroup!) {
-    isPlain = false;
-  } else {
-    isPlain = conversationItem.isBot!;
-  }
   context.read<AccountServer>().sendTextMessage(
         text,
+        conversationItem.isPlainConversation,
         conversationId: conversationItem.conversationId,
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
-        isPlain: isPlain,
       );
 
   context.read<QuoteMessageCubit>().emit(null);
@@ -365,15 +359,15 @@ class _FileButton extends StatelessWidget {
           if (file.isImage) {
             if ((await _PreviewImage.push(context, file)) != true) return;
             return Provider.of<AccountServer>(context, listen: false)
-                .sendImageMessage(file,
+                .sendImageMessage(file, conversationItem.isPlainConversation,
                     conversationId: conversationItem.conversationId);
           } else if (file.isVideo) {
             return Provider.of<AccountServer>(context, listen: false)
-                .sendVideoMessage(file,
+                .sendVideoMessage(file, conversationItem.isPlainConversation,
                     conversationId: conversationItem.conversationId);
           }
           await Provider.of<AccountServer>(context, listen: false)
-              .sendDataMessage(file,
+              .sendDataMessage(file, conversationItem.isPlainConversation,
                   conversationId: conversationItem.conversationId);
         },
       );

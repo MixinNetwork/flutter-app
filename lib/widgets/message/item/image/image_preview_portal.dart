@@ -4,6 +4,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/ui/home/bloc/conversation_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -264,8 +265,8 @@ class _Bar extends StatelessWidget {
               if (result.isEmpty) return;
               await accountServer.forwardMessage(
                 message.messageId,
+                isPlain(result.first.isGroup, result.first.isBot),
                 conversationId: result.first.conversationId,
-                isPlain: result.first.isBot,
               );
             },
           ),

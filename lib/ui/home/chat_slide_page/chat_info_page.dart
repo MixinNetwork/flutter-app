@@ -105,6 +105,7 @@ class ChatInfoPage extends HookWidget {
                         await accountServer.sendContactMessage(
                           conversation.userId!,
                           conversation.name!,
+                          conversation.isPlainConversation,
                           conversationId: conversationId,
                           recipientId: conversationId,
                         );

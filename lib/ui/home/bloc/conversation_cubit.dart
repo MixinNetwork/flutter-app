@@ -44,6 +44,8 @@ class ConversationState extends Equatable {
   UserRelationship? get relationship =>
       conversation?.relationship ?? user?.relationship;
 
+  bool get isPlainConversation => isPlain(isGroup!, isBot!);
+
   @override
   List<Object?> get props => [
         conversationId,
@@ -68,6 +70,16 @@ class ConversationState extends Equatable {
         conversation: conversation ?? this.conversation,
         user: user ?? this.user,
       );
+}
+
+bool isPlain(bool isGroup, bool isBot) {
+  bool isPlain;
+  if (isGroup) {
+    isPlain = false;
+  } else {
+    isPlain = isBot;
+  }
+  return isPlain;
 }
 
 class ConversationCubit extends SimpleCubit<ConversationState?>

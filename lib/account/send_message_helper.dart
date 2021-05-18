@@ -32,8 +32,8 @@ class SendMessageHelper {
   Future<void> sendTextMessage(
     String conversationId,
     String senderId,
+    bool isPlain,
     String content, {
-    bool isPlain = true,
     String? quoteMessageId,
   }) async {
     final category =
@@ -434,8 +434,8 @@ class SendMessageHelper {
       await sendTextMessage(
         conversationId,
         senderId,
+        isPlain,
         message.content!,
-        isPlain: isPlain,
       );
     } else if (message.category.isImage) {
       await sendImageMessage(

@@ -573,26 +573,25 @@ class AccountServer {
   }
 
   Future<void> sendTextMessage(
-    String content, {
+    String content,
+    bool isPlain, {
     String? conversationId,
     String? recipientId,
     String? quoteMessageId,
-    bool isPlain = true,
   }) async {
     if (content.isEmpty) return;
     await _sendMessageHelper.sendTextMessage(
       await _initConversation(conversationId, recipientId),
       userId,
+      isPlain,
       content,
-      isPlain: isPlain,
       quoteMessageId: quoteMessageId,
     );
   }
 
-  Future<void> sendImageMessage(XFile image,
+  Future<void> sendImageMessage(XFile image, bool isPlain,
           {String? conversationId,
           String? recipientId,
-          bool isPlain = true,
           String? quoteMessageId}) async =>
       _sendMessageHelper.sendImageMessage(
           await _initConversation(conversationId, recipientId),
@@ -601,10 +600,9 @@ class AccountServer {
           isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
           quoteMessageId);
 
-  Future<void> sendVideoMessage(XFile video,
+  Future<void> sendVideoMessage(XFile video, bool isPlain,
           {String? conversationId,
           String? recipientId,
-          bool isPlain = true,
           String? quoteMessageId}) async =>
       _sendMessageHelper.sendVideoMessage(
           await _initConversation(conversationId, recipientId),
@@ -613,10 +611,9 @@ class AccountServer {
           isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo,
           quoteMessageId);
 
-  Future<void> sendAudioMessage(XFile audio,
+  Future<void> sendAudioMessage(XFile audio, bool isPlain,
           {String? conversationId,
           String? recipientId,
-          bool isPlain = true,
           String? quoteMessageId}) async =>
       _sendMessageHelper.sendAudioMessage(
           await _initConversation(conversationId, recipientId),
@@ -625,10 +622,9 @@ class AccountServer {
           isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio,
           quoteMessageId);
 
-  Future<void> sendDataMessage(XFile file,
+  Future<void> sendDataMessage(XFile file, bool isPlain,
           {String? conversationId,
           String? recipientId,
-          bool isPlain = true,
           String? quoteMessageId}) async =>
       _sendMessageHelper.sendDataMessage(
           await _initConversation(conversationId, recipientId),
@@ -637,10 +633,12 @@ class AccountServer {
           isPlain ? MessageCategory.plainData : MessageCategory.signalData,
           quoteMessageId);
 
-  Future<void> sendStickerMessage(String stickerId,
-          {String? conversationId,
-          String? recipientId,
-          bool isPlain = true}) async =>
+  Future<void> sendStickerMessage(
+    String stickerId,
+    bool isPlain, {
+    String? conversationId,
+    String? recipientId,
+  }) async =>
       _sendMessageHelper.sendStickerMessage(
           await _initConversation(conversationId, recipientId),
           userId,
@@ -649,10 +647,10 @@ class AccountServer {
               ? MessageCategory.plainSticker
               : MessageCategory.signalSticker);
 
-  Future<void> sendContactMessage(String shareUserId, String shareUserFullName,
+  Future<void> sendContactMessage(
+          String shareUserId, String shareUserFullName, bool isPlain,
           {String? conversationId,
           String? recipientId,
-          bool isPlain = true,
           String? quoteMessageId}) async =>
       _sendMessageHelper.sendContactMessage(
         await _initConversation(conversationId, recipientId),
@@ -668,10 +666,12 @@ class AccountServer {
       _sendMessageHelper.sendRecallMessage(
           await _initConversation(conversationId, recipientId), messageIds);
 
-  Future<void> forwardMessage(String forwardMessageId,
-          {String? conversationId,
-          String? recipientId,
-          bool isPlain = true}) async =>
+  Future<void> forwardMessage(
+    String forwardMessageId,
+    bool isPlain, {
+    String? conversationId,
+    String? recipientId,
+  }) async =>
       _sendMessageHelper.forwardMessage(
         await _initConversation(conversationId, recipientId),
         userId,

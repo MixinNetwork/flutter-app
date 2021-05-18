@@ -157,6 +157,7 @@ class _StickerAlbumPageItem extends StatelessWidget {
                     .updateUsedAt(sticker.stickerId, DateTime.now()),
               accountServer.sendStickerMessage(
                 sticker.stickerId,
+                conversationItem.isPlainConversation,
                 conversationId: conversationItem.conversationId,
               ),
             ]);
