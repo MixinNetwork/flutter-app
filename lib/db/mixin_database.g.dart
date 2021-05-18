@@ -11295,7 +11295,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id                 AS messageId,\n       m.conversation_id            AS conversationId,\n       sender.user_id               AS senderId,\n       sender.full_name             AS senderFullName,\n       m.category                   AS type,\n       m.content                    AS content,\n       m.status                     AS status,\n       c.name                       AS groupName,\n       c.mute_until                 AS muteUntil,\n       conversationOwner.mute_until AS ownerMuteUntil,\n       conversationOwner.user_id    AS ownerUserId,\n       conversationOwner.full_name  AS ownerFullName,\n       m.created_at                 AS createdAt,\n       c.category                   AS category\nFROM   messages m\n       INNER JOIN users sender\n               ON m.user_id = sender.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users conversationOwner\n              ON c.owner_id = conversationOwner.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        'SELECT m.message_id                 AS messageId,\n       m.conversation_id            AS conversationId,\n       sender.user_id               AS senderId,\n       sender.full_name             AS senderFullName,\n       m.category                   AS type,\n       m.content                    AS content,\n       m.quote_content              AS quoteContent,\n       m.status                     AS status,\n       c.name                       AS groupName,\n       c.mute_until                 AS muteUntil,\n       conversationOwner.mute_until AS ownerMuteUntil,\n       conversationOwner.user_id    AS ownerUserId,\n       conversationOwner.full_name  AS ownerFullName,\n       m.created_at                 AS createdAt,\n       c.category                   AS category\nFROM   messages m\n       INNER JOIN users sender\n               ON m.user_id = sender.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users conversationOwner\n              ON c.owner_id = conversationOwner.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11312,6 +11312,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         senderFullName: row.read<String?>('senderFullName'),
         type: Messages.$converter0.mapToDart(row.read<String>('type'))!,
         content: row.read<String?>('content'),
+        quoteContent: row.read<String?>('quoteContent'),
         status: Messages.$converter2.mapToDart(row.read<String>('status'))!,
         groupName: row.read<String?>('groupName'),
         muteUntil:
@@ -13750,6 +13751,7 @@ class NotificationMessage {
   final String? senderFullName;
   final MessageCategory type;
   final String? content;
+  final String? quoteContent;
   final MessageStatus status;
   final String? groupName;
   final DateTime? muteUntil;
@@ -13765,6 +13767,7 @@ class NotificationMessage {
     this.senderFullName,
     required this.type,
     this.content,
+    this.quoteContent,
     required this.status,
     this.groupName,
     this.muteUntil,
@@ -13788,21 +13791,23 @@ class NotificationMessage {
                       $mrjc(
                           content.hashCode,
                           $mrjc(
-                              status.hashCode,
+                              quoteContent.hashCode,
                               $mrjc(
-                                  groupName.hashCode,
+                                  status.hashCode,
                                   $mrjc(
-                                      muteUntil.hashCode,
+                                      groupName.hashCode,
                                       $mrjc(
-                                          ownerMuteUntil.hashCode,
+                                          muteUntil.hashCode,
                                           $mrjc(
-                                              ownerUserId.hashCode,
+                                              ownerMuteUntil.hashCode,
                                               $mrjc(
-                                                  ownerFullName.hashCode,
+                                                  ownerUserId.hashCode,
                                                   $mrjc(
-                                                      createdAt.hashCode,
-                                                      category
-                                                          .hashCode))))))))))))));
+                                                      ownerFullName.hashCode,
+                                                      $mrjc(
+                                                          createdAt.hashCode,
+                                                          category
+                                                              .hashCode)))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13813,6 +13818,7 @@ class NotificationMessage {
           other.senderFullName == this.senderFullName &&
           other.type == this.type &&
           other.content == this.content &&
+          other.quoteContent == this.quoteContent &&
           other.status == this.status &&
           other.groupName == this.groupName &&
           other.muteUntil == this.muteUntil &&
@@ -13830,6 +13836,7 @@ class NotificationMessage {
           ..write('senderFullName: $senderFullName, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
+          ..write('quoteContent: $quoteContent, ')
           ..write('status: $status, ')
           ..write('groupName: $groupName, ')
           ..write('muteUntil: $muteUntil, ')

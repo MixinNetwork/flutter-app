@@ -3,13 +3,17 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
+import 'package:stream_transform/stream_transform.dart';
 
 import '../db/extension/conversation.dart';
+import '../db/extension/message_category.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
 import '../ui/home/local_notification_center.dart';
+import '../utils/load_balancer_utils.dart';
 import '../utils/message_optimize.dart';
+import '../utils/reg_exp_utils.dart';
 import 'account_server.dart';
 
 class NotificationService extends WidgetsBindingObserver {
@@ -35,11 +39,31 @@ class NotificationService extends WidgetsBindingObserver {
           })
           .where(
               (event) => event.senderId != context.read<AccountServer>().userId)
-          .where((event) {
+          .asyncWhere((event) async {
             final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
                 : event.ownerMuteUntil;
-            return muteUntil?.isAfter(DateTime.now()) != true;
+            if (muteUntil?.isAfter(DateTime.now()) != true) return true;
+
+            if (!event.type.isText) return false;
+
+            final account =
+                context.read<MultiAuthCubit>().state.current!.account;
+
+            // mention current user
+            if (mentionNumberRegExp
+                .allMatches(event.content ?? '')
+                .any((element) => element[0] == '@${account.identityNumber}'))
+              return true;
+
+            // quote current user
+            if (event.quoteContent?.isNotEmpty ?? false) {
+              if ((await jsonDecodeWithIsolate(event.quoteContent ?? '') ??
+                      {})['user_id'] ==
+                  account.userId) return true;
+            }
+
+            return false;
           })
           .where((event) => event.createdAt
               .isAfter(DateTime.now().subtract(const Duration(minutes: 2))))
