@@ -245,7 +245,7 @@ class ChatContainer extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              const InputContainer()
+                              const InputContainer(),
                             ],
                           ),
                         ),

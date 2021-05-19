@@ -116,8 +116,10 @@ class InputContainer extends HookWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const _QuoteMessage(),
-                  SizedBox(
-                    height: 56,
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: 56,
+                    ),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         color: BrightnessData.themeOf(context).primary,
@@ -211,18 +213,22 @@ class _SendTextField extends StatelessWidget {
               onInvoke: (Intent intent) => _sendMessage(context),
             ),
           },
-          child: TextField(
-            maxLines: 5,
-            minLines: 1,
-            controller: context.watch<TextEditingController>(),
-            style: TextStyle(
-              color: BrightnessData.themeOf(context).text,
-              fontSize: 14,
-            ),
-            decoration: const InputDecoration(
-              isDense: true,
-              enabledBorder: InputBorder.none,
-              focusedBorder: InputBorder.none,
+          child: AnimatedSize(
+            curve: Curves.easeOut,
+            duration: const Duration(milliseconds: 200),
+            child: TextField(
+              maxLines: 7,
+              minLines: 1,
+              controller: context.watch<TextEditingController>(),
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).text,
+                fontSize: 14,
+              ),
+              decoration: const InputDecoration(
+                isDense: true,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+              ),
             ),
           ),
         ),
