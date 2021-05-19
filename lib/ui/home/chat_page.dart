@@ -363,6 +363,7 @@ class _List extends StatelessWidget {
                   childCount: bottom.length,
                 ),
               ),
+              SliverToBoxAdapter(child: SizedBox(height: 4)),
             ],
           );
         },
