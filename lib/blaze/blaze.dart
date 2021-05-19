@@ -15,7 +15,6 @@ import '../enum/message_status.dart';
 import '../utils/load_balancer_utils.dart';
 import 'blaze_message.dart';
 import 'vo/blaze_message_data.dart';
-import 'vo/message_result.dart';
 
 const String _wsHost1 = 'wss://blaze.mixin.one';
 const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
@@ -188,12 +187,6 @@ class Blaze {
         Uint8List.fromList((await jsonEncodeWithIsolate(msg)).codeUnits)));
   }
 
-  Future<void> deliver(BlazeMessage blazeMessage) async {
-    // todo check send callback
-    channel?.sink.add(GZipEncoder().encode(Uint8List.fromList(
-        (await jsonEncodeWithIsolate(blazeMessage)).codeUnits)));
-  }
-
   void _disconnect() {
     debugPrint('ws _disconnect');
     transactions.clear();
@@ -203,32 +196,14 @@ class Blaze {
     channel = null;
   }
 
-  Future<MessageResult> deliverNoThrow(BlazeMessage blazeMessage) async {
+  Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
-    debugPrint('deliverNoThrow transactions size: ${transactions.length}');
-    final bm = await transaction.run(
-        () => channel?.sink.add(GZipEncoder()
-            .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
-        () => null);
-    if (bm == null) {
-      return deliverNoThrow(blazeMessage);
-    } else if (bm.error != null) {
-      // TODO
-      return MessageResult(false, true);
-    } else {
-      return MessageResult(true, false);
-    }
-  }
-
-  Future<BlazeMessage?> deliverAndWait(BlazeMessage blazeMessage) {
-    final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
-    transactions[blazeMessage.id] = transaction;
-    debugPrint('deliverAndWait transactions size: ${transactions.length}');
+    debugPrint('sendMessage transactions size: ${transactions.length}');
     return transaction.run(
-        () => channel?.sink.add(GZipEncoder()
+            () => channel?.sink.add(GZipEncoder()
             .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
-        () => null);
+            () => null);
   }
 
   Future<void> _reconnect() async {
@@ -290,6 +265,6 @@ class WebSocketTransaction<T> {
   }
 
   void error(T? data) {
-    _completer.completeError(error);
+    _completer.complete(data);
   }
 }

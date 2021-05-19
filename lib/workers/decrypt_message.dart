@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:flutter/foundation.dart';
+import 'sender.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
@@ -9,7 +10,6 @@ import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
-import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/app_card.dart';
 import '../blaze/vo/attachment_message.dart';
@@ -53,7 +53,7 @@ class DecryptMessage extends Injector {
     String userId,
     Database database,
     this._signalProtocol,
-    this._blaze,
+    this._sender,
     Client client,
     this._sessionId,
     this._privateKey,
@@ -65,7 +65,7 @@ class DecryptMessage extends Injector {
 
   String? _conversationId;
   late final SignalProtocol _signalProtocol;
-  late final Blaze _blaze;
+  late final Sender _sender;
   late final String _sessionId;
   late final PrivateKey _privateKey;
   late EncryptedProtocol _encryptedProtocol;
@@ -823,7 +823,7 @@ class DecryptMessage extends Injector {
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
         sessionId: sessionId));
-    unawaited(_blaze.deliverNoThrow(bm));
+    unawaited(_sender.deliverNoThrow(bm));
     final address = SignalProtocolAddress(recipientId, sessionId.getDeviceId());
     final ratchet = RatchetSenderKeysCompanion.insert(
         groupId: conversationId,
@@ -847,7 +847,7 @@ class DecryptMessage extends Injector {
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, userId, base64.encode(utf8.encode(plainText)),
         sessionId: sessionId));
-    unawaited(_blaze.deliverNoThrow(bm));
+    unawaited(_sender.deliverNoThrow(bm));
     await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
         conversationId,
         SignalProtocolAddress(userId, sessionId.getDeviceId()).toString());
@@ -864,14 +864,14 @@ class DecryptMessage extends Injector {
     }
     refreshKeyMap[conversationId] = current;
     final blazeMessage = createCountSignalKeys();
-    final data = (await _blaze.deliverAndWait(blazeMessage))?.data;
+    final data = (await _sender.signalKeysChannel(blazeMessage))?.data;
     final count = SignalKeyCount.fromJson(data);
     if (count.preKeyCount >= preKeyMinNum) {
       return;
     }
     final bm =
         createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
-    final result = await _blaze.deliverAndWait(bm);
+    final result = await _sender.signalKeysChannel(bm);
     if (result == null) {
       debugPrint('Registering new pre keys...');
     }

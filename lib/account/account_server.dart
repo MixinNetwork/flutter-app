@@ -7,18 +7,15 @@ import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import '../workers/sender.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
-import '../blaze/blaze_message_param_session.dart';
 import '../blaze/blaze_param.dart';
-import '../blaze/blaze_signal_key_message.dart';
 import '../blaze/vo/contact_message.dart';
 import '../blaze/vo/mention_user.dart';
-import '../blaze/vo/sender_key_status.dart';
-import '../blaze/vo/signal_key.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../crypto/crypto_key_value.dart';
@@ -121,11 +118,19 @@ class AccountServer {
     signalProtocol = SignalProtocol(userId);
     await signalProtocol.init();
 
+    _sender = Sender(
+      signalProtocol,
+      blaze,
+      client,
+      sessionId,
+      database,
+    );
+
     _decryptMessage = DecryptMessage(
       userId,
       database,
       signalProtocol,
-      blaze,
+      _sender,
       client,
       sessionId,
       this.privateKey,
@@ -146,6 +151,7 @@ class AccountServer {
   late Database database;
   late Blaze blaze;
   late DecryptMessage _decryptMessage;
+  late Sender _sender;
   late SendMessageHelper _sendMessageHelper;
   late AttachmentUtil _attachmentUtil;
 
@@ -220,8 +226,10 @@ class AccountServer {
         );
         final blazeMessage = BlazeMessage(
             id: const Uuid().v4(), action: createMessage, params: blazeParam);
-        await blaze.deliver(blazeMessage);
-        await database.jobsDao.deleteJobById(e.jobId);
+        final result = await _sender.deliverNoThrow(blazeMessage);
+        if (result.success) {
+          await database.jobsDao.deleteJobById(e.jobId);
+        }
       },
     );
 
@@ -245,10 +253,12 @@ class AccountServer {
             content = await base64EncodeWithIsolate(list);
           }
           final blazeMessage = _createBlazeMessage(message, content!);
-          await blaze.deliver(blazeMessage);
-          await database.messagesDao
-              .updateMessageStatusById(message.messageId, MessageStatus.sent);
-          await database.jobsDao.deleteJobById(job.jobId);
+          final result = await _sender.deliverNoThrow(blazeMessage);
+          if (result.success) {
+            await database.messagesDao
+                .updateMessageStatusById(message.messageId, MessageStatus.sent);
+            await database.jobsDao.deleteJobById(job.jobId);
+          }
         } else if (message.category.isEncrypted) {
           final conversation = await database.conversationDao
               .getConversationById(message.conversationId);
@@ -268,21 +278,25 @@ class AccountServer {
           );
           final blazeMessage = _createBlazeMessage(
               message, await base64EncodeWithIsolate(content));
-          await blaze.deliver(blazeMessage);
-          await database.messagesDao
-              .updateMessageStatusById(message.messageId, MessageStatus.sent);
-          await database.jobsDao.deleteJobById(job.jobId);
+          final result = await _sender.deliverNoThrow(blazeMessage);
+          if (result.success) {
+            await database.messagesDao
+                .updateMessageStatusById(message.messageId, MessageStatus.sent);
+            await database.jobsDao.deleteJobById(job.jobId);
+          }
         } else if (message.category.isSignal) {
           // TODO check resend data
           if (!await signalProtocol.isExistSenderKey(
               message.conversationId, message.userId)) {
-            await _checkConversation(message.conversationId);
+            await _sender.checkConversation(message.conversationId);
           }
-          await _checkSessionSenderKey(message.conversationId);
-          await blaze.deliverNoThrow(await encryptNormalMessage(message));
-          await database.messagesDao
-              .updateMessageStatusById(message.messageId, MessageStatus.sent);
-          await database.jobsDao.deleteJobById(job.jobId);
+          await _sender.checkSessionSenderKey(message.conversationId);
+          final result = await _sender.deliverNoThrow(await encryptNormalMessage(message));
+          if (result.success) {
+            await database.messagesDao
+                .updateMessageStatusById(message.messageId, MessageStatus.sent);
+            await database.jobsDao.deleteJobById(job.jobId);
+          }
         } else {}
       }
     });
@@ -303,254 +317,6 @@ class AccountServer {
         List<MentionUser>.from(list.map((e) => MentionUser.fromJson(e)));
     final ids = mentionUsers.map((e) => e.identityNumber);
     return database.userDao.findMultiUserIdsByIdentityNumbers(ids);
-  }
-
-  Future _checkSessionSenderKey(String conversationId) async {
-    final participants = await database.participantSessionDao
-        .getNotSendSessionParticipants(conversationId, sessionId);
-    if (participants.isEmpty) {
-      return;
-    }
-    final requestSignalKeyUsers = <BlazeMessageParamSession>[];
-    final signalKeyMessages = <BlazeSignalKeyMessage>[];
-    for (final p in participants) {
-      if (!await signalProtocol.containsSession(p.userId,
-          deviceId: p.sessionId.getDeviceId())) {
-        requestSignalKeyUsers.add(
-            BlazeMessageParamSession(userId: p.userId, sessionId: p.sessionId));
-      } else {
-        final deviceId = p.sessionId.getDeviceId();
-        final encryptedResult = await signalProtocol
-            .encryptSenderKey(conversationId, p.userId, deviceId: deviceId);
-        if (encryptedResult.err) {
-          requestSignalKeyUsers.add(BlazeMessageParamSession(
-              userId: p.userId, sessionId: p.sessionId));
-        } else {
-          signalKeyMessages.add(createBlazeSignalKeyMessage(
-              p.userId, encryptedResult.result!,
-              sessionId: p.sessionId));
-        }
-      }
-    }
-
-    for (final r in requestSignalKeyUsers) {
-      debugPrint('requestSignalKeyUser ${r.toJson()}');
-    }
-    if (requestSignalKeyUsers.isNotEmpty) {
-      final blazeMessage = createConsumeSessionSignalKeys(
-          createConsumeSignalKeysParam(requestSignalKeyUsers));
-      final data = (await blaze.deliverAndWait(blazeMessage))?.data;
-      debugPrint('consumeSignalKeys data: $data');
-      if (data != null) {
-        final signalKeys = List<SignalKey>.from(
-            (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
-        debugPrint('signalKeys size: ${signalKeys.length}');
-        final keys = <BlazeMessageParamSession>[];
-        if (signalKeys.isNotEmpty) {
-          for (final k in signalKeys) {
-            final preKeyBundle = k.createPreKeyBundle();
-            await signalProtocol.processSession(k.userId, preKeyBundle);
-            final deviceId = preKeyBundle.getDeviceId();
-            final encryptedResult = await signalProtocol
-                .encryptSenderKey(conversationId, k.userId, deviceId: deviceId);
-            signalKeyMessages.add(createBlazeSignalKeyMessage(
-                k.userId, encryptedResult.result!,
-                sessionId: k.sessionId));
-            keys.add(BlazeMessageParamSession(
-                userId: k.userId, sessionId: k.sessionId));
-          }
-        } else {
-          debugPrint(
-              'No any group signal key from server: ${requestSignalKeyUsers.toString()}');
-        }
-
-        final noKeyList = requestSignalKeyUsers.where((e) => !keys.contains(e));
-        if (noKeyList.isNotEmpty) {
-          final sentSenderKeys = noKeyList
-              .map((e) => db.ParticipantSessionData(
-                    conversationId: conversationId,
-                    userId: e.userId,
-                    sessionId: e.sessionId,
-                  ))
-              .toList();
-          await database.participantSessionDao.updateList(sentSenderKeys);
-        }
-      }
-    }
-    debugPrint('signalKeyMessages size: ${signalKeyMessages.length}');
-    if (signalKeyMessages.isEmpty) {
-      return;
-    }
-    final checksum = await getCheckSum(conversationId);
-    debugPrint('checksum: $checksum');
-    final bm = createSignalKeyMessage(createSignalKeyMessageParam(
-        conversationId, signalKeyMessages, checksum));
-    final result = await blaze.deliverNoThrow(bm);
-    debugPrint('result retry:${result.retry}, success: ${result.success}');
-    if (result.retry) {
-      return _checkSessionSenderKey(conversationId);
-    }
-    if (result.success) {
-      final sentSenderKeys = signalKeyMessages
-          .map((e) => db.ParticipantSessionData(
-              conversationId: conversationId,
-              userId: e.recipientId,
-              sessionId: e.sessionId!,
-              sentToServer: SenderKeyStatus.sent.index))
-          .toList();
-      await database.participantSessionDao.updateList(sentSenderKeys);
-    }
-  }
-
-  Future<String> getCheckSum(String conversationId) async {
-    final sessions = await database.participantSessionDao
-        .getParticipantSessionsByConversationId(conversationId);
-    if (sessions.isEmpty) {
-      return '';
-    } else {
-      return generateConversationChecksum(sessions);
-    }
-  }
-
-  String generateConversationChecksum(List<db.ParticipantSessionData> devices) {
-    devices.sort((a, b) => a.sessionId.compareTo(b.sessionId));
-    final d = devices.map((e) => e.sessionId).join('');
-    return d.md5();
-  }
-
-  Future _checkConversation(String conversationId) async {
-    final conversation =
-        await database.conversationDao.getConversationById(conversationId);
-    if (conversation == null) {
-      return;
-    }
-    if (conversation.category == ConversationCategory.group) {
-      await _syncConversation(conversationId);
-    } else {
-      await _checkConversationExists(conversation);
-    }
-  }
-
-  Future _syncConversation(String conversationId) async {
-    final res = await client.conversationApi.getConversation(conversationId);
-    final conversation = res.data;
-    final participants = <db.Participant>[];
-    conversation.participants.forEach((c) => participants.add(db.Participant(
-        conversationId: conversationId,
-        userId: c.userId,
-        role: c.role,
-        createdAt: c.createdAt!)));
-    await database.participantsDao.replaceAll(conversationId, participants);
-    if (conversation.participantSessions != null) {
-      await _syncParticipantSession(
-          conversationId, conversation.participantSessions!);
-    }
-  }
-
-  Future _syncParticipantSession(
-      String conversationId, List<UserSession> data) async {
-    await database.participantSessionDao.deleteByStatus(conversationId);
-    final remote = <db.ParticipantSessionData>[];
-    for (final s in data) {
-      remote.add(db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: s.userId,
-          sessionId: s.sessionId));
-    }
-    if (remote.isEmpty) {
-      await database.participantSessionDao
-          .deleteByConversationId(conversationId);
-      return;
-    }
-    final local = await database.participantSessionDao
-        .getParticipantSessionsByConversationId(conversationId);
-    if (local.isEmpty) {
-      await database.participantSessionDao.insertAll(remote);
-      return;
-    }
-    final common = remote.toSet().intersection(local.toSet());
-    final remove = <db.ParticipantSessionData>[];
-    for (final p in local) {
-      if (!common.contains(p)) {
-        remove.add(p);
-      }
-    }
-    final add = <db.ParticipantSessionData>[];
-    for (final p in remote) {
-      if (!common.contains(p)) {
-        add.add(p);
-      }
-    }
-    if (remove.isNotEmpty) {
-      await database.participantSessionDao.deleteList(remove);
-    }
-    if (add.isNotEmpty) {
-      await database.participantSessionDao.insertAll(add);
-    }
-  }
-
-  // todo
-  // ignore: unused_element
-  Future<bool> _checkSignalSession(
-    String recipientId, {
-    // ignore: unused_element
-    String? senderId,
-  }) async {
-    if (!await signalProtocol.containsSession(recipientId,
-        deviceId: sessionId.getDeviceId())) {
-      final blazeMessage = createConsumeSessionSignalKeys(
-          createConsumeSignalKeysParam(<BlazeMessageParamSession>[
-        BlazeMessageParamSession(userId: recipientId, sessionId: sessionId)
-      ]));
-      final data = (await blaze.deliverAndWait(blazeMessage))?.data;
-      if (data == null) {
-        return false;
-      }
-      final keys = List<SignalKey>.from(
-          (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
-      if (keys.isNotEmpty) {
-        final preKeyBundle = keys[0].createPreKeyBundle();
-        await signalProtocol.processSession(recipientId, preKeyBundle);
-      } else {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  Future _checkConversationExists(db.Conversation conversation) async {
-    if (conversation.status != ConversationStatus.success) {
-      await _createConversation(conversation);
-    }
-  }
-
-  Future _createConversation(db.Conversation conversation) async {
-    final response = await client.conversationApi.createConversation(
-      ConversationRequest(
-        conversationId: conversation.conversationId,
-        category: conversation.category,
-        participants: <ParticipantRequest>[
-          ParticipantRequest(userId: conversation.ownerId!)
-        ],
-      ),
-    );
-    await database.conversationDao.updateConversationStatusById(
-        conversation.conversationId, ConversationStatus.success);
-
-    final sessionParticipants = response.data.participantSessions;
-    if (sessionParticipants != null && sessionParticipants.isNotEmpty) {
-      final newParticipantSessions = <db.ParticipantSessionData>[];
-      for (final p in sessionParticipants) {
-        newParticipantSessions.add(db.ParticipantSessionData(
-            conversationId: conversation.conversationId,
-            userId: p.userId,
-            sessionId: p.sessionId));
-      }
-      if (newParticipantSessions.isNotEmpty) {
-        await database.participantSessionDao
-            .replaceAll(conversation.conversationId, newParticipantSessions);
-      }
-    }
   }
 
   BlazeMessage _createBlazeMessage(db.SendingMessage message, String data) {
