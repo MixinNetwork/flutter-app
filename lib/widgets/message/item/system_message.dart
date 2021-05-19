@@ -43,14 +43,14 @@ class SystemMessage extends StatelessWidget {
                     case MessageAction.join:
                       text = Localization.of(context).chatGroupJoin(
                         message.participantRelationship == UserRelationship.me
-                            ? Localization.of(context).you
+                            ? Localization.of(context).youStart
                             : message.participantFullName ?? '',
                       );
                       break;
                     case MessageAction.exit:
                       text = Localization.of(context).chatGroupExit(
                         message.participantRelationship == UserRelationship.me
-                            ? Localization.of(context).you
+                            ? Localization.of(context).youStart
                             // TODO why message.participantFullName is empty
                             : message.participantFullName ?? '',
                       );
@@ -58,7 +58,7 @@ class SystemMessage extends StatelessWidget {
                     case MessageAction.add:
                       text = Localization.of(context).chatGroupAdd(
                         message.relationship == UserRelationship.me
-                            ? Localization.of(context).you
+                            ? Localization.of(context).youStart
                             : message.userFullName!,
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
@@ -69,7 +69,7 @@ class SystemMessage extends StatelessWidget {
                     case MessageAction.remove:
                       text = Localization.of(context).chatGroupRemove(
                         message.relationship == UserRelationship.me
-                            ? Localization.of(context).you
+                            ? Localization.of(context).youStart
                             : message.userFullName!,
                         message.participantRelationship == UserRelationship.me
                             ? Localization.of(context).you
@@ -79,7 +79,7 @@ class SystemMessage extends StatelessWidget {
                     case MessageAction.create:
                       text = Localization.of(context).chatGroupCreate(
                         message.relationship == UserRelationship.me
-                            ? Localization.of(context).you
+                            ? Localization.of(context).youStart
                             : message.userFullName!,
                         message.groupName!,
                       );

@@ -206,6 +206,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("正在等待这个消息。"),
-        "you": MessageLookupByLibrary.simpleMessage("您")
+        "you": MessageLookupByLibrary.simpleMessage("你"),
+        "youStart": MessageLookupByLibrary.simpleMessage("您")
       };
 }

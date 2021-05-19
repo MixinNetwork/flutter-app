@@ -1099,7 +1099,7 @@ class _MessagePreview extends StatelessWidget {
       );
 }
 
-class _MessageContent extends StatelessWidget {
+class _MessageContent extends HookWidget {
   const _MessageContent({
     Key? key,
     required this.conversation,
@@ -1108,37 +1108,64 @@ class _MessageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (conversation.contentType == null) return const SizedBox();
+    final text = useMemoizedFuture(
+      () {
+        final isGroup = conversation.category == ConversationCategory.group ||
+            conversation.senderId != conversation.ownerId;
 
-    final dynamicColor = BrightnessData.themeOf(context).secondaryText;
-    return FutureBuilder<Tuple2<String?, String?>>(
-      future: messageOptimize(
+        return messagePreviewOptimize(
+          conversation.messageStatus,
+          conversation.contentType,
+          conversation.content,
+          conversation.senderId == context.read<AccountServer>().userId,
+          isGroup,
+          conversation.senderFullName,
+        );
+      },
+      null,
+      keys: [
         conversation.messageStatus,
         conversation.contentType,
         conversation.content,
-        UserRelationship.me == conversation.relationship,
-      ),
-      initialData: const Tuple2<String?, String?>(null, null),
-      builder: (context, snapshot) => Row(
-        children: [
-          if (snapshot.data?.item1 != null)
-            SvgPicture.asset(
-              snapshot.data!.item1!,
-              color: dynamicColor,
+        conversation.senderId,
+        conversation.ownerId,
+      ],
+    );
+
+    final icon = useMemoized(
+        () => messagePreviewIcon(
+              conversation.messageStatus,
+              conversation.contentType,
             ),
-          if (snapshot.data?.item2 != null)
-            Expanded(
-              child: Text(
-                snapshot.data!.item2!,
-                style: TextStyle(
-                  color: dynamicColor,
-                  fontSize: 14,
-                ),
-                overflow: TextOverflow.ellipsis,
+        [
+          conversation.messageStatus,
+          conversation.contentType,
+        ]);
+
+    if (conversation.contentType == null) return const SizedBox();
+
+    final dynamicColor = BrightnessData.themeOf(context).secondaryText;
+
+    return Row(
+      children: [
+        if (icon != null)
+          SvgPicture.asset(
+            icon,
+            color: dynamicColor,
+          ),
+        if (text != null)
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: dynamicColor,
+                fontSize: 14,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-        ].joinList(const SizedBox(width: 4)),
-      ),
+          ),
+      ].joinList(const SizedBox(width: 4)),
     );
   }
 }

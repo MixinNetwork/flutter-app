@@ -76,18 +76,17 @@ class NotificationService extends WidgetsBindingObserver {
 
             String? body;
             if (context.read<MultiAuthCubit>().state.currentMessagePreview) {
-              body = (await messageOptimize(
+              final isGroup = event.category == ConversationCategory.group ||
+                  event.senderId != event.ownerUserId;
+
+              body = await messagePreviewOptimize(
                 event.status,
                 event.type,
                 event.content,
                 false,
-              ))
-                  .item2;
-            }
-            if ((body?.isNotEmpty ?? false) &&
-                (event.category == ConversationCategory.group ||
-                    event.senderId != event.ownerUserId)) {
-              body = '${event.senderFullName} : $body';
+                isGroup,
+                event.senderFullName,
+              );
             }
 
             await showNotification(

@@ -720,11 +720,21 @@ class Localization {
     );
   }
 
-  /// `You`
+  /// `you`
   String get you {
     return Intl.message(
-      'You',
+      'you',
       name: 'you',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You`
+  String get youStart {
+    return Intl.message(
+      'You',
+      name: 'youStart',
       desc: '',
       args: [],
     );
