@@ -66,13 +66,14 @@ class _Content extends HookWidget {
       }
     }, null, keys: [watchEvent]);
 
-    if (list == null)
+    if (list == null) {
       return Center(
         child: CircularProgressIndicator(
           valueColor:
               AlwaysStoppedAnimation(BrightnessData.themeOf(context).accent),
         ),
       );
+    }
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(vertical: 40),

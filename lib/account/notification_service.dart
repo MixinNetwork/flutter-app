@@ -53,8 +53,9 @@ class NotificationService extends WidgetsBindingObserver {
             // mention current user
             if (mentionNumberRegExp
                 .allMatches(event.content ?? '')
-                .any((element) => element[0] == '@${account.identityNumber}'))
+                .any((element) => element[0] == '@${account.identityNumber}')) {
               return true;
+            }
 
             // quote current user
             if (event.quoteContent?.isNotEmpty ?? false) {
@@ -74,7 +75,7 @@ class NotificationService extends WidgetsBindingObserver {
             );
 
             String? body;
-            if (context.read<MultiAuthCubit>().state.currentMessagePreview)
+            if (context.read<MultiAuthCubit>().state.currentMessagePreview) {
               body = (await messageOptimize(
                 event.status,
                 event.type,
@@ -82,10 +83,12 @@ class NotificationService extends WidgetsBindingObserver {
                 false,
               ))
                   .item2;
+            }
             if ((body?.isNotEmpty ?? false) &&
                 (event.category == ConversationCategory.group ||
-                    event.senderId != event.ownerUserId))
+                    event.senderId != event.ownerUserId)) {
               body = '${event.senderFullName} : $body';
+            }
 
             await showNotification(
               title: name,
@@ -103,8 +106,9 @@ class NotificationService extends WidgetsBindingObserver {
         notificationSelectEvent(NotificationScheme.conversation).listen(
           (event) {
             final slideCategoryCubit = context.read<SlideCategoryCubit>();
-            if (slideCategoryCubit.state.type == SlideCategoryType.setting)
+            if (slideCategoryCubit.state.type == SlideCategoryType.setting) {
               slideCategoryCubit.select(SlideCategoryType.chats);
+            }
             context
                 .read<ConversationCubit>()
                 .selectConversation(event.host, event.path);

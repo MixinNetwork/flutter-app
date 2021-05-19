@@ -72,19 +72,20 @@ class StickerMessageWidget extends StatelessWidget {
       ),
       child: Builder(
         builder: (context) {
-          if (message.assetType == 'JSON')
+          if (message.assetType == 'JSON') {
             return Lottie.network(
               message.assetUrl!,
               height: height,
               width: width,
               fit: BoxFit.cover,
             );
-          else if (message.assetUrl != null)
+          } else if (message.assetUrl != null) {
             return CacheImage(
               message.assetUrl!,
               height: height,
               width: width,
             );
+          }
           return SizedBox(
             height: height,
             width: width,

@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'identity_key_util.dart';
 import 'signal_database.dart';

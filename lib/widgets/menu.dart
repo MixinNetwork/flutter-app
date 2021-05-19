@@ -107,11 +107,13 @@ class PositionedLayoutDelegate extends SingleChildLayoutDelegate {
   Offset getPositionForChild(Size size, Size childSize) {
     var dx = position.dx + _pointerPadding, dy = position.dy + _pointerPadding;
 
-    if ((size.width - position.dx) < childSize.width)
+    if ((size.width - position.dx) < childSize.width) {
       dx = position.dx - childSize.width;
+    }
 
-    if ((size.height - position.dy) < childSize.height)
+    if ((size.height - position.dy) < childSize.height) {
       dy = position.dy - childSize.height;
+    }
 
     return Offset(dx, dy);
   }

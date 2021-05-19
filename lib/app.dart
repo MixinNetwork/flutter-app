@@ -64,13 +64,14 @@ class App extends StatelessWidget {
             initialData: null,
             builder: (BuildContext context, _) => Consumer<AccountServer?>(
               builder: (context, accountServer, child) {
-                if (accountServer != null)
+                if (accountServer != null) {
                   return _Providers(
                     app: Portal(
                       child: child!,
                     ),
                     accountServer: accountServer,
                   );
+                }
                 return child!;
               },
               child: app,

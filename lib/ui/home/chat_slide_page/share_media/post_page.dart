@@ -64,7 +64,9 @@ class PostPage extends HookWidget {
     useEffect(
       () => messagesDao.insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
-            for (final item in value) yield item;
+            for (final item in value) {
+              yield item;
+            }
           })
           .where((event) =>
               event.conversationId == conversationId &&
@@ -88,7 +90,7 @@ class PostPage extends HookWidget {
       ),
     );
 
-    if (map.isEmpty)
+    if (map.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -108,6 +110,7 @@ class PostPage extends HookWidget {
           ],
         ),
       );
+    }
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {

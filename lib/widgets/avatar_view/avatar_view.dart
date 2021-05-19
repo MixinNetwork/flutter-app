@@ -44,7 +44,7 @@ class ConversationAvatarWidget extends HookWidget {
     final list = useStream(
           useMemoized(
             () {
-              if (_category == ConversationCategory.group)
+              if (_category == ConversationCategory.group) {
                 return context
                     .read<AccountServer>()
                     .database
@@ -57,6 +57,7 @@ class ConversationAvatarWidget extends HookWidget {
                                 element.relationship != UserRelationship.me)
                             .toList()
                         : event);
+              }
               return Stream.empty();
             },
             [_conversationId, _category],
@@ -66,15 +67,16 @@ class ConversationAvatarWidget extends HookWidget {
         <User>[];
 
     Widget child;
-    if (!(_category == ConversationCategory.group))
+    if (!(_category == ConversationCategory.group)) {
       child = AvatarWidget(
         userId: _conversationId!,
         name: _name ?? '',
         avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
         size: size,
       );
-    else
+    } else {
       child = AvatarPuzzlesWidget(list, size);
+    }
 
     return SizedBox.fromSize(
       size: Size.square(size),
@@ -172,13 +174,13 @@ class AvatarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (avatarUrl?.isNotEmpty == true)
+    if (avatarUrl?.isNotEmpty == true) {
       child = CacheImage(
         avatarUrl!,
         width: size,
         height: size,
       );
-    else
+    } else {
       child = SizedBox.fromSize(
         size: Size.square(size),
         child: DecoratedBox(
@@ -196,6 +198,7 @@ class AvatarWidget extends StatelessWidget {
           ),
         ),
       );
+    }
 
     if (clipOval) return ClipOval(child: child);
     return child;

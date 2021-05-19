@@ -54,19 +54,20 @@ Future<Tuple2<String?, String?>> messageOptimize(
     icon = Resources.assetsImagesAudioSvg;
   } else if (messageCategory == MessageCategory.appButtonGroup) {
     _content = 'APP_BUTTON_GROUP';
-    if (content != null)
-      // ignore: avoid_dynamic_calls
+    if (content != null) {
       _content = (await jsonDecodeWithIsolate(content))
           .map((e) => ActionData.fromJson(e))
           // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')
           .join();
+    }
     icon = Resources.assetsImagesAppButtonSvg;
   } else if (messageCategory == MessageCategory.appCard) {
     _content = 'APP_CARD';
-    if (content != null)
+    if (content != null) {
       _content =
           AppCardData.fromJson(await jsonDecodeWithIsolate(content)).title;
+    }
     icon = Resources.assetsImagesAppButtonSvg;
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';

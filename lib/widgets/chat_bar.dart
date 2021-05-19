@@ -114,11 +114,12 @@ class ConversationIDOrCount extends HookWidget {
 
     final isGroup = conversation?.isGroup ?? false;
 
-    if (!isGroup)
+    if (!isGroup) {
       return Text(
         conversation?.identityNumber ?? '',
         style: textStyle,
       );
+    }
 
     return StreamBuilder<int>(
       stream: countStream,
@@ -168,19 +169,21 @@ class ConversationAvatar extends StatelessWidget {
         child: BlocBuilder<ConversationCubit, ConversationState?>(
           buildWhen: (a, b) => b?.isLoaded ?? false,
           builder: (context, state) {
-            if (state?.conversation != null)
+            if (state?.conversation != null) {
               return ConversationAvatarWidget(
                 size: size,
                 conversation: state!.conversation,
               );
+            }
 
-            if (state?.user != null)
+            if (state?.user != null) {
               return AvatarWidget(
                 size: size,
                 userId: state!.user!.userId,
                 avatarUrl: state.user!.avatarUrl,
                 name: state.name!,
               );
+            }
 
             return const SizedBox();
           },

@@ -68,7 +68,9 @@ class FilePage extends HookWidget {
     useEffect(
       () => messagesDao.insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
-            for (final item in value) yield item;
+            for (final item in value) {
+              yield item;
+            }
           })
           .where((event) =>
               event.conversationId == conversationId &&
@@ -92,7 +94,7 @@ class FilePage extends HookWidget {
       ),
     );
 
-    if (map.isEmpty)
+    if (map.isEmpty) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -112,6 +114,7 @@ class FilePage extends HookWidget {
           ],
         ),
       );
+    }
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
@@ -205,10 +208,11 @@ class _Item extends StatelessWidget {
                     switch (message.mediaStatus) {
                       case MediaStatus.canceled:
                         if (message.relationship == UserRelationship.me &&
-                            message.mediaUrl?.isNotEmpty == true)
+                            message.mediaUrl?.isNotEmpty == true) {
                           return const StatusUpload();
-                        else
+                        } else {
                           return const StatusDownload();
+                        }
                       case MediaStatus.pending:
                         return const StatusPending();
                       case MediaStatus.expired:
@@ -227,9 +231,10 @@ class _Item extends StatelessWidget {
                           if (message.mediaName != null) {
                             final _lookupMimeType =
                                 lookupMimeType(message.mediaName!);
-                            if (_lookupMimeType != null)
+                            if (_lookupMimeType != null) {
                               extension = extensionFromMime(_lookupMimeType)
                                   .toUpperCase();
+                            }
                           }
                           return Text(
                             extension,

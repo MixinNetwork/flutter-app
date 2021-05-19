@@ -70,8 +70,9 @@ class _RenderMessageLayout extends RenderBox
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! MultiChildLayoutParentData)
+    if (child.parentData is! MultiChildLayoutParentData) {
       child.parentData = MultiChildLayoutParentData();
+    }
   }
 
   @override

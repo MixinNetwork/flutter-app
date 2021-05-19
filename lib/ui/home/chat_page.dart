@@ -48,8 +48,9 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           child: ChatInfoPage(),
         );
       case circles:
-        if (arguments == null || arguments is! Tuple2<String, String>)
+        if (arguments == null || arguments is! Tuple2<String, String>) {
           throw ArgumentError('Invalid route');
+        }
         return MaterialPage(
           key: const ValueKey(circles),
           name: circles,
@@ -76,8 +77,9 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   }
 
   void toggleInfoPage() {
-    if (state.pages.isEmpty)
+    if (state.pages.isEmpty) {
       return emit(state.copyWith(pages: [route(ChatSideCubit.infoPage, null)]));
+    }
     return clear();
   }
 }

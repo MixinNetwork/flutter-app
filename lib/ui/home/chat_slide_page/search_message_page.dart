@@ -78,9 +78,9 @@ class SearchMessagePage extends HookWidget {
         PagingState<SearchMessageDetailItem>>(bloc: searchMessageBloc);
 
     late Widget child;
-    if (pageState.count <= 0)
+    if (pageState.count <= 0) {
       child = const SizedBox();
-    else
+    } else {
       child = ScrollablePositionedList.builder(
         itemPositionsListener: searchMessageBloc.itemPositionsListener,
         itemCount: pageState.count,
@@ -98,6 +98,7 @@ class SearchMessagePage extends HookWidget {
           );
         },
       );
+    }
 
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,

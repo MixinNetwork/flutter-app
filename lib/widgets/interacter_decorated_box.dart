@@ -96,12 +96,14 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
         onLongPress: widget.onLongPress,
         child: Listener(
           onPointerUp: (PointerUpEvent event) {
-            if (event.pointer == lastPointerDown)
+            if (event.pointer == lastPointerDown) {
               widget.onRightClick?.call(event);
+            }
           },
           onPointerDown: (PointerDownEvent event) {
-            if (event.buttons == kSecondaryButton)
+            if (event.buttons == kSecondaryButton) {
               lastPointerDown = event.pointer;
+            }
           },
           child: child,
         ),

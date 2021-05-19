@@ -85,9 +85,10 @@ class _CenterPage extends StatelessWidget {
                 .contains(page.name);
           });
 
-          if (isSetting && !responsiveNavigatorCubit.state.navigationMode)
+          if (isSetting && !responsiveNavigatorCubit.state.navigationMode) {
             responsiveNavigatorCubit
                 .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);
+          }
         },
         child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
           converter: (state) => state.type == SlideCategoryType.setting,

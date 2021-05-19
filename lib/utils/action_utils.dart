@@ -10,10 +10,11 @@ extension ActionUtils on BuildContext {
     if (actionText.startsWith('input:/')) {
       final content = actionText.substring(6).trim();
       final conversationItem = read<ConversationCubit>().state;
-      if (content.isNotEmpty == true && conversationItem != null)
+      if (content.isNotEmpty == true && conversationItem != null) {
         read<AccountServer>().sendTextMessage(
             content, conversationItem.isPlainConversation,
             conversationId: conversationItem.conversationId);
+      }
 
       return true;
     }

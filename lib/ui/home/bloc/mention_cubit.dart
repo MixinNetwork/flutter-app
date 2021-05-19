@@ -57,9 +57,9 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
         participantsCubit.stream,
         (a, b) {
           late List<User> users;
-          if (a == null)
+          if (a == null) {
             users = [];
-          else {
+          } else {
             final keyword = a.toLowerCase();
             users = participantsCubit.state
                 .where(

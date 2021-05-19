@@ -49,6 +49,7 @@ linter:
     - prefer_const_declarations
     - sort_unnamed_constructors_first
     - use_setters_to_change_properties
+    - curly_braces_in_flow_control_structures
 
 
 #    - avoid_slow_async_io

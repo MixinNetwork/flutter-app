@@ -330,8 +330,9 @@ class DecryptMessage extends Injector {
 
   Future<Message> _generateMessage(
       BlazeMessageData data, MessageGenerator generator) async {
-    if (data.quoteMessageId == null || (data.quoteMessageId?.isEmpty ?? true))
+    if (data.quoteMessageId == null || (data.quoteMessageId?.isEmpty ?? true)) {
       return generator(null);
+    }
 
     final quoteMessage = await database.messagesDao
         .findMessageItemById(data.conversationId, data.quoteMessageId!);
@@ -374,8 +375,9 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isImage) {
-      if (data.category == MessageCategory.signalImage)
+      if (data.category == MessageCategory.signalImage) {
         return _updateRemoteMessageStatus(data.messageId, messageStatus);
+      }
       final attachment =
           AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plainText));
       final message = await _generateMessage(
@@ -400,13 +402,14 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
-      if (_photoAutoDownload)
+      if (_photoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
           conversationId: message.conversationId,
           category: message.category,
           content: message.content!,
         ));
+      }
     } else if (data.category.isVideo) {
       String plain;
       if (data.category == MessageCategory.signalVideo) {
@@ -440,13 +443,14 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
-      if (_videoAutoDownload)
+      if (_videoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
           conversationId: message.conversationId,
           category: message.category,
           content: message.content!,
         ));
+      }
     } else if (data.category.isData) {
       String plain;
       if (data.category == MessageCategory.signalData) {
@@ -476,13 +480,14 @@ class DecryptMessage extends Injector {
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
-      if (_fileAutoDownload)
+      if (_fileAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
           conversationId: message.conversationId,
           category: message.category,
           content: message.content!,
         ));
+      }
     } else if (data.category.isAudio) {
       String plain;
       if (data.category == MessageCategory.signalAudio) {

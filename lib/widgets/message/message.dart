@@ -73,18 +73,21 @@ class MessageItemWidget extends StatelessWidget {
         if (datetime != null) MessageDayTime(dateTime: datetime),
         Builder(
           builder: (context) {
-            if (message.type == MessageCategory.systemConversation)
+            if (message.type == MessageCategory.systemConversation) {
               return SystemMessage(
                 message: message,
               );
+            }
 
-            if (message.type == MessageCategory.secret)
+            if (message.type == MessageCategory.secret) {
               return const SecretMessage();
+            }
 
-            if (message.type == MessageCategory.stranger)
+            if (message.type == MessageCategory.stranger) {
               return StrangerMessage(
                 message: message,
               );
+            }
 
             return _MessageBubbleMargin(
               userName: userName,
@@ -160,88 +163,101 @@ class MessageItemWidget extends StatelessWidget {
                 ),
               ],
               builder: (BuildContext context) {
-                if (message.type.isLocation)
+                if (message.type.isLocation) {
                   return LocationMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
+                }
 
-                if (message.type.isPost)
+                if (message.type.isPost) {
                   return PostMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
+                }
 
-                if (message.type == MessageCategory.systemAccountSnapshot)
+                if (message.type == MessageCategory.systemAccountSnapshot) {
                   return TransferMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
+                }
 
-                if (message.type.isContact)
+                if (message.type.isContact) {
                   return ContactMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
+                }
 
-                if (message.type == MessageCategory.appButtonGroup)
+                if (message.type == MessageCategory.appButtonGroup) {
                   return ActionMessage(
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
+                }
 
-                if (message.type == MessageCategory.appCard)
+                if (message.type == MessageCategory.appCard) {
                   return ActionCardMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
+                }
 
-                if (message.type.isData)
+                if (message.type.isData) {
                   return FileMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
-                if (message.status == MessageStatus.failed)
+                }
+                if (message.status == MessageStatus.failed) {
                   return WaitingMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
-                if (message.type.isText)
+                }
+                if (message.type.isText) {
                   return TextMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
-                if (message.type.isSticker)
+                }
+                if (message.type.isSticker) {
                   return StickerMessageWidget(
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );
-                if (message.type.isImage)
+                }
+                if (message.type.isImage) {
                   return ImageMessageWidget(
                     showNip: showNip,
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );
-                if (message.type.isVideo || message.type.isLive)
+                }
+                if (message.type.isVideo || message.type.isLive) {
                   return VideoMessageWidget(
                     showNip: showNip,
                     message: message,
                     isCurrentUser: isCurrentUser,
                   );
-                if (message.type.isRecall)
+                }
+                if (message.type.isRecall) {
                   return RecallMessage(
                     showNip: showNip,
                     isCurrentUser: isCurrentUser,
                     message: message,
                   );
+                }
                 return UnknownMessage(
                   showNip: showNip,
                   isCurrentUser: isCurrentUser,

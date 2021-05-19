@@ -49,18 +49,19 @@ class MessageBubble extends StatelessWidget {
 
     var _child = child;
 
-    if (!includeNip)
+    if (!includeNip) {
       _child = _MessageBubbleNipPadding(
         currentUser: isCurrentUser,
         child: child,
       );
+    }
 
     _child = Padding(
       padding: padding,
       child: _child,
     );
 
-    if (quoteMessageId != null && quoteMessageContent?.isNotEmpty == true)
+    if (quoteMessageId != null && quoteMessageContent?.isNotEmpty == true) {
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -77,6 +78,7 @@ class MessageBubble extends StatelessWidget {
           ],
         ),
       );
+    }
 
     final clipper = _BubbleClipper(
       currentUser: isCurrentUser,
@@ -88,7 +90,7 @@ class MessageBubble extends StatelessWidget {
       child: _child,
     );
 
-    if (showBubble)
+    if (showBubble) {
       _child = CustomPaint(
         painter: _BubblePainter(
           color: showBubble ? bubbleColor : Colors.transparent,
@@ -96,6 +98,7 @@ class MessageBubble extends StatelessWidget {
         ),
         child: _child,
       );
+    }
 
     return Align(
       alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -237,8 +240,9 @@ class _BubblePainter extends CustomPainter with EquatableMixin {
   void paint(Canvas canvas, Size size) {
     final clip = clipper.getClip(size);
 
-    if (elevation != 0.0)
+    if (elevation != 0.0) {
       canvas.drawShadow(clip, shadowColor, elevation, false);
+    }
 
     canvas.drawPath(clip, _fillPaint);
   }

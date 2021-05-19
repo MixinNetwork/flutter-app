@@ -30,17 +30,19 @@ String _getConversationName(dynamic item) {
 
 String _getConversationId(dynamic item, BuildContext context) {
   if (item is ConversationItem) return item.conversationId;
-  if (item is User)
+  if (item is User) {
     return generateConversationId(
       item.userId,
       context.read<AccountServer>().userId,
     );
+  }
   throw ArgumentError('must be ConversationItem or User');
 }
 
 String? _getUserId(dynamic item) {
-  if (item is ConversationItem && !item.isGroupConversation)
+  if (item is ConversationItem && !item.isGroupConversation) {
     return item.ownerId;
+  }
   if (item is User) return item.userId;
 }
 
@@ -144,10 +146,11 @@ class _ConversationSelector extends HookWidget {
     final selector = useBloc(() => SimpleCubit<List<dynamic>>(const []));
     void selectItem(dynamic item) {
       final list = [...selector.state];
-      if (list.contains(item))
+      if (list.contains(item)) {
         list.remove(item);
-      else
+      } else {
         list.add(item);
+      }
       selector.emit(list);
     }
 

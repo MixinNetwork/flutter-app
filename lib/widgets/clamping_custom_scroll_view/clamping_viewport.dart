@@ -204,8 +204,9 @@ class ClampingRenderViewport extends RenderViewport {
           count += 1;
           continue;
         }
-        if (offset.applyContentDimensions(minScrollOffset, maxScrollOffset))
+        if (offset.applyContentDimensions(minScrollOffset, maxScrollOffset)) {
           break;
+        }
         // *** End of difference from [RenderViewport].
       }
       count += 1;

@@ -106,7 +106,9 @@ class ImagePreviewPage extends HookWidget {
           .messagesDao
           .insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
-            for (final item in value) yield item;
+            for (final item in value) {
+              yield item;
+            }
           })
           .where((event) =>
               event.conversationId == conversationId &&
@@ -115,8 +117,9 @@ class ImagePreviewPage extends HookWidget {
                 MessageCategory.signalImage,
               ].contains(event.type))
           .listen((event) {
-            if (event.messageId == current.value?.messageId)
+            if (event.messageId == current.value?.messageId) {
               current.value = event;
+            }
             if (event.messageId == prev.value?.messageId) prev.value = event;
             if (next.value?.messageId == _messageId.value) next.value = event;
           })

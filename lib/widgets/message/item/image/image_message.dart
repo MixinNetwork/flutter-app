@@ -91,10 +91,11 @@ class ImageMessageWidget extends StatelessWidget {
                               case MediaStatus.canceled:
                                 if (message.relationship ==
                                         UserRelationship.me &&
-                                    message.mediaUrl?.isNotEmpty == true)
+                                    message.mediaUrl?.isNotEmpty == true) {
                                   return const StatusUpload();
-                                else
+                                } else {
                                   return const StatusDownload();
+                                }
                               case MediaStatus.pending:
                                 return const StatusPending();
                               case MediaStatus.expired:

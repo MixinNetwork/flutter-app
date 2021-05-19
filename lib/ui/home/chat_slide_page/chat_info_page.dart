@@ -215,7 +215,7 @@ class ChatInfoPage extends HookWidget {
                         trailing: null,
                         onTap: () async {
                           final isGroup = conversation.isGroup ?? false;
-                          if (muting)
+                          if (muting) {
                             return runFutureWithToast(
                                 context,
                                 context
@@ -227,6 +227,7 @@ class ChatInfoPage extends HookWidget {
                                       userId:
                                           isGroup ? null : conversation.userId,
                                     ));
+                          }
 
                           final result = await showMixinDialog<int?>(
                               context: context, child: const MuteDialog());
@@ -499,14 +500,16 @@ class ConversationBio extends HookWidget {
 
     final textStream = useMemoized(() {
       final database = context.read<AccountServer>().database;
-      if (!conversation.isLoaded)
+      if (!conversation.isLoaded) {
         return () async* {
           yield '';
         }();
-      if (conversation.isGroup!)
+      }
+      if (conversation.isGroup!) {
         return database.conversationDao
             .announcement(conversation.conversationId)
             .watchSingle();
+      }
       return database.userDao.biography(conversation.userId!).watchSingle();
     }, [
       conversation.isLoaded,

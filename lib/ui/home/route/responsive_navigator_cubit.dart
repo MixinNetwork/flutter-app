@@ -100,8 +100,9 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
           ),
         );
       case storageUsageDetail:
-        if (arguments == null || arguments is! Tuple2<String, String>)
+        if (arguments == null || arguments is! Tuple2<String, String>) {
           throw ArgumentError('Invalid route');
+        }
 
         return MaterialPage(
           key: const ValueKey(storageUsageDetail),

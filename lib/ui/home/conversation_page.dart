@@ -147,14 +147,16 @@ class _SearchList extends HookWidget {
 
     final type = useState<_ShowMoreType?>(null);
 
-    if (users.isEmpty && conversations.isEmpty && messages.isEmpty)
+    if (users.isEmpty && conversations.isEmpty && messages.isEmpty) {
       return const SearchEmpty();
+    }
 
-    if (type.value == _ShowMoreType.message)
+    if (type.value == _ShowMoreType.message) {
       return _SearchMessageList(
         keyword: keyword,
         onTap: () => type.value = null,
       );
+    }
     return CustomScrollView(
       slivers: [
         if (users.isNotEmpty)
@@ -164,10 +166,11 @@ class _SearchList extends HookWidget {
               showMore: users.length > _defaultLimit,
               more: type.value != _ShowMoreType.contact,
               onTap: () {
-                if (type.value != _ShowMoreType.contact)
+                if (type.value != _ShowMoreType.contact) {
                   type.value = _ShowMoreType.contact;
-                else
+                } else {
                   type.value = null;
+                }
               },
             ),
           ),
@@ -205,10 +208,11 @@ class _SearchList extends HookWidget {
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {
-                if (type.value != _ShowMoreType.conversation)
+                if (type.value != _ShowMoreType.conversation) {
                   type.value = _ShowMoreType.conversation;
-                else
+                } else {
                   type.value = null;
+                }
               },
             ),
           ),
@@ -257,10 +261,11 @@ class _SearchList extends HookWidget {
               showMore: messages.length > _defaultLimit,
               more: type.value != _ShowMoreType.message,
               onTap: () {
-                if (type.value != _ShowMoreType.message)
+                if (type.value != _ShowMoreType.message) {
                   type.value = _ShowMoreType.message;
-                else
+                } else {
                   type.value = null;
+                }
               },
             ),
           ),
@@ -426,9 +431,9 @@ class _SearchMessageList extends HookWidget {
         PagingState<SearchMessageDetailItem>>(bloc: searchMessageBloc);
 
     late Widget child;
-    if (pageState.count <= 0)
+    if (pageState.count <= 0) {
       child = const SearchEmpty();
-    else
+    } else {
       child = ScrollablePositionedList.builder(
         itemPositionsListener: searchMessageBloc.itemPositionsListener,
         itemCount: pageState.count,
@@ -442,6 +447,7 @@ class _SearchMessageList extends HookWidget {
           );
         },
       );
+    }
 
     return Column(
       children: [
@@ -697,9 +703,9 @@ class _List extends HookWidget {
         false;
 
     Widget child;
-    if (pagingState.count <= 0)
+    if (pagingState.count <= 0) {
       child = const _Empty();
-    else {
+    } else {
       child = ScrollablePositionedList.builder(
         key: PageStorageKey(slideCategoryState),
         itemPositionsListener:
@@ -1173,7 +1179,7 @@ class _NetworkNotConnect extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (visible)
+    if (visible) {
       child = Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
         color: BrightnessData.themeOf(context).warning.withOpacity(0.2),
@@ -1208,8 +1214,9 @@ class _NetworkNotConnect extends StatelessWidget {
           ],
         ),
       );
-    else
+    } else {
       child = SizedBox();
+    }
 
     return AnimatedSize(
       alignment: Alignment.topCenter,

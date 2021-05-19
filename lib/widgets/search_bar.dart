@@ -53,8 +53,9 @@ class SearchBar extends StatelessWidget {
                       title: Localization.of(context).createCircle,
                       onlyContact: true,
                     );
-                    if (list.isEmpty || (list.first.userId?.isEmpty ?? true))
+                    if (list.isEmpty || (list.first.userId?.isEmpty ?? true)) {
                       return;
+                    }
                     final userId = list.first.userId!;
 
                     context.read<ConversationCubit>().selectUser(userId);

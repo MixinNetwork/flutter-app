@@ -54,7 +54,7 @@ class QuoteMessage extends HookWidget {
         quote = mapToQuoteMessage(decodeMap);
       }
       final MessageCategory type = quote.type;
-      if (type.isText)
+      if (type.isText) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -62,7 +62,8 @@ class QuoteMessage extends HookWidget {
           description: quote.content!,
           inputMode: inputMode,
         );
-      if (type.isImage)
+      }
+      if (type.isImage) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -76,7 +77,8 @@ class QuoteMessage extends HookWidget {
           description: Localization.of(context).image,
           inputMode: inputMode,
         );
-      if (type.isVideo)
+      }
+      if (type.isVideo) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -86,8 +88,9 @@ class QuoteMessage extends HookWidget {
           description: Localization.of(context).video,
           inputMode: inputMode,
         );
+      }
 
-      if (type.isLive)
+      if (type.isLive) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -97,8 +100,9 @@ class QuoteMessage extends HookWidget {
           description: Localization.of(context).live,
           inputMode: inputMode,
         );
+      }
 
-      if (type.isData)
+      if (type.isData) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -107,7 +111,8 @@ class QuoteMessage extends HookWidget {
           description: quote.mediaName ?? Localization.of(context).file,
           inputMode: inputMode,
         );
-      if (type.isPost)
+      }
+      if (type.isPost) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -116,7 +121,8 @@ class QuoteMessage extends HookWidget {
           description: (quote.content! as String).postOptimizeMarkdown,
           inputMode: inputMode,
         );
-      if (type.isLocation)
+      }
+      if (type.isLocation) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -125,7 +131,8 @@ class QuoteMessage extends HookWidget {
           description: Localization.of(context).location,
           inputMode: inputMode,
         );
-      if (type.isAudio)
+      }
+      if (type.isAudio) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -134,7 +141,8 @@ class QuoteMessage extends HookWidget {
           description: Localization.of(context).audio,
           inputMode: inputMode,
         );
-      if (type.isSticker)
+      }
+      if (type.isSticker) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -144,7 +152,8 @@ class QuoteMessage extends HookWidget {
           description: Localization.of(context).sticker,
           inputMode: inputMode,
         );
-      if (type.isContact)
+      }
+      if (type.isContact) {
         return _QuoteMessageBase(
           messageId: id!,
           userId: quote.userId,
@@ -162,6 +171,7 @@ class QuoteMessage extends HookWidget {
           description: quote.sharedUserIdentityNumber,
           inputMode: inputMode,
         );
+      }
       if (type == MessageCategory.appCard ||
           type == MessageCategory.appButtonGroup) {
         String? description;

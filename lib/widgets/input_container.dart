@@ -493,8 +493,9 @@ class HighlightTextEditingController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
-    if (!value.isComposingRangeValid || !withComposing)
+    if (!value.isComposingRangeValid || !withComposing) {
       return _buildTextSpan(text, style);
+    }
 
     return TextSpan(style: style, children: <TextSpan>[
       _buildTextSpan(value.composing.textBefore(value.text), style),

@@ -147,8 +147,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final conversationId = conversationCubit.state?.conversationId;
     if (conversationId == null) return;
     // If the conversationId has changed, then events other than init are ignored
-    if (event is! _MessageInitEvent && state.conversationId != conversationId)
+    if (event is! _MessageInitEvent && state.conversationId != conversationId) {
       return;
+    }
 
     if (event is _MessageInitEvent) {
       yield await _resetMessageList(
@@ -361,8 +362,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   }
 
   void jumpToCurrent() {
-    if (scrollController.hasClients && state.isLatest)
+    if (scrollController.hasClients && state.isLatest) {
       return scrollController.jumpTo(scrollController.position.maxScrollExtent);
+    }
     return add(_MessageInitEvent());
   }
 }

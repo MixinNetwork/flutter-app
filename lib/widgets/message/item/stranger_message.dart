@@ -65,12 +65,13 @@ class StrangerMessage extends StatelessWidget {
                   ? Localization.of(context).botInteractHi
                   : Localization.of(context).addContact,
               onTap: () {
-                if (isBotConversation)
+                if (isBotConversation) {
                   Provider.of<AccountServer>(context, listen: false)
                       .sendTextMessage('Hi', true,
                           conversationId: message.conversationId);
-                else
+                } else {
                   context.read<AccountServer>().addUser(message.userId);
+                }
               },
             ),
           ],

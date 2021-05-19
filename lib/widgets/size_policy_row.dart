@@ -36,11 +36,12 @@ class SizePolicyRow extends StatelessWidget {
 
         return Row(
           children: children.map((e) {
-            if (e._width != null)
+            if (e._width != null) {
               return SizedBox(
                 width: e._width,
                 child: e.child,
               );
+            }
             return Expanded(child: e.child);
           }).toList(),
         );

@@ -18,12 +18,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final currentScreen = await getCurrentScreen();
-  if (currentScreen != null)
+  if (currentScreen != null) {
     setWindowFrame(Rect.fromCenter(
       center: currentScreen.visibleFrame.center,
       width: 1280,
       height: 750,
     ));
+  }
   setWindowMinSize(
       const Size(slidePageMinWidth + responsiveNavigationMinWidth, 480));
 

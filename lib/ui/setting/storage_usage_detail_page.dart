@@ -82,14 +82,18 @@ class StorageUsageDetailPage extends HookWidget {
                 context,
                 () async {
                   final accountServer = context.read<AccountServer>();
-                  if (selected.value.item1)
+                  if (selected.value.item1) {
                     await _clear(accountServer.getImagesPath(conversationId));
-                  if (selected.value.item2)
+                  }
+                  if (selected.value.item2) {
                     await _clear(accountServer.getVideosPath(conversationId));
-                  if (selected.value.item3)
+                  }
+                  if (selected.value.item3) {
                     await _clear(accountServer.getAudiosPath(conversationId));
-                  if (selected.value.item4)
+                  }
+                  if (selected.value.item4) {
                     await _clear(accountServer.getFilesPath(conversationId));
+                  }
                 }(),
               ),
               child: Center(

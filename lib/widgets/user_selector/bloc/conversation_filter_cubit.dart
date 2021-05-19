@@ -41,9 +41,10 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     bots = <User>[];
 
     Iterable<User> users = await accountServer.database.userDao.friends().get();
-    if (!onlyContact)
+    if (!onlyContact) {
       users = users
           .where((element) => !contactConversationIds.contains(element.userId));
+    }
     users.forEach((e) {
       if (e.isBot) {
         bots.add(e);
@@ -62,26 +63,29 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
   }
 
   void _filterList() {
-    if (state.keyword?.isEmpty ?? true)
+    if (state.keyword?.isEmpty ?? true) {
       return emit(state.copyWith(
         recentConversations: conversations,
         friends: friends,
         bots: bots,
         keyword: state.keyword,
       ));
+    }
     final keyword = state.keyword!.toLowerCase();
 
     final recentConversations = conversations.where((element) {
-      if (element.isGroupConversation)
+      if (element.isGroupConversation) {
         return element.groupName != null &&
             element.groupName!.toLowerCase().contains(keyword);
-      else
+      } else {
         return element.name!.toLowerCase().contains(keyword) ||
             element.ownerIdentityNumber.toLowerCase().startsWith(keyword);
+      }
     }).toList()
       ..sort(compareValuesBy((e) {
-        if (e.isGroupConversation)
+        if (e.isGroupConversation) {
           return e.groupName!.toLowerCase().indexOf(keyword);
+        }
         final indexOf = e.name?.toLowerCase().indexOf(keyword) ?? -1;
         if (indexOf != -1) return indexOf;
         return e.ownerIdentityNumber.indexOf(keyword);

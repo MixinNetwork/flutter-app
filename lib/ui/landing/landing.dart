@@ -32,17 +32,19 @@ class LandingPage extends StatelessWidget {
             child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
               converter: (state) => state.status,
               builder: (context, status) {
-                if (status == LandingStatus.init)
+                if (status == LandingStatus.init) {
                   return _Loading(
                     title: Localization.of(context).initializing,
                     message: Localization.of(context).pleaseWait,
                   );
+                }
 
-                if (status == LandingStatus.provisioning)
+                if (status == LandingStatus.provisioning) {
                   return _Loading(
                     title: Localization.of(context).provisioning,
                     message: Localization.current.pleaseWait,
                   );
+                }
 
                 return const _QrCode();
               },
