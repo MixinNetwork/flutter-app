@@ -291,7 +291,8 @@ class AccountServer {
             await _sender.checkConversation(message.conversationId);
           }
           await _sender.checkSessionSenderKey(message.conversationId);
-          final result = await _sender.deliverNoThrow(await encryptNormalMessage(message));
+          final result =
+              await _sender.deliverNoThrow(await encryptNormalMessage(message));
           if (result.success) {
             await database.messagesDao
                 .updateMessageStatusById(message.messageId, MessageStatus.sent);

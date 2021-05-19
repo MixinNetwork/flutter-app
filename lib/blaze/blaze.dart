@@ -201,9 +201,9 @@ class Blaze {
     transactions[blazeMessage.id] = transaction;
     debugPrint('sendMessage transactions size: ${transactions.length}');
     return transaction.run(
-            () => channel?.sink.add(GZipEncoder()
+        () => channel?.sink.add(GZipEncoder()
             .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
-            () => null);
+        () => null);
   }
 
   Future<void> _reconnect() async {

@@ -16,7 +16,6 @@ const createSignalKeyMessages = 'CREATE_SIGNAL_KEY_MESSAGES';
 const countSignalKeys = 'COUNT_SIGNAL_KEYS';
 const syncSignalKeys = 'SYNC_SIGNAL_KEYS';
 
-
 const int forbidden = 403;
 const int conversationChecksumInvalidError = 20140;
 

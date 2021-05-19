@@ -375,9 +375,6 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isImage) {
-      if (data.category == MessageCategory.signalImage) {
-        return _updateRemoteMessageStatus(data.messageId, messageStatus);
-      }
       final attachment =
           AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plainText));
       final message = await _generateMessage(
@@ -411,13 +408,7 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isVideo) {
-      String plain;
-      if (data.category == MessageCategory.signalVideo) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
-      } else {
-        plain = await _decodeWithIsolate(plainText);
-      }
+      final plain = await _decodeWithIsolate(plainText);
       final attachment =
           AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = await _generateMessage(
@@ -452,13 +443,7 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isData) {
-      String plain;
-      if (data.category == MessageCategory.signalData) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
-      } else {
-        plain = await _decodeWithIsolate(plainText);
-      }
+      final plain = await _decodeWithIsolate(plainText);
       final attachment =
           AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = await _generateMessage(
@@ -489,13 +474,7 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isAudio) {
-      String plain;
-      if (data.category == MessageCategory.signalAudio) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
-      } else {
-        plain = await _decodeWithIsolate(plainText);
-      }
+      final plain = await _decodeWithIsolate(plainText);
       final attachment =
           AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = await _generateMessage(
@@ -525,13 +504,7 @@ class DecryptMessage extends Injector {
         content: message.content!,
       ));
     } else if (data.category.isSticker) {
-      String plain;
-      if (data.category == MessageCategory.signalSticker) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
-      } else {
-        plain = await _decodeWithIsolate(plainText);
-      }
+      final String plain = await _decodeWithIsolate(plainText);
       final stickerMessage =
           StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final sticker = await database.stickerDao
@@ -552,13 +525,7 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isContact) {
-      String plain;
-      if (data.category == MessageCategory.signalContact) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
-      } else {
-        plain = await _decodeWithIsolate(plainText);
-      }
+      final plain = await _decodeWithIsolate(plainText);
       final contactMessage =
           ContactMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
@@ -578,13 +545,7 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isLive) {
-      String plain;
-      if (data.category == MessageCategory.signalLive) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
-      } else {
-        plain = await _decodeWithIsolate(plainText);
-      }
+      final plain = await _decodeWithIsolate(plainText);
       final liveMessage =
           LiveMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = Message(
@@ -602,8 +563,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isLocation) {
       String plain;
       if (data.category == MessageCategory.signalLocation) {
-        await _updateRemoteMessageStatus(data.messageId, messageStatus);
-        return;
+        plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);
       }
@@ -633,7 +593,7 @@ class DecryptMessage extends Injector {
     } else if (data.category.isPost) {
       String plain;
       if (data.category == MessageCategory.signalPost) {
-        plain = 'SignalPost';
+        plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);
       }

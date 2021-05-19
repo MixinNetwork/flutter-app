@@ -1,4 +1,3 @@
-
 import 'identity_key_util.dart';
 import 'signal_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';

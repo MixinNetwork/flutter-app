@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -19,12 +18,12 @@ import '../db/mixin_database.dart' as db;
 
 class Sender {
   Sender(
-      this.signalProtocol,
-      this.blaze,
-      this.client,
-      this.sessionId,
-      this.database,
-      );
+    this.signalProtocol,
+    this.blaze,
+    this.client,
+    this.sessionId,
+    this.database,
+  );
 
   final SignalProtocol signalProtocol;
   final Blaze blaze;
@@ -101,7 +100,8 @@ class Sender {
     return bm;
   }
 
-  Future<void> _sleep(int seconds) async => Future.delayed(Duration(seconds: seconds));
+  Future<void> _sleep(int seconds) async =>
+      Future.delayed(Duration(seconds: seconds));
 
   Future checkSessionSenderKey(String conversationId) async {
     final participants = await database.participantSessionDao
@@ -162,10 +162,10 @@ class Sender {
         if (noKeyList.isNotEmpty) {
           final sentSenderKeys = noKeyList
               .map((e) => db.ParticipantSessionData(
-            conversationId: conversationId,
-            userId: e.userId,
-            sessionId: e.sessionId,
-          ))
+                    conversationId: conversationId,
+                    userId: e.userId,
+                    sessionId: e.sessionId,
+                  ))
               .toList();
           await database.participantSessionDao.updateList(sentSenderKeys);
         }
@@ -187,10 +187,10 @@ class Sender {
     if (result.success) {
       final sentSenderKeys = signalKeyMessages
           .map((e) => db.ParticipantSessionData(
-          conversationId: conversationId,
-          userId: e.recipientId,
-          sessionId: e.sessionId!,
-          sentToServer: SenderKeyStatus.sent.index))
+              conversationId: conversationId,
+              userId: e.recipientId,
+              sessionId: e.sessionId!,
+              sentToServer: SenderKeyStatus.sent.index))
           .toList();
       await database.participantSessionDao.updateList(sentSenderKeys);
     }
@@ -214,7 +214,7 @@ class Sender {
 
   Future checkConversation(String conversationId) async {
     final conversation =
-    await database.conversationDao.getConversationById(conversationId);
+        await database.conversationDao.getConversationById(conversationId);
     if (conversation == null) {
       return;
     }
