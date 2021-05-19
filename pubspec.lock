@@ -714,9 +714,11 @@ packages:
   photo_view:
     dependency: "direct main"
     description:
-      name: photo_view
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "7281d0092356441e50b89d0ac90629ebc05cce18"
+      resolved-ref: "7281d0092356441e50b89d0ac90629ebc05cce18"
+      url: "https://github.com/YeungKC/photo_view.git"
+    source: git
     version: "0.11.1"
   platform:
     dependency: transitive
