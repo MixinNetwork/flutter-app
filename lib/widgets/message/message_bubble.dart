@@ -61,7 +61,7 @@ class MessageBubble extends StatelessWidget {
       child: _child,
     );
 
-    if (quoteMessageId != null && quoteMessageContent?.isNotEmpty == true) {
+    if (quoteMessageId != null) {
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
