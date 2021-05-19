@@ -26,5 +26,5 @@ Map<String, dynamic> _$PlainJsonMessageToJson(PlainJsonMessage instance) =>
       'user_id': instance.userId,
       'message_id': instance.messageId,
       'session_id': instance.sessionId,
-      'ack_messages': instance.ackMessages,
+      'ack_messages': instance.ackMessages?.map((e) => e.toJson()).toList(),
     };

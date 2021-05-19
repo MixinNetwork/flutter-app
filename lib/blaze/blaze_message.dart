@@ -1,3 +1,4 @@
+import 'package:flutter_app/utils/json.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -28,9 +29,15 @@ class BlazeMessage {
   String id;
   @JsonKey(name: 'action')
   String action;
-  @JsonKey(name: 'params')
+  @JsonKey(
+    name: 'params',
+    toJson: dynamicToJson,
+  )
   dynamic params;
-  @JsonKey(name: 'data')
+  @JsonKey(
+    name: 'data',
+    toJson: dynamicToJson,
+  )
   dynamic data;
   @JsonKey(name: 'error')
   MixinError? error;

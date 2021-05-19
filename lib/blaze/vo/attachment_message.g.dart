@@ -25,8 +25,8 @@ AttachmentMessage _$AttachmentMessageFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$AttachmentMessageToJson(AttachmentMessage instance) =>
     <String, dynamic>{
-      'key': instance.key,
-      'digest': instance.digest,
+      'key': dynamicToJson(instance.key),
+      'digest': dynamicToJson(instance.digest),
       'attachment_id': instance.attachmentId,
       'mime_type': instance.mimeType,
       'size': instance.size,
@@ -35,6 +35,6 @@ Map<String, dynamic> _$AttachmentMessageToJson(AttachmentMessage instance) =>
       'height': instance.height,
       'thumbnail': instance.thumbnail,
       'duration': instance.duration,
-      'waveform': instance.waveform,
+      'waveform': dynamicToJson(instance.waveform),
       'caption': instance.caption,
     };

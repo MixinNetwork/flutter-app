@@ -19,6 +19,7 @@ SignalKeyRequest _$SignalKeyRequestFromJson(Map<String, dynamic> json) {
 Map<String, dynamic> _$SignalKeyRequestToJson(SignalKeyRequest instance) =>
     <String, dynamic>{
       'identity_key': instance.identityKey,
-      'signed_pre_key': instance.signedPreKey,
-      'one_time_pre_keys': instance.oneTimePreKeys,
+      'signed_pre_key': instance.signedPreKey.toJson(),
+      'one_time_pre_keys':
+          instance.oneTimePreKeys.map((e) => e.toJson()).toList(),
     };

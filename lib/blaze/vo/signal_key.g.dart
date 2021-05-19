@@ -19,8 +19,8 @@ SignalKey _$SignalKeyFromJson(Map<String, dynamic> json) {
 
 Map<String, dynamic> _$SignalKeyToJson(SignalKey instance) => <String, dynamic>{
       'identity_key': instance.identityKey,
-      'signed_pre_key': instance.signedPreKey,
-      'one_time_pre_key': instance.preKey,
+      'signed_pre_key': instance.signedPreKey.toJson(),
+      'one_time_pre_key': instance.preKey.toJson(),
       'registration_id': instance.registrationId,
       'user_id': instance.userId,
       'session_id': instance.sessionId,

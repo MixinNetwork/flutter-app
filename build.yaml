@@ -9,3 +9,6 @@ targets:
           sqlite_modules:
             - fts5
             - moor_ffi
+      json_serializable:
+        options:
+          explicit_to_json: true
