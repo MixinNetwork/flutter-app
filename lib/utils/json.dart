@@ -1,4 +1,6 @@
 dynamic dynamicToJson(dynamic object) {
-  if (object?.toJson != null) return object.toJson();
+  try {
+    if (object?.toJson != null) return object.toJson();
+  } catch (_) {}
   return object;
 }
