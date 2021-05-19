@@ -69,6 +69,7 @@ class _QrCode extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(11),
+              clipBehavior: Clip.antiAliasWithSaveLayer,
               child: SizedBox.fromSize(
                 size: const Size.square(200),
                 child: Stack(
