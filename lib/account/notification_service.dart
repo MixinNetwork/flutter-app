@@ -81,12 +81,10 @@ class NotificationService extends WidgetsBindingObserver {
                   event.senderId != event.ownerUserId;
 
               if (event.type.isText) {
-                final mentionCache = context
-                      .read<MentionCache>();
+                final mentionCache = context.read<MentionCache>();
                 body = mentionCache.replaceMention(
                   event.content,
-                  await mentionCache
-                      .checkMentionCache({event.content!}),
+                  await mentionCache.checkMentionCache({event.content!}),
                 );
               }
               body = await messagePreviewOptimize(
