@@ -105,23 +105,25 @@ class AttachmentUtil {
     try {
       final response = await _client.attachmentApi.postAttachment();
       if (response.data.uploadUrl != null) {
-        final fileStream = file.openRead();
-
+        File tmpFile;
         List<int>? keys = null;
         List<int>? digest = null;
         if (category.isSignal) {
+          tmpFile = File(p.join(file.parent.path, '$messageId.tmp'));
           keys = generateRandomKey(64);
           final iv = generateRandomKey(16);
           final encrypted = CryptoAttachment()
               .encryptAttachment(file.readAsBytesSync(), keys, iv);
           final encryptedBin = encrypted.item1;
           digest = encrypted.item2;
-          file.writeAsBytesSync(encryptedBin);
+          tmpFile.writeAsBytesSync(encryptedBin);
+        } else {
+          tmpFile = file;
         }
         final request =
             await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
-        final totalBytes = await file.length();
-        debugPrint(file.path);
+        final totalBytes = await tmpFile.length();
+        debugPrint(tmpFile.path);
 
         request.headers
           ..add(HttpHeaders.contentTypeHeader, 'application/octet-stream')
@@ -131,6 +133,7 @@ class AttachmentUtil {
 
         var byteCount = 0;
 
+        final fileStream = tmpFile.openRead();
         await request.addStream(fileStream.transform(
           StreamTransformer.fromHandlers(
             handleData: (data, sink) {
@@ -148,6 +151,7 @@ class AttachmentUtil {
 
         final httpResponse = await request.close();
         if (httpResponse.statusCode == 200) {
+          deleteCryptoTmpFile(category, tmpFile);
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
           return AttachmentResult(
               response.data.attachmentId,
@@ -156,6 +160,7 @@ class AttachmentUtil {
                   ? await base64EncodeWithIsolate(digest!)
                   : null);
         } else {
+          deleteCryptoTmpFile(category, tmpFile);
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;
         }
@@ -167,6 +172,12 @@ class AttachmentUtil {
       debugPrint(e.toString());
       await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
       return null;
+    }
+  }
+
+  void deleteCryptoTmpFile(MessageCategory category, File file) {
+    if (category.isSignal) {
+      file.delete();
     }
   }
 
