@@ -174,12 +174,10 @@ class Blaze {
     if (offset != null) {
       params = '{"offset":"${offset.toUtc()}"}';
     }
-    await _sendGZip(
-      BlazeMessage(
-          id: const Uuid().v4(),
-          params: params,
-          action: 'LIST_PENDING_MESSAGES'),
-    );
+    final m = BlazeMessage(
+        id: const Uuid().v4(), params: params, action: 'LIST_PENDING_MESSAGES');
+    debugPrint('blaze send: ${m.toJson()}');
+    await _sendGZip(m);
   }
 
   Future<void> _sendGZip(BlazeMessage msg) async {
@@ -197,6 +195,7 @@ class Blaze {
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
+    debugPrint('blaze send: ${blazeMessage.toJson()}');
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
     debugPrint('sendMessage transactions size: ${transactions.length}');
