@@ -660,6 +660,7 @@ class AccountServer {
       _sendMessageHelper.reUploadAttachment(
           message.conversationId,
           message.messageId,
+          message.type,
           File(message.mediaUrl!),
           message.mediaName,
           message.mediaMimeType!,

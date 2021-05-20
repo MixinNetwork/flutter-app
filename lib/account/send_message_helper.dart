@@ -89,13 +89,13 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final attachmentId =
-        await _attachmentUtil.uploadAttachment(attachment, messageId);
-    if (attachmentId == null) return;
+    final attachmentResult =
+        await _attachmentUtil.uploadAttachment(attachment, messageId, category);
+    if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        null,
-        null,
-        attachmentId,
+        attachmentResult.keys,
+        attachmentResult.digest,
+        attachmentResult.attachmentId,
         mimeType,
         attachmentSize,
         null,
@@ -143,13 +143,13 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final attachmentId =
-        await _attachmentUtil.uploadAttachment(attachment, messageId);
-    if (attachmentId == null) return;
+    final attachmentResult =
+        await _attachmentUtil.uploadAttachment(attachment, messageId, category);
+    if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        null,
-        null,
-        attachmentId,
+        attachmentResult.keys,
+        attachmentResult.digest,
+        attachmentResult.attachmentId,
         mimeType,
         attachmentSize,
         file.name,
@@ -217,13 +217,13 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final attachmentId =
-        await _attachmentUtil.uploadAttachment(attachment, messageId);
-    if (attachmentId == null) return;
+    final attachmentResult =
+        await _attachmentUtil.uploadAttachment(attachment, messageId, category);
+    if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        null,
-        null,
-        attachmentId,
+        attachmentResult.keys,
+        attachmentResult.digest,
+        attachmentResult.attachmentId,
         mimeType,
         attachmentSize,
         file.name,
@@ -301,13 +301,13 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final attachmentId =
-        await _attachmentUtil.uploadAttachment(attachment, messageId);
-    if (attachmentId == null) return;
+    final attachmentResult =
+        await _attachmentUtil.uploadAttachment(attachment, messageId, category);
+    if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        null,
-        null,
-        attachmentId,
+        attachmentResult.keys,
+        attachmentResult.digest,
+        attachmentResult.attachmentId,
         mimeType,
         attachmentSize,
         file.name,
@@ -505,6 +505,7 @@ class SendMessageHelper {
   Future<void> reUploadAttachment(
       String conversationId,
       String messageId,
+      MessageCategory category,
       File file,
       String? name,
       String mediaMimeType,
@@ -514,14 +515,14 @@ class SendMessageHelper {
       String? thumbImage,
       String? mediaDuration,
       dynamic mediaWaveform) async {
-    final attachmentId =
-        await _attachmentUtil.uploadAttachment(file, messageId);
-    if (attachmentId == null) return;
+    final attachmentResult =
+        await _attachmentUtil.uploadAttachment(file, messageId, category);
+    if (attachmentResult == null) return;
     final duration = mediaDuration != null ? int.parse(mediaDuration) : null;
     final attachmentMessage = AttachmentMessage(
-        null,
-        null,
-        attachmentId,
+        attachmentResult.keys,
+        attachmentResult.digest,
+        attachmentResult.attachmentId,
         mediaMimeType,
         mediaSize,
         name,

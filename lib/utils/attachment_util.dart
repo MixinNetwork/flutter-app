@@ -2,6 +2,10 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+import '../crypto/attachment/crypto_attachment.dart';
+import 'load_balancer_utils.dart';
+import 'crypto_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -29,6 +33,8 @@ class AttachmentUtil {
     required String content,
     required String conversationId,
     required MessageCategory category,
+    String? key,
+    String? digest,
   }) async {
     await _messagesDao.updateMediaStatus(MediaStatus.pending, messageId);
 
@@ -56,6 +62,29 @@ class AttachmentUtil {
         try {
           await httpResponse.pipe(out);
 
+          if (category.isSignal) {
+            var localKey = key;
+            var localDigest = digest;
+            if (localKey == null || localDigest == null) {
+              final message =
+                  await _messagesDao.findMessageByMessageId(messageId);
+              if (message != null) {
+                localKey = message.mediaKey;
+                localDigest = message.mediaDigest;
+              }
+              if (localKey == null || localDigest == null) {
+                throw InvalidKeyException(
+                    'decrypt attachment key: $key, digest: $digest');
+              }
+            }
+            final result = CryptoAttachment().decryptAttachment(
+              file.readAsBytesSync(),
+              await base64DecodeWithIsolate(localKey),
+              await base64DecodeWithIsolate(localDigest),
+            );
+            file.writeAsBytesSync(result);
+          }
+
           await _messagesDao.updateMediaMessageUrl(file.path, messageId);
           await _messagesDao.updateMediaSize(await file.length(), messageId);
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
@@ -71,16 +100,28 @@ class AttachmentUtil {
     }
   }
 
-  Future<String?> uploadAttachment(File file, String messageId) async {
+  Future<AttachmentResult?> uploadAttachment(
+      File file, String messageId, MessageCategory category) async {
     try {
       final response = await _client.attachmentApi.postAttachment();
       if (response.data.uploadUrl != null) {
         final fileStream = file.openRead();
 
-        final totalBytes = await file.length();
-
+        List<int>? keys = null;
+        List<int>? digest = null;
+        if (category.isSignal) {
+          keys = generateRandomKey(64);
+          final iv = generateRandomKey(16);
+          final encrypted = CryptoAttachment()
+              .encryptAttachment(file.readAsBytesSync(), keys, iv);
+          final encryptedBin = encrypted.item1;
+          digest = encrypted.item2;
+          file.writeAsBytesSync(encryptedBin);
+        }
         final request =
             await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
+        final totalBytes = await file.length();
+        debugPrint(file.path);
 
         request.headers
           ..add(HttpHeaders.contentTypeHeader, 'application/octet-stream')
@@ -108,7 +149,12 @@ class AttachmentUtil {
         final httpResponse = await request.close();
         if (httpResponse.statusCode == 200) {
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
-          return response.data.attachmentId;
+          return AttachmentResult(
+              response.data.attachmentId,
+              category.isSignal ? await base64EncodeWithIsolate(keys!) : null,
+              category.isSignal
+                  ? await base64EncodeWithIsolate(digest!)
+                  : null);
         } else {
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;
@@ -166,4 +212,12 @@ class AttachmentUtil {
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
     return AttachmentUtil(client, messagesDao, mediaDirectory.path);
   }
+}
+
+class AttachmentResult {
+  AttachmentResult(this.attachmentId, this.keys, this.digest);
+
+  final String attachmentId;
+  final String? keys;
+  final String? digest;
 }
