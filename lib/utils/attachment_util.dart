@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/crypto/attachment/crypto_attachment.dart';
 import 'package:flutter_app/utils/load_balancer_utils.dart';
 import '../crypto/attachment/crypto_encryptor.dart';
 import 'crypto_util.dart';
@@ -75,17 +76,24 @@ class AttachmentUtil {
     }
   }
 
-  Future<AttachmentResult?> uploadAttachment(File file, String messageId, MessageCategory category) async {
+  Future<AttachmentResult?> uploadAttachment(
+      File file, String messageId, MessageCategory category) async {
     try {
       final response = await _client.attachmentApi.postAttachment();
       if (response.data.uploadUrl != null) {
         final fileStream = file.openRead();
 
-        final fileLength = await file.length();
-        final int totalBytes = (16 + (((fileLength / 16) +1) * 16) + 32).toInt();
-
+        final keys = generateRandomKey(64);
+        final iv = generateRandomKey(16);
+        final encrypted = CryptoAttachment()
+            .encryptAttachment(file.readAsBytesSync(), keys, iv);
+        final encryptedBin = encrypted.item1;
+        final digest = encrypted.item2;
+        file.writeAsBytesSync(encryptedBin);
         final request =
             await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
+        final totalBytes = await file.length();
+        debugPrint(file.path);
 
         request.headers
           ..add(HttpHeaders.contentTypeHeader, 'application/octet-stream')
@@ -95,48 +103,28 @@ class AttachmentUtil {
 
         var byteCount = 0;
 
-        final List<int>? key;
-        if (category.isSignal) {
-          key = generateRandomKey(64);
-        } else {
-          key = null;
-        }
-
-        CryptoEncryptor? encryptor;
-        List<int>? digest = null;
         await request.addStream(fileStream.transform(
           StreamTransformer.fromHandlers(
             handleData: (data, sink) {
-              if (key != null && encryptor == null) {
-                encryptor = CryptoEncryptor(sink, key);
-              }
               byteCount += data.length;
               // upload progress
               debugPrint('$byteCount / $totalBytes');
-              if (encryptor != null) {
-                encryptor?.process(Uint8List.fromList(data));
-              } else {
-                sink.add(data);
-              }
+              sink.add(data);
             },
-            handleError: (error, stack, sink) {
-              debugPrint('uploadAttachment error: $error');
-            },
+            handleError: (error, stack, sink) {},
             handleDone: (sink) {
-              if (encryptor != null) {
-                digest = encryptor?.close();
-              } else {
-                sink.close();
-              }
+              sink.close();
             },
           ),
         ));
 
         final httpResponse = await request.close();
-        debugPrint('uploadAttachment httpResponse: ${httpResponse.statusCode}');
         if (httpResponse.statusCode == 200) {
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
-          return AttachmentResult(response.data.attachmentId, await base64EncodeWithIsolate(key!), await base64EncodeWithIsolate(digest!));
+          return AttachmentResult(
+              response.data.attachmentId,
+              await base64EncodeWithIsolate(keys),
+              await base64EncodeWithIsolate(digest));
         } else {
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;
