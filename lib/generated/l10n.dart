@@ -1609,6 +1609,46 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Message {name}`
+  String groupPopMenuMessage(Object name) {
+    return Intl.message(
+      'Message $name',
+      name: 'groupPopMenuMessage',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Make group admin`
+  String get groupPopMenuMakeAdmin {
+    return Intl.message(
+      'Make group admin',
+      name: 'groupPopMenuMakeAdmin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dismiss admin`
+  String get groupPopMenuDismissAdmin {
+    return Intl.message(
+      'Dismiss admin',
+      name: 'groupPopMenuDismissAdmin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove ${name}`
+  String groupPopMenuRemoveParticipants(Object name) {
+    return Intl.message(
+      'Remove \$$name',
+      name: 'groupPopMenuRemoveParticipants',
+      desc: '',
+      args: [name],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

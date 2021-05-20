@@ -154,5 +154,9 @@
   "networkConnectionFailed": "Network connection failed",
   "groupParticipants": "Participants",
   "groupAdmin": "admin",
-  "groupOwner": "owner"
+  "groupOwner": "owner",
+  "groupPopMenuMessage": "Message {name}",
+  "groupPopMenuMakeAdmin": "Make group admin",
+  "groupPopMenuDismissAdmin": "Dismiss admin",
+  "groupPopMenuRemoveParticipants": "Remove ${name}"
 }

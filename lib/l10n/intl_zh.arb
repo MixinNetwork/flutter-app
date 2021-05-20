@@ -149,5 +149,9 @@
   "networkConnectionFailed": "网络连接失败",
   "groupParticipants": "群成员",
   "groupAdmin": "管理员",
-  "groupOwner": "群主"
+  "groupOwner": "群主",
+  "groupPopMenuMessage": "发送消息至 {name}",
+  "groupPopMenuMakeAdmin": "设定为群组管理员",
+  "groupPopMenuDismissAdmin": "撤销管理员身份",
+  "groupPopMenuRemoveParticipants": "移除 ${name}"
 }

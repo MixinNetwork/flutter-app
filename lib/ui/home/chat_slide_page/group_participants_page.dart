@@ -11,6 +11,7 @@ import '../../../generated/l10n.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/menu.dart';
 import '../bloc/conversation_cubit.dart';
 
 /**
@@ -41,23 +42,36 @@ class GroupParticipantsPage extends HookWidget {
               return Container();
             }
             final data = snapshot.requireData;
+            final me = data.firstWhere((element) =>
+                element.userId == context.read<AccountServer>().userId);
             return ListView.builder(
                 itemCount: data.length,
                 itemBuilder: (BuildContext context, int index) =>
-                    _ParticipantTile(participant: data[index]));
+                    _ParticipantTile(
+                      participant: data[index],
+                      me: me,
+                    ));
           }),
     );
   }
 }
 
 class _ParticipantTile extends StatelessWidget {
-  const _ParticipantTile({required this.participant, Key? key})
+  const _ParticipantTile(
+      {required this.participant, Key? key, required this.me})
       : super(key: key);
 
   final ParticipantUser participant;
 
+  final ParticipantUser me;
+
   @override
-  Widget build(BuildContext context) => ListTile(
+  Widget build(BuildContext context) {
+    final self = participant.userId == me.userId;
+    return _ParticipantMenuEntry(
+      participant: participant,
+      me: me,
+      child: ListTile(
         contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         leading: AvatarWidget(
           size: 50,
@@ -70,10 +84,78 @@ class _ParticipantTile extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyText1,
         ),
         onTap: () {
-          debugPrint("on click: ${participant.fullName}");
+          // skip self
+          if (self) {
+            return;
+          }
+          context.read<ConversationCubit>().selectUser(participant.userId);
         },
+        onLongPress: () {},
         trailing: _RoleWidget(role: participant.role),
-      );
+      ),
+    );
+  }
+}
+
+class _ParticipantMenuEntry extends StatelessWidget {
+  final ParticipantUser participant;
+  final ParticipantUser me;
+
+  final Widget child;
+
+  const _ParticipantMenuEntry({
+    Key? key,
+    required this.child,
+    required this.participant,
+    required this.me,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final self = participant.userId == context.read<AccountServer>().userId;
+    if (self) {
+      return child;
+    }
+
+    return ContextMenuPortalEntry(
+      child: child,
+      buildMenus: () {
+        final menus = [
+          ContextMenu(
+            title: Localization.of(context)
+                .groupPopMenuMessage(participant.fullName ?? "?"),
+            onTap: () {
+              context.read<ConversationCubit>().selectUser(participant.userId);
+            },
+          ),
+        ];
+        if (me.role == ParticipantRole.owner) {
+          if (participant.role != ParticipantRole.admin) {
+            menus.add(
+              ContextMenu(
+                title: Localization.of(context).groupPopMenuMakeAdmin,
+                onTap: () {},
+              ),
+            );
+          } else {
+            menus.add(ContextMenu(
+                title: Localization.of(context).groupPopMenuDismissAdmin));
+          }
+          menus.add(ContextMenu(
+            title: Localization.of(context)
+                .groupPopMenuRemoveParticipants(participant.fullName ?? "?"),
+          ));
+        } else if (me.role == ParticipantRole.admin) {
+          if (participant.role == null) {
+            menus.add(ContextMenu(
+                title: Localization.of(context).groupPopMenuRemoveParticipants(
+                    participant.fullName ?? "?")));
+          }
+        }
+        return menus;
+      },
+    );
+  }
 }
 
 class _RoleWidget extends StatelessWidget {
