@@ -14,3 +14,13 @@ SELECT conversation_id, user_id, session_id, public_key FROM participant_session
 
 getNotSendSessionParticipants AS ParticipantSession:
 SELECT p.* FROM participant_session p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL;
+
+getGroupParticipants as ParticipantUser:
+SELECT p.conversation_id as conversationId, p.role as role, p.created_at as createdAt,
+u.user_id as userId, u.identity_number as identityNumber, u.relationship as relationship, u.biography as biography, u.full_name as fullName,
+u.avatar_url as avatarUrl, u.phone as phone, u.is_verified as isVerified, u.created_at as userCreatedAt, u.mute_until as muteUntil,
+u.has_pin as hasPin, u.app_id as appId, u.is_scam as isScam
+FROM participants p, users u
+WHERE p.conversation_id = :conversationId
+AND p.user_id = u.user_id
+ORDER BY p.created_at DESC;

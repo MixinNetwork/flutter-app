@@ -1579,6 +1579,36 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Participants`
+  String get groupParticipants {
+    return Intl.message(
+      'Participants',
+      name: 'groupParticipants',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `admin`
+  String get groupAdmin {
+    return Intl.message(
+      'admin',
+      name: 'groupAdmin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `owner`
+  String get groupOwner {
+    return Intl.message(
+      'owner',
+      name: 'groupOwner',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

@@ -151,5 +151,8 @@
   "includeFiles": "Include Files",
   "includeVideos": "Include Videos",
   "clear": "Clear",
-  "networkConnectionFailed": "Network connection failed"
+  "networkConnectionFailed": "Network connection failed",
+  "groupParticipants": "Participants",
+  "groupAdmin": "admin",
+  "groupOwner": "owner"
 }

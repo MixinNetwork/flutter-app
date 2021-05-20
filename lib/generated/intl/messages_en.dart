@@ -142,6 +142,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "group": MessageLookupByLibrary.simpleMessage("Group"),
+        "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
+        "groupOwner": MessageLookupByLibrary.simpleMessage("owner"),
+        "groupParticipants":
+            MessageLookupByLibrary.simpleMessage("Participants"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),
