@@ -84,9 +84,9 @@ class _RoleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (role) {
       case ParticipantRole.owner:
-        return _RoleLabel(Localization.of(context).groupAdmin);
-      case ParticipantRole.admin:
         return _RoleLabel(Localization.of(context).groupOwner);
+      case ParticipantRole.admin:
+        return _RoleLabel(Localization.of(context).groupAdmin);
       default:
         return Container(width: 0);
     }
