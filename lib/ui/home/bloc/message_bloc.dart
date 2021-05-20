@@ -250,7 +250,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     int limit, {
     String? centerMessageId,
   }) async {
-    if (centerMessageId == null) {
+    Future<MessageState> recentMessages() async {
       final list = await messagesDao
           .messagesByConversationId(
             conversationId,
@@ -265,8 +265,14 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       );
     }
 
+    if (centerMessageId == null) return recentMessages();
+
     return database.transaction(() async {
-      final rowId = await messagesDao.messageRowId(centerMessageId).getSingle();
+      final rowId =
+          await messagesDao.messageRowId(centerMessageId).getSingleOrNull();
+      if (rowId == null) {
+        return recentMessages();
+      }
       final _limit = limit ~/ 2;
       final bottomList = await messagesDao
           .afterMessagesByConversationId(rowId, conversationId, _limit)
