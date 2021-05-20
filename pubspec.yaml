@@ -53,7 +53,7 @@ dependencies:
   #  desktop_window: ^0.4.0
   bloc: ^7.0.0
   flutter_bloc: ^7.0.0
-  equatable: ^2.0.0
+  equatable: ^2.0.2
   intl: ^0.17.0
   flutter_svg: ^0.22.0
   tuple: ^2.0.0
