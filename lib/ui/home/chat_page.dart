@@ -17,6 +17,7 @@ import '../../widgets/chat_bar.dart';
 import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../widgets/input_container.dart';
 import '../../widgets/interacter_decorated_box.dart';
+import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message/message.dart';
 import '../../widgets/message/message_bubble.dart';
 import 'bloc/conversation_cubit.dart';
@@ -138,6 +139,7 @@ class ChatPage extends HookWidget {
           create: (context) => MessageBloc(
             database: context.read<AccountServer>().database,
             conversationCubit: context.read<ConversationCubit>(),
+            mentionCache: context.read<MentionCache>(),
             limit: windowHeight ~/ 20,
           ),
         ),

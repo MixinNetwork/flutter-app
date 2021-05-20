@@ -84,7 +84,7 @@ class InputContainer extends HookWidget {
 
       void onListener() {
         text = textEditingController.text;
-        final mention = mentionRegExp.stringMatch(text)?.replaceFirst('@', '');
+        final mention = mentionRegExp.firstMatch(text)?[1];
         mentionCubit.send(mention);
       }
 
@@ -521,8 +521,8 @@ class HighlightTextEditingController extends TextEditingController {
       mentionNumberRegExp,
       onMatch: (match) {
         final text = match[0];
-        final index = participantsCubit.state.indexWhere(
-            (user) => '@${user.identityNumber}' == text?.trimRight());
+        final index = participantsCubit.state
+            .indexWhere((user) => user.identityNumber == match[1]);
         children.add(TextSpan(
             text: text,
             style: index > -1 ? style?.merge(highlightTextStyle) : style));

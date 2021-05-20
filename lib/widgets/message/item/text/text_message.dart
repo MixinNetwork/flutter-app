@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../ui/home/chat_page.dart';
@@ -31,30 +30,8 @@ class TextMessage extends HookWidget {
   Widget build(BuildContext context) {
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
 
-    final mentionMap = useFuture<Map<String, String>>(
-        useMemoized(
-          () => MentionBuilder.mentionsConverter(message.mentions),
-          [message.mentions],
-        ),
-        initialData: {}).data;
-
     final highlightTextSpans = useMemoized(
       () => <HighlightTextSpan>[
-        ...mentionNumberRegExp
-            .allMatches(message.content!)
-            .map((e) => e[0]!)
-            .map((e) => Tuple2(e, mentionMap?[e]))
-            .map(
-              (tuple2) => HighlightTextSpan(
-                tuple2.item2 ?? tuple2.item1,
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).accent,
-                ),
-                onTap: () {
-                  // TODO click mention user
-                },
-              ),
-            ),
         ...uriRegExp.allMatches(message.content!).map(
               (e) => HighlightTextSpan(
                 e[0]!,
@@ -65,14 +42,15 @@ class TextMessage extends HookWidget {
               ),
             ),
       ],
-      [message.content, mentionMap],
+      [message.content],
     );
 
     final content = Builder(
       builder: (context) => MentionBuilder(
-        mentionString: message.mentions,
-        builder: (context, mentionMapAsyncSnapshot) => HighlightSelectableText(
-          message.content!,
+        content: message.content,
+        builder: (context, newContent, mentionHighlightTextSpans) =>
+            HighlightSelectableText(
+          newContent!,
           highlightTextSpans: [
             HighlightTextSpan(
               keyword,
@@ -81,6 +59,7 @@ class TextMessage extends HookWidget {
               ),
             ),
             ...highlightTextSpans,
+            ...mentionHighlightTextSpans,
           ],
           style: TextStyle(
             fontSize: 16,

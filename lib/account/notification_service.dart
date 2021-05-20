@@ -14,6 +14,7 @@ import '../ui/home/local_notification_center.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
+import '../widgets/message/item/text/mention_builder.dart';
 import 'account_server.dart';
 
 class NotificationService extends WidgetsBindingObserver {
@@ -53,7 +54,7 @@ class NotificationService extends WidgetsBindingObserver {
             // mention current user
             if (mentionNumberRegExp
                 .allMatches(event.content ?? '')
-                .any((element) => element[0] == '@${account.identityNumber}')) {
+                .any((element) => element[1] == account.identityNumber)) {
               return true;
             }
 
@@ -74,15 +75,24 @@ class NotificationService extends WidgetsBindingObserver {
               event.ownerFullName,
             );
 
-            String? body;
+            var body = event.content;
             if (context.read<MultiAuthCubit>().state.currentMessagePreview) {
               final isGroup = event.category == ConversationCategory.group ||
                   event.senderId != event.ownerUserId;
 
+              if (event.type.isText) {
+                final mentionCache = context
+                      .read<MentionCache>();
+                body = mentionCache.replaceMention(
+                  event.content,
+                  await mentionCache
+                      .checkMentionCache({event.content!}),
+                );
+              }
               body = await messagePreviewOptimize(
                 event.status,
                 event.type,
-                event.content,
+                body,
                 false,
                 isGroup,
                 event.senderFullName,

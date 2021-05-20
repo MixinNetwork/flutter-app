@@ -7,7 +7,6 @@ import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import '../workers/sender.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -15,7 +14,6 @@ import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/blaze_param.dart';
 import '../blaze/vo/contact_message.dart';
-import '../blaze/vo/mention_user.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../crypto/crypto_key_value.dart';
@@ -38,6 +36,7 @@ import '../utils/load_Balancer_utils.dart';
 import '../utils/stream_extension.dart';
 import '../utils/string_extension.dart';
 import '../workers/decrypt_message.dart';
+import '../workers/sender.dart';
 import 'send_message_helper.dart';
 
 class AccountServer {
@@ -314,9 +313,7 @@ class AccountServer {
       return null;
     }
     final Iterable list = json.decode(mentionData);
-    final mentionUsers =
-        List<MentionUser>.from(list.map((e) => MentionUser.fromJson(e)));
-    final ids = mentionUsers.map((e) => e.identityNumber);
+    final ids = list.map((e) => e['identity_number'] as String);
     return database.userDao.findMultiUserIdsByIdentityNumbers(ids);
   }
 

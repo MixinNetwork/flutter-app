@@ -10723,6 +10723,22 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         .map((QueryRow row) => row.read<String?>('biography'));
   }
 
+  Selectable<MentionUser> userByIdentityNumbers(List<String> numbers) {
+    var $arrayStartIndex = 1;
+    final expandednumbers = $expandVar($arrayStartIndex, numbers.length);
+    $arrayStartIndex += numbers.length;
+    return customSelect(
+        'SELECT user_id, identity_number, full_name FROM users WHERE identity_number IN ($expandednumbers)',
+        variables: [for (var $ in numbers) Variable<String>($)],
+        readsFrom: {users}).map((QueryRow row) {
+      return MentionUser(
+        userId: row.read<String>('user_id'),
+        identityNumber: row.read<String>('identity_number'),
+        fullName: row.read<String?>('full_name'),
+      );
+    });
+  }
+
   Selectable<StickerAlbum> systemAlbums() {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
@@ -12950,6 +12966,36 @@ class ConversationCircleManagerItem {
           ..write('circleId: $circleId, ')
           ..write('name: $name, ')
           ..write('count: $count')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MentionUser {
+  final String userId;
+  final String identityNumber;
+  final String? fullName;
+  MentionUser({
+    required this.userId,
+    required this.identityNumber,
+    this.fullName,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      userId.hashCode, $mrjc(identityNumber.hashCode, fullName.hashCode)));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MentionUser &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.fullName == this.fullName);
+  @override
+  String toString() {
+    return (StringBuffer('MentionUser(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('fullName: $fullName')
           ..write(')'))
         .toString();
   }

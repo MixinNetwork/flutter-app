@@ -24,6 +24,7 @@ import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'utils/hook.dart';
 import 'widgets/brightness_observer.dart';
+import 'widgets/message/item/text/mention_builder.dart';
 
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
@@ -94,11 +95,18 @@ class _Providers extends StatelessWidget {
   final AccountServer accountServer;
 
   @override
-  Widget build(BuildContext context) => Provider<AccountServer>(
-        key: ValueKey(accountServer.userId),
-        create: (context) => accountServer,
-        dispose: (BuildContext context, AccountServer accountServer) =>
-            accountServer.stop(),
+  Widget build(BuildContext context) => MultiProvider(
+        providers: [
+          Provider<AccountServer>(
+            key: ValueKey(accountServer.userId),
+            create: (context) => accountServer,
+            dispose: (BuildContext context, AccountServer accountServer) =>
+                accountServer.stop(),
+          ),
+          Provider(
+            create: (context) => MentionCache(accountServer.database.userDao),
+          ),
+        ],
         child: Builder(
           builder: (context) => MultiBlocProvider(
             providers: [
@@ -132,6 +140,7 @@ class _Providers extends StatelessWidget {
                 create: (BuildContext context) => ConversationListBloc(
                   context.read<SlideCategoryCubit>(),
                   accountServer.database,
+                  context.read<MentionCache>(),
                 ),
               ),
             ],

@@ -76,4 +76,6 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
             ..where((tbl) => tbl.identityNumber.isIn(identityNumbers)))
           .map((row) => row.userId)
           .get();
+
+  Selectable<MentionUser> userByIdentityNumbers(List<String> list) => db.userByIdentityNumbers(list);
 }

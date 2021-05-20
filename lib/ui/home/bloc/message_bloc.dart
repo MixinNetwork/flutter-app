@@ -13,6 +13,7 @@ import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_status.dart';
 import '../../../utils/list_utils.dart';
+import '../../../widgets/message/item/text/mention_builder.dart';
 import 'conversation_cubit.dart';
 
 abstract class _MessageEvent extends Equatable {
@@ -113,6 +114,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.conversationCubit,
     required this.limit,
     required this.database,
+    required this.mentionCache,
   }) : super(const MessageState()) {
     add(_MessageInitEvent());
     addSubscription(
@@ -135,9 +137,27 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final ScrollController scrollController = ScrollController();
   final ConversationCubit conversationCubit;
   final Database database;
+  final MentionCache mentionCache;
   int limit;
 
   MessagesDao get messagesDao => database.messagesDao;
+
+  @override
+  Stream<Transition<_MessageEvent, MessageState>> transformTransitions(
+          Stream<Transition<_MessageEvent, MessageState>> transitions) =>
+      super.transformTransitions(transitions.asyncMap((event) async {
+        final state = event.nextState;
+
+        await mentionCache.checkMentionCache(
+          {...state.top, state.center, ...state.bottom}
+              .map((e) => e?.content)
+              .where((element) => element != null)
+              .cast<String>()
+              .toSet(),
+        );
+
+        return event;
+      }));
 
   @override
   Stream<MessageState> mapEventToState(_MessageEvent event) async* {

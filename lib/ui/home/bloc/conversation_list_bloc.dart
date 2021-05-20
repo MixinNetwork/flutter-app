@@ -8,12 +8,16 @@ import '../../../bloc/paging/paging_bloc.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
+import '../../../widgets/message/item/text/mention_builder.dart';
 import 'slide_category_cubit.dart';
 
 class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
     with SubscribeMixin {
-  ConversationListBloc(this.slideCategoryCubit, this.database)
-      : super(const PagingState<ConversationItem>()) {
+  ConversationListBloc(
+    this.slideCategoryCubit,
+    this.database,
+    this.mentionCache,
+  ) : super(const PagingState<ConversationItem>()) {
     addSubscription(slideCategoryCubit.stream
         .distinct()
         .listen((event) => _switchBloc(event, limit)));
@@ -22,6 +26,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
 
   final SlideCategoryCubit slideCategoryCubit;
   final Database database;
+  final MentionCache mentionCache;
   final Map<SlideCategoryState, _ConversationListBloc> _map = {};
 
   late int limit;
@@ -45,6 +50,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           (limit, offset) =>
               database.conversationDao.chatConversations(limit, offset).get(),
           database.conversationDao.updateEvent,
+          mentionCache,
         );
         break;
       case SlideCategoryType.contacts:
@@ -55,6 +61,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               .contactConversations(limit, offset)
               .get(),
           database.conversationDao.updateEvent,
+          mentionCache,
         );
         break;
       case SlideCategoryType.groups:
@@ -64,6 +71,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           (limit, offset) =>
               database.conversationDao.groupConversations(limit, offset).get(),
           database.conversationDao.updateEvent,
+          mentionCache,
         );
         break;
       case SlideCategoryType.bots:
@@ -73,6 +81,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
           (limit, offset) =>
               database.conversationDao.botConversations(limit, offset).get(),
           database.conversationDao.updateEvent,
+          mentionCache,
         );
         break;
       case SlideCategoryType.strangers:
@@ -84,6 +93,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               .strangerConversations(limit, offset)
               .get(),
           database.conversationDao.updateEvent,
+          mentionCache,
         );
         break;
       case SlideCategoryType.circle:
@@ -96,6 +106,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               .conversationsByCircleId(state.id!, limit, offset)
               .get(),
           database.conversationDao.updateEvent,
+          mentionCache,
         );
         break;
       default:
@@ -135,6 +146,7 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
     Future<int> Function() queryCount,
     Future<List<ConversationItem>> Function(int limit, int offset) queryRange,
     Stream<void> updateEvent,
+    this.mentionCache,
   )   : _queryCount = queryCount,
         _queryRange = queryRange,
         super(
@@ -145,10 +157,21 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
     addSubscription(updateEvent.listen((event) => add(PagingUpdateEvent())));
   }
 
+  final MentionCache mentionCache;
   final Future<int> Function() _queryCount;
-
   final Future<List<ConversationItem>> Function(int limit, int offset)
       _queryRange;
+
+  @override
+  Stream<Transition<PagingEvent, PagingState<ConversationItem>>>
+      transformTransitions(
+              Stream<Transition<PagingEvent, PagingState<ConversationItem>>>
+                  transitions) =>
+          super.transformTransitions(transitions.asyncMap((event) async {
+            await mentionCache.checkMentionCache(
+                event.nextState.map.values.map((e) => e.content).toSet());
+            return event;
+          }));
 
   @override
   Future<int> queryCount() => _queryCount();

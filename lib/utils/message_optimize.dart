@@ -23,7 +23,6 @@ Future<String?> messagePreviewOptimize(
   if (messageStatus == MessageStatus.failed) {
     _content = Localization.current.waitingForThisMessage;
   } else if (messageCategory.isText) {
-    // todo mention
     _content = trimContent;
   } else if (messageCategory == MessageCategory.systemAccountSnapshot) {
     _content = '[${Localization.current.transfer}]';

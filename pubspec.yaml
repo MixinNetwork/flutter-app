@@ -90,6 +90,7 @@ dependencies:
       ref: 7281d0092356441e50b89d0ac90629ebc05cce18
   lottie: ^1.0.1
   stream_transform: ^2.0.0
+  ecache: ^2.0.1
 
 dev_dependencies:
   build_runner:

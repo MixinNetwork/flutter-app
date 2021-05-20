@@ -30,6 +30,7 @@ import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/menu.dart';
+import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message_status_icon.dart';
 import '../../widgets/radio.dart';
 import '../../widgets/search_bar.dart';
@@ -115,35 +116,38 @@ class _SearchList extends HookWidget {
     final accountServer = context.read<AccountServer>();
 
     final users = useStream<List<User>>(
-        useMemoized(
-            () => accountServer.database.userDao
-                .fuzzySearchUser(
-                    id: accountServer.userId,
-                    username: keyword,
-                    identityNumber: keyword)
-                .watch(),
-            [keyword]),
-        initialData: []).data!;
+            useMemoized(
+                () => accountServer.database.userDao
+                    .fuzzySearchUser(
+                        id: accountServer.userId,
+                        username: keyword,
+                        identityNumber: keyword)
+                    .watch(),
+                [keyword]),
+            initialData: []).data ??
+        [];
 
     final messages = useStream<List<SearchMessageDetailItem>>(
-        useMemoized(() async* {
-          if (keyword.trim().isEmpty) {
-            yield [];
-          } else {
-            yield* accountServer.database.messagesDao
-                .fuzzySearchMessage(query: keyword, limit: 4)
-                .watch();
-          }
-        }, [keyword]),
-        initialData: []).data!;
+            useMemoized(() async* {
+              if (keyword.trim().isEmpty) {
+                yield [];
+              } else {
+                yield* accountServer.database.messagesDao
+                    .fuzzySearchMessage(query: keyword, limit: 4)
+                    .watch();
+              }
+            }, [keyword]),
+            initialData: []).data ??
+        [];
 
     final conversations = useStream<List<SearchConversationItem>>(
-        useMemoized(
-            () => accountServer.database.conversationDao
-                .fuzzySearchConversation(keyword)
-                .watch(),
-            [keyword]),
-        initialData: []).data!;
+            useMemoized(
+                () => accountServer.database.conversationDao
+                    .fuzzySearchConversation(keyword)
+                    .watch(),
+                [keyword]),
+            initialData: []).data ??
+        [];
 
     final type = useState<_ShowMoreType?>(null);
 
@@ -1109,14 +1113,19 @@ class _MessageContent extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final text = useMemoizedFuture(
-      () {
+      () async {
         final isGroup = conversation.category == ConversationCategory.group ||
             conversation.senderId != conversation.ownerId;
+
+        final mentionCache = context.read<MentionCache>();
 
         return messagePreviewOptimize(
           conversation.messageStatus,
           conversation.contentType,
-          conversation.content,
+          mentionCache.replaceMention(
+            conversation.content,
+            await mentionCache.checkMentionCache({conversation.content}),
+          ),
           conversation.senderId == context.read<AccountServer>().userId,
           isGroup,
           conversation.senderFullName,
