@@ -1,5 +1,6 @@
-import 'package:flutter_app/utils/json.dart';
 import 'package:json_annotation/json_annotation.dart';
+
+import '../../utils/json.dart';
 
 part 'attachment_message.g.dart';
 
@@ -22,11 +23,13 @@ class AttachmentMessage {
   factory AttachmentMessage.fromJson(Map<String, dynamic> json) =>
       _$AttachmentMessageFromJson(json);
 
-  @JsonKey(name: 'key',
+  @JsonKey(
+    name: 'key',
     toJson: dynamicToJson,
   )
   dynamic key;
-  @JsonKey(name: 'digest',
+  @JsonKey(
+    name: 'digest',
     toJson: dynamicToJson,
   )
   dynamic digest;
@@ -46,7 +49,8 @@ class AttachmentMessage {
   String? thumbnail;
   @JsonKey(name: 'duration')
   int? duration;
-  @JsonKey(name: 'waveform',
+  @JsonKey(
+    name: 'waveform',
     toJson: dynamicToJson,
   )
   dynamic waveform;

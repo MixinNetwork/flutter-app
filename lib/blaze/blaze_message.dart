@@ -1,4 +1,3 @@
-import 'package:flutter_app/utils/json.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -7,6 +6,7 @@ import '../constants/constants.dart';
 import '../crypto/signal/signal_key_request.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
+import '../utils/json.dart';
 import 'blaze_message_param_session.dart';
 import 'blaze_param.dart';
 
