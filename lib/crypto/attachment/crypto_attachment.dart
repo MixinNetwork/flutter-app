@@ -9,6 +9,11 @@ import '../../utils/crypto_util.dart';
 class CryptoAttachment {
   List<int> decryptAttachment(
       List<int> encryptedBin, List<int> keys, List<int> theirDigest) {
+    final digest = _calculateDigest(encryptedBin);
+    if (!listEquals(digest, theirDigest)) {
+      throw Exception('Invalid digest');
+    }
+
     final aesKey = keys.sublist(0, 32);
     final macKey = keys.sublist(32, 64);
 

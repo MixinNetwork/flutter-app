@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:json_annotation/json_annotation.dart';
 
 part 'attachment_message.g.dart';
@@ -22,9 +24,9 @@ class AttachmentMessage {
       _$AttachmentMessageFromJson(json);
 
   @JsonKey(name: 'key')
-  dynamic key;
+  String? key;
   @JsonKey(name: 'digest')
-  dynamic digest;
+  String? digest;
   @JsonKey(name: 'attachment_id')
   String attachmentId;
   @JsonKey(name: 'mime_type')

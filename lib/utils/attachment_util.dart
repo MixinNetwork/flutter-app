@@ -2,7 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/utils/load_balancer_utils.dart';
+import '../crypto/attachment/crypto_encryptor.dart';
+import 'crypto_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
@@ -71,13 +75,14 @@ class AttachmentUtil {
     }
   }
 
-  Future<String?> uploadAttachment(File file, String messageId) async {
+  Future<AttachmentResult?> uploadAttachment(File file, String messageId, MessageCategory category) async {
     try {
       final response = await _client.attachmentApi.postAttachment();
       if (response.data.uploadUrl != null) {
         final fileStream = file.openRead();
 
-        final totalBytes = await file.length();
+        final fileLength = await file.length();
+        final int totalBytes = (16 + (((fileLength / 16) +1) * 16) + 32).toInt();
 
         final request =
             await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
@@ -90,25 +95,48 @@ class AttachmentUtil {
 
         var byteCount = 0;
 
+        final List<int>? key;
+        if (category.isSignal) {
+          key = generateRandomKey(64);
+        } else {
+          key = null;
+        }
+
+        CryptoEncryptor? encryptor;
+        List<int>? digest = null;
         await request.addStream(fileStream.transform(
           StreamTransformer.fromHandlers(
             handleData: (data, sink) {
+              if (key != null && encryptor == null) {
+                encryptor = CryptoEncryptor(sink, key);
+              }
               byteCount += data.length;
               // upload progress
               debugPrint('$byteCount / $totalBytes');
-              sink.add(data);
+              if (encryptor != null) {
+                encryptor?.process(Uint8List.fromList(data));
+              } else {
+                sink.add(data);
+              }
             },
-            handleError: (error, stack, sink) {},
+            handleError: (error, stack, sink) {
+              debugPrint('uploadAttachment error: $error');
+            },
             handleDone: (sink) {
-              sink.close();
+              if (encryptor != null) {
+                digest = encryptor?.close();
+              } else {
+                sink.close();
+              }
             },
           ),
         ));
 
         final httpResponse = await request.close();
+        debugPrint('uploadAttachment httpResponse: ${httpResponse.statusCode}');
         if (httpResponse.statusCode == 200) {
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
-          return response.data.attachmentId;
+          return AttachmentResult(response.data.attachmentId, await base64EncodeWithIsolate(key!), await base64EncodeWithIsolate(digest!));
         } else {
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;
@@ -166,4 +194,12 @@ class AttachmentUtil {
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
     return AttachmentUtil(client, messagesDao, mediaDirectory.path);
   }
+}
+
+class AttachmentResult {
+  AttachmentResult(this.attachmentId, this.keys, this.digest);
+
+  final String attachmentId;
+  final String? keys;
+  final String? digest;
 }
