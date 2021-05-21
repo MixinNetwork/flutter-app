@@ -162,31 +162,36 @@ class _App extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: 'Mixin',
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          Localization.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: [
-          ...Localization.delegate.supportedLocales,
-        ],
-        builder: (context, child) {
-          try {
-            Provider.of<AccountServer>(context).language =
-                Localizations.localeOf(context).languageCode;
-          } catch (_) {}
-          return BrightnessObserver(
-            lightThemeData: lightBrightnessThemeData,
-            darkThemeData: darkBrightnessThemeData,
-            child: child!,
-          );
-        },
-        home: const _Home(),
-      );
+  Widget build(BuildContext context) => DefaultTextStyle(
+    style: TextStyle(
+      height: 1.0,
+    ),
+    child: MaterialApp(
+          title: 'Mixin',
+          debugShowCheckedModeBanner: false,
+          localizationsDelegates: const [
+            Localization.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+          ],
+          supportedLocales: [
+            ...Localization.delegate.supportedLocales,
+          ],
+          builder: (context, child) {
+            try {
+              Provider.of<AccountServer>(context).language =
+                  Localizations.localeOf(context).languageCode;
+            } catch (_) {}
+            return BrightnessObserver(
+              lightThemeData: lightBrightnessThemeData,
+              darkThemeData: darkBrightnessThemeData,
+              child: child!,
+            );
+          },
+          home: const _Home(),
+        ),
+  );
 }
 
 class _Home extends HookWidget {
