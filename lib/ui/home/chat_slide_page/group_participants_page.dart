@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter_app/widgets/search_text_field.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -10,11 +9,12 @@ import 'package:provider/provider.dart';
 import '../../../account/account_server.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
+import '../../../utils/hook.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/menu.dart';
-import '../../../utils/hook.dart';
+import '../../../widgets/search_text_field.dart';
 import '../bloc/conversation_cubit.dart';
 
 /**
@@ -28,9 +28,6 @@ class GroupParticipantsPage extends HookWidget {
     final conversationId =
         context.read<ConversationCubit>().state?.conversationId;
     assert(conversationId != null);
-    if (conversationId == null) {
-      return _InternalErrorLayout();
-    }
     final filterCubit = useBloc(() => _ParticipantFilterCubit());
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
@@ -47,7 +44,7 @@ class GroupParticipantsPage extends HookWidget {
           ),
           BlocProvider.value(
             value: filterCubit,
-            child: Expanded(child: _ParticipantList(conversationId)),
+            child: Expanded(child: _ParticipantList(conversationId!)),
           ),
         ],
       ),
@@ -71,14 +68,12 @@ class _ParticipantList extends HookWidget {
       final dao = context.read<AccountServer>().database.participantsDao;
       return dao.watchParticipants(conversationId);
     }));
-    if (!participants.hasData) {
-      return _InternalErrorLayout();
-    }
+
     final participantList =
         List.of(participants.data ?? const <ParticipantUser>[]);
 
-    final me = participantList
-        .firstWhere((e) => e.userId == context.read<AccountServer>().userId);
+    final me = useMemoized(() => participantList
+        .firstWhere((e) => e.userId == context.read<AccountServer>().userId));
 
     final keyword = useBlocState<_ParticipantFilterCubit, String>().trim();
     if (keyword.isNotEmpty) {
@@ -237,12 +232,4 @@ class _RoleLabel extends StatelessWidget {
         label,
         style: Theme.of(context).textTheme.caption,
       );
-}
-
-// TODO error layout.
-class _InternalErrorLayout extends StatelessWidget {
-  const _InternalErrorLayout({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => Container();
 }

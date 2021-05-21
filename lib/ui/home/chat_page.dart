@@ -39,8 +39,6 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const circles = 'circles';
   static const searchMessageHistory = 'searchMessageHistory';
   static const sharedMedia = 'sharedMedia';
-
-  // 群成员
   static const participants = "members";
 
   @override

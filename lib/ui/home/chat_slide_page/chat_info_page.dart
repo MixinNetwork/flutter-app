@@ -90,6 +90,7 @@ class ChatInfoPage extends HookWidget {
                 if (isGroupConversation)
                   CellGroup(
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         CellItem(
                           title: Text(
