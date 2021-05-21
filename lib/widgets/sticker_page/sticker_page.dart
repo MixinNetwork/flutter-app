@@ -159,6 +159,7 @@ class _StickerAlbumPageItem extends StatelessWidget {
                 sticker.stickerId,
                 conversationItem.isPlainConversation,
                 conversationId: conversationItem.conversationId,
+                recipientId: conversationItem.user?.userId,
               ),
             ]);
           },

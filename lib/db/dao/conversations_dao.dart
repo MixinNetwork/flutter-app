@@ -113,7 +113,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
         'UPDATE conversations SET status = ? WHERE conversation_id = ?',
         variables: [
           Variable.withString(conversationId),
-          Variable<ConversationStatus>(status)
+          Variable.withInt(status.index),
         ],
         updates: {db.conversations},
         updateKind: UpdateKind.update,
