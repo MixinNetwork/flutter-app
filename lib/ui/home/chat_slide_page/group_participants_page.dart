@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../account/account_server.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
-import '../../../utils/hook.dart';
+import '../../../utils/list_utils.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
@@ -28,7 +28,7 @@ class GroupParticipantsPage extends HookWidget {
     final conversationId =
         context.read<ConversationCubit>().state?.conversationId;
     assert(conversationId != null);
-    final filterCubit = useBloc(() => _ParticipantFilterCubit());
+    final filterKeyWord = useState("");
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
       appBar: MixinAppBar(
@@ -39,12 +39,14 @@ class GroupParticipantsPage extends HookWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SearchTextField(
-              onChanged: (text) => filterCubit.emit(text),
+              onChanged: (text) => filterKeyWord.value = text,
             ),
           ),
-          BlocProvider.value(
-            value: filterCubit,
-            child: Expanded(child: _ParticipantList(conversationId!)),
+          Expanded(
+            child: _ParticipantList(
+              conversationId!,
+              filterKeyword: filterKeyWord.value,
+            ),
           ),
         ],
       ),
@@ -52,41 +54,46 @@ class GroupParticipantsPage extends HookWidget {
   }
 }
 
-// Type parameter <String?> : The key to filter Participants.
-class _ParticipantFilterCubit extends Cubit<String> {
-  _ParticipantFilterCubit() : super("");
-}
-
 class _ParticipantList extends HookWidget {
-  const _ParticipantList(this.conversationId, {Key? key}) : super(key: key);
+  const _ParticipantList(
+    this.conversationId, {
+    Key? key,
+    this.filterKeyword = "",
+  }) : super(key: key);
 
   final String conversationId;
+
+  /// The keyword to filter participants of group.
+  /// Empty indicates non filter.
+  final String filterKeyword;
 
   @override
   Widget build(BuildContext context) {
     final participants = useStream(useMemoized(() {
       final dao = context.read<AccountServer>().database.participantsDao;
       return dao.watchParticipants(conversationId);
-    }));
+    }), initialData: const <ParticipantUser>[]);
 
-    final participantList =
-        List.of(participants.data ?? const <ParticipantUser>[]);
+    final participantList = List.of(participants.data!);
 
-    final me = useMemoized(() => participantList
-        .firstWhere((e) => e.userId == context.read<AccountServer>().userId));
+    final me = useMemoized(
+        () => participantList.firstWhereOrNull(
+            (e) => e.userId == context.read<AccountServer>().userId),
+        [participants]);
 
-    final keyword = useBlocState<_ParticipantFilterCubit, String>().trim();
-    if (keyword.isNotEmpty) {
+    assert(!(participantList.isNotEmpty && me == null));
+
+    if (filterKeyword.isNotEmpty) {
       participantList.retainWhere((e) =>
-          (e.fullName?.contains(keyword) ?? false) ||
-          e.identityNumber.contains(keyword));
+          (e.fullName?.contains(filterKeyword) ?? false) ||
+          e.identityNumber.contains(filterKeyword));
     }
 
     return ListView.builder(
       itemCount: participantList.length,
       itemBuilder: (context, index) => _ParticipantTile(
         participant: participantList[index],
-        me: me,
+        me: me!,
       ),
     );
   }

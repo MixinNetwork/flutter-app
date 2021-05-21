@@ -39,4 +39,11 @@ extension ListExtension<T> on List<T> {
       return null;
     }
   }
+
+  T? firstWhereOrNull(bool test(T element)) {
+    for (T element in this) {
+      if (test(element)) return element;
+    }
+    return null;
+  }
 }
