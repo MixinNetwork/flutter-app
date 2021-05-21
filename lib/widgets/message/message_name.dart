@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../brightness_observer.dart';
+import '../interacter_decorated_box.dart';
 
 class MessageName extends StatelessWidget {
   const MessageName({
@@ -17,9 +18,9 @@ class MessageName extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Align(
         alignment: Alignment.centerLeft,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
+        child: InteractableDecoratedBox(
           onTap: () => context.read<ConversationCubit>().selectUser(userId),
+          cursor: SystemMouseCursors.click,
           child: Padding(
             padding: const EdgeInsets.only(
               left: 10,

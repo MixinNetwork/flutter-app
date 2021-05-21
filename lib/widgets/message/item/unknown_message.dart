@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -6,7 +7,6 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
-import '../../mouse_region_span.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
@@ -33,18 +33,16 @@ class UnknownMessage extends StatelessWidget {
           color: BrightnessData.themeOf(context).text,
         ),
         children: [
-          MouseRegionSpan(
+          TextSpan(
             mouseCursor: SystemMouseCursors.click,
-            child: GestureDetector(
-              onTap: () => openUri(Localization.of(context).chatNotSupportUrl),
-              child: Text(
-                Localization.of(context).chatLearn,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: BrightnessData.themeOf(context).accent,
-                ),
-              ),
+            text: Localization.of(context).chatLearn,
+            style: TextStyle(
+              fontSize: 16,
+              color: BrightnessData.themeOf(context).accent,
             ),
+            recognizer: TapGestureRecognizer()
+              ..onTap =
+                  () => openUri(Localization.of(context).chatNotSupportUrl),
           ),
         ],
       ),

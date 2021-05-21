@@ -22,6 +22,7 @@ class InteracterBuilder extends StatefulWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.cursor = MouseCursor.defer,
   }) : super(key: key);
 
   final Function(BuildContext context, InteracteStatus status,
@@ -36,6 +37,7 @@ class InteracterBuilder extends StatefulWidget {
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;
+  final MouseCursor cursor;
 
   @override
   _InteracterBuilderState createState() => _InteracterBuilderState();
@@ -66,6 +68,7 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
         });
         widget.onEnter?.call(event);
       },
+      cursor: widget.cursor,
       onHover: (event) {
         setState(() {
           hovering = true;
@@ -129,6 +132,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.cursor = MouseCursor.defer,
   })  : _decoration = decoration,
         super(key: key);
 
@@ -148,6 +152,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.cursor = MouseCursor.defer,
   })  : _decoration = decoration ?? const BoxDecoration(),
         hoveringDecoration = hoveringColor != null
             ? decoration?.copyWith(color: hoveringColor)
@@ -174,6 +179,8 @@ class InteractableDecoratedBox extends StatelessWidget {
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;
 
+  final MouseCursor cursor;
+
   @override
   Widget build(BuildContext context) => InteracterBuilder(
         onTap: onTap,
@@ -184,6 +191,7 @@ class InteractableDecoratedBox extends StatelessWidget {
         onEnter: onEnter,
         onExit: onExit,
         onHover: onHover,
+        cursor: cursor,
         builder: (BuildContext context, InteracteStatus status,
                 InteracteStatus lastStatus, Widget? child) =>
             TweenAnimationBuilder<Decoration>(

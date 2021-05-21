@@ -46,8 +46,11 @@ List<InlineSpan> _buildSpan(
     onMatch: (Match match) {
       final text = match[0];
       final highlightTextSpan = map[text?.toLowerCase()];
+      final mouseCursor =
+          highlightTextSpan?.onTap != null ? SystemMouseCursors.click : null;
       children.add(
         TextSpan(
+          mouseCursor: mouseCursor,
           text: text,
           style: style?.merge(highlightTextSpan?.style) ??
               highlightTextSpan?.style,
