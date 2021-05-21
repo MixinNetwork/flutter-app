@@ -775,6 +775,7 @@ class AccountServer {
       );
     } catch (e) {
       debugPrint('$e');
+      rethrow;
     }
   }
 
@@ -785,6 +786,7 @@ class AccountServer {
           [ParticipantRequest(userId: userId, role: role)]);
     } catch (e) {
       debugPrint('$e');
+      rethrow;
     }
   }
 

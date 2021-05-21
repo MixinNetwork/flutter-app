@@ -16,6 +16,7 @@ import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
+import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
 
 /**
@@ -26,11 +27,6 @@ class GroupParticipantsPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-            converter: (state) => state?.conversationId,
-            when: (conversationId) => conversationId != null);
-    assert(conversationId != null);
     final filterKeyWord = useState("");
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
@@ -47,7 +43,6 @@ class GroupParticipantsPage extends HookWidget {
           ),
           Expanded(
             child: _ParticipantList(
-              conversationId!,
               filterKeyword: filterKeyWord.value.trim(),
             ),
           ),
@@ -58,13 +53,10 @@ class GroupParticipantsPage extends HookWidget {
 }
 
 class _ParticipantList extends HookWidget {
-  const _ParticipantList(
-    this.conversationId, {
+  const _ParticipantList({
     Key? key,
     this.filterKeyword = "",
   }) : super(key: key);
-
-  final String conversationId;
 
   /// The keyword to filter participants of group.
   /// Empty indicates non filter.
@@ -72,10 +64,16 @@ class _ParticipantList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+            converter: (state) => state?.conversationId,
+            when: (conversationId) => conversationId != null);
+    assert(conversationId != null);
+
     final participants = useStream(useMemoized(() {
           final dao = context.read<AccountServer>().database.participantsDao;
-          return dao.watchParticipants(conversationId);
-        })).data ??
+          return dao.watchParticipants(conversationId!);
+        }, [conversationId])).data ??
         const <ParticipantUser>[];
 
     // Find current user infos to check if we have group manage permission.
@@ -187,26 +185,25 @@ class _ParticipantMenuEntry extends StatelessWidget {
         ];
         if (me.role == ParticipantRole.owner) {
           if (participant.role != ParticipantRole.admin) {
-            menus.add(
-              ContextMenu(
-                title: Localization.of(context).groupPopMenuMakeAdmin,
-                onTap: () {
-                  context.read<AccountServer>().updateParticipantRole(
-                      context.read<ConversationCubit>().state!.conversationId,
-                      participant.userId,
-                      ParticipantRole.admin);
-                },
-              ),
-            );
-          } else {
             menus.add(ContextMenu(
-              title: Localization.of(context).groupPopMenuDismissAdmin,
-              onTap: () {
+              title: Localization.of(context).groupPopMenuMakeAdmin,
+              onTap: () => runFutureWithToast(
+                context,
                 context.read<AccountServer>().updateParticipantRole(
                     context.read<ConversationCubit>().state!.conversationId,
                     participant.userId,
-                    null);
-              },
+                    ParticipantRole.admin),
+              ),
+            ));
+          } else {
+            menus.add(ContextMenu(
+              title: Localization.of(context).groupPopMenuDismissAdmin,
+              onTap: () => runFutureWithToast(
+                  context,
+                  context.read<AccountServer>().updateParticipantRole(
+                      context.read<ConversationCubit>().state!.conversationId,
+                      participant.userId,
+                      null)),
             ));
           }
         }
@@ -216,11 +213,11 @@ class _ParticipantMenuEntry extends StatelessWidget {
           menus.add(ContextMenu(
             title: Localization.of(context)
                 .groupPopMenuRemoveParticipants(participant.fullName ?? "?"),
-            onTap: () {
-              context.read<AccountServer>().removeParticipant(
-                  context.read<ConversationCubit>().state!.conversationId,
-                  participant.userId);
-            },
+            onTap: () => runFutureWithToast(
+                context,
+                context.read<AccountServer>().removeParticipant(
+                    context.read<ConversationCubit>().state!.conversationId,
+                    participant.userId)),
           ));
         }
         return menus;
