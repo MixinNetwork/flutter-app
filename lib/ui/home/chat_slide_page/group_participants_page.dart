@@ -191,7 +191,10 @@ class _ParticipantMenuEntry extends StatelessWidget {
               ContextMenu(
                 title: Localization.of(context).groupPopMenuMakeAdmin,
                 onTap: () {
-                  // TODO make admin
+                  context.read<AccountServer>().updateParticipantRole(
+                      context.read<ConversationCubit>().state!.conversationId,
+                      participant.userId,
+                      ParticipantRole.admin);
                 },
               ),
             );
@@ -199,7 +202,10 @@ class _ParticipantMenuEntry extends StatelessWidget {
             menus.add(ContextMenu(
               title: Localization.of(context).groupPopMenuDismissAdmin,
               onTap: () {
-                // TODO remove admin
+                context.read<AccountServer>().updateParticipantRole(
+                    context.read<ConversationCubit>().state!.conversationId,
+                    participant.userId,
+                    null);
               },
             ));
           }
@@ -211,7 +217,9 @@ class _ParticipantMenuEntry extends StatelessWidget {
             title: Localization.of(context)
                 .groupPopMenuRemoveParticipants(participant.fullName ?? "?"),
             onTap: () {
-              // TODO remove participant.
+              context.read<AccountServer>().removeParticipant(
+                  context.read<ConversationCubit>().state!.conversationId,
+                  participant.userId);
             },
           ));
         }
