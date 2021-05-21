@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:flutter_app/widgets/search_text_field.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +14,7 @@ import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/menu.dart';
+import '../../../utils/hook.dart';
 import '../bloc/conversation_cubit.dart';
 
 /**
@@ -28,15 +31,33 @@ class GroupParticipantsPage extends HookWidget {
     if (conversationId == null) {
       return _InternalErrorLayout();
     }
-
+    final filterCubit = useBloc(() => _ParticipantFilterCubit());
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
       appBar: MixinAppBar(
         title: Text(Localization.of(context).groupParticipants),
       ),
-      body: _ParticipantList(conversationId),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SearchTextField(
+              onChanged: (text) => filterCubit.emit(text),
+            ),
+          ),
+          BlocProvider.value(
+            value: filterCubit,
+            child: Expanded(child: _ParticipantList(conversationId)),
+          ),
+        ],
+      ),
     );
   }
+}
+
+// Type parameter <String?> : The key to filter Participants.
+class _ParticipantFilterCubit extends Cubit<String> {
+  _ParticipantFilterCubit() : super("");
 }
 
 class _ParticipantList extends HookWidget {
@@ -46,16 +67,25 @@ class _ParticipantList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dao = context.read<AccountServer>().database.participantsDao;
-    final participants = useStream(dao.watchParticipants(conversationId));
-
+    final participants = useStream(useMemoized(() {
+      final dao = context.read<AccountServer>().database.participantsDao;
+      return dao.watchParticipants(conversationId);
+    }));
     if (!participants.hasData) {
       return _InternalErrorLayout();
     }
-    final participantList = participants.data!;
+    final participantList =
+        List.of(participants.data ?? const <ParticipantUser>[]);
 
     final me = participantList
         .firstWhere((e) => e.userId == context.read<AccountServer>().userId);
+
+    final keyword = useBlocState<_ParticipantFilterCubit, String>().trim();
+    if (keyword.isNotEmpty) {
+      participantList.retainWhere((e) =>
+          (e.fullName?.contains(keyword) ?? false) ||
+          e.identityNumber.contains(keyword));
+    }
 
     return ListView.builder(
       itemCount: participantList.length,
@@ -93,6 +123,10 @@ class _ParticipantTile extends StatelessWidget {
         title: Text(
           participant.fullName ?? "?",
           style: Theme.of(context).textTheme.bodyText1,
+        ),
+        subtitle: Text(
+          participant.identityNumber,
+          style: Theme.of(context).textTheme.caption,
         ),
         onTap: () {
           // skip self
