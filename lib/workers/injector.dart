@@ -4,7 +4,6 @@ import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../constants/constants.dart';
 import '../db/database.dart';
-import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
 
 class Injector {
@@ -84,9 +83,9 @@ class Injector {
         });
     await database.participantsDao.replaceAll(conversationId, online.toList());
 
-    final participantSessions = <ParticipantSessionData>[];
+    final participantSessions = <db.ParticipantSessionData>[];
     userSessions?.forEach((u) {
-      participantSessions.add(ParticipantSessionData(
+      participantSessions.add(db.ParticipantSessionData(
           conversationId: conversationId,
           userId: u.userId,
           sessionId: u.sessionId));
@@ -118,52 +117,55 @@ class Injector {
   Future<List<db.User>?> _fetchUsers(List<String> ids) async {
     try {
       final response = await client.userApi.getUsers(ids);
-      final users = response.data;
-      final result = <db.User>[];
-      for (final e in users) {
-        final user = db.User(
-          userId: e.userId,
-          identityNumber: e.identityNumber,
-          relationship: e.relationship,
-          fullName: e.fullName,
-          avatarUrl: e.avatarUrl,
-          phone: e.phone,
-          isVerified: e.isVerified,
-          createdAt: e.createdAt,
-          muteUntil: DateTime.tryParse(e.muteUntil),
-          appId: e.app?.appId,
-          biography: e.biography,
-          isScam: e.isScam ? 1 : 0,
-        );
-        result.add(user);
-
-        await database.userDao.insert(user);
-        final app = e.app;
-        if (app != null) {
-          await database.appsDao.insert(
-            db.App(
-              appId: app.appId,
-              appNumber: app.appNumber,
-              homeUri: app.homeUri,
-              redirectUri: app.redirectUri,
-              name: app.name,
-              iconUrl: app.iconUrl,
-              category: app.category,
-              description: app.description,
-              appSecret: app.category,
-              capabilities: app.capabilites.toString(),
-              creatorId: app.creatorId,
-              resourcePatterns: app.resourcePatterns.toString(),
-              updatedAt: app.updatedAt,
-            ),
-          );
-        }
-      }
-      return result;
+      return insertUpdateUsers(response.data);
     } catch (e, s) {
       debugPrint('$e');
       debugPrint('$s');
     }
+  }
+
+  Future<List<db.User>> insertUpdateUsers(List<User> users) async {
+    final result = <db.User>[];
+    for (final e in users) {
+      final user = db.User(
+        userId: e.userId,
+        identityNumber: e.identityNumber,
+        relationship: e.relationship,
+        fullName: e.fullName,
+        avatarUrl: e.avatarUrl,
+        phone: e.phone,
+        isVerified: e.isVerified,
+        createdAt: e.createdAt,
+        muteUntil: DateTime.tryParse(e.muteUntil),
+        appId: e.app?.appId,
+        biography: e.biography,
+        isScam: e.isScam ? 1 : 0,
+      );
+      result.add(user);
+
+      await database.userDao.insert(user);
+      final app = e.app;
+      if (app != null) {
+        await database.appsDao.insert(
+          db.App(
+            appId: app.appId,
+            appNumber: app.appNumber,
+            homeUri: app.homeUri,
+            redirectUri: app.redirectUri,
+            name: app.name,
+            iconUrl: app.iconUrl,
+            category: app.category,
+            description: app.description,
+            appSecret: app.category,
+            capabilities: app.capabilites.toString(),
+            creatorId: app.creatorId,
+            resourcePatterns: app.resourcePatterns.toString(),
+            updatedAt: app.updatedAt,
+          ),
+        );
+      }
+    }
+    return result;
   }
 
   Future<void> refreshSticker(String stickerId) async {

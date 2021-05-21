@@ -1,15 +1,13 @@
 import 'dart:io';
 
+import 'package:flutter_app/utils/hive_key_values.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
-class PrivacyKeyValue {
-  PrivacyKeyValue._();
-
-  late Box box;
-  bool hasInit = false;
+class PrivacyKeyValue extends HiveKeyValue {
+  PrivacyKeyValue._() : super(hivePrivacy);
 
   static PrivacyKeyValue? instance;
 
@@ -18,25 +16,6 @@ class PrivacyKeyValue {
   static const hivePrivacy = 'privacy_box';
   static const hasSyncSession = 'has_sync_session';
   static const hasPushSignalKeys = 'has_push_signal_keys';
-
-  Future init() async {
-    if (hasInit) {
-      return;
-    }
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, hivePrivacy));
-    await Hive.initFlutter(file.path);
-    box = await Hive.openBox(hivePrivacy);
-    hasInit = true;
-  }
-
-  Future delete() async {
-    if (!hasInit) {
-      return;
-    }
-    await Hive.deleteBoxFromDisk(hivePrivacy);
-    hasInit = false;
-  }
 
   bool getHasSyncSession() => box.get(hasSyncSession, defaultValue: false);
   void setHasSyncSession(bool value) => box.put(hasSyncSession, value);

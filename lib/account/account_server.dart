@@ -7,6 +7,7 @@ import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import '../utils/hive_key_values.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +17,6 @@ import '../blaze/blaze_param.dart';
 import '../blaze/vo/contact_message.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
-import '../crypto/crypto_key_value.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
 import '../crypto/privacy_key_value.dart';
 import '../crypto/signal/signal_database.dart';
@@ -37,6 +37,7 @@ import '../utils/stream_extension.dart';
 import '../utils/string_extension.dart';
 import '../workers/decrypt_message.dart';
 import '../workers/sender.dart';
+import 'account_key_value.dart';
 import 'send_message_helper.dart';
 
 class AccountServer {
@@ -137,8 +138,7 @@ class AccountServer {
       multiAuthCubit,
     );
 
-    await PrivacyKeyValue.get.init();
-    await CryptoKeyValue.get.init();
+    await HiveKeyValue.initKeyValues();
   }
 
   late String userId;
@@ -331,8 +331,7 @@ class AccountServer {
 
   Future<void> signOutAndClear() async {
     await client.accountApi.logout(LogoutRequest(sessionId));
-    await PrivacyKeyValue.get.delete();
-    await CryptoKeyValue.get.delete();
+    await HiveKeyValue.clearKeyValues();
     await SignalDatabase.get.clear();
   }
 
@@ -476,7 +475,7 @@ class AccountServer {
     // todo release resource
   }
 
-  Future refreshSelf() async {
+  Future<void> refreshSelf() async {
     final me = (await client.userApi.getMe()).data;
     await database.userDao.insert(db.User(
       userId: me.userId,
@@ -494,7 +493,12 @@ class AccountServer {
     ));
   }
 
-  Future pushSignalKeys() async {
+  Future<void> refreshFriends() async {
+    final friends = (await client.accountApi.getFriends()).data;
+    _decryptMessage.insertUpdateUsers(friends);
+  }
+
+  Future<void> pushSignalKeys() async {
     // TODO try 3 times at most
     final hasPushSignalKeys = PrivacyKeyValue.get.getHasPushSignalKeys();
     if (hasPushSignalKeys) {
@@ -567,6 +571,13 @@ class AccountServer {
   }
 
   Future<void> initSticker() async {
+    final refreshStickerLastTime =
+        AccountKeyValue.get.getRefreshStickerLastTime();
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - refreshStickerLastTime < hours24) {
+      return;
+    }
+
     final res = await client.accountApi.getStickerAlbums();
     res.data.forEach((item) async {
       await database.stickerAlbumsDao.insert(db.StickerAlbum(
@@ -580,11 +591,18 @@ class AccountServer {
           description: item.description));
       await _updateStickerAlbums(item.albumId);
     });
+
+    AccountKeyValue.get.setRefreshStickerLastTime(now);
   }
 
   final refreshUserIdSet = <dynamic>{};
 
   Future<void> initCircles() async {
+    final hasSyncCircle = AccountKeyValue.get.getHasSyncCircle();
+    if (hasSyncCircle) {
+      return;
+    }
+
     refreshUserIdSet.clear();
     final res = await client.circleApi.getCircles();
     res.data.forEach((circle) async {
@@ -595,6 +613,8 @@ class AccountServer {
           orderedAt: null));
       await handleCircle(circle);
     });
+
+    AccountKeyValue.get.setHasSyncCircle(true);
   }
 
   Future<void> handleCircle(CircleResponse circle, {int? offset}) async {

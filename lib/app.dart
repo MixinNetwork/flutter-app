@@ -208,6 +208,7 @@ class _Home extends HookWidget {
         accountServer!
           ..pushSignalKeys()
           ..refreshSelf()
+          ..refreshFriends()
           ..initSticker()
           ..initCircles();
       }

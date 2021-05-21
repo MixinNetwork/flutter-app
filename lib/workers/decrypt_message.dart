@@ -373,7 +373,9 @@ class DecryptMessage extends Injector {
               createdAt: data.createdAt,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent));
+      debugPrint('insert message: ${message.toJson()}');
       await database.messagesDao.insert(message, accountId);
+      debugPrint('after insert');
     } else if (data.category.isImage) {
       final attachment =
           AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plainText));

@@ -1,19 +1,11 @@
-import 'dart:io';
-
-import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import '../utils/hive_key_values.dart';
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/util/Medium.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../utils/crypto_util.dart';
 
-class CryptoKeyValue {
-  CryptoKeyValue._();
-
-  late Box box;
-  bool hasInit = false;
+class CryptoKeyValue extends HiveKeyValue {
+  CryptoKeyValue._() : super(hiveCrypto);
 
   static CryptoKeyValue? instance;
 
@@ -24,25 +16,6 @@ class CryptoKeyValue {
   static const nextPreKeyId = 'next_pre_key_id';
   static const nextSignedPreKeyId = 'next_signed_pre_key_id';
   static const activeSignedPreKeyId = 'active_signed_pre_key_id';
-
-  Future init() async {
-    if (hasInit) {
-      return;
-    }
-    final dbFolder = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dbFolder.path, hiveCrypto));
-    await Hive.initFlutter(file.path);
-    box = await Hive.openBox(hiveCrypto);
-    hasInit = true;
-  }
-
-  Future delete() async {
-    if (!hasInit) {
-      return;
-    }
-    await Hive.deleteBoxFromDisk(hiveCrypto);
-    hasInit = false;
-  }
 
   int getLocalRegistrationId() => box.get(localRegistrationId, defaultValue: 0);
   void setLocalRegistrationId(int registrationId) =>

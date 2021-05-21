@@ -41,3 +41,6 @@ const mixinProtocolUrls = {
   MixinSchemeHost.apps: 'https://mixin.one/apps',
   MixinSchemeHost.snapshots: 'https://mixin.one/snapshots'
 };
+
+const int hour1 = 1000 * 60 * 60;
+const int hours24 = hour1 * 24;
