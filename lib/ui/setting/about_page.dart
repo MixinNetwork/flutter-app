@@ -52,7 +52,7 @@ class AboutPage extends HookWidget {
                   ),
                 ),
                 onTap: () {
-                  if (!kReleaseMode) return;
+                  if (kReleaseMode) return;
 
                   Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(
@@ -72,7 +72,8 @@ class AboutPage extends HookWidget {
                   ),
                 ),
                 onTap: () {
-                  if (!kReleaseMode) return;
+                  if (kReleaseMode) return;
+
                   Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(
                       builder: (context) => MoorDbViewer(
