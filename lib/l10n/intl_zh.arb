@@ -153,5 +153,5 @@
   "groupPopMenuMessage": "发送消息至 {name}",
   "groupPopMenuMakeAdmin": "设定为群组管理员",
   "groupPopMenuDismissAdmin": "撤销管理员身份",
-  "groupPopMenuRemoveParticipants": "移除 ${name}"
+  "groupPopMenuRemoveParticipants": "移除 {name}"
 }

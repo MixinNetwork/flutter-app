@@ -15,7 +15,7 @@ import '../../../widgets/menu.dart';
 import '../bloc/conversation_cubit.dart';
 
 /**
- * 群组成员列表。
+ * The participants of group.
  */
 class GroupParticipantsPage extends HookWidget {
   const GroupParticipantsPage({Key? key}) : super(key: key);
@@ -26,32 +26,43 @@ class GroupParticipantsPage extends HookWidget {
         context.read<ConversationCubit>().state?.conversationId;
     assert(conversationId != null);
     if (conversationId == null) {
-      return _InternalError();
+      return _InternalErrorLayout();
     }
 
-    final participants = context.read<AccountServer>().database.participantsDao;
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
       appBar: MixinAppBar(
         title: Text(Localization.of(context).groupParticipants),
       ),
-      body: StreamBuilder<List<ParticipantUser>>(
-          stream: participants.watchParticipants(conversationId),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Container();
-            }
-            final data = snapshot.requireData;
-            final me = data.firstWhere((element) =>
-                element.userId == context.read<AccountServer>().userId);
-            return ListView.builder(
-                itemCount: data.length,
-                itemBuilder: (BuildContext context, int index) =>
-                    _ParticipantTile(
-                      participant: data[index],
-                      me: me,
-                    ));
-          }),
+      body: _ParticipantList(conversationId),
+    );
+  }
+}
+
+class _ParticipantList extends HookWidget {
+  const _ParticipantList(this.conversationId, {Key? key}) : super(key: key);
+
+  final String conversationId;
+
+  @override
+  Widget build(BuildContext context) {
+    final dao = context.read<AccountServer>().database.participantsDao;
+    final participants = useStream(dao.watchParticipants(conversationId));
+
+    if (!participants.hasData) {
+      return _InternalErrorLayout();
+    }
+    final participantList = participants.data!;
+
+    final me = participantList
+        .firstWhere((e) => e.userId == context.read<AccountServer>().userId);
+
+    return ListView.builder(
+      itemCount: participantList.length,
+      itemBuilder: (context, index) => _ParticipantTile(
+        participant: participantList[index],
+        me: me,
+      ),
     );
   }
 }
@@ -134,23 +145,30 @@ class _ParticipantMenuEntry extends StatelessWidget {
             menus.add(
               ContextMenu(
                 title: Localization.of(context).groupPopMenuMakeAdmin,
-                onTap: () {},
+                onTap: () {
+                  // TODO make admin
+                },
               ),
             );
           } else {
             menus.add(ContextMenu(
-                title: Localization.of(context).groupPopMenuDismissAdmin));
+              title: Localization.of(context).groupPopMenuDismissAdmin,
+              onTap: () {
+                // TODO remove admin
+              },
+            ));
           }
+        }
+
+        if (me.role != null && participant.role == null ||
+            me.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
             title: Localization.of(context)
                 .groupPopMenuRemoveParticipants(participant.fullName ?? "?"),
+            onTap: () {
+              // TODO remove participant.
+            },
           ));
-        } else if (me.role == ParticipantRole.admin) {
-          if (participant.role == null) {
-            menus.add(ContextMenu(
-                title: Localization.of(context).groupPopMenuRemoveParticipants(
-                    participant.fullName ?? "?")));
-          }
         }
         return menus;
       },
@@ -187,8 +205,9 @@ class _RoleLabel extends StatelessWidget {
       );
 }
 
-class _InternalError extends StatelessWidget {
-  const _InternalError({Key? key}) : super(key: key);
+// TODO error layout.
+class _InternalErrorLayout extends StatelessWidget {
+  const _InternalErrorLayout({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => Container();

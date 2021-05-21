@@ -39,7 +39,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(name) => "发送消息至 ${name}";
 
-  static String m11(name) => "移除 \$${name}";
+  static String m11(name) => "移除 ${name}";
 
   static String m12(name) => "确定删除${name}圈子吗？";
 

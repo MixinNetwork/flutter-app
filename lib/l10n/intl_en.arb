@@ -158,5 +158,5 @@
   "groupPopMenuMessage": "Message {name}",
   "groupPopMenuMakeAdmin": "Make group admin",
   "groupPopMenuDismissAdmin": "Dismiss admin",
-  "groupPopMenuRemoveParticipants": "Remove ${name}"
+  "groupPopMenuRemoveParticipants": "Remove {name}"
 }

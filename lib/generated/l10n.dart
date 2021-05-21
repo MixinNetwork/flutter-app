@@ -1640,10 +1640,10 @@ class Localization {
     );
   }
 
-  /// `Remove ${name}`
+  /// `Remove {name}`
   String groupPopMenuRemoveParticipants(Object name) {
     return Intl.message(
-      'Remove \$$name',
+      'Remove $name',
       name: 'groupPopMenuRemoveParticipants',
       desc: '',
       args: [name],

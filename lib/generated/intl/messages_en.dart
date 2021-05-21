@@ -42,7 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(name) => "Message ${name}";
 
-  static String m11(name) => "Remove \$${name}";
+  static String m11(name) => "Remove ${name}";
 
   static String m12(name) => "Do you want to delete ${name} circle?";
 
