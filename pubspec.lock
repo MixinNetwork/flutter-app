@@ -606,6 +606,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.3.0"
+  moor_db_viewer:
+    dependency: "direct main"
+    description:
+      name: moor_db_viewer
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   moor_generator:
     dependency: "direct dev"
     description:

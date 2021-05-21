@@ -15,21 +15,21 @@ import 'dao/users_dao.dart';
 import 'mixin_database.dart';
 
 class Database {
-  Database(this._database) {
-    appsDao = AppsDao(_database);
-    conversationDao = ConversationsDao(_database);
-    circlesDao = CirclesDao(_database);
-    circleConversationDao = CircleConversationDao(_database);
-    floodMessagesDao = FloodMessagesDao(_database);
-    messagesDao = MessagesDao(_database);
-    messageMentionsDao = MessageMentionsDao(_database);
-    jobsDao = JobsDao(_database);
-    participantsDao = ParticipantsDao(_database);
-    userDao = UserDao(_database);
-    stickerDao = StickerDao(_database);
-    stickerAlbumsDao = StickerAlbumsDao(_database);
-    stickerRelationshipsDao = StickerRelationshipsDao(_database);
-    participantSessionDao = ParticipantSessionDao(_database);
+  Database(this.mixinDatabase) {
+    appsDao = AppsDao(mixinDatabase);
+    conversationDao = ConversationsDao(mixinDatabase);
+    circlesDao = CirclesDao(mixinDatabase);
+    circleConversationDao = CircleConversationDao(mixinDatabase);
+    floodMessagesDao = FloodMessagesDao(mixinDatabase);
+    messagesDao = MessagesDao(mixinDatabase);
+    messageMentionsDao = MessageMentionsDao(mixinDatabase);
+    jobsDao = JobsDao(mixinDatabase);
+    participantsDao = ParticipantsDao(mixinDatabase);
+    userDao = UserDao(mixinDatabase);
+    stickerDao = StickerDao(mixinDatabase);
+    stickerAlbumsDao = StickerAlbumsDao(mixinDatabase);
+    stickerRelationshipsDao = StickerRelationshipsDao(mixinDatabase);
+    participantSessionDao = ParticipantSessionDao(mixinDatabase);
   }
 
   // static MixinDatabase _database;
@@ -37,7 +37,7 @@ class Database {
   //   _database = await getMixinDatabaseConnection('3910');
   // }
 
-  final MixinDatabase _database;
+  final MixinDatabase mixinDatabase;
 
   late final AppsDao appsDao;
 
@@ -68,11 +68,11 @@ class Database {
   late final StickerRelationshipsDao stickerRelationshipsDao;
 
   Future<void> dispose() async {
-    await _database.eventBus.dispose();
-    await _database.close();
+    await mixinDatabase.eventBus.dispose();
+    await mixinDatabase.close();
     // dispose stream, https://github.com/simolus3/moor/issues/290
   }
 
   Future<T> transaction<T>(Future<T> Function() action) =>
-      _database.transaction<T>(action);
+      mixinDatabase.transaction<T>(action);
 }
