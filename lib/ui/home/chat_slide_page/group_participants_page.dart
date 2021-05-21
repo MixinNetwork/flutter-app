@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../../../account/account_server.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
+import '../../../utils/hook.dart';
 import '../../../utils/list_utils.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
@@ -26,7 +27,9 @@ class GroupParticipantsPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final conversationId =
-        context.read<ConversationCubit>().state?.conversationId;
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+            converter: (state) => state?.conversationId,
+            when: (conversationId) => conversationId != null);
     assert(conversationId != null);
     final filterKeyWord = useState("");
     return Scaffold(
@@ -45,7 +48,7 @@ class GroupParticipantsPage extends HookWidget {
           Expanded(
             child: _ParticipantList(
               conversationId!,
-              filterKeyword: filterKeyWord.value,
+              filterKeyword: filterKeyWord.value.trim(),
             ),
           ),
         ],
@@ -70,29 +73,35 @@ class _ParticipantList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final participants = useStream(useMemoized(() {
-      final dao = context.read<AccountServer>().database.participantsDao;
-      return dao.watchParticipants(conversationId);
-    }), initialData: const <ParticipantUser>[]);
+          final dao = context.read<AccountServer>().database.participantsDao;
+          return dao.watchParticipants(conversationId);
+        })).data ??
+        const <ParticipantUser>[];
 
-    final participantList = List.of(participants.data!);
-
+    // Find current user infos to check if we have group manage permission.
     final me = useMemoized(
-        () => participantList.firstWhereOrNull(
-            (e) => e.userId == context.read<AccountServer>().userId),
-        [participants]);
+      () => participants.firstWhereOrNull(
+          (e) => e.userId == context.read<AccountServer>().userId),
+      [participants],
+    );
 
-    assert(!(participantList.isNotEmpty && me == null));
+    assert(!(participants.isNotEmpty && me == null));
 
-    if (filterKeyword.isNotEmpty) {
-      participantList.retainWhere((e) =>
-          (e.fullName?.contains(filterKeyword) ?? false) ||
-          e.identityNumber.contains(filterKeyword));
-    }
+    final filteredParticipants = useMemoized(() {
+      if (filterKeyword.isEmpty) {
+        return participants;
+      }
+      return participants
+          .where((e) =>
+              (e.fullName?.contains(filterKeyword) ?? false) ||
+              e.identityNumber.contains(filterKeyword))
+          .toList();
+    }, [participants, filterKeyword]);
 
     return ListView.builder(
-      itemCount: participantList.length,
+      itemCount: filteredParticipants.length,
       itemBuilder: (context, index) => _ParticipantTile(
-        participant: participantList[index],
+        participant: filteredParticipants[index],
         me: me!,
       ),
     );
