@@ -69,7 +69,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insertFts(String messageId, String conversationId, String content,
           DateTime createdAt, String userId) =>
       db.customInsert(
-        'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'$content\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')',
+        'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'${content.escapeSqliteSingleQuotationMarks()}\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')',
         updates: {db.messagesFts},
       );
 

@@ -24,6 +24,8 @@ extension StringExtension on String {
     return content.toString();
   }
 
+  String escapeSqliteSingleQuotationMarks() => this.replaceAll('\'', '\'\'');
+
   static final regExp = RegExp('[a-zA-Z0-9]');
 
   String md5() => crypto.md5.convert(utf8.encode(this)).toString();
