@@ -110,6 +110,7 @@ class ConversationIDOrCount extends HookWidget {
     final textStyle = TextStyle(
       color: BrightnessData.themeOf(context).secondaryText,
       fontSize: fontSize,
+      height: 1,
     );
 
     final isGroup = conversation?.isGroup ?? false;
@@ -150,6 +151,7 @@ class ConversationName extends StatelessWidget {
           style: TextStyle(
             color: BrightnessData.themeOf(context).text,
             fontSize: fontSize,
+            height: 1,
           ),
         ),
       );
