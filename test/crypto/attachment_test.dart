@@ -35,7 +35,8 @@ void testEncryptAttachment() {
   // [83, -102, 46, 63, 100, -106, -94, -10, 15, -98, 32, 43, -22, -84, 71, 63]
   final iv = base64Decode('U5ouP2SWovYPniAr6qxHPw==');
   // [83, -102, 46, 63, 100, -106, -94, -10, 15, -98, 32, 43, -22, -84, 71, 63, -116, 110, -47, 112, -30, -70, -50, -86, -15, 99, 26, 46, -57, 97, 6, -103, -124, -8, -91, 59, 61, 30, 104, 74, 122, 107, 86, -28, 111, -113, -26, -51, -56, -53, 11, 80, 106, -44, 126, 12, 56, -22, -72, -83, 58, -62, -128, 78]
-  final cipherText = base64Decode('U5ouP2SWovYPniAr6qxHP4xu0XDius6q8WMaLsdhBpmE+KU7PR5oSnprVuRvj+bNyMsLUGrUfgw46ritOsKATg==');
+  final cipherText = base64Decode(
+      'U5ouP2SWovYPniAr6qxHP4xu0XDius6q8WMaLsdhBpmE+KU7PR5oSnprVuRvj+bNyMsLUGrUfgw46ritOsKATg==');
   // [-103, -58, 63, 80, 21, 63, 107, 34, -123, 0, 18, 37, 84, -115, 66, -42, -72, 13, -40, -28, -120, 56, -24, -49, -21, -114, -67, -56, 19, -71, 121, 69
   final digest = base64Decode('mcY/UBU/ayKFABIlVI1C1rgN2OSIOOjP6469yBO5eUU=');
 

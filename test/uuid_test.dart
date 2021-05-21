@@ -6,7 +6,7 @@ void main() {
   debugPrint('Done!');
 }
 
-void testGenerateConversationId(){
+void testGenerateConversationId() {
   const a = '80f5130e-a5f5-47e4-80a1-535563687709';
   const b = '508c75a2-ddce-4858-9e66-cf6d58db15cf';
   final result = generateConversationId(a, b);
