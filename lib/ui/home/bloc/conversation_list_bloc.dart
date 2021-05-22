@@ -163,20 +163,15 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
       _queryRange;
 
   @override
-  Stream<Transition<PagingEvent, PagingState<ConversationItem>>>
-      transformTransitions(
-              Stream<Transition<PagingEvent, PagingState<ConversationItem>>>
-                  transitions) =>
-          super.transformTransitions(transitions.asyncMap((event) async {
-            await mentionCache.checkMentionCache(
-                event.nextState.map.values.map((e) => e.content).toSet());
-            return event;
-          }));
-
-  @override
   Future<int> queryCount() => _queryCount();
 
   @override
-  Future<List<ConversationItem>> queryRange(int limit, int offset) =>
-      _queryRange(limit, offset);
+  Future<List<ConversationItem>> queryRange(int limit, int offset) async {
+    final list = await _queryRange(limit, offset);
+    await mentionCache.checkMentionCache(
+      list.map((e) => e.content).toSet(),
+    );
+
+    return list;
+  }
 }

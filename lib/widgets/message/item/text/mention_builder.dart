@@ -16,9 +16,9 @@ class MentionCache {
 
   final UserDao _userDao;
 
-  final _contentMentionLruCache = LruCache<String, Map<String, MentionUser>>(
+  final _contentMentionLruCache = LruCache<int, Map<String, MentionUser>>(
     storage: SimpleStorage(),
-    capacity: 1024,
+    capacity: 1024 * 4,
   );
   final _userLruCache = LruCache<String, MentionUser>(
     storage: SimpleStorage(),
@@ -27,7 +27,7 @@ class MentionCache {
 
   Map<String, MentionUser> mentionCache(String? content) {
     if (content == null) return {};
-    return _contentMentionLruCache.get(content) ?? {};
+    return _contentMentionLruCache.get(content.hashCode) ?? {};
   }
 
   Future<Map<String, MentionUser>> checkMentionCache(
@@ -39,7 +39,7 @@ class MentionCache {
         _contents.where((element) => element != null).cast<String>().toSet();
 
     contents.forEach((element) {
-      final cache = _contentMentionLruCache.get(element);
+      final cache = _contentMentionLruCache.get(element.hashCode);
       if (cache != null) {
         map.addAll(cache);
       } else {
@@ -63,7 +63,8 @@ class MentionCache {
     };
 
     if (userIds.isEmpty) {
-      noCacheContents.forEach((e) => _contentMentionLruCache.set(e, {}));
+      noCacheContents
+          .forEach((e) => _contentMentionLruCache.set(e.hashCode, {}));
     } else {
       userIds = userIds
           .where((element) => _userLruCache.get(element) == null)
@@ -80,7 +81,7 @@ class MentionCache {
 
       noCacheContentUserIdMap.entries.forEach((element) {
         _contentMentionLruCache.set(
-          element.key,
+          element.key.hashCode,
           Map.fromEntries(
             map.entries.where(
               (entry) => element.value.contains(entry.key),

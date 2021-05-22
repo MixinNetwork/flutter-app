@@ -142,22 +142,15 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   MessagesDao get messagesDao => database.messagesDao;
 
-  @override
-  Stream<Transition<_MessageEvent, MessageState>> transformTransitions(
-          Stream<Transition<_MessageEvent, MessageState>> transitions) =>
-      super.transformTransitions(transitions.asyncMap((event) async {
-        final state = event.nextState;
-
-        await mentionCache.checkMentionCache(
-          {...state.top, state.center, ...state.bottom}
-              .map((e) => e?.content)
-              .where((element) => element != null)
-              .cast<String>()
-              .toSet(),
-        );
-
-        return event;
-      }));
+  Future<void> _preCacheMention(MessageState state) async {
+    await mentionCache.checkMentionCache(
+      {...state.top, state.center, ...state.bottom}
+          .map((e) => e?.content)
+          .where((element) => element != null)
+          .cast<String>()
+          .toSet(),
+    );
+  }
 
   @override
   Stream<MessageState> mapEventToState(_MessageEvent event) async* {
@@ -172,22 +165,31 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     }
 
     if (event is _MessageInitEvent) {
-      yield await _resetMessageList(
+      final messageState = await _resetMessageList(
         conversationId,
         finalLimit,
         event.centerMessageId,
       );
+      await _preCacheMention(messageState);
+      yield messageState;
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
           if (state.isLatest) return;
-          yield await _after(conversationId);
+          final messageState = await _after(conversationId);
+          await _preCacheMention(messageState);
+          yield messageState;
         } else if (event is _MessageLoadBeforeEvent) {
-          yield await _before(conversationId);
+          final messageState = await _before(conversationId);
+          await _preCacheMention(messageState);
+          yield messageState;
         }
       } else if (event is _MessageInsertOrReplaceEvent) {
         final result = _insertOrReplace(conversationId, event.data);
-        if (result != null) yield result;
+        if (result != null) {
+          await _preCacheMention(result);
+          yield result;
+        }
       } else if (event is _MessageScrollEvent) {
         add(_MessageInitEvent(
           centerMessageId: event.messageId,
