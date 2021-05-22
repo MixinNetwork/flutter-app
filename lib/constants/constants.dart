@@ -9,6 +9,7 @@ const sendingMessage = 'SENDING_MESSAGE';
 const recallMessage = 'RECALL_MESSAGE';
 const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
+const listPendingMessage = 'LIST_PENDING_MESSAGES';
 const resendKey = 'RESEND_KEY';
 const errorAction = 'ERROR';
 const consumeSessionSignalKeys = 'CONSUME_SESSION_SIGNAL_KEYS';

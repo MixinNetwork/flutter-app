@@ -48,6 +48,10 @@ class BlazeMessage {
 BlazeMessage createParamBlazeMessage(BlazeMessageParam param) =>
     BlazeMessage(id: const Uuid().v4(), action: createMessage, params: param);
 
+BlazeMessage createPendingBlazeMessage(BlazeMessageParamOffset offset) =>
+    BlazeMessage(
+        id: const Uuid().v4(), action: listPendingMessage, params: offset);
+
 BlazeMessage createConsumeSessionSignalKeys(BlazeMessageParam param) =>
     BlazeMessage(
         id: const Uuid().v4(), action: consumeSessionSignalKeys, params: param);

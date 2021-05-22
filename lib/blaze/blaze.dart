@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import 'blaze_message_param_session.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -170,12 +171,11 @@ class Blaze {
     final offset =
         await database.floodMessagesDao.getLastBlazeMessageCreatedAt();
     // ignore: prefer_typing_uninitialized_variables
-    var params;
+    var param = '';
     if (offset != null) {
-      params = '{"offset":"${offset.toUtc()}"}';
+      param = "${offset}";
     }
-    final m = BlazeMessage(
-        id: const Uuid().v4(), params: params, action: 'LIST_PENDING_MESSAGES');
+    final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     debugPrint('blaze send: ${m.toJson()}');
     await _sendGZip(m);
   }

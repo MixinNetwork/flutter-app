@@ -20,3 +20,16 @@ Map<String, dynamic> _$BlazeMessageParamSessionToJson(
       'user_id': instance.userId,
       'session_id': instance.sessionId,
     };
+
+BlazeMessageParamOffset _$BlazeMessageParamOffsetFromJson(
+    Map<String, dynamic> json) {
+  return BlazeMessageParamOffset(
+    offset: json['offset'] as String,
+  );
+}
+
+Map<String, dynamic> _$BlazeMessageParamOffsetToJson(
+        BlazeMessageParamOffset instance) =>
+    <String, dynamic>{
+      'offset': instance.offset,
+    };

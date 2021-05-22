@@ -19,3 +19,18 @@ class BlazeMessageParamSession {
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamSessionToJson(this);
 }
+
+@JsonSerializable()
+class BlazeMessageParamOffset {
+  BlazeMessageParamOffset({
+    required this.offset,
+  });
+
+  factory BlazeMessageParamOffset.fromJson(Map<String, dynamic> json) =>
+      _$BlazeMessageParamOffsetFromJson(json);
+
+  @JsonKey(name: 'offset')
+  String offset;
+
+  Map<String, dynamic> toJson() => _$BlazeMessageParamOffsetToJson(this);
+}
