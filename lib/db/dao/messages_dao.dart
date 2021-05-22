@@ -49,6 +49,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       .cast<NotificationMessage>();
 
   Future<int> insert(Message message, String userId) async {
+    if (message.userId.isEmpty) {
+      print('fuck message userid is null: ${StackTrace.current}');
+    }
     final result = await into(db.messages).insertOnConflictUpdate(message);
     if (message.category.isText) {
       final content = message.content!.fts5ContentFilter();

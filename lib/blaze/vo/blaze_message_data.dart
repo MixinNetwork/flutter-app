@@ -52,4 +52,7 @@ class BlazeMessageData {
   String sessionId;
 
   Map<String, dynamic> toJson() => _$BlazeMessageDataToJson(this);
+
+  String get senderId =>
+      (representativeId?.isNotEmpty ?? false) ? representativeId! : userId;
 }
