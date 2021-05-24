@@ -106,6 +106,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
+        "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
+        "conversationAddContact":
+            MessageLookupByLibrary.simpleMessage("+ Add Contact"),
         "conversationCount": m7,
         "conversationID": m8,
         "conversationName":

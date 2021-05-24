@@ -159,5 +159,7 @@
   "groupPopMenuMakeAdmin": "Make group admin",
   "groupPopMenuDismissAdmin": "Dismiss admin",
   "groupPopMenuRemoveParticipants": "Remove {name}",
-  "groupSearchParticipants": "Mixin ID, Name"
+  "groupSearchParticipants": "Mixin ID, Name",
+  "conversationAddContact": "+ Add Contact",
+  "conversationAddBot": "+ Add Bot"
 }

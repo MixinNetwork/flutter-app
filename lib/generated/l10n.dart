@@ -1659,6 +1659,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `+ Add Contact`
+  String get conversationAddContact {
+    return Intl.message(
+      '+ Add Contact',
+      name: 'conversationAddContact',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `+ Add Bot`
+  String get conversationAddBot {
+    return Intl.message(
+      '+ Add Bot',
+      name: 'conversationAddBot',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

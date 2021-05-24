@@ -30,8 +30,10 @@ class ConversationState extends Equatable {
 
   bool? get isBot => conversation?.isBotConversation ?? user?.isBot;
 
+  // note: check user information first.
+  // because in bot stranger conversation. it might be conversation.isStrangerConversation == false
   bool? get isStranger =>
-      conversation?.isStrangerConversation ?? user?.isStranger;
+      user?.isStranger ?? conversation?.isStrangerConversation;
 
   bool? get isGroup =>
       (conversation?.isGroupConversation) ?? (user != null ? false : null);
