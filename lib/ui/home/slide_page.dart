@@ -1,10 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
@@ -12,6 +10,7 @@ import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
+import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/menu.dart';
@@ -68,27 +67,30 @@ class SlidePage extends StatelessWidget {
             const _CircleList(),
             const Spacer(),
             Builder(
-              builder: (context) => BlocConverter<MultiAuthCubit,
-                  MultiAuthState, Tuple2<String?, String?>>(
-                converter: (state) => Tuple2(state.current?.account.fullName,
-                    state.current?.account.avatarUrl),
-                when: (a, b) => b?.item1 != null && b?.item2 != null,
-                builder: (context, tuple) =>
+              builder: (context) =>
+                  BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
+                converter: (state) => state.current?.account,
+                when: (a, b) => b?.fullName != null,
+                builder: (context, account) =>
                     BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
                   converter: (state) => state.type == SlideCategoryType.setting,
-                  builder: (context, selected) => SelectItem(
-                    icon: ClipOval(
-                      child: CachedNetworkImage(
-                        imageUrl: tuple.item2!,
-                        width: 30,
-                        height: 30,
+                  builder: (context, selected) {
+                    assert(account != null);
+                    return SelectItem(
+                      icon: ClipOval(
+                        child: AvatarWidget(
+                          avatarUrl: account!.avatarUrl,
+                          size: 30,
+                          name: account.fullName!,
+                          userId: account.userId,
+                        ),
                       ),
-                    ),
-                    title: tuple.item1!,
-                    selected: selected,
-                    onTap: () => BlocProvider.of<SlideCategoryCubit>(context)
-                        .select(SlideCategoryType.setting),
-                  ),
+                      title: account.fullName!,
+                      selected: selected,
+                      onTap: () => BlocProvider.of<SlideCategoryCubit>(context)
+                          .select(SlideCategoryType.setting),
+                    );
+                  },
                 ),
               ),
             ),
