@@ -91,6 +91,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "confirm": MessageLookupByLibrary.simpleMessage("确定"),
         "contact": MessageLookupByLibrary.simpleMessage("联系人"),
         "contacts": MessageLookupByLibrary.simpleMessage("联系人"),
+        "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ 添加机器人"),
+        "conversationAddContact":
+            MessageLookupByLibrary.simpleMessage("+ 添加联系人"),
         "conversationCount": m7,
         "conversationName": MessageLookupByLibrary.simpleMessage("群组名称"),
         "conversationParticipantsCount": m9,
