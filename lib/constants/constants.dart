@@ -11,6 +11,7 @@ const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
 const listPendingMessage = 'LIST_PENDING_MESSAGES';
 const resendKey = 'RESEND_KEY';
+const noKey = 'NO_KEY';
 const errorAction = 'ERROR';
 const consumeSessionSignalKeys = 'CONSUME_SESSION_SIGNAL_KEYS';
 const createSignalKeyMessages = 'CREATE_SIGNAL_KEY_MESSAGES';

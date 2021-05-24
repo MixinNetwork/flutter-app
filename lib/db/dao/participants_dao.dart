@@ -65,4 +65,11 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
           ..where((tbl) => tbl.conversationId.equals(conversationId)))
         .go();
   }
+
+  Future deleteByCIdAndPId(String conversationId, String participantId) async =>
+      (delete(db.participants)
+            ..where((tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.userId.equals(participantId)))
+          .go();
 }

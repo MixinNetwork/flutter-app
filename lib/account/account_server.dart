@@ -123,6 +123,7 @@ class AccountServer {
       blaze,
       client,
       sessionId,
+      userId,
       database,
     );
 

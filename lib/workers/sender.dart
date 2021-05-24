@@ -1,6 +1,14 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import '../blaze/vo/blaze_message_data.dart';
+import '../blaze/vo/plain_json_message.dart';
+import '../enum/message_category.dart';
+import '../enum/message_status.dart';
+import '../utils/load_balancer_utils.dart';
+import 'package:uuid/uuid.dart';
+import 'package:very_good_analysis/very_good_analysis.dart';
 import '../blaze/vo/message_result.dart';
 import '../constants/constants.dart';
 import '../blaze/blaze.dart';
@@ -22,6 +30,7 @@ class Sender {
     this.blaze,
     this.client,
     this.sessionId,
+    this.accountId,
     this.database,
   );
 
@@ -29,6 +38,7 @@ class Sender {
   final Blaze blaze;
   final Client client;
   final String sessionId;
+  final String accountId;
   final Database database;
 
   Future<bool> deliver(BlazeMessage blazeMessage) async {
@@ -317,4 +327,121 @@ class Sender {
       }
     }
   }
+
+  Future<bool> sendSenderKey(
+      String conversationId, String recipientId, String sessionId) async {
+    final requestKeys = <BlazeMessageParamSession>[];
+    requestKeys.add(
+        BlazeMessageParamSession(userId: recipientId, sessionId: sessionId));
+    final blazeMessage = createConsumeSessionSignalKeys(
+        createConsumeSignalKeysParam(requestKeys));
+    final data = (await signalKeysChannel(blazeMessage))?.data;
+    if (data == null) {
+      return false;
+    }
+    final keys = List<SignalKey>.from(
+        (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
+    if (keys.isNotEmpty && keys.length > 0) {
+      final preKeyBundle = keys[0].createPreKeyBundle();
+      await signalProtocol.processSession(recipientId, preKeyBundle);
+    } else {
+      database.participantSessionDao.insert(db.ParticipantSessionData(
+          conversationId: conversationId,
+          userId: recipientId,
+          sessionId: sessionId));
+      return false;
+    }
+    final encryptedResult = await signalProtocol.encryptSenderKey(
+        conversationId, recipientId,
+        deviceId: sessionId.getDeviceId());
+    if (encryptedResult.err) {
+      return false;
+    }
+    final signalKeyMessage = createBlazeSignalKeyMessage(
+        recipientId, encryptedResult.result!,
+        sessionId: sessionId);
+    final signalKeyMessages = <BlazeSignalKeyMessage>[]..add(signalKeyMessage);
+    final checksum = await getCheckSum(conversationId);
+    final bm = createSignalKeyMessage(createSignalKeyMessageParam(
+        conversationId, signalKeyMessages, checksum));
+    final result = await deliverNoThrow(bm);
+    if (result.retry) {
+      return sendSenderKey(conversationId, recipientId, sessionId);
+    }
+    if (result.success) {
+      database.participantSessionDao.insert(db.ParticipantSessionData(
+          conversationId: conversationId,
+          userId: recipientId,
+          sessionId: sessionId,
+          sentToServer: SenderKeyStatus.sent.index));
+    }
+    return result.success;
+  }
+
+  Future<void> sendNoKeyMessage(
+      String conversationId, String recipientId) async {
+    final plainText = PlainJsonMessage(noKey, null, null, null, null, null)
+        .toJson()
+        .toString();
+    final encoded = base64Encode(await utf8EncodeWithIsolate(plainText));
+    final blazeParam = BlazeMessageParam(
+      conversationId: conversationId,
+      recipientId: recipientId,
+      messageId: const Uuid().v4(),
+      category: MessageCategory.plainJson,
+      data: encoded,
+      status: MessageStatus.sending.toString(),
+    );
+    final bm = BlazeMessage(
+        id: const Uuid().v4(), action: createMessage, params: blazeParam);
+    unawaited(deliverNoThrow(bm));
+  }
+
+  Future<void> sendProcessSignalKey(
+      BlazeMessageData data, ProcessSignalKeyAction action,
+      {String? participantId}) async {
+    if (action == ProcessSignalKeyAction.resendKey) {
+      final result =
+          await sendSenderKey(data.conversationId, data.userId, data.sessionId);
+      if (!result) {
+        await sendNoKeyMessage(data.conversationId, data.userId);
+      }
+    } else if (action == ProcessSignalKeyAction.removeParticipant) {
+      final pid = participantId!;
+      await database.transaction(() async {
+        database.participantsDao.deleteByCIdAndPId(data.conversationId, pid);
+        database.participantSessionDao
+            .deleteByCIdAndPId(data.conversationId, pid);
+        database.participantSessionDao
+            .emptyStatusByConversationId(data.conversationId);
+      });
+      signalProtocol.clearSenderKey(data.conversationId, accountId);
+      // TODO publish signal key change
+    } else if (action == ProcessSignalKeyAction.addParticipant) {
+      final userIds = <String>[]..add(participantId!);
+      await refreshSession(data.conversationId, userIds);
+      // TODO publish signal key change
+    }
+  }
+
+  Future<void> refreshSession(
+      String conversationId, List<String> userIds) async {
+    final response = await client.userApi.getSessions(userIds);
+    final list = <db.ParticipantSessionData>[];
+    response.data.forEach((e) {
+      list.add(db.ParticipantSessionData(
+          conversationId: conversationId,
+          userId: e.userId,
+          sessionId: e.sessionId));
+    });
+    if (list.isNotEmpty) {
+      await database.participantSessionDao.insertAll(list);
+    }
+  }
+}
+
+enum ProcessSignalKeyAction {
+  addParticipant,
+  removeParticipant,
+  resendKey,
 }

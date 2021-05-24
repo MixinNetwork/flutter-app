@@ -35,6 +35,18 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
         .go();
   }
 
+  Future deleteByCIdAndPId(String conversationId, String participantId) async =>
+      (delete(db.participantSession)
+            ..where((tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.userId.equals(participantId)))
+          .go();
+
+  Future emptyStatusByConversationId(String conversationId) async =>
+      (update(db.participantSession)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ParticipantSessionCompanion(sentToServer: Value(null)));
+
   Future<List<ParticipantSessionData>> getParticipantSessionsByConversationId(
           String conversationId) async =>
       (select(db.participantSession)

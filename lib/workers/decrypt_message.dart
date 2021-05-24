@@ -625,11 +625,10 @@ class DecryptMessage extends Injector {
     if (userId == systemUser &&
         (await database.userDao.findUserById(userId).getSingleOrNull()) ==
             null) {
-      // todo UserRelationship
       await database.userDao.insert(db.User(
-          userId: systemUser,
-          identityNumber: '0',
-          relationship: UserRelationship.friend));
+        userId: systemUser,
+        identityNumber: '0',
+      ));
     }
     final message = db.Message(
         messageId: data.messageId,
@@ -643,14 +642,23 @@ class DecryptMessage extends Injector {
         participantId: systemMessage.participantId);
     if (systemMessage.action == MessageAction.add ||
         systemMessage.action == MessageAction.join) {
-      // database.participantsDao.insert(db.Participant(conversationId: data.conversationId,userId: systemMessage.participantId, role: '' ,createdAt: data.createdAt));
-      // todo refresh conversation and signal key
+      database.participantsDao.insert(db.Participant(
+          conversationId: data.conversationId,
+          userId: systemMessage.participantId!,
+          createdAt: data.createdAt));
       if (systemMessage.participantId == accountId) {
-        await syncConversion(data.conversationId);
-        // } else if (systemMessage.userId != selfId && no signal key) {
+        syncConversion(data.conversationId, force: true, unWait: true);
+      } else if (systemMessage.participantId != accountId &&
+          await _signalProtocol.isExistSenderKey(
+              data.conversationId, accountId)) {
+        unawaited(_sender.sendProcessSignalKey(
+            data, ProcessSignalKeyAction.addParticipant,
+            participantId: systemMessage.participantId));
+        await refreshUsers(<String>[]..add(systemMessage.participantId!));
       } else {
-        // syncSession();
-        // syncUser();
+        final userIds = <String>[]..add(systemMessage.participantId!);
+        unawaited(_sender.refreshSession(data.conversationId, userIds));
+        await refreshUsers(<String>[]..add(systemMessage.participantId!));
       }
     } else if (systemMessage.action == MessageAction.remove ||
         systemMessage.action == MessageAction.exit) {
@@ -658,11 +666,15 @@ class DecryptMessage extends Injector {
         unawaited(database.conversationDao.updateConversationStatusById(
             data.conversationId, ConversationStatus.quit));
       }
-      // todo remove signal key
+      await refreshUsers(<String>[]..add(systemMessage.participantId!));
+      unawaited(_sender.sendProcessSignalKey(
+          data, ProcessSignalKeyAction.removeParticipant,
+          participantId: systemMessage.participantId));
     } else if (systemMessage.action == MessageAction.update) {
       final participantId = systemMessage.participantId;
       if (participantId != null && participantId.isNotEmpty) {
-        await refreshUsers(<String>[systemMessage.participantId!], force: true);
+        unawaited(
+            refreshUsers(<String>[systemMessage.participantId!], force: true));
       } else {
         await syncConversion(data.conversationId, force: true, unWait: true);
       }
@@ -674,7 +686,7 @@ class DecryptMessage extends Injector {
         systemMessage.participantId!,
         systemMessage.role,
       );
-      if (systemMessage.participantId == accountId) {
+      if (systemMessage.participantId != accountId) {
         return;
       }
     }
