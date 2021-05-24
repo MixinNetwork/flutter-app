@@ -62,7 +62,8 @@ class MessageItemWidget extends StatelessWidget {
     String? userName;
     String? userId;
 
-    if (message.userId != message.conversationOwnerId &&
+    if ((message.conversionCategory == ConversationCategory.group ||
+            message.userId != message.conversationOwnerId) &&
         !isCurrentUser &&
         (!sameUserPrev || !sameDayPrev)) {
       userName = message.userFullName;

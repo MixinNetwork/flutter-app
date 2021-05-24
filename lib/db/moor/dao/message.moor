@@ -1,7 +1,7 @@
 import '../mixin.moor';
 
 messagesByConversationId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -28,7 +28,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         LIMIT :offset, :limit;
 
 messagesByMessageIds AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -131,7 +131,7 @@ UPDATE messages SET category = 'MESSAGE_RECALL', content = NULL, media_url = NUL
     album_id = NULL, sticker_id = NULL, shared_user_id = NULL, media_waveform = NULL, quote_message_id = NULL, quote_content = NULL WHERE message_id = :messageId;
 
 mediaMessages AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -215,7 +215,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     LIMIT :limit OFFSET :offset;
 
 mediaMessagesBefore AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -242,7 +242,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         LIMIT :limit;
 
 mediaMessagesAfter AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -273,7 +273,7 @@ messageRowId:
 SELECT rowid FROM messages where message_id = :messageId;
 
 postMessages AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -300,7 +300,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         LIMIT :offset, :limit;
 
 postMessagesBefore AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -328,7 +328,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
 
 
 fileMessages AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -355,7 +355,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         LIMIT :offset, :limit;
 
 fileMessagesBefore AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -382,7 +382,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         LIMIT :limit;
 
 beforeMessagesByConversationId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -409,7 +409,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         LIMIT :limit;
 
 afterMessagesByConversationId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
@@ -436,7 +436,7 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         LIMIT :limit;
 
 messageItemByMessageId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId,
+SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
         u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
         m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
         m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
