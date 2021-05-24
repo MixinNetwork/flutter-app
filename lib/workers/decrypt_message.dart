@@ -299,9 +299,7 @@ class DecryptMessage extends Injector {
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
-      userId: data.representativeId?.isNotEmpty == true
-          ? data.representativeId!
-          : data.senderId,
+      userId: data.senderId,
       category: data.category!,
       content: content,
       status: MessageStatus.delivered,

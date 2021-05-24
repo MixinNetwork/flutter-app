@@ -47,7 +47,6 @@ Future<String?> messagePreviewOptimize(
     if (trimContent != null) {
       _content = (await jsonDecodeWithIsolate(trimContent))
           .map((e) => ActionData.fromJson(e))
-          // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')
           .join();
     }
@@ -117,8 +116,6 @@ String? messagePreviewIcon(
   } else if (messageCategory.isCallMessage) {
     icon = Resources.assetsImagesVideoCallSvg;
   } else if (messageCategory.isRecall) {
-    icon = Resources.assetsImagesRecallSvg;
-  } else {
     icon = Resources.assetsImagesRecallSvg;
   }
   return icon;

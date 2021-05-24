@@ -1,7 +1,9 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:provider/provider.dart';
 
+import '../../../account/account_server.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
@@ -37,77 +39,89 @@ class SystemMessage extends StatelessWidget {
                   vertical: 5,
                   horizontal: 10,
                 ),
-                child: Builder(builder: (context) {
-                  String text;
-                  switch (message.actionName) {
-                    case MessageAction.join:
-                      text = Localization.of(context).chatGroupJoin(
-                        message.participantRelationship == UserRelationship.me
-                            ? Localization.of(context).youStart
-                            : message.participantFullName ?? '',
-                      );
-                      break;
-                    case MessageAction.exit:
-                      text = Localization.of(context).chatGroupExit(
-                        message.participantRelationship == UserRelationship.me
-                            ? Localization.of(context).youStart
-                            // TODO why message.participantFullName is empty
-                            : message.participantFullName ?? '',
-                      );
-                      break;
-                    case MessageAction.add:
-                      text = Localization.of(context).chatGroupAdd(
-                        message.relationship == UserRelationship.me
-                            ? Localization.of(context).youStart
-                            : message.userFullName!,
-                        message.participantRelationship == UserRelationship.me
-                            ? Localization.of(context).you
-                            // TODO why message.participantFullName is empty
-                            : message.participantFullName ?? '',
-                      );
-                      break;
-                    case MessageAction.remove:
-                      text = Localization.of(context).chatGroupRemove(
-                        message.relationship == UserRelationship.me
-                            ? Localization.of(context).youStart
-                            : message.userFullName!,
-                        message.participantRelationship == UserRelationship.me
-                            ? Localization.of(context).you
-                            : message.participantFullName ?? '',
-                      );
-                      break;
-                    case MessageAction.create:
-                      text = Localization.of(context).chatGroupCreate(
-                        message.relationship == UserRelationship.me
-                            ? Localization.of(context).youStart
-                            : message.userFullName!,
-                        message.groupName!,
-                      );
-                      break;
-                    // case MessageAction.update:
-                    //   // todo May not be used anymore
-                    //   break;
-                    case MessageAction.role:
-                      text = Localization.of(context).chatGroupRole;
-                      break;
-                    default:
-                      text = Localization.of(context).chatNotSupport;
-                      break;
-                  }
-                  return Text(
-                    text,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: BrightnessData.dynamicColor(
-                        context,
-                        const Color.fromRGBO(0, 0, 0, 1),
-                      ),
+                child: Text(
+                  generateSystemText(
+                    actionName: message.actionName,
+                    senderIsCurrentUser:
+                        message.userId == context.read<AccountServer>().userId,
+                    relationship: message.relationship,
+                    participantFullName: message.participantFullName,
+                    senderFullName: message.userFullName,
+                    groupName: message.groupName,
+                  ),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: BrightnessData.dynamicColor(
+                      context,
+                      const Color.fromRGBO(0, 0, 0, 1),
                     ),
-                  );
-                }),
+                  ),
+                ),
               ),
             ),
           ),
         ),
       );
+}
+
+String generateSystemText({
+  required MessageAction? actionName,
+  required bool senderIsCurrentUser,
+  required UserRelationship? relationship,
+  required String? participantFullName,
+  required String? senderFullName,
+  required String? groupName,
+}) {
+  String text;
+  switch (actionName) {
+    case MessageAction.join:
+      text = Localization.current.chatGroupJoin(
+        senderIsCurrentUser
+            ? Localization.current.youStart
+            : participantFullName ?? '',
+      );
+      break;
+    case MessageAction.exit:
+      text = Localization.current.chatGroupExit(
+        senderIsCurrentUser
+            ? Localization.current.youStart
+            : participantFullName ?? '',
+      );
+      break;
+    case MessageAction.add:
+      text = Localization.current.chatGroupAdd(
+        relationship == UserRelationship.me
+            ? Localization.current.youStart
+            : senderFullName!,
+        senderIsCurrentUser
+            ? Localization.current.you
+            : participantFullName ?? '',
+      );
+      break;
+    case MessageAction.remove:
+      text = Localization.current.chatGroupRemove(
+        relationship == UserRelationship.me
+            ? Localization.current.youStart
+            : senderFullName!,
+        senderIsCurrentUser
+            ? Localization.current.you
+            : participantFullName ?? '',
+      );
+      break;
+    case MessageAction.create:
+      text = Localization.current.chatGroupCreate(
+        relationship == UserRelationship.me
+            ? Localization.current.youStart
+            : senderFullName!,
+        groupName!,
+      );
+      break;
+    case MessageAction.role:
+      text = Localization.current.chatGroupRole;
+      break;
+    default:
+      text = Localization.current.chatNotSupport;
+      break;
+  }
+  return text;
 }

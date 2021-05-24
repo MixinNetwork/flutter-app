@@ -31,6 +31,7 @@ import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/menu.dart';
+import '../../widgets/message/item/system_message.dart';
 import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message_status_icon.dart';
 import '../../widgets/radio.dart';
@@ -1118,6 +1119,18 @@ class _MessageContent extends HookWidget {
       () async {
         final isGroup = conversation.category == ConversationCategory.group ||
             conversation.senderId != conversation.ownerId;
+        print('fuck conversation.contentType: ${conversation.contentType}');
+        if (conversation.contentType == MessageCategory.systemConversation) {
+          return generateSystemText(
+            actionName: conversation.actionName,
+            senderIsCurrentUser:
+                conversation.senderId == context.read<AccountServer>().userId,
+            relationship: conversation.relationship,
+            participantFullName: conversation.participantFullName,
+            senderFullName: conversation.senderFullName,
+            groupName: conversation.groupName,
+          );
+        }
 
         final mentionCache = context.read<MentionCache>();
 
@@ -1135,11 +1148,16 @@ class _MessageContent extends HookWidget {
       },
       null,
       keys: [
+        conversation.actionName,
         conversation.messageStatus,
         conversation.contentType,
         conversation.content,
         conversation.senderId,
         conversation.ownerId,
+        conversation.relationship,
+        conversation.participantFullName,
+        conversation.senderFullName,
+        conversation.groupName,
       ],
     );
 
