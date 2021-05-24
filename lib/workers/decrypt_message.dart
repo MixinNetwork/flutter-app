@@ -674,7 +674,7 @@ class DecryptMessage extends Injector {
       await database.participantsDao.updateParticipantRole(
         data.conversationId,
         systemMessage.participantId!,
-        systemMessage.role!,
+        systemMessage.role,
       );
       if (systemMessage.participantId == accountId) {
         return;
