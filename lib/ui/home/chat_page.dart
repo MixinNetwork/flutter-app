@@ -165,8 +165,8 @@ class ChatPage extends HookWidget {
               children: [
                 if (!navigationMode)
                   SizedBox(
-                    width:
-                        boxConstraints.maxWidth - (hasPage ? kChatSidePageWidth : 0),
+                    width: boxConstraints.maxWidth -
+                        (hasPage ? kChatSidePageWidth : 0),
                     child: chatContainerPage.child,
                   ),
                 if (navigationMode || hasPage)

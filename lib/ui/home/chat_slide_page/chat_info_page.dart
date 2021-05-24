@@ -295,7 +295,7 @@ class ChatInfoPage extends HookWidget {
                             );
                           },
                         ),
-                      if (conversation.relationship == UserRelationship.friend)
+                      if (!isGroupConversation)
                         Builder(builder: (context) {
                           final title = conversation.isBot!
                               ? Localization.of(context).removeBot
