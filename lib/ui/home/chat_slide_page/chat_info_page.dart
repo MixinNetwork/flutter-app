@@ -118,7 +118,8 @@ class ChatInfoPage extends HookWidget {
                               conversation.name!,
                               conversation.isPlainConversation,
                               conversationId: conversationId,
-                              recipientId: conversationId, // TODO conversationId?
+                              recipientId:
+                                  conversationId, // TODO conversationId?
                             );
                           },
                         ),
