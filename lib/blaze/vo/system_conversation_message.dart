@@ -7,6 +7,7 @@ part 'system_conversation_message.g.dart';
 
 @JsonSerializable()
 @MessageActionJsonConverter()
+@ParticipantRoleJsonConverter()
 class SystemConversationMessage {
   SystemConversationMessage(
     this.action,
