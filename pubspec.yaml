@@ -78,7 +78,7 @@ dependencies:
   flutter_markdown: ^0.6.2
   markdown: ^4.0.0
   map: ^0.3.0
-  flutter_local_notifications: ^5.0.0+4
+  flutter_local_notifications: ^6.0.0
   flutter_app_icon_badge: ^2.0.0
   flutter_hooks: ^0.17.0
   package_info: ^2.0.0
