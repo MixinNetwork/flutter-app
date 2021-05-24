@@ -61,7 +61,10 @@ class MessageItemWidget extends StatelessWidget {
     final datetime = sameDayPrev ? null : message.createdAt;
     String? userName;
     String? userId;
-    if (!isCurrentUser && (!sameUserPrev || !sameDayPrev)) {
+
+    if (message.userId != message.conversationOwnerId &&
+        !isCurrentUser &&
+        (!sameUserPrev || !sameDayPrev)) {
       userName = message.userFullName;
       userId = message.userId;
     }
