@@ -37,13 +37,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m9(count) => "${count} 成员";
 
-  static String m10(name) => "确定删除${name}圈子吗？";
+  static String m10(name) => "发送消息至 ${name}";
 
-  static String m11(date) => "${date}加入";
+  static String m11(name) => "移除 ${name}";
 
-  static String m12(count) => "共 ${count} 人";
+  static String m12(name) => "确定删除${name}圈子吗？";
 
-  static String m13(count) => "${count} 条相关的消息";
+  static String m13(date) => "${date}加入";
+
+  static String m14(count) => "共 ${count} 人";
+
+  static String m15(count) => "${count} 条相关的消息";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -117,6 +121,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "followTwitter": MessageLookupByLibrary.simpleMessage("关注我们的 Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
         "group": MessageLookupByLibrary.simpleMessage("群组"),
+        "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
+        "groupOwner": MessageLookupByLibrary.simpleMessage("群主"),
+        "groupParticipants": MessageLookupByLibrary.simpleMessage("群成员"),
+        "groupPopMenuDismissAdmin":
+            MessageLookupByLibrary.simpleMessage("撤销管理员身份"),
+        "groupPopMenuMakeAdmin":
+            MessageLookupByLibrary.simpleMessage("设定为群组管理员"),
+        "groupPopMenuMessage": m10,
+        "groupPopMenuRemoveParticipants": m11,
+        "groupSearchParticipants":
+            MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
         "image": MessageLookupByLibrary.simpleMessage("照片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包含文件"),
@@ -152,8 +167,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("没有媒体"),
         "noPost": MessageLookupByLibrary.simpleMessage("没有文章"),
         "notification": MessageLookupByLibrary.simpleMessage("通知"),
-        "pageDeleteCircle": m10,
-        "pageEditProfileJoin": m11,
+        "pageDeleteCircle": m12,
+        "pageEditProfileJoin": m13,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -162,7 +177,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "通过 QrCode 登录 Mixin Messenger"),
         "pageRightEmptyMessage":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
-        "participantsCount": m12,
+        "participantsCount": m14,
         "people": MessageLookupByLibrary.simpleMessage("通讯录"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
@@ -182,7 +197,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
-        "searchRelatedMessage": m13,
+        "searchRelatedMessage": m15,
         "shareContact": MessageLookupByLibrary.simpleMessage("发送名片"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("分享的应用"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒体内容"),

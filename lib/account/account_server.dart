@@ -775,16 +775,18 @@ class AccountServer {
       );
     } catch (e) {
       debugPrint('$e');
+      rethrow;
     }
   }
 
   Future<void> updateParticipantRole(
-      String conversationId, String userId, ParticipantRole role) async {
+      String conversationId, String userId, ParticipantRole? role) async {
     try {
-      await client.conversationApi.participants(conversationId, 'REMOVE',
+      await client.conversationApi.participants(conversationId, 'ROLE',
           [ParticipantRequest(userId: userId, role: role)]);
     } catch (e) {
       debugPrint('$e');
+      rethrow;
     }
   }
 

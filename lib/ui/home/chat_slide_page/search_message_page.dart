@@ -122,6 +122,7 @@ class SearchMessagePage extends HookWidget {
               onChanged: (keyword) =>
                   context.read<SearchConversationKeywordCubit>().emit(keyword),
               fontSize: 16,
+              hintText: Localization.of(context).search,
             ),
           ),
           Expanded(

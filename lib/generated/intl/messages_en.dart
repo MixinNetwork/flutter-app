@@ -40,13 +40,17 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m9(count) => "${count} Participants";
 
-  static String m10(name) => "Do you want to delete ${name} circle?";
+  static String m10(name) => "Message ${name}";
 
-  static String m11(date) => "${date} join";
+  static String m11(name) => "Remove ${name}";
 
-  static String m12(count) => "${count} Participants";
+  static String m12(name) => "Do you want to delete ${name} circle?";
 
-  static String m13(count) => "${count} related messages";
+  static String m13(date) => "${date} join";
+
+  static String m14(count) => "${count} Participants";
+
+  static String m15(count) => "${count} related messages";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -142,6 +146,18 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "group": MessageLookupByLibrary.simpleMessage("Group"),
+        "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
+        "groupOwner": MessageLookupByLibrary.simpleMessage("owner"),
+        "groupParticipants":
+            MessageLookupByLibrary.simpleMessage("Participants"),
+        "groupPopMenuDismissAdmin":
+            MessageLookupByLibrary.simpleMessage("Dismiss admin"),
+        "groupPopMenuMakeAdmin":
+            MessageLookupByLibrary.simpleMessage("Make group admin"),
+        "groupPopMenuMessage": m10,
+        "groupPopMenuRemoveParticipants": m11,
+        "groupSearchParticipants":
+            MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),
@@ -181,8 +197,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("NO MEDIA"),
         "noPost": MessageLookupByLibrary.simpleMessage("NO POST"),
         "notification": MessageLookupByLibrary.simpleMessage("Notification"),
-        "pageDeleteCircle": m10,
-        "pageEditProfileJoin": m11,
+        "pageDeleteCircle": m12,
+        "pageEditProfileJoin": m13,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -191,7 +207,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
-        "participantsCount": m12,
+        "participantsCount": m14,
         "people": MessageLookupByLibrary.simpleMessage("People"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
@@ -216,7 +232,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory":
             MessageLookupByLibrary.simpleMessage("Search Conversation"),
-        "searchRelatedMessage": m13,
+        "searchRelatedMessage": m15,
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),

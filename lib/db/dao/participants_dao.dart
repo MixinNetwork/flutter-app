@@ -22,6 +22,9 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
     return query.get();
   }
 
+  Stream<List<ParticipantUser>> watchParticipants(String conversationId) =>
+      db.getGroupParticipants(conversationId).watch();
+
   Future<void> insertAll(List<Participant> add) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.participants, add);
       });
@@ -39,11 +42,11 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
       db.participantsAvatar(conversationId);
 
   Future<int> updateParticipantRole(
-          String conversationId, String participantId, ParticipantRole role) =>
+          String conversationId, String participantId, ParticipantRole? role) =>
       db.customUpdate(
         'UPDATE participants SET role = ? where conversation_id = ? AND user_id = ?',
         variables: [
-          Variable<ParticipantRole>(role),
+          Variable<String?>(const ParticipantRoleJsonConverter().toJson(role)),
           Variable.withString(conversationId),
           Variable.withString(participantId)
         ],

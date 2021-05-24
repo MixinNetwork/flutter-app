@@ -1579,6 +1579,86 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Participants`
+  String get groupParticipants {
+    return Intl.message(
+      'Participants',
+      name: 'groupParticipants',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `admin`
+  String get groupAdmin {
+    return Intl.message(
+      'admin',
+      name: 'groupAdmin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `owner`
+  String get groupOwner {
+    return Intl.message(
+      'owner',
+      name: 'groupOwner',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Message {name}`
+  String groupPopMenuMessage(Object name) {
+    return Intl.message(
+      'Message $name',
+      name: 'groupPopMenuMessage',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Make group admin`
+  String get groupPopMenuMakeAdmin {
+    return Intl.message(
+      'Make group admin',
+      name: 'groupPopMenuMakeAdmin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Dismiss admin`
+  String get groupPopMenuDismissAdmin {
+    return Intl.message(
+      'Dismiss admin',
+      name: 'groupPopMenuDismissAdmin',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Remove {name}`
+  String groupPopMenuRemoveParticipants(Object name) {
+    return Intl.message(
+      'Remove $name',
+      name: 'groupPopMenuRemoveParticipants',
+      desc: '',
+      args: [name],
+    );
+  }
+
+  /// `Mixin ID, Name`
+  String get groupSearchParticipants {
+    return Intl.message(
+      'Mixin ID, Name',
+      name: 'groupSearchParticipants',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

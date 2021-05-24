@@ -39,6 +39,7 @@ class SearchBar extends StatelessWidget {
                 controller: context.read<TextEditingController>(),
                 onChanged: (keyword) =>
                     context.read<KeywordCubit>().emit(keyword),
+                hintText: Localization.of(context).search,
               ),
             ),
             const SizedBox(width: 8),

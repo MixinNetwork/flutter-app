@@ -10807,6 +10807,35 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(participantSession.mapFromRow);
   }
 
+  Selectable<ParticipantUser> getGroupParticipants(String conversationId) {
+    return customSelect(
+        'SELECT p.conversation_id as conversationId, p.role as role, p.created_at as createdAt,\nu.user_id as userId, u.identity_number as identityNumber, u.relationship as relationship, u.biography as biography, u.full_name as fullName,\nu.avatar_url as avatarUrl, u.phone as phone, u.is_verified as isVerified, u.created_at as userCreatedAt, u.mute_until as muteUntil,\nu.has_pin as hasPin, u.app_id as appId, u.is_scam as isScam\nFROM participants p, users u\nWHERE p.conversation_id = :conversationId\nAND p.user_id = u.user_id\nORDER BY p.created_at DESC',
+        variables: [Variable<String>(conversationId)],
+        readsFrom: {participants, users}).map((QueryRow row) {
+      return ParticipantUser(
+        conversationId: row.read<String>('conversationId'),
+        role: Participants.$converter0.mapToDart(row.read<String?>('role')),
+        createdAt:
+            Participants.$converter1.mapToDart(row.read<int>('createdAt'))!,
+        userId: row.read<String>('userId'),
+        identityNumber: row.read<String>('identityNumber'),
+        relationship:
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
+        biography: row.read<String?>('biography'),
+        fullName: row.read<String?>('fullName'),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        phone: row.read<String?>('phone'),
+        isVerified: row.read<bool?>('isVerified'),
+        userCreatedAt:
+            Users.$converter1.mapToDart(row.read<int?>('userCreatedAt')),
+        muteUntil: Users.$converter2.mapToDart(row.read<int?>('muteUntil')),
+        hasPin: row.read<int?>('hasPin'),
+        appId: row.read<String?>('appId'),
+        isScam: row.read<int?>('isScam'),
+      );
+    });
+  }
+
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
@@ -13044,6 +13073,118 @@ class ParticipantSessionKey {
           ..write('userId: $userId, ')
           ..write('sessionId: $sessionId, ')
           ..write('publicKey: $publicKey')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ParticipantUser {
+  final String conversationId;
+  final ParticipantRole? role;
+  final DateTime createdAt;
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? biography;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? userCreatedAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final int? isScam;
+  ParticipantUser({
+    required this.conversationId,
+    this.role,
+    required this.createdAt,
+    required this.userId,
+    required this.identityNumber,
+    this.relationship,
+    this.biography,
+    this.fullName,
+    this.avatarUrl,
+    this.phone,
+    this.isVerified,
+    this.userCreatedAt,
+    this.muteUntil,
+    this.hasPin,
+    this.appId,
+    this.isScam,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      conversationId.hashCode,
+      $mrjc(
+          role.hashCode,
+          $mrjc(
+              createdAt.hashCode,
+              $mrjc(
+                  userId.hashCode,
+                  $mrjc(
+                      identityNumber.hashCode,
+                      $mrjc(
+                          relationship.hashCode,
+                          $mrjc(
+                              biography.hashCode,
+                              $mrjc(
+                                  fullName.hashCode,
+                                  $mrjc(
+                                      avatarUrl.hashCode,
+                                      $mrjc(
+                                          phone.hashCode,
+                                          $mrjc(
+                                              isVerified.hashCode,
+                                              $mrjc(
+                                                  userCreatedAt.hashCode,
+                                                  $mrjc(
+                                                      muteUntil.hashCode,
+                                                      $mrjc(
+                                                          hasPin.hashCode,
+                                                          $mrjc(
+                                                              appId.hashCode,
+                                                              isScam
+                                                                  .hashCode))))))))))))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParticipantUser &&
+          other.conversationId == this.conversationId &&
+          other.role == this.role &&
+          other.createdAt == this.createdAt &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.relationship == this.relationship &&
+          other.biography == this.biography &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.phone == this.phone &&
+          other.isVerified == this.isVerified &&
+          other.userCreatedAt == this.userCreatedAt &&
+          other.muteUntil == this.muteUntil &&
+          other.hasPin == this.hasPin &&
+          other.appId == this.appId &&
+          other.isScam == this.isScam);
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantUser(')
+          ..write('conversationId: $conversationId, ')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('biography: $biography, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('userCreatedAt: $userCreatedAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('isScam: $isScam')
           ..write(')'))
         .toString();
   }

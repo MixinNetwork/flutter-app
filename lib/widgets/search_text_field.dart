@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../constants/resources.dart';
-import '../generated/l10n.dart';
 import 'brightness_observer.dart';
 
 class SearchTextField extends StatelessWidget {
@@ -12,12 +11,15 @@ class SearchTextField extends StatelessWidget {
     this.controller,
     this.onChanged,
     this.fontSize = 14,
+    this.hintText,
   }) : super(key: key);
 
   final FocusNode? focusNode;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
   final double fontSize;
+
+  final String? hintText;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +69,7 @@ class SearchTextField extends StatelessWidget {
             ),
           ),
           contentPadding: const EdgeInsets.only(right: 8),
-          hintText: Localization.of(context).search,
+          hintText: hintText,
           hintStyle: TextStyle(
             color: hintColor,
             fontSize: fontSize,

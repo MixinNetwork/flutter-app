@@ -90,6 +90,17 @@ class ChatInfoPage extends HookWidget {
                 if (isGroupConversation)
                   CellGroup(
                     child: CellItem(
+                      title: Text(
+                        Localization.of(context).groupParticipants,
+                      ),
+                      onTap: () => context
+                          .read<ChatSideCubit>()
+                          .pushPage(ChatSideCubit.participants),
+                    ),
+                  ),
+                if (isGroupConversation)
+                  CellGroup(
+                    child: CellItem(
                       title: Text(Localization.of(context).shareContact),
                       onTap: () async {
                         final result = await showConversationSelector(
