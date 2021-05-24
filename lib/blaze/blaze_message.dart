@@ -76,7 +76,7 @@ BlazeMessageParam createPlainJsonParam(
         conversationId: conversationId,
         recipientId: userId,
         messageId: const Uuid().v4(),
-        candidate: MessageCategory.plainJson.toString(),
+        category: MessageCategory.plainJson,
         data: encoded,
         status: MessageStatus.sending.toString(),
         sessionId: sessionId);
