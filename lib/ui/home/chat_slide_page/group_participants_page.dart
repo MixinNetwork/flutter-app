@@ -18,6 +18,7 @@ import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
+import '../conversation_page.dart';
 
 /**
  * The participants of group.
@@ -130,12 +131,22 @@ class _ParticipantTile extends StatelessWidget {
           userId: participant.userId,
           name: participant.fullName ?? "?",
         ),
-        title: Text(
-          participant.fullName ?? "?",
-          style: TextStyle(
-            color: BrightnessData.themeOf(context).text,
-            fontSize: 16,
-          ),
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                participant.fullName ?? "?",
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).text,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            VerifiedOrBotWidget(
+              isBot: participant.appId != null,
+              verified: participant.isVerified,
+            ),
+          ],
         ),
         onTap: () {
           // skip self
