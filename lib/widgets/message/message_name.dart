@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/utils/color_utils.dart';
 import 'package:provider/provider.dart';
 
 import '../../ui/home/bloc/conversation_cubit.dart';
-import '../brightness_observer.dart';
 import '../interacter_decorated_box.dart';
 
 class MessageName extends StatelessWidget {
@@ -30,7 +30,7 @@ class MessageName extends StatelessWidget {
               userName,
               style: TextStyle(
                 fontSize: 15,
-                color: BrightnessData.themeOf(context).accent,
+                color: getNameColorById(userId),
               ),
             ),
           ),

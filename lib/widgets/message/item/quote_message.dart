@@ -238,6 +238,9 @@ class _QuoteMessageBase extends StatelessWidget {
     final iterator = LineSplitter.split(description).iterator;
     final _description =
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
+    final color = userId?.isNotEmpty == true
+        ? getNameColorById(userId!)
+        : BrightnessData.themeOf(context).accent;
     return GestureDetector(
       onTap: () {
         if (onTap != null) {
@@ -262,18 +265,14 @@ class _QuoteMessageBase extends StatelessWidget {
                   if (inputMode)
                     Container(
                       width: 6,
-                      color: userId?.isNotEmpty == true
-                          ? getNameColorById(userId!)
-                          : BrightnessData.themeOf(context).accent,
+                      color: color,
                     ),
                   if (!inputMode)
                     SvgPicture.asset(
                       Resources.assetsImagesQuoteBorderSvg,
                       height: 50,
                       width: 6,
-                      color: userId?.isNotEmpty == true
-                          ? getNameColorById(userId!)
-                          : BrightnessData.themeOf(context).accent,
+                      color: color,
                     ),
                   Flexible(
                     child: Padding(
@@ -294,7 +293,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                 name!,
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: BrightnessData.themeOf(context).accent,
+                                  color: color,
                                   height: 1,
                                 ),
                                 maxLines: 1,
