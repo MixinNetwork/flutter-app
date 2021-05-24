@@ -93,8 +93,6 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   }
 }
 
-const sidePageWidth = 300.0;
-
 class SearchConversationKeywordCubit extends SimpleCubit<String>
     with SubscribeMixin {
   SearchConversationKeywordCubit({required ChatSideCubit chatSideCubit})
@@ -159,7 +157,7 @@ class ChatPage extends HookWidget {
         child: LayoutBuilder(
           builder: (context, boxConstraints) {
             final navigationMode = boxConstraints.maxWidth <
-                (responsiveNavigationMinWidth + sidePageWidth);
+                (kResponsiveNavigationMinWidth + kChatSidePageWidth);
             chatSideCubit.updateNavigationMode(navigationMode);
 
             final hasPage = navigatorState.pages.isNotEmpty;
@@ -168,14 +166,14 @@ class ChatPage extends HookWidget {
                 if (!navigationMode)
                   SizedBox(
                     width:
-                        boxConstraints.maxWidth - (hasPage ? sidePageWidth : 0),
+                        boxConstraints.maxWidth - (hasPage ? kChatSidePageWidth : 0),
                     child: chatContainerPage.child,
                   ),
                 if (navigationMode || hasPage)
                   SizedBox(
                     width: navigationMode
                         ? boxConstraints.maxWidth
-                        : sidePageWidth,
+                        : kChatSidePageWidth,
                     child: ClipRect(
                       child: Navigator(
                         onPopPage: (Route<dynamic> route, dynamic result) {

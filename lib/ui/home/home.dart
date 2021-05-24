@@ -14,9 +14,16 @@ import 'route/responsive_navigator.dart';
 import 'route/responsive_navigator_cubit.dart';
 import 'slide_page.dart';
 
-const slidePageMinWidth = 98.0;
-const slidePageMaxWidth = 200.0;
-const responsiveNavigationMinWidth = 460.0;
+// chat category list min width
+const kSlidePageMinWidth = 98.0;
+// chat category and chat list max width
+const kSlidePageMaxWidth = 200.0;
+// chat page min width, message list, setting page etc.
+const kResponsiveNavigationMinWidth = 460.0;
+// conversation list fixed width, conversation list, setting list etc.
+const kConversationListWidth = 300.0;
+// chat side page fixed width, chat info page etc.
+const kChatSidePageWidth = 300.0;
 
 final _conversationPageKey = GlobalKey();
 
@@ -30,20 +37,21 @@ class HomePage extends StatelessWidget {
           children: [
             SizePolicyData(
               child: const SlidePage(),
-              minWidth: slidePageMinWidth,
-              maxWidth: slidePageMaxWidth,
+              minWidth: kSlidePageMinWidth,
+              maxWidth: kSlidePageMaxWidth,
               sizePolicyOrder: 0,
             ),
             SizePolicyData(
-              minWidth: responsiveNavigationMinWidth,
+              minWidth: kResponsiveNavigationMinWidth,
               child: ResponsiveNavigator(
-                switchWidth: responsiveNavigationMinWidth + 260,
+                switchWidth:
+                    kResponsiveNavigationMinWidth + kConversationListWidth,
                 leftPage: MaterialPage(
                   key: const ValueKey('center'),
                   name: 'center',
                   child: SizedBox(
                     key: _conversationPageKey,
-                    width: 300,
+                    width: kConversationListWidth,
                     child: const _CenterPage(),
                   ),
                 ),

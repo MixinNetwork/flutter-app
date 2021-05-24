@@ -26,7 +26,7 @@ Future<void> main() async {
     ));
   }
   setWindowMinSize(
-      const Size(slidePageMinWidth + responsiveNavigationMinWidth, 480));
+      const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480));
 
   LoadBalancer.create(64, IsolateRunner.spawn).then((value) {
     loadBalancer = value;
