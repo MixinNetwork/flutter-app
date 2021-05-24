@@ -1649,6 +1649,16 @@ class Localization {
       args: [name],
     );
   }
+
+  /// `Mixin ID, Name`
+  String get groupSearchParticipants {
+    return Intl.message(
+      'Mixin ID, Name',
+      name: 'groupSearchParticipants',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

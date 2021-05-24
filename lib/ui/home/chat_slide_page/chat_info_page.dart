@@ -89,41 +89,38 @@ class ChatInfoPage extends HookWidget {
                 const SizedBox(height: 32),
                 if (isGroupConversation)
                   CellGroup(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CellItem(
-                          title: Text(
-                            Localization.of(context).groupParticipants,
-                          ),
-                          onTap: () => context
-                              .read<ChatSideCubit>()
-                              .pushPage(ChatSideCubit.participants),
-                        ),
-                        CellItem(
-                          title: Text(Localization.of(context).shareContact),
-                          onTap: () async {
-                            final result = await showConversationSelector(
-                              context: context,
-                              singleSelect: true,
-                              title: Localization.of(context).shareContact,
-                              onlyContact: false,
-                            );
+                    child: CellItem(
+                      title: Text(
+                        Localization.of(context).groupParticipants,
+                      ),
+                      onTap: () => context
+                          .read<ChatSideCubit>()
+                          .pushPage(ChatSideCubit.participants),
+                    ),
+                  ),
+                if (isGroupConversation)
+                  CellGroup(
+                    child: CellItem(
+                      title: Text(Localization.of(context).shareContact),
+                      onTap: () async {
+                        final result = await showConversationSelector(
+                          context: context,
+                          singleSelect: true,
+                          title: Localization.of(context).shareContact,
+                          onlyContact: false,
+                        );
 
-                            if (result.isEmpty) return;
-                            final conversationId = result[0].conversationId;
+                        if (result.isEmpty) return;
+                        final conversationId = result[0].conversationId;
 
-                            await accountServer.sendContactMessage(
-                              conversation.userId!,
-                              conversation.name!,
-                              conversation.isPlainConversation,
-                              conversationId: conversationId,
-                              recipientId:
-                                  conversationId, // TODO conversationId?
-                            );
-                          },
-                        ),
-                      ],
+                        await accountServer.sendContactMessage(
+                          conversation.userId!,
+                          conversation.name!,
+                          conversation.isPlainConversation,
+                          conversationId: conversationId,
+                          recipientId: conversationId, // TODO conversationId?
+                        );
+                      },
                     ),
                   ),
                 CellGroup(

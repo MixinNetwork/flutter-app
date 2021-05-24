@@ -156,6 +156,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Make group admin"),
         "groupPopMenuMessage": m10,
         "groupPopMenuRemoveParticipants": m11,
+        "groupSearchParticipants":
+            MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),

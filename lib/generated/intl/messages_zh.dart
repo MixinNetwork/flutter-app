@@ -130,6 +130,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("设定为群组管理员"),
         "groupPopMenuMessage": m10,
         "groupPopMenuRemoveParticipants": m11,
+        "groupSearchParticipants":
+            MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
         "image": MessageLookupByLibrary.simpleMessage("照片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包含文件"),

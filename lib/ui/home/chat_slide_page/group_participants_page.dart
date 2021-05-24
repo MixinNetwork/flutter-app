@@ -39,6 +39,7 @@ class GroupParticipantsPage extends HookWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SearchTextField(
               onChanged: (text) => filterKeyWord.value = text,
+              hintText: Localization.of(context).groupSearchParticipants,
             ),
           ),
           Expanded(
@@ -122,7 +123,7 @@ class _ParticipantTile extends StatelessWidget {
       participant: participant,
       me: me,
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         leading: AvatarWidget(
           size: 50,
           avatarUrl: participant.avatarUrl,
@@ -131,11 +132,10 @@ class _ParticipantTile extends StatelessWidget {
         ),
         title: Text(
           participant.fullName ?? "?",
-          style: Theme.of(context).textTheme.bodyText1,
-        ),
-        subtitle: Text(
-          participant.identityNumber,
-          style: Theme.of(context).textTheme.caption,
+          style: TextStyle(
+            color: BrightnessData.themeOf(context).text,
+            fontSize: 16,
+          ),
         ),
         onTap: () {
           // skip self
@@ -251,6 +251,9 @@ class _RoleLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
         label,
-        style: Theme.of(context).textTheme.caption,
+        style: TextStyle(
+          color: BrightnessData.themeOf(context).secondaryText,
+          fontSize: 14,
+        ),
       );
 }
