@@ -77,13 +77,11 @@ class SlidePage extends StatelessWidget {
                   builder: (context, selected) {
                     assert(account != null);
                     return SelectItem(
-                      icon: ClipOval(
-                        child: AvatarWidget(
-                          avatarUrl: account!.avatarUrl,
-                          size: 30,
-                          name: account.fullName!,
-                          userId: account.userId,
-                        ),
+                      icon: AvatarWidget(
+                        avatarUrl: account!.avatarUrl,
+                        size: 30,
+                        name: account.fullName!,
+                        userId: account.userId,
                       ),
                       title: account.fullName!,
                       selected: selected,
