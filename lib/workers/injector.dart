@@ -43,46 +43,45 @@ class Injector {
       } else if (response.data.category == ConversationCategory.group) {
         await refreshUsers(<String>[ownerId]);
       }
+      await database.conversationDao.insert(
+        db.Conversation(
+          conversationId: response.data.conversationId,
+          ownerId: ownerId,
+          category: response.data.category,
+          name: response.data.name,
+          announcement: response.data.announcement,
+          createdAt: response.data.createdAt,
+          status: ConversationStatus.success,
+          muteUntil: DateTime.parse(response.data.muteUntil),
+        ),
+      );
 
-      await database.transaction(() async {
-        await database.conversationDao.insert(
-          db.Conversation(
-            conversationId: response.data.conversationId,
-            ownerId: ownerId,
-            category: response.data.category,
-            name: response.data.name,
-            announcement: response.data.announcement,
-            createdAt: response.data.createdAt,
-            status: ConversationStatus.success,
-            muteUntil: DateTime.parse(response.data.muteUntil),
-          ),
-        );
-        await refreshParticipants(
-          response.data.conversationId,
-          response.data.participants,
-          response.data.participantSessions,
-        );
+      final remote = <db.Participant>[];
+      final conversationUserIds = <String>[];
+      response.data.participants.forEach((item) {
+        remote.add(db.Participant(
+            conversationId: conversationId,
+            userId: item.userId,
+            role: item.role,
+            createdAt: item.createdAt ?? DateTime.now()));
+        conversationUserIds.add(item.userId);
       });
+      unawaited(refreshUsers(conversationUserIds));
+
+      await refreshParticipants(
+        response.data.conversationId,
+        remote.toList(),
+        response.data.participantSessions,
+      );
     } catch (e, s) {
       debugPrint('$e');
       debugPrint('$s');
     }
   }
 
-  Future<void> refreshParticipants(
-      String conversationId,
-      List<ParticipantRequest> participants,
-      List<UserSession>? userSessions) async {
-    final online = <db.Participant>[];
-    participants.forEach((item) => {
-          online.add(db.Participant(
-              conversationId: conversationId,
-              userId: item.userId,
-              role: item.role,
-              createdAt: item.createdAt ?? DateTime.now()))
-        });
-    await database.participantsDao.replaceAll(conversationId, online.toList());
-
+  Future<void> refreshParticipants(String conversationId,
+      List<db.Participant> remote, List<UserSession>? userSessions) async {
+    await database.participantsDao.replaceAll(conversationId, remote);
     final participantSessions = <db.ParticipantSessionData>[];
     userSessions?.forEach((u) {
       participantSessions.add(db.ParticipantSessionData(
