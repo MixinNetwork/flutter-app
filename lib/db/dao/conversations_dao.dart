@@ -75,10 +75,19 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   ) =>
       db.botConversations(limit, offset);
 
-  Future<int> updateLastMessageId(String conversationId, String messageId) =>
+  Future<int> updateLastMessageId(
+    String conversationId,
+    String messageId,
+    DateTime lastMessageCreatedAt,
+  ) =>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(ConversationsCompanion(lastMessageId: Value(messageId)));
+          .write(
+        ConversationsCompanion(
+          lastMessageId: Value(messageId),
+          lastMessageCreatedAt: Value(lastMessageCreatedAt),
+        ),
+      );
 
   Selectable<int> chatConversationCount() => db.chatConversationCount();
 

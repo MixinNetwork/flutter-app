@@ -5,6 +5,7 @@ import 'package:moor/moor.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_status.dart';
 import '../../utils/string_extension.dart';
+import '../converter/message_status_type_converter.dart';
 import '../database_event_bus.dart';
 import '../extension/message_category.dart';
 import '../mixin_database.dart';
@@ -49,17 +50,26 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       .cast<NotificationMessage>();
 
   Future<int> insert(Message message, String userId) async {
-    if (message.userId.isEmpty) {
-      print('fuck message userid is null: ${StackTrace.current}');
-    }
-    final result = await into(db.messages).insertOnConflictUpdate(message);
-    if (message.category.isText) {
-      final content = message.content!.fts5ContentFilter();
-      await insertFts(message.messageId, message.conversationId, content,
-          message.createdAt, message.userId);
-    }
-    await db.conversationsDao
-        .updateLastMessageId(message.conversationId, message.messageId);
+    final result = await db.transaction(() async {
+      final futures = <Future>[];
+      futures.add(into(db.messages).insertOnConflictUpdate(message));
+      if (message.category.isText) {
+        final content = message.content!.fts5ContentFilter();
+        futures.add(insertFts(
+          message.messageId,
+          message.conversationId,
+          content,
+          message.createdAt,
+          message.userId,
+        ));
+      }
+      futures.add(db.conversationsDao.updateLastMessageId(
+        message.conversationId,
+        message.messageId,
+        message.createdAt,
+      ));
+      return (await Future.wait(futures))[0];
+    });
     await _takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
     db.eventBus.send(DatabaseEvent.insert, message.messageId);
@@ -124,17 +134,32 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<int> _takeUnseen(String userId, String conversationId) =>
-      db.customUpdate(
-        'UPDATE conversations SET unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
-        variables: [
-          Variable.withString(conversationId),
-          Variable.withString(userId),
-          Variable.withString(conversationId)
-        ],
-        updates: {db.conversations},
-        updateKind: UpdateKind.update,
-      );
+  Future<int> _takeUnseen(String userId, String conversationId) async {
+    final messageId = await (db.selectOnly(db.messages)
+          ..addColumns([db.messages.messageId])
+          ..where(db.messages.conversationId.equals(conversationId) &
+              db.messages.status.equals(
+                  MessageStatusTypeConverter().mapToSql(MessageStatus.read)))
+          ..orderBy([
+            OrderingTerm(
+                expression: db.messages.createdAt, mode: OrderingMode.desc)
+          ])
+          ..limit(1))
+        .map((row) => row.read(db.messages.messageId))
+        .getSingleOrNull();
+
+    return db.customUpdate(
+      'UPDATE conversations SET last_read_message_id = ?, unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
+      variables: [
+        Variable(messageId),
+        Variable.withString(conversationId),
+        Variable.withString(userId),
+        Variable.withString(conversationId)
+      ],
+      updates: {db.conversations},
+      updateKind: UpdateKind.update,
+    );
+  }
 
   Future<void> markMessageRead(List<String> messageIds) =>
       transaction(() async {

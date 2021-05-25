@@ -1119,7 +1119,6 @@ class _MessageContent extends HookWidget {
       () async {
         final isGroup = conversation.category == ConversationCategory.group ||
             conversation.senderId != conversation.ownerId;
-        print('fuck conversation.contentType: ${conversation.contentType}');
         if (conversation.contentType == MessageCategory.systemConversation) {
           return generateSystemText(
             actionName: conversation.actionName,
