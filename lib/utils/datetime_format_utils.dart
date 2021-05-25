@@ -4,7 +4,7 @@ String convertStringTime(DateTime _dateTime) {
   final now = DateTime.now().toLocal();
   final dateTime = _dateTime.toLocal();
   if (isSameDay(now, dateTime)) {
-    return DateFormat.jm().format(dateTime);
+    return DateFormat.Hm().format(dateTime);
   }
   if (isYesterday(now, dateTime)) {
     return 'Yesterday';

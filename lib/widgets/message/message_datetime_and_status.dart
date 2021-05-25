@@ -50,7 +50,7 @@ class _MessageDatetime extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final text = useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-      converter: (_) => DateFormat.jm().format(dateTime),
+      converter: (_) => DateFormat.Hm().format(dateTime),
     );
     return Text(
       text,
