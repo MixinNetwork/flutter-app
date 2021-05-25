@@ -98,7 +98,7 @@ packages:
       name: build_runner
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.4"
+    version: "2.0.3"
   build_runner_core:
     dependency: transitive
     description:
@@ -612,7 +612,7 @@ packages:
       name: moor
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.1"
+    version: "4.3.0"
   moor_db_viewer:
     dependency: "direct main"
     description:
@@ -626,7 +626,7 @@ packages:
       name: moor_generator
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.1"
+    version: "4.3.0"
   nested:
     dependency: transitive
     description:
