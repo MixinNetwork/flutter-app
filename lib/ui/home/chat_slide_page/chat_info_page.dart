@@ -563,7 +563,7 @@ class _AddToContactsButton extends StatelessWidget {
                 child: TextButton(
                   style: TextButton.styleFrom(
                     backgroundColor: BrightnessData.themeOf(context).background,
-                    padding: EdgeInsets.zero,
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
                     fixedSize: Size.fromHeight(30),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
@@ -574,19 +574,16 @@ class _AddToContactsButton extends StatelessWidget {
                       context
                           .read<AccountServer>()
                           .addUser(conversation.userId!)),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    child: Text(
-                      conversation.isBot!
-                          ? Localization.of(context).conversationAddBot
-                          : Localization.of(context).conversationAddContact,
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: BrightnessData.themeOf(context).accent),
-                    ),
+                  child: Text(
+                    conversation.isBot!
+                        ? Localization.of(context).conversationAddBot
+                        : Localization.of(context).conversationAddContact,
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: BrightnessData.themeOf(context).accent),
                   ),
                 ),
               )
-            : Container(height: 0),
+            : SizedBox(height: 0),
       );
 }
