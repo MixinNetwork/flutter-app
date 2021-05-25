@@ -24,7 +24,7 @@ class Injector {
       if (unWait) {
         unawaited(_refreshConversation(conversationId));
       } else {
-        _refreshConversation(conversationId);
+        await _refreshConversation(conversationId);
       }
     }
   }
