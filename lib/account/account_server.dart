@@ -7,6 +7,7 @@ import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import '../db/extension/job.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
@@ -451,19 +452,7 @@ class AccountServer {
   Future<void> _markRead(conversationId) async {
     final ids =
         await database.messagesDao.getUnreadMessageIds(conversationId, userId);
-    final status =
-        EnumToString.convertToString(MessageStatus.read)!.toUpperCase();
-    final now = DateTime.now();
-    final jobs = ids
-        .map((id) => jsonEncode(BlazeAckMessage(messageId: id, status: status)))
-        .map((blazeMessage) => Job(
-            jobId: const Uuid().v4(),
-            action: acknowledgeMessageReceipts,
-            priority: 5,
-            blazeMessage: blazeMessage,
-            createdAt: now,
-            runCount: 0))
-        .toList();
+    final jobs = ids.map((id) => createAckJob(id, MessageStatus.read)).toList();
     await database.jobsDao.insertAll(jobs);
   }
 

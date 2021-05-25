@@ -94,31 +94,38 @@ class DecryptMessage extends Injector {
     final data = BlazeMessageData.fromJson(
         await jsonDecodeWithIsolate(floodMessage.data));
     debugPrint('DecryptMessage process data: ${data.toJson()}');
-    await syncConversion(data.conversationId);
-    final category = data.category;
-    if (category.isSignal) {
-      debugPrint('DecryptMessage isSignal');
-      await _processSignalMessage(data);
-    } else if (category.isPlain) {
-      debugPrint('DecryptMessage isPlain');
-      await _processPlainMessage(data);
-    } else if (category.isEncrypted) {
-      debugPrint('DecryptMessage isEncrypted');
-      await _processEncryptedMessage(data);
-    } else if (category.isSystem) {
-      debugPrint('DecryptMessage isSystem');
-      await _processSystemMessage(data);
-    } else if (category == MessageCategory.appButtonGroup ||
-        category == MessageCategory.appCard) {
-      debugPrint('DecryptMessage isApp');
-      await _processApp(data);
-    } else if (category == MessageCategory.messageRecall) {
-      debugPrint('DecryptMessage isMessageRecall');
-      await _processRecallMessage(data);
+    try {
+      await syncConversion(data.conversationId);
+      final category = data.category;
+      if (category.isSignal) {
+        debugPrint('DecryptMessage isSignal');
+        await _processSignalMessage(data);
+      } else if (category.isPlain) {
+        debugPrint('DecryptMessage isPlain');
+        await _processPlainMessage(data);
+      } else if (category.isEncrypted) {
+        debugPrint('DecryptMessage isEncrypted');
+        await _processEncryptedMessage(data);
+      } else if (category.isSystem) {
+        debugPrint('DecryptMessage isSystem');
+        await _processSystemMessage(data);
+      } else if (category == MessageCategory.appButtonGroup ||
+          category == MessageCategory.appCard) {
+        debugPrint('DecryptMessage isApp');
+        await _processApp(data);
+      } else if (category == MessageCategory.messageRecall) {
+        debugPrint('DecryptMessage isMessageRecall');
+        await _processRecallMessage(data);
+      }
+      await database.floodMessagesDao.deleteFloodMessage(floodMessage);
+    } catch (e, s) {
+      debugPrint('$e');
+      debugPrint('$s');
+      _insertInvalidMessage(data);
+      await _updateRemoteMessageStatus(
+          floodMessage.messageId, MessageStatus.delivered);
+      await database.floodMessagesDao.deleteFloodMessage(floodMessage);
     }
-    await _updateRemoteMessageStatus(
-        floodMessage.messageId, MessageStatus.delivered);
-    await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
 
   Future<void> _processSignalMessage(BlazeMessageData data) async {
@@ -612,8 +619,6 @@ class DecryptMessage extends Injector {
       );
       await database.messagesDao.insert(message, accountId);
     }
-
-    await _updateRemoteMessageStatus(data.messageId, messageStatus);
   }
 
   Future<void> _processSystemConversationMessage(
