@@ -4,8 +4,9 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
+import '../db/extension/job.dart';
+import '../utils/dao_extension.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../constants/constants.dart';
@@ -102,15 +103,9 @@ class Blaze {
           debugPrint('blazeMessage not a BlazeMessageData');
           return;
         }
-        if (blazeMessage.action == acknowledgeMessageReceipts) {
-          // makeMessageStatus
-          await updateRemoteMessageStatus(
-              (data as Map<String, dynamic>)['message_id'],
-              MessageStatus.delivered);
-        } else if (blazeMessage.action == createMessage) {
+        if (blazeMessage.action == createMessage) {
           if (data.userId == userId && data.category == null) {
-            await updateRemoteMessageStatus(
-                data.messageId, MessageStatus.delivered);
+            await makeMessageStatus(data.messageId, data.status);
           } else {
             await database.floodMessagesDao.insert(FloodMessage(
                 messageId: data.messageId,
@@ -119,11 +114,9 @@ class Blaze {
           }
         } else if (blazeMessage.action == acknowledgeMessageReceipt) {
           await makeMessageStatus(data.messageId, data.status);
-          await updateRemoteMessageStatus(
-              data.messageId, MessageStatus.delivered);
         } else {
-          await updateRemoteMessageStatus(
-              data.messageId, MessageStatus.delivered);
+          await database.jobsDao.insertNoReplace(
+              createAckJob(data.messageId, MessageStatus.delivered));
         }
       },
       onError: (error, s) {
@@ -142,24 +135,7 @@ class Blaze {
   }
 
   Future<void> updateRemoteMessageStatus(
-      String messageId, MessageStatus status) async {
-    final blazeMessage = BlazeAckMessage(
-        messageId: messageId,
-        status: EnumToString.convertToString(status)!.toUpperCase());
-    final jobId = const Uuid().v4();
-    // final jobId = Ulid.fromBytes(utf8.encode('$messageId${blazeMessage.status}$acknowledgeMessageReceipts')).toString();
-    // final job = await database.jobsDao.findAckJobById(jobId);
-    // if (job != null) {
-    //   return;
-    // }
-    await database.jobsDao.insert(Job(
-        jobId: jobId,
-        action: acknowledgeMessageReceipts,
-        priority: 5,
-        blazeMessage: await jsonEncodeWithIsolate(blazeMessage),
-        createdAt: DateTime.now(),
-        runCount: 0));
-  }
+      String messageId, MessageStatus status) async {}
 
   Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =

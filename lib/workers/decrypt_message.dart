@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:flutter/foundation.dart';
+import '../db/extension/job.dart';
+import '../utils/dao_extension.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
@@ -723,16 +725,7 @@ class DecryptMessage extends Injector {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
-    final blazeMessage = BlazeAckMessage(
-        messageId: messageId,
-        status: EnumToString.convertToString(status)!.toUpperCase());
-    await database.jobsDao.insert(Job(
-        jobId: const Uuid().v4(),
-        action: acknowledgeMessageReceipts,
-        priority: 5,
-        blazeMessage: jsonEncode(blazeMessage),
-        createdAt: DateTime.now(),
-        runCount: 0));
+    await database.jobsDao.insertNoReplace(createAckJob(messageId, status));
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
