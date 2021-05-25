@@ -9,24 +9,36 @@ part 'multi_auth_state.dart';
 class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
   MultiAuthCubit() : super(const MultiAuthState());
 
+  static late String currentUserId;
+
   void signIn(AuthState authState) {
-    final auths = state.auths.toSet()
-      ..removeWhere(
-        (element) => element.account.userId == authState.account.userId,
-      )
-      ..add(authState);
+    var _authState = state._auths.cast<AuthState?>().firstWhere(
+          (element) => element?.account.userId == authState.account.userId,
+          orElse: () => null,
+        );
+    _authState = _authState?.copyWith(
+          account: authState.account,
+          privateKey: authState.privateKey,
+        ) ??
+        authState;
+
     emit(
       MultiAuthState(
-        auths: auths,
+        auths: {
+          ...state._auths.where(
+              (element) => element.account.userId != authState.account.userId),
+          _authState,
+        },
       ),
     );
+    currentUserId = authState.account.userId;
   }
 
   void signOut() {
-    if (state.auths.isEmpty) return;
+    if (state._auths.isEmpty) return;
     emit(
       MultiAuthState(
-        auths: state.auths.toSet()..remove(state.auths.last),
+        auths: state._auths.toSet()..remove(state._auths.last),
       ),
     );
   }
@@ -38,8 +50,6 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
   @override
   Map<String, dynamic> toJson(MultiAuthState state) => state.toMap();
 
-  String? get currentUserId => state.current?.account.userId;
-
   void setCurrentSetting({
     bool? messagePreview,
     bool? photoAutoDownload,
@@ -49,7 +59,7 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
     final current = state.current;
     assert(current != null);
 
-    final auths = state.auths.toSet()
+    final auths = state._auths.toSet()
       ..remove(current)
       ..add(current!.copyWith(
         messagePreview: messagePreview,

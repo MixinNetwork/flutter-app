@@ -2,8 +2,8 @@ part of 'multi_auth_cubit.dart';
 
 class MultiAuthState extends Equatable {
   const MultiAuthState({
-    this.auths = const {},
-  });
+    Set<AuthState> auths = const {},
+  }) : _auths = auths;
 
   factory MultiAuthState.fromMap(Map<String, dynamic> map) => MultiAuthState(
         auths:
@@ -14,9 +14,9 @@ class MultiAuthState extends Equatable {
   factory MultiAuthState.fromJson(String source) =>
       MultiAuthState.fromMap(json.decode(source));
 
-  final Set<AuthState> auths;
+  final Set<AuthState> _auths;
 
-  AuthState? get current => auths.isNotEmpty ? auths.last : null;
+  AuthState? get current => _auths.isNotEmpty ? _auths.last : null;
 
   bool get currentMessagePreview => current?.messagePreview ?? true;
 
@@ -28,11 +28,11 @@ class MultiAuthState extends Equatable {
 
   @override
   List<Object> get props => [
-        auths,
+        _auths,
       ];
 
   Map<String, dynamic> toMap() => {
-        'auths': auths.map((x) => x.toMap()).toList(),
+        'auths': _auths.map((x) => x.toMap()).toList(),
       };
 
   String toJson() => json.encode(toMap());
