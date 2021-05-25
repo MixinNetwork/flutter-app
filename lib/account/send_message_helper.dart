@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:uuid/uuid.dart';
@@ -21,6 +24,8 @@ import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
 import '../utils/load_balancer_utils.dart';
+
+const _kEnableImageBlurHashThumb = false;
 
 class SendMessageHelper {
   SendMessageHelper(this._messagesDao, this._jobsDao, this._attachmentUtil);
@@ -63,7 +68,24 @@ class SendMessageHelper {
     final attachment =
         _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
     final bytes = await file.readAsBytes();
-    final image = decodeImage(bytes);
+    final image = decodeImage(bytes)!;
+
+    // TODO encode in separate isolate.
+    String? thumbImage;
+    if (_kEnableImageBlurHashThumb) {
+      thumbImage = BlurHash.encode(image).hash;
+    } else {
+      final scale = max(max(image.width, image.height) / 48, 1.0);
+      final thumbnail = copyResize(
+        image,
+        width: image.width ~/ scale,
+        height: image.height ~/ scale,
+      );
+      thumbImage = base64Encode(encodeJpg(thumbnail, quality: 50));
+    }
+
+    debugPrint("thumbImage = ${thumbImage}");
+
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
@@ -78,9 +100,9 @@ class SendMessageHelper {
       mediaUrl: attachment.path,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
-      mediaWidth: image!.width,
+      mediaWidth: image.width,
       mediaHeight: image.height,
-      // thumbImage: , // todo
+      thumbImage: thumbImage,
       name: file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
@@ -101,7 +123,7 @@ class SendMessageHelper {
         null,
         image.width,
         image.height,
-        null,
+        thumbImage,
         null,
         null,
         null);
