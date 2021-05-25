@@ -58,6 +58,7 @@ class ChatBar extends HookWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   ConversationName(),
+                  SizedBox(height: 2),
                   ConversationIDOrCount(),
                 ],
               ),
@@ -136,7 +137,7 @@ class ConversationIDOrCount extends HookWidget {
 class ConversationName extends StatelessWidget {
   const ConversationName({
     Key? key,
-    this.fontSize = 20,
+    this.fontSize = 16,
   }) : super(key: key);
 
   final double fontSize;

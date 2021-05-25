@@ -74,7 +74,7 @@ Future<String?> messagePreviewOptimize(
     } else {
       sender = senderFullName;
     }
-    _content = '$sender : $_content';
+    _content = '$sender: $_content';
   }
 
   return _content;
