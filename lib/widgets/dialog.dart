@@ -248,14 +248,14 @@ class DialogTextField extends HookWidget {
         height: 48,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: BrightnessData.themeOf(context).background,
           borderRadius: BorderRadius.circular(5),
         ),
         alignment: Alignment.center,
         child: TextField(
           controller: textEditingController,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: BrightnessData.themeOf(context).text,
           ),
           scrollPadding: EdgeInsets.zero,
           decoration: InputDecoration(
@@ -298,11 +298,17 @@ class EditDialog extends HookWidget {
     required this.title,
     this.editText = '',
     this.hintText = '',
+    this.positiveAction,
   }) : super(key: key);
 
   final Widget title;
   final String editText;
   final String hintText;
+
+  /**
+   * Positive action text. null to use default "Create"
+   */
+  final String? positiveAction;
 
   @override
   Widget build(BuildContext context) {
@@ -320,7 +326,7 @@ class EditDialog extends HookWidget {
         MixinButton(
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
-          child: Text(Localization.of(context).create),
+          child: Text(positiveAction ?? Localization.of(context).create),
         ),
       ],
     );

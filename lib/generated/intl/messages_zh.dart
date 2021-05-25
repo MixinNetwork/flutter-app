@@ -67,6 +67,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "botInteractOpen": MessageLookupByLibrary.simpleMessage("打开主页"),
         "bots": MessageLookupByLibrary.simpleMessage("机器人"),
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
+        "change": MessageLookupByLibrary.simpleMessage("更改"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("聊天记录备份"),
         "chatGroupAdd": m0,
         "chatGroupCreate": m1,

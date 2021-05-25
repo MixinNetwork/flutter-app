@@ -179,29 +179,6 @@ class ChatInfoPage extends HookWidget {
                             },
                           );
                         }),
-                        if (!isGroupConversation)
-                          CellItem(
-                            title: Text(Localization.of(context).editName),
-                            onTap: () async {
-                              final name = await showMixinDialog<String>(
-                                context: context,
-                                child: EditDialog(
-                                  editText: conversation.name ?? '',
-                                  title:
-                                      Text(Localization.of(context).editName),
-                                  hintText:
-                                      Localization.of(context).conversationName,
-                                ),
-                              );
-                              if (name?.isEmpty ?? true) return;
-
-                              await runFutureWithToast(
-                                context,
-                                accountServer.editContactName(
-                                    conversation.userId!, name!),
-                              );
-                            },
-                          ),
                       ],
                     ),
                   ),
@@ -256,6 +233,29 @@ class ChatInfoPage extends HookWidget {
                                   ));
                         },
                       ),
+                      if (!isGroupConversation)
+                        CellItem(
+                          title: Text(Localization.of(context).editName),
+                          onTap: () async {
+                            final name = await showMixinDialog<String>(
+                              context: context,
+                              child: EditDialog(
+                                editText: conversation.name ?? '',
+                                title: Text(Localization.of(context).editName),
+                                hintText:
+                                    Localization.of(context).conversationName,
+                                positiveAction: Localization.of(context).change,
+                              ),
+                            );
+                            if (name?.isEmpty ?? true) return;
+
+                            await runFutureWithToast(
+                              context,
+                              accountServer.editContactName(
+                                  conversation.userId!, name!),
+                            );
+                          },
+                        ),
                     ],
                   ),
                 ),
