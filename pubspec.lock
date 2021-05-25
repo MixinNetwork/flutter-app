@@ -50,6 +50,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.0.0"
+  blurhash_dart:
+    dependency: "direct main"
+    description:
+      name: blurhash_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.2"
   boolean_selector:
     dependency: transitive
     description:
@@ -91,7 +98,7 @@ packages:
       name: build_runner
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   build_runner_core:
     dependency: transitive
     description:
@@ -605,7 +612,7 @@ packages:
       name: moor
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.0"
+    version: "4.3.1"
   moor_db_viewer:
     dependency: "direct main"
     description:
@@ -619,7 +626,7 @@ packages:
       name: moor_generator
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.0"
+    version: "4.3.1"
   nested:
     dependency: transitive
     description:
