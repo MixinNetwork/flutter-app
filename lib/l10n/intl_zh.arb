@@ -154,5 +154,6 @@
   "groupPopMenuMakeAdmin": "设定为群组管理员",
   "groupPopMenuDismissAdmin": "撤销管理员身份",
   "groupPopMenuRemoveParticipants": "移除 {name}",
-  "groupSearchParticipants": "Mixin ID, 昵称"
+  "groupSearchParticipants": "Mixin ID, 昵称",
+  "change": "更改"
 }

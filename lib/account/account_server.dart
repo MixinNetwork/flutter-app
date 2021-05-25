@@ -851,9 +851,9 @@ class AccountServer {
     }
   }
 
-  Future<void> editContactName(String userId, String name) async {
-    // todo
-  }
+  Future<void> editContactName(String userId, String name) =>
+      _relationship(RelationshipRequest(
+          userId: userId, fullName: name, action: RelationshipAction.update));
 
   Future<void> circleRemoveConversation(
     String circleId,

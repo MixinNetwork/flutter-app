@@ -75,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Open Home page"),
         "bots": MessageLookupByLibrary.simpleMessage("Bots"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "change": MessageLookupByLibrary.simpleMessage("Change"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("Chat Backup"),
         "chatBackupDescription": MessageLookupByLibrary.simpleMessage(
             "Back up your chat history to iCloud so if you lose your iPhone or switch to a new one, your chat history is safe. You can restore your chat history when you reinstall MixinMessenger. messenger you back up are encryption while in icloud."),
