@@ -88,7 +88,7 @@ class ImageByBlurHashOrBase64 extends HookWidget {
   Widget build(BuildContext context) {
     final blurHash = useMemoized(() {
       try {
-        BlurHash.decode(imageData);
+        return BlurHash.decode(imageData);
       } catch (_) {
         return null;
       }

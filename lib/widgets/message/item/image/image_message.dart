@@ -81,7 +81,6 @@ class ImageMessageWidget extends StatelessWidget {
                       Image.file(
                         File(message.mediaUrl ?? ''),
                         fit: BoxFit.cover,
-                        // ignore: prefer_expression_function_bodies
                         errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
                             imageData: message.thumbImage!),
                       ),
