@@ -4,7 +4,6 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
-import 'blaze_message_param_session.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:web_socket_channel/io.dart';
@@ -15,6 +14,7 @@ import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
 import '../utils/load_balancer_utils.dart';
 import 'blaze_message.dart';
+import 'blaze_message_param_session.dart';
 import 'vo/blaze_message_data.dart';
 
 const String _wsHost1 = 'wss://blaze.mixin.one';
@@ -70,6 +70,8 @@ class Blaze {
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
+        connectedStateStreamController.add(true);
+
         debugPrint('blazeMessage: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == errorAction &&
