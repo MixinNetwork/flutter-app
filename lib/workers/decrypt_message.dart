@@ -694,7 +694,7 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemUserMessage(
       SystemUserMessage systemMessage) async {
     if (systemMessage.action == SystemUserAction.update) {
-      await refreshUsers(<String>[systemMessage.userId]);
+      unawaited(refreshUsers(<String>[systemMessage.userId], force: true));
     }
   }
 
