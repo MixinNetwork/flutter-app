@@ -81,6 +81,7 @@ class ChatInfoPage extends HookWidget {
                 const ConversationName(fontSize: 18),
                 const SizedBox(height: 4),
                 const ConversationIDOrCount(fontSize: 12),
+                _AddToContactsButton(conversation),
                 const SizedBox(height: 12),
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 36),
@@ -295,7 +296,7 @@ class ChatInfoPage extends HookWidget {
                             );
                           },
                         ),
-                      if (!isGroupConversation)
+                      if (!isGroupConversation && !conversation.isStranger!)
                         Builder(builder: (context) {
                           final title = conversation.isBot!
                               ? Localization.of(context).removeBot
@@ -539,4 +540,50 @@ class ConversationBio extends HookWidget {
       ),
     );
   }
+}
+
+///
+/// Button to add strange to contacts.
+///
+/// if conversation is not stranger, show nothing.
+///
+class _AddToContactsButton extends StatelessWidget {
+  _AddToContactsButton(this.conversation, {Key? key})
+      : assert(conversation.isLoaded),
+        super(key: key);
+  final ConversationState conversation;
+
+  @override
+  Widget build(BuildContext context) => AnimatedSize(
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+        child: conversation.isStranger!
+            ? Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: BrightnessData.themeOf(context).background,
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    fixedSize: Size.fromHeight(30),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () => runFutureWithToast(
+                      context,
+                      context
+                          .read<AccountServer>()
+                          .addUser(conversation.userId!)),
+                  child: Text(
+                    conversation.isBot!
+                        ? Localization.of(context).conversationAddBot
+                        : Localization.of(context).conversationAddContact,
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: BrightnessData.themeOf(context).accent),
+                  ),
+                ),
+              )
+            : SizedBox(height: 0),
+      );
 }

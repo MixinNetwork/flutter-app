@@ -160,5 +160,7 @@
   "groupPopMenuDismissAdmin": "Dismiss admin",
   "groupPopMenuRemoveParticipants": "Remove {name}",
   "groupSearchParticipants": "Mixin ID, Name",
-  "change": "Change"
+  "change": "Change",
+  "conversationAddContact": "+ Add Contact",
+  "conversationAddBot": "+ Add Bot"
 }
