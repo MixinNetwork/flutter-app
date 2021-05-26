@@ -28,9 +28,9 @@ Future<void> main() async {
   setWindowMinSize(
       const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480));
 
-  LoadBalancer.create(64, IsolateRunner.spawn).then((value) {
+  unawaited(LoadBalancer.create(64, IsolateRunner.spawn).then((value) {
     loadBalancer = value;
-  });
+  }));
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: await getApplicationDocumentsDirectory(),

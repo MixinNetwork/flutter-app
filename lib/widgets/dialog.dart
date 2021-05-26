@@ -305,9 +305,7 @@ class EditDialog extends HookWidget {
   final String editText;
   final String hintText;
 
-  /**
-   * Positive action text. null to use default "Create"
-   */
+  /// Positive action text. null to use default "Create"
   final String? positiveAction;
 
   @override

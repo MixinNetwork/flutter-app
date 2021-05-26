@@ -38,14 +38,14 @@ class MentionCache {
     final contents =
         _contents.where((element) => element != null).cast<String>().toSet();
 
-    contents.forEach((element) {
+    for (var element in contents) {
       final cache = _contentMentionLruCache.get(element.hashCode);
       if (cache != null) {
         map.addAll(cache);
       } else {
         noCacheContents.add(element);
       }
-    });
+    }
 
     if (noCacheContents.isEmpty) return map;
 
@@ -63,8 +63,9 @@ class MentionCache {
     };
 
     if (userIds.isEmpty) {
-      noCacheContents
-          .forEach((e) => _contentMentionLruCache.set(e.hashCode, {}));
+      for (var e in noCacheContents) {
+        _contentMentionLruCache.set(e.hashCode, {});
+      }
     } else {
       userIds = userIds
           .where((element) => _userLruCache.get(element) == null)
@@ -79,7 +80,7 @@ class MentionCache {
         map[element.identityNumber] = element;
       });
 
-      noCacheContentUserIdMap.entries.forEach((element) {
+      for (var element in noCacheContentUserIdMap.entries) {
         _contentMentionLruCache.set(
           element.key.hashCode,
           Map.fromEntries(
@@ -88,7 +89,7 @@ class MentionCache {
             ),
           ),
         );
-      });
+      }
     }
 
     return map;
@@ -139,9 +140,9 @@ class MentionBuilder extends HookWidget {
       [content, mentionMap],
     );
 
-    final Iterable<HighlightTextSpan> highlightTextSpans = useMemoized(
+    final highlightTextSpans = useMemoized(
       () {
-        if (!generateHighlightTextSpan) return [];
+        if (!generateHighlightTextSpan) return <HighlightTextSpan>[];
 
         return mentionMap.entries.map(
           (entry) => HighlightTextSpan(

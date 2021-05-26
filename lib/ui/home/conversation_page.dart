@@ -1288,14 +1288,14 @@ class _NetworkNotConnect extends StatelessWidget {
         ),
       );
     } else {
-      child = SizedBox();
+      child = const SizedBox();
     }
 
     return AnimatedSize(
       alignment: Alignment.topCenter,
       curve: Curves.easeOut,
-      child: child,
       duration: const Duration(milliseconds: 200),
+      child: child,
     );
   }
 }

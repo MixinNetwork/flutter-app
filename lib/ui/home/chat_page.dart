@@ -39,7 +39,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const circles = 'circles';
   static const searchMessageHistory = 'searchMessageHistory';
   static const sharedMedia = 'sharedMedia';
-  static const participants = "members";
+  static const participants = 'members';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -242,7 +242,7 @@ class ChatContainer extends StatelessWidget {
                               Expanded(
                                 child: Stack(
                                   children: [
-                                    _NotificationListener(
+                                    const _NotificationListener(
                                       child: _List(),
                                     ),
                                     Positioned(
@@ -377,7 +377,7 @@ class _List extends StatelessWidget {
                   childCount: bottom.length,
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: 4)),
+              const SliverToBoxAdapter(child: SizedBox(height: 4)),
             ],
           );
         },
@@ -525,7 +525,7 @@ class _JumpMentionButton extends HookWidget {
                 alignment: Alignment.center,
                 child: Text(
                   '${messageMentions.length}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                     height: 1,
                     color: Colors.white,

@@ -44,13 +44,6 @@ class AboutPage extends HookWidget {
               ),
               const SizedBox(height: 24),
               InteractableDecoratedBox(
-                child: Text(
-                  Localization.of(context).mixinMessenger,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 18,
-                  ),
-                ),
                 onTap: () {
                   if (kReleaseMode) return;
 
@@ -60,17 +53,17 @@ class AboutPage extends HookWidget {
                     ),
                   );
                 },
+                child: Text(
+                  Localization.of(context).mixinMessenger,
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).text,
+                    fontSize: 18,
+                  ),
+                ),
               ),
               // SignalDatabase.get
               const SizedBox(height: 8),
               InteractableDecoratedBox(
-                child: Text(
-                  version,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 16,
-                  ),
-                ),
                 onTap: () {
                   if (kReleaseMode) return;
 
@@ -81,6 +74,13 @@ class AboutPage extends HookWidget {
                     ),
                   );
                 },
+                child: Text(
+                  version,
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).secondaryText,
+                    fontSize: 16,
+                  ),
+                ),
               ),
               const SizedBox(height: 50),
               CellGroup(

@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -20,15 +19,13 @@ import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
 import '../conversation_page.dart';
 
-/**
- * The participants of group.
- */
+/// The participants of group.
 class GroupParticipantsPage extends HookWidget {
   const GroupParticipantsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final filterKeyWord = useState("");
+    final filterKeyWord = useState('');
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
       appBar: MixinAppBar(
@@ -57,7 +54,7 @@ class GroupParticipantsPage extends HookWidget {
 class _ParticipantList extends HookWidget {
   const _ParticipantList({
     Key? key,
-    this.filterKeyword = "",
+    this.filterKeyword = '',
   }) : super(key: key);
 
   /// The keyword to filter participants of group.
@@ -124,18 +121,18 @@ class _ParticipantTile extends StatelessWidget {
       participant: participant,
       me: me,
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         leading: AvatarWidget(
           size: 50,
           avatarUrl: participant.avatarUrl,
           userId: participant.userId,
-          name: participant.fullName ?? "?",
+          name: participant.fullName ?? '?',
         ),
         title: Row(
           children: [
             Flexible(
               child: Text(
-                participant.fullName ?? "?",
+                participant.fullName ?? '?',
                 style: TextStyle(
                   color: BrightnessData.themeOf(context).text,
                   fontSize: 16,
@@ -163,17 +160,16 @@ class _ParticipantTile extends StatelessWidget {
 }
 
 class _ParticipantMenuEntry extends StatelessWidget {
-  final ParticipantUser participant;
-  final ParticipantUser me;
-
-  final Widget child;
-
   const _ParticipantMenuEntry({
     Key? key,
     required this.child,
     required this.participant,
     required this.me,
   }) : super(key: key);
+
+  final ParticipantUser participant;
+  final ParticipantUser me;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -183,12 +179,11 @@ class _ParticipantMenuEntry extends StatelessWidget {
     }
 
     return ContextMenuPortalEntry(
-      child: child,
       buildMenus: () {
         final menus = [
           ContextMenu(
             title: Localization.of(context)
-                .groupPopMenuMessage(participant.fullName ?? "?"),
+                .groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
               context.read<ConversationCubit>().selectUser(participant.userId);
             },
@@ -223,7 +218,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
             me.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
             title: Localization.of(context)
-                .groupPopMenuRemoveParticipants(participant.fullName ?? "?"),
+                .groupPopMenuRemoveParticipants(participant.fullName ?? '?'),
             onTap: () => runFutureWithToast(
                 context,
                 context.read<AccountServer>().removeParticipant(
@@ -233,6 +228,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
         }
         return menus;
       },
+      child: child,
     );
   }
 }
