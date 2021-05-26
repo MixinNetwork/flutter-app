@@ -68,6 +68,8 @@ class SendMessageHelper {
         _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
 
     final bytes = await file.readAsBytes();
+
+    // Only retrieve image bounds info.
     final imageInfo = findDecoderForData(bytes)?.startDecode(bytes);
 
     final imageWidth = imageInfo!.width;

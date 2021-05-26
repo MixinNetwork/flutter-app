@@ -71,7 +71,8 @@ class QuoteMessage extends HookWidget {
           image: Image.file(
             File(quote.mediaUrl ?? ''),
             fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => ImageByBase64(quote.thumbImage!),
+            errorBuilder: (_, __, ___) =>
+                ImageByBlurHashOrBase64(imageData: quote.thumbImage),
           ),
           icon: SvgPicture.asset(Resources.assetsImagesImageSvg),
           description: Localization.of(context).image,
