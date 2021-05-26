@@ -121,7 +121,8 @@ class _ParticipantTile extends StatelessWidget {
       participant: participant,
       me: me,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         leading: AvatarWidget(
           size: 50,
           avatarUrl: participant.avatarUrl,
