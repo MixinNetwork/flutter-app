@@ -10656,7 +10656,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(
-        'SELECT u.* FROM participants p, users u\n        WHERE u.user_id != :id\n        AND p.conversation_id = :conversationId AND p.user_id = u.user_id\n        AND (u.full_name LIKE \'%\' || :username || \'%\'  ESCAPE \'\\\\\' OR u.identity_number like \'%\' || :identityNumber || \'%\'  ESCAPE \'\\\\\')\n        ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC',
+        'SELECT u.* FROM participants p, users u\n        WHERE u.user_id != :id\n        AND p.conversation_id = :conversationId AND p.user_id = u.user_id\n        AND (u.full_name LIKE \'%\' || :username || \'%\'  ESCAPE \'\\\' OR u.identity_number like \'%\' || :identityNumber || \'%\'  ESCAPE \'\\\')\n        ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(conversationId),
@@ -10706,7 +10706,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchUser(
       String id, String username, String identityNumber) {
     return customSelect(
-        'SELECT *\nFROM   users\nWHERE  user_id != :id\n       AND relationship = \'FRIEND\'\n       AND ( full_name LIKE \'%\'\n                            || :username\n                            || \'%\' ESCAPE \'\\\\\'\n              OR identity_number LIKE \'%\'\n                                      || :identityNumber\n                                      || \'%\' ESCAPE \'\\\\\' )\nORDER  BY full_name = :username COLLATE nocase\n           OR identity_number = :identityNumber COLLATE nocase DESC',
+        'SELECT *\nFROM   users\nWHERE  user_id != :id\n       AND relationship = \'FRIEND\'\n       AND ( full_name LIKE \'%\' || :username || \'%\' ESCAPE \'\\\'\n             OR identity_number LIKE \'%\' || :identityNumber || \'%\' ESCAPE \'\\\')\nORDER  BY full_name = :username COLLATE nocase\n           OR identity_number = :identityNumber COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
@@ -12719,7 +12719,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName,\n        ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl,\n        ou.is_verified AS isVerified, ou.app_id AS appId\n        FROM conversations c\n        INNER JOIN users ou ON ou.user_id = c.owner_id\n        LEFT JOIN messages m ON c.last_message_id = m.message_id\n        WHERE (c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\\\')\n        OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n            AND (ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\\\'\n                OR ou.identity_number like \'%\' || :query || \'%\' ESCAPE \'\\\\\'))\n        ORDER BY\n            (c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)\n                OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n                    AND (ou.full_name = :query COLLATE NOCASE\n                        OR ou.identity_number = :query COLLATE NOCASE)) DESC,\n            c.pin_time DESC,\n            m.created_at DESC',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName,\n        ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl,\n        ou.is_verified AS isVerified, ou.app_id AS appId\n        FROM conversations c\n        INNER JOIN users ou ON ou.user_id = c.owner_id\n        LEFT JOIN messages m ON c.last_message_id = m.message_id\n        WHERE (c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\')\n        OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n            AND (ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\'\n                OR ou.identity_number like \'%\' || :query || \'%\' ESCAPE \'\\\'))\n        ORDER BY\n            (c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)\n                OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n                    AND (ou.full_name = :query COLLATE NOCASE\n                        OR ou.identity_number = :query COLLATE NOCASE)) DESC,\n            c.pin_time DESC,\n            m.created_at DESC',
         variables: [Variable<String>(query)],
         readsFrom: {conversations, users, messages}).map((QueryRow row) {
       return SearchConversationItem(
