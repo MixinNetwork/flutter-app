@@ -986,7 +986,7 @@ class _Item extends StatelessWidget {
                                     _UnreadText(
                                       conversation: conversation,
                                       data:
-                                          '${conversation.unseenMessageCount ?? 0}',
+                                          '${min(conversation.unseenMessageCount ?? 0, 99)}',
                                     ),
                                   if ((conversation.unseenMessageCount ?? 0) <=
                                       0)
