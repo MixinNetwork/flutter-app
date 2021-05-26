@@ -379,6 +379,14 @@ class DecryptMessage extends Injector {
               createdAt: data.createdAt,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent));
+      if (message.content?.isNotEmpty ?? false) {
+        await database.messageMentionsDao.parseMentionData(
+          message.content!,
+          message.messageId,
+          message.conversationId,
+          data.senderId,
+        );
+      }
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isImage) {
       final attachment =

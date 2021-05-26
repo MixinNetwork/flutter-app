@@ -9,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import '../db/extension/job.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:moor/src/runtime/query_builder/query_builder.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
@@ -23,6 +24,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/converter/message_category_type_converter.dart';
 import '../db/database.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart' as db;
@@ -34,6 +36,7 @@ import '../utils/attachment_util.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/reg_exp_utils.dart';
 import '../utils/stream_extension.dart';
 import '../utils/string_extension.dart';
 import '../workers/decrypt_message.dart';
@@ -309,13 +312,24 @@ class AccountServer {
           message, await getMentionData(message.messageId));
 
   Future<List<String>?> getMentionData(String messageId) async {
-    final mentionData =
-        await database.messageMentionsDao.getMentionData(messageId);
-    if (mentionData == null) {
-      return null;
-    }
-    final Iterable list = json.decode(mentionData);
-    final ids = list.map((e) => e['identity_number'] as String);
+    final messages = database.mixinDatabase.messages;
+
+    final Expression<bool> equals = messages.messageId.equals(messageId);
+
+    final content = await (database.mixinDatabase.selectOnly(messages)
+          ..addColumns([messages.content])
+          ..where(equals &
+              messages.category.isIn([
+                MessageCategory.plainText,
+                MessageCategory.encryptedText,
+                MessageCategory.signalText
+              ].map((e) => const MessageCategoryTypeConverter().mapToSql(e)))))
+        .map((row) => row.read(messages.content))
+        .getSingleOrNull();
+
+    if (content?.isEmpty ?? true) return null;
+    final ids = mentionNumberRegExp.allMatches(content!).map((e) => e[1]!);
+    if (ids.isEmpty) return null;
     return database.userDao.findMultiUserIdsByIdentityNumbers(ids);
   }
 
@@ -1030,4 +1044,21 @@ class AccountServer {
       _attachmentUtil.getFilesPath(conversationId);
 
   String getMediaFilePath() => _attachmentUtil.mediaPath;
+
+  Future<void> markMentionRead(String messageId, String conversationId) =>
+      Future.wait([
+        database.messageMentionsDao.markMentionRead(messageId),
+        database.jobsDao.insert(
+          Job(
+            jobId: const Uuid().v4(),
+            action: createMessage,
+            createdAt: DateTime.now(),
+            conversationId: conversationId,
+            runCount: 0,
+            priority: 5,
+            blazeMessage: jsonEncode(
+                BlazeAckMessage(messageId: messageId, status: 'MENTION_READ')),
+          ),
+        )
+      ]);
 }

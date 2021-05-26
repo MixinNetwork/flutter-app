@@ -277,9 +277,6 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
           String conversationId, int limit, int offset) =>
       db.mediaMessages(conversationId, offset, limit);
 
-  Selectable<int> messageIndex(String conversationId, String messageId) =>
-      db.messageIndex(conversationId, messageId);
-
   Future<void> recallMessage(String messageId) async {
     await db.recallMessage(messageId);
     // Maybe use another event

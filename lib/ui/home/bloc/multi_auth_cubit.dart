@@ -9,7 +9,7 @@ part 'multi_auth_state.dart';
 class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
   MultiAuthCubit() : super(const MultiAuthState());
 
-  static late String currentUserId;
+  static Account? currentAccount;
 
   void signIn(AuthState authState) {
     var _authState = state._auths.cast<AuthState?>().firstWhere(
@@ -31,7 +31,7 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
         },
       ),
     );
-    currentUserId = authState.account.userId;
+    currentAccount = authState.account;
   }
 
   void signOut() {

@@ -973,10 +973,26 @@ class _Item extends StatelessWidget {
                                   conversation: conversation,
                                 ),
                               ),
-                              if ((conversation.unseenMessageCount ?? 0) > 0)
-                                _UnreadText(conversation: conversation),
-                              if ((conversation.unseenMessageCount ?? 0) <= 0)
-                                _StatusRow(conversation: conversation),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  if (conversation.mentionCount > 0)
+                                    _UnreadText(
+                                      conversation: conversation,
+                                      data: '@',
+                                    ),
+                                  if ((conversation.unseenMessageCount ?? 0) >
+                                      0)
+                                    _UnreadText(
+                                      conversation: conversation,
+                                      data:
+                                          '${conversation.unseenMessageCount ?? 0}',
+                                    ),
+                                  if ((conversation.unseenMessageCount ?? 0) <=
+                                      0)
+                                    _StatusRow(conversation: conversation),
+                                ].joinList(const SizedBox(width: 8)),
+                              ),
                             ],
                           ),
                         ),
@@ -1063,13 +1079,15 @@ class _UnreadText extends StatelessWidget {
   const _UnreadText({
     Key? key,
     required this.conversation,
+    required this.data,
   }) : super(key: key);
 
   final ConversationItem conversation;
+  final String data;
 
   @override
   Widget build(BuildContext context) => UnreadText(
-        count: conversation.unseenMessageCount ?? 0,
+        data: data,
         backgroundColor: conversation.pinTime?.isAfter(DateTime.now()) == true
             ? BrightnessData.themeOf(context).accent
             : BrightnessData.themeOf(context).secondaryText,

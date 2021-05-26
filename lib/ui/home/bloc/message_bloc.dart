@@ -143,9 +143,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   MessagesDao get messagesDao => database.messagesDao;
 
   Future<void> _preCacheMention(MessageState state) async {
+    final set = {...state.top, state.center, ...state.bottom};
     await mentionCache.checkMentionCache(
-      {...state.top, state.center, ...state.bottom}
-          .map((e) => e?.content)
+      {...set.map((e) => e?.content), ...set.map((e) => e?.quoteContent)}
           .where((element) => element != null)
           .cast<String>()
           .toSet(),

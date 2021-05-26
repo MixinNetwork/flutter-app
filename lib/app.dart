@@ -53,13 +53,18 @@ class App extends StatelessWidget {
               authState.privateKey,
             )),
             create: (BuildContext context) async {
-              await accountServer.initServer(
-                authState.account.userId,
-                authState.account.sessionId,
-                authState.account.identityNumber,
-                authState.privateKey,
-                context.read<MultiAuthCubit>(),
-              );
+              try {
+                await accountServer.initServer(
+                  authState.account.userId,
+                  authState.account.sessionId,
+                  authState.account.identityNumber,
+                  authState.privateKey,
+                  context.read<MultiAuthCubit>(),
+                );
+              } catch (e, s) {
+                debugPrint('accountServer.initServer error: $e, $s');
+                rethrow;
+              }
               return accountServer;
             },
             initialData: null,

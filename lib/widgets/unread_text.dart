@@ -1,11 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 
 class UnreadText extends StatelessWidget {
   const UnreadText({
     Key? key,
-    required this.count,
+    required this.data,
     this.backgroundColor,
     this.textColor,
     this.fontWeight,
@@ -14,28 +12,26 @@ class UnreadText extends StatelessWidget {
   final Color? backgroundColor;
   final Color? textColor;
   final FontWeight? fontWeight;
-  final int count;
+  final String data;
 
   @override
-  Widget build(BuildContext context) => Visibility(
-        visible: count > 0,
-        child: Container(
-          height: 20,
-          width: 26,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(10),
+  Widget build(BuildContext context) => Container(
+        height: 20,
+        width: 26,
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          data,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 12,
+            fontWeight: fontWeight,
+            height: 1,
           ),
-          alignment: Alignment.center,
-          child: Text(
-            '${min(count, 99)}',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 12,
-              fontWeight: fontWeight,
-            ),
-            textAlign: TextAlign.center,
-          ),
+          textAlign: TextAlign.center,
         ),
       );
 }
