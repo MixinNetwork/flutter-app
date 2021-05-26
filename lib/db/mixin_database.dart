@@ -95,6 +95,13 @@ class MixinDatabase extends _$MixinDatabase {
   int get schemaVersion => 1;
 
   final eventBus = DataBaseEventBus();
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(beforeOpen: (_) async {
+        if (executor.dialect == SqlDialect.sqlite) {
+          await customStatement('PRAGMA journal_mode=WAL');
+        }
+      });
 }
 
 LazyDatabase _openConnection(File dbFile) =>
