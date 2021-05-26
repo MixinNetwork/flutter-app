@@ -13,6 +13,7 @@ import '../../../utils/list_utils.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../../widgets/toast.dart';
@@ -90,7 +91,10 @@ class _ParticipantList extends HookWidget {
       }
       return participants
           .where((e) =>
-              (e.fullName?.contains(filterKeyword) ?? false) ||
+              (e.fullName
+                      ?.toLowerCase()
+                      .contains(filterKeyword.toLowerCase()) ??
+                  false) ||
               e.identityNumber.contains(filterKeyword))
           .toList();
     }, [participants, filterKeyword]);
@@ -100,19 +104,25 @@ class _ParticipantList extends HookWidget {
       itemBuilder: (context, index) => _ParticipantTile(
         participant: filteredParticipants[index],
         me: me!,
+        keyword: filterKeyword,
       ),
     );
   }
 }
 
 class _ParticipantTile extends StatelessWidget {
-  const _ParticipantTile(
-      {required this.participant, Key? key, required this.me})
-      : super(key: key);
+  const _ParticipantTile({
+    required this.participant,
+    Key? key,
+    required this.me,
+    required this.keyword,
+  }) : super(key: key);
 
   final ParticipantUser participant;
 
   final ParticipantUser me;
+
+  final String keyword;
 
   @override
   Widget build(BuildContext context) {
@@ -121,7 +131,8 @@ class _ParticipantTile extends StatelessWidget {
       participant: participant,
       me: me,
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
         leading: AvatarWidget(
           size: 50,
           avatarUrl: participant.avatarUrl,
@@ -131,12 +142,20 @@ class _ParticipantTile extends StatelessWidget {
         title: Row(
           children: [
             Flexible(
-              child: Text(
+              child: HighlightText(
                 participant.fullName ?? '?',
                 style: TextStyle(
                   color: BrightnessData.themeOf(context).text,
                   fontSize: 16,
                 ),
+                highlightTextSpans: [
+                  HighlightTextSpan(
+                    keyword,
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).accent,
+                    ),
+                  )
+                ],
               ),
             ),
             VerifiedOrBotWidget(
@@ -217,6 +236,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (me.role != null && participant.role == null ||
             me.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
+            isDestructiveAction: true,
             title: Localization.of(context)
                 .groupPopMenuRemoveParticipants(participant.fullName ?? '?'),
             onTap: () => runFutureWithToast(
