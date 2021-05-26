@@ -94,10 +94,8 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .go();
 
-  Future<SendingMessage?> sendingMessage(String messageId) async {
-    final sendingMessage = await db.sendingMessage(messageId).get();
-    return sendingMessage.isNotEmpty ? sendingMessage.single : null;
-  }
+  Future<SendingMessage?> sendingMessage(String messageId) async =>
+      db.sendingMessage(messageId).getSingleOrNull();
 
   Future<int> updateMessageStatusById(
       String messageId, MessageStatus status) async {

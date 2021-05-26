@@ -4,6 +4,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
 import 'package:moor/moor.dart';
 
+import '../converter/conversation_status_type_converter.dart';
 import '../mixin_database.dart';
 
 part 'conversations_dao.g.dart';
@@ -118,15 +119,14 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> updateConversationStatusById(
           String conversationId, ConversationStatus status) =>
-      db.customUpdate(
-        'UPDATE conversations SET status = ? WHERE conversation_id = ?',
-        variables: [
-          Variable.withString(conversationId),
-          Variable.withInt(status.index),
-        ],
-        updates: {db.conversations},
-        updateKind: UpdateKind.update,
-      );
+      (db.update(db.conversations)
+            ..where((tbl) =>
+                tbl.conversationId.equals(conversationId) &
+                tbl.status
+                    .equals(const ConversationStatusTypeConverter()
+                        .mapToSql(status))
+                    .not()))
+          .write(ConversationsCompanion(status: Value(status)));
 
   Selectable<ConversationItem> conversationItem(String conversationId) =>
       db.conversationItem(conversationId);

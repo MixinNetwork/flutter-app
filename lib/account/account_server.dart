@@ -8,14 +8,14 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-// ignore: implementation_imports
-import 'package:moor/src/runtime/query_builder/query_builder.dart';
+import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/blaze_param.dart';
 import '../blaze/vo/contact_message.dart';
+import '../blaze/vo/message_result.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
@@ -242,70 +242,69 @@ class AccountServer {
   }
 
   Future<void> _runSendJob(List<db.Job> jobs) async {
-    jobs.where((element) => element.blazeMessage != null).forEach((job) async {
+    final futures =
+        jobs.where((element) => element.blazeMessage != null).map((job) async {
       final message =
           await database.messagesDao.sendingMessage(job.blazeMessage!);
       if (message == null) {
         await database.jobsDao.deleteJobById(job.jobId);
-      } else {
-        if (message.category.isPlain ||
-            message.category == MessageCategory.appCard) {
-          var content = message.content;
-          if (message.category == MessageCategory.appCard ||
-              message.category == MessageCategory.plainPost ||
-              message.category == MessageCategory.plainText) {
-            final list = await utf8EncodeWithIsolate(content!);
-            content = await base64EncodeWithIsolate(list);
-          }
-          final blazeMessage = _createBlazeMessage(message, content!);
-          final result = await _sender.deliverNoThrow(blazeMessage);
-          if (result.success) {
-            await database.messagesDao
-                .updateMessageStatusById(message.messageId, MessageStatus.sent);
-            await database.jobsDao.deleteJobById(job.jobId);
-          }
-        } else if (message.category.isEncrypted) {
-          final conversation = await database.conversationDao
-              .getConversationById(message.conversationId);
-          if (conversation == null) return;
-          final participantSessionKey = await database.participantSessionDao
-              .getParticipantSessionKeyWithoutSelf(
-                  message.conversationId, userId);
-          if (participantSessionKey == null) {
-            // todo throw checksum
-            return;
-          }
-          final content = _encryptedProtocol.encryptMessage(
-            privateKey,
-            await utf8EncodeWithIsolate(message.content!),
-            await base64DecodeWithIsolate(participantSessionKey.publicKey!),
-            participantSessionKey.sessionId,
-          );
-          final blazeMessage = _createBlazeMessage(
-              message, await base64EncodeWithIsolate(content));
-          final result = await _sender.deliverNoThrow(blazeMessage);
-          if (result.success) {
-            await database.messagesDao
-                .updateMessageStatusById(message.messageId, MessageStatus.sent);
-            await database.jobsDao.deleteJobById(job.jobId);
-          }
-        } else if (message.category.isSignal) {
-          // TODO check resend data
-          if (!await signalProtocol.isExistSenderKey(
-              message.conversationId, message.userId)) {
-            await _sender.checkConversation(message.conversationId);
-          }
-          await _sender.checkSessionSenderKey(message.conversationId);
-          final result =
-              await _sender.deliverNoThrow(await encryptNormalMessage(message));
-          if (result.success) {
-            await database.messagesDao
-                .updateMessageStatusById(message.messageId, MessageStatus.sent);
-            await database.jobsDao.deleteJobById(job.jobId);
-          }
-        } else {}
+        return;
+      }
+
+      MessageResult? result;
+
+      if (message.category.isPlain ||
+          message.category == MessageCategory.appCard) {
+        var content = message.content;
+        if (message.category == MessageCategory.appCard ||
+            message.category == MessageCategory.plainPost ||
+            message.category == MessageCategory.plainText) {
+          final list = await utf8EncodeWithIsolate(content!);
+          content = await base64EncodeWithIsolate(list);
+        }
+        final blazeMessage = _createBlazeMessage(message, content!);
+        result = await _sender.deliverNoThrow(blazeMessage);
+      } else if (message.category.isEncrypted) {
+        final conversation = await database.conversationDao
+            .getConversationById(message.conversationId);
+        if (conversation == null) return;
+        final participantSessionKey = await database.participantSessionDao
+            .getParticipantSessionKeyWithoutSelf(
+                message.conversationId, userId);
+        if (participantSessionKey == null) {
+          // todo throw checksum
+          return;
+        }
+        final content = _encryptedProtocol.encryptMessage(
+          privateKey,
+          await utf8EncodeWithIsolate(message.content!),
+          await base64DecodeWithIsolate(participantSessionKey.publicKey!),
+          participantSessionKey.sessionId,
+        );
+        final blazeMessage = _createBlazeMessage(
+            message, await base64EncodeWithIsolate(content));
+        result = await _sender.deliverNoThrow(blazeMessage);
+      } else if (message.category.isSignal) {
+        // TODO check resend data
+        if (!await signalProtocol.isExistSenderKey(
+            message.conversationId, message.userId)) {
+          await _sender.checkConversation(message.conversationId);
+        }
+        await _sender.checkSessionSenderKey(message.conversationId);
+        result =
+            await _sender.deliverNoThrow(await encryptNormalMessage(message));
+      } else {}
+
+      if (result?.success ?? false) {
+        await database.messagesDao
+            .updateMessageStatusById(message.messageId, MessageStatus.sent);
+        await database.conversationDao.updateConversationStatusById(
+            message.conversationId, ConversationStatus.success);
+        await database.jobsDao.deleteJobById(job.jobId);
       }
     });
+
+    await Future.wait(futures);
   }
 
   Future<BlazeMessage> encryptNormalMessage(db.SendingMessage message) async =>
