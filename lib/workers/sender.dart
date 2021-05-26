@@ -2,27 +2,28 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import '../blaze/vo/blaze_message_data.dart';
-import '../blaze/vo/plain_json_message.dart';
-import '../enum/message_category.dart';
-import '../enum/message_status.dart';
-import '../utils/load_balancer_utils.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
-import '../blaze/vo/message_result.dart';
-import '../constants/constants.dart';
+
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/blaze_message_param_session.dart';
 import '../blaze/blaze_param.dart';
 import '../blaze/blaze_signal_key_message.dart';
+import '../blaze/vo/blaze_message_data.dart';
+import '../blaze/vo/message_result.dart';
+import '../blaze/vo/plain_json_message.dart';
 import '../blaze/vo/sender_key_status.dart';
 import '../blaze/vo/signal_key.dart';
+import '../constants/constants.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
-import '../utils/string_extension.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../db/mixin_database.dart' as db;
+import '../enum/message_category.dart';
+import '../enum/message_status.dart';
+import '../utils/load_balancer_utils.dart';
+import '../utils/string_extension.dart';
 
 class Sender {
   Sender(
@@ -51,7 +52,7 @@ class Sender {
     final bm = await blaze.sendMessage(blazeMessage);
     if (bm == null) {
       await _sleep(1);
-      throw WebSocketException();
+      throw const WebSocketException();
     } else if (bm.error != null) {
       if (bm.error?.code == conversationChecksumInvalidError) {
         final cid = (blazeMessage.params as BlazeMessageParam).conversationId;
@@ -62,7 +63,7 @@ class Sender {
       } else if (bm.error?.code == forbidden) {
         return true;
       } else {
-        _sleep(1);
+        await _sleep(1);
         debugPrint('$blazeMessage \n $bm');
         return false;
       }
@@ -86,7 +87,7 @@ class Sender {
       } else if (bm.error?.code == forbidden) {
         return MessageResult(true, false);
       } else {
-        _sleep(1);
+        await _sleep(1);
         return deliverNoThrow(blazeMessage);
       }
     } else {
@@ -330,9 +331,9 @@ class Sender {
 
   Future<bool> sendSenderKey(
       String conversationId, String recipientId, String sessionId) async {
-    final requestKeys = <BlazeMessageParamSession>[];
-    requestKeys.add(
-        BlazeMessageParamSession(userId: recipientId, sessionId: sessionId));
+    final requestKeys = <BlazeMessageParamSession>[
+      BlazeMessageParamSession(userId: recipientId, sessionId: sessionId)
+    ];
     final blazeMessage = createConsumeSessionSignalKeys(
         createConsumeSignalKeysParam(requestKeys));
     final data = (await signalKeysChannel(blazeMessage))?.data;
@@ -341,11 +342,11 @@ class Sender {
     }
     final keys = List<SignalKey>.from(
         (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
-    if (keys.isNotEmpty && keys.length > 0) {
+    if (keys.isNotEmpty && keys.isNotEmpty) {
       final preKeyBundle = keys[0].createPreKeyBundle();
       await signalProtocol.processSession(recipientId, preKeyBundle);
     } else {
-      database.participantSessionDao.insert(db.ParticipantSessionData(
+      await database.participantSessionDao.insert(db.ParticipantSessionData(
           conversationId: conversationId,
           userId: recipientId,
           sessionId: sessionId));
@@ -369,7 +370,7 @@ class Sender {
       return sendSenderKey(conversationId, recipientId, sessionId);
     }
     if (result.success) {
-      database.participantSessionDao.insert(db.ParticipantSessionData(
+      await database.participantSessionDao.insert(db.ParticipantSessionData(
           conversationId: conversationId,
           userId: recipientId,
           sessionId: sessionId,
@@ -409,10 +410,11 @@ class Sender {
     } else if (action == ProcessSignalKeyAction.removeParticipant) {
       final pid = participantId!;
       await database.transaction(() async {
-        database.participantsDao.deleteByCIdAndPId(data.conversationId, pid);
-        database.participantSessionDao
+        await database.participantsDao
             .deleteByCIdAndPId(data.conversationId, pid);
-        database.participantSessionDao
+        await database.participantSessionDao
+            .deleteByCIdAndPId(data.conversationId, pid);
+        await database.participantSessionDao
             .emptyStatusByConversationId(data.conversationId);
       });
       signalProtocol.clearSenderKey(data.conversationId, accountId);

@@ -47,7 +47,6 @@ extension QueteMessage on QuoteMessageItem {
         'shared_user_avatar_url': sharedUserAvatarUrl,
         'shared_user_is_verified': sharedUserIsVerified,
         'shared_user_app_id': sharedUserAppId,
-        'mentions': mentions,
       });
 }
 
@@ -89,5 +88,4 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) =>
       sharedUserAvatarUrl: map['shared_user_avatar_url'],
       sharedUserIsVerified: map['shared_user_is_verified'],
       sharedUserAppId: map['shared_user_app_id'],
-      mentions: map['mentions'],
     );

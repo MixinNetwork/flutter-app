@@ -1,8 +1,8 @@
-import '../utils/hive_key_values.dart';
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/util/Medium.dart';
 
 import '../utils/crypto_util.dart';
+import '../utils/hive_key_values.dart';
 
 class CryptoKeyValue extends HiveKeyValue {
   CryptoKeyValue._() : super(hiveCrypto);

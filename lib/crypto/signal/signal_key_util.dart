@@ -1,8 +1,8 @@
-import 'identity_key_util.dart';
-import 'signal_database.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import 'identity_key_util.dart';
 import 'pre_key_util.dart';
+import 'signal_database.dart';
 import 'signal_key_request.dart';
 
 const int preKeyMinNum = 500;

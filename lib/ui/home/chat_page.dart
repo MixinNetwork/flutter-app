@@ -39,7 +39,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const circles = 'circles';
   static const searchMessageHistory = 'searchMessageHistory';
   static const sharedMedia = 'sharedMedia';
-  static const participants = "members";
+  static const participants = 'members';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -220,7 +220,7 @@ class ChatContainer extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: BrightnessData.themeOf(context).chatBackground,
                       image: DecorationImage(
-                        image: ExactAssetImage(
+                        image: const ExactAssetImage(
                           Resources.assetsImagesChatBackgroundPng,
                         ),
                         fit: BoxFit.cover,
@@ -241,14 +241,20 @@ class ChatContainer extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: Stack(
-                                  children: const [
-                                    _NotificationListener(
+                                  children: [
+                                    const _NotificationListener(
                                       child: _List(),
                                     ),
                                     Positioned(
                                       bottom: 16,
                                       right: 16,
-                                      child: _JumpCurrentButton(),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: const [
+                                          _JumpMentionButton(),
+                                          _JumpCurrentButton(),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -371,7 +377,7 @@ class _List extends StatelessWidget {
                   childCount: bottom.length,
                 ),
               ),
-              SliverToBoxAdapter(child: SizedBox(height: 4)),
+              const SliverToBoxAdapter(child: SizedBox(height: 4)),
             ],
           );
         },
@@ -410,33 +416,124 @@ class _JumpCurrentButton extends HookWidget {
     final enable =
         (!state.isEmpty && !state.isLatest) || listPositionIsLatest.value;
 
-    return IgnorePointer(
-      ignoring: !enable,
-      child: AnimatedOpacity(
-        opacity: enable ? 1 : 0,
-        duration: const Duration(milliseconds: 200),
-        child: InteractableDecoratedBox(
-          onTap: messageBloc.jumpToCurrent,
-          child: ClipOval(
-            child: Container(
-              height: 38,
-              width: 38,
-              decoration: BoxDecoration(
-                color: context.messageBubbleColor(false),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Color.fromRGBO(0, 0, 0, 0.15),
-                    offset: Offset(0, 2),
-                    blurRadius: 10,
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: SvgPicture.asset(
-                Resources.assetsImagesJumpCurrentArrowSvg,
-              ),
+    if (!enable) return const SizedBox();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8.0),
+      child: InteractableDecoratedBox(
+        onTap: messageBloc.jumpToCurrent,
+        child: ClipOval(
+          child: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              color: context.messageBubbleColor(false),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color.fromRGBO(0, 0, 0, 0.15),
+                  offset: Offset(0, 2),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: SvgPicture.asset(
+              Resources.assetsImagesJumpCurrentArrowSvg,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _JumpMentionButton extends HookWidget {
+  const _JumpMentionButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (conversationId) => conversationId != null,
+    )!;
+    final messageMentions = useStream(
+          useMemoized(
+              () => context
+                  .read<AccountServer>()
+                  .database
+                  .messageMentionsDao
+                  .unreadMentionMessageByConversationId(conversationId)
+                  .watch(),
+              [conversationId]),
+        ).data ??
+        [];
+
+    if (messageMentions.isEmpty) return const SizedBox();
+
+    return InteractableDecoratedBox(
+      onTap: () {
+        final mention = messageMentions.first;
+        context.read<MessageBloc>().scrollTo(mention.messageId);
+        context
+            .read<AccountServer>()
+            .markMentionRead(mention.messageId, mention.conversationId);
+      },
+      child: SizedBox(
+        height: 52,
+        width: 40,
+        child: Stack(
+          children: [
+            Positioned(
+              top: 12,
+              child: ClipOval(
+                child: Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: context.messageBubbleColor(false),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.15),
+                        offset: Offset(0, 2),
+                        blurRadius: 10,
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '@',
+                    style: TextStyle(
+                      fontSize: 17,
+                      height: 1,
+                      color: BrightnessData.themeOf(context).text,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              width: 40,
+              alignment: Alignment.topCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: BrightnessData.themeOf(context).accent,
+                  shape: BoxShape.circle,
+                ),
+                width: 20,
+                height: 20,
+                alignment: Alignment.center,
+                child: Text(
+                  '${messageMentions.length}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    height: 1,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

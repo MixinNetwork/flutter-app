@@ -50,16 +50,17 @@ class SelectItem extends StatelessWidget {
                     ),
                   ),
                 ),
-              UnreadText(
-                count: count,
-                backgroundColor: BrightnessData.dynamicColor(
-                  context,
-                  const Color.fromRGBO(51, 51, 51, 0.16),
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+              if (count > 0)
+                UnreadText(
+                  data: '$count',
+                  backgroundColor: BrightnessData.dynamicColor(
+                    context,
+                    const Color.fromRGBO(51, 51, 51, 0.16),
+                    darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+                  ),
+                  textColor: BrightnessData.themeOf(context).text,
+                  fontWeight: FontWeight.w700,
                 ),
-                textColor: BrightnessData.themeOf(context).text,
-                fontWeight: FontWeight.w700,
-              ),
             ],
           ),
         );

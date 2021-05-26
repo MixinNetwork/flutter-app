@@ -60,6 +60,7 @@ class NotificationService extends WidgetsBindingObserver {
 
             // quote current user
             if (event.quoteContent?.isNotEmpty ?? false) {
+              // ignore: avoid_dynamic_calls
               if ((await jsonDecodeWithIsolate(event.quoteContent ?? '') ??
                       {})['user_id'] ==
                   account.userId) return true;

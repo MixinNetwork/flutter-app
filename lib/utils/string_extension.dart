@@ -25,7 +25,7 @@ extension StringExtension on String {
     return content.toString();
   }
 
-  String escapeSqliteSingleQuotationMarks() => this.replaceAll('\'', '\'\'');
+  String escapeSqliteSingleQuotationMarks() => replaceAll('\'', '\'\'');
 
   static final regExp = RegExp('[a-zA-Z0-9]');
 

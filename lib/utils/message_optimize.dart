@@ -45,8 +45,10 @@ Future<String?> messagePreviewOptimize(
   } else if (messageCategory == MessageCategory.appButtonGroup) {
     _content = '';
     if (trimContent != null) {
+      // ignore: avoid_dynamic_calls
       _content = (await jsonDecodeWithIsolate(trimContent))
           .map((e) => ActionData.fromJson(e))
+          // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')
           .join();
     }
@@ -68,11 +70,11 @@ Future<String?> messagePreviewOptimize(
   }
 
   if ((_content?.isNotEmpty ?? false) && isGroup) {
-    var sender;
+    late String sender;
     if (isCurrentUser) {
       sender = Localization.current.youStart;
     } else {
-      sender = senderFullName;
+      sender = senderFullName ?? '';
     }
     _content = '$sender: $_content';
   }

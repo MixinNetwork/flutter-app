@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../account/account_server.dart';
 import '../../db/extension/message_category.dart';
@@ -70,7 +71,7 @@ class MessageItemWidget extends StatelessWidget {
       userId = message.userId;
     }
 
-    return Column(
+    final child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -273,6 +274,20 @@ class MessageItemWidget extends StatelessWidget {
         ),
       ],
     );
+    if (message.mentionRead == false) {
+      return VisibilityDetector(
+        onVisibilityChanged: (VisibilityInfo info) {
+          if (info.visibleFraction < 1) return;
+          context
+              .read<AccountServer>()
+              .markMentionRead(message.messageId, message.conversationId);
+        },
+        key: ValueKey(message.messageId),
+        child: child,
+      );
+    }
+
+    return child;
   }
 }
 

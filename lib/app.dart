@@ -33,7 +33,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    precacheImage(AssetImage(Resources.assetsImagesChatBackgroundPng), context);
+    precacheImage(
+        const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(
@@ -53,13 +54,18 @@ class App extends StatelessWidget {
               authState.privateKey,
             )),
             create: (BuildContext context) async {
-              await accountServer.initServer(
-                authState.account.userId,
-                authState.account.sessionId,
-                authState.account.identityNumber,
-                authState.privateKey,
-                context.read<MultiAuthCubit>(),
-              );
+              try {
+                await accountServer.initServer(
+                  authState.account.userId,
+                  authState.account.sessionId,
+                  authState.account.identityNumber,
+                  authState.privateKey,
+                  context.read<MultiAuthCubit>(),
+                );
+              } catch (e, s) {
+                debugPrint('accountServer.initServer error: $e, $s');
+                rethrow;
+              }
               return accountServer;
             },
             initialData: null,

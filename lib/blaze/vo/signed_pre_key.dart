@@ -16,6 +16,7 @@ class SignedPreKey extends OneTimePreKey with EquatableMixin {
   @JsonKey(name: 'signature')
   String signature;
 
+  @override
   Map<String, dynamic> toJson() => _$SignedPreKeyToJson(this);
 
   @override
