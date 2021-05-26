@@ -129,8 +129,6 @@ class _SearchList extends HookWidget {
             initialData: []).data ??
         [];
 
-    debugPrint("users = ${users}");
-
     final messages = useStream<List<SearchMessageDetailItem>>(
             useMemoized(() async* {
               if (keyword.trim().isEmpty) {
