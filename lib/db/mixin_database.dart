@@ -48,8 +48,6 @@ import 'dao/stickers_dao.dart';
 import 'dao/users_dao.dart';
 import 'database_event_bus.dart';
 
-import 'package:flutter/widgets.dart' show debugPrint;
-
 part 'mixin_database.g.dart';
 
 @UseMoor(
