@@ -40,6 +40,13 @@ class SignalDatabase extends _$SignalDatabase {
   @override
   int get schemaVersion => 1;
 
+  @override
+  MigrationStrategy get migration => MigrationStrategy(beforeOpen: (_) async {
+        if (executor.dialect == SqlDialect.sqlite) {
+          await customStatement('PRAGMA journal_mode=WAL');
+        }
+      });
+
   Future<void> clear() => transaction(() async {
         for (var table in allTables) {
           await delete(table).go();
