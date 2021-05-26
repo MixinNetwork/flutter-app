@@ -3,8 +3,8 @@ import 'dart:typed_data';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart' as ed;
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/utils/crypto_util.dart';
 import 'package:flutter_app/crypto/encrypted/encrypted_protocol.dart';
+import 'package:flutter_app/utils/crypto_util.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';

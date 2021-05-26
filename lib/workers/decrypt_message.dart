@@ -2,10 +2,9 @@ import 'dart:convert';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:flutter/foundation.dart';
-import '../db/extension/job.dart';
-import '../utils/dao_extension.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+// ignore: implementation_imports
 import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
 import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
@@ -33,6 +32,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../db/database.dart';
+import '../db/extension/job.dart';
 import '../db/extension/message.dart' show QueteMessage;
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
@@ -45,6 +45,7 @@ import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/attachment_util.dart';
+import '../utils/dao_extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/string_extension.dart';
 import 'injector.dart';
@@ -121,7 +122,7 @@ class DecryptMessage extends Injector {
     } catch (e, s) {
       debugPrint('$e');
       debugPrint('$s');
-      _insertInvalidMessage(data);
+      await _insertInvalidMessage(data);
       await _updateRemoteMessageStatus(
           floodMessage.messageId, MessageStatus.delivered);
       await database.floodMessagesDao.deleteFloodMessage(floodMessage);
@@ -523,7 +524,7 @@ class DecryptMessage extends Injector {
           key: attachment.key,
           digest: attachment.digest));
     } else if (data.category.isSticker) {
-      final String plain = await _decodeWithIsolate(plainText);
+      final plain = await _decodeWithIsolate(plainText);
       final stickerMessage =
           StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final sticker = await database.stickerDao
@@ -655,12 +656,12 @@ class DecryptMessage extends Injector {
         participantId: systemMessage.participantId);
     if (systemMessage.action == MessageAction.add ||
         systemMessage.action == MessageAction.join) {
-      database.participantsDao.insert(db.Participant(
+      await database.participantsDao.insert(db.Participant(
           conversationId: data.conversationId,
           userId: systemMessage.participantId!,
           createdAt: data.createdAt));
       if (systemMessage.participantId == accountId) {
-        syncConversion(data.conversationId, force: true, unWait: true);
+        await syncConversion(data.conversationId, force: true, unWait: true);
       } else if (systemMessage.participantId != accountId &&
           await _signalProtocol.isExistSenderKey(
               data.conversationId, accountId)) {

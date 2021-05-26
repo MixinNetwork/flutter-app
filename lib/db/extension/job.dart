@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
 import '../../constants/constants.dart';
 import '../../enum/message_status.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../utils/string_extension.dart';
 import '../mixin_database.dart';
 

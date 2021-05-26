@@ -33,7 +33,8 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    precacheImage(AssetImage(Resources.assetsImagesChatBackgroundPng), context);
+    precacheImage(
+        const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
     return MultiBlocProvider(
       providers: [
         BlocProvider(

@@ -7,8 +7,8 @@ import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import '../db/extension/job.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+// ignore: implementation_imports
 import 'package:moor/src/runtime/query_builder/query_builder.dart';
 import 'package:uuid/uuid.dart';
 
@@ -26,6 +26,7 @@ import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
 import '../db/converter/message_category_type_converter.dart';
 import '../db/database.dart';
+import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
@@ -314,7 +315,7 @@ class AccountServer {
   Future<List<String>?> getMentionData(String messageId) async {
     final messages = database.mixinDatabase.messages;
 
-    final Expression<bool> equals = messages.messageId.equals(messageId);
+    final equals = messages.messageId.equals(messageId);
 
     final content = await (database.mixinDatabase.selectOnly(messages)
           ..addColumns([messages.content])
@@ -499,7 +500,7 @@ class AccountServer {
 
   Future<void> refreshFriends() async {
     final friends = (await client.accountApi.getFriends()).data;
-    _decryptMessage.insertUpdateUsers(friends);
+    await _decryptMessage.insertUpdateUsers(friends);
   }
 
   Future<void> pushSignalKeys() async {

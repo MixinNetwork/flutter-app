@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+// ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/groups/state/SenderKeyRecord.dart';
 
 import '../dao/sender_key_dao.dart';

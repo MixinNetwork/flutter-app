@@ -4,15 +4,15 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:flutter/foundation.dart';
-import '../db/extension/job.dart';
-import '../utils/dao_extension.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:web_socket_channel/io.dart';
 
 import '../constants/constants.dart';
 import '../db/database.dart';
+import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
+import '../utils/dao_extension.dart';
 import '../utils/load_balancer_utils.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
@@ -151,7 +151,7 @@ class Blaze {
     // ignore: prefer_typing_uninitialized_variables
     var param = '';
     if (offset != null) {
-      param = "${offset}";
+      param = '$offset';
     }
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     debugPrint('blaze send: ${m.toJson()}');

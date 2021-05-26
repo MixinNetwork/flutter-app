@@ -45,5 +45,5 @@ class MessageMentionsDao extends DatabaseAccessor<MixinDatabase>
   Future<int> markMentionRead(String messageId) =>
       (db.update(db.messageMentions)
             ..where((tbl) => tbl.messageId.equals(messageId)))
-          .write(MessageMentionsCompanion(hasRead: Value(true)));
+          .write(const MessageMentionsCompanion(hasRead: Value(true)));
 }

@@ -3,17 +3,17 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
-import '../crypto/attachment/crypto_attachment.dart';
-import 'load_balancer_utils.dart';
-import 'crypto_util.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import '../crypto/attachment/crypto_attachment.dart';
 import '../db/dao/messages_dao.dart';
 import '../db/extension/message_category.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
+import 'crypto_util.dart';
+import 'load_balancer_utils.dart';
 
 class AttachmentUtil {
   AttachmentUtil(this._client, this._messagesDao, this.mediaPath) {
@@ -106,8 +106,8 @@ class AttachmentUtil {
       final response = await _client.attachmentApi.postAttachment();
       if (response.data.uploadUrl != null) {
         File tmpFile;
-        List<int>? keys = null;
-        List<int>? digest = null;
+        List<int>? keys;
+        List<int>? digest;
         if (category.isSignal) {
           tmpFile = File(p.join(file.parent.path, '$messageId.tmp'));
           keys = generateRandomKey(64);

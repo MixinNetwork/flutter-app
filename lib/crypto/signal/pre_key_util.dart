@@ -1,4 +1,5 @@
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+// ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/util/Medium.dart';
 
 import '../crypto_key_value.dart';

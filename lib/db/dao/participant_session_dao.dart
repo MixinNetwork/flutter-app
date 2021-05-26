@@ -45,7 +45,7 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
   Future emptyStatusByConversationId(String conversationId) async =>
       (update(db.participantSession)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .write(ParticipantSessionCompanion(sentToServer: Value(null)));
+          .write(const ParticipantSessionCompanion(sentToServer: Value(null)));
 
   Future<List<ParticipantSessionData>> getParticipantSessionsByConversationId(
           String conversationId) async =>

@@ -51,8 +51,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> insert(Message message, String userId) async {
     final result = await db.transaction(() async {
-      final futures = <Future>[];
-      futures.add(into(db.messages).insertOnConflictUpdate(message));
+      final futures = <Future>[
+        into(db.messages).insertOnConflictUpdate(message)
+      ];
       if (message.category.isText) {
         final content = message.content!.fts5ContentFilter();
         futures.add(insertFts(
@@ -138,8 +139,8 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     final messageId = await (db.selectOnly(db.messages)
           ..addColumns([db.messages.messageId])
           ..where(db.messages.conversationId.equals(conversationId) &
-              db.messages.status.equals(
-                  MessageStatusTypeConverter().mapToSql(MessageStatus.read)))
+              db.messages.status.equals(const MessageStatusTypeConverter()
+                  .mapToSql(MessageStatus.read)))
           ..orderBy([
             OrderingTerm(
                 expression: db.messages.createdAt, mode: OrderingMode.desc)

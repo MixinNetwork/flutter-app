@@ -220,7 +220,7 @@ class ChatContainer extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: BrightnessData.themeOf(context).chatBackground,
                       image: DecorationImage(
-                        image: ExactAssetImage(
+                        image: const ExactAssetImage(
                           Resources.assetsImagesChatBackgroundPng,
                         ),
                         fit: BoxFit.cover,

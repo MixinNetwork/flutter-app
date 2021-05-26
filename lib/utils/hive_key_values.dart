@@ -1,12 +1,13 @@
 import 'dart:io';
 
-import '../account/account_key_value.dart';
-import '../crypto/crypto_key_value.dart';
-import '../crypto/privacy_key_value.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+
+import '../account/account_key_value.dart';
+import '../crypto/crypto_key_value.dart';
+import '../crypto/privacy_key_value.dart';
 
 abstract class HiveKeyValue {
   HiveKeyValue(this._boxName);
