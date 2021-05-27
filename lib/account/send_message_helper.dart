@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
@@ -21,6 +23,8 @@ import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
 import '../utils/load_balancer_utils.dart';
+
+const _kEnableImageBlurHashThumb = false;
 
 class SendMessageHelper {
   SendMessageHelper(this._messagesDao, this._jobsDao, this._attachmentUtil);
@@ -62,8 +66,15 @@ class SendMessageHelper {
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'image/jpeg';
     final attachment =
         _attachmentUtil.getAttachmentFile(category, conversationId, messageId);
+
     final bytes = await file.readAsBytes();
-    final image = decodeImage(bytes);
+
+    // Only retrieve image bounds info.
+    final imageInfo = findDecoderForData(bytes)?.startDecode(bytes);
+
+    final imageWidth = imageInfo!.width;
+    final imageHeight = imageInfo.height;
+
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
@@ -78,9 +89,9 @@ class SendMessageHelper {
       mediaUrl: attachment.path,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
-      mediaWidth: image!.width,
-      mediaHeight: image.height,
-      // thumbImage: , // todo
+      mediaWidth: imageWidth,
+      mediaHeight: imageHeight,
+      thumbImage: null,
       name: file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
@@ -89,6 +100,9 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
+    final thumbImage =
+        await runLoadBalancer(_getImageThumbnailString, file.path);
+
     final attachmentResult =
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
@@ -99,9 +113,9 @@ class SendMessageHelper {
         mimeType,
         attachmentSize,
         null,
-        image.width,
-        image.height,
-        null,
+        imageWidth,
+        imageHeight,
+        thumbImage,
         null,
         null,
         null);
@@ -536,6 +550,23 @@ class SendMessageHelper {
     await _messagesDao.updateMessageContent(messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
+}
+
+Future<String?> _getImageThumbnailString(String path) async {
+  final image = decodeImage(await XFile(path).readAsBytes())!;
+  String? thumbImage;
+  if (_kEnableImageBlurHashThumb) {
+    thumbImage = BlurHash.encode(image).hash;
+  } else {
+    final scale = max(max(image.width, image.height) / 48, 1.0);
+    final thumbnail = copyResize(
+      image,
+      width: image.width ~/ scale,
+      height: image.height ~/ scale,
+    );
+    thumbImage = base64Encode(encodeJpg(thumbnail, quality: 50));
+  }
+  return thumbImage;
 }
 
 String _encode(Object object) => base64Encode(utf8.encode(jsonEncode(object)));
