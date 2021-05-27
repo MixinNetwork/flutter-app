@@ -100,7 +100,7 @@ class ChatInfoPage extends HookWidget {
                           .pushPage(ChatSideCubit.participants),
                     ),
                   ),
-                if (isGroupConversation)
+                if (!isGroupConversation)
                   CellGroup(
                     child: CellItem(
                       title: Text(Localization.of(context).shareContact),
@@ -115,13 +115,18 @@ class ChatInfoPage extends HookWidget {
                         if (result.isEmpty) return;
                         final conversationId = result[0].conversationId;
 
-                        await accountServer.sendContactMessage(
-                          conversation.userId!,
-                          conversation.name!,
-                          conversation.isPlainConversation,
-                          conversationId: conversationId,
-                          recipientId: conversationId, // TODO conversationId?
-                        );
+                        assert(!(result[0].isGroup && result[0].userId != null),
+                            'group conversation should not contains userId!');
+
+                        await runFutureWithToast(
+                            context,
+                            accountServer.sendContactMessage(
+                              conversation.userId!,
+                              conversation.name!,
+                              conversation.isPlainConversation,
+                              conversationId: conversationId,
+                              recipientId: result[0].userId,
+                            ));
                       },
                     ),
                   ),
