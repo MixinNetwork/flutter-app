@@ -709,8 +709,12 @@ class AccountServer {
           message.mediaDuration,
           message.mediaWaveform);
 
-  Future<void> addUser(String userId) => _relationship(
-      RelationshipRequest(userId: userId, action: RelationshipAction.add));
+  Future<void> addUser(String userId, String? fullName) =>
+      _relationship(RelationshipRequest(
+        userId: userId,
+        action: RelationshipAction.add,
+        fullName: fullName,
+      ));
 
   Future<void> removeUser(String userId) => _relationship(
       RelationshipRequest(userId: userId, action: RelationshipAction.remove));

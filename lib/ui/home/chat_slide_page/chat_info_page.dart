@@ -573,9 +573,10 @@ class _AddToContactsButton extends StatelessWidget {
                   ),
                   onPressed: () => runFutureWithToast(
                       context,
-                      context
-                          .read<AccountServer>()
-                          .addUser(conversation.userId!)),
+                      context.read<AccountServer>().addUser(
+                            conversation.userId!,
+                            conversation.user?.fullName,
+                          )),
                   child: Text(
                     conversation.isBot!
                         ? Localization.of(context).conversationAddBot
