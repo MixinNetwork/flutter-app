@@ -1689,6 +1689,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `New Messages</`
+  String get unread {
+    return Intl.message(
+      'New Messages</',
+      name: 'unread',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

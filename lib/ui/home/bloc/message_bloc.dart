@@ -22,13 +22,22 @@ abstract class _MessageEvent extends Equatable {
 }
 
 class _MessageInitEvent extends _MessageEvent {
-  _MessageInitEvent({this.centerMessageId, this.isLatest = true});
+  _MessageInitEvent({
+    this.centerMessageId,
+    this.isLastReadMessageId = false,
+  });
 
   final String? centerMessageId;
-  final bool? isLatest;
+  final bool isLastReadMessageId;
 
   @override
-  List<Object?> get props => [centerMessageId, isLatest];
+  List<Object?> get props => [
+        centerMessageId,
+        isLastReadMessageId,
+      ];
+
+  @override
+  final stringify = true;
 }
 
 class _MessageScrollEvent extends _MessageEvent {
@@ -62,6 +71,7 @@ class MessageState extends Equatable {
     this.bottom = const [],
     this.conversationId,
     this.isLatest = false,
+    this.isLastReadMessageId = false,
     this.initUUID,
   });
 
@@ -70,6 +80,7 @@ class MessageState extends Equatable {
   final MessageItem? center;
   final List<MessageItem> bottom;
   final bool isLatest;
+  final bool isLastReadMessageId;
   final String? initUUID;
 
   @override
@@ -79,6 +90,7 @@ class MessageState extends Equatable {
         center,
         bottom,
         isLatest,
+        isLastReadMessageId,
         initUUID,
       ];
 
@@ -96,6 +108,7 @@ class MessageState extends Equatable {
     final MessageItem? center,
     final List<MessageItem>? bottom,
     final bool? isLatest,
+    final bool? isLastReadMessageId,
     final String? initUUID,
   }) =>
       MessageState(
@@ -104,6 +117,7 @@ class MessageState extends Equatable {
         center: center ?? this.center,
         bottom: bottom ?? this.bottom,
         isLatest: isLatest ?? this.isLatest,
+        isLastReadMessageId: isLastReadMessageId ?? this.isLastReadMessageId,
         initUUID: initUUID ?? this.initUUID,
       );
 }
@@ -116,15 +130,26 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.database,
     required this.mentionCache,
   }) : super(const MessageState()) {
-    add(_MessageInitEvent());
+    add(_MessageInitEvent(
+      centerMessageId: conversationCubit.state?.initIndexMessageId,
+      isLastReadMessageId:
+          conversationCubit.state?.isLastReadMessageId ?? false,
+    ));
     addSubscription(
       conversationCubit.stream
           .where((event) => event?.conversationId != null)
-          .map((event) =>
-              Tuple2(event?.conversationId, event?.initIndexMessageId))
+          .map((event) => Tuple3(
+                event?.conversationId,
+                event?.initIndexMessageId,
+                event?.isLastReadMessageId ?? false,
+              ))
           .distinct()
-          .asyncMap((event) async => _MessageInitEvent(
-              centerMessageId: event.item2, isLatest: event.item2 == null))
+          .asyncMap(
+            (event) async => _MessageInitEvent(
+              centerMessageId: event.item2,
+              isLastReadMessageId: event.item3,
+            ),
+          )
           .listen(add),
     );
 
@@ -171,7 +196,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         event.centerMessageId,
       );
       await _preCacheMention(messageState);
-      yield messageState;
+      yield messageState.copyWith(
+        isLastReadMessageId: event.isLastReadMessageId,
+      );
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
@@ -191,10 +218,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           yield result;
         }
       } else if (event is _MessageScrollEvent) {
-        add(_MessageInitEvent(
-          centerMessageId: event.messageId,
-          isLatest: false,
-        ));
+        add(_MessageInitEvent(centerMessageId: event.messageId));
       }
     }
   }

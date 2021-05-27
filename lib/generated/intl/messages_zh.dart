@@ -220,6 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unMute": MessageLookupByLibrary.simpleMessage("取消静音"),
         "unPin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),
+        "unread": MessageLookupByLibrary.simpleMessage("未读消息"),
         "video": MessageLookupByLibrary.simpleMessage("视频"),
         "videoCall": MessageLookupByLibrary.simpleMessage("语音电话"),
         "videos": MessageLookupByLibrary.simpleMessage("视频"),

@@ -256,6 +256,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unMute": MessageLookupByLibrary.simpleMessage("UnMute"),
         "unPin": MessageLookupByLibrary.simpleMessage("UnPin"),
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
+        "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videoCall": MessageLookupByLibrary.simpleMessage("Video call"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),

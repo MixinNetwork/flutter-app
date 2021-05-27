@@ -16,6 +16,7 @@ class ConversationState extends Equatable {
     required this.conversationId,
     this.userId,
     this.initIndexMessageId,
+    this.isLastReadMessageId = false,
     this.conversation,
     this.user,
   });
@@ -23,6 +24,7 @@ class ConversationState extends Equatable {
   final String conversationId;
   final String? userId;
   final String? initIndexMessageId;
+  final bool isLastReadMessageId;
   final ConversationItem? conversation;
   final User? user;
 
@@ -55,6 +57,7 @@ class ConversationState extends Equatable {
         initIndexMessageId,
         conversation,
         user,
+        isLastReadMessageId,
       ];
 
   ConversationState copyWith({
@@ -62,6 +65,7 @@ class ConversationState extends Equatable {
     final String? userId,
     final String? initIndexMessageId,
     final int? unseenMessageCount,
+    final bool? isLastReadMessageId,
     final ConversationItem? conversation,
     final User? user,
   }) =>
@@ -71,6 +75,7 @@ class ConversationState extends Equatable {
         initIndexMessageId: initIndexMessageId ?? this.initIndexMessageId,
         conversation: conversation ?? this.conversation,
         user: user ?? this.user,
+        isLastReadMessageId: isLastReadMessageId ?? this.isLastReadMessageId,
       );
 }
 
@@ -134,11 +139,17 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     responsiveNavigatorCubit.clear();
   }
 
-  void selectConversation(String conversationId, [String? initIndexMessageId]) {
-    emit(ConversationState(
+  void selectConversation(
+    String conversationId, [
+    String? initIndexMessageId,
+    bool isLastReadMessageId = false,
+  ]) {
+    final conversationState = ConversationState(
       conversationId: conversationId,
       initIndexMessageId: initIndexMessageId,
-    ));
+      isLastReadMessageId: isLastReadMessageId,
+    );
+    emit(conversationState);
     accountServer.selectConversation(conversationId);
     responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);
   }

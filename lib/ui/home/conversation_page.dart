@@ -815,6 +815,7 @@ class _List extends HookWidget {
                 context.read<ConversationCubit>().selectConversation(
                       conversation.conversationId,
                       conversation.lastReadMessageId,
+                      true,
                     );
               },
             ),

@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../generated/l10n.dart';
 import '../../account/account_server.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../bloc/subscribe_mixin.dart';
@@ -366,6 +367,24 @@ class _List extends StatelessWidget {
                   );
                 }),
               ),
+              if (center != null &&
+                  bottom.isNotEmpty &&
+                  state.isLastReadMessageId)
+                SliverToBoxAdapter(
+                  child: Container(
+                    color: BrightnessData.themeOf(context).background,
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    margin: const EdgeInsets.symmetric(vertical: 6),
+                    alignment: Alignment.center,
+                    child: Text(
+                      Localization.of(context).unread,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) => MessageItemWidget(

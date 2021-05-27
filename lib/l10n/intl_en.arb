@@ -162,5 +162,6 @@
   "groupSearchParticipants": "Mixin ID, Name",
   "change": "Change",
   "conversationAddContact": "+ Add Contact",
-  "conversationAddBot": "+ Add Bot"
+  "conversationAddBot": "+ Add Bot",
+  "unread": "New Messages</"
 }
