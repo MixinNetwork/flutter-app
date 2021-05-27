@@ -118,17 +118,15 @@ class ChatInfoPage extends HookWidget {
                         assert(!(result[0].isGroup && result[0].userId != null),
                             'group conversation should not contains userId!');
 
-                        await accountServer.sendContactMessage(
-                          conversation.userId!,
-                          conversation.name!,
-                          conversation.isPlainConversation,
-                          conversationId: conversationId,
-                          recipientId: result[0].userId,
-                        );
-
-                        context
-                            .read<ConversationCubit>()
-                            .selectConversation(conversationId);
+                        await runFutureWithToast(
+                            context,
+                            accountServer.sendContactMessage(
+                              conversation.userId!,
+                              conversation.name!,
+                              conversation.isPlainConversation,
+                              conversationId: conversationId,
+                              recipientId: result[0].userId,
+                            ));
                       },
                     ),
                   ),
