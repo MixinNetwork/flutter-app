@@ -385,7 +385,7 @@ class Sender {
     final signalKeyMessage = createBlazeSignalKeyMessage(
         recipientId, encryptedResult.result!,
         sessionId: sessionId);
-    final signalKeyMessages = <BlazeSignalKeyMessage>[]..add(signalKeyMessage);
+    final signalKeyMessages = <BlazeSignalKeyMessage>[signalKeyMessage];
     final checksum = await getCheckSum(conversationId);
     final bm = createSignalKeyMessage(createSignalKeyMessageParam(
         conversationId, signalKeyMessages, checksum));
@@ -444,7 +444,7 @@ class Sender {
       signalProtocol.clearSenderKey(data.conversationId, accountId);
       // TODO publish signal key change
     } else if (action == ProcessSignalKeyAction.addParticipant) {
-      final userIds = <String>[]..add(participantId!);
+      final userIds = <String>[participantId!];
       await refreshSession(data.conversationId, userIds);
       // TODO publish signal key change
     }

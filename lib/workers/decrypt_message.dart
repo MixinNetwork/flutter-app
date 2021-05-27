@@ -713,11 +713,11 @@ class DecryptMessage extends Injector {
         unawaited(_sender.sendProcessSignalKey(
             data, ProcessSignalKeyAction.addParticipant,
             participantId: systemMessage.participantId));
-        await refreshUsers(<String>[]..add(systemMessage.participantId!));
+        await refreshUsers(<String>[systemMessage.participantId!]);
       } else {
-        final userIds = <String>[]..add(systemMessage.participantId!);
+        final userIds = <String>[systemMessage.participantId!];
         unawaited(_sender.refreshSession(data.conversationId, userIds));
-        await refreshUsers(<String>[]..add(systemMessage.participantId!));
+        await refreshUsers(<String>[systemMessage.participantId!]);
       }
     } else if (systemMessage.action == MessageAction.remove ||
         systemMessage.action == MessageAction.exit) {
@@ -725,7 +725,7 @@ class DecryptMessage extends Injector {
         unawaited(database.conversationDao.updateConversationStatusById(
             data.conversationId, ConversationStatus.quit));
       }
-      await refreshUsers(<String>[]..add(systemMessage.participantId!));
+      await refreshUsers(<String>[systemMessage.participantId!]);
       unawaited(_sender.sendProcessSignalKey(
           data, ProcessSignalKeyAction.removeParticipant,
           participantId: systemMessage.participantId));

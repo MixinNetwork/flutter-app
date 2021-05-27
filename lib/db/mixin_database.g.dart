@@ -520,8 +520,8 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
   Set<GeneratedColumn> get $primaryKey => {jobId};
   @override
   Job map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Job.fromData(data, _db, prefix: effectivePrefix);
+    return Job.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -1356,8 +1356,8 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   Set<GeneratedColumn> get $primaryKey => {conversationId};
   @override
   Conversation map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Conversation.fromData(data, _db, prefix: effectivePrefix);
+    return Conversation.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -2719,8 +2719,8 @@ class Messages extends Table with TableInfo<Messages, Message> {
   Set<GeneratedColumn> get $primaryKey => {messageId};
   @override
   Message map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Message.fromData(data, _db, prefix: effectivePrefix);
+    return Message.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -2999,8 +2999,8 @@ class Participants extends Table with TableInfo<Participants, Participant> {
   Set<GeneratedColumn> get $primaryKey => {conversationId, userId};
   @override
   Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Participant.fromData(data, _db, prefix: effectivePrefix);
+    return Participant.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -3573,8 +3573,8 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   Set<GeneratedColumn> get $primaryKey => {snapshotId};
   @override
   Snapshot map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Snapshot.fromData(data, _db, prefix: effectivePrefix);
+    return Snapshot.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4222,8 +4222,8 @@ class Users extends Table with TableInfo<Users, User> {
   Set<GeneratedColumn> get $primaryKey => {userId};
   @override
   User map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return User.fromData(data, _db, prefix: effectivePrefix);
+    return User.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -4788,8 +4788,8 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   Set<GeneratedColumn> get $primaryKey => {addressId};
   @override
   Addresse map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Addresse.fromData(data, _db, prefix: effectivePrefix);
+    return Addresse.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -5443,8 +5443,8 @@ class Apps extends Table with TableInfo<Apps, App> {
   Set<GeneratedColumn> get $primaryKey => {appId};
   @override
   App map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return App.fromData(data, _db, prefix: effectivePrefix);
+    return App.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -6127,8 +6127,8 @@ class Assets extends Table with TableInfo<Assets, Asset> {
   Set<GeneratedColumn> get $primaryKey => {assetId};
   @override
   Asset map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Asset.fromData(data, _db, prefix: effectivePrefix);
+    return Asset.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -6441,8 +6441,8 @@ class CircleConversations extends Table
   Set<GeneratedColumn> get $primaryKey => {conversationId, circleId};
   @override
   CircleConversation map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return CircleConversation.fromData(data, _db, prefix: effectivePrefix);
+    return CircleConversation.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -6710,8 +6710,8 @@ class Circles extends Table with TableInfo<Circles, Circle> {
   Set<GeneratedColumn> get $primaryKey => {circleId};
   @override
   Circle map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Circle.fromData(data, _db, prefix: effectivePrefix);
+    return Circle.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -6937,8 +6937,8 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   Set<GeneratedColumn> get $primaryKey => {messageId};
   @override
   FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return FloodMessage.fromData(data, _db, prefix: effectivePrefix);
+    return FloodMessage.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -7252,8 +7252,8 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   Set<GeneratedColumn> get $primaryKey => {hyperlink};
   @override
   Hyperlink map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Hyperlink.fromData(data, _db, prefix: effectivePrefix);
+    return Hyperlink.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -7484,8 +7484,8 @@ class MessageMentions extends Table
   Set<GeneratedColumn> get $primaryKey => {messageId};
   @override
   MessageMention map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return MessageMention.fromData(data, _db, prefix: effectivePrefix);
+    return MessageMention.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -7890,8 +7890,8 @@ class MessagesFts extends Table
   Set<GeneratedColumn> get $primaryKey => <GeneratedColumn>{};
   @override
   MessagesFt map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return MessagesFt.fromData(data, _db, prefix: effectivePrefix);
+    return MessagesFt.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -8045,8 +8045,8 @@ class MessagesHistory extends Table
   Set<GeneratedColumn> get $primaryKey => {messageId};
   @override
   MessagesHistoryData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return MessagesHistoryData.fromData(data, _db, prefix: effectivePrefix);
+    return MessagesHistoryData.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -8230,8 +8230,8 @@ class Offsets extends Table with TableInfo<Offsets, Offset> {
   Set<GeneratedColumn> get $primaryKey => {key};
   @override
   Offset map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Offset.fromData(data, _db, prefix: effectivePrefix);
+    return Offset.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -8591,8 +8591,8 @@ class ParticipantSession extends Table
   Set<GeneratedColumn> get $primaryKey => {conversationId, userId, sessionId};
   @override
   ParticipantSessionData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ParticipantSessionData.fromData(data, _db, prefix: effectivePrefix);
+    return ParticipantSessionData.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -8906,8 +8906,8 @@ class ResendSessionMessages extends Table
   Set<GeneratedColumn> get $primaryKey => {messageId, userId, sessionId};
   @override
   ResendSessionMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return ResendSessionMessage.fromData(data, _db, prefix: effectivePrefix);
+    return ResendSessionMessage.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -9271,8 +9271,8 @@ class SentSessionSenderKeys extends Table
   Set<GeneratedColumn> get $primaryKey => {conversationId, userId, sessionId};
   @override
   SentSessionSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return SentSessionSenderKey.fromData(data, _db, prefix: effectivePrefix);
+    return SentSessionSenderKey.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -9708,8 +9708,8 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
   Set<GeneratedColumn> get $primaryKey => {albumId};
   @override
   StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return StickerAlbum.fromData(data, _db, prefix: effectivePrefix);
+    return StickerAlbum.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -9902,8 +9902,8 @@ class StickerRelationships extends Table
   Set<GeneratedColumn> get $primaryKey => {albumId, stickerId};
   @override
   StickerRelationship map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return StickerRelationship.fromData(data, _db, prefix: effectivePrefix);
+    return StickerRelationship.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -10384,8 +10384,8 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   Set<GeneratedColumn> get $primaryKey => {stickerId};
   @override
   Sticker map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Sticker.fromData(data, _db, prefix: effectivePrefix);
+    return Sticker.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override

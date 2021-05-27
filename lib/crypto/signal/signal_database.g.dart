@@ -395,8 +395,8 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Identitie map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Identitie.fromData(data, _db, prefix: effectivePrefix);
+    return Identitie.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -612,8 +612,8 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Prekey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Prekey.fromData(data, _db, prefix: effectivePrefix);
+    return Prekey.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -872,8 +872,8 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   SignedPrekey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return SignedPrekey.fromData(data, _db, prefix: effectivePrefix);
+    return SignedPrekey.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -1175,8 +1175,8 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Session map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return Session.fromData(data, _db, prefix: effectivePrefix);
+    return Session.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -1398,8 +1398,8 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
   @override
   SenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return SenderKey.fromData(data, _db, prefix: effectivePrefix);
+    return SenderKey.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -1712,8 +1712,8 @@ class RatchetSenderKeys extends Table
   Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
   @override
   RatchetSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : null;
-    return RatchetSenderKey.fromData(data, _db, prefix: effectivePrefix);
+    return RatchetSenderKey.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
