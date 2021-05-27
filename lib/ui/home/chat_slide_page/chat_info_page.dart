@@ -67,6 +67,7 @@ class ChatInfoPage extends HookWidget {
           actions: [
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
+              color: BrightnessData.themeOf(context).icon,
               onTap: () => Navigator.pop(context),
             ),
           ],
@@ -237,6 +238,7 @@ class ChatInfoPage extends HookWidget {
                       if (!isGroupConversation)
                         CellItem(
                           title: Text(Localization.of(context).editName),
+                          trailing: null,
                           onTap: () async {
                             final name = await showMixinDialog<String>(
                               context: context,

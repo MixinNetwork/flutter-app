@@ -28,6 +28,8 @@ class StickerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
         color: Colors.transparent,
+        elevation: 5,
+        borderRadius: const BorderRadius.all(Radius.circular(11)),
         child: Builder(
           builder: (context) => Container(
             width: 464,
@@ -229,12 +231,13 @@ class _StickerAlbumBarItem extends StatelessWidget {
               builder: (context) {
                 if (index < 2) {
                   return SvgPicture.asset(
-                    {
+                    const {
                       0: Resources.assetsImagesRecentStickerSvg,
                       1: Resources.assetsImagesPersonalStickerSvg,
                       // todo
                       // 2: Resources.assetsImagesGifStickerSvg
                     }[index]!,
+                    color: BrightnessData.themeOf(context).secondaryText,
                     width: 24,
                     height: 24,
                   );

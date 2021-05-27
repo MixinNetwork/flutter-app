@@ -119,6 +119,7 @@ class _Arrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
         Resources.assetsImagesIcArrowRightSvg,
+        color: BrightnessData.themeOf(context).secondaryText,
         width: 30,
         height: 30,
       );

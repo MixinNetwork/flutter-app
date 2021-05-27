@@ -27,7 +27,7 @@ import '../utils/text_utils.dart';
 import 'action_button.dart';
 import 'brightness_observer.dart';
 import 'dash_path_border.dart';
-import 'hoer_overlay.dart';
+import 'hover_overlay.dart';
 import 'interacter_decorated_box.dart';
 import 'mention_panel.dart';
 import 'message/item/quote_message.dart';
