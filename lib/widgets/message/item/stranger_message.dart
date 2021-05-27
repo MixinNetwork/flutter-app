@@ -70,7 +70,9 @@ class StrangerMessage extends StatelessWidget {
                       .sendTextMessage('Hi', true,
                           conversationId: message.conversationId);
                 } else {
-                  context.read<AccountServer>().addUser(message.userId);
+                  context
+                      .read<AccountServer>()
+                      .addUser(message.userId, message.userFullName);
                 }
               },
             ),
