@@ -16,6 +16,7 @@ import '../blaze/blaze_message.dart';
 import '../blaze/blaze_param.dart';
 import '../blaze/vo/contact_message.dart';
 import '../blaze/vo/message_result.dart';
+import '../blaze/vo/plain_json_message.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
@@ -28,8 +29,8 @@ import '../db/converter/message_category_type_converter.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
@@ -182,6 +183,15 @@ class AccountServer {
         .asyncMapDrop(_runAckJob)
         .listen((_) {});
 
+    final primarySessionId = AccountKeyValue.get.getPrimarySessionId();
+    if (primarySessionId != null) {
+      database.jobsDao
+          .findSessionAckJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runSessionAckJob)
+          .listen((_) {});
+    }
+
     database.jobsDao
         .findRecallMessageJobs()
         .where((jobs) => jobs.isNotEmpty == true)
@@ -214,6 +224,42 @@ class AccountServer {
       await database.jobsDao.deleteJobs(jobIds);
     } catch (e, s) {
       debugPrint('Send ack error: $e, stack: $s');
+    }
+  }
+
+  Future<void> _runSessionAckJob(List<db.Job> jobs) async {
+    final conversationId =
+        await database.participantsDao.findJoinedConversationId(userId);
+    if (conversationId == null) {
+      return;
+    }
+    final ack = await Future.wait(
+      jobs.where((element) => element.blazeMessage != null).map(
+        (e) async {
+          final Map map = await jsonDecodeWithIsolate(e.blazeMessage!);
+          return BlazeAckMessage(
+              messageId: map['message_id'], status: map['status']);
+        },
+      ),
+    );
+    final jobIds = jobs.map((e) => e.jobId).toList();
+    final plainText = PlainJsonMessage(
+            acknowledgeMessageReceipts, null, null, null, null, ack)
+        .toJson()
+        .toString();
+    final encoded =
+        await base64EncodeWithIsolate(await utf8EncodeWithIsolate(plainText));
+    final primarySessionId = AccountKeyValue.get.getPrimarySessionId();
+    final bm = createParamBlazeMessage(createPlainJsonParam(
+        conversationId, userId, encoded,
+        sessionId: primarySessionId));
+    try {
+      final result = await _sender.deliverNoThrow(bm);
+      if (result.success) {
+        await database.jobsDao.deleteJobs(jobIds);
+      }
+    } catch (e, s) {
+      debugPrint('Send session ack error: $e, stack: $s');
     }
   }
 
@@ -483,7 +529,22 @@ class AccountServer {
   Future<void> _markRead(conversationId) async {
     final ids =
         await database.messagesDao.getUnreadMessageIds(conversationId, userId);
-    final jobs = ids.map((id) => createAckJob(id, MessageStatus.read)).toList();
+    final jobs = ids
+        .map((id) =>
+            createAckJob(acknowledgeMessageReceipts, id, MessageStatus.read))
+        .toList();
+    await database.jobsDao.insertAll(jobs);
+    await _createReadSessionMessage(ids);
+  }
+
+  Future<void> _createReadSessionMessage(List<String> messageIds) async {
+    final primarySessionId = AccountKeyValue.get.getPrimarySessionId();
+    if (primarySessionId == null) {
+      return;
+    }
+    final jobs = messageIds
+        .map((id) => createAckJob(createMessage, id, MessageStatus.read))
+        .toList();
     await database.jobsDao.insertAll(jobs);
   }
 

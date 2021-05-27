@@ -13,6 +13,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../account/account_key_value.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
@@ -129,14 +130,18 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       await SignalProtocol.initSignal(private);
       final registrationId = CryptoKeyValue.get.getLocalRegistrationId();
 
+      await AccountKeyValue.get.init();
+      // ignore: avoid_dynamic_calls
+      final sessionId = msg['session_id'];
+      AccountKeyValue.get.setPrimarySessionId(sessionId);
+
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
           // ignore: avoid_dynamic_calls
           code: msg['provisioning_code'],
           // ignore: avoid_dynamic_calls
           userId: msg['user_id'],
-          // ignore: avoid_dynamic_calls
-          sessionId: msg['session_id'],
+          sessionId: sessionId,
           platform: 'Desktop',
           purpose: 'SESSION',
           sessionSecret: base64Encode(edKeyPair.publicKey!.bytes),

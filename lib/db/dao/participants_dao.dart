@@ -33,6 +33,14 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
                 tbl.userId.equals(userId)))
           .getSingleOrNull();
 
+  Future<String?> findJoinedConversationId(String userId) async => db
+      .customSelect(
+        'SELECT p.conversation_id FROM participants p, conversations c WHERE p.user_id = ? AND p.conversation_id = c.conversation_id AND c.status = 2 LIMIT 1',
+        variables: [Variable.withString(userId)],
+      )
+      .map((row) => row.read<String>('conversation_id'))
+      .getSingleOrNull();
+
   Future<void> insertAll(List<Participant> add) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.participants, add);
       });
