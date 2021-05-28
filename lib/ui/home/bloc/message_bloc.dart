@@ -386,18 +386,15 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     if (scrollController.hasClients && newBottomMessage) {
       final position = scrollController.position;
       final oldMaxScrollExtent = position.maxScrollExtent;
-      final oldPixels = position.pixels;
-      if (oldPixels == oldMaxScrollExtent) {
-        WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-          if (!scrollController.hasClients) return;
-          final newMaxScrollExtent = position.maxScrollExtent;
-          final newPixels = position.pixels;
-          if (newMaxScrollExtent != oldMaxScrollExtent &&
-              newMaxScrollExtent != newPixels) {
-            scrollController.jumpTo(newMaxScrollExtent);
-          }
-        });
-      }
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+        if (!scrollController.hasClients) return;
+        final newMaxScrollExtent = position.maxScrollExtent;
+        final newPixels = position.pixels;
+        if (newMaxScrollExtent != oldMaxScrollExtent &&
+            newMaxScrollExtent != newPixels) {
+          scrollController.jumpTo(newMaxScrollExtent);
+        }
+      });
     }
     return state.copyWith(
       top: top,
