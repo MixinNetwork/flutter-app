@@ -158,5 +158,7 @@
   "change": "更改",
   "conversationAddContact": "+ 添加联系人",
   "conversationAddBot": "+ 添加机器人",
-  "unread": "未读消息"
+  "unread": "未读消息",
+  "yesterday": "昨天",
+  "today": "今天"
 }

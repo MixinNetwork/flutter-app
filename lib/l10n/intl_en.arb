@@ -163,5 +163,7 @@
   "change": "Change",
   "conversationAddContact": "+ Add Contact",
   "conversationAddBot": "+ Add Bot",
-  "unread": "New Messages</"
+  "unread": "New Messages",
+  "yesterday": "Yesterday",
+  "today": "Today"
 }

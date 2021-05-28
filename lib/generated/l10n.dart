@@ -1690,11 +1690,31 @@ class Localization {
     );
   }
 
-  /// `New Messages</`
+  /// `New Messages`
   String get unread {
     return Intl.message(
-      'New Messages</',
+      'New Messages',
       name: 'unread',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Yesterday`
+  String get yesterday {
+    return Intl.message(
+      'Yesterday',
+      name: 'yesterday',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Today`
+  String get today {
+    return Intl.message(
+      'Today',
+      name: 'today',
       desc: '',
       args: [],
     );

@@ -1,5 +1,7 @@
 import 'package:intl/intl.dart';
 
+import '../../generated/l10n.dart';
+
 String convertStringTime(DateTime _dateTime) {
   final now = DateTime.now().toLocal();
   final dateTime = _dateTime.toLocal();
@@ -7,7 +9,7 @@ String convertStringTime(DateTime _dateTime) {
     return DateFormat.Hm().format(dateTime);
   }
   if (isYesterday(now, dateTime)) {
-    return 'Yesterday';
+    return Localization.current.yesterday;
   }
   if (isSameWeek(now, dateTime)) {
     return DateFormat.EEEE().format(dateTime);

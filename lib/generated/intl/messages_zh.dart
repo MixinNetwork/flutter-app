@@ -215,6 +215,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "strangers": MessageLookupByLibrary.simpleMessage("陌生人"),
         "successful": MessageLookupByLibrary.simpleMessage("成功"),
         "termsService": MessageLookupByLibrary.simpleMessage("服务条款"),
+        "today": MessageLookupByLibrary.simpleMessage("今天"),
         "transactions": MessageLookupByLibrary.simpleMessage("转账记录"),
         "transfer": MessageLookupByLibrary.simpleMessage("转账"),
         "unMute": MessageLookupByLibrary.simpleMessage("取消静音"),
@@ -226,6 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("正在等待这个消息。"),
+        "yesterday": MessageLookupByLibrary.simpleMessage("昨天"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youStart": MessageLookupByLibrary.simpleMessage("您")
       };

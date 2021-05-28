@@ -251,6 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "successful": MessageLookupByLibrary.simpleMessage("Successful"),
         "termsService":
             MessageLookupByLibrary.simpleMessage("Terms of Service"),
+        "today": MessageLookupByLibrary.simpleMessage("Today"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
         "unMute": MessageLookupByLibrary.simpleMessage("UnMute"),
@@ -262,6 +263,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
+        "yesterday": MessageLookupByLibrary.simpleMessage("Yesterday"),
         "you": MessageLookupByLibrary.simpleMessage("you"),
         "youStart": MessageLookupByLibrary.simpleMessage("You")
       };
