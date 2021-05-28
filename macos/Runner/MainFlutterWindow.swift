@@ -15,6 +15,7 @@ class MainFlutterWindow: NSWindow {
     
     self.isOpaque = false
     self.backgroundColor = NSColor.init(calibratedWhite: 1.0, alpha: 0.5)
+    self.isReleasedWhenClosed = false
     
     super.awakeFromNib()
   }
