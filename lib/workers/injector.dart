@@ -13,6 +13,8 @@ class Injector {
   Database database;
   Client client;
 
+  final refreshUserIdSet = <String>{};
+
   Future<void> syncConversion(String? conversationId,
       {bool force = false, bool unWait = false}) async {
     if (conversationId == null || conversationId == systemUser) {
@@ -182,6 +184,54 @@ class Injector {
       ));
     } catch (e) {
       debugPrint('$e');
+    }
+  }
+
+  Future<void> refreshCircle({String? circleId}) async {
+    if (circleId == null) {
+      final res = await client.circleApi.getCircles();
+      res.data.forEach((circle) async {
+        await database.circlesDao.insertUpdate(db.Circle(
+            circleId: circle.circleId,
+            name: circle.name,
+            createdAt: circle.createdAt,
+            orderedAt: null));
+        await handleCircle(circle);
+      });
+    } else {
+      final circle = (await client.circleApi.getCircle(circleId)).data;
+      await database.circlesDao.insertUpdate(db.Circle(
+          circleId: circle.circleId,
+          name: circle.name,
+          createdAt: circle.createdAt,
+          orderedAt: null));
+      await handleCircle(circle);
+    }
+
+    if (refreshUserIdSet.isNotEmpty) {
+      unawaited(refreshUsers(refreshUserIdSet.toList()));
+    }
+  }
+
+  Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
+    final ccList =
+        (await client.circleApi.getCircleConversations(circle.circleId)).data;
+    for (final cc in ccList) {
+      await database.circleConversationDao.insert(db.CircleConversation(
+        conversationId: cc.conversationId,
+        circleId: cc.circleId,
+        createdAt: cc.createdAt,
+      ));
+      if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
+        final u =
+            await database.userDao.findUserById(cc.userId!).getSingleOrNull();
+        if (u == null) {
+          refreshUserIdSet.add(cc.userId!);
+        }
+      }
+    }
+    if (ccList.length >= 500) {
+      await handleCircle(circle, offset: offset ?? 0 + 500);
     }
   }
 }

@@ -23,7 +23,6 @@ import '../blaze/vo/snapshot_message.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../blaze/vo/system_circle_message.dart';
 import '../blaze/vo/system_conversation_message.dart';
-import '../blaze/vo/system_session_message.dart';
 import '../blaze/vo/system_user_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
@@ -318,10 +317,6 @@ class DecryptMessage extends Injector {
       final systemSnapshot =
           SnapshotMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
       await _processSystemSnapshotMessage(data, systemSnapshot);
-    } else if (data.category == MessageCategory.systemSession) {
-      final systemSession = SystemSessionMessage.fromJson(
-          await _jsonDecodeWithIsolate(data.data));
-      await _processSystemSessionMessage(systemSession);
     }
   }
 
@@ -763,10 +758,30 @@ class DecryptMessage extends Injector {
       BlazeMessageData data, SystemCircleMessage systemMessage) async {
     if (systemMessage.action == SystemCircleAction.create ||
         systemMessage.action == SystemCircleAction.update) {
-      // todo refresh circle
+      unawaited(refreshCircle(circleId: systemMessage.circleId));
     } else if (systemMessage.action == SystemCircleAction.add) {
+      final circle =
+          await database.circlesDao.findCircleById(systemMessage.circleId);
+      if (circle == null) {
+        unawaited(refreshCircle(circleId: systemMessage.circleId));
+      }
+      final conversationId = systemMessage.conversationId;
+      await refreshUsers(<String>[systemMessage.userId]);
+      await database.circleConversationDao.insert(db.CircleConversation(
+        conversationId: conversationId,
+        circleId: systemMessage.circleId,
+        userId: systemMessage.userId,
+        createdAt: data.createdAt,
+      ));
     } else if (systemMessage.action == SystemCircleAction.remove) {
-    } else if (systemMessage.action == SystemCircleAction.delete) {}
+      final conversationId = systemMessage.conversationId;
+      await database.circleConversationDao
+          .deleteByIds(conversationId, systemMessage.circleId);
+    } else if (systemMessage.action == SystemCircleAction.delete) {
+      await database.circlesDao.deleteCircleById(systemMessage.circleId);
+      await database.circleConversationDao
+          .deleteByCircleId(systemMessage.circleId);
+    }
   }
 
   Future<void> _processSystemSnapshotMessage(
@@ -811,11 +826,6 @@ class DecryptMessage extends Injector {
         status: status,
         createdAt: data.createdAt);
     await database.messagesDao.insert(message, accountId);
-  }
-
-  Future<void> _processSystemSessionMessage(
-      SystemSessionMessage systemSession) async {
-    // todo only run mobile client
   }
 
   Future<void> _updateRemoteMessageStatus(

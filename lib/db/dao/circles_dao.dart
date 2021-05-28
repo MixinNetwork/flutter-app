@@ -31,6 +31,10 @@ class CirclesDao extends DatabaseAccessor<MixinDatabase>
           String conversationId) =>
       db.circleByConversationId(conversationId);
 
+  Future<Circle?> findCircleById(String circleId) =>
+      (select(db.circles)..where((t) => t.circleId.equals(circleId)))
+          .getSingleOrNull();
+
   Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
           String conversationId) =>
       db.otherCircleByConversationId(conversationId);
