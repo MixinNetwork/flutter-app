@@ -6,6 +6,7 @@ import 'package:moor/moor.dart';
 
 import '../converter/conversation_status_type_converter.dart';
 import '../mixin_database.dart';
+import '../../utils/string_extension.dart';
 
 part 'conversations_dao.g.dart';
 
@@ -134,7 +135,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationItem> conversationItems() => db.conversationItems();
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) =>
-      db.fuzzySearchConversation(query);
+      db.fuzzySearchConversation(query.trim().escapeSql());
 
   Future<ConversationItem?> conversationByUserId(String id) =>
       db.conversationByOwnerId(id).getSingleOrNull();

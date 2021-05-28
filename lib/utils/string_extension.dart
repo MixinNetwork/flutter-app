@@ -39,6 +39,32 @@ extension StringExtension on String {
     md5Bytes[8] |= 0x80;
     return UuidValue.fromList(md5Bytes).uuid;
   }
+
+  static final RegExp _alpha = RegExp(r'^[a-zA-Z]+$');
+  static final RegExp _numeric = RegExp(r'^-?[0-9]+$');
+
+  /// check if the string contains only letters (a-zA-Z).
+  bool isAlphabet() => _alpha.hasMatch(this);
+
+  /// check if the string contains only numbers
+  bool isNumeric() => _numeric.hasMatch(this);
+
+  String joinWithCharacter(String char) {
+    assert(char.length == 1);
+    final result = StringBuffer();
+    for (var i = 0; i < length; i++) {
+      final c = this[i];
+      final lookAhead = i < length - 1 ? this[i + 1] : char;
+      final isSameType = (c.isAlphabet() && lookAhead.isAlphabet()) ||
+          (c.isNumeric() && lookAhead.isNumeric());
+      final needSpace = !isSameType && c != ' ';
+      result.write(c);
+      if (needSpace) {
+        result.write(char);
+      }
+    }
+    return result.toString().trim();
+  }
 }
 
 extension NullableStringExtension on String? {
@@ -65,4 +91,20 @@ String maxOf(String a, String b) {
   } else {
     return b;
   }
+}
+
+const _kEscapeSqlChars = {'\\', '%', '_', '[', ']'};
+
+extension SqlStringExt on String {
+  String escapeSql() {
+    var result = this;
+    for (var c in _kEscapeSqlChars) {
+      result = result.replaceAll(c.toString(), '\\$c');
+    }
+    return result;
+  }
+
+  String joinStar() => joinWithCharacter('*');
+
+  String replaceQuotationMark() => replaceAll('"', '');
 }

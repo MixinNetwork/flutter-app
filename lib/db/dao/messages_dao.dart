@@ -294,7 +294,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     required int limit,
     int offset = 0,
   }) =>
-      db.fuzzySearchMessage(query, limit, offset);
+      db.fuzzySearchMessage(
+        query.trim().escapeSql().joinStar().replaceQuotationMark(),
+        limit,
+        offset,
+      );
 
   Selectable<int> fuzzySearchMessageCount(String keyword) =>
       db.fuzzySearchMessageCount(keyword);
@@ -306,7 +310,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     int offset = 0,
   }) =>
       db.fuzzySearchMessageByConversationId(
-          conversationId, query, limit, offset);
+        conversationId,
+        query.trim().escapeSql().joinStar().replaceQuotationMark(),
+        limit,
+        offset,
+      );
 
   Selectable<int> fuzzySearchMessageCountByConversationId(
           String keyword, String conversationId) =>

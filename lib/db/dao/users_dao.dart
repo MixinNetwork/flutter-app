@@ -1,5 +1,6 @@
 import 'package:moor/moor.dart';
 
+import '../../utils/string_extension.dart';
 import '../mixin_database.dart';
 
 part 'users_dao.g.dart';
@@ -60,7 +61,8 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     required String username,
     required String identityNumber,
   }) =>
-      db.fuzzySearchUser(id, username, identityNumber);
+      db.fuzzySearchUser(
+          id, username.trim().escapeSql(), identityNumber.escapeSql());
 
   Selectable<String?> biography(String userId) =>
       db.biographyByIdentityNumber(userId);
