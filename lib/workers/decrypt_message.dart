@@ -352,6 +352,7 @@ class DecryptMessage extends Injector {
 
   Future<void> _processAppCard(
       BlazeMessageData data, MessageStatus status) async {
+    await refreshUsers(<String>[data.userId]);
     final content = await _decodeWithIsolate(data.data);
     final appCard = AppCard.fromJson(await jsonDecodeWithIsolate(content));
     final message = Message(

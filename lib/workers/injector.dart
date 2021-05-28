@@ -112,7 +112,7 @@ class Injector {
     if (queryUsers.isEmpty) {
       return null;
     }
-    return _fetchUsers(ids);
+    return _fetchUsers(queryUsers);
   }
 
   Future<List<db.User>?> _fetchUsers(List<String> ids) async {
@@ -210,6 +210,7 @@ class Injector {
 
     if (refreshUserIdSet.isNotEmpty) {
       unawaited(refreshUsers(refreshUserIdSet.toList()));
+      refreshUserIdSet.clear();
     }
   }
 
