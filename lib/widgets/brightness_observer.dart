@@ -1,15 +1,18 @@
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class BrightnessObserver extends StatelessWidget {
+import '../bloc/setting_cubits.dart';
+import '../utils/hook.dart';
+
+class BrightnessObserver extends HookWidget {
   const BrightnessObserver({
     Key? key,
     this.duration = const Duration(milliseconds: 200),
     this.curve = Curves.linear,
     this.onEnd,
     required this.child,
-    this.forceBrightness,
     required this.lightThemeData,
     required this.darkThemeData,
   }) : super(key: key);
@@ -18,7 +21,6 @@ class BrightnessObserver extends StatelessWidget {
   final Curve curve;
   final VoidCallback? onEnd;
   final Widget child;
-  final Brightness? forceBrightness;
   final BrightnessThemeData lightThemeData;
   final BrightnessThemeData darkThemeData;
 
@@ -28,10 +30,11 @@ class BrightnessObserver extends StatelessWidget {
         curve: curve,
         onEnd: onEnd,
         tween: Tween<double>(
-          end: {
+          end: const {
             Brightness.light: 0.0,
             Brightness.dark: 1.0,
-          }[forceBrightness ?? MediaQuery.platformBrightnessOf(context)],
+          }[useBlocState<BrightnessCubit, Brightness?>() ??
+              MediaQuery.platformBrightnessOf(context)],
         ),
         builder: (BuildContext context, double value, Widget? child) =>
             BrightnessData(

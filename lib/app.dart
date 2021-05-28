@@ -11,6 +11,7 @@ import 'account/notification_service.dart';
 import 'bloc/bloc_converter.dart';
 import 'bloc/keyword_cubit.dart';
 import 'bloc/minute_timer_cubit.dart';
+import 'bloc/setting_cubits.dart';
 import 'constants/brightness_theme_data.dart';
 import 'constants/resources.dart';
 import 'generated/l10n.dart';
@@ -40,6 +41,7 @@ class App extends StatelessWidget {
         BlocProvider(
           create: (context) => MultiAuthCubit(),
         ),
+        BlocProvider(create: (context) => BrightnessCubit()),
       ],
       child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
         converter: (state) => state.current,

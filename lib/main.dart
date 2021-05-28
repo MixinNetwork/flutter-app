@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:isolate/isolate.dart';
 import 'package:path_provider/path_provider.dart';
@@ -12,6 +11,7 @@ import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
 import 'ui/home/local_notification_center.dart';
+import 'ui/setting/bloc/setting_key_value.dart';
 import 'utils/load_balancer_utils.dart';
 
 Future<void> main() async {
@@ -37,6 +37,8 @@ Future<void> main() async {
   );
 
   debugHighlightDeprecatedWidgets = true;
+
+  await SettingKeyValue.instance.init();
 
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../setting/about_page.dart';
+import '../../setting/appearance_page.dart';
 import '../../setting/backup_page.dart';
 import '../../setting/edit_profile_page.dart';
 import '../../setting/notification_page.dart';
@@ -113,6 +114,13 @@ class ResponsiveNavigatorCubit extends AbstractResponsiveNavigatorCubit {
             conversationId: arguments.item2,
           ),
         );
+      case appearancePage:
+        return const MaterialPage(
+            key: ValueKey(appearancePage),
+            name: appearancePage,
+            child: AppearancePage(
+              key: ValueKey(appearancePage),
+            ));
       default:
         throw ArgumentError('Invalid route');
     }

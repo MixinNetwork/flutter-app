@@ -160,5 +160,9 @@
   "conversationAddBot": "+ 添加机器人",
   "unread": "未读消息",
   "yesterday": "昨天",
-  "today": "今天"
+  "today": "今天",
+  "settingThemeNight": "暗黑",
+  "settingThemeLight": "浅色",
+  "settingThemeAuto": "跟随系统",
+  "settingTheme": "主题"
 }
