@@ -4,9 +4,9 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
 import 'package:moor/moor.dart';
 
+import '../../utils/string_extension.dart';
 import '../converter/conversation_status_type_converter.dart';
 import '../mixin_database.dart';
-import '../../utils/string_extension.dart';
 
 part 'conversations_dao.g.dart';
 
