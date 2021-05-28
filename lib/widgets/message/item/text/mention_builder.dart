@@ -150,9 +150,10 @@ class MentionBuilder extends HookWidget {
             style: TextStyle(
               color: BrightnessData.themeOf(context).accent,
             ),
-            onTap: () => context
-                .read<ConversationCubit>()
-                .selectUser(entry.value.userId),
+            onTap: () => context.read<ConversationCubit>().selectUser(
+                  entry.value.userId,
+                  !entry.value.identityNumber.startsWith('7000'),
+                ),
           ),
         );
       },

@@ -19,6 +19,7 @@ class ConversationState extends Equatable {
     this.isLastReadMessageId = false,
     this.conversation,
     this.user,
+    this.showSecret = true,
   });
 
   final String conversationId;
@@ -27,6 +28,7 @@ class ConversationState extends Equatable {
   final bool isLastReadMessageId;
   final ConversationItem? conversation;
   final User? user;
+  final bool showSecret;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -58,6 +60,7 @@ class ConversationState extends Equatable {
         conversation,
         user,
         isLastReadMessageId,
+        showSecret,
       ];
 
   ConversationState copyWith({
@@ -66,6 +69,7 @@ class ConversationState extends Equatable {
     final String? initIndexMessageId,
     final int? unseenMessageCount,
     final bool? isLastReadMessageId,
+    final bool? showSecret,
     final ConversationItem? conversation,
     final User? user,
   }) =>
@@ -76,6 +80,7 @@ class ConversationState extends Equatable {
         conversation: conversation ?? this.conversation,
         user: user ?? this.user,
         isLastReadMessageId: isLastReadMessageId ?? this.isLastReadMessageId,
+        showSecret: showSecret ?? this.showSecret,
       );
 }
 
@@ -143,22 +148,25 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String conversationId, [
     String? initIndexMessageId,
     bool isLastReadMessageId = false,
+    bool showSecret = true,
   ]) {
     final conversationState = ConversationState(
       conversationId: conversationId,
       initIndexMessageId: initIndexMessageId,
       isLastReadMessageId: isLastReadMessageId,
+      showSecret: showSecret,
     );
     emit(conversationState);
     accountServer.selectConversation(conversationId);
     responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);
   }
 
-  void selectUser(String userId) {
+  void selectUser(String userId, bool showSecret) {
     final conversationId = generateConversationId(userId, accountServer.userId);
     emit(ConversationState(
       conversationId: conversationId,
       userId: userId,
+      showSecret: showSecret,
     ));
     accountServer.selectConversation(conversationId);
     responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);

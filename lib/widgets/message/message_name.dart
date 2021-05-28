@@ -10,16 +10,21 @@ class MessageName extends StatelessWidget {
     Key? key,
     required this.userName,
     required this.userId,
+    required this.isBot,
   }) : super(key: key);
 
   final String userName;
   final String userId;
+  final bool isBot;
 
   @override
   Widget build(BuildContext context) => Align(
         alignment: Alignment.centerLeft,
         child: InteractableDecoratedBox(
-          onTap: () => context.read<ConversationCubit>().selectUser(userId),
+          onTap: () => context.read<ConversationCubit>().selectUser(
+                userId,
+                !isBot,
+              ),
           cursor: SystemMouseCursors.click,
           child: Padding(
             padding: const EdgeInsets.only(

@@ -20,17 +20,23 @@ class MessageDayTime extends HookWidget {
   Widget build(BuildContext context) {
     final dateTimeString =
         useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-            converter: (dateTime) {
-      if (isSameDay(dateTime, this.dateTime)) {
-        return Localization.of(context).today;
-      }
+      converter: (dateTime) {
+        if (isSameDay(dateTime, this.dateTime)) {
+          return Localization.of(context).today;
+        }
 
-      if (isYesterday(dateTime, this.dateTime)) {
-        return Localization.of(context).yesterday;
-      }
+        if (isYesterday(dateTime, this.dateTime)) {
+          return Localization.of(context).yesterday;
+        }
 
-      return DateFormat.MEd().format(dateTime);
-    });
+        if (isSameWeek(dateTime, this.dateTime)) {
+          return DateFormat.EEEE().format(dateTime);
+        }
+
+        return DateFormat.MEd().format(dateTime);
+      },
+      keys: [dateTime],
+    );
     return Container(
       height: 60,
       alignment: Alignment.center,

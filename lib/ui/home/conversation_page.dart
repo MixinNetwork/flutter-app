@@ -195,7 +195,10 @@ class _SearchList extends HookWidget {
                   name: user.fullName ?? '?',
                   keyword: keyword,
                   onTap: () async {
-                    context.read<ConversationCubit>().selectUser(user.userId);
+                    context.read<ConversationCubit>().selectUser(
+                          user.userId,
+                          user.appId?.isEmpty ?? true,
+                        );
                     _clear(context);
                   },
                 );

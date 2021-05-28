@@ -59,7 +59,10 @@ class SearchBar extends StatelessWidget {
                     }
                     final userId = list.first.userId!;
 
-                    context.read<ConversationCubit>().selectUser(userId);
+                    context.read<ConversationCubit>().selectUser(
+                          userId,
+                          !list.first.isBot,
+                        );
                   },
                 ),
                 ContextMenu(

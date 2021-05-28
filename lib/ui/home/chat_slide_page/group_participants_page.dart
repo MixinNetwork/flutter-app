@@ -169,7 +169,10 @@ class _ParticipantTile extends StatelessWidget {
           if (self) {
             return;
           }
-          context.read<ConversationCubit>().selectUser(participant.userId);
+          context.read<ConversationCubit>().selectUser(
+                participant.userId,
+                participant.appId?.isEmpty ?? true,
+              );
         },
         onLongPress: () {},
         trailing: _RoleWidget(role: participant.role),
@@ -204,7 +207,10 @@ class _ParticipantMenuEntry extends StatelessWidget {
             title: Localization.of(context)
                 .groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
-              context.read<ConversationCubit>().selectUser(participant.userId);
+              context.read<ConversationCubit>().selectUser(
+                    participant.userId,
+                    participant.appId?.isEmpty ?? true,
+                  );
             },
           ),
         ];

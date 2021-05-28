@@ -11,6 +11,7 @@ import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/messages_dao.dart';
 import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
+import '../../../enum/message_category.dart';
 import '../../../enum/message_status.dart';
 import '../../../utils/list_utils.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
@@ -71,6 +72,7 @@ class MessageState extends Equatable {
     this.bottom = const [],
     this.conversationId,
     this.isLatest = false,
+    this.isOldest = false,
     this.isLastReadMessageId = false,
     this.initUUID,
   });
@@ -80,6 +82,7 @@ class MessageState extends Equatable {
   final MessageItem? center;
   final List<MessageItem> bottom;
   final bool isLatest;
+  final bool isOldest;
   final bool isLastReadMessageId;
   final String? initUUID;
 
@@ -90,6 +93,7 @@ class MessageState extends Equatable {
         center,
         bottom,
         isLatest,
+        isOldest,
         isLastReadMessageId,
         initUUID,
       ];
@@ -102,12 +106,19 @@ class MessageState extends Equatable {
 
   bool get isEmpty => top.isEmpty && center == null && bottom.isEmpty;
 
+  List<MessageItem> get list => [
+        ...top,
+        if (center != null) center!,
+        ...bottom,
+      ];
+
   MessageState copyWith({
     final String? conversationId,
     final List<MessageItem>? top,
     final MessageItem? center,
     final List<MessageItem>? bottom,
     final bool? isLatest,
+    final bool? isOldest,
     final bool? isLastReadMessageId,
     final String? initUUID,
   }) =>
@@ -117,6 +128,7 @@ class MessageState extends Equatable {
         center: center ?? this.center,
         bottom: bottom ?? this.bottom,
         isLatest: isLatest ?? this.isLatest,
+        isOldest: isOldest ?? this.isOldest,
         isLastReadMessageId: isLastReadMessageId ?? this.isLastReadMessageId,
         initUUID: initUUID ?? this.initUUID,
       );
@@ -196,26 +208,27 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         event.centerMessageId,
       );
       await _preCacheMention(messageState);
-      yield messageState.copyWith(
+      yield _pretreatment(messageState.copyWith(
         isLastReadMessageId: event.isLastReadMessageId,
-      );
+      ));
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {
           if (state.isLatest) return;
           final messageState = await _after(conversationId);
           await _preCacheMention(messageState);
-          yield messageState;
+          yield _pretreatment(messageState);
         } else if (event is _MessageLoadBeforeEvent) {
+          if (state.isOldest) return;
           final messageState = await _before(conversationId);
           await _preCacheMention(messageState);
-          yield messageState;
+          yield _pretreatment(messageState);
         }
       } else if (event is _MessageInsertOrReplaceEvent) {
         final result = _insertOrReplace(conversationId, event.data);
         if (result != null) {
           await _preCacheMention(result);
-          yield result;
+          yield _pretreatment(result);
         }
       } else if (event is _MessageScrollEvent) {
         add(_MessageInitEvent(centerMessageId: event.messageId));
@@ -236,11 +249,14 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .beforeMessagesByConversationId(rowId, conversationId, limit)
           .get();
     });
+
+    final isOldest = list.length < limit;
     final result = state.copyWith(
       top: [
         ...list.reversed.toList(),
         ...state.top,
       ],
+      isOldest: isOldest,
     );
     return result;
   }
@@ -323,17 +339,20 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       final bottomList = await messagesDao
           .afterMessagesByConversationId(rowId, conversationId, _limit)
           .get();
+      final topList = (await messagesDao
+              .beforeMessagesByConversationId(rowId, conversationId, _limit)
+              .get())
+          .reversed
+          .toList();
       return MessageState(
-          top: (await messagesDao
-                  .beforeMessagesByConversationId(rowId, conversationId, _limit)
-                  .get())
-              .reversed
-              .toList(),
-          center: await messagesDao
-              .messageItemByMessageId(centerMessageId)
-              .getSingleOrNull(),
-          bottom: bottomList,
-          isLatest: bottomList.length < _limit);
+        top: topList,
+        center: await messagesDao
+            .messageItemByMessageId(centerMessageId)
+            .getSingleOrNull(),
+        bottom: bottomList,
+        isLatest: bottomList.length < _limit,
+        isOldest: topList.length < _limit,
+      );
     });
   }
 
@@ -415,5 +434,33 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       return scrollController.jumpTo(scrollController.position.maxScrollExtent);
     }
     return add(_MessageInitEvent());
+  }
+
+  MessageState _pretreatment(MessageState messageState) {
+    List<MessageItem>? top;
+    // check secretMessage
+    if (messageState.isOldest && conversationCubit.state?.showSecret == true) {
+      if (messageState.top.firstOrNull?.type == MessageCategory.secret) {
+        messageState.top.remove(messageState.top.first);
+      }
+
+      top = [
+        MessageItem(
+          sharedUserIdentityNumber: '',
+          status: MessageStatus.read,
+          messageId: '',
+          conversationId: '',
+          userIdentityNumber: '',
+          participantUserId: '',
+          userId: '',
+          type: MessageCategory.secret,
+          createdAt: messageState.topMessage?.createdAt ?? DateTime.now(),
+        ),
+        ...messageState.top,
+      ];
+    }
+    return messageState.copyWith(
+      top: top,
+    );
   }
 }

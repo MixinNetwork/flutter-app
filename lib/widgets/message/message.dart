@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -36,7 +37,7 @@ import 'item/waiting_message.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
 
-class MessageItemWidget extends StatelessWidget {
+class MessageItemWidget extends HookWidget {
   const MessageItemWidget({
     Key? key,
     required this.message,
@@ -98,6 +99,7 @@ class MessageItemWidget extends StatelessWidget {
               userName: userName,
               userId: userId,
               isCurrentUser: isCurrentUser,
+              isBot: message.appId?.isNotEmpty ?? false,
               buildMenus: () => [
                 if (message.type.isText ||
                     message.type.isImage ||
@@ -299,9 +301,11 @@ class _MessageBubbleMargin extends StatelessWidget {
     required this.userId,
     required this.builder,
     required this.buildMenus,
+    required this.isBot,
   }) : super(key: key);
 
   final bool isCurrentUser;
+  final bool isBot;
   final String? userName;
   final String? userId;
   final WidgetBuilder builder;
@@ -319,7 +323,11 @@ class _MessageBubbleMargin extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (userName != null && userId != null)
-              MessageName(userName: userName!, userId: userId!),
+              MessageName(
+                userName: userName!,
+                userId: userId!,
+                isBot: isBot,
+              ),
             ContextMenuPortalEntry(
               buildMenus: buildMenus,
               child: Builder(builder: builder),
