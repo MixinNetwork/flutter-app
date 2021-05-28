@@ -1,4 +1,5 @@
 import 'dao/apps_dao.dart';
+import 'dao/assets_dao.dart';
 import 'dao/circle_conversations_dao.dart';
 import 'dao/circles_dao.dart';
 import 'dao/conversations_dao.dart';
@@ -9,6 +10,7 @@ import 'dao/messages_dao.dart';
 import 'dao/participant_session_dao.dart';
 import 'dao/participants_dao.dart';
 import 'dao/resend_session_messages_dao.dart';
+import 'dao/snapshots_dao.dart';
 import 'dao/sticker_albums_dao.dart';
 import 'dao/sticker_relationships_dao.dart';
 import 'dao/stickers_dao.dart';
@@ -18,6 +20,7 @@ import 'mixin_database.dart';
 class Database {
   Database(this.mixinDatabase) {
     appsDao = AppsDao(mixinDatabase);
+    assetsDao = AssetsDao(mixinDatabase);
     conversationDao = ConversationsDao(mixinDatabase);
     circlesDao = CirclesDao(mixinDatabase);
     circleConversationDao = CircleConversationDao(mixinDatabase);
@@ -26,12 +29,13 @@ class Database {
     messageMentionsDao = MessageMentionsDao(mixinDatabase);
     jobsDao = JobsDao(mixinDatabase);
     participantsDao = ParticipantsDao(mixinDatabase);
-    userDao = UserDao(mixinDatabase);
+    resendSessionMessagesDao = ResendSessionMessagesDao(mixinDatabase);
+    snapshotsDao = SnapshotsDao(mixinDatabase);
     stickerDao = StickerDao(mixinDatabase);
     stickerAlbumsDao = StickerAlbumsDao(mixinDatabase);
     stickerRelationshipsDao = StickerRelationshipsDao(mixinDatabase);
     participantSessionDao = ParticipantSessionDao(mixinDatabase);
-    resendSessionMessagesDao = ResendSessionMessagesDao(mixinDatabase);
+    userDao = UserDao(mixinDatabase);
   }
 
   // static MixinDatabase _database;
@@ -42,6 +46,8 @@ class Database {
   final MixinDatabase mixinDatabase;
 
   late final AppsDao appsDao;
+
+  late final AssetsDao assetsDao;
 
   late final MessagesDao messagesDao;
 
@@ -59,9 +65,11 @@ class Database {
 
   late final ParticipantsDao participantsDao;
 
-  late final UserDao userDao;
-
   late final ParticipantSessionDao participantSessionDao;
+
+  late final ResendSessionMessagesDao resendSessionMessagesDao;
+
+  late final SnapshotsDao snapshotsDao;
 
   late final StickerDao stickerDao;
 
@@ -69,7 +77,7 @@ class Database {
 
   late final StickerRelationshipsDao stickerRelationshipsDao;
 
-  late final ResendSessionMessagesDao resendSessionMessagesDao;
+  late final UserDao userDao;
 
   Future<void> dispose() async {
     await mixinDatabase.eventBus.dispose();

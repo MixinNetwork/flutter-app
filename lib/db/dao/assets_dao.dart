@@ -12,4 +12,8 @@ class AssetsDao extends DatabaseAccessor<MixinDatabase> with _$AssetsDaoMixin {
       into(db.assets).insertOnConflictUpdate(asset);
 
   Future deleteAsset(Asset asset) => delete(db.assets).delete(asset);
+
+  Future<Asset?> findAssetById(String assetId) =>
+      (select(db.assets)..where((t) => t.assetId.equals(assetId)))
+          .getSingleOrNull();
 }

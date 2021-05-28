@@ -770,8 +770,47 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processSystemSnapshotMessage(
-      BlazeMessageData data, SnapshotMessage systemSnapshot) async {
-    // todo process snapshot message
+      BlazeMessageData data, SnapshotMessage snapshotMessage) async {
+    final snapshot = Snapshot(
+        snapshotId: snapshotMessage.snapshotId,
+        type: snapshotMessage.type,
+        assetId: snapshotMessage.assetId,
+        amount: snapshotMessage.amount,
+        createdAt: DateTime.parse(snapshotMessage.createdAt));
+    await database.snapshotsDao.insert(snapshot);
+    final exists = await database.assetsDao.findAssetById(snapshot.assetId);
+    if (exists == null) {
+      final a =
+          (await client.assetApi.getAssetById(snapshotMessage.assetId)).data;
+      final asset = Asset(
+          assetId: a.assetId,
+          symbol: a.symbol,
+          name: a.name,
+          iconUrl: a.iconUrl,
+          balance: a.balance,
+          destination: a.destination,
+          priceBtc: a.priceBtc,
+          priceUsd: a.priceUsd,
+          chainId: a.chainId,
+          changeUsd: a.changeUsd,
+          changeBtc: a.changeBtc,
+          confirmations: a.confirmations);
+      await database.assetsDao.insert(asset);
+    }
+    var status = data.status;
+    if (_conversationId == data.conversationId && data.userId != accountId) {
+      status = MessageStatus.read;
+    }
+    final message = Message(
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.senderId,
+        category: data.category!,
+        content: '',
+        snapshotId: snapshot.snapshotId,
+        status: status,
+        createdAt: data.createdAt);
+    await database.messagesDao.insert(message, accountId);
   }
 
   Future<void> _processSystemSessionMessage(
