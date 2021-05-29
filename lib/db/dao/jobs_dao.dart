@@ -37,6 +37,13 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
     return query.watch();
   }
 
+  Stream<List<Job>> findSessionAckJobs() {
+    final query = select(db.jobs)
+      ..where((Jobs row) => row.action.equals(createMessage))
+      ..limit(100);
+    return query.watch();
+  }
+
   Future<Job?> findAckJobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
           .getSingleOrNull();

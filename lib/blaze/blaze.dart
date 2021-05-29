@@ -115,8 +115,10 @@ class Blaze {
         } else if (blazeMessage.action == acknowledgeMessageReceipt) {
           await makeMessageStatus(data.messageId, data.status);
         } else {
-          await database.jobsDao.insertNoReplace(
-              createAckJob(data.messageId, MessageStatus.delivered));
+          await database.jobsDao.insertNoReplace(createAckJob(
+              acknowledgeMessageReceipts,
+              data.messageId,
+              MessageStatus.delivered));
         }
       },
       onError: (error, s) {

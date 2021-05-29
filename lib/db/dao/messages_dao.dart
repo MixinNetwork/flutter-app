@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:moor/moor.dart';
 
 import '../../enum/media_status.dart';
@@ -160,14 +161,23 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     );
   }
 
-  Future<void> markMessageRead(List<String> messageIds) =>
-      transaction(() async {
-        for (final id in messageIds) {
-          await (update(db.messages)..where((e) => e.messageId.equals(id)))
-              .write(const MessagesCompanion(
-                  status: Value<MessageStatus>(MessageStatus.read)));
-        }
-      });
+  Future<void> markMessageRead(List<String> messageIds) async {
+    var arrayStartIndex = 1;
+    final expandedMessageIds = $expandVar(arrayStartIndex, messageIds.length);
+    arrayStartIndex += messageIds.length;
+    final count = await db.customUpdate(
+      'UPDATE messages SET status = \'READ\' WHERE message_id IN ($expandedMessageIds) AND status != \'FAILED\'',
+      variables: [for (var $ in messageIds) Variable<String>($)],
+    );
+
+    // TODO refresh unseen count
+    final first = messageIds[0];
+    // final message = await findMessageByMessageId(first);
+    // if (message != null) {
+    //   await _takeUnseen(message.userId, message.conversationId);
+    // }
+    debugPrint('markMessageRead $first, count: $count');
+  }
 
   Selectable<MessageItem> messagesByConversationId(
     String conversationId,
