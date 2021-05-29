@@ -4,6 +4,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
 import 'package:moor/moor.dart';
 
+import '../../utils/string_extension.dart';
 import '../converter/conversation_status_type_converter.dart';
 import '../mixin_database.dart';
 
@@ -134,7 +135,7 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
   Selectable<ConversationItem> conversationItems() => db.conversationItems();
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) =>
-      db.fuzzySearchConversation(query);
+      db.fuzzySearchConversation(query.trim().escapeSql());
 
   Future<ConversationItem?> conversationByUserId(String id) =>
       db.conversationByOwnerId(id).getSingleOrNull();
