@@ -458,6 +458,7 @@ class _JumpCurrentButton extends HookWidget {
             alignment: Alignment.center,
             child: SvgPicture.asset(
               Resources.assetsImagesJumpCurrentArrowSvg,
+              color: BrightnessData.themeOf(context).text,
             ),
           ),
         ),
