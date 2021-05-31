@@ -1,7 +1,3 @@
-// Copyright 2019 The Fuchsia Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
@@ -42,6 +38,8 @@ class ClampingViewport extends Viewport {
         anchor: anchor,
         offset: offset,
         cacheExtent: cacheExtent,
+        cacheExtentStyle: cacheExtentStyle,
+        clipBehavior: clipBehavior,
       );
 
   @override
@@ -62,6 +60,12 @@ class ClampingViewport extends Viewport {
 // comment.
 class ClampingRenderViewport extends RenderViewport {
   /// Creates a viewport for [RenderSliver] objects.
+  ///
+  /// If the [center] is not specified, then the first child in the `children`
+  /// list, if any, is used.
+  ///
+  /// The [offset] must be specified. For testing purposes, consider passing a
+  /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
   ClampingRenderViewport({
     AxisDirection axisDirection = AxisDirection.down,
     required AxisDirection crossAxisDirection,
@@ -70,53 +74,202 @@ class ClampingRenderViewport extends RenderViewport {
     List<RenderSliver>? children,
     RenderSliver? center,
     double? cacheExtent,
-  })  : _anchor = anchor,
+    CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
+    Clip clipBehavior = Clip.hardEdge,
+  })  : assert(anchor >= 0.0 && anchor <= 1.0),
+        assert(cacheExtentStyle != CacheExtentStyle.viewport ||
+            cacheExtent != null),
+        _anchor = anchor,
+        _center = center,
         super(
           axisDirection: axisDirection,
           crossAxisDirection: crossAxisDirection,
           offset: offset,
-          center: center,
           cacheExtent: cacheExtent,
-          children: children);
+          cacheExtentStyle: cacheExtentStyle,
+          clipBehavior: clipBehavior,
+        ) {
+    addAll(children);
+    if (center == null && firstChild != null) _center = firstChild;
+  }
+
+  double? _calculatedCacheExtent;
+
+  // diff start
+  double _correctedOffset = 0;
+
+  // diff end
+
+  /// If a [RenderAbstractViewport] overrides
+  /// [RenderObject.describeSemanticsConfiguration] to add the [SemanticsTag]
+  /// [useTwoPaneSemantics] to its [SemanticsConfiguration], two semantics nodes
+  /// will be used to represent the viewport with its associated scrolling
+  /// actions in the semantics tree.
+  ///
+  /// Two semantics nodes (an inner and an outer node) are necessary to exclude
+  /// certain child nodes (via the [excludeFromScrolling] tag) from the
+  /// scrollable area for semantic purposes: The [SemanticsNode]s of children
+  /// that should be excluded from scrolling will be attached to the outer node.
+  /// The semantic scrolling actions and the [SemanticsNode]s of scrollable
+  /// children will be attached to the inner node, which itself is a child of
+  /// the outer node.
+  ///
+  /// See also:
+  ///
+  /// * [RenderViewportBase.describeSemanticsConfiguration], which adds this
+  ///   tag to its [SemanticsConfiguration].
+  static const SemanticsTag useTwoPaneSemantics =
+      SemanticsTag('RenderViewport.twoPane');
+
+  /// When a top-level [SemanticsNode] below a [RenderAbstractViewport] is
+  /// tagged with [excludeFromScrolling] it will not be part of the scrolling
+  /// area for semantic purposes.
+  ///
+  /// This behavior is only active if the [RenderAbstractViewport]
+  /// tagged its [SemanticsConfiguration] with [useTwoPaneSemantics].
+  /// Otherwise, the [excludeFromScrolling] tag is ignored.
+  ///
+  /// As an example, a [RenderSliver] that stays on the screen within a
+  /// [Scrollable] even though the user has scrolled past it (e.g. a pinned app
+  /// bar) can tag its [SemanticsNode] with [excludeFromScrolling] to indicate
+  /// that it should no longer be considered for semantic actions related to
+  /// scrolling.
+  static const SemanticsTag excludeFromScrolling =
+      SemanticsTag('RenderViewport.excludeFromScrolling');
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverPhysicalContainerParentData) {
+      child.parentData = SliverPhysicalContainerParentData();
+    }
+  }
+
+  /// The relative position of the zero scroll offset.
+  ///
+  /// For example, if [anchor] is 0.5 and the [axisDirection] is
+  /// [AxisDirection.down] or [AxisDirection.up], then the zero scroll offset is
+  /// vertically centered within the viewport. If the [anchor] is 1.0, and the
+  /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
+  /// on the left edge of the viewport.
+  @override
+  double get anchor => _anchor;
+  double _anchor;
+
+  @override
+  set anchor(double value) {
+    assert(value >= 0.0 && value <= 1.0);
+    if (value == _anchor) return;
+    _anchor = value;
+    markNeedsLayout();
+  }
+
+  /// The first child in the [GrowthDirection.forward] growth direction.
+  ///
+  /// This child that will be at the position defined by [anchor] when the
+  /// [ViewportOffset.pixels] of [offset] is `0`.
+  ///
+  /// Children after [center] will be placed in the [axisDirection] relative to
+  /// the [center]. Children before [center] will be placed in the opposite of
+  /// the [axisDirection] relative to the [center].
+  ///
+  /// The [center] must be a child of the viewport.
+  @override
+  RenderSliver? get center => _center;
+  RenderSliver? _center;
+
+  @override
+  set center(RenderSliver? value) {
+    if (value == _center) return;
+    _center = value;
+    markNeedsLayout();
+  }
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) {
+    assert(() {
+      if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
+        switch (axis) {
+          case Axis.vertical:
+            if (!constraints.hasBoundedHeight) {
+              throw FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Vertical viewport was given unbounded height.'),
+                ErrorDescription(
+                  'Viewports expand in the scrolling direction to fill their container. '
+                  'In this case, a vertical viewport was given an unlimited amount of '
+                  'vertical space in which to expand. This situation typically happens '
+                  'when a scrollable widget is nested inside another scrollable widget.',
+                ),
+                ErrorHint(
+                  'If this widget is always nested in a scrollable widget there '
+                  'is no need to use a viewport because there will always be enough '
+                  'vertical space for the children. In this case, consider using a '
+                  'Column instead. Otherwise, consider using the "shrinkWrap" property '
+                  '(or a ShrinkWrappingViewport) to size the height of the viewport '
+                  'to the sum of the heights of its children.',
+                ),
+              ]);
+            }
+            if (!constraints.hasBoundedWidth) {
+              throw FlutterError(
+                'Vertical viewport was given unbounded width.\n'
+                'Viewports expand in the cross axis to fill their container and '
+                'constrain their children to match their extent in the cross axis. '
+                'In this case, a vertical viewport was given an unlimited amount of '
+                'horizontal space in which to expand.',
+              );
+            }
+            break;
+          case Axis.horizontal:
+            if (!constraints.hasBoundedWidth) {
+              throw FlutterError.fromParts(<DiagnosticsNode>[
+                ErrorSummary('Horizontal viewport was given unbounded width.'),
+                ErrorDescription(
+                  'Viewports expand in the scrolling direction to fill their container. '
+                  'In this case, a horizontal viewport was given an unlimited amount of '
+                  'horizontal space in which to expand. This situation typically happens '
+                  'when a scrollable widget is nested inside another scrollable widget.',
+                ),
+                ErrorHint(
+                  'If this widget is always nested in a scrollable widget there '
+                  'is no need to use a viewport because there will always be enough '
+                  'horizontal space for the children. In this case, consider using a '
+                  'Row instead. Otherwise, consider using the "shrinkWrap" property '
+                  '(or a ShrinkWrappingViewport) to size the width of the viewport '
+                  'to the sum of the widths of its children.',
+                ),
+              ]);
+            }
+            if (!constraints.hasBoundedHeight) {
+              throw FlutterError(
+                'Horizontal viewport was given unbounded height.\n'
+                'Viewports expand in the cross axis to fill their container and '
+                'constrain their children to match their extent in the cross axis. '
+                'In this case, a horizontal viewport was given an unlimited amount of '
+                'vertical space in which to expand.',
+              );
+            }
+            break;
+        }
+      }
+      return true;
+    }());
+    return constraints.biggest;
+  }
 
   static const int _maxLayoutCycles = 10;
-
-  double _anchor;
 
   // Out-of-band data computed during layout.
   late double _minScrollExtent;
   late double _maxScrollExtent;
   bool _hasVisualOverflow = false;
 
-  /// This value is set during layout based on the [CacheExtentStyle].
-  ///
-  /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
-  /// of the viewport multiplied by the requested cache extent, which is still
-  /// expressed in pixels.
-  double? _calculatedCacheExtent;
-
   @override
-  double get anchor => _anchor;
-
-  // *** Difference from [RenderViewport].
-  double correctedOffset = 0.0;
-  bool isLessMainAxisExtent = false;
-
-  // *** End of difference from [RenderViewport].
-
-  @override
-  set anchor(double value) {
-    if (value == _anchor) return;
-    _anchor = value;
-    markNeedsLayout();
-  }
-
-  @override
-  void performResize() {
-    super.performResize();
-    // TODO: Figure out why this override is needed as a result of
-    // https://github.com/flutter/flutter/pull/61973 and see if it can be
-    // removed somehow.
+  void performLayout() {
+    // Ignore the return value of applyViewportDimension because we are
+    // doing a layout regardless.
     switch (axis) {
       case Axis.vertical:
         offset.applyViewportDimension(size.height);
@@ -125,34 +278,7 @@ class ClampingRenderViewport extends RenderViewport {
         offset.applyViewportDimension(size.width);
         break;
     }
-  }
 
-  @override
-  Rect describeSemanticsClip(RenderSliver child) {
-    if (_calculatedCacheExtent == null) {
-      return semanticBounds;
-    }
-
-    switch (axis) {
-      case Axis.vertical:
-        return Rect.fromLTRB(
-          semanticBounds.left,
-          semanticBounds.top - _calculatedCacheExtent!,
-          semanticBounds.right,
-          semanticBounds.bottom + _calculatedCacheExtent!,
-        );
-      default:
-        return Rect.fromLTRB(
-          semanticBounds.left - _calculatedCacheExtent!,
-          semanticBounds.top,
-          semanticBounds.right + _calculatedCacheExtent!,
-          semanticBounds.bottom,
-        );
-    }
-  }
-
-  @override
-  void performLayout() {
     if (center == null) {
       assert(firstChild == null);
       _minScrollExtent = 0.0;
@@ -163,8 +289,8 @@ class ClampingRenderViewport extends RenderViewport {
     }
     assert(center!.parent == this);
 
-    double mainAxisExtent;
-    double crossAxisExtent;
+    final double mainAxisExtent;
+    final double crossAxisExtent;
     switch (axis) {
       case Axis.vertical:
         mainAxisExtent = size.height;
@@ -181,46 +307,53 @@ class ClampingRenderViewport extends RenderViewport {
     double correction;
     var count = 0;
     do {
-      // *** Difference from [RenderViewport].
       correction = _attemptLayout(mainAxisExtent, crossAxisExtent,
-          offset.pixels + centerOffsetAdjustment + correctedOffset);
-      // *** End of difference from [RenderViewport].
+          offset.pixels + centerOffsetAdjustment + _correctedOffset);
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
-        // *** Difference from [RenderViewport].
-        final scrollExtent = _maxScrollExtent - _minScrollExtent;
-        if (!isLessMainAxisExtent && scrollExtent < mainAxisExtent) {
-          isLessMainAxisExtent = true;
-          correctedOffset = (mainAxisExtent * anchor) + _minScrollExtent;
-          continue;
-        }
+        // diff start
+        void debugLog() => debugPrint(
+            'ClampingRenderViewport: mainAxisExtent: $mainAxisExtent, scrollExtent: ${_maxScrollExtent - _minScrollExtent}, anchor: $anchor, StackTrace: ${StackTrace.current}');
 
         final top =
-            _minScrollExtent + mainAxisExtent * anchor - correctedOffset;
-        final bottom = _maxScrollExtent -
-            mainAxisExtent * (1.0 - anchor) -
-            correctedOffset;
-        final maxScrollOffset = math.max(math.min(0.0, top), bottom);
-        final minScrollOffset = math.min(top, maxScrollOffset);
-
-        final centerScrollExtent = center!.geometry!.scrollExtent *
-            (correctedOffset.isNegative ? -1 : 1);
-        final clampScrollExtent = centerScrollExtent.clamp(
-          math.min(minScrollOffset, maxScrollOffset),
-          math.max(minScrollOffset, maxScrollOffset),
-        );
-        if (!isLessMainAxisExtent &&
-            clampScrollExtent != centerScrollExtent &&
-            count < 1) {
-          correctedOffset = clampScrollExtent.toDouble();
-          count += 1;
+            _minScrollExtent + mainAxisExtent * anchor - _correctedOffset;
+        if (top > 0.0) {
+          _correctedOffset = (mainAxisExtent * anchor) + _minScrollExtent;
+          debugLog();
           continue;
         }
-        if (offset.applyContentDimensions(minScrollOffset, maxScrollOffset)) {
-          break;
+
+        final scrollExtent = _maxScrollExtent - _minScrollExtent;
+        final bottom = _maxScrollExtent -
+            mainAxisExtent * (1.0 - anchor) -
+            _correctedOffset;
+
+        if (mainAxisExtent > scrollExtent) {
+          if (((mainAxisExtent - scrollExtent) - (-bottom - offset.pixels)) <
+              0) {
+            _correctedOffset = bottom;
+            debugLog();
+            continue;
+          }
+        } else {
+          if (bottom - offset.pixels < 0) {
+            _correctedOffset = bottom;
+            debugLog();
+            continue;
+          }
         }
-        // *** End of difference from [RenderViewport].
+        // diff end
+
+        if (offset.applyContentDimensions(
+          math.min(0.0,
+              _minScrollExtent + mainAxisExtent * anchor - _correctedOffset),
+          math.max(
+              0.0,
+              _maxScrollExtent -
+                  mainAxisExtent * (1.0 - anchor) -
+                  _correctedOffset),
+        )) break;
       }
       count += 1;
     } while (count < _maxLayoutCycles);
@@ -228,22 +361,23 @@ class ClampingRenderViewport extends RenderViewport {
       if (count >= _maxLayoutCycles) {
         assert(count != 1);
         throw FlutterError(
-            'A RenderViewport exceeded its maximum number of layout cycles.\n'
-                'RenderViewport render objects, during layout, can retry if either their '
-                'slivers or their ViewportOffset decide that the offset should be corrected '
-                'to take into account information collected during that layout.\n'
-                'In the case of this RenderViewport object, however, this happened $count '
-                'times and still there was no consensus on the scroll offset. This usually '
-                'indicates a bug. Specifically, it means that one of the following three '
-                'problems is being experienced by the RenderViewport object:\n'
-                ' * One of the RenderSliver children or the ViewportOffset have a bug such'
-                ' that they always think that they need to correct the offset regardless.\n'
-                ' * Some combination of the RenderSliver children and the ViewportOffset'
-                ' have a bad interaction such that one applies a correction then another'
-                ' applies a reverse correction, leading to an infinite loop of corrections.\n'
-                ' * There is a pathological case that would eventually resolve, but it is'
-                ' so complicated that it cannot be resolved in any reasonable number of'
-                ' layout passes.');
+          'A RenderViewport exceeded its maximum number of layout cycles.\n'
+          'RenderViewport render objects, during layout, can retry if either their '
+          'slivers or their ViewportOffset decide that the offset should be corrected '
+          'to take into account information collected during that layout.\n'
+          'In the case of this RenderViewport object, however, this happened $count '
+          'times and still there was no consensus on the scroll offset. This usually '
+          'indicates a bug. Specifically, it means that one of the following three '
+          'problems is being experienced by the RenderViewport object:\n'
+          ' * One of the RenderSliver children or the ViewportOffset have a bug such'
+          ' that they always think that they need to correct the offset regardless.\n'
+          ' * Some combination of the RenderSliver children and the ViewportOffset'
+          ' have a bad interaction such that one applies a correction then another'
+          ' applies a reverse correction, leading to an infinite loop of corrections.\n'
+          ' * There is a pathological case that would eventually resolve, but it is'
+          ' so complicated that it cannot be resolved in any reasonable number of'
+          ' layout passes.',
+        );
       }
       return true;
     }());
@@ -265,9 +399,9 @@ class ClampingRenderViewport extends RenderViewport {
     // reverse slivers).
     final centerOffset = mainAxisExtent * anchor - correctedOffset;
     final reverseDirectionRemainingPaintExtent =
-    centerOffset.clamp(0.0, mainAxisExtent);
+        centerOffset.clamp(0.0, mainAxisExtent);
     final forwardDirectionRemainingPaintExtent =
-    (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
+        (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
 
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
@@ -281,9 +415,9 @@ class ClampingRenderViewport extends RenderViewport {
     final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
     final centerCacheOffset = centerOffset + _calculatedCacheExtent!;
     final reverseDirectionRemainingCacheExtent =
-    centerCacheOffset.clamp(0.0, fullCacheExtent);
+        centerCacheOffset.clamp(0.0, fullCacheExtent);
     final forwardDirectionRemainingCacheExtent =
-    (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
+        (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
     final leadingNegativeChild = childBefore(center!);
 
@@ -311,7 +445,7 @@ class ClampingRenderViewport extends RenderViewport {
       child: center,
       scrollOffset: math.max(0.0, -centerOffset),
       overlap:
-      leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
+          leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
       layoutOffset: centerOffset >= mainAxisExtent
           ? centerOffset
           : reverseDirectionRemainingPaintExtent,
@@ -359,4 +493,3 @@ class ClampingRenderViewport extends RenderViewport {
     }
   }
 }
-
