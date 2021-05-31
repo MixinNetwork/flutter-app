@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:moor/moor.dart';
 
 import '../../enum/media_status.dart';
