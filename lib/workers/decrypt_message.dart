@@ -850,8 +850,12 @@ class DecryptMessage extends Injector {
     });
 
     if (messageIds.isNotEmpty) {
-      await database.messagesDao.markMessageRead(messageIds);
-      // todo refresh conversion
+      await database.messagesDao.markMessageRead(accountId, messageIds);
+      final conversationIds =
+          await database.messagesDao.findConversationIdsByMessages(messageIds);
+      for (var cId in conversationIds) {
+        await database.messagesDao.takeUnseen(accountId, cId);
+      }
     }
   }
 

@@ -72,7 +72,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       ));
       return (await Future.wait(futures))[0];
     });
-    await _takeUnseen(userId, message.conversationId);
+    await takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
     db.eventBus.send(DatabaseEvent.insert, message.messageId);
     return result;
@@ -134,7 +134,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<int> _takeUnseen(String userId, String conversationId) async {
+  Future<int> takeUnseen(String userId, String conversationId) async {
     final messageId = await (db.selectOnly(db.messages)
           ..addColumns([db.messages.messageId])
           ..where(db.messages.conversationId.equals(conversationId) &
@@ -161,22 +161,30 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     );
   }
 
-  Future<void> markMessageRead(List<String> messageIds) async {
+  Future<int> markMessageRead(String userId, List<String> messageIds) async {
     var arrayStartIndex = 1;
     final expandedMessageIds = $expandVar(arrayStartIndex, messageIds.length);
     arrayStartIndex += messageIds.length;
-    final count = await db.customUpdate(
+    return db.customUpdate(
       'UPDATE messages SET status = \'READ\' WHERE message_id IN ($expandedMessageIds) AND status != \'FAILED\'',
       variables: [for (var $ in messageIds) Variable<String>($)],
+      updates: {db.messages},
+      updateKind: UpdateKind.update,
     );
+  }
 
-    // TODO refresh unseen count
-    final first = messageIds[0];
-    // final message = await findMessageByMessageId(first);
-    // if (message != null) {
-    //   await _takeUnseen(message.userId, message.conversationId);
-    // }
-    debugPrint('markMessageRead $first, count: $count');
+  Future<List<String>> findConversationIdsByMessages(
+      List<String> messageIds) async {
+    var arrayStartIndex = 1;
+    final expandedMessageIds = $expandVar(arrayStartIndex, messageIds.length);
+    arrayStartIndex += messageIds.length;
+    return db
+        .customSelect(
+          'SELECT DISTINCT conversation_id FROM messages WHERE message_id IN ($expandedMessageIds)',
+          variables: [for (var $ in messageIds) Variable<String>($)],
+        )
+        .map((row) => row.read<String>('conversation_id'))
+        .get();
   }
 
   Selectable<MessageItem> messagesByConversationId(
@@ -233,7 +241,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
           updates: {db.messages},
           updateKind: UpdateKind.update,
         );
-        await _takeUnseen(userId, conversationId);
+        await takeUnseen(userId, conversationId);
         return list;
       });
 
