@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -35,6 +36,7 @@ class AttachmentUtil {
     required MessageCategory category,
     String? key,
     String? digest,
+    String? mimeType,
   }) async {
     await _messagesDao.updateMediaStatus(MediaStatus.pending, messageId);
 
@@ -52,9 +54,10 @@ class AttachmentUtil {
         final httpResponse = await request.close();
 
         final file = _getAttachmentFile(
-          conversationId: conversationId,
-          messageId: messageId,
-          category: category,
+            conversationId: conversationId,
+            messageId: messageId,
+            category: category,
+            mimeType: mimeType,
         );
         await file.create(recursive: true);
         final out = file.openWrite();
@@ -182,27 +185,47 @@ class AttachmentUtil {
   }
 
   File getAttachmentFile(
-      MessageCategory category, String conversationId, String messageId) {
+      MessageCategory category, String conversationId, String messageId,
+      {String? mimeType}) {
     assert(category.isAttachment);
-    String? path;
+    String path;
+    String suffix;
     if (category.isImage) {
       path = getImagesPath(conversationId);
+      if (_equalsIgnoreCase(mimeType, 'image/png')) {
+        suffix = 'png';
+      } else if (_equalsIgnoreCase(mimeType, 'image/gif')) {
+        suffix = 'gif';
+      } else if (_equalsIgnoreCase(mimeType, 'image/webp')) {
+        suffix = 'webp';
+      } else {
+        suffix = 'jpg';
+      }
     } else if (category.isVideo) {
       path = getVideosPath(conversationId);
+      suffix = 'mp4';
     } else if (category.isAudio) {
       path = getAudiosPath(conversationId);
+      suffix = 'ogg';
     } else {
       path = getFilesPath(conversationId);
+      assert(mimeType != null);
+      suffix = extensionFromMime(mimeType!);
     }
-    return File(p.join(path, messageId));
+    return File(p.join(path, '$messageId.$suffix'));
   }
+
+  bool _equalsIgnoreCase(String? string1, String? string2) =>
+      string1?.toLowerCase() == string2?.toLowerCase();
 
   File _getAttachmentFile({
     required String messageId,
     required String conversationId,
     required MessageCategory category,
+    String? mimeType,
   }) =>
-      getAttachmentFile(category, conversationId, messageId);
+      getAttachmentFile(category, conversationId, messageId,
+          mimeType: mimeType);
 
   String getImagesPath(String conversationId) =>
       p.join(mediaPath, 'Images', conversationId);

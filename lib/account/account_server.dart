@@ -753,6 +753,7 @@ class AccountServer {
         messageId: message.messageId,
         conversationId: message.conversationId,
         category: message.type,
+        mimeType: message.mediaMimeType
       );
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
