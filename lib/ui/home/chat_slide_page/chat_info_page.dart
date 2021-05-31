@@ -576,12 +576,20 @@ class _AddToContactsButton extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  onPressed: () => runFutureWithToast(
-                      context,
-                      context.read<AccountServer>().addUser(
-                            conversation.userId!,
-                            conversation.user?.fullName,
-                          )),
+                  onPressed: () {
+                    final username = conversation.user?.fullName ??
+                        conversation.conversation?.validName;
+                    assert(username != null,
+                        'ContactsAdd: username should not be null.');
+                    assert(conversation.isGroup != true,
+                        'ContactsAdd conversation should not be a group.');
+                    runFutureWithToast(
+                        context,
+                        context.read<AccountServer>().addUser(
+                              conversation.userId!,
+                              username,
+                            ));
+                  },
                   child: Text(
                     conversation.isBot!
                         ? Localization.of(context).conversationAddBot
