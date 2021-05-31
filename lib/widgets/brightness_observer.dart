@@ -1,12 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../bloc/setting_cubits.dart';
-import '../utils/hook.dart';
-
-class BrightnessObserver extends HookWidget {
+class BrightnessObserver extends StatelessWidget {
   const BrightnessObserver({
     Key? key,
     this.duration = const Duration(milliseconds: 200),
@@ -15,6 +11,7 @@ class BrightnessObserver extends HookWidget {
     required this.child,
     required this.lightThemeData,
     required this.darkThemeData,
+    this.forceBrightness,
   }) : super(key: key);
 
   final Duration duration;
@@ -23,6 +20,7 @@ class BrightnessObserver extends HookWidget {
   final Widget child;
   final BrightnessThemeData lightThemeData;
   final BrightnessThemeData darkThemeData;
+  final Brightness? forceBrightness;
 
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
@@ -33,8 +31,7 @@ class BrightnessObserver extends HookWidget {
           end: const {
             Brightness.light: 0.0,
             Brightness.dark: 1.0,
-          }[useBlocState<BrightnessCubit, Brightness?>() ??
-              MediaQuery.platformBrightnessOf(context)],
+          }[forceBrightness ?? MediaQuery.platformBrightnessOf(context)],
         ),
         builder: (BuildContext context, double value, Widget? child) =>
             BrightnessData(

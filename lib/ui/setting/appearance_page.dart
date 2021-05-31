@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../bloc/setting_cubits.dart';
+import '../../bloc/setting_cubit.dart';
 import '../../generated/l10n.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
@@ -45,9 +45,9 @@ class _Body extends StatelessWidget {
             CellItem(
               title: RadioItem<Brightness?>(
                 title: Text(Localization.of(context).settingThemeAuto),
-                groupValue: context.watch<BrightnessCubit>().state,
+                groupValue: context.watch<SettingCubit>().brightness,
                 onChanged: (value) =>
-                    context.read<BrightnessCubit>().emit(value),
+                    context.read<SettingCubit>().brightness = value,
                 value: null,
               ),
               trailing: null,
@@ -55,9 +55,9 @@ class _Body extends StatelessWidget {
             CellItem(
               title: RadioItem<Brightness?>(
                 title: Text(Localization.of(context).settingThemeLight),
-                groupValue: context.watch<BrightnessCubit>().state,
+                groupValue: context.watch<SettingCubit>().brightness,
                 onChanged: (value) =>
-                    context.read<BrightnessCubit>().emit(value),
+                    context.read<SettingCubit>().brightness = value,
                 value: Brightness.light,
               ),
               trailing: null,
@@ -65,9 +65,9 @@ class _Body extends StatelessWidget {
             CellItem(
               title: RadioItem<Brightness?>(
                 title: Text(Localization.of(context).settingThemeNight),
-                groupValue: context.watch<BrightnessCubit>().state,
+                groupValue: context.watch<SettingCubit>().brightness,
                 onChanged: (value) =>
-                    context.read<BrightnessCubit>().emit(value),
+                    context.read<SettingCubit>().brightness = value,
                 value: Brightness.dark,
               ),
               trailing: null,
