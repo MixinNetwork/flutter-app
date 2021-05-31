@@ -99,7 +99,7 @@ class ImageMessageWidget extends StatelessWidget {
                     ),
                     Positioned(
                       bottom: 4,
-                      right: 12,
+                      right: isCurrentUser ? 12 : 4,
                       child: DecoratedBox(
                         decoration: const ShapeDecoration(
                           color: Color.fromRGBO(0, 0, 0, 0.3),
