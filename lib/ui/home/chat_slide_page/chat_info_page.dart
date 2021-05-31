@@ -578,7 +578,7 @@ class _AddToContactsButton extends StatelessWidget {
                   ),
                   onPressed: () {
                     final username = conversation.user?.fullName ??
-                        conversation.conversation?.name;
+                        conversation.conversation?.validName;
                     assert(username != null,
                         'ContactsAdd: username should not be null.');
                     assert(conversation.isGroup != true,
