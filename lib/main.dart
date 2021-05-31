@@ -11,7 +11,6 @@ import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
 import 'ui/home/local_notification_center.dart';
-import 'ui/setting/bloc/setting_key_value.dart';
 import 'utils/load_balancer_utils.dart';
 
 Future<void> main() async {
@@ -37,8 +36,6 @@ Future<void> main() async {
   );
 
   debugHighlightDeprecatedWidgets = true;
-
-  await SettingKeyValue.instance.init();
 
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());

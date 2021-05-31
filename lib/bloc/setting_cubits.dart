@@ -1,13 +1,23 @@
 import 'dart:ui';
 
-import '../ui/setting/bloc/setting_key_value.dart';
-import 'simple_cubit.dart';
-import 'subscribe_mixin.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 
-class BrightnessCubit extends SimpleCubit<Brightness?> with SubscribeMixin {
-  BrightnessCubit() : super(SettingKeyValue.instance.brightness) {
-    addSubscription(stream.listen((event) {
-      SettingKeyValue.instance.brightness = event;
-    }));
+class BrightnessCubit extends HydratedCubit<Brightness?> {
+  BrightnessCubit() : super(null);
+
+  static const _kKeyBrightness = 'Brightness';
+
+  @override
+  Brightness? fromJson(Map<String, dynamic> json) {
+    final int? index = json[_kKeyBrightness];
+    assert(const {0, 1, null}.contains(index), 'invalid brightness value.');
+    if (index == null) {
+      return null;
+    }
+    return Brightness.values[index];
   }
+
+  @override
+  Map<String, dynamic>? toJson(Brightness? state) =>
+      {_kKeyBrightness: state?.index};
 }
