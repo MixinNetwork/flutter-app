@@ -237,6 +237,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchMessageHistory":
             MessageLookupByLibrary.simpleMessage("Search Conversation"),
         "searchRelatedMessage": m15,
+        "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
+        "settingThemeAuto":
+            MessageLookupByLibrary.simpleMessage("Follow system"),
+        "settingThemeLight": MessageLookupByLibrary.simpleMessage("Light"),
+        "settingThemeNight": MessageLookupByLibrary.simpleMessage("Dark"),
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
