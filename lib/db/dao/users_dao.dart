@@ -62,7 +62,7 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
     required String identityNumber,
   }) =>
       db.fuzzySearchUser(
-          id, username.trim().escapeSql(), identityNumber.escapeSql());
+          id, username.trim().escapeSql(), identityNumber.trim().escapeSql());
 
   Selectable<String?> biography(String userId) =>
       db.biographyByIdentityNumber(userId);
