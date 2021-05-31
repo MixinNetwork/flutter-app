@@ -72,12 +72,12 @@ class ClampingRenderViewport extends RenderViewport {
     double? cacheExtent,
   })  : _anchor = anchor,
         super(
-          axisDirection: axisDirection,
-          crossAxisDirection: crossAxisDirection,
-          offset: offset,
-          center: center,
-          cacheExtent: cacheExtent,
-          children: children);
+            axisDirection: axisDirection,
+            crossAxisDirection: crossAxisDirection,
+            offset: offset,
+            center: center,
+            cacheExtent: cacheExtent,
+            children: children);
 
   static const int _maxLayoutCycles = 10;
 
@@ -229,21 +229,21 @@ class ClampingRenderViewport extends RenderViewport {
         assert(count != 1);
         throw FlutterError(
             'A RenderViewport exceeded its maximum number of layout cycles.\n'
-                'RenderViewport render objects, during layout, can retry if either their '
-                'slivers or their ViewportOffset decide that the offset should be corrected '
-                'to take into account information collected during that layout.\n'
-                'In the case of this RenderViewport object, however, this happened $count '
-                'times and still there was no consensus on the scroll offset. This usually '
-                'indicates a bug. Specifically, it means that one of the following three '
-                'problems is being experienced by the RenderViewport object:\n'
-                ' * One of the RenderSliver children or the ViewportOffset have a bug such'
-                ' that they always think that they need to correct the offset regardless.\n'
-                ' * Some combination of the RenderSliver children and the ViewportOffset'
-                ' have a bad interaction such that one applies a correction then another'
-                ' applies a reverse correction, leading to an infinite loop of corrections.\n'
-                ' * There is a pathological case that would eventually resolve, but it is'
-                ' so complicated that it cannot be resolved in any reasonable number of'
-                ' layout passes.');
+            'RenderViewport render objects, during layout, can retry if either their '
+            'slivers or their ViewportOffset decide that the offset should be corrected '
+            'to take into account information collected during that layout.\n'
+            'In the case of this RenderViewport object, however, this happened $count '
+            'times and still there was no consensus on the scroll offset. This usually '
+            'indicates a bug. Specifically, it means that one of the following three '
+            'problems is being experienced by the RenderViewport object:\n'
+            ' * One of the RenderSliver children or the ViewportOffset have a bug such'
+            ' that they always think that they need to correct the offset regardless.\n'
+            ' * Some combination of the RenderSliver children and the ViewportOffset'
+            ' have a bad interaction such that one applies a correction then another'
+            ' applies a reverse correction, leading to an infinite loop of corrections.\n'
+            ' * There is a pathological case that would eventually resolve, but it is'
+            ' so complicated that it cannot be resolved in any reasonable number of'
+            ' layout passes.');
       }
       return true;
     }());
@@ -265,9 +265,9 @@ class ClampingRenderViewport extends RenderViewport {
     // reverse slivers).
     final centerOffset = mainAxisExtent * anchor - correctedOffset;
     final reverseDirectionRemainingPaintExtent =
-    centerOffset.clamp(0.0, mainAxisExtent);
+        centerOffset.clamp(0.0, mainAxisExtent);
     final forwardDirectionRemainingPaintExtent =
-    (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
+        (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
 
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
@@ -281,9 +281,9 @@ class ClampingRenderViewport extends RenderViewport {
     final fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent!;
     final centerCacheOffset = centerOffset + _calculatedCacheExtent!;
     final reverseDirectionRemainingCacheExtent =
-    centerCacheOffset.clamp(0.0, fullCacheExtent);
+        centerCacheOffset.clamp(0.0, fullCacheExtent);
     final forwardDirectionRemainingCacheExtent =
-    (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
+        (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
     final leadingNegativeChild = childBefore(center!);
 
@@ -311,7 +311,7 @@ class ClampingRenderViewport extends RenderViewport {
       child: center,
       scrollOffset: math.max(0.0, -centerOffset),
       overlap:
-      leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
+          leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
       layoutOffset: centerOffset >= mainAxisExtent
           ? centerOffset
           : reverseDirectionRemainingPaintExtent,
@@ -359,4 +359,3 @@ class ClampingRenderViewport extends RenderViewport {
     }
   }
 }
-
