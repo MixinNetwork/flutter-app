@@ -1034,8 +1034,8 @@ class VerifiedOrBotWidget extends StatelessWidget {
             Resources.assetsImagesVerifiedSvg,
             width: 12,
             height: 12,
-          ),
-        if (isBot)
+          )
+        else if (isBot)
           SvgPicture.asset(
             Resources.assetsImagesBotFillSvg,
             width: 12,
