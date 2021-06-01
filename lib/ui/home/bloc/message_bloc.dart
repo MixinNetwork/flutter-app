@@ -22,6 +22,8 @@ abstract class _MessageEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class _MessageJumpCurrentEvent extends _MessageEvent {}
+
 class _MessageInitEvent extends _MessageEvent {
   _MessageInitEvent({
     this.centerMessageId,
@@ -73,7 +75,7 @@ class MessageState extends Equatable {
     this.conversationId,
     this.isLatest = false,
     this.isOldest = false,
-    this.isLastReadMessageId = false,
+    this.lastReadMessageId,
     this.initUUID,
   });
 
@@ -83,7 +85,7 @@ class MessageState extends Equatable {
   final List<MessageItem> bottom;
   final bool isLatest;
   final bool isOldest;
-  final bool isLastReadMessageId;
+  final String? lastReadMessageId;
   final String? initUUID;
 
   @override
@@ -94,7 +96,7 @@ class MessageState extends Equatable {
         bottom,
         isLatest,
         isOldest,
-        isLastReadMessageId,
+        lastReadMessageId,
         initUUID,
       ];
 
@@ -119,7 +121,7 @@ class MessageState extends Equatable {
     final List<MessageItem>? bottom,
     final bool? isLatest,
     final bool? isOldest,
-    final bool? isLastReadMessageId,
+    final String? lastReadMessageId,
     final String? initUUID,
   }) =>
       MessageState(
@@ -129,8 +131,19 @@ class MessageState extends Equatable {
         bottom: bottom ?? this.bottom,
         isLatest: isLatest ?? this.isLatest,
         isOldest: isOldest ?? this.isOldest,
-        isLastReadMessageId: isLastReadMessageId ?? this.isLastReadMessageId,
+        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         initUUID: initUUID ?? this.initUUID,
+      );
+
+  MessageState _copyWithJumpCurrentState() => MessageState(
+        center: null,
+        bottom: const [],
+        top: list.toList(),
+        initUUID: const Uuid().v4(),
+        conversationId: conversationId,
+        isLatest: isLatest,
+        isOldest: isOldest,
+        lastReadMessageId: lastReadMessageId,
       );
 }
 
@@ -209,7 +222,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       );
       await _preCacheMention(messageState);
       yield _pretreatment(messageState.copyWith(
-        isLastReadMessageId: event.isLastReadMessageId,
+        lastReadMessageId: event.centerMessageId,
       ));
     } else {
       if (event is _MessageLoadMoreEvent) {
@@ -232,6 +245,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         }
       } else if (event is _MessageScrollEvent) {
         add(_MessageInitEvent(centerMessageId: event.messageId));
+      } else if (event is _MessageJumpCurrentEvent) {
+        yield _pretreatment(state._copyWithJumpCurrentState());
       }
     }
   }
@@ -363,7 +378,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     var bottom = state.bottom.toList();
 
     final bottomMessage = state.bottomMessage;
-    var newBottomMessage = false;
+    var jumpToBottom = false;
     for (final item in list) {
       if (item.conversationId != conversationId) continue;
 
@@ -390,36 +405,31 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       if (bottomMessage != null &&
           bottomMessage.createdAt.isAfter(item.createdAt)) continue;
 
+      final currentUserSent = item.relationship == UserRelationship.me;
+
       if (state.isLatest) {
         bottom = [...bottom, item];
-        newBottomMessage = true;
+        jumpToBottom = currentUserSent ||
+            scrollController.position.pixels ==
+                scrollController.position.maxScrollExtent;
       } else {
-        if (item.relationship == UserRelationship.me &&
-            item.status == MessageStatus.sent) {
+        if (currentUserSent) {
           add(_MessageInitEvent());
           return null;
         }
       }
     }
 
-    if (scrollController.hasClients && newBottomMessage) {
-      final position = scrollController.position;
-      final oldMaxScrollExtent = position.maxScrollExtent;
-      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-        if (!scrollController.hasClients) return;
-        final newMaxScrollExtent = position.maxScrollExtent;
-        final newPixels = position.pixels;
-        if (newMaxScrollExtent != oldMaxScrollExtent &&
-            newMaxScrollExtent != newPixels) {
-          scrollController.jumpTo(newMaxScrollExtent);
-        }
-      });
-    }
-    return state.copyWith(
+    final result = state.copyWith(
       top: top,
       center: center,
       bottom: bottom,
     );
+
+    if (scrollController.hasClients && jumpToBottom) {
+      return result._copyWithJumpCurrentState();
+    }
+    return result;
   }
 
   void scrollTo(String messageId) =>
@@ -431,7 +441,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   void jumpToCurrent() {
     if (scrollController.hasClients && state.isLatest) {
-      return scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      return add(_MessageJumpCurrentEvent());
     }
     return add(_MessageInitEvent());
   }

@@ -313,49 +313,42 @@ class ClampingRenderViewport extends RenderViewport {
         offset.correctBy(correction);
       } else {
         // diff start
-        void debugLog() => debugPrint(
-            'ClampingRenderViewport: mainAxisExtent: $mainAxisExtent, scrollExtent: ${_maxScrollExtent - _minScrollExtent}, anchor: $anchor, StackTrace: ${StackTrace.current}');
+        count += 1;
 
         final top =
             _minScrollExtent + mainAxisExtent * anchor - _correctedOffset;
+        final bottom = _maxScrollExtent -
+            mainAxisExtent * (1.0 - anchor) -
+            _correctedOffset;
+        final minScrollExtent = math.min(0.0, top);
+        final maxScrollExtent = math.max(0.0, bottom);
+
         if (top > 0.0) {
           _correctedOffset = (mainAxisExtent * anchor) + _minScrollExtent;
-          debugLog();
           continue;
         }
 
         final scrollExtent = _maxScrollExtent - _minScrollExtent;
-        final bottom = _maxScrollExtent -
-            mainAxisExtent * (1.0 - anchor) -
-            _correctedOffset;
 
         if (mainAxisExtent > scrollExtent) {
           if (((mainAxisExtent - scrollExtent) - (-bottom - offset.pixels)) <
               0) {
             _correctedOffset = bottom;
-            debugLog();
             continue;
           }
         } else {
-          if (bottom - offset.pixels < 0) {
-            _correctedOffset = bottom;
-            debugLog();
+          if (bottom != 0 && bottom - offset.pixels < 0) {
+            _correctedOffset += bottom;
             continue;
           }
         }
-        // diff end
 
         if (offset.applyContentDimensions(
-          math.min(0.0,
-              _minScrollExtent + mainAxisExtent * anchor - _correctedOffset),
-          math.max(
-              0.0,
-              _maxScrollExtent -
-                  mainAxisExtent * (1.0 - anchor) -
-                  _correctedOffset),
+          minScrollExtent,
+          maxScrollExtent,
         )) break;
+        // diff end
       }
-      count += 1;
     } while (count < _maxLayoutCycles);
     assert(() {
       if (count >= _maxLayoutCycles) {
