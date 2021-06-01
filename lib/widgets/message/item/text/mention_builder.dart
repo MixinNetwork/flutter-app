@@ -58,20 +58,21 @@ class MentionCache {
       ),
     );
 
-    var userIds = <String>{
+    var userNumbers = <String>{
       for (final item in noCacheContentUserIdMap.values) ...item
     };
 
-    if (userIds.isEmpty) {
+    if (userNumbers.isEmpty) {
       for (var e in noCacheContents) {
         _contentMentionLruCache.set(e.hashCode, {});
       }
     } else {
-      userIds = userIds
+      userNumbers = userNumbers
           .where((element) => _userLruCache.get(element) == null)
           .toSet();
 
-      final list = await _userDao.userByIdentityNumbers(userIds.toList()).get();
+      final list =
+          await _userDao.userByIdentityNumbers(userNumbers.toList()).get();
 
       list
           .where((element) => element.fullName?.isNotEmpty ?? false)
@@ -81,6 +82,13 @@ class MentionCache {
       });
 
       for (var element in noCacheContentUserIdMap.entries) {
+        element.value.forEach((String element) {
+          if (map[element] != null) return;
+          final mentionUser = _userLruCache.get(element);
+          if (mentionUser == null) return;
+          map[element] = mentionUser;
+        });
+
         _contentMentionLruCache.set(
           element.key.hashCode,
           Map.fromEntries(
