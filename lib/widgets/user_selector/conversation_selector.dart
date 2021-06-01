@@ -207,6 +207,7 @@ class _ConversationSelector extends HookWidget {
                       alignment: Alignment.centerLeft,
                       child: ActionButton(
                         name: Resources.assetsImagesIcCloseSvg,
+                        color: BrightnessData.themeOf(context).icon,
                         onTap: () => Navigator.pop(context),
                       ),
                     ),
