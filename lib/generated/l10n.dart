@@ -1769,6 +1769,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Add Participants`
+  String get groupAdd {
+    return Intl.message(
+      'Add Participants',
+      name: 'groupAdd',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

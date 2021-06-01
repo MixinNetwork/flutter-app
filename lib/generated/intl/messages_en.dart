@@ -150,6 +150,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "group": MessageLookupByLibrary.simpleMessage("Group"),
+        "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
         "groupCantSendDes": MessageLookupByLibrary.simpleMessage(
             "You can\'t send messages to this group because you\'re no longer a participant."),

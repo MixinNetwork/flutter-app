@@ -125,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followTwitter": MessageLookupByLibrary.simpleMessage("关注我们的 Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
         "group": MessageLookupByLibrary.simpleMessage("群组"),
+        "groupAdd": MessageLookupByLibrary.simpleMessage("添加成员"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
         "groupCantSendDes":
             MessageLookupByLibrary.simpleMessage("您不能发送消息，因为您已经不再是此群组成员。"),

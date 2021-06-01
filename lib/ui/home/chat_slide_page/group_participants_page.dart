@@ -6,10 +6,12 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
 import '../../../account/account_server.dart';
+import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/list_utils.dart';
+import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/brightness_observer.dart';
@@ -17,50 +19,13 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../../widgets/toast.dart';
+import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
 import '../conversation_page.dart';
 
 /// The participants of group.
 class GroupParticipantsPage extends HookWidget {
   const GroupParticipantsPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final filterKeyWord = useState('');
-    return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).primary,
-      appBar: MixinAppBar(
-        title: Text(Localization.of(context).groupParticipants),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: SearchTextField(
-              onChanged: (text) => filterKeyWord.value = text,
-              hintText: Localization.of(context).groupSearchParticipants,
-            ),
-          ),
-          Expanded(
-            child: _ParticipantList(
-              filterKeyword: filterKeyWord.value.trim(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ParticipantList extends HookWidget {
-  const _ParticipantList({
-    Key? key,
-    this.filterKeyword = '',
-  }) : super(key: key);
-
-  /// The keyword to filter participants of group.
-  /// Empty indicates non filter.
-  final String filterKeyword;
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +41,7 @@ class _ParticipantList extends HookWidget {
         }, [conversationId])).data ??
         const <ParticipantUser>[];
 
-    // Find current user infos to check if we have group manage permission.
+    // Find current user info to check if we have group manage permission.
     final me = useMemoized(
       () => participants.firstWhereOrNull(
           (e) => e.userId == context.read<AccountServer>().userId),
@@ -84,7 +49,58 @@ class _ParticipantList extends HookWidget {
     );
 
     assert(!(participants.isNotEmpty && me == null));
+    final filterKeyWord = useState('');
 
+    return Scaffold(
+      backgroundColor: BrightnessData.themeOf(context).primary,
+      appBar: MixinAppBar(
+        title: Text(Localization.of(context).groupParticipants),
+        actions: [
+          if (me?.role != null)
+            _ActionAddParticipants(participants: participants)
+        ],
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SearchTextField(
+              onChanged: (text) => filterKeyWord.value = text,
+              hintText: Localization.of(context).groupSearchParticipants,
+              autofocus: true,
+            ),
+          ),
+          Expanded(
+            child: _ParticipantList(
+              filterKeyword: filterKeyWord.value.trim(),
+              currentUser: me,
+              participants: participants,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ParticipantList extends HookWidget {
+  const _ParticipantList({
+    Key? key,
+    this.filterKeyword = '',
+    required this.participants,
+    required this.currentUser,
+  }) : super(key: key);
+
+  /// The keyword to filter participants of group.
+  /// Empty indicates non filter.
+  final String filterKeyword;
+
+  final List<ParticipantUser> participants;
+
+  final ParticipantUser? currentUser;
+
+  @override
+  Widget build(BuildContext context) {
     final filteredParticipants = useMemoized(() {
       if (filterKeyword.isEmpty) {
         return participants;
@@ -103,7 +119,7 @@ class _ParticipantList extends HookWidget {
       itemCount: filteredParticipants.length,
       itemBuilder: (context, index) => _ParticipantTile(
         participant: filteredParticipants[index],
-        me: me!,
+        me: currentUser!,
         keyword: filterKeyword,
       ),
     );
@@ -288,5 +304,48 @@ class _RoleLabel extends StatelessWidget {
           color: BrightnessData.themeOf(context).secondaryText,
           fontSize: 14,
         ),
+      );
+}
+
+class _ActionAddParticipants extends StatelessWidget {
+  const _ActionAddParticipants({
+    Key? key,
+    required this.participants,
+  }) : super(key: key);
+
+  final List<ParticipantUser> participants;
+
+  @override
+  Widget build(BuildContext context) => ActionButton(
+        name: Resources.assetsImagesIcAddSvg,
+        color: BrightnessData.themeOf(context).icon,
+        size: 16,
+        padding: const EdgeInsets.all(16),
+        onTap: () async {
+          final result = await showConversationSelector(
+            context: context,
+            singleSelect: false,
+            title: Localization.of(context).groupAdd,
+            onlyContact: true,
+          );
+          if (result.isEmpty) {
+            return;
+          }
+          final userIds = [
+            context.read<AccountServer>().userId,
+            ...result.where((e) => e.userId != null).map(
+                  (e) => e.userId!,
+                )
+          ];
+          final conversationId =
+              context.read<ConversationCubit>().state?.conversationId;
+          assert(conversationId != null);
+          await runFutureWithToast(
+            context,
+            Future.wait(userIds.map((userId) => context
+                .read<AccountServer>()
+                .addParticipant(conversationId!, userId))),
+          );
+        },
       );
 }
