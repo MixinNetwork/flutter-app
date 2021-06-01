@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
+import '../../../utils/logger.dart';
 import '../dao/pre_key_dao.dart';
 import '../dao/signed_pre_key_dao.dart';
 import '../signal_database.dart';
@@ -64,7 +64,7 @@ class MixinPreKeyStore implements PreKeyStore, SignedPreKeyStore {
         result.add(SignedPreKeyRecord.fromSerialized(signedPreKey.record));
       }
     } on IOException catch (e) {
-      debugPrint('$e');
+      w('loadSignedPreKeys $e');
     }
     return result;
   }

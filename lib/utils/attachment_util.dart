@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -15,6 +14,7 @@ import '../enum/media_status.dart';
 import '../enum/message_category.dart';
 import 'crypto_util.dart';
 import 'load_balancer_utils.dart';
+import 'logger.dart';
 
 class AttachmentUtil {
   AttachmentUtil(this._client, this._messagesDao, this.mediaPath) {
@@ -42,7 +42,7 @@ class AttachmentUtil {
 
     try {
       final response = await _client.attachmentApi.getAttachment(content);
-      debugPrint('download ${response.data.viewUrl}');
+      d('download ${response.data.viewUrl}');
 
       if (response.data.viewUrl != null) {
         final request =
@@ -126,7 +126,7 @@ class AttachmentUtil {
         final request =
             await _attachmentClient.putUrl(Uri.parse(response.data.uploadUrl!));
         final totalBytes = await tmpFile.length();
-        debugPrint(tmpFile.path);
+        d(tmpFile.path);
 
         request.headers
           ..add(HttpHeaders.contentTypeHeader, 'application/octet-stream')
@@ -142,7 +142,7 @@ class AttachmentUtil {
             handleData: (data, sink) {
               byteCount += data.length;
               // upload progress
-              debugPrint('$byteCount / $totalBytes');
+              i('$byteCount / $totalBytes');
               sink.add(data);
             },
             handleError: (error, stack, sink) {},
@@ -172,7 +172,7 @@ class AttachmentUtil {
         return null;
       }
     } catch (e) {
-      debugPrint(e.toString());
+      w(e.toString());
       await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
       return null;
     }

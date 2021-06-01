@@ -24,6 +24,7 @@ import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
 import 'utils/hook.dart';
+import 'utils/logger.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
@@ -67,7 +68,7 @@ class App extends StatelessWidget {
                   context.read<MultiAuthCubit>(),
                 );
               } catch (e, s) {
-                debugPrint('accountServer.initServer error: $e, $s');
+                w('accountServer.initServer error: $e, $s');
                 rethrow;
               }
               return accountServer;

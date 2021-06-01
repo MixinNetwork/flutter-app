@@ -1,10 +1,10 @@
-import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../constants/constants.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart' as db;
+import '../utils/logger.dart';
 
 class Injector {
   Injector(this.accountId, this.database, this.client);
@@ -76,8 +76,7 @@ class Injector {
         response.data.participantSessions,
       );
     } catch (e, s) {
-      debugPrint('$e');
-      debugPrint('$s');
+      w('refreshConversation error $e, stack: $s');
     }
   }
 
@@ -120,8 +119,7 @@ class Injector {
       final response = await client.userApi.getUsers(ids);
       return insertUpdateUsers(response.data);
     } catch (e, s) {
-      debugPrint('$e');
-      debugPrint('$s');
+      w('_fetchUsers error $e, stack: $s');
     }
   }
 
@@ -182,8 +180,8 @@ class Injector {
         assetHeight: sticker.assetHeight,
         createdAt: sticker.createdAt,
       ));
-    } catch (e) {
-      debugPrint('$e');
+    } catch (e, s) {
+      w('refreshSticker error $e, stack: $s');
     }
   }
 
