@@ -15,9 +15,9 @@ import 'route/responsive_navigator_cubit.dart';
 import 'slide_page.dart';
 
 // chat category list min width
-const kSlidePageMinWidth = 98.0;
+const kSlidePageMinWidth = 80.0;
 // chat category and chat list max width
-const kSlidePageMaxWidth = 200.0;
+const kSlidePageMaxWidth = 160.0;
 // chat page min width, message list, setting page etc.
 const kResponsiveNavigationMinWidth = 460.0;
 // conversation list fixed width, conversation list, setting list etc.
