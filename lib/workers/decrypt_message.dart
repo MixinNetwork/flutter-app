@@ -495,13 +495,13 @@ class DecryptMessage extends Injector {
       await database.messagesDao.insert(message, accountId);
       if (_videoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
-            messageId: message.messageId,
-            conversationId: message.conversationId,
-            category: message.category,
-            content: message.content!,
-            key: attachment.key,
-            digest: attachment.digest,
-            mimeType: attachment.mimeType,
+          messageId: message.messageId,
+          conversationId: message.conversationId,
+          category: message.category,
+          content: message.content!,
+          key: attachment.key,
+          digest: attachment.digest,
+          mimeType: attachment.mimeType,
         ));
       }
     } else if (data.category.isData) {
@@ -529,13 +529,13 @@ class DecryptMessage extends Injector {
       await database.messagesDao.insert(message, accountId);
       if (_fileAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
-            messageId: message.messageId,
-            conversationId: message.conversationId,
-            category: message.category,
-            content: message.content!,
-            key: attachment.key,
-            digest: attachment.digest,
-            mimeType: attachment.mimeType,
+          messageId: message.messageId,
+          conversationId: message.conversationId,
+          category: message.category,
+          content: message.content!,
+          key: attachment.key,
+          digest: attachment.digest,
+          mimeType: attachment.mimeType,
         ));
       }
     } else if (data.category.isAudio) {
@@ -563,13 +563,13 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent));
       await database.messagesDao.insert(message, accountId);
       unawaited(_attachmentUtil.downloadAttachment(
-          messageId: message.messageId,
-          conversationId: message.conversationId,
-          category: message.category,
-          content: message.content!,
-          key: attachment.key,
-          digest: attachment.digest,
-          mimeType: attachment.mimeType,
+        messageId: message.messageId,
+        conversationId: message.conversationId,
+        category: message.category,
+        content: message.content!,
+        key: attachment.key,
+        digest: attachment.digest,
+        mimeType: attachment.mimeType,
       ));
     } else if (data.category.isSticker) {
       final plain = await _decodeWithIsolate(plainText);

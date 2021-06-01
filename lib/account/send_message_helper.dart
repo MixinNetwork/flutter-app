@@ -64,8 +64,9 @@ class SendMessageHelper {
       XFile file, MessageCategory category, String? quoteMessageId) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'image/jpeg';
-    final attachment =
-        _attachmentUtil.getAttachmentFile(category, conversationId, messageId, mimeType: mimeType);
+    final attachment = _attachmentUtil.getAttachmentFile(
+        category, conversationId, messageId,
+        mimeType: mimeType);
 
     final bytes = await file.readAsBytes();
 
@@ -129,8 +130,9 @@ class SendMessageHelper {
       XFile file, MessageCategory category, String? quoteMessageId) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
-    final attachment =
-        _attachmentUtil.getAttachmentFile(category, conversationId, messageId, mimeType: mimeType);
+    final attachment = _attachmentUtil.getAttachmentFile(
+        category, conversationId, messageId,
+        mimeType: mimeType);
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
@@ -206,8 +208,9 @@ class SendMessageHelper {
     final mimeType = file.mimeType ??
         lookupMimeType(file.path) ??
         'application/octet-stream';
-    final attachment =
-        _attachmentUtil.getAttachmentFile(category, conversationId, messageId, mimeType: mimeType);
+    final attachment = _attachmentUtil.getAttachmentFile(
+        category, conversationId, messageId,
+        mimeType: mimeType);
 
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);
@@ -288,8 +291,9 @@ class SendMessageHelper {
       XFile file, MessageCategory category, String? quoteMessageId) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'audio/ogg';
-    final attachment =
-        _attachmentUtil.getAttachmentFile(category, conversationId, messageId, mimeType: mimeType);
+    final attachment = _attachmentUtil.getAttachmentFile(
+        category, conversationId, messageId,
+        mimeType: mimeType);
 
     await attachment.create(recursive: true);
     await File(file.path).copy(attachment.path);

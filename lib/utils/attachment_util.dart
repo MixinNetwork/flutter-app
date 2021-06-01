@@ -54,10 +54,10 @@ class AttachmentUtil {
         final httpResponse = await request.close();
 
         final file = _getAttachmentFile(
-            conversationId: conversationId,
-            messageId: messageId,
-            category: category,
-            mimeType: mimeType,
+          conversationId: conversationId,
+          messageId: messageId,
+          category: category,
+          mimeType: mimeType,
         );
         await file.create(recursive: true);
         final out = file.openWrite();
