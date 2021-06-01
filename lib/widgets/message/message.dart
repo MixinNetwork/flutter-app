@@ -277,7 +277,8 @@ class MessageItemWidget extends HookWidget {
             );
           },
         ),
-        if (message.messageId == lastReadMessageId && next != null) const _UnreadMessageBar(),
+        if (message.messageId == lastReadMessageId && next != null)
+          const _UnreadMessageBar(),
       ],
     );
     if (message.mentionRead == false) {
