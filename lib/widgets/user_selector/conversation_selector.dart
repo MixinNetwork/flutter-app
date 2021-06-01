@@ -207,6 +207,7 @@ class _ConversationSelector extends HookWidget {
                       alignment: Alignment.centerLeft,
                       child: ActionButton(
                         name: Resources.assetsImagesIcCloseSvg,
+                        color: BrightnessData.themeOf(context).icon,
                         onTap: () => Navigator.pop(context),
                       ),
                     ),
@@ -265,28 +266,37 @@ class _ConversationSelector extends HookWidget {
             ),
             Container(
               height: 32,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(5),
+                color: BrightnessData.themeOf(context).background,
+                borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.center,
               child: TextField(
                 onChanged: (string) => conversationFilterCubit.keyword = string,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).text,
+                  fontSize: 14,
                 ),
+                autofocus: true,
                 scrollPadding: EdgeInsets.zero,
                 decoration: InputDecoration(
-                  icon: SvgPicture.asset(
-                    Resources.assetsImagesIcSearchSvg,
-                    width: 20,
+                  prefixIcon: Padding(
+                    padding: const EdgeInsetsDirectional.only(end: 8.0),
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesIcSearchSvg,
+                      color: BrightnessData.themeOf(context).secondaryText,
+                    ),
                   ),
-                  contentPadding: EdgeInsets.zero,
+                  prefixIconConstraints: const BoxConstraints(
+                    minHeight: 16,
+                    minWidth: 16,
+                  ),
                   isDense: true,
-                  hintText: 'Search',
-                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.08)),
+                  hintText: Localization.of(context).search,
+                  hintStyle: TextStyle(
+                      color: BrightnessData.themeOf(context).secondaryText),
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
                 ),
