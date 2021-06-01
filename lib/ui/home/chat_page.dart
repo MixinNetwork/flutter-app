@@ -400,6 +400,7 @@ class _JumpCurrentButton extends HookWidget {
       converter: (state) => state?.conversationId,
       when: (conversationId) => conversationId != null,
     )!;
+
     final state = useBlocState<MessageBloc, MessageState>();
     final scrollController = useListenable(messageBloc.scrollController);
 
@@ -413,7 +414,8 @@ class _JumpCurrentButton extends HookWidget {
     }, [
       scrollController.hasClients,
       scrollController.position.pixels,
-      conversationId
+      conversationId,
+      state.initUUID,
     ]);
 
     final enable =
