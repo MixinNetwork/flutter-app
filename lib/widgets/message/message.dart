@@ -79,7 +79,6 @@ class MessageItemWidget extends HookWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (message.messageId == lastReadMessageId) const _UnreadMessageBar(),
         if (datetime != null) MessageDayTime(dateTime: datetime),
         Builder(
           builder: (context) {
@@ -278,6 +277,7 @@ class MessageItemWidget extends HookWidget {
             );
           },
         ),
+        if (message.messageId == lastReadMessageId && next != null) const _UnreadMessageBar(),
       ],
     );
     if (message.mentionRead == false) {
