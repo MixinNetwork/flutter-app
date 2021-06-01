@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/enum/message_category.dart';
+import 'package:flutter_app/widgets/message/item/system_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -78,24 +80,36 @@ class NotificationService extends WidgetsBindingObserver {
 
             var body = event.content;
             if (context.read<MultiAuthCubit>().state.currentMessagePreview) {
-              final isGroup = event.category == ConversationCategory.group ||
-                  event.senderId != event.ownerUserId;
+              if (event.type == MessageCategory.systemConversation) {
+                body = generateSystemText(
+                  actionName: event.actionName,
+                  senderIsCurrentUser:
+                      event.senderId == context.read<AccountServer>().userId,
+                  relationship: event.relationship,
+                  participantFullName: event.participantFullName,
+                  senderFullName: event.senderFullName,
+                  groupName: event.groupName,
+                );
+              } else {
+                final isGroup = event.category == ConversationCategory.group ||
+                    event.senderId != event.ownerUserId;
 
-              if (event.type.isText) {
-                final mentionCache = context.read<MentionCache>();
-                body = mentionCache.replaceMention(
-                  event.content,
-                  await mentionCache.checkMentionCache({event.content!}),
+                if (event.type.isText) {
+                  final mentionCache = context.read<MentionCache>();
+                  body = mentionCache.replaceMention(
+                    event.content,
+                    await mentionCache.checkMentionCache({event.content!}),
+                  );
+                }
+                body = await messagePreviewOptimize(
+                  event.status,
+                  event.type,
+                  body,
+                  false,
+                  isGroup,
+                  event.senderFullName,
                 );
               }
-              body = await messagePreviewOptimize(
-                event.status,
-                event.type,
-                body,
-                false,
-                isGroup,
-                event.senderFullName,
-              );
             }
 
             await showNotification(
