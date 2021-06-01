@@ -755,7 +755,7 @@ class _List extends HookWidget {
                   onTap: () async {
                     final isGroupConversation =
                         conversation.isGroupConversation;
-                    return runFutureWithToast(
+                    await runFutureWithToast(
                       context,
                       context.read<AccountServer>().unMuteConversation(
                             conversationId: isGroupConversation
@@ -766,6 +766,7 @@ class _List extends HookWidget {
                                 : conversation.ownerId,
                           ),
                     );
+                    return;
                   },
                 )
               else
@@ -779,7 +780,7 @@ class _List extends HookWidget {
                     final isGroupConversation =
                         conversation.isGroupConversation;
 
-                    return runFutureWithToast(
+                    await runFutureWithToast(
                       context,
                       context.read<AccountServer>().muteConversation(
                             result,
@@ -791,6 +792,7 @@ class _List extends HookWidget {
                                 : conversation.ownerId,
                           ),
                     );
+                    return;
                   },
                 ),
               ContextMenu(

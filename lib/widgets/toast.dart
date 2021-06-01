@@ -109,14 +109,30 @@ void showToastSuccessful(BuildContext context) => Toast.createView(
       ),
     );
 
-void showToastFailed(BuildContext context) => Toast.createView(
-      context: context,
-      child: ToastWidget(
-        barrierColor: Colors.transparent,
-        icon: const _Failed(),
-        text: Localization.of(context).failed,
-      ),
-    );
+class ToastError extends Error {
+  ToastError(this.message);
+
+  final String message;
+
+  static ToastError? fromError(Object? error) => null;
+}
+
+Future<void> showToastFailed(BuildContext context, Object? error) {
+  String? message;
+  if (error is ToastError) {
+    message = error.message;
+  } else {
+    message = ToastError.fromError(error)?.message;
+  }
+  return Toast.createView(
+    context: context,
+    child: ToastWidget(
+      barrierColor: Colors.transparent,
+      icon: const _Failed(),
+      text: message ?? Localization.of(context).failed,
+    ),
+  );
+}
 
 // must be show to toast or toast dismiss.
 void showToastLoading(BuildContext context) => Toast.createView(
@@ -153,13 +169,16 @@ class _Successful extends StatelessWidget {
       SvgPicture.asset(Resources.assetsImagesSuccessfulSvg);
 }
 
-Future<void> runFutureWithToast(
+Future<bool> runFutureWithToast(
     BuildContext context, Future<dynamic> future) async {
   showToastLoading(context);
   try {
     await future;
-  } catch (e) {
-    return showToastFailed(context);
+  } catch (error) {
+    await showToastFailed(context, error);
+    return false;
   }
   showToastSuccessful(context);
+
+  return true;
 }

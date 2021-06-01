@@ -228,6 +228,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unPin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),
         "unread": MessageLookupByLibrary.simpleMessage("未读消息"),
+        "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "video": MessageLookupByLibrary.simpleMessage("视频"),
         "videoCall": MessageLookupByLibrary.simpleMessage("语音电话"),
         "videos": MessageLookupByLibrary.simpleMessage("视频"),

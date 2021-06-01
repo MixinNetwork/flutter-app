@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../account/account_server.dart';
 import '../bloc/bloc_converter.dart';
@@ -47,22 +48,36 @@ class InputContainer extends HookWidget {
       when: (state) => state != null,
     );
 
-    final participant = useStream(useMemoized(
-        () => context
-            .read<AccountServer>()
-            .database
-            .participantsDao
-            .findParticipantById(
-              conversationId!,
-              context.read<MultiAuthCubit>().state.current!.account.userId,
-            )
-            .watchSingleOrNull(),
-        [
-          conversationId,
-          context.read<MultiAuthCubit>().state.current?.account.userId,
-        ])).data;
+    final hasParticipant = useStream(
+            useMemoized(() {
+              final database = context.read<AccountServer>().database;
+              return CombineLatestStream([
+                database.conversationDao
+                    .conversationItem(conversationId!)
+                    .watchSingleOrNull(),
+                database.participantsDao
+                    .findParticipantById(
+                      conversationId,
+                      context
+                          .read<MultiAuthCubit>()
+                          .state
+                          .current!
+                          .account
+                          .userId,
+                    )
+                    .watchSingleOrNull(),
+              ], (list) {
+                if (list[0] == null) return true;
+                return list[1] != null;
+              });
+            }, [
+              conversationId,
+              context.read<MultiAuthCubit>().state.current?.account.userId,
+            ]),
+            initialData: true)
+        .data!;
 
-    return participant != null
+    return hasParticipant
         ? const _InputContainer()
         : Container(
             decoration: BoxDecoration(

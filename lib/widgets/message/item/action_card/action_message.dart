@@ -43,7 +43,7 @@ class ActionCardMessage extends HookWidget {
       child: InteractableDecoratedBox(
         onTap: () {
           if (context.openAction(appCardData.action)) return;
-          openUri(appCardData.action);
+          openUri(context, appCardData.action);
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,

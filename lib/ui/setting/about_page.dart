@@ -89,25 +89,28 @@ class AboutPage extends HookWidget {
                   children: [
                     CellItem(
                       title: Text(Localization.of(context).followTwitter),
-                      onTap: () =>
-                          openUri('https://twitter.com/MixinMessenger'),
+                      onTap: () => openUri(
+                          context, 'https://twitter.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).followFacebook),
-                      onTap: () => openUri('https://fb.com/MixinMessenger'),
+                      onTap: () =>
+                          openUri(context, 'https://fb.com/MixinMessenger'),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).helpCenter),
-                      onTap: () =>
-                          openUri('https://mixinmessenger.zendesk.com'),
+                      onTap: () => openUri(
+                          context, 'https://mixinmessenger.zendesk.com'),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).termsService),
-                      onTap: () => openUri('https://mixin.one/pages/terms'),
+                      onTap: () =>
+                          openUri(context, 'https://mixin.one/pages/terms'),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).privacyPolicy),
-                      onTap: () => openUri('https://mixin.one/pages/privacy'),
+                      onTap: () =>
+                          openUri(context, 'https://mixin.one/pages/privacy'),
                     ),
                   ],
                 ),
