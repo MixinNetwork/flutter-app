@@ -151,6 +151,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "group": MessageLookupByLibrary.simpleMessage("Group"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
+        "groupCantSendDes": MessageLookupByLibrary.simpleMessage(
+            "You can\'t send messages to this group because you\'re no longer a participant."),
         "groupOwner": MessageLookupByLibrary.simpleMessage("owner"),
         "groupParticipants":
             MessageLookupByLibrary.simpleMessage("Participants"),

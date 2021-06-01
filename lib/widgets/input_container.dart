@@ -41,6 +41,52 @@ class InputContainer extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (state) => state != null,
+    );
+
+    final participant = useStream(useMemoized(
+        () => context
+            .read<AccountServer>()
+            .database
+            .participantsDao
+            .findParticipantById(
+              conversationId!,
+              context.read<MultiAuthCubit>().state.current!.account.userId,
+            )
+            .watchSingleOrNull(),
+        [
+          conversationId,
+          context.read<MultiAuthCubit>().state.current?.account.userId,
+        ])).data;
+
+    return participant != null
+        ? const _InputContainer()
+        : Container(
+            decoration: BoxDecoration(
+              color: BrightnessData.themeOf(context).primary,
+            ),
+            height: 56,
+            alignment: Alignment.center,
+            child: Text(
+              Localization.of(context).groupCantSendDes,
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).secondaryText,
+              ),
+            ),
+          );
+  }
+}
+
+class _InputContainer extends HookWidget {
+  const _InputContainer({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     final mentionCubit = useBloc(
       () => MentionCubit(
         userDao: context.read<AccountServer>().database.userDao,
@@ -120,40 +166,38 @@ class InputContainer extends HookWidget {
                     constraints: const BoxConstraints(
                       minHeight: 56,
                     ),
-                    child: DecoratedBox(
+                    child: Container(
                       decoration: BoxDecoration(
                         color: BrightnessData.themeOf(context).primary,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            _FileButton(
-                                actionColor:
-                                    BrightnessData.themeOf(context).icon),
-                            const SizedBox(width: 6),
-                            const _StickerButton(),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: 32,
-                                ),
-                                child: const _SendTextField(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _FileButton(
+                              actionColor:
+                                  BrightnessData.themeOf(context).icon),
+                          const SizedBox(width: 6),
+                          const _StickerButton(),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minHeight: 32,
                               ),
+                              child: const _SendTextField(),
                             ),
-                            const SizedBox(width: 16),
-                            ActionButton(
-                              name: Resources.assetsImagesIcSendSvg,
-                              color: BrightnessData.themeOf(context).icon,
-                              onTap: () => _sendMessage(context),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 16),
+                          ActionButton(
+                            name: Resources.assetsImagesIcSendSvg,
+                            color: BrightnessData.themeOf(context).icon,
+                            onTap: () => _sendMessage(context),
+                          ),
+                        ],
                       ),
                     ),
                   ),

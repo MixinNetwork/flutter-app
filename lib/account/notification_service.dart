@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/enum/message_category.dart';
-import 'package:flutter_app/widgets/message/item/system_message.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../db/extension/conversation.dart';
 import '../db/extension/message_category.dart';
+import '../enum/message_category.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
@@ -16,6 +15,7 @@ import '../ui/home/local_notification_center.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
+import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
 import 'account_server.dart';
 

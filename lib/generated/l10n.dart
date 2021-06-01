@@ -1759,6 +1759,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `You can't send messages to this group because you're no longer a participant.`
+  String get groupCantSendDes {
+    return Intl.message(
+      'You can\'t send messages to this group because you\'re no longer a participant.',
+      name: 'groupCantSendDes',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

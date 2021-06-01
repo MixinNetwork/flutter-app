@@ -169,5 +169,6 @@
   "settingThemeNight": "Dark",
   "settingThemeLight": "Light",
   "settingThemeAuto": "Follow system",
-  "settingTheme": "Theme"
+  "settingTheme": "Theme",
+  "groupCantSendDes": "You can't send messages to this group because you're no longer a participant."
 }

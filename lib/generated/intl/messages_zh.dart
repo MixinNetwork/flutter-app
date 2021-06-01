@@ -126,6 +126,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
         "group": MessageLookupByLibrary.simpleMessage("群组"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
+        "groupCantSendDes":
+            MessageLookupByLibrary.simpleMessage("您不能发送消息，因为您已经不再是此群组成员。"),
         "groupOwner": MessageLookupByLibrary.simpleMessage("群主"),
         "groupParticipants": MessageLookupByLibrary.simpleMessage("群成员"),
         "groupPopMenuDismissAdmin":

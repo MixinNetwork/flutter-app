@@ -164,5 +164,6 @@
   "settingThemeNight": "暗黑",
   "settingThemeLight": "浅色",
   "settingThemeAuto": "跟随系统",
-  "settingTheme": "主题"
+  "settingTheme": "主题",
+  "groupCantSendDes": "您不能发送消息，因为您已经不再是此群组成员。"
 }
