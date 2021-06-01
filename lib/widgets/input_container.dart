@@ -69,7 +69,7 @@ class InputContainer extends HookWidget {
               ], (list) {
                 if (list[0] == null) return true;
                 return list[1] != null;
-              });
+              }).debounceTime(const Duration(milliseconds: 500));
             }, [
               conversationId,
               context.read<MultiAuthCubit>().state.current?.account.userId,
