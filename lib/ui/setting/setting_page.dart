@@ -12,6 +12,7 @@ import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
+import '../../widgets/window/move_window.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
@@ -22,7 +23,10 @@ class SettingPage extends StatelessWidget {
   Widget build(BuildContext context) => SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 64),
+            const SizedBox(
+              height: 64,
+              child: MoveWindow(behavior: HitTestBehavior.opaque),
+            ),
             const _UserProfile(),
             const SizedBox(height: 24),
             Column(

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+
 import 'back_button.dart';
 import 'brightness_observer.dart';
+import 'window/move_window.dart';
 
 class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
   const MixinAppBar({
@@ -19,28 +21,34 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
       fontWeight: FontWeight.w500,
       color: BrightnessData.themeOf(context).accent,
     );
-    return AppBar(
-      toolbarHeight: 64,
-      title: title == null
-          ? null
-          : DefaultTextStyle(
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: BrightnessData.themeOf(context).text,
+    return MoveWindow(
+      child: AppBar(
+        toolbarHeight: 64,
+        title: title == null
+            ? null
+            : DefaultTextStyle(
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: BrightnessData.themeOf(context).text,
+                ),
+                child: title!,
               ),
-              child: title!,
-            ),
-      actions: actions
-          .map((e) => DefaultTextStyle(style: actionTextStyle, child: e))
-          .toList(),
-      elevation: 0,
-      centerTitle: true,
-      backgroundColor: BrightnessData.themeOf(context).primary,
-      leading: Builder(
-        builder: (context) => ModalRoute.of(context)?.canPop ?? false
-            ? const MixinBackButton()
-            : const SizedBox(width: 56),
+        actions: actions
+            .map((e) => MoveWindowBarrier(
+                  child: DefaultTextStyle(style: actionTextStyle, child: e),
+                ))
+            .toList(),
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: BrightnessData.themeOf(context).primary,
+        leading: MoveWindowBarrier(
+          child: Builder(
+            builder: (context) => ModalRoute.of(context)?.canPop ?? false
+                ? const MixinBackButton()
+                : const SizedBox(width: 56),
+          ),
+        ),
       ),
     );
   }

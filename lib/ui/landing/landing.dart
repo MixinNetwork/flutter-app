@@ -6,6 +6,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
+import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
@@ -28,6 +29,8 @@ class LandingPage extends StatelessWidget {
             const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(35, 39, 43, 1),
           ),
+          // To detect window move event.
+          appBar: const MixinAppBar(),
           body: Center(
             child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
               converter: (state) => state.status,
