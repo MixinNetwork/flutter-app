@@ -601,8 +601,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: a5c3fa0e9268b4bcf7330fe7a440f3ef4664671d
-      resolved-ref: a5c3fa0e9268b4bcf7330fe7a440f3ef4664671d
+      ref: "60018b47b8ac1b9ca4f8a355180155fffc13fe9a"
+      resolved-ref: "60018b47b8ac1b9ca4f8a355180155fffc13fe9a"
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"
