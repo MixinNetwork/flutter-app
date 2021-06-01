@@ -6,7 +6,7 @@ import 'signal_database.dart';
 import 'signal_vo_extension.dart';
 
 class IdentityKeyUtil {
-  static Future generateIdentityKeyPair(
+  static Future<void> generateIdentityKeyPair(
       SignalDatabase db, List<int> privateKey) async {
     final registrationId = generateRegistrationId(false);
     CryptoKeyValue.instance.localRegistrationId = registrationId;

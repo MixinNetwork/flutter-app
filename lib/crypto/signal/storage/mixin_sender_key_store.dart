@@ -38,8 +38,8 @@ class MixinSenderKeyStore extends SenderKeyStore {
         record: record.serialize()));
   }
 
-  void removeSenderKey(SenderKeyName senderKeyName) {
-    senderKeyDao.deleteByGroupIdAndSenderId(
+  Future<void> removeSenderKey(SenderKeyName senderKeyName) async {
+    await senderKeyDao.deleteByGroupIdAndSenderId(
         senderKeyName.groupId, senderKeyName.sender.toString());
   }
 }

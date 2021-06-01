@@ -154,21 +154,18 @@ class DecryptMessage extends Injector {
     final deviceId = data.sessionId.getDeviceId();
     final composeMessageData = _signalProtocol.decodeMessageData(data.data);
     try {
-      _signalProtocol.decrypt(
+      await _signalProtocol.decrypt(
           data.conversationId,
           data.senderId,
           composeMessageData.keyType,
           composeMessageData.cipher,
           data.category?.toString() ?? '',
           data.sessionId, (plaintext) async {
-        if (data.category == MessageCategory.signalKey &&
-            data.senderId != accountId) {
-          // publish sender key change
-        }
         if (data.category != MessageCategory.signalKey) {
           final plain = utf8.decode(plaintext);
           if (composeMessageData.resendMessageId != null) {
-            // resent
+            await _processReDecryptMessage(
+                data, composeMessageData.resendMessageId!, plain);
           } else {
             await _processDecryptSuccess(data, plain, messageStatus);
           }
@@ -401,7 +398,6 @@ class DecryptMessage extends Injector {
     String plainText,
     MessageStatus status,
   ) async {
-    // todo
     await refreshUsers(<String>[data.senderId]);
 
     if (data.category.isText) {
@@ -899,6 +895,86 @@ class DecryptMessage extends Injector {
         createdAt: data.createdAt,
       );
       await database.messagesDao.insert(message, data.senderId);
+    }
+  }
+
+  Future<void> _processReDecryptMessage(
+      BlazeMessageData data, String messageId, String plaintext) async {
+    if (data.category == MessageCategory.signalText) {
+      await database.messageMentionsDao.parseMentionData(
+        plaintext,
+        messageId,
+        data.conversationId,
+        data.senderId,
+      );
+      await database.messagesDao
+          .updateMessageContentAndStatus(messageId, plaintext, data.status);
+    } else if (data.category == MessageCategory.signalPost) {
+      await database.messagesDao
+          .updateMessageContentAndStatus(messageId, plaintext, data.status);
+    } else if (data.category == MessageCategory.signalLocation) {
+      await database.messagesDao
+          .updateMessageContentAndStatus(messageId, plaintext, data.status);
+    } else if (data.category == MessageCategory.signalImage ||
+        data.category == MessageCategory.signalVideo ||
+        data.category == MessageCategory.signalData ||
+        data.category == MessageCategory.signalAudio) {
+      final attachment =
+          AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plaintext));
+      final messagesCompanion = MessagesCompanion(
+          status: Value(data.status),
+          content: Value(attachment.attachmentId),
+          mediaMimeType: Value(attachment.mimeType),
+          mediaSize: Value(attachment.size),
+          mediaStatus: const Value(MediaStatus.canceled),
+          mediaWidth: Value(attachment.width),
+          mediaHeight: Value(attachment.height),
+          mediaDigest: Value(attachment.digest),
+          mediaKey: Value(attachment.key),
+          mediaWaveform: Value(attachment.waveform),
+          name: Value(attachment.name),
+          thumbImage: Value(attachment.thumbnail),
+          mediaDuration: Value(attachment.duration.toString()));
+      await database.messagesDao
+          .updateAttachmentMessage(messageId, messagesCompanion);
+    } else if (data.category == MessageCategory.signalSticker) {
+      final plain = await _decodeWithIsolate(plaintext);
+      final stickerMessage =
+          StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final sticker = await database.stickerDao
+          .getStickerByUnique(stickerMessage.stickerId);
+      if (sticker == null) {
+        await refreshSticker(stickerMessage.stickerId);
+      }
+      await database.messagesDao.updateStickerMessage(
+          messageId, data.status, stickerMessage.stickerId);
+    } else if (data.category == MessageCategory.signalContact) {
+      final plain = await _decodeWithIsolate(plaintext);
+      final contactMessage =
+          ContactMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      await database.messagesDao
+          .updateContactMessage(messageId, data.status, contactMessage.userId);
+    } else if (data.category == MessageCategory.signalLive) {
+      final plain = await _decodeWithIsolate(plaintext);
+      final liveMessage =
+          LiveMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      await database.messagesDao.updateLiveMessage(
+          messageId,
+          liveMessage.width,
+          liveMessage.height,
+          liveMessage.url,
+          liveMessage.thumbUrl,
+          data.status);
+    }
+    if (await database.messagesDao
+            .countMessageByQuoteId(data.conversationId, messageId) >
+        0) {
+      final messageItem = await database.messagesDao
+          .findMessageItemById(data.conversationId, messageId);
+      if (messageItem != null) {
+        await database.messagesDao.updateQuoteContentByQuoteId(
+            data.conversationId, messageId, messageItem.toJson());
+      }
     }
   }
 

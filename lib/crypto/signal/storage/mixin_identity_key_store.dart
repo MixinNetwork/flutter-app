@@ -89,7 +89,7 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
     return true;
   }
 
-  void removeIdentity(SignalProtocolAddress address) {
-    identityDao.deleteByAddress(address.getName());
+  Future<void> removeIdentity(SignalProtocolAddress address) async {
+    await identityDao.deleteByAddress(address.getName());
   }
 }

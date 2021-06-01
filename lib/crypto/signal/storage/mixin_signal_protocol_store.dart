@@ -103,7 +103,7 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
           SignalProtocolAddress address, IdentityKey? identityKey) async =>
       identityKeyStore.saveIdentity(address, identityKey);
 
-  void removeIdentity(SignalProtocolAddress address) {
-    identityKeyStore.removeIdentity(address);
+  Future<void> removeIdentity(SignalProtocolAddress address) async {
+    await identityKeyStore.removeIdentity(address);
   }
 }

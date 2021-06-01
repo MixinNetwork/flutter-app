@@ -441,12 +441,10 @@ class Sender {
         await database.participantSessionDao
             .emptyStatusByConversationId(data.conversationId);
       });
-      signalProtocol.clearSenderKey(data.conversationId, accountId);
-      // TODO publish signal key change
+      await signalProtocol.clearSenderKey(data.conversationId, accountId);
     } else if (action == ProcessSignalKeyAction.addParticipant) {
       final userIds = <String>[participantId!];
       await refreshSession(data.conversationId, userIds);
-      // TODO publish signal key change
     }
   }
 

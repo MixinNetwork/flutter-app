@@ -276,12 +276,101 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
           .map((row) => row.read<String>('message_id'))
           .get();
 
+  Future<int> countMessageByQuoteId(String conversationId, String messageId) =>
+      (db.customSelect(
+        'SELECT count(message_id) FROM messages WHERE conversation_id = :conversationId AND quote_message_id = :messageId AND quote_content IS NULL',
+        variables: [
+          Variable.withString(conversationId),
+          Variable.withString(messageId),
+        ],
+      )).map((row) => row.read<int>('count(message_id)')).getSingle();
+
+  Future<int> updateQuoteContentByQuoteId(
+          String conversationId, String messageId, String content) =>
+      db.customUpdate(
+        'UPDATE messages SET quote_content = :content WHERE conversation_id = :conversationId AND quote_message_id = :messageId',
+        variables: [
+          Variable.withString(conversationId),
+          Variable.withString(messageId),
+          Variable.withString(content),
+        ],
+        updates: {db.messages},
+        updateKind: UpdateKind.update,
+      );
+
   Future<int> updateMessageContent(String messageId, String encoded) =>
       db.customUpdate(
         'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
         variables: [
           Variable.withString(encoded),
           Variable.withString(messageId)
+        ],
+        updates: {db.messages},
+        updateKind: UpdateKind.update,
+      );
+
+  Future<int> updateMessageContentAndStatus(
+          String messageId, String content, MessageStatus status) =>
+      db.customUpdate(
+        'UPDATE messages SET content = :content, status = :status WHERE message_id = :id AND category != \'MESSAGE_RECALL\'',
+        variables: [
+          Variable.withString(content),
+          Variable.withString(
+              const MessageStatusTypeConverter().mapToSql(status)!),
+          Variable.withString(messageId),
+        ],
+        updates: {db.messages},
+        updateKind: UpdateKind.update,
+      );
+
+  Future<int> updateAttachmentMessage(
+          String messageId, MessagesCompanion messagesCompanion) async =>
+      (update(db.messages)..where((t) => t.messageId.equals(messageId)))
+          .write(messagesCompanion);
+
+  Future<int> updateStickerMessage(
+          String messageId, MessageStatus status, String stickerId) =>
+      db.customUpdate(
+        'UPDATE messages SET sticker_id = :stickerId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
+        variables: [
+          Variable.withString(stickerId),
+          Variable.withString(
+              const MessageStatusTypeConverter().mapToSql(status)!),
+          Variable.withString(messageId),
+        ],
+        updates: {db.messages},
+        updateKind: UpdateKind.update,
+      );
+
+  Future<int> updateContactMessage(
+          String messageId, MessageStatus status, String sharedUserId) =>
+      db.customUpdate(
+        'UPDATE messages SET shared_user_id = :sharedUserId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
+        variables: [
+          Variable.withString(sharedUserId),
+          Variable.withString(
+              const MessageStatusTypeConverter().mapToSql(status)!),
+          Variable.withString(messageId),
+        ],
+        updates: {db.messages},
+        updateKind: UpdateKind.update,
+      );
+
+  Future<int> updateLiveMessage(String messageId, int width, int height,
+          String url, String thumbUrl, MessageStatus status) =>
+      db.customUpdate(
+        '''
+    UPDATE messages SET media_width = :width, media_height = :height, media_url=:url, thumb_url = :thumbUrl, status = :status 
+    WHERE message_id = :messageId AND category != 'SIGNAL_LIVE'
+    ''',
+        variables: [
+          Variable.withInt(width),
+          Variable.withInt(height),
+          Variable.withString(url),
+          Variable.withString(thumbUrl),
+          Variable.withString(
+              const MessageStatusTypeConverter().mapToSql(status)!),
+          Variable.withString(messageId),
         ],
         updates: {db.messages},
         updateKind: UpdateKind.update,
