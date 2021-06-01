@@ -25,13 +25,12 @@ class ParticipantsDao extends DatabaseAccessor<MixinDatabase>
   Stream<List<ParticipantUser>> watchParticipants(String conversationId) =>
       db.getGroupParticipants(conversationId).watch();
 
-  Future<Participant?> findParticipantById(
-          String conversationId, String userId) async =>
+  SimpleSelectStatement<Participants, Participant> findParticipantById(
+          String conversationId, String userId) =>
       (select(db.participants)
-            ..where((tbl) =>
-                tbl.conversationId.equals(conversationId) &
-                tbl.userId.equals(userId)))
-          .getSingleOrNull();
+        ..where((tbl) =>
+            tbl.conversationId.equals(conversationId) &
+            tbl.userId.equals(userId)));
 
   Future<String?> findJoinedConversationId(String userId) async => db
       .customSelect(

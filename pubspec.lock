@@ -42,7 +42,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.7.0"
+    version: "2.6.1"
   bloc:
     dependency: "direct main"
     description:
@@ -589,7 +589,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.3.0"
   mime:
     dependency: "direct main"
     description:
@@ -601,8 +601,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: a5c3fa0e9268b4bcf7330fe7a440f3ef4664671d
-      resolved-ref: a5c3fa0e9268b4bcf7330fe7a440f3ef4664671d
+      ref: "60018b47b8ac1b9ca4f8a355180155fffc13fe9a"
+      resolved-ref: "60018b47b8ac1b9ca4f8a355180155fffc13fe9a"
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"
@@ -983,7 +983,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "0.3.0"
   timezone:
     dependency: transitive
     description:

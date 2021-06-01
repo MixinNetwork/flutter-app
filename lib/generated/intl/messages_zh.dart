@@ -126,6 +126,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
         "group": MessageLookupByLibrary.simpleMessage("群组"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
+        "groupCantSendDes":
+            MessageLookupByLibrary.simpleMessage("您不能发送消息，因为您已经不再是此群组成员。"),
         "groupOwner": MessageLookupByLibrary.simpleMessage("群主"),
         "groupParticipants": MessageLookupByLibrary.simpleMessage("群成员"),
         "groupPopMenuDismissAdmin":
@@ -202,6 +204,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
         "searchRelatedMessage": m15,
+        "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
+        "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
+        "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),
+        "settingThemeNight": MessageLookupByLibrary.simpleMessage("暗黑"),
         "shareContact": MessageLookupByLibrary.simpleMessage("发送名片"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("分享的应用"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒体内容"),
@@ -222,6 +228,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unPin": MessageLookupByLibrary.simpleMessage("取消置顶"),
         "unblock": MessageLookupByLibrary.simpleMessage("解除屏蔽"),
         "unread": MessageLookupByLibrary.simpleMessage("未读消息"),
+        "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "video": MessageLookupByLibrary.simpleMessage("视频"),
         "videoCall": MessageLookupByLibrary.simpleMessage("语音电话"),
         "videos": MessageLookupByLibrary.simpleMessage("视频"),

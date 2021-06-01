@@ -7,6 +7,7 @@ import 'package:stream_transform/stream_transform.dart';
 
 import '../db/extension/conversation.dart';
 import '../db/extension/message_category.dart';
+import '../enum/message_category.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
@@ -14,6 +15,7 @@ import '../ui/home/local_notification_center.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
+import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
 import 'account_server.dart';
 
@@ -78,24 +80,36 @@ class NotificationService extends WidgetsBindingObserver {
 
             var body = event.content;
             if (context.read<MultiAuthCubit>().state.currentMessagePreview) {
-              final isGroup = event.category == ConversationCategory.group ||
-                  event.senderId != event.ownerUserId;
+              if (event.type == MessageCategory.systemConversation) {
+                body = generateSystemText(
+                  actionName: event.actionName,
+                  senderIsCurrentUser:
+                      event.senderId == context.read<AccountServer>().userId,
+                  relationship: event.relationship,
+                  participantFullName: event.participantFullName,
+                  senderFullName: event.senderFullName,
+                  groupName: event.groupName,
+                );
+              } else {
+                final isGroup = event.category == ConversationCategory.group ||
+                    event.senderId != event.ownerUserId;
 
-              if (event.type.isText) {
-                final mentionCache = context.read<MentionCache>();
-                body = mentionCache.replaceMention(
-                  event.content,
-                  await mentionCache.checkMentionCache({event.content!}),
+                if (event.type.isText) {
+                  final mentionCache = context.read<MentionCache>();
+                  body = mentionCache.replaceMention(
+                    event.content,
+                    await mentionCache.checkMentionCache({event.content!}),
+                  );
+                }
+                body = await messagePreviewOptimize(
+                  event.status,
+                  event.type,
+                  body,
+                  false,
+                  isGroup,
+                  event.senderFullName,
                 );
               }
-              body = await messagePreviewOptimize(
-                event.status,
-                event.type,
-                body,
-                false,
-                isGroup,
-                event.senderFullName,
-              );
             }
 
             await showNotification(

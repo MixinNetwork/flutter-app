@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../account/account_server.dart';
 import '../bloc/bloc_converter.dart';
@@ -36,6 +37,66 @@ import 'sticker_page/sticker_page.dart';
 
 class InputContainer extends HookWidget {
   const InputContainer({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (state) => state != null,
+    );
+
+    final hasParticipant = useStream(
+            useMemoized(() {
+              final database = context.read<AccountServer>().database;
+              return CombineLatestStream([
+                database.conversationDao
+                    .conversationItem(conversationId!)
+                    .watchSingleOrNull(),
+                database.participantsDao
+                    .findParticipantById(
+                      conversationId,
+                      context
+                          .read<MultiAuthCubit>()
+                          .state
+                          .current!
+                          .account
+                          .userId,
+                    )
+                    .watchSingleOrNull(),
+              ], (list) {
+                if (list[0] == null) return true;
+                return list[1] != null;
+              });
+            }, [
+              conversationId,
+              context.read<MultiAuthCubit>().state.current?.account.userId,
+            ]),
+            initialData: true)
+        .data!;
+
+    return hasParticipant
+        ? const _InputContainer()
+        : Container(
+            decoration: BoxDecoration(
+              color: BrightnessData.themeOf(context).primary,
+            ),
+            height: 56,
+            alignment: Alignment.center,
+            child: Text(
+              Localization.of(context).groupCantSendDes,
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).secondaryText,
+              ),
+            ),
+          );
+  }
+}
+
+class _InputContainer extends HookWidget {
+  const _InputContainer({
     Key? key,
   }) : super(key: key);
 
@@ -120,40 +181,38 @@ class InputContainer extends HookWidget {
                     constraints: const BoxConstraints(
                       minHeight: 56,
                     ),
-                    child: DecoratedBox(
+                    child: Container(
                       decoration: BoxDecoration(
                         color: BrightnessData.themeOf(context).primary,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            _FileButton(
-                                actionColor:
-                                    BrightnessData.themeOf(context).icon),
-                            const SizedBox(width: 6),
-                            const _StickerButton(),
-                            const SizedBox(width: 16),
-                            Expanded(
-                              child: ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  minHeight: 32,
-                                ),
-                                child: const _SendTextField(),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          _FileButton(
+                              actionColor:
+                                  BrightnessData.themeOf(context).icon),
+                          const SizedBox(width: 6),
+                          const _StickerButton(),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                minHeight: 32,
                               ),
+                              child: const _SendTextField(),
                             ),
-                            const SizedBox(width: 16),
-                            ActionButton(
-                              name: Resources.assetsImagesIcSendSvg,
-                              color: BrightnessData.themeOf(context).icon,
-                              onTap: () => _sendMessage(context),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 16),
+                          ActionButton(
+                            name: Resources.assetsImagesIcSendSvg,
+                            color: BrightnessData.themeOf(context).icon,
+                            onTap: () => _sendMessage(context),
+                          ),
+                        ],
                       ),
                     ),
                   ),

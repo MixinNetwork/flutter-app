@@ -1719,6 +1719,66 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Dark`
+  String get settingThemeNight {
+    return Intl.message(
+      'Dark',
+      name: 'settingThemeNight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Light`
+  String get settingThemeLight {
+    return Intl.message(
+      'Light',
+      name: 'settingThemeLight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Follow system`
+  String get settingThemeAuto {
+    return Intl.message(
+      'Follow system',
+      name: 'settingThemeAuto',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Theme`
+  String get settingTheme {
+    return Intl.message(
+      'Theme',
+      name: 'settingTheme',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You can't send messages to this group because you're no longer a participant.`
+  String get groupCantSendDes {
+    return Intl.message(
+      'You can\'t send messages to this group because you\'re no longer a participant.',
+      name: 'groupCantSendDes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `User not found`
+  String get userNotFound {
+    return Intl.message(
+      'User not found',
+      name: 'userNotFound',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

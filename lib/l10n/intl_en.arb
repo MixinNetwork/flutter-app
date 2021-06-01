@@ -165,5 +165,11 @@
   "conversationAddBot": "+ Add Bot",
   "unread": "New Messages",
   "yesterday": "Yesterday",
-  "today": "Today"
+  "today": "Today",
+  "settingThemeNight": "Dark",
+  "settingThemeLight": "Light",
+  "settingThemeAuto": "Follow system",
+  "settingTheme": "Theme",
+  "groupCantSendDes": "You can't send messages to this group because you're no longer a participant.",
+  "userNotFound": "User not found"
 }

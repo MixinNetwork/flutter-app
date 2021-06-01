@@ -50,7 +50,7 @@ class StrangerMessage extends StatelessWidget {
                       .appsDao
                       .findUserById(message.appId!);
                   if (app == null) return;
-                  await openUri(app.homeUri);
+                  await openUri(context, app.homeUri);
                 } else {
                   await runFutureWithToast(
                     context,

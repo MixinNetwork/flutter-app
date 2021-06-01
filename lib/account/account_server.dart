@@ -29,7 +29,6 @@ import '../db/converter/message_category_type_converter.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
@@ -688,7 +687,7 @@ class AccountServer {
     refreshUserIdSet.clear();
     final res = await client.circleApi.getCircles();
     res.data.forEach((circle) async {
-      await database.circlesDao.insertUpdate(Circle(
+      await database.circlesDao.insertUpdate(db.Circle(
           circleId: circle.circleId,
           name: circle.name,
           createdAt: circle.createdAt,
@@ -724,9 +723,9 @@ class AccountServer {
   Future<void> _updateStickerAlbums(String albumId) async {
     try {
       final response = await client.accountApi.getStickersByAlbumId(albumId);
-      final relationships = <StickerRelationship>[];
+      final relationships = <db.StickerRelationship>[];
       response.data.forEach((sticker) {
-        relationships.add(StickerRelationship(
+        relationships.add(db.StickerRelationship(
             albumId: albumId, stickerId: sticker.stickerId));
         database.stickerDao.insert(db.Sticker(
           stickerId: sticker.stickerId,
@@ -1131,7 +1130,7 @@ class AccountServer {
       Future.wait([
         database.messageMentionsDao.markMentionRead(messageId),
         database.jobsDao.insert(
-          Job(
+          db.Job(
             jobId: const Uuid().v4(),
             action: createMessage,
             createdAt: DateTime.now(),
@@ -1143,4 +1142,7 @@ class AccountServer {
           ),
         )
       ]);
+
+  Future<List<db.User>?> refreshUsers(List<String> ids) =>
+      _decryptMessage.refreshUsers(ids);
 }

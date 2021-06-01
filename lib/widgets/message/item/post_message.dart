@@ -108,7 +108,7 @@ class PostPreview extends StatelessWidget {
             extensionSet: ExtensionSet.gitHubWeb,
             styleSheet: markdownStyleSheet(context),
             onTapLink: (String text, String? href, String title) =>
-                openUri(href!),
+                openUri(context, href!),
           ),
         ),
       );

@@ -53,11 +53,11 @@ class SettingPage extends StatelessWidget {
                             ResponsiveNavigatorCubit.dataAndStorageUsagePage,
                         title: Localization.of(context).dataAndStorageUsage,
                       ),
-                      // _Item(
-                      //   assetName: Resources.assetsImagesIcAppearanceSvg,
-                      //   pageName: ResponsiveNavigatorCubit.appearancePage,
-                      //   title: Localization.of(context).appearance,
-                      // ),
+                      _Item(
+                        assetName: Resources.assetsImagesIcAppearanceSvg,
+                        pageName: ResponsiveNavigatorCubit.appearancePage,
+                        title: Localization.of(context).appearance,
+                      ),
                       _Item(
                         assetName: Resources.assetsImagesIcAboutSvg,
                         pageName: ResponsiveNavigatorCubit.aboutPage,

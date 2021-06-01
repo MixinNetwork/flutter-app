@@ -18,8 +18,8 @@ class SecretMessage extends StatelessWidget {
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () =>
-                  openUri(Localization.of(context).aboutEncryptedInfoUrl),
+              onTap: () => openUri(
+                  context, Localization.of(context).aboutEncryptedInfoUrl),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: BrightnessData.themeOf(context).encrypt,

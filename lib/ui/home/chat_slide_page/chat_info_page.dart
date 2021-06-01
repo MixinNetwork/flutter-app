@@ -211,17 +211,17 @@ class ChatInfoPage extends HookWidget {
                         onTap: () async {
                           final isGroup = conversation.isGroup ?? false;
                           if (muting) {
-                            return runFutureWithToast(
-                                context,
-                                context
-                                    .read<AccountServer>()
-                                    .unMuteConversation(
-                                      conversationId: isGroup
-                                          ? conversation.conversationId
-                                          : null,
-                                      userId:
-                                          isGroup ? null : conversation.userId,
-                                    ));
+                            await runFutureWithToast(
+                              context,
+                              context.read<AccountServer>().unMuteConversation(
+                                    conversationId: isGroup
+                                        ? conversation.conversationId
+                                        : null,
+                                    userId:
+                                        isGroup ? null : conversation.userId,
+                                  ),
+                            );
+                            return;
                           }
 
                           final result = await showMixinDialog<int?>(
@@ -576,12 +576,20 @@ class _AddToContactsButton extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                     ),
                   ),
-                  onPressed: () => runFutureWithToast(
-                      context,
-                      context.read<AccountServer>().addUser(
-                            conversation.userId!,
-                            conversation.user?.fullName,
-                          )),
+                  onPressed: () {
+                    final username = conversation.user?.fullName ??
+                        conversation.conversation?.validName;
+                    assert(username != null,
+                        'ContactsAdd: username should not be null.');
+                    assert(conversation.isGroup != true,
+                        'ContactsAdd conversation should not be a group.');
+                    runFutureWithToast(
+                        context,
+                        context.read<AccountServer>().addUser(
+                              conversation.userId!,
+                              username,
+                            ));
+                  },
                   child: Text(
                     conversation.isBot!
                         ? Localization.of(context).conversationAddBot

@@ -9,18 +9,18 @@ class BrightnessObserver extends StatelessWidget {
     this.curve = Curves.linear,
     this.onEnd,
     required this.child,
-    this.forceBrightness,
     required this.lightThemeData,
     required this.darkThemeData,
+    this.forceBrightness,
   }) : super(key: key);
 
   final Duration duration;
   final Curve curve;
   final VoidCallback? onEnd;
   final Widget child;
-  final Brightness? forceBrightness;
   final BrightnessThemeData lightThemeData;
   final BrightnessThemeData darkThemeData;
+  final Brightness? forceBrightness;
 
   @override
   Widget build(BuildContext context) => TweenAnimationBuilder<double>(
@@ -28,7 +28,7 @@ class BrightnessObserver extends StatelessWidget {
         curve: curve,
         onEnd: onEnd,
         tween: Tween<double>(
-          end: {
+          end: const {
             Brightness.light: 0.0,
             Brightness.dark: 1.0,
           }[forceBrightness ?? MediaQuery.platformBrightnessOf(context)],

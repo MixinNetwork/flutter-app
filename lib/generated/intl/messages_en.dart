@@ -151,6 +151,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "group": MessageLookupByLibrary.simpleMessage("Group"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
+        "groupCantSendDes": MessageLookupByLibrary.simpleMessage(
+            "You can\'t send messages to this group because you\'re no longer a participant."),
         "groupOwner": MessageLookupByLibrary.simpleMessage("owner"),
         "groupParticipants":
             MessageLookupByLibrary.simpleMessage("Participants"),
@@ -237,6 +239,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchMessageHistory":
             MessageLookupByLibrary.simpleMessage("Search Conversation"),
         "searchRelatedMessage": m15,
+        "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
+        "settingThemeAuto":
+            MessageLookupByLibrary.simpleMessage("Follow system"),
+        "settingThemeLight": MessageLookupByLibrary.simpleMessage("Light"),
+        "settingThemeNight": MessageLookupByLibrary.simpleMessage("Dark"),
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
@@ -258,6 +265,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unPin": MessageLookupByLibrary.simpleMessage("UnPin"),
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
         "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
+        "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videoCall": MessageLookupByLibrary.simpleMessage("Video call"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
