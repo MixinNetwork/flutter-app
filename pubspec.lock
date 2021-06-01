@@ -578,8 +578,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "107b696d07a95d9f0454e9746238bb6daeab00ea"
-      resolved-ref: "107b696d07a95d9f0454e9746238bb6daeab00ea"
+      ref: edcc10fc8c8c8f00197d0237623125781fc53210
+      resolved-ref: edcc10fc8c8c8f00197d0237623125781fc53210
       url: "https://github.com/MixinNetwork/libsignal_protocol_dart.git"
     source: git
     version: "0.4.0-nullsafety.0"
@@ -624,7 +624,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.3.0"
   mime:
     dependency: "direct main"
     description:
@@ -1011,7 +1011,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "0.3.0"
   timezone:
     dependency: transitive
     description:

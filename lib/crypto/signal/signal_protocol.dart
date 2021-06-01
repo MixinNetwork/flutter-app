@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 // ignore: implementation_imports
-import 'package:libsignal_protocol_dart/src/InvalidMessageException.dart';
+import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:moor/moor.dart';
 
 import '../../blaze/blaze_message.dart';
@@ -109,14 +109,14 @@ class SignalProtocol {
         SessionCipher.fromStore(mixinSignalProtocolStore, address);
     debugPrint('decrypt category: $category, dataType: $dataType');
     if (category == MessageCategory.signalKey.toString()) {
-      if (dataType == CiphertextMessage.PREKEY_TYPE) {
+      if (dataType == CiphertextMessage.prekeyType) {
         sessionCipher.decryptWithCallback(PreKeySignalMessage(cipherText),
             (plainText) {
           processGroupSession(groupId, address,
               SenderKeyDistributionMessageWrapper.fromSerialized(plainText));
           callback.call(plainText);
         });
-      } else if (dataType == CiphertextMessage.WHISPER_TYPE) {
+      } else if (dataType == CiphertextMessage.whisperType) {
         sessionCipher.decryptFromSignalWithCallback(
             SignalMessage.fromSerialized(cipherText), (plaintext) {
           processGroupSession(groupId, address,
@@ -125,13 +125,13 @@ class SignalProtocol {
         });
       }
     } else {
-      if (dataType == CiphertextMessage.PREKEY_TYPE) {
+      if (dataType == CiphertextMessage.prekeyType) {
         sessionCipher.decryptWithCallback(
             PreKeySignalMessage(cipherText), callback);
-      } else if (dataType == CiphertextMessage.WHISPER_TYPE) {
+      } else if (dataType == CiphertextMessage.whisperType) {
         sessionCipher.decryptFromSignalWithCallback(
             SignalMessage.fromSerialized(cipherText), callback);
-      } else if (dataType == CiphertextMessage.SENDERKEY_TYPE) {
+      } else if (dataType == CiphertextMessage.senderKeyType) {
         decryptGroupMessage(groupId, address, cipherText, callback);
       } else {
         throw InvalidMessageException('Unknown type: $dataType');
@@ -221,7 +221,7 @@ class SignalProtocol {
     }
 
     final data = encodeMessageData(ComposeMessageData(
-        CiphertextMessage.SENDERKEY_TYPE, Uint8List.fromList(cipher)));
+        CiphertextMessage.senderKeyType, Uint8List.fromList(cipher)));
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
       messageId: message.messageId,
@@ -253,7 +253,7 @@ class SignalProtocol {
   String encodeMessageData(ComposeMessageData data) {
     if (data.resendMessageId == null) {
       final header = Uint8List.fromList(<int>[
-        CiphertextMessage.CURRENT_VERSION,
+        CiphertextMessage.currentVersion,
         data.keyType,
         0,
         0,
@@ -266,7 +266,7 @@ class SignalProtocol {
       return base64.encode(cipherText);
     } else {
       final header = Uint8List.fromList(<int>[
-        CiphertextMessage.CURRENT_VERSION,
+        CiphertextMessage.currentVersion,
         data.keyType,
         1,
         0,
@@ -285,7 +285,7 @@ class SignalProtocol {
     final cipherText = base64.decode(encoded);
     final header = cipherText.sublist(0, 8);
     final version = header[0].toInt();
-    if (version != CiphertextMessage.CURRENT_VERSION) {
+    if (version != CiphertextMessage.currentVersion) {
       throw InvalidMessageException('Unknown version: $version');
     }
     final dataType = header[1].toInt();

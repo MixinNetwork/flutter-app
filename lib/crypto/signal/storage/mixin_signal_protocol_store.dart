@@ -67,18 +67,18 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
       signedPreKeyStore.loadSignedPreKeys();
 
   @override
-  void removePreKey(int preKeyId) {
-    preKeyStore.removePreKey(preKeyId);
+  Future<void> removePreKey(int preKeyId) async {
+    await preKeyStore.removePreKey(preKeyId);
   }
 
   @override
-  void removeSignedPreKey(int signedPreKeyId) {
-    signedPreKeyStore.removeSignedPreKey(signedPreKeyId);
+  Future<void> removeSignedPreKey(int signedPreKeyId) async {
+    await signedPreKeyStore.removeSignedPreKey(signedPreKeyId);
   }
 
   @override
-  void storePreKey(int preKeyId, PreKeyRecord record) {
-    preKeyStore.storePreKey(preKeyId, record);
+  Future<void> storePreKey(int preKeyId, PreKeyRecord record) async {
+    await preKeyStore.storePreKey(preKeyId, record);
   }
 
   @override
@@ -88,8 +88,9 @@ class MixinSignalProtocolStore extends SignalProtocolStore {
   }
 
   @override
-  void storeSignedPreKey(int signedPreKeyId, SignedPreKeyRecord record) {
-    signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);
+  Future<void> storeSignedPreKey(
+      int signedPreKeyId, SignedPreKeyRecord record) async {
+    await signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);
   }
 
   @override

@@ -44,10 +44,10 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
       return identityKey == local;
     }
     switch (direction) {
-      case Direction.SENDING:
+      case Direction.sending:
         return isTrustedForSending(
             identityKey!, await identityDao.getIdentityByAddress(theirAddress));
-      case Direction.RECEIVING:
+      case Direction.receiving:
         return true;
       default:
         throw AssertionError('Unknown direction: $direction');

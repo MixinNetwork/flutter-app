@@ -1,6 +1,8 @@
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 // ignore: implementation_imports
-import 'package:libsignal_protocol_dart/src/util/Medium.dart';
+import 'package:libsignal_protocol_dart/src/util/key_helper.dart' as helper;
+// ignore: implementation_imports
+import 'package:libsignal_protocol_dart/src/util/medium.dart';
 
 import '../crypto_key_value.dart';
 import 'signal_database.dart';
@@ -12,7 +14,7 @@ class PreKeyUtil {
   static Future<List<PreKeyRecord>> generatePreKeys() async {
     final preKeyStore = MixinPreKeyStore(SignalDatabase.get);
     final preKeyIdOffset = CryptoKeyValue.get.getNextPreKeyId();
-    final records = KeyHelper.generatePreKeys(preKeyIdOffset, batchSize);
+    final records = helper.generatePreKeys(preKeyIdOffset, batchSize);
     final preKeys = <PrekeysCompanion>[];
     for (final r in records) {
       preKeys
@@ -20,7 +22,7 @@ class PreKeyUtil {
     }
     await preKeyStore.storePreKeyList(preKeys);
     CryptoKeyValue.get
-        .setNextPreKeyId((preKeyIdOffset + batchSize + 1) % Medium.MAX_VALUE);
+        .setNextPreKeyId((preKeyIdOffset + batchSize + 1) % maxValue);
     return records;
   }
 
@@ -28,11 +30,9 @@ class PreKeyUtil {
       IdentityKeyPair identityKeyPair, bool active) async {
     final signedPreKeyStore = MixinPreKeyStore(SignalDatabase.get);
     final signedPreKeyId = CryptoKeyValue.get.getNextSignedPreKeyId();
-    final record =
-        KeyHelper.generateSignedPreKey(identityKeyPair, signedPreKeyId);
+    final record = helper.generateSignedPreKey(identityKeyPair, signedPreKeyId);
     await signedPreKeyStore.storeSignedPreKey(signedPreKeyId, record);
-    CryptoKeyValue.get
-        .setNextSignedPreKeyId((signedPreKeyId + 1) % Medium.MAX_VALUE);
+    CryptoKeyValue.get.setNextSignedPreKeyId((signedPreKeyId + 1) % maxValue);
 
     if (active) {
       CryptoKeyValue.get.setActiveSignedPreKeyId(signedPreKeyId);

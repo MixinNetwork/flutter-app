@@ -1,5 +1,5 @@
 // ignore: implementation_imports
-import 'package:libsignal_protocol_dart/src/util/Medium.dart';
+import 'package:libsignal_protocol_dart/src/util/medium.dart';
 
 import '../utils/crypto_util.dart';
 import '../utils/hive_key_values.dart';
@@ -22,11 +22,11 @@ class CryptoKeyValue extends HiveKeyValue {
       box.put(localRegistrationId, registrationId);
 
   int getNextPreKeyId() =>
-      box.get(nextPreKeyId, defaultValue: generateRandomInt(Medium.MAX_VALUE));
+      box.get(nextPreKeyId, defaultValue: generateRandomInt(maxValue));
   void setNextPreKeyId(int preKeyId) => box.put(nextPreKeyId, preKeyId);
 
-  int getNextSignedPreKeyId() => box.get(nextSignedPreKeyId,
-      defaultValue: generateRandomInt(Medium.MAX_VALUE));
+  int getNextSignedPreKeyId() =>
+      box.get(nextSignedPreKeyId, defaultValue: generateRandomInt(maxValue));
   void setNextSignedPreKeyId(int preKeyId) =>
       box.put(nextSignedPreKeyId, preKeyId);
 
