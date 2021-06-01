@@ -5,33 +5,33 @@ import '../utils/crypto_util.dart';
 import '../utils/hive_key_values.dart';
 
 class CryptoKeyValue extends HiveKeyValue {
-  CryptoKeyValue._() : super(hiveCrypto);
+  CryptoKeyValue._() : super(_hiveCrypto);
 
-  static CryptoKeyValue? instance;
+  static CryptoKeyValue? _instance;
 
-  static CryptoKeyValue get get => instance ??= CryptoKeyValue._();
+  static CryptoKeyValue get instance => _instance ??= CryptoKeyValue._();
 
-  static const hiveCrypto = 'crypto_box';
-  static const localRegistrationId = 'local_registration_id';
-  static const nextPreKeyId = 'next_pre_key_id';
-  static const nextSignedPreKeyId = 'next_signed_pre_key_id';
-  static const activeSignedPreKeyId = 'active_signed_pre_key_id';
+  static const _hiveCrypto = 'crypto_box';
+  static const _localRegistrationId = 'local_registration_id';
+  static const _nextPreKeyId = 'next_pre_key_id';
+  static const _nextSignedPreKeyId = 'next_signed_pre_key_id';
+  static const _activeSignedPreKeyId = 'active_signed_pre_key_id';
 
-  int getLocalRegistrationId() => box.get(localRegistrationId, defaultValue: 0);
-  void setLocalRegistrationId(int registrationId) =>
-      box.put(localRegistrationId, registrationId);
+  int get localRegistrationId => box.get(_localRegistrationId, defaultValue: 0);
+  set localRegistrationId(int registrationId) =>
+      box.put(_localRegistrationId, registrationId);
 
-  int getNextPreKeyId() =>
-      box.get(nextPreKeyId, defaultValue: generateRandomInt(maxValue));
-  void setNextPreKeyId(int preKeyId) => box.put(nextPreKeyId, preKeyId);
+  int get nextPreKeyId =>
+      box.get(_nextPreKeyId, defaultValue: generateRandomInt(maxValue));
+  set nextPreKeyId(int preKeyId) => box.put(_nextPreKeyId, preKeyId);
 
-  int getNextSignedPreKeyId() =>
-      box.get(nextSignedPreKeyId, defaultValue: generateRandomInt(maxValue));
-  void setNextSignedPreKeyId(int preKeyId) =>
-      box.put(nextSignedPreKeyId, preKeyId);
+  int get nextSignedPreKeyId =>
+      box.get(_nextSignedPreKeyId, defaultValue: generateRandomInt(maxValue));
+  set nextSignedPreKeyId(int preKeyId) =>
+      box.put(_nextSignedPreKeyId, preKeyId);
 
-  int getActiveSignedPreKeyId() =>
-      box.get(activeSignedPreKeyId, defaultValue: -1);
-  void setActiveSignedPreKeyId(int preKeyId) =>
-      box.put(activeSignedPreKeyId, preKeyId);
+  int get activeSignedPreKeyId =>
+      box.get(_activeSignedPreKeyId, defaultValue: -1);
+  set activeSignedPreKeyId(int preKeyId) =>
+      box.put(_activeSignedPreKeyId, preKeyId);
 }

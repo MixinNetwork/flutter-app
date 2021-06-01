@@ -1,26 +1,26 @@
 import '../utils/hive_key_values.dart';
 
 class AccountKeyValue extends HiveKeyValue {
-  AccountKeyValue._() : super(hiveAccount);
+  AccountKeyValue._() : super(_hiveAccount);
 
-  static AccountKeyValue? instance;
+  static AccountKeyValue? _instance;
 
-  static AccountKeyValue get get => instance ??= AccountKeyValue._();
+  static AccountKeyValue get instance => _instance ??= AccountKeyValue._();
 
-  static const hiveAccount = 'account_box';
-  static const hasSyncCircle = 'has_sync_circle';
-  static const refreshStickerLastTime = 'refreshStickerLastTime';
-  static const primarySessionId = 'primarySessionId';
+  static const _hiveAccount = 'account_box';
+  static const _hasSyncCircle = 'has_sync_circle';
+  static const _refreshStickerLastTime = 'refreshStickerLastTime';
+  static const _primarySessionId = 'primarySessionId';
 
-  bool getHasSyncCircle() => box.get(hasSyncCircle, defaultValue: false);
-  void setHasSyncCircle(bool value) => box.put(hasSyncCircle, value);
+  bool get hasSyncCircle => box.get(_hasSyncCircle, defaultValue: false);
+  set hasSyncCircle(bool value) => box.put(_hasSyncCircle, value);
 
-  int getRefreshStickerLastTime() =>
-      box.get(refreshStickerLastTime, defaultValue: 0);
-  void setRefreshStickerLastTime(int value) =>
-      box.put(refreshStickerLastTime, value);
+  int get refreshStickerLastTime =>
+      box.get(_refreshStickerLastTime, defaultValue: 0);
+  set refreshStickerLastTime(int value) =>
+      box.put(_refreshStickerLastTime, value);
 
-  String? getPrimarySessionId() =>
-      box.get(primarySessionId, defaultValue: null);
-  void setPrimarySessionId(String value) => box.put(primarySessionId, value);
+  String? get primarySessionId =>
+      box.get(_primarySessionId, defaultValue: null);
+  set primarySessionId(String? value) => box.put(_primarySessionId, value);
 }

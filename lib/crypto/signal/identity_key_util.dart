@@ -9,7 +9,7 @@ class IdentityKeyUtil {
   static Future generateIdentityKeyPair(
       SignalDatabase db, List<int> privateKey) async {
     final registrationId = generateRegistrationId(false);
-    CryptoKeyValue.get.setLocalRegistrationId(registrationId);
+    CryptoKeyValue.instance.localRegistrationId = registrationId;
     final identityKeyPair = generateIdentityKeyPairFromPrivate(privateKey);
     final identity = IdentitiesCompanion.insert(
         address: '-1',
