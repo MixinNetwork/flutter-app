@@ -279,6 +279,7 @@ class _ConversationSelector extends HookWidget {
                   color: BrightnessData.themeOf(context).text,
                   fontSize: 14,
                 ),
+                autofocus: true,
                 scrollPadding: EdgeInsets.zero,
                 decoration: InputDecoration(
                   prefixIcon: Padding(
