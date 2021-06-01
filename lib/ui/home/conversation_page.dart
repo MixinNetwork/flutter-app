@@ -969,6 +969,7 @@ class _Item extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 2),
                         SizedBox(
                           height: 20,
                           child: Row(

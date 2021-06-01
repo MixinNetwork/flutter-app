@@ -58,7 +58,7 @@ class ChatBar extends HookWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: const [
                   ConversationName(),
-                  SizedBox(height: 2),
+                  SizedBox(height: 4),
                   ConversationIDOrCount(),
                 ],
               ),
