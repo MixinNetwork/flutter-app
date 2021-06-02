@@ -101,7 +101,7 @@ class VideoMessageWidget extends StatelessWidget {
                               milliseconds: int.parse(message.mediaDuration!));
                           return Positioned(
                             top: 6,
-                            left: 6,
+                            left: isCurrentUser ? 6 : 14,
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 color: const Color.fromRGBO(0, 0, 0, 0.3),
@@ -110,7 +110,7 @@ class VideoMessageWidget extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.all(4),
                                 child: Text(
-                                  '${duration.inMinutes.remainder(60)}:${duration.inSeconds.remainder(60)}',
+                                  formatVideoDuration(duration),
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: BrightnessData.themeOf(context).text,
@@ -125,7 +125,7 @@ class VideoMessageWidget extends StatelessWidget {
                       }),
                       Positioned(
                         bottom: 4,
-                        right: 12,
+                        right: isCurrentUser ? 12 : 4,
                         child: DecoratedBox(
                           decoration: const ShapeDecoration(
                             color: Color.fromRGBO(0, 0, 0, 0.3),
@@ -153,3 +153,6 @@ class VideoMessageWidget extends StatelessWidget {
         },
       );
 }
+
+String formatVideoDuration(Duration duration) =>
+    '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';
