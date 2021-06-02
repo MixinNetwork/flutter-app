@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../account/account_server.dart';
@@ -9,6 +11,8 @@ import '../../../crypto/uuid/uuid.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/extension/user.dart';
 import '../../../db/mixin_database.dart';
+import '../../../generated/l10n.dart';
+import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
 
 class ConversationState extends Equatable {
@@ -16,19 +20,17 @@ class ConversationState extends Equatable {
     required this.conversationId,
     this.userId,
     this.initIndexMessageId,
-    this.isLastReadMessageId = false,
+    this.lastReadMessageId,
     this.conversation,
     this.user,
-    this.showSecret = true,
   });
 
   final String conversationId;
   final String? userId;
   final String? initIndexMessageId;
-  final bool isLastReadMessageId;
+  final String? lastReadMessageId;
   final ConversationItem? conversation;
   final User? user;
-  final bool showSecret;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -59,8 +61,7 @@ class ConversationState extends Equatable {
         initIndexMessageId,
         conversation,
         user,
-        isLastReadMessageId,
-        showSecret,
+        lastReadMessageId,
       ];
 
   ConversationState copyWith({
@@ -68,8 +69,7 @@ class ConversationState extends Equatable {
     final String? userId,
     final String? initIndexMessageId,
     final int? unseenMessageCount,
-    final bool? isLastReadMessageId,
-    final bool? showSecret,
+    final String? lastReadMessageId,
     final ConversationItem? conversation,
     final User? user,
   }) =>
@@ -79,8 +79,7 @@ class ConversationState extends Equatable {
         initIndexMessageId: initIndexMessageId ?? this.initIndexMessageId,
         conversation: conversation ?? this.conversation,
         user: user ?? this.user,
-        isLastReadMessageId: isLastReadMessageId ?? this.isLastReadMessageId,
-        showSecret: showSecret ?? this.showSecret,
+        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
       );
 }
 
@@ -127,7 +126,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .where((event) => event != null)
           .distinct()
           .switchMap((event) => accountServer.database.userDao
-              .findUserById(event!)
+              .userById(event!)
               .watchSingleOrNull())
           .listen((event) => emit(
                 state?.copyWith(user: event),
@@ -144,31 +143,85 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     responsiveNavigatorCubit.clear();
   }
 
-  void selectConversation(
-    String conversationId, [
+  static Future<void> selectConversation(
+    BuildContext context,
+    String conversationId, {
+    ConversationItem? conversation,
     String? initIndexMessageId,
-    bool isLastReadMessageId = false,
-    bool showSecret = true,
-  ]) {
+  }) async {
+    final accountServer = context.read<AccountServer>();
+    final conversationCubit = context.read<ConversationCubit>();
+    final state = conversationCubit.state;
+
+    if (state?.conversationId == conversationId) return;
+
+    final _conversation = conversation ??
+        await accountServer.database.conversationDao
+            .conversationItem(conversationId)
+            .getSingleOrNull();
+
+    if (_conversation == null) {
+      return showToastFailed(context, null);
+    }
+
+    final _initIndexMessageId =
+        initIndexMessageId ?? _conversation.lastReadMessageId;
     final conversationState = ConversationState(
       conversationId: conversationId,
-      initIndexMessageId: initIndexMessageId,
-      isLastReadMessageId: isLastReadMessageId,
-      showSecret: showSecret,
+      conversation: _conversation,
+      initIndexMessageId: _initIndexMessageId,
+      lastReadMessageId: (_conversation.unseenMessageCount ?? 0) > 0
+          ? _initIndexMessageId
+          : null,
     );
-    emit(conversationState);
+
+    conversationCubit.emit(conversationState);
+
     accountServer.selectConversation(conversationId);
-    responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);
+    conversationCubit.responsiveNavigatorCubit
+        .pushPage(ResponsiveNavigatorCubit.chatPage);
   }
 
-  void selectUser(String userId, bool showSecret) {
+  static Future<void> selectUser(
+    BuildContext context,
+    String userId, {
+    User? user,
+  }) async {
+    final accountServer = context.read<AccountServer>();
+    final conversationCubit = context.read<ConversationCubit>();
+    final state = conversationCubit.state;
+
     final conversationId = generateConversationId(userId, accountServer.userId);
-    emit(ConversationState(
+
+    if (state?.conversationId == conversationId) return;
+
+    final conversation = await accountServer.database.conversationDao
+        .conversationItem(conversationId)
+        .getSingleOrNull();
+
+    if (conversation != null) {
+      return selectConversation(
+        context,
+        conversationId,
+        conversation: conversation,
+      );
+    }
+
+    final _user = user ??
+        await accountServer.database.userDao.userById(userId).getSingleOrNull();
+
+    if (_user == null) {
+      return showToastFailed(
+          context, ToastError(Localization.of(context).userNotFound));
+    }
+
+    conversationCubit.emit(ConversationState(
       conversationId: conversationId,
       userId: userId,
-      showSecret: showSecret,
+      user: _user,
     ));
     accountServer.selectConversation(conversationId);
-    responsiveNavigatorCubit.pushPage(ResponsiveNavigatorCubit.chatPage);
+    conversationCubit.responsiveNavigatorCubit
+        .pushPage(ResponsiveNavigatorCubit.chatPage);
   }
 }

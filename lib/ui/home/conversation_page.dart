@@ -195,10 +195,11 @@ class _SearchList extends HookWidget {
                   name: user.fullName ?? '?',
                   keyword: keyword,
                   onTap: () async {
-                    context.read<ConversationCubit>().selectUser(
-                          user.userId,
-                          user.appId?.isEmpty ?? true,
-                        );
+                    await ConversationCubit.selectUser(
+                      context,
+                      user.userId,
+                      user: user,
+                    );
                     _clear(context);
                   },
                 );
@@ -248,9 +249,10 @@ class _SearchList extends HookWidget {
                   ),
                   keyword: keyword,
                   onTap: () async {
-                    context
-                        .read<ConversationCubit>()
-                        .selectConversation(conversation.conversationId);
+                    await ConversationCubit.selectConversation(
+                      context,
+                      conversation.conversationId,
+                    );
 
                     _clear(context);
                   },
@@ -304,10 +306,11 @@ class _SearchList extends HookWidget {
 Future Function() _searchMessageItemOnTap(
         BuildContext context, SearchMessageDetailItem message) =>
     () async {
-      context.read<ConversationCubit>().selectConversation(
-            message.conversationId,
-            message.messageId,
-          );
+      await ConversationCubit.selectConversation(
+        context,
+        message.conversationId,
+        initIndexMessageId: message.messageId,
+      );
 
       _clear(context);
     };
@@ -817,11 +820,11 @@ class _List extends HookWidget {
               selected: selected,
               conversation: conversation,
               onTap: () {
-                context.read<ConversationCubit>().selectConversation(
-                      conversation.conversationId,
-                      conversation.lastReadMessageId,
-                      (conversation.unseenMessageCount ?? 0) > 0,
-                    );
+                ConversationCubit.selectConversation(
+                  context,
+                  conversation.conversationId,
+                  conversation: conversation,
+                );
               },
             ),
           );

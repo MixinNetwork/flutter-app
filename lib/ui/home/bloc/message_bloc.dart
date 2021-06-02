@@ -27,16 +27,16 @@ class _MessageJumpCurrentEvent extends _MessageEvent {}
 class _MessageInitEvent extends _MessageEvent {
   _MessageInitEvent({
     this.centerMessageId,
-    this.isLastReadMessageId = false,
+    this.lastReadMessageId,
   });
 
   final String? centerMessageId;
-  final bool isLastReadMessageId;
+  final String? lastReadMessageId;
 
   @override
   List<Object?> get props => [
         centerMessageId,
-        isLastReadMessageId,
+        lastReadMessageId,
       ];
 
   @override
@@ -157,8 +157,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   }) : super(const MessageState()) {
     add(_MessageInitEvent(
       centerMessageId: conversationCubit.state?.initIndexMessageId,
-      isLastReadMessageId:
-          conversationCubit.state?.isLastReadMessageId ?? false,
+      lastReadMessageId: conversationCubit.state?.lastReadMessageId,
     ));
     addSubscription(
       conversationCubit.stream
@@ -166,13 +165,13 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .map((event) => Tuple3(
                 event?.conversationId,
                 event?.initIndexMessageId,
-                event?.isLastReadMessageId ?? false,
+                event?.lastReadMessageId,
               ))
           .distinct()
           .asyncMap(
             (event) async => _MessageInitEvent(
               centerMessageId: event.item2,
-              isLastReadMessageId: event.item3,
+              lastReadMessageId: event.item3,
             ),
           )
           .listen(add),
@@ -222,7 +221,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       );
       await _preCacheMention(messageState);
       yield _pretreatment(messageState.copyWith(
-        lastReadMessageId: event.centerMessageId,
+        lastReadMessageId: event.lastReadMessageId,
       ));
     } else {
       if (event is _MessageLoadMoreEvent) {
@@ -449,7 +448,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   MessageState _pretreatment(MessageState messageState) {
     List<MessageItem>? top;
     // check secretMessage
-    if (messageState.isOldest && conversationCubit.state?.showSecret == true) {
+    if (messageState.isOldest && conversationCubit.state?.isBot == false) {
       if (messageState.top.firstOrNull?.type == MessageCategory.secret) {
         messageState.top.remove(messageState.top.first);
       }

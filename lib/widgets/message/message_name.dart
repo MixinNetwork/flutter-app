@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/color_utils.dart';
@@ -10,21 +9,19 @@ class MessageName extends StatelessWidget {
     Key? key,
     required this.userName,
     required this.userId,
-    required this.isBot,
   }) : super(key: key);
 
   final String userName;
   final String userId;
-  final bool isBot;
 
   @override
   Widget build(BuildContext context) => Align(
         alignment: Alignment.centerLeft,
         child: InteractableDecoratedBox(
-          onTap: () => context.read<ConversationCubit>().selectUser(
-                userId,
-                !isBot,
-              ),
+          onTap: () => ConversationCubit.selectUser(
+            context,
+            userId,
+          ),
           cursor: SystemMouseCursors.click,
           child: Padding(
             padding: const EdgeInsets.only(
