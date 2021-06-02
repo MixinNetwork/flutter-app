@@ -61,7 +61,7 @@ class GlobalMoveWindow extends StatelessWidget {
           const Align(
             alignment: Alignment.topCenter,
             child: SizedBox(
-              height: 20,
+              height: 28.0,
               child: MoveWindow(behavior: HitTestBehavior.opaque),
             ),
           ),
