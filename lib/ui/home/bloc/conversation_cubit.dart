@@ -172,6 +172,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       lastReadMessageId: (_conversation.unseenMessageCount ?? 0) > 0
           ? _initIndexMessageId
           : null,
+      userId: !_conversation.isGroupConversation ? _conversation.ownerId : null,
     );
 
     conversationCubit.emit(conversationState);
