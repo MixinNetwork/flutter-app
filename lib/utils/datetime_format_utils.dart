@@ -1,6 +1,8 @@
 import 'package:intl/intl.dart';
 
-String convertStringTime(DateTime _dateTime) {
+import '../../generated/l10n.dart';
+
+String formatDateTime(DateTime _dateTime) {
   final now = DateTime.now().toLocal();
   final dateTime = _dateTime.toLocal();
   if (isSameDay(now, dateTime)) {
@@ -13,6 +15,21 @@ String convertStringTime(DateTime _dateTime) {
     return DateFormat.MMMd().format(dateTime);
   }
   return DateFormat.yMMMd().format(dateTime);
+}
+
+String formatDateTimeOfDay(DateTime _dateTime) {
+  final now = DateTime.now().toLocal();
+  final dateTime = _dateTime.toLocal();
+  if (isSameDay(now, dateTime)) {
+    return Localization.current.today;
+  }
+  if (isSameWeek(now, dateTime)) {
+    return DateFormat.EEEE().format(dateTime);
+  }
+  if (isSameYear(now, dateTime)) {
+    return DateFormat.MMMEd().format(dateTime);
+  }
+  return DateFormat.yMMMEd().format(dateTime);
 }
 
 bool isSameYear(DateTime? a, DateTime? b) {
