@@ -93,6 +93,7 @@ dependencies:
   moor_db_viewer: ^4.0.0
   blurhash_dart: ^1.0.2
   visibility_detector: ^0.2.0
+  bitsdojo_window: ^0.1.0+1
 
 dev_dependencies:
   build_runner:

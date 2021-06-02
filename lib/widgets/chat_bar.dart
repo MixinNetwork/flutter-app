@@ -14,6 +14,7 @@ import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
 import 'back_button.dart';
 import 'brightness_observer.dart';
+import 'window/move_window.dart';
 
 class ChatBar extends HookWidget {
   const ChatBar({
@@ -36,51 +37,61 @@ class ChatBar extends HookWidget {
       converter: (state) => state.navigationMode,
     );
 
-    return Padding(
-      padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
-      child: Row(children: [
-        Builder(
-          builder: (context) => navigationMode
-              ? MixinBackButton(
-                  color: actionColor,
-                  onTap: () => context.read<ConversationCubit>().unselected(),
-                )
-              : const SizedBox(width: 16),
-        ),
-        Expanded(
-          flex: 1,
-          child: Row(
-            children: [
-              const ConversationAvatar(),
-              const SizedBox(width: 10),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  ConversationName(),
-                  SizedBox(height: 4),
-                  ConversationIDOrCount(),
-                ],
-              ),
-            ],
+    return MoveWindow(
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
+        child: Row(children: [
+          Builder(
+            builder: (context) => navigationMode
+                ? MoveWindowBarrier(
+                    child: MixinBackButton(
+                      color: actionColor,
+                      onTap: () =>
+                          context.read<ConversationCubit>().unselected(),
+                    ),
+                  )
+                : const SizedBox(width: 16),
           ),
-        ),
-        ActionButton(
-          name: Resources.assetsImagesIcSearchSvg,
-          color: actionColor,
-          onTap: () => context
-              .read<ChatSideCubit>()
-              .pushPage(ChatSideCubit.searchMessageHistory),
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesIcScreenSvg,
-          color: hasSidePage
-              ? BrightnessData.themeOf(context).accent
-              : actionColor,
-          onTap: chatSideCubit.toggleInfoPage,
-        ),
-      ]),
+          Expanded(
+            flex: 1,
+            child: Row(
+              children: [
+                const ConversationAvatar(),
+                const SizedBox(width: 10),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    ConversationName(),
+                    SizedBox(height: 4),
+                    ConversationIDOrCount(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          MoveWindowBarrier(
+            child: ActionButton(
+              name: Resources.assetsImagesIcSearchSvg,
+              color: actionColor,
+              onTap: () => context
+                  .read<ChatSideCubit>()
+                  .pushPage(ChatSideCubit.searchMessageHistory),
+            ),
+          ),
+          const SizedBox(width: 14),
+          MoveWindowBarrier(
+            child: ActionButton(
+              name: Resources.assetsImagesIcScreenSvg,
+              color: hasSidePage
+                  ? BrightnessData.themeOf(context).accent
+                  : actionColor,
+              onTap: chatSideCubit.toggleInfoPage,
+            ),
+          ),
+        ]),
+      ),
     );
   }
 }
