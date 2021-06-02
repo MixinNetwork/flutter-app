@@ -1700,16 +1700,6 @@ class Localization {
     );
   }
 
-  /// `Yesterday`
-  String get yesterday {
-    return Intl.message(
-      'Yesterday',
-      name: 'yesterday',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Today`
   String get today {
     return Intl.message(
