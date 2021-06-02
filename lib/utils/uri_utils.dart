@@ -20,26 +20,32 @@ Future<bool> openUri(BuildContext context, String text) async {
     if (protocolUrl != null) {
       return launch('$protocolUrl${uri.path}');
     } else if (MixinSchemeHost.users == host) {
-      return runFutureWithToast(context, () async {
-        if (uri.pathSegments.isEmpty) throw ArgumentError();
-        final userId = uri.pathSegments[0];
+      if (uri.pathSegments.isEmpty) return false;
 
-        final accountServer = context.read<AccountServer>();
+      final userId = uri.pathSegments[0];
 
-        var user = await accountServer.database.userDao
-            .userById(userId)
-            .getSingleOrNull();
+      final accountServer = context.read<AccountServer>();
 
-        if (user == null) {
-          final list = await accountServer.refreshUsers([userId]);
-          if (list?.isEmpty ?? true) {
-            throw ToastError(Localization.of(context).userNotFound);
-          }
-          user = list![0];
+      var user = await accountServer.database.userDao
+          .userById(userId)
+          .getSingleOrNull();
+
+      if (user == null) {
+        // Because request network need long time.
+        showToastLoading(context);
+        final list = await accountServer.refreshUsers([userId]);
+        if (list?.isEmpty ?? true) {
+          await showToastFailed(
+              context, ToastError(Localization.of(context).userNotFound));
+          return false;
         }
+        user = list![0];
+      }
 
-        await ConversationCubit.selectUser(context, userId);
-      }());
+      Toast.dismiss();
+
+      await ConversationCubit.selectUser(context, userId, user: user);
+      return true;
     }
   }
 
