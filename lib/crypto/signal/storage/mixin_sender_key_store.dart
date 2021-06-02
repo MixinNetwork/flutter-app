@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/groups/state/sender_key_record.dart';
 
+import '../../../utils/logger.dart';
 import '../dao/sender_key_dao.dart';
 import '../signal_database.dart';
 
@@ -24,7 +24,7 @@ class MixinSenderKeyStore extends SenderKeyStore {
         return SenderKeyRecord.fromSerialized(senderKey.record);
       }
     } on IOException catch (e) {
-      debugPrint('$e');
+      w('loadSenderKey $e');
     }
     return SenderKeyRecord();
   }

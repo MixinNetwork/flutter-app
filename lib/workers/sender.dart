@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
@@ -23,6 +22,7 @@ import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/logger.dart';
 import '../utils/string_extension.dart';
 
 class Sender {
@@ -64,7 +64,7 @@ class Sender {
         return true;
       } else {
         await _sleep(1);
-        debugPrint('$blazeMessage \n $bm');
+        d('$blazeMessage \n $bm');
         return false;
       }
     } else {
@@ -174,7 +174,7 @@ class Sender {
       if (data != null) {
         final signalKeys = List<SignalKey>.from(
             (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
-        debugPrint('signalKeys size: ${signalKeys.length}');
+        d('signalKeys size: ${signalKeys.length}');
         final keys = <BlazeMessageParamSession>[];
         if (signalKeys.isNotEmpty) {
           for (final k in signalKeys) {
@@ -190,8 +190,7 @@ class Sender {
                 userId: k.userId, sessionId: k.sessionId));
           }
         } else {
-          debugPrint(
-              'No any group signal key from server: ${requestSignalKeyUsers.toString()}');
+          i('No any group signal key from server: ${requestSignalKeyUsers.toString()}');
         }
 
         final noKeyList = requestSignalKeyUsers.where((e) => !keys.contains(e));
@@ -207,16 +206,16 @@ class Sender {
         }
       }
     }
-    debugPrint('signalKeyMessages size: ${signalKeyMessages.length}');
+    d('signalKeyMessages size: ${signalKeyMessages.length}');
     if (signalKeyMessages.isEmpty) {
       return;
     }
     final checksum = await getCheckSum(conversationId);
-    debugPrint('checksum: $checksum');
+    d('checksum: $checksum');
     final bm = createSignalKeyMessage(createSignalKeyMessageParam(
         conversationId, signalKeyMessages, checksum));
     final result = await deliverNoThrow(bm);
-    debugPrint('result retry:${result.retry}, success: ${result.success}');
+    d('result retry:${result.retry}, success: ${result.success}');
     if (result.retry) {
       return checkSessionSenderKey(conversationId);
     }
