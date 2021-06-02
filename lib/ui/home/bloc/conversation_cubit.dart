@@ -14,6 +14,7 @@ import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
 import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
+import 'conversation_list_bloc.dart';
 
 class ConversationState extends Equatable {
   const ConversationState({
@@ -155,10 +156,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     if (state?.conversationId == conversationId) return;
 
-    final _conversation = conversation ??
-        await accountServer.database.conversationDao
-            .conversationItem(conversationId)
-            .getSingleOrNull();
+    final _conversation =
+        conversation ?? await _conversationItem(context, conversationId);
 
     if (_conversation == null) {
       return showToastFailed(context, null);
@@ -195,9 +194,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     if (state?.conversationId == conversationId) return;
 
-    final conversation = await accountServer.database.conversationDao
-        .conversationItem(conversationId)
-        .getSingleOrNull();
+    final conversation = await _conversationItem(context, conversationId);
 
     if (conversation != null) {
       return selectConversation(
@@ -223,5 +220,26 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
         .pushPage(ResponsiveNavigatorCubit.chatPage);
+  }
+
+  static Future<ConversationItem?> _conversationItem(
+      BuildContext context, String conversationId) async {
+    final conversations = context
+        .read<ConversationListBloc>()
+        .state
+        .map
+        .values
+        .cast<ConversationItem?>()
+        .toList();
+
+    return conversations.firstWhere(
+            (element) => element?.conversationId == conversationId,
+            orElse: () => null) ??
+        await context
+            .read<AccountServer>()
+            .database
+            .conversationDao
+            .conversationItem(conversationId)
+            .getSingleOrNull();
   }
 }
