@@ -228,8 +228,8 @@ class _InputContainer extends HookWidget {
 
 void _sendMessage(BuildContext context) {
   final textEditingController = context.read<TextEditingController>();
-  final text = textEditingController.value.text;
-  if (text.trim().isEmpty) return;
+  final text = textEditingController.value.text.trim();
+  if (text.isEmpty) return;
 
   textEditingController.text = '';
   final conversationItem = context.read<ConversationCubit>().state;
