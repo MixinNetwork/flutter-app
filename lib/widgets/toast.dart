@@ -134,13 +134,13 @@ Future<void> showToastFailed(BuildContext context, Object? error) {
   );
 }
 
-// must be show to toast or toast dismiss.
 void showToastLoading(BuildContext context) => Toast.createView(
       context: context,
       child: ToastWidget(
         icon: const _Loading(),
         text: Localization.of(context).loading,
       ),
+      duration: null,
     );
 
 class _Loading extends StatelessWidget {
@@ -170,7 +170,9 @@ class _Successful extends StatelessWidget {
 }
 
 Future<bool> runFutureWithToast(
-    BuildContext context, Future<dynamic> future) async {
+  BuildContext context,
+  Future<dynamic> future,
+) async {
   showToastLoading(context);
   try {
     await future;

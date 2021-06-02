@@ -195,14 +195,16 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     if (state?.conversationId == conversationId) return;
 
-    final conversation = await _conversationItem(context, conversationId);
+    if (user == null) {
+      final conversation = await _conversationItem(context, conversationId);
 
-    if (conversation != null) {
-      return selectConversation(
-        context,
-        conversationId,
-        conversation: conversation,
-      );
+      if (conversation != null) {
+        return selectConversation(
+          context,
+          conversationId,
+          conversation: conversation,
+        );
+      }
     }
 
     final _user = user ??
