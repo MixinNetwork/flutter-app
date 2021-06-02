@@ -6,7 +6,6 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
-import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
