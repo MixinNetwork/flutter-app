@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart' hide AnimatedTheme;
-import 'package:flutter_app/widgets/window/window_shortcuts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -28,6 +27,7 @@ import 'utils/hook.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
+import 'widgets/window/window_shortcuts.dart';
 
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
