@@ -224,8 +224,7 @@ class Injector {
         createdAt: cc.createdAt,
       ));
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-        final u =
-            await database.userDao.findUserById(cc.userId!).getSingleOrNull();
+        final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
         if (u == null) {
           refreshUserIdSet.add(cc.userId!);
         }

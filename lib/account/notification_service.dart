@@ -131,9 +131,11 @@ class NotificationService extends WidgetsBindingObserver {
             if (slideCategoryCubit.state.type == SlideCategoryType.setting) {
               slideCategoryCubit.select(SlideCategoryType.chats);
             }
-            context
-                .read<ConversationCubit>()
-                .selectConversation(event.host, event.path);
+            ConversationCubit.selectConversation(
+              context,
+              event.host,
+              initIndexMessageId: event.path,
+            );
           },
         ),
       );

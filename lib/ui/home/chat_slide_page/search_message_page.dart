@@ -90,11 +90,11 @@ class SearchMessagePage extends HookWidget {
           return SearchMessageItem(
             message: message,
             keyword: keyword,
-            onTap: () async =>
-                context.read<ConversationCubit>().selectConversation(
-                      message.conversationId,
-                      message.messageId,
-                    ),
+            onTap: () async => ConversationCubit.selectConversation(
+              context,
+              message.conversationId,
+              initIndexMessageId: message.messageId,
+            ),
           );
         },
       );
