@@ -155,8 +155,8 @@ class ImageMessageLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, boxConstraints) {
-        final maxWidth = min(boxConstraints.maxWidth * 0.6, 600.0);
-        final minWidth = max(boxConstraints.maxWidth * 0.2, 200.0);
+        final maxWidth = min(boxConstraints.maxWidth * 0.6, 300.0);
+        final minWidth = max(boxConstraints.maxWidth * 0.2, 100.0);
         final width = max(
             min(imageWidthInPixel / MediaQuery.of(context).devicePixelRatio,
                 maxWidth),
