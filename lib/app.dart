@@ -26,6 +26,8 @@ import 'ui/landing/landing.dart';
 import 'utils/hook.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/message/item/text/mention_builder.dart';
+import 'widgets/window/move_window.dart';
+import 'widgets/window/window_shortcuts.dart';
 
 class App extends StatelessWidget {
   App({Key? key}) : super(key: key);
@@ -170,31 +172,35 @@ class _App extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: 'Mixin',
-        debugShowCheckedModeBanner: false,
-        localizationsDelegates: const [
-          Localization.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-        ],
-        supportedLocales: [
-          ...Localization.delegate.supportedLocales,
-        ],
-        builder: (context, child) {
-          try {
-            Provider.of<AccountServer>(context).language =
-                Localizations.localeOf(context).languageCode;
-          } catch (_) {}
-          return BrightnessObserver(
-            lightThemeData: lightBrightnessThemeData,
-            darkThemeData: darkBrightnessThemeData,
-            forceBrightness: context.watch<SettingCubit>().brightness,
-            child: child!,
-          );
-        },
-        home: const _Home(),
+  Widget build(BuildContext context) => WindowShortcuts(
+        child: GlobalMoveWindow(
+          child: MaterialApp(
+            title: 'Mixin',
+            debugShowCheckedModeBanner: false,
+            localizationsDelegates: const [
+              Localization.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+            ],
+            supportedLocales: [
+              ...Localization.delegate.supportedLocales,
+            ],
+            builder: (context, child) {
+              try {
+                Provider.of<AccountServer>(context).language =
+                    Localizations.localeOf(context).languageCode;
+              } catch (_) {}
+              return BrightnessObserver(
+                lightThemeData: lightBrightnessThemeData,
+                darkThemeData: darkBrightnessThemeData,
+                forceBrightness: context.watch<SettingCubit>().brightness,
+                child: child!,
+              );
+            },
+            home: const _Home(),
+          ),
+        ),
       );
 }
 
