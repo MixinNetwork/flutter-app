@@ -546,7 +546,7 @@ class _SearchItem extends StatelessWidget {
                         ),
                         if (date != null)
                           BlocConverter<MinuteTimerCubit, DateTime, String>(
-                            converter: (_) => convertStringTime(date!),
+                            converter: (_) => formatDateTime(date!),
                             builder: (context, text) => Text(
                               text,
                               style: TextStyle(
@@ -959,7 +959,7 @@ class _Item extends StatelessWidget {
                               ),
                             ),
                             BlocConverter<MinuteTimerCubit, DateTime, String>(
-                              converter: (_) => convertStringTime(
+                              converter: (_) => formatDateTime(
                                   conversation.lastMessageCreatedAt ??
                                       conversation.createdAt),
                               builder: (context, text) => Text(

@@ -1,9 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:intl/intl.dart';
 
 import '../../bloc/minute_timer_cubit.dart';
-import '../../generated/l10n.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/hook.dart';
 import '../brightness_observer.dart';
@@ -20,21 +18,7 @@ class MessageDayTime extends HookWidget {
   Widget build(BuildContext context) {
     final dateTimeString =
         useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-      converter: (dateTime) {
-        if (isSameDay(dateTime, this.dateTime)) {
-          return Localization.of(context).today;
-        }
-
-        if (isYesterday(dateTime, this.dateTime)) {
-          return Localization.of(context).yesterday;
-        }
-
-        if (isSameWeek(dateTime, this.dateTime)) {
-          return DateFormat.EEEE().format(dateTime);
-        }
-
-        return DateFormat.MEd().format(dateTime);
-      },
+      converter: (dateTime) => formatDateTimeOfDay(this.dateTime),
       keys: [dateTime],
     );
     return Container(
