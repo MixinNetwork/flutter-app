@@ -37,7 +37,9 @@ Future<void> main() async {
     appWindow.minSize =
         const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
     appWindow.size = const Size(1280, 750);
-    appWindow.alignment = Alignment.center;
+    // FIXME remove this when the issues fixed.
+    // https://github.com/bitsdojo/bitsdojo_window/issues/72
+    // appWindow.alignment = Alignment.center;
     appWindow.show();
   });
 }
