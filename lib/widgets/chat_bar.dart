@@ -109,14 +109,25 @@ class ConversationIDOrCount extends HookWidget {
     final conversation = useBlocState<ConversationCubit, ConversationState?>(
         when: (state) => state?.isLoaded ?? false);
 
+    final isGroup = conversation?.isGroup ?? false;
+
     final countStream = useMemoized(
-      () => context
-          .read<AccountServer>()
-          .database
-          .conversationDao
-          .conversationParticipantsCount(conversation!.conversationId)
-          .watchSingle(),
-      [conversation?.conversationId],
+      () {
+        if (isGroup) {
+          return context
+              .read<AccountServer>()
+              .database
+              .conversationDao
+              .conversationParticipantsCount(conversation!.conversationId)
+              .watchSingle();
+        }
+
+        return const Stream<int>.empty();
+      },
+      [
+        conversation?.conversationId,
+        isGroup,
+      ],
     );
 
     final textStyle = TextStyle(
@@ -124,8 +135,6 @@ class ConversationIDOrCount extends HookWidget {
       fontSize: fontSize,
       height: 1,
     );
-
-    final isGroup = conversation?.isGroup ?? false;
 
     if (!isGroup) {
       return Text(
@@ -136,11 +145,15 @@ class ConversationIDOrCount extends HookWidget {
 
     return StreamBuilder<int>(
       stream: countStream,
-      builder: (context, snapshot) => Text(
-        Localization.of(context)
-            .conversationParticipantsCount(snapshot.data ?? 0),
-        style: textStyle,
-      ),
+      builder: (context, snapshot) {
+        final count = snapshot.data;
+        return Text(
+          count != null
+              ? Localization.of(context).conversationParticipantsCount(count)
+              : '',
+          style: textStyle,
+        );
+      },
     );
   }
 }
