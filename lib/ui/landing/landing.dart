@@ -29,8 +29,6 @@ class LandingPage extends StatelessWidget {
             const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(35, 39, 43, 1),
           ),
-          // To detect window move event.
-          appBar: const MixinAppBar(),
           body: Center(
             child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
               converter: (state) => state.status,
