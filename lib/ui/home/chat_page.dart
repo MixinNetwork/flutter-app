@@ -315,76 +315,76 @@ class _NotificationListener extends StatelessWidget {
       );
 }
 
-class _List extends StatelessWidget {
+class _List extends HookWidget {
   const _List({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocBuilder<MessageBloc, MessageState>(
-        buildWhen: (a, b) => b.conversationId != null,
-        builder: (context, state) {
-          final key = ValueKey(
-            Tuple2(
-              state.conversationId,
-              state.initUUID,
-            ),
-          );
-          final top = state.top;
-          final center = state.center;
-          final bottom = state.bottom;
+  Widget build(BuildContext context) {
+    final state = useBlocState<MessageBloc, MessageState>(
+      when: (state) => state.conversationId != null,
+    );
 
-          return ClampingCustomScrollView(
-            key: key,
-            center: key,
-            controller: BlocProvider.of<MessageBloc>(context).scrollController,
-            anchor: 0.3,
-            slivers: [
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) {
-                    final actualIndex = top.length - index - 1;
-                    return MessageItemWidget(
-                      prev: top.getOrNull(actualIndex - 1),
-                      message: top[actualIndex],
-                      next: top.getOrNull(actualIndex + 1) ??
-                          center ??
-                          bottom.lastOrNull,
-                      lastReadMessageId: state.lastReadMessageId,
-                    );
-                  },
-                  childCount: top.length,
-                ),
-              ),
-              SliverToBoxAdapter(
-                key: key,
-                child: Builder(builder: (context) {
-                  if (center == null) return const SizedBox();
-                  return MessageItemWidget(
-                    prev: top.lastOrNull,
-                    message: center,
-                    next: bottom.firstOrNull,
-                    lastReadMessageId: state.lastReadMessageId,
-                  );
-                }),
-              ),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => MessageItemWidget(
-                    prev:
-                        bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
-                    message: bottom[index],
-                    next: bottom.getOrNull(index + 1),
-                    lastReadMessageId: state.lastReadMessageId,
-                  ),
-                  childCount: bottom.length,
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 4)),
-            ],
-          );
-        },
-      );
+    final key = ValueKey(
+      Tuple2(
+        state.conversationId,
+        state.initUUID,
+      ),
+    );
+    final top = state.top;
+    final center = state.center;
+    final bottom = state.bottom;
+
+    return ClampingCustomScrollView(
+      key: key,
+      center: key,
+      controller: BlocProvider.of<MessageBloc>(context).scrollController,
+      anchor: 0.3,
+      slivers: [
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+              final actualIndex = top.length - index - 1;
+              return MessageItemWidget(
+                prev: top.getOrNull(actualIndex - 1),
+                message: top[actualIndex],
+                next: top.getOrNull(actualIndex + 1) ??
+                    center ??
+                    bottom.lastOrNull,
+                lastReadMessageId: state.lastReadMessageId,
+              );
+            },
+            childCount: top.length,
+          ),
+        ),
+        SliverToBoxAdapter(
+          key: key,
+          child: Builder(builder: (context) {
+            if (center == null) return const SizedBox();
+            return MessageItemWidget(
+              prev: top.lastOrNull,
+              message: center,
+              next: bottom.firstOrNull,
+              lastReadMessageId: state.lastReadMessageId,
+            );
+          }),
+        ),
+        SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) => MessageItemWidget(
+              prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+              message: bottom[index],
+              next: bottom.getOrNull(index + 1),
+              lastReadMessageId: state.lastReadMessageId,
+            ),
+            childCount: bottom.length,
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 4)),
+      ],
+    );
+  }
 }
 
 class _JumpCurrentButton extends HookWidget {
@@ -405,6 +405,12 @@ class _JumpCurrentButton extends HookWidget {
     final scrollController = useListenable(messageBloc.scrollController);
 
     final listPositionIsLatest = useState(false);
+
+    double? pixels;
+    try {
+      pixels = scrollController.position.pixels;
+    } catch (_) {}
+
     useEffect(() {
       WidgetsBinding.instance?.addPostFrameCallback((timeStamp) =>
           listPositionIsLatest.value = scrollController.hasClients &&
@@ -413,7 +419,7 @@ class _JumpCurrentButton extends HookWidget {
                   40);
     }, [
       scrollController.hasClients,
-      scrollController.position.pixels,
+      pixels,
       conversationId,
       state.initUUID,
     ]);

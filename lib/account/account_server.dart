@@ -708,8 +708,7 @@ class AccountServer {
         createdAt: cc.createdAt,
       ));
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
-        final u =
-            await database.userDao.findUserById(cc.userId!).getSingleOrNull();
+        final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
         if (u == null) {
           refreshUserIdSet.add(cc.userId);
         }
@@ -748,11 +747,11 @@ class AccountServer {
 
   Future<String?> downloadAttachment(db.MessageItem message) =>
       _attachmentUtil.downloadAttachment(
-        content: message.content!,
-        messageId: message.messageId,
-        conversationId: message.conversationId,
-        category: message.type,
-      );
+          content: message.content!,
+          messageId: message.messageId,
+          conversationId: message.conversationId,
+          category: message.type,
+          mimeType: message.mediaMimeType);
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(
@@ -972,7 +971,7 @@ class AccountServer {
               );
               if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
                 final u = await database.userDao
-                    .findUserById(cc.userId!)
+                    .userById(cc.userId!)
                     .getSingleOrNull();
                 if (u == null) {
                   refreshUserIdSet.add(cc.userId);

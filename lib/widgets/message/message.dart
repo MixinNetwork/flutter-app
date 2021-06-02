@@ -102,7 +102,6 @@ class MessageItemWidget extends HookWidget {
               userName: userName,
               userId: userId,
               isCurrentUser: isCurrentUser,
-              isBot: message.appId?.isNotEmpty ?? false,
               buildMenus: () => [
                 if (message.type.isText ||
                     message.type.isImage ||
@@ -306,11 +305,9 @@ class _MessageBubbleMargin extends StatelessWidget {
     required this.userId,
     required this.builder,
     required this.buildMenus,
-    required this.isBot,
   }) : super(key: key);
 
   final bool isCurrentUser;
-  final bool isBot;
   final String? userName;
   final String? userId;
   final WidgetBuilder builder;
@@ -331,7 +328,6 @@ class _MessageBubbleMargin extends StatelessWidget {
               MessageName(
                 userName: userName!,
                 userId: userId!,
-                isBot: isBot,
               ),
             ContextMenuPortalEntry(
               buildMenus: buildMenus,

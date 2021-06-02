@@ -6,7 +6,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../generated/l10n.dart';
 import '../account/account_server.dart';
 import '../constants/constants.dart';
-import '../db/extension/user.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../widgets/toast.dart';
 
@@ -28,7 +27,7 @@ Future<bool> openUri(BuildContext context, String text) async {
         final accountServer = context.read<AccountServer>();
 
         var user = await accountServer.database.userDao
-            .findUserById(userId)
+            .userById(userId)
             .getSingleOrNull();
 
         if (user == null) {
@@ -39,7 +38,7 @@ Future<bool> openUri(BuildContext context, String text) async {
           user = list![0];
         }
 
-        context.read<ConversationCubit>().selectUser(userId, !user.isBot);
+        await ConversationCubit.selectUser(context, userId);
       }());
     }
   }

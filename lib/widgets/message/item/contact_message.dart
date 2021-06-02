@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/bloc/conversation_cubit.dart';
@@ -35,10 +34,10 @@ class ContactMessage extends StatelessWidget {
           status: message.status,
         ),
         child: InteractableDecoratedBox(
-          onTap: () => context.read<ConversationCubit>().selectUser(
-                message.sharedUserId!,
-                message.sharedUserAppId?.isEmpty ?? true,
-              ),
+          onTap: () => ConversationCubit.selectUser(
+            context,
+            message.sharedUserId!,
+          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
