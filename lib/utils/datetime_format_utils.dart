@@ -23,9 +23,6 @@ String formatDateTimeOfDay(DateTime _dateTime) {
   if (isSameDay(now, dateTime)) {
     return Localization.current.today;
   }
-  if (isSameWeek(now, dateTime)) {
-    return DateFormat.EEEE().format(dateTime);
-  }
   if (isSameYear(now, dateTime)) {
     return DateFormat.MMMEd().format(dateTime);
   }
