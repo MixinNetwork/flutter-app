@@ -243,7 +243,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           yield _pretreatment(result);
         }
       } else if (event is _MessageScrollEvent) {
-        add(_MessageInitEvent(centerMessageId: event.messageId));
+        add(_MessageInitEvent(
+          centerMessageId: event.messageId,
+          lastReadMessageId: state.lastReadMessageId,
+        ));
       } else if (event is _MessageJumpCurrentEvent) {
         yield _pretreatment(state._copyWithJumpCurrentState());
       }
