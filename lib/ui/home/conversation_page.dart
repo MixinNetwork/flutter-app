@@ -505,8 +505,8 @@ class _SearchItem extends StatelessWidget {
           width: double.infinity,
           color: BrightnessData.themeOf(context).primary,
           padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 15,
+            horizontal: 12,
+            vertical: 12,
           ),
           child: Row(
             children: [
@@ -619,7 +619,7 @@ class _SearchHeader extends StatelessWidget {
           top: 16,
           bottom: 10,
           right: 20,
-          left: 20,
+          left: 12,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
