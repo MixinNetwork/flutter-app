@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:isolate/isolate.dart';
 import 'package:path_provider/path_provider.dart';
@@ -18,17 +19,6 @@ import 'utils/load_balancer_utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // final currentScreen = await getCurrentScreen();
-  // if (currentScreen != null) {
-  //   setWindowFrame(Rect.fromCenter(
-  //     center: currentScreen.visibleFrame.center,
-  //     width: 1280,
-  //     height: 750,
-  //   ));
-  // }
-  // setWindowMinSize(
-  //     const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480));
 
   unawaited(LoadBalancer.create(64, IsolateRunner.spawn).then((value) {
     loadBalancer = value;
@@ -47,13 +37,13 @@ Future<void> main() async {
   doWhenWindowReady(() {
     appWindow.minSize =
         const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
-    appWindow.size = const Size(1280, 720);
+    appWindow.size = const Size(1280, 750);
     appWindow.alignment = Alignment.center;
     appWindow.show();
   });
   RawKeyboard.instance.addListener((value) {
     if (value.isMetaPressed && value.character == 'w') {
-      appWindow.close();
+      appWindow.hide();
     }
   });
 }
