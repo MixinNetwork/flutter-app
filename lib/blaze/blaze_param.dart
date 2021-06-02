@@ -54,7 +54,7 @@ class BlazeMessageParam {
   SignalKeyRequest? keys;
   @JsonKey(name: 'messages')
   List<dynamic>? messages;
-  @JsonKey(name: 'quoteMessage_id')
+  @JsonKey(name: 'quote_message_id')
   String? quoteMessageId;
   @JsonKey(name: 'session_id')
   String? sessionId;
