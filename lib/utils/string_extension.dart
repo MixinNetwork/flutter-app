@@ -94,8 +94,7 @@ extension NullableStringExtension on String? {
 }
 
 int toInt32(Uint8List list) {
-  final byteArray = Uint8List.fromList(list);
-  final buffer = byteArray.buffer;
+  final buffer = list.buffer;
   final data = ByteData.view(buffer);
   final short = data.getInt32(0, Endian.big);
   return short;
