@@ -747,11 +747,11 @@ class AccountServer {
 
   Future<String?> downloadAttachment(db.MessageItem message) =>
       _attachmentUtil.downloadAttachment(
-        content: message.content!,
-        messageId: message.messageId,
-        conversationId: message.conversationId,
-        category: message.type,
-      );
+          content: message.content!,
+          messageId: message.messageId,
+          conversationId: message.conversationId,
+          category: message.type,
+          mimeType: message.mediaMimeType);
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(
