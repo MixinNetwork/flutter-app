@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:ulid/ulid.dart';
@@ -65,6 +66,21 @@ extension StringExtension on String {
     }
     return result.toString().trim();
   }
+
+  int uuidHashcode() {
+    final components = split('-');
+    assert(components.length == 5);
+    final mostSigBits = (int.parse(components[0], radix: 16) << 32) |
+        (int.parse(components[1], radix: 16) << 16) |
+        (int.parse(components[2], radix: 16));
+    final leastSigBits = (int.parse(components[3], radix: 16) << 48) |
+        (int.parse(components[4], radix: 16));
+    final hilo = mostSigBits ^ leastSigBits;
+    final i = Uint8List(8)..buffer.asByteData().setInt64(0, hilo, Endian.big);
+    final a = toInt32(i.sublist(0, 4));
+    final b = toInt32(i.sublist(4, 8));
+    return a ^ b;
+  }
 }
 
 extension NullableStringExtension on String? {
@@ -75,6 +91,13 @@ extension NullableStringExtension on String? {
     // this must be a valid uuid
     return Ulid.parse(this!).hashCode;
   }
+}
+
+int toInt32(Uint8List list) {
+  final buffer = list.buffer;
+  final data = ByteData.view(buffer);
+  final short = data.getInt32(0, Endian.big);
+  return short;
 }
 
 String minOf(String a, String b) {

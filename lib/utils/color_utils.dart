@@ -1,20 +1,21 @@
 import 'dart:ui';
 
 import '../constants/brightness_theme_data.dart';
+import 'string_extension.dart';
 
 Color getNameColorById(String userId) {
-  final hashCode = userId.trim().hashCode;
-  return nameColors[hashCode % nameColors.length];
+  final hashCode = userId.trim().uuidHashcode();
+  return nameColors[hashCode.abs() % nameColors.length];
 }
 
 Color getAvatarColorById(String userId) {
-  final hashCode = userId.trim().hashCode;
-  return avatarColors[hashCode % avatarColors.length];
+  final hashCode = userId.trim().uuidHashcode();
+  return avatarColors[hashCode.abs() % avatarColors.length];
 }
 
 Color getCircleColorById(String circleId) {
-  final hashCode = circleId.trim().hashCode;
-  return circleColors[hashCode % circleColors.length];
+  final hashCode = circleId.trim().uuidHashcode();
+  return circleColors[hashCode.abs() % circleColors.length];
 }
 
 Color? colorHex(String hexString) {
