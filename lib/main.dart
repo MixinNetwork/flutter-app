@@ -3,7 +3,6 @@ import 'dart:ui';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 
 // ignore: import_of_legacy_library_into_null_safe
@@ -40,10 +39,5 @@ Future<void> main() async {
     appWindow.size = const Size(1280, 750);
     appWindow.alignment = Alignment.center;
     appWindow.show();
-  });
-  RawKeyboard.instance.addListener((value) {
-    if (value.isMetaPressed && value.character == 'w') {
-      appWindow.hide();
-    }
   });
 }
