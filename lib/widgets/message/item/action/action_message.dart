@@ -38,7 +38,7 @@ class ActionMessage extends StatelessWidget {
                       // ignore: avoid_dynamic_calls
                       if (context.openAction(e.action)) return;
                       // ignore: avoid_dynamic_calls
-                      openUri(e.action);
+                      openUri(context, e.action);
                     },
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8),

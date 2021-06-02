@@ -100,6 +100,7 @@ class MixinDatabase extends _$MixinDatabase {
   MigrationStrategy get migration => MigrationStrategy(beforeOpen: (_) async {
         if (executor.dialect == SqlDialect.sqlite) {
           await customStatement('PRAGMA journal_mode=WAL');
+          await customStatement('PRAGMA foreign_keys=ON');
         }
       });
 }

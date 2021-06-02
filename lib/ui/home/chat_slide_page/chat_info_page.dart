@@ -211,17 +211,17 @@ class ChatInfoPage extends HookWidget {
                         onTap: () async {
                           final isGroup = conversation.isGroup ?? false;
                           if (muting) {
-                            return runFutureWithToast(
-                                context,
-                                context
-                                    .read<AccountServer>()
-                                    .unMuteConversation(
-                                      conversationId: isGroup
-                                          ? conversation.conversationId
-                                          : null,
-                                      userId:
-                                          isGroup ? null : conversation.userId,
-                                    ));
+                            await runFutureWithToast(
+                              context,
+                              context.read<AccountServer>().unMuteConversation(
+                                    conversationId: isGroup
+                                        ? conversation.conversationId
+                                        : null,
+                                    userId:
+                                        isGroup ? null : conversation.userId,
+                                  ),
+                            );
+                            return;
                           }
 
                           final result = await showMixinDialog<int?>(

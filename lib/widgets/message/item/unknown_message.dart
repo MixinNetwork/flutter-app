@@ -41,8 +41,8 @@ class UnknownMessage extends StatelessWidget {
               color: BrightnessData.themeOf(context).accent,
             ),
             recognizer: TapGestureRecognizer()
-              ..onTap =
-                  () => openUri(Localization.of(context).chatNotSupportUrl),
+              ..onTap = () =>
+                  openUri(context, Localization.of(context).chatNotSupportUrl),
           ),
         ],
       ),

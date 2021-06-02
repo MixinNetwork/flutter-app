@@ -6,7 +6,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../generated/l10n.dart';
 import '../../account/account_server.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../bloc/subscribe_mixin.dart';
@@ -351,6 +350,7 @@ class _List extends StatelessWidget {
                       next: top.getOrNull(actualIndex + 1) ??
                           center ??
                           bottom.lastOrNull,
+                      lastReadMessageId: state.lastReadMessageId,
                     );
                   },
                   childCount: top.length,
@@ -364,27 +364,10 @@ class _List extends StatelessWidget {
                     prev: top.lastOrNull,
                     message: center,
                     next: bottom.firstOrNull,
+                    lastReadMessageId: state.lastReadMessageId,
                   );
                 }),
               ),
-              if (center != null &&
-                  bottom.isNotEmpty &&
-                  state.isLastReadMessageId)
-                SliverToBoxAdapter(
-                  child: Container(
-                    color: BrightnessData.themeOf(context).background,
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    alignment: Alignment.center,
-                    child: Text(
-                      Localization.of(context).unread,
-                      style: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
               SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (BuildContext context, int index) => MessageItemWidget(
@@ -392,6 +375,7 @@ class _List extends StatelessWidget {
                         bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
                     message: bottom[index],
                     next: bottom.getOrNull(index + 1),
+                    lastReadMessageId: state.lastReadMessageId,
                   ),
                   childCount: bottom.length,
                 ),
@@ -416,6 +400,7 @@ class _JumpCurrentButton extends HookWidget {
       converter: (state) => state?.conversationId,
       when: (conversationId) => conversationId != null,
     )!;
+
     final state = useBlocState<MessageBloc, MessageState>();
     final scrollController = useListenable(messageBloc.scrollController);
 
@@ -429,7 +414,8 @@ class _JumpCurrentButton extends HookWidget {
     }, [
       scrollController.hasClients,
       scrollController.position.pixels,
-      conversationId
+      conversationId,
+      state.initUUID,
     ]);
 
     final enable =

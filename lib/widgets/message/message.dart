@@ -15,6 +15,7 @@ import '../../generated/l10n.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../utils/datetime_format_utils.dart';
+import '../brightness_observer.dart';
 import '../menu.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
@@ -43,11 +44,13 @@ class MessageItemWidget extends HookWidget {
     required this.message,
     this.prev,
     this.next,
+    this.lastReadMessageId,
   }) : super(key: key);
 
   final MessageItem message;
   final MessageItem? prev;
   final MessageItem? next;
+  final String? lastReadMessageId;
 
   @override
   Widget build(BuildContext context) {
@@ -274,6 +277,8 @@ class MessageItemWidget extends HookWidget {
             );
           },
         ),
+        if (message.messageId == lastReadMessageId && next != null)
+          const _UnreadMessageBar(),
       ],
     );
     if (message.mentionRead == false) {
@@ -333,6 +338,25 @@ class _MessageBubbleMargin extends StatelessWidget {
               child: Builder(builder: builder),
             ),
           ],
+        ),
+      );
+}
+
+class _UnreadMessageBar extends StatelessWidget {
+  const _UnreadMessageBar({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Container(
+        color: BrightnessData.themeOf(context).background,
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        margin: const EdgeInsets.symmetric(vertical: 6),
+        alignment: Alignment.center,
+        child: Text(
+          Localization.of(context).unread,
+          style: TextStyle(
+            color: BrightnessData.themeOf(context).secondaryText,
+            fontSize: 14,
+          ),
         ),
       );
 }

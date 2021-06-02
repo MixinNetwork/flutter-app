@@ -38,7 +38,7 @@ class TextMessage extends HookWidget {
                 style: TextStyle(
                   color: BrightnessData.themeOf(context).accent,
                 ),
-                onTap: () => openUri(e[0]!),
+                onTap: () => openUri(context, e[0]!),
               ),
             ),
       ],

@@ -755,7 +755,7 @@ class _List extends HookWidget {
                   onTap: () async {
                     final isGroupConversation =
                         conversation.isGroupConversation;
-                    return runFutureWithToast(
+                    await runFutureWithToast(
                       context,
                       context.read<AccountServer>().unMuteConversation(
                             conversationId: isGroupConversation
@@ -766,6 +766,7 @@ class _List extends HookWidget {
                                 : conversation.ownerId,
                           ),
                     );
+                    return;
                   },
                 )
               else
@@ -779,7 +780,7 @@ class _List extends HookWidget {
                     final isGroupConversation =
                         conversation.isGroupConversation;
 
-                    return runFutureWithToast(
+                    await runFutureWithToast(
                       context,
                       context.read<AccountServer>().muteConversation(
                             result,
@@ -791,6 +792,7 @@ class _List extends HookWidget {
                                 : conversation.ownerId,
                           ),
                     );
+                    return;
                   },
                 ),
               ContextMenu(
@@ -912,11 +914,11 @@ class _Item extends StatelessWidget {
                 )
               : const BoxDecoration(),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                   child: ConversationAvatarWidget(
                     conversation: conversation,
                     size: 50,
@@ -925,7 +927,7 @@ class _Item extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -967,6 +969,7 @@ class _Item extends StatelessWidget {
                             ),
                           ],
                         ),
+                        const SizedBox(height: 2),
                         SizedBox(
                           height: 20,
                           child: Row(
@@ -990,7 +993,7 @@ class _Item extends StatelessWidget {
                                     _UnreadText(
                                       conversation: conversation,
                                       data:
-                                          '${min(conversation.unseenMessageCount ?? 0, 99)}',
+                                          '${conversation.unseenMessageCount}',
                                     ),
                                   if ((conversation.unseenMessageCount ?? 0) <=
                                       0)

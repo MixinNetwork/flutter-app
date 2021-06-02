@@ -265,6 +265,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "unPin": MessageLookupByLibrary.simpleMessage("UnPin"),
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
         "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
+        "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videoCall": MessageLookupByLibrary.simpleMessage("Video call"),
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),

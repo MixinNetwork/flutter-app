@@ -55,7 +55,7 @@ class LocationMessage extends HookWidget {
               url =
                   'https://www.google.com/maps/search/${Uri.encodeComponent(location.address!)}/@${location.latitude},${location.longitude},17z?hl=zh-CN';
             }
-            openUri(url);
+            openUri(context, url);
           },
           child: Stack(
             children: [

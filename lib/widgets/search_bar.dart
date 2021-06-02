@@ -55,7 +55,7 @@ class SearchBar extends StatelessWidget {
                       final list = await showConversationSelector(
                         context: context,
                         singleSelect: true,
-                        title: Localization.of(context).createCircle,
+                        title: Localization.of(context).createConversation,
                         onlyContact: true,
                       );
                       if (list.isEmpty ||

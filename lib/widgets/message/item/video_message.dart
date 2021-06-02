@@ -56,7 +56,7 @@ class VideoMessageWidget extends StatelessWidget {
                   }
                 } else if (message.mediaStatus == MediaStatus.done &&
                     message.mediaUrl != null) {
-                  openUri(Uri.file(message.mediaUrl!).toString());
+                  openUri(context, Uri.file(message.mediaUrl!).toString());
                 }
               },
               child: ClipRRect(
