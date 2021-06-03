@@ -97,6 +97,8 @@ class ClampingRenderViewport extends RenderViewport {
 
   // diff start
   double _correctedOffset = 0;
+  double? _lastMainAxisExtent;
+  bool _isMaxScrollPixel = false;
 
   // diff end
 
@@ -343,10 +345,24 @@ class ClampingRenderViewport extends RenderViewport {
           }
         }
 
+        if (offset is ScrollPosition &&
+            _isMaxScrollPixel &&
+            _lastMainAxisExtent != null &&
+            _lastMainAxisExtent != mainAxisExtent) {
+          (offset as ScrollPosition).correctPixels(maxScrollExtent);
+          _isMaxScrollPixel = offset.pixels == maxScrollExtent;
+          _lastMainAxisExtent = mainAxisExtent;
+          continue;
+        }
+
         if (offset.applyContentDimensions(
           minScrollExtent,
           maxScrollExtent,
-        )) break;
+        )) {
+          _isMaxScrollPixel = offset.pixels == maxScrollExtent;
+          _lastMainAxisExtent = mainAxisExtent;
+          break;
+        }
         // diff end
       }
     } while (count < _maxLayoutCycles);
