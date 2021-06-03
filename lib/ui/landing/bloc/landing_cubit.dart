@@ -124,16 +124,16 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
 
       final edKeyPair = ed.generateKey();
 
-      await CryptoKeyValue.get.init();
+      await CryptoKeyValue.instance.init();
       // ignore: avoid_dynamic_calls
       final private = base64.decode(msg['identity_key_private']);
       await SignalProtocol.initSignal(private);
-      final registrationId = CryptoKeyValue.get.getLocalRegistrationId();
+      final registrationId = CryptoKeyValue.instance.localRegistrationId;
 
-      await AccountKeyValue.get.init();
+      await AccountKeyValue.instance.init();
       // ignore: avoid_dynamic_calls
       final sessionId = msg['session_id'];
-      AccountKeyValue.get.setPrimarySessionId(sessionId);
+      AccountKeyValue.instance.primarySessionId = sessionId;
 
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(

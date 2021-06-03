@@ -14,36 +14,36 @@ abstract class HiveKeyValue {
 
   final String _boxName;
   late Box box;
-  bool hasInit = false;
+  bool _hasInit = false;
 
   Future init() async {
-    if (hasInit) {
+    if (_hasInit) {
       return;
     }
     final dbFolder = await getApplicationDocumentsDirectory();
     final file = File(p.join(dbFolder.path, _boxName));
     await Hive.initFlutter(file.path);
     box = await Hive.openBox(_boxName);
-    hasInit = true;
+    _hasInit = true;
   }
 
   Future delete() async {
-    if (!hasInit) {
+    if (!_hasInit) {
       return;
     }
     await Hive.deleteBoxFromDisk(_boxName);
-    hasInit = false;
+    _hasInit = false;
   }
 
   static Future<void> initKeyValues() async {
-    await PrivacyKeyValue.get.init();
-    await CryptoKeyValue.get.init();
-    await AccountKeyValue.get.init();
+    await PrivacyKeyValue.instance.init();
+    await CryptoKeyValue.instance.init();
+    await AccountKeyValue.instance.init();
   }
 
   static Future<void> clearKeyValues() async {
-    await PrivacyKeyValue.get.delete();
-    await CryptoKeyValue.get.delete();
-    await AccountKeyValue.get.delete();
+    await PrivacyKeyValue.instance.delete();
+    await CryptoKeyValue.instance.delete();
+    await AccountKeyValue.instance.delete();
   }
 }

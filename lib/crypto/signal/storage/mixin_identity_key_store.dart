@@ -44,10 +44,10 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
       return identityKey == local;
     }
     switch (direction) {
-      case Direction.SENDING:
+      case Direction.sending:
         return isTrustedForSending(
             identityKey!, await identityDao.getIdentityByAddress(theirAddress));
-      case Direction.RECEIVING:
+      case Direction.receiving:
         return true;
       default:
         throw AssertionError('Unknown direction: $direction');
@@ -89,7 +89,7 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
     return true;
   }
 
-  void removeIdentity(SignalProtocolAddress address) {
-    identityDao.deleteByAddress(address.getName());
+  Future<void> removeIdentity(SignalProtocolAddress address) async {
+    await identityDao.deleteByAddress(address.getName());
   }
 }

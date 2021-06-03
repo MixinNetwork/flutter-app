@@ -79,4 +79,15 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
       await update(db.participantSession).replace(p);
     }
   }
+
+  Future<void> deleteBySessionId(String sessionId) async {
+    await (delete(db.participantSession)
+          ..where((t) => t.sessionId.equals(sessionId)))
+        .go();
+  }
+
+  Future<void> updateSentToServer() async {
+    await update(db.participantSession)
+        .write(const ParticipantSessionCompanion(sentToServer: Value(null)));
+  }
 }

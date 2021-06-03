@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 // ignore: implementation_imports
-import 'package:libsignal_protocol_dart/src/InvalidMessageException.dart';
+import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:moor/moor.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../blaze/blaze_message.dart';
 import '../../blaze/blaze_param.dart';
@@ -32,11 +33,11 @@ class SignalProtocol {
   late MixinSignalProtocolStore mixinSignalProtocolStore;
   late MixinSenderKeyStore senderKeyStore;
 
-  static Future initSignal(List<int> private) async {
+  static Future<void> initSignal(List<int> private) async {
     await IdentityKeyUtil.generateIdentityKeyPair(SignalDatabase.get, private);
   }
 
-  Future init() async {
+  Future<void> init() async {
     db = SignalDatabase.get;
     final preKeyStore = MixinPreKeyStore(db);
     final signedPreKeyStore = MixinPreKeyStore(db);
@@ -82,7 +83,7 @@ class SignalProtocol {
       return EncryptResult(cipher, false);
     } on UntrustedIdentityException {
       final remoteAddress = SignalProtocolAddress(recipientId, deviceId);
-      mixinSignalProtocolStore.removeIdentity(remoteAddress);
+      await mixinSignalProtocolStore.removeIdentity(remoteAddress);
       await mixinSignalProtocolStore.deleteSession(remoteAddress);
       return EncryptResult(null, true);
     }
@@ -96,28 +97,28 @@ class SignalProtocol {
     return sessionCipher.encrypt(content);
   }
 
-  void decrypt(
+  Future<void> decrypt(
       String groupId,
       String senderId,
       int dataType,
       Uint8List cipherText,
       String category,
       String? sessionId,
-      DecryptionCallback callback) {
+      DecryptionCallback callback) async {
     final address = SignalProtocolAddress(senderId, sessionId.getDeviceId());
     final sessionCipher =
         SessionCipher.fromStore(mixinSignalProtocolStore, address);
     debugPrint('decrypt category: $category, dataType: $dataType');
     if (category == MessageCategory.signalKey.toString()) {
-      if (dataType == CiphertextMessage.PREKEY_TYPE) {
-        sessionCipher.decryptWithCallback(PreKeySignalMessage(cipherText),
+      if (dataType == CiphertextMessage.prekeyType) {
+        await sessionCipher.decryptWithCallback(PreKeySignalMessage(cipherText),
             (plainText) {
           processGroupSession(groupId, address,
               SenderKeyDistributionMessageWrapper.fromSerialized(plainText));
           callback.call(plainText);
         });
-      } else if (dataType == CiphertextMessage.WHISPER_TYPE) {
-        sessionCipher.decryptFromSignalWithCallback(
+      } else if (dataType == CiphertextMessage.whisperType) {
+        await sessionCipher.decryptFromSignalWithCallback(
             SignalMessage.fromSerialized(cipherText), (plaintext) {
           processGroupSession(groupId, address,
               SenderKeyDistributionMessageWrapper.fromSerialized(plaintext));
@@ -125,14 +126,14 @@ class SignalProtocol {
         });
       }
     } else {
-      if (dataType == CiphertextMessage.PREKEY_TYPE) {
-        sessionCipher.decryptWithCallback(
+      if (dataType == CiphertextMessage.prekeyType) {
+        await sessionCipher.decryptWithCallback(
             PreKeySignalMessage(cipherText), callback);
-      } else if (dataType == CiphertextMessage.WHISPER_TYPE) {
-        sessionCipher.decryptFromSignalWithCallback(
+      } else if (dataType == CiphertextMessage.whisperType) {
+        await sessionCipher.decryptFromSignalWithCallback(
             SignalMessage.fromSerialized(cipherText), callback);
-      } else if (dataType == CiphertextMessage.SENDERKEY_TYPE) {
-        decryptGroupMessage(groupId, address, cipherText, callback);
+      } else if (dataType == CiphertextMessage.senderKeyType) {
+        await decryptGroupMessage(groupId, address, cipherText, callback);
       } else {
         throw InvalidMessageException('Unknown type: $dataType');
       }
@@ -158,18 +159,18 @@ class SignalProtocol {
     return mixinSignalProtocolStore.containsSession(signalProtocolAddress);
   }
 
-  void clearSenderKey(String groupId, String senderId) {
+  Future<void> clearSenderKey(String groupId, String senderId) async {
     final senderKeyName = SenderKeyName(
         groupId, SignalProtocolAddress(senderId, defaultDeviceId));
-    senderKeyStore.removeSenderKey(senderKeyName);
+    await senderKeyStore.removeSenderKey(senderKeyName);
   }
 
-  Future deleteSession(String userId) async {
+  Future<void> deleteSession(String userId) async {
     await mixinSignalProtocolStore.sessionStore.sessionDao
         .deleteSessionsByAddress(userId);
   }
 
-  Future processSession(String userId, PreKeyBundle preKeyBundle) async {
+  Future<void> processSession(String userId, PreKeyBundle preKeyBundle) async {
     final signalProtocolAddress =
         SignalProtocolAddress(userId, preKeyBundle.getDeviceId());
     final sessionBuilder = SessionBuilder.fromSignalStore(
@@ -177,13 +178,13 @@ class SignalProtocol {
     try {
       await sessionBuilder.processPreKeyBundle(preKeyBundle);
     } on UntrustedIdentityException {
-      mixinSignalProtocolStore.removeIdentity(signalProtocolAddress);
+      await mixinSignalProtocolStore.removeIdentity(signalProtocolAddress);
       await sessionBuilder.processPreKeyBundle(preKeyBundle);
     }
   }
 
   Future<BlazeMessage> encryptSessionMessage(
-      Message message, String recipientId,
+      SendingMessage message, String recipientId,
       {String? resendMessageId,
       String? sessionId,
       List<String>? mentionData}) async {
@@ -197,7 +198,7 @@ class SignalProtocol {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
       recipientId: recipientId,
-      messageId: message.messageId,
+      messageId: const Uuid().v4(),
       category: message.category,
       data: data,
       quoteMessageId: message.quoteMessageId,
@@ -221,7 +222,7 @@ class SignalProtocol {
     }
 
     final data = encodeMessageData(ComposeMessageData(
-        CiphertextMessage.SENDERKEY_TYPE, Uint8List.fromList(cipher)));
+        CiphertextMessage.senderKeyType, Uint8List.fromList(cipher)));
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
       messageId: message.messageId,
@@ -233,11 +234,13 @@ class SignalProtocol {
     return createParamBlazeMessage(blazeParam);
   }
 
-  void processGroupSession(String groupId, SignalProtocolAddress address,
-      SenderKeyDistributionMessageWrapper senderKeyDM) {
+  Future<void> processGroupSession(
+      String groupId,
+      SignalProtocolAddress address,
+      SenderKeyDistributionMessageWrapper senderKeyDM) async {
     final builder = GroupSessionBuilder(senderKeyStore);
     final senderKeyName = SenderKeyName(groupId, address);
-    builder.process(senderKeyName, senderKeyDM);
+    await builder.process(senderKeyName, senderKeyDM);
   }
 
   Future<Uint8List> decryptGroupMessage(
@@ -253,7 +256,7 @@ class SignalProtocol {
   String encodeMessageData(ComposeMessageData data) {
     if (data.resendMessageId == null) {
       final header = Uint8List.fromList(<int>[
-        CiphertextMessage.CURRENT_VERSION,
+        CiphertextMessage.currentVersion,
         data.keyType,
         0,
         0,
@@ -266,7 +269,7 @@ class SignalProtocol {
       return base64.encode(cipherText);
     } else {
       final header = Uint8List.fromList(<int>[
-        CiphertextMessage.CURRENT_VERSION,
+        CiphertextMessage.currentVersion,
         data.keyType,
         1,
         0,
@@ -285,7 +288,7 @@ class SignalProtocol {
     final cipherText = base64.decode(encoded);
     final header = cipherText.sublist(0, 8);
     final version = header[0].toInt();
-    if (version != CiphertextMessage.CURRENT_VERSION) {
+    if (version != CiphertextMessage.currentVersion) {
       throw InvalidMessageException('Unknown version: $version');
     }
     final dataType = header[1].toInt();

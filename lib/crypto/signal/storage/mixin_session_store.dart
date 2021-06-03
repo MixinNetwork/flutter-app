@@ -22,7 +22,7 @@ class MixinSessionStore extends SessionStore {
     final sessionRecord = await loadSession(address);
     return sessionRecord.sessionState.hasSenderChain() &&
         sessionRecord.sessionState.getSessionVersion() ==
-            CiphertextMessage.CURRENT_VERSION;
+            CiphertextMessage.currentVersion;
   }
 
   @override

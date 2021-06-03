@@ -115,8 +115,9 @@ class Sender {
       Future.delayed(Duration(seconds: seconds));
 
   Future<bool> checkSignalSession(String recipientId, String sessionId) async {
-    if (!await signalProtocol.containsSession(recipientId,
-        deviceId: sessionId.getDeviceId())) {
+    final contains = await signalProtocol.containsSession(recipientId,
+        deviceId: sessionId.getDeviceId());
+    if (!contains) {
       final requestKeys = <BlazeMessageParamSession>[
         BlazeMessageParamSession(userId: recipientId, sessionId: sessionId)
       ];
@@ -128,7 +129,7 @@ class Sender {
       }
       final keys = List<SignalKey>.from(
           (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
-      if (keys.isNotEmpty && keys.isNotEmpty) {
+      if (keys.isNotEmpty) {
         final preKeyBundle = keys[0].createPreKeyBundle();
         await signalProtocol.processSession(recipientId, preKeyBundle);
       } else {
@@ -366,7 +367,7 @@ class Sender {
     }
     final keys = List<SignalKey>.from(
         (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
-    if (keys.isNotEmpty && keys.isNotEmpty) {
+    if (keys.isNotEmpty) {
       final preKeyBundle = keys[0].createPreKeyBundle();
       await signalProtocol.processSession(recipientId, preKeyBundle);
     } else {
@@ -441,12 +442,10 @@ class Sender {
         await database.participantSessionDao
             .emptyStatusByConversationId(data.conversationId);
       });
-      signalProtocol.clearSenderKey(data.conversationId, accountId);
-      // TODO publish signal key change
+      await signalProtocol.clearSenderKey(data.conversationId, accountId);
     } else if (action == ProcessSignalKeyAction.addParticipant) {
       final userIds = <String>[participantId!];
       await refreshSession(data.conversationId, userIds);
-      // TODO publish signal key change
     }
   }
 

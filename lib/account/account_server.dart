@@ -182,7 +182,7 @@ class AccountServer {
         .asyncMapDrop(_runAckJob)
         .listen((_) {});
 
-    final primarySessionId = AccountKeyValue.get.getPrimarySessionId();
+    final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId != null) {
       database.jobsDao
           .findSessionAckJobs()
@@ -248,7 +248,7 @@ class AccountServer {
         .toString();
     final encoded =
         await base64EncodeWithIsolate(await utf8EncodeWithIsolate(plainText));
-    final primarySessionId = AccountKeyValue.get.getPrimarySessionId();
+    final primarySessionId = AccountKeyValue.instance.primarySessionId;
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, userId, encoded,
         sessionId: primarySessionId));
@@ -349,10 +349,15 @@ class AccountServer {
     MessageResult? result;
     if (message.resendStatus != null) {
       if (message.resendStatus == 1) {
-        if (await _sender.checkSignalSession(
-            message.resendUserId!, message.resendSessionId!)) {
-          result =
-              await _sender.deliverNoThrow(await encryptNormalMessage(message));
+        final check = await _sender.checkSignalSession(
+            message.resendUserId!, message.resendSessionId!);
+        if (check) {
+          final encrypted = await signalProtocol.encryptSessionMessage(
+              message, message.resendUserId!,
+              resendMessageId: message.messageId,
+              sessionId: message.resendSessionId,
+              mentionData: await getMentionData(message.messageId));
+          result = await _sender.deliverNoThrow(encrypted);
           if (result.success) {
             await database.resendSessionMessagesDao
                 .deleteResendSessionMessageById(message.messageId);
@@ -411,6 +416,8 @@ class AccountServer {
     await client.accountApi.logout(LogoutRequest(sessionId));
     await HiveKeyValue.clearKeyValues();
     await SignalDatabase.get.clear();
+    await database.participantSessionDao.deleteBySessionId(sessionId);
+    await database.participantSessionDao.updateSentToServer();
   }
 
   Future<void> sendTextMessage(
@@ -537,7 +544,7 @@ class AccountServer {
   }
 
   Future<void> _createReadSessionMessage(List<String> messageIds) async {
-    final primarySessionId = AccountKeyValue.get.getPrimarySessionId();
+    final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId == null) {
       return;
     }
@@ -581,16 +588,16 @@ class AccountServer {
 
   Future<void> pushSignalKeys() async {
     // TODO try 3 times at most
-    final hasPushSignalKeys = PrivacyKeyValue.get.getHasPushSignalKeys();
+    final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
     if (hasPushSignalKeys) {
       return;
     }
     await refreshSignalKeys(client);
-    PrivacyKeyValue.get.setHasPushSignalKeys(true);
+    PrivacyKeyValue.instance.hasPushSignalKeys = true;
   }
 
   Future<void> syncSession() async {
-    final hasSyncSession = PrivacyKeyValue.get.getHasSyncSession();
+    final hasSyncSession = PrivacyKeyValue.instance.hasSyncSession;
     if (hasSyncSession) {
       return;
     }
@@ -648,12 +655,12 @@ class AccountServer {
       }
     });
     await database.participantSessionDao.insertAll(newParticipantSessions);
-    PrivacyKeyValue.get.setHasSyncSession(true);
+    PrivacyKeyValue.instance.hasSyncSession = true;
   }
 
   Future<void> initSticker() async {
     final refreshStickerLastTime =
-        AccountKeyValue.get.getRefreshStickerLastTime();
+        AccountKeyValue.instance.refreshStickerLastTime;
     final now = DateTime.now().millisecondsSinceEpoch;
     if (now - refreshStickerLastTime < hours24) {
       return;
@@ -673,13 +680,13 @@ class AccountServer {
       await _updateStickerAlbums(item.albumId);
     });
 
-    AccountKeyValue.get.setRefreshStickerLastTime(now);
+    AccountKeyValue.instance.refreshStickerLastTime = now;
   }
 
   final refreshUserIdSet = <dynamic>{};
 
   Future<void> initCircles() async {
-    final hasSyncCircle = AccountKeyValue.get.getHasSyncCircle();
+    final hasSyncCircle = AccountKeyValue.instance.hasSyncCircle;
     if (hasSyncCircle) {
       return;
     }
@@ -695,7 +702,7 @@ class AccountServer {
       await handleCircle(circle);
     });
 
-    AccountKeyValue.get.setHasSyncCircle(true);
+    AccountKeyValue.instance.hasSyncCircle = true;
   }
 
   Future<void> handleCircle(CircleResponse circle, {int? offset}) async {
