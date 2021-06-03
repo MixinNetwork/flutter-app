@@ -171,5 +171,10 @@
   "settingTheme": "Theme",
   "groupCantSendDes": "You can't send messages to this group because you're no longer a participant.",
   "userNotFound": "User not found",
-  "groupAdd": "Add Participants"
+  "groupAdd": "Add Participants",
+  "groupInvite": "Invite to Group via Link",
+  "groupInviteInfo": "Anyone with Mixin can follow this link to join this group. Only share it with people you trust.",
+  "groupInviteShare": "Share Link",
+  "groupInviteCopy": "Copy Link",
+  "groupInviteReset": "Reset Link"
 }

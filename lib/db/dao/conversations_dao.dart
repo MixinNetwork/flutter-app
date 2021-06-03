@@ -47,6 +47,11 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .getSingleOrNull();
 
+  Stream<Conversation?> watchConversationById(String conversationId) =>
+      (select(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .watchSingleOrNull();
+
   Selectable<ConversationItem> chatConversations(
     int limit,
     int offset,
@@ -189,6 +194,11 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
           ),
         );
       });
+
+  Future<int> updateCodeUrl(String conversationId, String codeUrl) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(codeUrl: Value(codeUrl)));
 
   Future<int> updateMuteUntil(String conversationId, String muteUntil) =>
       (update(db.conversations)

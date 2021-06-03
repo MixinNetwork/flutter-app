@@ -129,6 +129,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
         "groupCantSendDes":
             MessageLookupByLibrary.simpleMessage("您不能发送消息，因为您已经不再是此群组成员。"),
+        "groupInvite": MessageLookupByLibrary.simpleMessage("群邀请链接"),
+        "groupInviteCopy": MessageLookupByLibrary.simpleMessage("复制邀请链接"),
+        "groupInviteInfo": MessageLookupByLibrary.simpleMessage(
+            "Mixin 使用者可以使用此链接加入这个群组，请只跟您信任的人共享链接。"),
+        "groupInviteReset": MessageLookupByLibrary.simpleMessage("重置邀请链接"),
+        "groupInviteShare": MessageLookupByLibrary.simpleMessage("分享邀请链接"),
         "groupOwner": MessageLookupByLibrary.simpleMessage("群主"),
         "groupParticipants": MessageLookupByLibrary.simpleMessage("群成员"),
         "groupPopMenuDismissAdmin":

@@ -1102,6 +1102,18 @@ class AccountServer {
     await database.conversationDao.updateConversation(response.data);
   }
 
+  Future<void> refreshGroup(String conversationId) async {
+    final response =
+        await client.conversationApi.getConversation(conversationId);
+    await database.conversationDao.updateConversation(response.data);
+  }
+
+  Future<void> rotate(String conversationId) async {
+    final response = await client.conversationApi.rotate(conversationId);
+    await database.conversationDao
+        .updateCodeUrl(conversationId, response.data.codeUrl);
+  }
+
   Future<void> unpin(String conversationId) =>
       database.conversationDao.unpin(conversationId);
 

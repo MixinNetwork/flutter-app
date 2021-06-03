@@ -6,6 +6,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
 import '../../../account/account_server.dart';
+import '../../../bloc/simple_cubit.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
@@ -22,6 +23,7 @@ import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
 import '../conversation_page.dart';
+import 'group_invite/group_invite_dialog.dart';
 
 /// The participants of group.
 class GroupParticipantsPage extends HookWidget {
@@ -316,36 +318,55 @@ class _ActionAddParticipants extends StatelessWidget {
   final List<ParticipantUser> participants;
 
   @override
-  Widget build(BuildContext context) => ActionButton(
-        name: Resources.assetsImagesIcAddSvg,
-        color: BrightnessData.themeOf(context).icon,
-        size: 16,
-        padding: const EdgeInsets.all(16),
-        onTap: () async {
-          final result = await showConversationSelector(
-            context: context,
-            singleSelect: false,
+  Widget build(BuildContext context) => ContextMenuPortalEntry(
+        buildMenus: () => [
+          ContextMenu(
             title: Localization.of(context).groupAdd,
-            onlyContact: true,
-          );
-          if (result.isEmpty) {
-            return;
-          }
-          final userIds = [
-            context.read<AccountServer>().userId,
-            ...result.where((e) => e.userId != null).map(
-                  (e) => e.userId!,
-                )
-          ];
-          final conversationId =
-              context.read<ConversationCubit>().state?.conversationId;
-          assert(conversationId != null);
-          await runFutureWithToast(
-            context,
-            Future.wait(userIds.map((userId) => context
-                .read<AccountServer>()
-                .addParticipant(conversationId!, userId))),
-          );
-        },
+            onTap: () async {
+              final result = await showConversationSelector(
+                context: context,
+                singleSelect: false,
+                title: Localization.of(context).groupAdd,
+                onlyContact: true,
+              );
+              if (result.isEmpty) {
+                return;
+              }
+              final userIds = [
+                context.read<AccountServer>().userId,
+                ...result.where((e) => e.userId != null).map(
+                      (e) => e.userId!,
+                    )
+              ];
+              final conversationId =
+                  context.read<ConversationCubit>().state?.conversationId;
+              assert(conversationId != null);
+              await runFutureWithToast(
+                context,
+                Future.wait(userIds.map((userId) => context
+                    .read<AccountServer>()
+                    .addParticipant(conversationId!, userId))),
+              );
+            },
+          ),
+          ContextMenu(
+            title: Localization.of(context).groupInvite,
+            onTap: () {
+              final conversationCubit = context.read<ConversationCubit>().state;
+              assert(conversationCubit != null);
+              showGroupInviteByLinkDialog(context,
+                  conversationId: conversationCubit!.conversationId);
+            },
+          ),
+        ],
+        child: Builder(
+            builder: (context) => ActionButton(
+                  name: Resources.assetsImagesIcAddSvg,
+                  color: BrightnessData.themeOf(context).icon,
+                  size: 16,
+                  onTapUp: (event) =>
+                      context.read<OffsetCubit>().emit(event.globalPosition),
+                  padding: const EdgeInsets.all(16),
+                )),
       );
 }
