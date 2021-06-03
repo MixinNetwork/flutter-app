@@ -411,6 +411,8 @@ class AccountServer {
     await client.accountApi.logout(LogoutRequest(sessionId));
     await HiveKeyValue.clearKeyValues();
     await SignalDatabase.get.clear();
+    await database.participantSessionDao.deleteBySessionId(sessionId);
+    await database.participantSessionDao.updateSentToServer();
   }
 
   Future<void> sendTextMessage(
