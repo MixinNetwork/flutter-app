@@ -980,11 +980,9 @@ class DecryptMessage extends Injector {
 
   Future<void> _requestResendKey(String conversationId, String recipientId,
       String messageId, String? sessionId) async {
-    final plainText =
-        PlainJsonMessage(resendKey, null, null, messageId, null, null)
-            .toJson()
-            .toString();
-    final encoded = base64.encode(utf8.encode(plainText));
+    final plainJsonMessage =
+        PlainJsonMessage(resendKey, null, null, messageId, null, null);
+    final encoded = await _jsonEncodeWithIsolate(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
         sessionId: sessionId));
@@ -1005,12 +1003,11 @@ class DecryptMessage extends Injector {
     if (messages.isEmpty) {
       return;
     }
-    final plainText = PlainJsonMessage(
-            resendMessages, messages.reversed.toList(), null, null, null, null)
-        .toJson()
-        .toString();
+    final plainJsonMessage = PlainJsonMessage(
+        resendMessages, messages.reversed.toList(), null, null, null, null);
+    final encoded = await _jsonEncodeWithIsolate(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
-        conversationId, userId, base64.encode(utf8.encode(plainText)),
+        conversationId, userId, encoded,
         sessionId: sessionId));
     unawaited(_sender.deliverNoThrow(bm));
     await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
@@ -1049,8 +1046,14 @@ dynamic _jsonDecode(String encoded) => jsonDecode(_decode(encoded));
 
 String _decode(String encoded) => utf8.decode(base64Decode(encoded));
 
+String _jsonEncode(Object object) =>
+    base64Encode(utf8.encode(jsonEncode(object)));
+
 Future<dynamic> _jsonDecodeWithIsolate(String encoded) =>
     runLoadBalancer(_jsonDecode, encoded);
+
+Future<String> _jsonEncodeWithIsolate(Object object) =>
+    runLoadBalancer(_jsonEncode, object);
 
 Future<String> _decodeWithIsolate(String encoded) =>
     runLoadBalancer(_decode, encoded);

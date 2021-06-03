@@ -268,7 +268,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
           String conversationId, String userId) async =>
       db
           .customSelect(
-              'SELECT id FROM messages WHERE conversation_id = ? AND user_id = ? AND status = \'FAILED\' ORDER BY created_at DESC LIMIT 1000',
+              'SELECT message_id FROM messages WHERE conversation_id = ? AND user_id = ? AND status = \'FAILED\' ORDER BY created_at DESC LIMIT 1000',
               variables: [
                 Variable.withString(conversationId),
                 Variable.withString(userId)
