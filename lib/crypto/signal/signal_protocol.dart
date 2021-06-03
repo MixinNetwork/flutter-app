@@ -5,6 +5,7 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:moor/moor.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../blaze/blaze_message.dart';
 import '../../blaze/blaze_param.dart';
@@ -183,7 +184,7 @@ class SignalProtocol {
   }
 
   Future<BlazeMessage> encryptSessionMessage(
-      Message message, String recipientId,
+      SendingMessage message, String recipientId,
       {String? resendMessageId,
       String? sessionId,
       List<String>? mentionData}) async {
@@ -197,7 +198,7 @@ class SignalProtocol {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
       recipientId: recipientId,
-      messageId: message.messageId,
+      messageId: const Uuid().v4(),
       category: message.category,
       data: data,
       quoteMessageId: message.quoteMessageId,

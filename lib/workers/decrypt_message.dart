@@ -285,16 +285,13 @@ class DecryptMessage extends Injector {
       if (p.createdAt.isAfter(needResendMessage.createdAt)) {
         continue;
       }
-      final newResendMessage =
-          needResendMessage.copyWith(messageId: const Uuid().v4());
       await database.resendSessionMessagesDao.insert(ResendSessionMessage(
           messageId: id,
           userId: data.userId,
           sessionId: data.sessionId,
           status: 1,
           createdAt: DateTime.now()));
-      await database.jobsDao
-          .insertSendingJob(newResendMessage.messageId, data.conversationId);
+      await database.jobsDao.insertSendingJob(id, data.conversationId);
     }
   }
 
@@ -886,7 +883,7 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.signalLocation ||
         data.category == MessageCategory.signalPost) {
       final message = Message(
-        messageId: const Uuid().v4(),
+        messageId: data.messageId,
         conversationId: data.conversationId,
         userId: data.senderId,
         category: data.category!,

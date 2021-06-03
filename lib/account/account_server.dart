@@ -349,10 +349,15 @@ class AccountServer {
     MessageResult? result;
     if (message.resendStatus != null) {
       if (message.resendStatus == 1) {
-        if (await _sender.checkSignalSession(
-            message.resendUserId!, message.resendSessionId!)) {
-          result =
-              await _sender.deliverNoThrow(await encryptNormalMessage(message));
+        final check = await _sender.checkSignalSession(
+            message.resendUserId!, message.resendSessionId!);
+        if (check) {
+          final encrypted = await signalProtocol.encryptSessionMessage(
+              message, message.resendUserId!,
+              resendMessageId: message.messageId,
+              sessionId: message.resendSessionId,
+              mentionData: await getMentionData(message.messageId));
+          result = await _sender.deliverNoThrow(encrypted);
           if (result.success) {
             await database.resendSessionMessagesDao
                 .deleteResendSessionMessageById(message.messageId);
