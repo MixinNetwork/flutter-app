@@ -345,11 +345,10 @@ class ClampingRenderViewport extends RenderViewport {
           }
         }
 
-        if (offset is ScrollPosition &&
-            _isMaxScrollPixel &&
+        if (_isMaxScrollPixel &&
             _lastMainAxisExtent != null &&
             _lastMainAxisExtent != mainAxisExtent) {
-          (offset as ScrollPosition).correctPixels(maxScrollExtent);
+          offset.correctBy(maxScrollExtent - offset.pixels);
           _isMaxScrollPixel = offset.pixels == maxScrollExtent;
           _lastMainAxisExtent = mainAxisExtent;
           continue;
