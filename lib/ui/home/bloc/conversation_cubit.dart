@@ -24,6 +24,7 @@ class ConversationState extends Equatable {
     this.lastReadMessageId,
     this.conversation,
     this.user,
+    required this.refreshKey,
   });
 
   final String conversationId;
@@ -32,6 +33,7 @@ class ConversationState extends Equatable {
   final String? lastReadMessageId;
   final ConversationItem? conversation;
   final User? user;
+  final Object refreshKey;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -63,6 +65,7 @@ class ConversationState extends Equatable {
         conversation,
         user,
         lastReadMessageId,
+        refreshKey,
       ];
 
   ConversationState copyWith({
@@ -73,6 +76,7 @@ class ConversationState extends Equatable {
     final String? lastReadMessageId,
     final ConversationItem? conversation,
     final User? user,
+    final Object? refreshKey,
   }) =>
       ConversationState(
         conversationId: conversationId ?? this.conversationId,
@@ -81,6 +85,7 @@ class ConversationState extends Equatable {
         conversation: conversation ?? this.conversation,
         user: user ?? this.user,
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
+        refreshKey: refreshKey ?? this.refreshKey,
       );
 }
 
@@ -154,10 +159,16 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     final conversationCubit = context.read<ConversationCubit>();
     final state = conversationCubit.state;
 
-    if (state?.conversationId == conversationId) return;
+    ConversationItem? _conversation;
+    String? lastReadMessageId;
+    if (state?.conversationId == conversationId) {
+      _conversation = state?.conversation;
+      lastReadMessageId = state?.lastReadMessageId;
+    }
 
-    final _conversation =
-        conversation ?? await _conversationItem(context, conversationId);
+    _conversation = conversation ??
+        _conversation ??
+        await _conversationItem(context, conversationId);
 
     if (_conversation == null) {
       return showToastFailed(context, null);
@@ -165,14 +176,19 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     final _initIndexMessageId =
         initIndexMessageId ?? _conversation.lastReadMessageId;
+
+    lastReadMessageId = lastReadMessageId ??
+        ((_conversation.unseenMessageCount ?? 0) > 0
+            ? _initIndexMessageId
+            : null);
+
     final conversationState = ConversationState(
       conversationId: conversationId,
       conversation: _conversation,
       initIndexMessageId: _initIndexMessageId,
-      lastReadMessageId: (_conversation.unseenMessageCount ?? 0) > 0
-          ? _initIndexMessageId
-          : null,
+      lastReadMessageId: lastReadMessageId,
       userId: !_conversation.isGroupConversation ? _conversation.ownerId : null,
+      refreshKey: Object(),
     );
 
     conversationCubit.emit(conversationState);
@@ -189,11 +205,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
   }) async {
     final accountServer = context.read<AccountServer>();
     final conversationCubit = context.read<ConversationCubit>();
-    final state = conversationCubit.state;
 
     final conversationId = generateConversationId(userId, accountServer.userId);
-
-    if (state?.conversationId == conversationId) return;
 
     if (user == null) {
       final conversation = await _conversationItem(context, conversationId);
@@ -219,6 +232,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       conversationId: conversationId,
       userId: userId,
       user: _user,
+      refreshKey: Object(),
     ));
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit

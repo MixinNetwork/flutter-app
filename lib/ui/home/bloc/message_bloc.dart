@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/messages_dao.dart';
@@ -76,7 +75,7 @@ class MessageState extends Equatable {
     this.isLatest = false,
     this.isOldest = false,
     this.lastReadMessageId,
-    this.initUUID,
+    this.refreshKey,
   });
 
   final String? conversationId;
@@ -86,7 +85,7 @@ class MessageState extends Equatable {
   final bool isLatest;
   final bool isOldest;
   final String? lastReadMessageId;
-  final String? initUUID;
+  final Object? refreshKey;
 
   @override
   List<Object?> get props => [
@@ -97,7 +96,7 @@ class MessageState extends Equatable {
         isLatest,
         isOldest,
         lastReadMessageId,
-        initUUID,
+        refreshKey,
       ];
 
   MessageItem? get bottomMessage =>
@@ -122,7 +121,7 @@ class MessageState extends Equatable {
     final bool? isLatest,
     final bool? isOldest,
     final String? lastReadMessageId,
-    final String? initUUID,
+    final Object? refreshKey,
   }) =>
       MessageState(
         conversationId: conversationId ?? this.conversationId,
@@ -132,14 +131,14 @@ class MessageState extends Equatable {
         isLatest: isLatest ?? this.isLatest,
         isOldest: isOldest ?? this.isOldest,
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
-        initUUID: initUUID ?? this.initUUID,
+        refreshKey: refreshKey ?? this.refreshKey,
       );
 
   MessageState _copyWithJumpCurrentState() => MessageState(
         center: null,
         bottom: const [],
         top: list.toList(),
-        initUUID: const Uuid().v4(),
+        refreshKey: Object(),
         conversationId: conversationId,
         isLatest: isLatest,
         isOldest: isOldest,
@@ -162,10 +161,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     addSubscription(
       conversationCubit.stream
           .where((event) => event?.conversationId != null)
-          .map((event) => Tuple3(
+          .map((event) => Tuple4(
                 event?.conversationId,
                 event?.initIndexMessageId,
                 event?.lastReadMessageId,
+                event?.refreshKey,
               ))
           .distinct()
           .asyncMap(
@@ -221,6 +221,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       );
       await _preCacheMention(messageState);
       yield _pretreatment(messageState.copyWith(
+        refreshKey: Object(),
         lastReadMessageId: event.lastReadMessageId,
       ));
     } else {
@@ -319,7 +320,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       center: state.center,
       bottom: state.bottom,
       top: state.top,
-      initUUID: const Uuid().v4(),
     );
     return result;
   }

@@ -329,7 +329,7 @@ class _List extends HookWidget {
     final key = ValueKey(
       Tuple2(
         state.conversationId,
-        state.initUUID,
+        state.refreshKey,
       ),
     );
     final top = state.top;
@@ -421,7 +421,7 @@ class _JumpCurrentButton extends HookWidget {
       scrollController.hasClients,
       pixels,
       conversationId,
-      state.initUUID,
+      state.refreshKey,
     ]);
 
     final enable =
