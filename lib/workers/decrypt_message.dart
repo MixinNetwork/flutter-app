@@ -837,6 +837,10 @@ class DecryptMessage extends Injector {
     }
     await database.jobsDao.insertNoReplace(
         createAckJob(acknowledgeMessageReceipts, messageId, status));
+    if (status == MessageStatus.read) {
+      await database.jobsDao
+          .insert(createAckJob(createMessage, messageId, MessageStatus.read));
+    }
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
