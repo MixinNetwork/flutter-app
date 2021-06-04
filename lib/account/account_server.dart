@@ -243,14 +243,11 @@ class AccountServer {
     );
     final jobIds = jobs.map((e) => e.jobId).toList();
     final plainText = PlainJsonMessage(
-            acknowledgeMessageReceipts, null, null, null, null, ack)
-        .toJson()
-        .toString();
-    final encoded =
-        await base64EncodeWithIsolate(await utf8EncodeWithIsolate(plainText));
+        acknowledgeMessageReceipts, null, null, null, null, ack);
+    final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     final bm = createParamBlazeMessage(createPlainJsonParam(
-        conversationId, userId, encoded,
+        conversationId, userId, encode,
         sessionId: primarySessionId));
     try {
       final result = await _sender.deliverNoThrow(bm);

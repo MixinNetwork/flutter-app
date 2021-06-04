@@ -21,10 +21,10 @@ dynamic _jsonDecode(String json) => convert.jsonDecode(json);
 Future<dynamic> jsonDecodeWithIsolate(String json) =>
     runLoadBalancer(_jsonDecode, json);
 
-String _jsonEncode(Object? object) => convert.jsonEncode(object);
+String jsonEncode(Object? object) => convert.jsonEncode(object);
 
-Future<String> jsonEncodeWithIsolate(Object? object) =>
-    runLoadBalancer(_jsonEncode, object);
+Future<String> jsonEncodeWithIsolate(Object object) =>
+    runLoadBalancer(jsonEncode, object);
 
 List<int> _utf8Encode(String input) => utf8.encode(input);
 
