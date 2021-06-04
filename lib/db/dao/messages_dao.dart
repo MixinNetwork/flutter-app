@@ -17,24 +17,27 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     with _$MessagesDaoMixin {
   MessagesDao(MixinDatabase db) : super(db);
 
-  late Stream<void> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
-    db.messages,
-    db.users,
-    db.snapshots,
-    db.assets,
-    db.stickers,
-    db.hyperlinks,
-    db.messageMentions,
-    db.conversations,
-  ]));
+  late Stream<void> updateEvent = db.tableUpdates(
+    TableUpdateQuery.onAllTables([
+      db.messages,
+      db.users,
+      db.snapshots,
+      db.assets,
+      db.stickers,
+      db.hyperlinks,
+      db.messageMentions,
+      db.conversations,
+    ]),
+  );
 
-  late Stream<void> searchMessageUpdateEvent =
-      db.tableUpdates(TableUpdateQuery.onAllTables([
-    db.messages,
-    db.users,
-    db.conversations,
-    db.messagesFts,
-  ]));
+  late Stream<void> searchMessageUpdateEvent = db.tableUpdates(
+    TableUpdateQuery.onAllTables([
+      db.messages,
+      db.users,
+      db.conversations,
+      db.messagesFts,
+    ]),
+  );
 
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
@@ -49,6 +52,15 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       .where((event) => event != null)
       .cast<NotificationMessage>();
 
+  Future<T> _sendInsertOrReplaceEventWithFuture<T>(
+    List<String> messageIds,
+    Future<T> future,
+  ) async {
+    final result = await future;
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+    return result;
+  }
+
   Future<int> insert(Message message, String userId) async {
     final result = await db.transaction(() async {
       final futures = <Future>[
@@ -56,19 +68,23 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       ];
       if (message.category.isText) {
         final content = message.content!.fts5ContentFilter();
-        futures.add(insertFts(
-          message.messageId,
-          message.conversationId,
-          content,
-          message.createdAt,
-          message.userId,
-        ));
+        futures.add(
+          insertFts(
+            message.messageId,
+            message.conversationId,
+            content,
+            message.createdAt,
+            message.userId,
+          ),
+        );
       }
-      futures.add(db.conversationsDao.updateLastMessageId(
-        message.conversationId,
-        message.messageId,
-        message.createdAt,
-      ));
+      futures.add(
+        db.conversationsDao.updateLastMessageId(
+          message.conversationId,
+          message.messageId,
+          message.createdAt,
+        ),
+      );
       return (await Future.wait(futures))[0];
     });
     await takeUnseen(userId, message.conversationId);
@@ -97,41 +113,40 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<SendingMessage?> sendingMessage(String messageId) async =>
       db.sendingMessage(messageId).getSingleOrNull();
 
-  Future<int> updateMessageStatusById(
-      String messageId, MessageStatus status) async {
-    final result = await (db.update(db.messages)
-          ..where((tbl) => tbl.messageId.equals(messageId)))
-        .write(MessagesCompanion(status: Value(status)));
-    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
-    return result;
-  }
+  Future<int> updateMessageStatusById(String messageId, MessageStatus status) =>
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        (db.update(db.messages)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(status: Value(status))),
+      );
 
   Future<MessageStatus?> findMessageStatusById(String messageId) =>
       db.findMessageStatusById(messageId).getSingleOrNull();
 
-  Future<int> updateMediaMessageUrl(String path, String messageId) async {
-    final result = await (db.update(db.messages)
-          ..where((tbl) => tbl.messageId.equals(messageId)))
-        .write(MessagesCompanion(mediaUrl: Value(path)));
-    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
-    return result;
-  }
+  Future<int> updateMediaMessageUrl(String path, String messageId) =>
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        (db.update(db.messages)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(mediaUrl: Value(path))),
+      );
 
-  Future<int> updateMediaSize(int length, String messageId) async {
-    final result = await (db.update(db.messages)
-          ..where((tbl) => tbl.messageId.equals(messageId)))
-        .write(MessagesCompanion(mediaSize: Value(length)));
-    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
-    return result;
-  }
+  Future<int> updateMediaSize(int length, String messageId) =>
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        (db.update(db.messages)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(mediaSize: Value(length))),
+      );
 
-  Future<int> updateMediaStatus(MediaStatus status, String messageId) async {
-    final result = await (db.update(db.messages)
-          ..where((tbl) => tbl.messageId.equals(messageId)))
-        .write(MessagesCompanion(mediaStatus: Value(status)));
-    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
-    return result;
-  }
+  Future<int> updateMediaStatus(MediaStatus status, String messageId) =>
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        (db.update(db.messages)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(mediaStatus: Value(status))),
+      );
 
   Future<int> takeUnseen(String userId, String conversationId) async {
     final messageId = await (db.selectOnly(db.messages)
@@ -213,7 +228,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     return (db.selectOnly(db.messages)
           ..addColumns([countExp])
           ..where(db.messages.conversationId.equals(conversationId)))
-        .map((row) => row.read(countExp));
+        .map(
+      (row) => row.read(countExp),
+    );
   }
 
   Future<List<String>> getUnreadMessageIds(
@@ -287,93 +304,114 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<int> updateQuoteContentByQuoteId(
           String conversationId, String messageId, String content) =>
-      db.customUpdate(
-        'UPDATE messages SET quote_content = :content WHERE conversation_id = :conversationId AND quote_message_id = :messageId',
-        variables: [
-          Variable.withString(conversationId),
-          Variable.withString(messageId),
-          Variable.withString(content),
-        ],
-        updates: {db.messages},
-        updateKind: UpdateKind.update,
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        db.customUpdate(
+          'UPDATE messages SET quote_content = :content WHERE conversation_id = :conversationId AND quote_message_id = :messageId',
+          variables: [
+            Variable.withString(conversationId),
+            Variable.withString(messageId),
+            Variable.withString(content),
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        ),
       );
 
   Future<int> updateMessageContent(String messageId, String encoded) =>
-      db.customUpdate(
-        'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
-        variables: [
-          Variable.withString(encoded),
-          Variable.withString(messageId)
-        ],
-        updates: {db.messages},
-        updateKind: UpdateKind.update,
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        db.customUpdate(
+          'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
+          variables: [
+            Variable.withString(encoded),
+            Variable.withString(messageId)
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        ),
       );
 
   Future<int> updateMessageContentAndStatus(
           String messageId, String content, MessageStatus status) =>
-      db.customUpdate(
-        'UPDATE messages SET content = :content, status = :status WHERE message_id = :id AND category != \'MESSAGE_RECALL\'',
-        variables: [
-          Variable.withString(content),
-          Variable.withString(
-              const MessageStatusTypeConverter().mapToSql(status)!),
-          Variable.withString(messageId),
-        ],
-        updates: {db.messages},
-        updateKind: UpdateKind.update,
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        db.customUpdate(
+          'UPDATE messages SET content = :content, status = :status WHERE message_id = :id AND category != \'MESSAGE_RECALL\'',
+          variables: [
+            Variable.withString(content),
+            Variable.withString(
+                const MessageStatusTypeConverter().mapToSql(status)!),
+            Variable.withString(messageId),
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        ),
       );
 
   Future<int> updateAttachmentMessage(
           String messageId, MessagesCompanion messagesCompanion) async =>
-      (update(db.messages)..where((t) => t.messageId.equals(messageId)))
-          .write(messagesCompanion);
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        (update(db.messages)..where((t) => t.messageId.equals(messageId)))
+            .write(messagesCompanion),
+      );
 
   Future<int> updateStickerMessage(
           String messageId, MessageStatus status, String stickerId) =>
-      db.customUpdate(
-        'UPDATE messages SET sticker_id = :stickerId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
-        variables: [
-          Variable.withString(stickerId),
-          Variable.withString(
-              const MessageStatusTypeConverter().mapToSql(status)!),
-          Variable.withString(messageId),
-        ],
-        updates: {db.messages},
-        updateKind: UpdateKind.update,
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        db.customUpdate(
+          'UPDATE messages SET sticker_id = :stickerId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
+          variables: [
+            Variable.withString(stickerId),
+            Variable.withString(
+                const MessageStatusTypeConverter().mapToSql(status)!),
+            Variable.withString(messageId),
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        ),
       );
 
   Future<int> updateContactMessage(
           String messageId, MessageStatus status, String sharedUserId) =>
-      db.customUpdate(
-        'UPDATE messages SET shared_user_id = :sharedUserId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
-        variables: [
-          Variable.withString(sharedUserId),
-          Variable.withString(
-              const MessageStatusTypeConverter().mapToSql(status)!),
-          Variable.withString(messageId),
-        ],
-        updates: {db.messages},
-        updateKind: UpdateKind.update,
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        db.customUpdate(
+          'UPDATE messages SET shared_user_id = :sharedUserId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
+          variables: [
+            Variable.withString(sharedUserId),
+            Variable.withString(
+                const MessageStatusTypeConverter().mapToSql(status)!),
+            Variable.withString(messageId),
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        ),
       );
 
   Future<int> updateLiveMessage(String messageId, int width, int height,
           String url, String thumbUrl, MessageStatus status) =>
-      db.customUpdate(
-        '''
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        db.customUpdate(
+          '''
     UPDATE messages SET media_width = :width, media_height = :height, media_url=:url, thumb_url = :thumbUrl, status = :status 
     WHERE message_id = :messageId AND category != 'SIGNAL_LIVE'
     ''',
-        variables: [
-          Variable.withInt(width),
-          Variable.withInt(height),
-          Variable.withString(url),
-          Variable.withString(thumbUrl),
-          Variable.withString(
-              const MessageStatusTypeConverter().mapToSql(status)!),
-          Variable.withString(messageId),
-        ],
-        updates: {db.messages},
-        updateKind: UpdateKind.update,
+          variables: [
+            Variable.withInt(width),
+            Variable.withInt(height),
+            Variable.withString(url),
+            Variable.withString(thumbUrl),
+            Variable.withString(
+                const MessageStatusTypeConverter().mapToSql(status)!),
+            Variable.withString(messageId),
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        ),
       );
 
   Selectable<int> mediaMessageRowIdByConversationId(
