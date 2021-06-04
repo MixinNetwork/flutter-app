@@ -573,7 +573,8 @@ class _SearchItem extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: BrightnessData.themeOf(context).text,
+                                color: BrightnessData.themeOf(context)
+                                    .secondaryText,
                                 fontSize: 14,
                               ),
                               highlightTextSpans: [
