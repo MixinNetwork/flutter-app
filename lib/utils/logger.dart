@@ -1,9 +1,8 @@
 import 'package:logger/logger.dart';
 
-final Logger logger = Logger(
-    printer: PrettyPrinter(
-  colors: true,
-));
+import 'pretty_printer.dart' as printer;
+
+final Logger logger = Logger(printer: printer.PrettyPrinter());
 
 void v(dynamic message, [dynamic error, StackTrace? stackTrace]) {
   logger.v(message, error, stackTrace);
