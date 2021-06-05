@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
@@ -11,6 +10,7 @@ import '../../blaze/blaze_message.dart';
 import '../../blaze/blaze_param.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
+import '../../utils/logger.dart';
 import '../../utils/string_extension.dart';
 import 'encrypt_result.dart';
 import 'identity_key_util.dart';
@@ -108,7 +108,7 @@ class SignalProtocol {
     final address = SignalProtocolAddress(senderId, sessionId.getDeviceId());
     final sessionCipher =
         SessionCipher.fromStore(mixinSignalProtocolStore, address);
-    debugPrint('decrypt category: $category, dataType: $dataType');
+    d('decrypt category: $category, dataType: $dataType');
     if (category == MessageCategory.signalKey.toString()) {
       if (dataType == CiphertextMessage.prekeyType) {
         await sessionCipher.decryptWithCallback(PreKeySignalMessage(cipherText),
@@ -218,7 +218,7 @@ class SignalProtocol {
       cipher = await groupCipher
           .encrypt(Uint8List.fromList(utf8.encode(message.content!)));
     } on NoSessionException catch (e) {
-      debugPrint('No such session $e');
+      w('No such session $e');
     }
 
     final data = encodeMessageData(ComposeMessageData(

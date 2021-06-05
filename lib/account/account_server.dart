@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
@@ -37,6 +36,7 @@ import '../utils/attachment_util.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/stream_extension.dart';
 import '../utils/string_extension.dart';
@@ -97,7 +97,7 @@ class AccountServer {
     await _initDatabase(privateKey, multiAuthCubit);
 
     Timer.periodic(const Duration(days: 1), (timer) {
-      debugPrint('refreshSignalKeys periodic');
+      i('refreshSignalKeys periodic');
       refreshSignalKeys(client);
     });
 
@@ -222,7 +222,7 @@ class AccountServer {
       await client.messageApi.acknowledgements(ack);
       await database.jobsDao.deleteJobs(jobIds);
     } catch (e, s) {
-      debugPrint('Send ack error: $e, stack: $s');
+      w('Send ack error: $e, stack: $s');
     }
   }
 
@@ -255,7 +255,7 @@ class AccountServer {
         await database.jobsDao.deleteJobs(jobIds);
       }
     } catch (e, s) {
-      debugPrint('Send session ack error: $e, stack: $s');
+      w('Send session ack error: $e, stack: $s');
     }
   }
 
@@ -744,8 +744,7 @@ class AccountServer {
 
       await database.stickerRelationshipsDao.insertAll(relationships);
     } catch (e, s) {
-      debugPrint('$e');
-      debugPrint('$s');
+      w('Update sticker albums error: $e, stack: $s');
     }
   }
 
@@ -806,7 +805,7 @@ class AccountServer {
           isScam: user.isScam ? 1 : 0,
           createdAt: user.createdAt));
     } catch (e) {
-      debugPrint('$e');
+      w('_relationship error $e');
     }
   }
 
@@ -846,7 +845,7 @@ class AccountServer {
 
       await database.conversationDao.updateConversation(response.data);
     } catch (e) {
-      debugPrint('$e');
+      w('addParticipant error $e');
       // throw error??
     }
   }
@@ -862,7 +861,7 @@ class AccountServer {
         [ParticipantRequest(userId: userId)],
       );
     } catch (e) {
-      debugPrint('$e');
+      w('removeParticipant error $e');
       rethrow;
     }
   }
@@ -873,7 +872,7 @@ class AccountServer {
       await client.conversationApi.participants(conversationId, 'ROLE',
           [ParticipantRequest(userId: userId, role: role)]);
     } catch (e) {
-      debugPrint('$e');
+      w('updateParticipantRole error $e');
       rethrow;
     }
   }

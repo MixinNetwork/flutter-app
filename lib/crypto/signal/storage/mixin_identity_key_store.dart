@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
+import '../../../utils/logger.dart';
 import '../dao/identity_dao.dart';
 import '../signal_database.dart';
 import '../signal_vo_extension.dart';
@@ -60,14 +60,14 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
     final signalAddress = address.getName();
     final identity = await identityDao.getIdentityByAddress(signalAddress);
     if (identity == null) {
-      debugPrint('Saving new identity...$address');
+      i('Saving new identity...$address');
       await identityDao.insert(IdentitiesCompanion.insert(
           address: signalAddress,
           publicKey: identityKey!.serialize(),
           timestamp: DateTime.now().millisecondsSinceEpoch));
       return true;
     } else if (identity.getIdentityKey() != identityKey) {
-      debugPrint('Replacing existing identity...$address');
+      i('Replacing existing identity...$address');
       await identityDao.insert(IdentitiesCompanion.insert(
           address: signalAddress,
           publicKey: identityKey!.serialize(),
@@ -79,11 +79,11 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
 
   bool isTrustedForSending(IdentityKey identityKey, Identitie? identity) {
     if (identity == null) {
-      debugPrint('Nothing here, returning true...');
+      i('Nothing here, returning true...');
       return true;
     }
     if (identityKey != identity.getIdentityKey()) {
-      debugPrint('Identity keys don\'t match...');
+      i('Identity keys don\'t match...');
       return false;
     }
     return true;

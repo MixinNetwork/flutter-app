@@ -1,10 +1,8 @@
 import 'dart:convert';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart';
-import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
 // ignore: implementation_imports
 import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
 import 'package:moor/moor.dart';
@@ -47,6 +45,7 @@ import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../utils/attachment_util.dart';
 import '../utils/dao_extension.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/logger.dart';
 import '../utils/string_extension.dart';
 import 'injector.dart';
 import 'sender.dart';
@@ -96,7 +95,7 @@ class DecryptMessage extends Injector {
   Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
         await jsonDecodeWithIsolate(floodMessage.data));
-    debugPrint('DecryptMessage process data: ${data.toJson()}');
+    d('DecryptMessage process data: ${data.toJson()}');
     try {
       var status = MessageStatus.delivered;
       _remoteStatus = MessageStatus.delivered;
@@ -108,35 +107,34 @@ class DecryptMessage extends Injector {
       await syncConversion(data.conversationId);
       final category = data.category;
       if (category.isSignal) {
-        debugPrint('DecryptMessage isSignal');
+        d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
           _remoteStatus = MessageStatus.read;
         }
         await _processSignalMessage(data, status);
       } else if (category.isPlain) {
-        debugPrint('DecryptMessage isPlain');
+        d('DecryptMessage isPlain');
         await _processPlainMessage(data, status);
       } else if (category.isEncrypted) {
-        debugPrint('DecryptMessage isEncrypted');
+        d('DecryptMessage isEncrypted');
         await _processEncryptedMessage(data, status);
       } else if (category.isSystem) {
-        debugPrint('DecryptMessage isSystem');
+        d('DecryptMessage isSystem');
         _remoteStatus = MessageStatus.read;
         await _processSystemMessage(data, status);
       } else if (category == MessageCategory.appButtonGroup ||
           category == MessageCategory.appCard) {
-        debugPrint('DecryptMessage isApp');
+        d('DecryptMessage isApp');
         await _processApp(data, status);
       } else if (category == MessageCategory.messageRecall) {
-        debugPrint('DecryptMessage isMessageRecall');
+        d('DecryptMessage isMessageRecall');
         _remoteStatus = MessageStatus.read;
         await _processRecallMessage(data);
       } else {
         _remoteStatus = MessageStatus.delivered;
       }
     } catch (e, s) {
-      debugPrint('$e');
-      debugPrint('$s');
+      w('process error $e, stack $s');
       await _insertInvalidMessage(data);
       _remoteStatus = MessageStatus.delivered;
     }
@@ -181,7 +179,7 @@ class DecryptMessage extends Injector {
         }
       });
     } on Exception catch (e) {
-      debugPrint('decrypt failed ${data.messageId}, $e');
+      i('decrypt failed ${data.messageId}, $e');
       await _refreshSignalKeys(data.conversationId);
       if (data.category == MessageCategory.signalKey) {
         await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
@@ -248,7 +246,7 @@ class DecryptMessage extends Injector {
       }
     } catch (e) {
       // todo
-      debugPrint(e.toString());
+      w(e.toString());
     }
   }
 
@@ -317,8 +315,7 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processApp(BlazeMessageData data, MessageStatus status) async {
-    debugPrint(
-        'data.conversationId: ${data.conversationId}, _conversationId: $_conversationId');
+    d('data.conversationId: ${data.conversationId}, _conversationId: $_conversationId');
     if (data.category == MessageCategory.appButtonGroup) {
       await _processAppButton(data, status);
     } else if (data.category == MessageCategory.appCard) {
@@ -636,7 +633,7 @@ class DecryptMessage extends Injector {
         locationMessage =
             LocationMessage.fromJson(await jsonDecodeWithIsolate(plain));
       } catch (e) {
-        debugPrint(e.toString());
+        w('decode locationMessage error $e');
       }
       if (locationMessage == null ||
           locationMessage.latitude == 0.0 ||
@@ -1032,7 +1029,7 @@ class DecryptMessage extends Injector {
         createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
     final result = await _sender.signalKeysChannel(bm);
     if (result == null) {
-      debugPrint('Registering new pre keys...');
+      i('Registering new pre keys...');
     }
   }
 

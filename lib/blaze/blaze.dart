@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -14,6 +13,7 @@ import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
 import '../utils/dao_extension.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/logger.dart';
 import 'blaze_message.dart';
 import 'blaze_message_param_session.dart';
 import 'vo/blaze_message_data.dart';
@@ -50,7 +50,7 @@ class Blaze {
   final transactions = <String, WebSocketTransaction>{};
 
   void connect() {
-    debugPrint('ws connect');
+    i('ws connect');
     _token ??= signAuthTokenWithEdDSA(
         userId, sessionId, privateKey, scp, 'GET', '/', '');
     try {
@@ -73,7 +73,7 @@ class Blaze {
       (blazeMessage) async {
         connectedStateStreamController.add(true);
 
-        debugPrint('blazeMessage: ${blazeMessage.toJson()}');
+        d('blazeMessage: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == errorAction &&
             blazeMessage.error?.code == 401) {
@@ -83,14 +83,14 @@ class Blaze {
         if (blazeMessage.error == null) {
           final transaction = transactions[blazeMessage.id];
           if (transaction != null) {
-            debugPrint('transaction success id: ${transaction.tid}');
+            d('transaction success id: ${transaction.tid}');
             transaction.success(blazeMessage);
             transactions.removeWhere((key, value) => key == blazeMessage.id);
           }
         } else {
           final transaction = transactions[blazeMessage.id];
           if (transaction != null) {
-            debugPrint('transaction error id: ${transaction.tid}');
+            d('transaction error id: ${transaction.tid}');
             transaction.error(blazeMessage);
             transactions.removeWhere((key, value) => key == blazeMessage.id);
           }
@@ -100,7 +100,7 @@ class Blaze {
         try {
           data = BlazeMessageData.fromJson(blazeMessage.data);
         } catch (e) {
-          debugPrint('blazeMessage not a BlazeMessageData');
+          d('blazeMessage not a BlazeMessageData');
           return;
         }
         if (blazeMessage.action == createMessage) {
@@ -122,11 +122,11 @@ class Blaze {
         }
       },
       onError: (error, s) {
-        debugPrint('ws error: $error, s: $s');
+        i('ws error: $error, s: $s');
         _reconnect();
       },
       onDone: () {
-        debugPrint('web socket done');
+        i('web socket done');
         _reconnect();
       },
       cancelOnError: true,
@@ -156,7 +156,7 @@ class Blaze {
       param = '$offset';
     }
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
-    debugPrint('blaze send: ${m.toJson()}');
+    d('blaze send: ${m.toJson()}');
     await _sendGZip(m);
   }
 
@@ -166,7 +166,7 @@ class Blaze {
   }
 
   void _disconnect() {
-    debugPrint('ws _disconnect');
+    i('ws _disconnect');
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
@@ -175,10 +175,10 @@ class Blaze {
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
-    debugPrint('blaze send: ${blazeMessage.toJson()}');
+    d('blaze send: ${blazeMessage.toJson()}');
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
     transactions[blazeMessage.id] = transaction;
-    debugPrint('sendMessage transactions size: ${transactions.length}');
+    d('sendMessage transactions size: ${transactions.length}');
     return transaction.run(
         () => channel?.sink.add(GZipEncoder()
             .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
@@ -186,8 +186,7 @@ class Blaze {
   }
 
   Future<void> _reconnect() async {
-    debugPrint(
-        '_reconnect reconnecting: $_reconnecting start: ${StackTrace.current}');
+    i('_reconnect reconnecting: $_reconnecting start: ${StackTrace.current}');
     if (_reconnecting) return;
     connectedStateStreamController.add(false);
     _reconnecting = true;
@@ -196,16 +195,16 @@ class Blaze {
     try {
       _disconnect();
       await client.accountApi.getMe();
-      debugPrint('http ping');
+      i('http ping');
       _reconnecting = false;
-      debugPrint('reconnecting set false, ${StackTrace.current}');
+      i('reconnecting set false, ${StackTrace.current}');
       connect();
     } catch (e) {
-      debugPrint('ws ping error: $e');
+      w('ws ping error: $e');
       if (e is MixinApiError && e.error.code == 401) return;
       await Future.delayed(const Duration(seconds: 2));
       _reconnecting = false;
-      debugPrint('reconnecting set false, ${StackTrace.current}');
+      i('reconnecting set false, ${StackTrace.current}');
       return _reconnect();
     }
   }

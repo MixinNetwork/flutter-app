@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:ui';
 
+import 'package:ansicolor/ansicolor.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +17,7 @@ import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
 import 'ui/home/local_notification_center.dart';
 import 'utils/load_balancer_utils.dart';
+import 'utils/logger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +34,16 @@ Future<void> main() async {
 
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());
-  runApp(App());
+
+  ansiColorDisabled = false;
+  runZonedGuarded(() => runApp(App()), (Object error, StackTrace stack) {
+    if (kReleaseMode) return;
+    e('$error, $stack');
+  }, zoneSpecification: ZoneSpecification(
+      print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+    if (kReleaseMode) return;
+    parent.print(zone, colorize(line));
+  }));
 
   doWhenWindowReady(() {
     appWindow.minSize =
