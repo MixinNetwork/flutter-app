@@ -1,13 +1,16 @@
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
+import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/uri_utils.dart';
@@ -57,6 +60,8 @@ class VideoMessageWidget extends StatelessWidget {
                 } else if (message.mediaStatus == MediaStatus.done &&
                     message.mediaUrl != null) {
                   openUri(context, Uri.file(message.mediaUrl!).toString());
+                } else if (message.type.isLive && message.mediaUrl != null) {
+                  launch(message.mediaUrl!);
                 }
               },
               child: ClipRRect(
@@ -69,6 +74,11 @@ class VideoMessageWidget extends StatelessWidget {
                     children: [
                       if (message.thumbImage != null)
                         ImageByBase64(message.thumbImage!),
+                      if (message.thumbUrl != null)
+                        CachedNetworkImage(
+                          imageUrl: message.thumbUrl!,
+                          fit: BoxFit.cover,
+                        ),
                       Center(
                         child: Builder(
                           builder: (BuildContext context) {
