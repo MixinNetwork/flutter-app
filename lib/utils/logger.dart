@@ -1,6 +1,8 @@
 import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter/foundation.dart';
 
+// ignore_for_file: avoid_print
+
 const _verbosePrefix = '[V]';
 const _debugPrefix = '[D]';
 const _infoPrefix = '[I]';
@@ -14,9 +16,6 @@ final _warningPen = AnsiPen()..yellow();
 final _errorPen = AnsiPen()..red();
 
 String colorize(String message) {
-  if (!kDebugMode) {
-    return message;
-  }
   if (message.length < 3) {
     return _debugPen(message);
   }
@@ -38,36 +37,27 @@ String colorize(String message) {
 }
 
 void v(String message) {
-  if (kDebugMode) {
-    // ignore: avoid_print
-    print('$_verbosePrefix $message');
-  }
+  if (kReleaseMode) return;
+
+  print('$_verbosePrefix $message');
 }
 
 void d(String message) {
-  if (kDebugMode) {
-    // ignore: avoid_print
-    print('$_debugPrefix $message');
-  }
+  if (kReleaseMode) return;
+  print('$_debugPrefix $message');
 }
 
 void i(String message) {
-  if (kDebugMode) {
-    // ignore: avoid_print
-    print('$_infoPrefix $message');
-  }
+  if (kReleaseMode) return;
+  print('$_infoPrefix $message');
 }
 
 void w(String message) {
-  if (kDebugMode) {
-    // ignore: avoid_print
-    print('$_warningPrefix $message');
-  }
+  if (kReleaseMode) return;
+  print('$_warningPrefix $message');
 }
 
 void e(String message) {
-  if (kDebugMode) {
-    // ignore: avoid_print
-    print('$_errorPrefix $message');
-  }
+  if (kReleaseMode) return;
+  print('$_errorPrefix $message');
 }

@@ -6,6 +6,7 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:isolate/isolate.dart';
 import 'package:path_provider/path_provider.dart';
@@ -36,9 +37,11 @@ Future<void> main() async {
 
   ansiColorDisabled = false;
   runZonedGuarded(() => runApp(App()), (Object error, StackTrace stack) {
+    if (kReleaseMode) return;
     e('$error, $stack');
   }, zoneSpecification: ZoneSpecification(
       print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+    if (kReleaseMode) return;
     parent.print(zone, colorize(line));
   }));
 
