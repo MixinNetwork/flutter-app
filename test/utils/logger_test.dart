@@ -7,10 +7,10 @@ void main() {
     ansiColorDisabled = false;
 
     const originText = 'foo';
-    final debugText = colorize(originText);
+    final debugText = colorizeNonAnsi(originText);
 
     expect(debugText, isNot(originText));
-    expect(debugText, colorize(debugText));
+    expect(debugText, colorizeNonAnsi(debugText));
 
     v('verbose message');
     d('debug message');

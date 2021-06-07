@@ -15,7 +15,7 @@ final _warningPen = AnsiPen()..yellow();
 final _errorPen = AnsiPen()..red();
 final _wtfPen = AnsiPen()..magenta();
 
-String colorize(String message) {
+String colorizeNonAnsi(String message) {
   final ansiColorMessage =
       message.startsWith(ansiEscape) && message.endsWith(ansiDefault);
 
