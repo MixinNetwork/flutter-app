@@ -12,6 +12,7 @@ import '../../../db/extension/conversation.dart';
 import '../../../db/extension/user.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
+import '../../../utils/logger.dart';
 import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list_bloc.dart';
@@ -192,6 +193,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     );
 
     conversationCubit.emit(conversationState);
+    wtf('selectConversation conversationId: $conversationId, userId: ${conversationState.userId}, StackTrace: ${StackTrace.current}');
 
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
@@ -234,6 +236,9 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       user: _user,
       refreshKey: Object(),
     ));
+
+    wtf('selectUser conversationId: $conversationId, userId: $userId, StackTrace: ${StackTrace.current}');
+
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
         .pushPage(ResponsiveNavigatorCubit.chatPage);
