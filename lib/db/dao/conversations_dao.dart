@@ -42,10 +42,9 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<Conversation?> getConversationById(String conversationId) async =>
+  Selectable<Conversation?> conversationById(String conversationId) =>
       (select(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .getSingleOrNull();
+        ..where((tbl) => tbl.conversationId.equals(conversationId)));
 
   Selectable<ConversationItem> chatConversations(
     int limit,
@@ -189,6 +188,11 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
           ),
         );
       });
+
+  Future<int> updateCodeUrl(String conversationId, String codeUrl) =>
+      (update(db.conversations)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .write(ConversationsCompanion(codeUrl: Value(codeUrl)));
 
   Future<int> updateMuteUntil(String conversationId, String muteUntil) =>
       (update(db.conversations)

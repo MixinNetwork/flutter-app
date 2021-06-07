@@ -1769,6 +1769,66 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Add Participants`
+  String get groupAdd {
+    return Intl.message(
+      'Add Participants',
+      name: 'groupAdd',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Invite to Group via Link`
+  String get groupInvite {
+    return Intl.message(
+      'Invite to Group via Link',
+      name: 'groupInvite',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Anyone with Mixin can follow this link to join this group. Only share it with people you trust.`
+  String get groupInviteInfo {
+    return Intl.message(
+      'Anyone with Mixin can follow this link to join this group. Only share it with people you trust.',
+      name: 'groupInviteInfo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Share Link`
+  String get groupInviteShare {
+    return Intl.message(
+      'Share Link',
+      name: 'groupInviteShare',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Copy Link`
+  String get groupInviteCopy {
+    return Intl.message(
+      'Copy Link',
+      name: 'groupInviteCopy',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Reset Link`
+  String get groupInviteReset {
+    return Intl.message(
+      'Reset Link',
+      name: 'groupInviteReset',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

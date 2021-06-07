@@ -12,6 +12,7 @@ class SearchTextField extends StatelessWidget {
     this.onChanged,
     this.fontSize = 14,
     this.hintText,
+    this.autofocus = false,
   }) : super(key: key);
 
   final FocusNode? focusNode;
@@ -20,6 +21,7 @@ class SearchTextField extends StatelessWidget {
   final double fontSize;
 
   final String? hintText;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,7 @@ class SearchTextField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: TextField(
         focusNode: focusNode,
+        autofocus: autofocus,
         controller: controller,
         onChanged: onChanged,
         style: TextStyle(

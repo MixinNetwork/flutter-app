@@ -150,9 +150,17 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "group": MessageLookupByLibrary.simpleMessage("Group"),
+        "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
         "groupCantSendDes": MessageLookupByLibrary.simpleMessage(
             "You can\'t send messages to this group because you\'re no longer a participant."),
+        "groupInvite":
+            MessageLookupByLibrary.simpleMessage("Invite to Group via Link"),
+        "groupInviteCopy": MessageLookupByLibrary.simpleMessage("Copy Link"),
+        "groupInviteInfo": MessageLookupByLibrary.simpleMessage(
+            "Anyone with Mixin can follow this link to join this group. Only share it with people you trust."),
+        "groupInviteReset": MessageLookupByLibrary.simpleMessage("Reset Link"),
+        "groupInviteShare": MessageLookupByLibrary.simpleMessage("Share Link"),
         "groupOwner": MessageLookupByLibrary.simpleMessage("owner"),
         "groupParticipants":
             MessageLookupByLibrary.simpleMessage("Participants"),

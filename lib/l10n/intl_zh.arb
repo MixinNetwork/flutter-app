@@ -165,5 +165,11 @@
   "settingThemeAuto": "跟随系统",
   "settingTheme": "主题",
   "groupCantSendDes": "您不能发送消息，因为您已经不再是此群组成员。",
-  "userNotFound": "找不到这个用户"
+  "userNotFound": "找不到这个用户",
+  "groupAdd": "添加成员",
+  "groupInvite": "群邀请链接",
+  "groupInviteInfo": "Mixin 使用者可以使用此链接加入这个群组，请只跟您信任的人共享链接。",
+  "groupInviteShare": "分享邀请链接",
+  "groupInviteCopy": "复制邀请链接",
+  "groupInviteReset": "重置邀请链接"
 }

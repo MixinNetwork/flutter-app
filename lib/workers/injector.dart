@@ -20,8 +20,9 @@ class Injector {
     if (conversationId == null || conversationId == systemUser) {
       return;
     }
-    final conversation =
-        await database.conversationDao.getConversationById(conversationId);
+    final conversation = await database.conversationDao
+        .conversationById(conversationId)
+        .getSingleOrNull();
     if (conversation == null || force) {
       if (unWait) {
         unawaited(_refreshConversation(conversationId));
@@ -55,6 +56,7 @@ class Injector {
           createdAt: response.data.createdAt,
           status: ConversationStatus.success,
           muteUntil: DateTime.parse(response.data.muteUntil),
+          codeUrl: response.data.codeUrl,
         ),
       );
 

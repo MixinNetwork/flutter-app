@@ -308,7 +308,8 @@ class AccountServer {
         result = await _sender.deliverNoThrow(blazeMessage);
       } else if (message.category.isEncrypted) {
         final conversation = await database.conversationDao
-            .getConversationById(message.conversationId);
+            .conversationById(message.conversationId)
+            .getSingleOrNull();
         if (conversation == null) return;
         final participantSessionKey = await database.participantSessionDao
             .getParticipantSessionKeyWithoutSelf(
@@ -914,8 +915,9 @@ class AccountServer {
       if (cid != null) {
         assert(cid == conversationId);
       }
-      final conversation =
-          await database.conversationDao.getConversationById(conversationId);
+      final conversation = await database.conversationDao
+          .conversationById(conversationId)
+          .getSingleOrNull();
       if (conversation == null) {
         await database.conversationDao.insert(db.Conversation(
             conversationId: conversationId,
@@ -1100,6 +1102,18 @@ class AccountServer {
     );
 
     await database.conversationDao.updateConversation(response.data);
+  }
+
+  Future<void> refreshGroup(String conversationId) async {
+    final response =
+        await client.conversationApi.getConversation(conversationId);
+    await database.conversationDao.updateConversation(response.data);
+  }
+
+  Future<void> rotate(String conversationId) async {
+    final response = await client.conversationApi.rotate(conversationId);
+    await database.conversationDao
+        .updateCodeUrl(conversationId, response.data.codeUrl);
   }
 
   Future<void> unpin(String conversationId) =>

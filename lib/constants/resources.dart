@@ -109,6 +109,15 @@ class Resources {
 
   static const String assetsImagesImageSvg = 'assets/images/image.svg';
 
+  static const String assetsImagesInviteCopySvg =
+      'assets/images/invite_copy.svg';
+
+  static const String assetsImagesInviteRefreshSvg =
+      'assets/images/invite_refresh.svg';
+
+  static const String assetsImagesInviteShareSvg =
+      'assets/images/invite_share.svg';
+
   static const String assetsImagesJumpCurrentArrowSvg =
       'assets/images/jump_current_arrow.svg';
 
