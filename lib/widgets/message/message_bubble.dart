@@ -224,7 +224,7 @@ class _BubblePainter extends CustomPainter with EquatableMixin {
   _BubblePainter({
     required this.clipper,
     required Color color,
-    this.elevation = 1.0,
+    this.elevation = 0.6,
     this.shadowColor = Colors.black,
   }) : _fillPaint = Paint()
           ..color = color
