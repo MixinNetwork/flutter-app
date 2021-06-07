@@ -3,11 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../account/account_server.dart';
-import '../bloc/bloc_converter.dart';
 import '../constants/resources.dart';
 import '../generated/l10n.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/chat_page.dart';
+import '../ui/home/conversation_page.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
 import '../utils/hook.dart';
 import 'action_button.dart';
@@ -168,16 +168,25 @@ class ConversationName extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationState?, String?>(
-        converter: (state) => state?.name,
-        when: (a, b) => b != null,
-        builder: (context, name) => Text(
-          name ?? '',
-          style: TextStyle(
-            color: BrightnessData.themeOf(context).text,
-            fontSize: fontSize,
-            height: 1,
-          ),
+      BlocBuilder<ConversationCubit, ConversationState?>(
+        buildWhen: (previous, current) =>
+            current != null && current != previous,
+        builder: (context, conversation) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              conversation?.name ?? '',
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).text,
+                fontSize: fontSize,
+                height: 1,
+              ),
+            ),
+            VerifiedOrBotWidget(
+              verified: conversation?.isVerified ?? false,
+              isBot: conversation?.isBot ?? false,
+            ),
+          ],
         ),
       );
 }
