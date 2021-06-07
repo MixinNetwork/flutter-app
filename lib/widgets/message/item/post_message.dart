@@ -44,6 +44,11 @@ class PostMessage extends StatelessWidget {
                       extensionSet: ExtensionSet.gitHubWeb,
                       styleSheet: markdownStyleSheet(context),
                       imageBuilder: (_, __, ___) => const SizedBox(),
+                      onTapLink: (String text, String? href, String title) {
+                        if (href?.isEmpty ?? true) return;
+
+                        openUri(context, href!);
+                      },
                     ),
                   ),
                   Positioned(
