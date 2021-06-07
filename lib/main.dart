@@ -42,7 +42,7 @@ Future<void> main() async {
   }, zoneSpecification: ZoneSpecification(
       print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
     if (kReleaseMode) return;
-    parent.print(zone, colorize(line));
+    parent.print(zone, colorizeNonAnsi(line));
   }));
 
   doWhenWindowReady(() {

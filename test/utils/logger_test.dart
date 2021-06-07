@@ -5,15 +5,18 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('test logger colors', () {
     ansiColorDisabled = false;
-    // ignore: avoid_print
-    print(colorize('[V] ..... verbose message ......'));
-    // ignore: avoid_print
-    print(colorize('[D] ===== debug message ====='));
-    // ignore: avoid_print
-    print(colorize('[I] info message'));
-    // ignore: avoid_print
-    print(colorize('[W] Just a warning! ${StackTrace.current}'));
-    // ignore: avoid_print
-    print(colorize('[E] Error! Something bad happened ${StackTrace.current}'));
+
+    const originText = 'foo';
+    final debugText = colorizeNonAnsi(originText);
+
+    expect(debugText, isNot(originText));
+    expect(debugText, colorizeNonAnsi(debugText));
+
+    v('verbose message');
+    d('debug message');
+    i('info message');
+    w('warning message');
+    e('error message');
+    wtf('wtf message');
   });
 }

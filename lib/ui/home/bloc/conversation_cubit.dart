@@ -235,6 +235,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       user: _user,
       refreshKey: Object(),
     ));
+
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
         .pushPage(ResponsiveNavigatorCubit.chatPage);
