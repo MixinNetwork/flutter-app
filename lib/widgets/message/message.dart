@@ -280,6 +280,7 @@ class MessageItemWidget extends HookWidget {
           const _UnreadMessageBar(),
       ],
     );
+
     if (message.mentionRead == false) {
       return VisibilityDetector(
         onVisibilityChanged: (VisibilityInfo info) {
@@ -293,7 +294,10 @@ class MessageItemWidget extends HookWidget {
       );
     }
 
-    return child;
+    return Padding(
+      padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
+      child: child,
+    );
   }
 }
 
