@@ -127,16 +127,14 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       }),
     );
     addSubscription(
-      stream
-          .map((event) => event?.userId)
-          .where((event) => event != null)
-          .distinct()
-          .switchMap((event) => accountServer.database.userDao
-              .userById(event!)
-              .watchSingleOrNull())
-          .listen((event) => emit(
-                state?.copyWith(user: event),
-              )),
+      stream.map((event) => event?.userId).distinct().switchMap((userId) {
+        if (userId == null) return const Stream.empty();
+        return accountServer.database.userDao
+            .userById(userId)
+            .watchSingleOrNull();
+      }).listen((event) => emit(
+            state?.copyWith(user: event),
+          )),
     );
   }
 

@@ -911,6 +911,9 @@ class AccountServer {
   Future<String> _initConversation(String? cid, String? recipientId) async {
     if (recipientId != null) {
       final conversationId = generateConversationId(recipientId, userId);
+      if (cid != null) {
+        assert(cid == conversationId);
+      }
       final conversation =
           await database.conversationDao.getConversationById(conversationId);
       if (conversation == null) {
