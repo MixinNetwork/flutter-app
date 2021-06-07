@@ -9,8 +9,8 @@ void main() {
     const originText = 'foo';
     final debugText = colorize(originText);
 
-    expect(debugText != originText, isTrue);
-    expect(debugText == colorize(debugText), isTrue);
+    expect(debugText, isNot(originText));
+    expect(debugText, colorize(debugText));
 
     v('verbose message');
     d('debug message');
