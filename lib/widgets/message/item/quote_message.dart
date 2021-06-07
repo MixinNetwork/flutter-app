@@ -242,105 +242,99 @@ class _QuoteMessageBase extends StatelessWidget {
     final color = userId?.isNotEmpty == true
         ? getNameColorById(userId!)
         : BrightnessData.themeOf(context).accent;
-    return GestureDetector(
-      onTap: () {
-        if (onTap != null) {
-          onTap!();
-          return;
-        }
-        context.read<MessageBloc>().scrollTo(messageId);
-      },
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        height: 50,
-        color: inputMode ? null : const Color.fromRGBO(0, 0, 0, 0.04),
-        margin: inputMode ? null : const EdgeInsets.all(2),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (inputMode)
+    return ClipRRect(
+      borderRadius: inputMode ? BorderRadius.zero : BorderRadius.circular(8),
+      child: GestureDetector(
+        onTap: () {
+          if (onTap != null) {
+            onTap!();
+            return;
+          }
+          context.read<MessageBloc>().scrollTo(messageId);
+        },
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          height: 50,
+          color: inputMode ? null : const Color.fromRGBO(0, 0, 0, 0.04),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Container(
                       width: 6,
                       color: color,
                     ),
-                  if (!inputMode)
-                    SvgPicture.asset(
-                      Resources.assetsImagesQuoteBorderSvg,
-                      height: 50,
-                      width: 6,
-                      color: color,
-                    ),
-                  Flexible(
-                    child: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 6,
-                        left: 6,
-                        bottom: 6,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          if (name != null)
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 4),
-                              child: Text(
-                                name!,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: color,
-                                  height: 1,
-                                ),
-                                maxLines: 1,
-                              ),
-                            ),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (icon != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 4),
-                                  child: icon,
-                                ),
-                              Flexible(
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          top: 6,
+                          left: 6,
+                          bottom: 6,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            if (name != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
                                 child: Text(
-                                  _description,
+                                  name!,
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: BrightnessData.themeOf(context)
-                                        .secondaryText,
+                                    fontSize: 14,
+                                    color: color,
                                     height: 1,
                                   ),
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (icon != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 4),
+                                    child: icon,
+                                  ),
+                                Flexible(
+                                  child: Text(
+                                    _description,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: BrightnessData.themeOf(context)
+                                          .secondaryText,
+                                      height: 1,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (image != null)
-              SizedBox(
-                width: 48,
-                height: 48,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: image,
+                  ],
                 ),
               ),
-          ],
+              const SizedBox(width: 8),
+              if (image != null)
+                SizedBox(
+                  width: 48,
+                  height: 48,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: image,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
