@@ -161,10 +161,7 @@ class ImageMessageLayout extends StatelessWidget {
             min(imageWidthInPixel / MediaQuery.of(context).devicePixelRatio,
                 maxWidth),
             minWidth);
-        var aspectRatio = imageWidthInPixel / imageHeightInPixel;
-        aspectRatio = max(aspectRatio, 9 / 16);
-        aspectRatio = min(aspectRatio, 2 / 1);
-
+        final aspectRatio = imageWidthInPixel / imageHeightInPixel;
         final height = width / aspectRatio;
         return builder(context, width, height);
       });
