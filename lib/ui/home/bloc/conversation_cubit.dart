@@ -131,7 +131,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     );
     addSubscription(
       stream.map((event) => event?.userId).distinct().switchMap((userId) {
-        if (userId == null) return const Stream.empty();
+        if (userId == null) return Stream.value(null);
         return accountServer.database.userDao
             .userById(userId)
             .watchSingleOrNull();
@@ -188,7 +188,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       conversation: _conversation,
       initIndexMessageId: _initIndexMessageId,
       lastReadMessageId: lastReadMessageId,
-      userId: !_conversation.isGroupConversation ? _conversation.ownerId : null,
+      userId: _conversation.isGroupConversation ? null : _conversation.ownerId,
       refreshKey: Object(),
     );
 
