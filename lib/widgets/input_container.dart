@@ -23,7 +23,6 @@ import '../ui/home/bloc/participants_cubit.dart';
 import '../ui/home/bloc/quote_message_cubit.dart';
 import '../utils/file.dart';
 import '../utils/hook.dart';
-import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/text_utils.dart';
 import 'action_button.dart';
@@ -236,7 +235,6 @@ void _sendMessage(BuildContext context) {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
-  wtf('sendMessage conversationId: ${conversationItem.conversationId}, userId: ${conversationItem.user?.userId}, StackTrace: ${StackTrace.current}');
   context.read<AccountServer>().sendTextMessage(
         text,
         conversationItem.isPlainConversation,
