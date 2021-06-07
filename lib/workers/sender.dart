@@ -248,8 +248,9 @@ class Sender {
   }
 
   Future checkConversation(String conversationId) async {
-    final conversation =
-        await database.conversationDao.getConversationById(conversationId);
+    final conversation = await database.conversationDao
+        .conversationById(conversationId)
+        .getSingleOrNull();
     if (conversation == null) {
       return;
     }

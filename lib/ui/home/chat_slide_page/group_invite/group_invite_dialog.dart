@@ -41,7 +41,8 @@ class _GroupInviteByLinkDialog extends HookWidget {
         final accountServer = context.read<AccountServer>()
           ..refreshGroup(conversationId);
         return accountServer.database.conversationDao
-            .watchConversationById(conversationId);
+            .conversationById(conversationId)
+            .watchSingleOrNull();
       }, [conversationId]),
     ).data;
     return Material(

@@ -44,13 +44,13 @@ class GroupParticipantsPage extends HookWidget {
         const <ParticipantUser>[];
 
     // Find current user info to check if we have group manage permission.
-    final me = useMemoized(
+    // Could be null if has been removed from group.
+    final currentUser = useMemoized(
       () => participants.firstWhereOrNull(
           (e) => e.userId == context.read<AccountServer>().userId),
       [participants],
     );
 
-    assert(!(participants.isNotEmpty && me == null));
     final filterKeyWord = useState('');
 
     return Scaffold(
@@ -58,7 +58,7 @@ class GroupParticipantsPage extends HookWidget {
       appBar: MixinAppBar(
         title: Text(Localization.of(context).groupParticipants),
         actions: [
-          if (me?.role != null)
+          if (currentUser?.role != null)
             _ActionAddParticipants(participants: participants)
         ],
       ),
@@ -75,7 +75,7 @@ class GroupParticipantsPage extends HookWidget {
           Expanded(
             child: _ParticipantList(
               filterKeyword: filterKeyWord.value.trim(),
-              currentUser: me,
+              currentUser: currentUser,
               participants: participants,
             ),
           ),
@@ -121,7 +121,7 @@ class _ParticipantList extends HookWidget {
       itemCount: filteredParticipants.length,
       itemBuilder: (context, index) => _ParticipantTile(
         participant: filteredParticipants[index],
-        me: currentUser!,
+        currentUser: currentUser,
         keyword: filterKeyword,
       ),
     );
@@ -132,22 +132,22 @@ class _ParticipantTile extends StatelessWidget {
   const _ParticipantTile({
     required this.participant,
     Key? key,
-    required this.me,
+    required this.currentUser,
     required this.keyword,
   }) : super(key: key);
 
   final ParticipantUser participant;
 
-  final ParticipantUser me;
+  final ParticipantUser? currentUser;
 
   final String keyword;
 
   @override
   Widget build(BuildContext context) {
-    final self = participant.userId == me.userId;
+    final self = participant.userId == currentUser?.userId;
     return _ParticipantMenuEntry(
       participant: participant,
-      me: me,
+      currentUser: currentUser,
       child: ListTile(
         contentPadding:
             const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
@@ -204,11 +204,11 @@ class _ParticipantMenuEntry extends StatelessWidget {
     Key? key,
     required this.child,
     required this.participant,
-    required this.me,
+    required this.currentUser,
   }) : super(key: key);
 
   final ParticipantUser participant;
-  final ParticipantUser me;
+  final ParticipantUser? currentUser;
   final Widget child;
 
   @override
@@ -232,7 +232,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
             },
           ),
         ];
-        if (me.role == ParticipantRole.owner) {
+        if (currentUser?.role == ParticipantRole.owner) {
           if (participant.role != ParticipantRole.admin) {
             menus.add(ContextMenu(
               title: Localization.of(context).groupPopMenuMakeAdmin,
@@ -257,8 +257,8 @@ class _ParticipantMenuEntry extends StatelessWidget {
           }
         }
 
-        if (me.role != null && participant.role == null ||
-            me.role == ParticipantRole.owner) {
+        if (currentUser?.role != null && participant.role == null ||
+            currentUser?.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
             isDestructiveAction: true,
             title: Localization.of(context)

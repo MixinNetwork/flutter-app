@@ -42,15 +42,9 @@ class ConversationsDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<Conversation?> getConversationById(String conversationId) async =>
+  Selectable<Conversation?> conversationById(String conversationId) =>
       (select(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .getSingleOrNull();
-
-  Stream<Conversation?> watchConversationById(String conversationId) =>
-      (select(db.conversations)
-            ..where((tbl) => tbl.conversationId.equals(conversationId)))
-          .watchSingleOrNull();
+        ..where((tbl) => tbl.conversationId.equals(conversationId)));
 
   Selectable<ConversationItem> chatConversations(
     int limit,

@@ -308,7 +308,8 @@ class AccountServer {
         result = await _sender.deliverNoThrow(blazeMessage);
       } else if (message.category.isEncrypted) {
         final conversation = await database.conversationDao
-            .getConversationById(message.conversationId);
+            .conversationById(message.conversationId)
+            .getSingleOrNull();
         if (conversation == null) return;
         final participantSessionKey = await database.participantSessionDao
             .getParticipantSessionKeyWithoutSelf(
@@ -914,8 +915,9 @@ class AccountServer {
       if (cid != null) {
         assert(cid == conversationId);
       }
-      final conversation =
-          await database.conversationDao.getConversationById(conversationId);
+      final conversation = await database.conversationDao
+          .conversationById(conversationId)
+          .getSingleOrNull();
       if (conversation == null) {
         await database.conversationDao.insert(db.Conversation(
             conversationId: conversationId,
