@@ -27,6 +27,8 @@ class MainFlutterWindow: BitsdojoWindow {
 
   public func dummyMethodToEnforceBundling() {
     // This will never be executed
+    #if RELEASE
     setWindowCanBeShown(true)
+    #endif
   }
 }
