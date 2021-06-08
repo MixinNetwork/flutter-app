@@ -9,12 +9,12 @@ import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
+import '../utils/file.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
 import 'converter/media_status_type_converter.dart';
@@ -109,7 +109,7 @@ LazyDatabase _openConnection(File dbFile) =>
     LazyDatabase(() => VmDatabase(dbFile));
 
 Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
-  final dbFolder = await getApplicationDocumentsDirectory();
+  final dbFolder = await getMixinDocumentsDirectory();
   final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
   final moorIsolate = await _createMoorIsolate(dbFile);
   final databaseConnection = await moorIsolate.connect();
