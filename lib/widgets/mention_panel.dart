@@ -50,23 +50,21 @@ class MentionPanelPortalEntry extends HookWidget {
     return FocusableActionDetector(
       shortcuts: selectable
           ? {
-              const SingleActivator(LogicalKeyboardKey.arrowDown):
+              LogicalKeySet(LogicalKeyboardKey.arrowDown):
                   const _ListSelectionNextIntent(),
-              const SingleActivator(LogicalKeyboardKey.arrowUp):
+              LogicalKeySet(LogicalKeyboardKey.arrowUp):
                   const _ListSelectionPrevIntent(),
-              const SingleActivator(LogicalKeyboardKey.tab):
+              LogicalKeySet(LogicalKeyboardKey.tab):
                   const _ListSelectionNextIntent(),
-              const SingleActivator(LogicalKeyboardKey.enter):
+              LogicalKeySet(LogicalKeyboardKey.enter):
                   const _ListSelectionSelectedIntent(),
               if (Platform.isMacOS) ...{
-                const SingleActivator(
-                  LogicalKeyboardKey.keyN,
-                  control: true,
-                ): const _ListSelectionNextIntent(),
-                const SingleActivator(
-                  LogicalKeyboardKey.keyP,
-                  control: true,
-                ): const _ListSelectionPrevIntent(),
+                LogicalKeySet(
+                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyN):
+                    const _ListSelectionNextIntent(),
+                LogicalKeySet(
+                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
+                    const _ListSelectionPrevIntent(),
               }
             }
           : const {},
