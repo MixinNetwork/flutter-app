@@ -79,12 +79,12 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
                   }));
           }
 
-          return state.copyWith(
+          return MentionState(
             text: a,
             users: users,
             index: listEquals(users.map(_mapper).toList(),
                     state.users.map(_mapper).toList())
-                ? null
+                ? state.index
                 : 0,
           );
         },

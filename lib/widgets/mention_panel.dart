@@ -48,26 +48,27 @@ class MentionPanelPortalEntry extends HookWidget {
     );
 
     return FocusableActionDetector(
-      shortcuts: selectable
-          ? {
-              LogicalKeySet(LogicalKeyboardKey.arrowDown):
-                  const _ListSelectionNextIntent(),
-              LogicalKeySet(LogicalKeyboardKey.arrowUp):
-                  const _ListSelectionPrevIntent(),
-              LogicalKeySet(LogicalKeyboardKey.tab):
-                  const _ListSelectionNextIntent(),
-              LogicalKeySet(LogicalKeyboardKey.enter):
-                  const _ListSelectionSelectedIntent(),
-              if (Platform.isMacOS) ...{
-                LogicalKeySet(
-                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyN):
-                    const _ListSelectionNextIntent(),
-                LogicalKeySet(
-                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
-                    const _ListSelectionPrevIntent(),
-              }
-            }
-          : const {},
+      enabled: selectable,
+      shortcuts: {
+        const SingleActivator(LogicalKeyboardKey.arrowDown):
+            const _ListSelectionNextIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowUp):
+            const _ListSelectionPrevIntent(),
+        const SingleActivator(LogicalKeyboardKey.tab):
+            const _ListSelectionNextIntent(),
+        const SingleActivator(LogicalKeyboardKey.enter):
+            const _ListSelectionSelectedIntent(),
+        if (Platform.isMacOS) ...{
+          const SingleActivator(
+            LogicalKeyboardKey.keyN,
+            control: true,
+          ): const _ListSelectionNextIntent(),
+          const SingleActivator(
+            LogicalKeyboardKey.keyP,
+            control: true,
+          ): const _ListSelectionPrevIntent(),
+        }
+      },
       actions: {
         _ListSelectionNextIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) => context.read<MentionCubit>().next(),
