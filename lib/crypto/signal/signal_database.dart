@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:moor/ffi.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
+import '../../utils/file.dart';
 import 'dao/identity_dao.dart';
 import 'dao/pre_key_dao.dart';
 import 'dao/ratchet_sender_key_dao.dart';
@@ -55,7 +55,7 @@ class SignalDatabase extends _$SignalDatabase {
 }
 
 LazyDatabase _openConnection() => LazyDatabase(() async {
-      final dbFolder = await getApplicationDocumentsDirectory();
+      final dbFolder = await getMixinDocumentsDirectory();
       final file = File(p.join(dbFolder.path, 'signal.db'));
       return VmDatabase(file);
     });

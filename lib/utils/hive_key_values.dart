@@ -1,13 +1,14 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../account/account_key_value.dart';
 import '../crypto/crypto_key_value.dart';
 import '../crypto/privacy_key_value.dart';
+import 'file.dart';
 
 abstract class HiveKeyValue {
   HiveKeyValue(this._boxName);
@@ -20,9 +21,12 @@ abstract class HiveKeyValue {
     if (_hasInit) {
       return;
     }
-    final dbFolder = await getApplicationDocumentsDirectory();
+    final dbFolder = await getMixinDocumentsDirectory();
     final file = File(p.join(dbFolder.path, _boxName));
-    await Hive.initFlutter(file.path);
+    WidgetsFlutterBinding.ensureInitialized();
+    if (!kIsWeb) {
+      Hive.init(file.absolute.path);
+    }
     box = await Hive.openBox(_boxName);
     _hasInit = true;
   }
