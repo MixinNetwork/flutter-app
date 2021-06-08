@@ -1,0 +1,11 @@
+{
+  "title": "Mixin Desktop",
+  "background": "bg.png",
+  "window": {
+    "size": {"width": 670, "height": 398}
+  },
+  "contents": [
+    { "x": 441, "y": 203, "type": "link", "path": "/Applications" },
+    { "x": 229, "y": 203, "type": "file", "path": "Mixin.app" }
+  ]
+}
