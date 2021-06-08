@@ -19,6 +19,8 @@ import 'brightness_observer.dart';
 import 'high_light_text.dart';
 import 'interacter_decorated_box.dart';
 
+const kMentionItemHeight = 48.0;
+
 class MentionPanelPortalEntry extends HookWidget {
   const MentionPanelPortalEntry({
     Key? key,
@@ -42,26 +44,29 @@ class MentionPanelPortalEntry extends HookWidget {
 
     final isGroup =
         useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
-            converter: (state) => state?.isGroup ?? false);
+      converter: (state) => state?.isGroup ?? false,
+    );
 
     return FocusableActionDetector(
       shortcuts: selectable
           ? {
-              LogicalKeySet(LogicalKeyboardKey.arrowDown):
+              const SingleActivator(LogicalKeyboardKey.arrowDown):
                   const _ListSelectionNextIntent(),
-              LogicalKeySet(LogicalKeyboardKey.arrowUp):
+              const SingleActivator(LogicalKeyboardKey.arrowUp):
                   const _ListSelectionPrevIntent(),
-              LogicalKeySet(LogicalKeyboardKey.tab):
+              const SingleActivator(LogicalKeyboardKey.tab):
                   const _ListSelectionNextIntent(),
-              LogicalKeySet(LogicalKeyboardKey.enter):
+              const SingleActivator(LogicalKeyboardKey.enter):
                   const _ListSelectionSelectedIntent(),
               if (Platform.isMacOS) ...{
-                LogicalKeySet(
-                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyN):
-                    const _ListSelectionNextIntent(),
-                LogicalKeySet(
-                        LogicalKeyboardKey.control, LogicalKeyboardKey.keyP):
-                    const _ListSelectionPrevIntent(),
+                const SingleActivator(
+                  LogicalKeyboardKey.keyN,
+                  control: true,
+                ): const _ListSelectionNextIntent(),
+                const SingleActivator(
+                  LogicalKeyboardKey.keyP,
+                  control: true,
+                ): const _ListSelectionPrevIntent(),
               }
             }
           : const {},
@@ -86,7 +91,7 @@ class MentionPanelPortalEntry extends HookWidget {
         closeDuration: const Duration(milliseconds: 150),
         portal: ConstrainedBox(
           constraints: BoxConstraints(
-            maxHeight: 168,
+            maxHeight: kMentionItemHeight * 4,
             minWidth: constraints.maxWidth,
             maxWidth: constraints.maxWidth,
           ),
@@ -178,10 +183,9 @@ class _MentionItem extends StatelessWidget {
               ? BrightnessData.themeOf(context).listSelected
               : Colors.transparent,
         ),
-        tapDowningColor: BrightnessData.themeOf(context).listSelected,
         onTap: () => onSelect?.call(user),
         child: Container(
-          height: 48,
+          height: kMentionItemHeight,
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [

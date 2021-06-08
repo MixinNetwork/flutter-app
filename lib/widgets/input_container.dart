@@ -149,6 +149,7 @@ class _InputContainer extends HookWidget {
         mentionCubit.send(mention);
       }
 
+      onListener();
       textEditingController.addListener(onListener);
 
       return () {
