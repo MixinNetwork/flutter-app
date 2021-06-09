@@ -22,6 +22,7 @@ import '../enum/media_status.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
+import '../utils/datetime_format_utils.dart';
 import '../utils/load_balancer_utils.dart';
 
 const _kEnableImageBlurHashThumb = false;
@@ -61,7 +62,8 @@ class SendMessageHelper {
   }
 
   Future<void> sendImageMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId) async {
+      XFile file, MessageCategory category, String? quoteMessageId,
+      {AttachmentResult? attachmentResult}) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'image/jpeg';
     final attachment = _attachmentUtil.getAttachmentFile(
@@ -103,31 +105,34 @@ class SendMessageHelper {
     await _messagesDao.insert(message, senderId);
     final thumbImage =
         await runLoadBalancer(_getImageThumbnailString, file.path);
-
-    final attachmentResult =
+    // ignore: parameter_assignments
+    attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        attachmentResult.keys,
-        attachmentResult.digest,
-        attachmentResult.attachmentId,
-        mimeType,
-        attachmentSize,
-        null,
-        imageWidth,
-        imageHeight,
-        thumbImage,
-        null,
-        null,
-        null);
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      null,
+      imageWidth,
+      imageHeight,
+      thumbImage,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
 
-    final encoded = await runLoadBalancer(_encode, attachmentMessage);
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messagesDao.updateMessageContent(messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
 
   Future<void> sendVideoMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId) async {
+      XFile file, MessageCategory category, String? quoteMessageId,
+      {AttachmentResult? attachmentResult}) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
     final attachment = _attachmentUtil.getAttachmentFile(
@@ -159,31 +164,34 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final attachmentResult =
+    // ignore: parameter_assignments
+    attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        attachmentResult.keys,
-        attachmentResult.digest,
-        attachmentResult.attachmentId,
-        mimeType,
-        attachmentSize,
-        file.name,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      file.name,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
 
-    final encoded = await runLoadBalancer(_encode, attachmentMessage);
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messagesDao.updateMessageContent(messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
 
   Future<void> sendStickerMessage(String conversationId, String senderId,
       StickerMessage stickerMessage, MessageCategory category) async {
-    final encoded = await runLoadBalancer(_encode, stickerMessage);
+    final encoded = await jsonEncodeWithIsolate(stickerMessage);
 
     final message = Message(
       messageId: const Uuid().v4(),
@@ -203,7 +211,8 @@ class SendMessageHelper {
   }
 
   Future<void> sendDataMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId) async {
+      XFile file, MessageCategory category, String? quoteMessageId,
+      {AttachmentResult? attachmentResult}) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ??
         lookupMimeType(file.path) ??
@@ -234,24 +243,27 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final attachmentResult =
+    // ignore: parameter_assignments
+    attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        attachmentResult.keys,
-        attachmentResult.digest,
-        attachmentResult.attachmentId,
-        mimeType,
-        attachmentSize,
-        file.name,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      file.name,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
 
-    final encoded = await runLoadBalancer(_encode, attachmentMessage);
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messagesDao.updateMessageContent(messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
@@ -266,7 +278,7 @@ class SendMessageHelper {
   }) async {
     final category =
         isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
-    final encoded = await runLoadBalancer(_encode, contactMessage);
+    final encoded = await jsonBase64EncodeWithIsolate(contactMessage);
 
     final quoteMessage =
         await _messagesDao.findMessageItemByMessageId(quoteMessageId);
@@ -288,7 +300,8 @@ class SendMessageHelper {
   }
 
   Future<void> sendAudioMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId) async {
+      XFile file, MessageCategory category, String? quoteMessageId,
+      {AttachmentResult? attachmentResult}) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'audio/ogg';
     final attachment = _attachmentUtil.getAttachmentFile(
@@ -319,24 +332,27 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final attachmentResult =
+    // ignore: parameter_assignments
+    attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
     final attachmentMessage = AttachmentMessage(
-        attachmentResult.keys,
-        attachmentResult.digest,
-        attachmentResult.attachmentId,
-        mimeType,
-        attachmentSize,
-        file.name,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null);
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mimeType,
+      attachmentSize,
+      file.name,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      attachmentResult.createdAt,
+    );
 
-    final encoded = await runLoadBalancer(_encode, attachmentMessage);
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messagesDao.updateMessageContent(messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
@@ -456,33 +472,73 @@ class SendMessageHelper {
         message.content!,
       );
     } else if (message.category.isImage) {
+      final category =
+          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage;
+      AttachmentResult? attachmentResult;
+      if (message.category == category && message.content != null) {
+        attachmentResult = await _checkAttachment(message.content!);
+      } else {
+        attachmentResult = null;
+      }
       await sendImageMessage(
-          conversationId,
-          senderId,
-          XFile(message.mediaUrl!),
-          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
-          null);
+        conversationId,
+        senderId,
+        XFile(message.mediaUrl!),
+        category,
+        null,
+        attachmentResult: attachmentResult,
+      );
     } else if (message.category.isVideo) {
+      final category =
+          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
+      AttachmentResult? attachmentResult;
+      if (message.category == category && message.content != null) {
+        attachmentResult = await _checkAttachment(message.content!);
+      } else {
+        attachmentResult = null;
+      }
       await sendVideoMessage(
-          conversationId,
-          senderId,
-          XFile(message.mediaUrl!),
-          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo,
-          null);
+        conversationId,
+        senderId,
+        XFile(message.mediaUrl!),
+        category,
+        null,
+        attachmentResult: attachmentResult,
+      );
     } else if (message.category.isAudio) {
+      final category =
+          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio;
+      AttachmentResult? attachmentResult;
+      if (message.category == category && message.content != null) {
+        attachmentResult = await _checkAttachment(message.content!);
+      } else {
+        attachmentResult = null;
+      }
       await sendAudioMessage(
-          conversationId,
-          senderId,
-          XFile(message.mediaUrl!),
-          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio,
-          null);
+        conversationId,
+        senderId,
+        XFile(message.mediaUrl!),
+        category,
+        null,
+        attachmentResult: attachmentResult,
+      );
     } else if (message.category.isData) {
+      final category =
+          isPlain ? MessageCategory.plainData : MessageCategory.signalData;
+      AttachmentResult? attachmentResult;
+      if (message.category == category && message.content != null) {
+        attachmentResult = await _checkAttachment(message.content!);
+      } else {
+        attachmentResult = null;
+      }
       await sendVideoMessage(
-          conversationId,
-          senderId,
-          XFile(message.mediaUrl!),
-          isPlain ? MessageCategory.plainData : MessageCategory.signalData,
-          null);
+        conversationId,
+        senderId,
+        XFile(message.mediaUrl!),
+        category,
+        null,
+        attachmentResult: attachmentResult,
+      );
     } else if (message.category.isSticker) {
       await sendStickerMessage(
           conversationId,
@@ -521,38 +577,72 @@ class SendMessageHelper {
   }
 
   Future<void> reUploadAttachment(
-      String conversationId,
-      String messageId,
-      MessageCategory category,
-      File file,
-      String? name,
-      String mediaMimeType,
-      int mediaSize,
-      int? mediaWidth,
-      int? mediaHeight,
-      String? thumbImage,
-      String? mediaDuration,
-      dynamic mediaWaveform) async {
-    final attachmentResult =
+    String conversationId,
+    String messageId,
+    MessageCategory category,
+    File file,
+    String? name,
+    String mediaMimeType,
+    int mediaSize,
+    int? mediaWidth,
+    int? mediaHeight,
+    String? thumbImage,
+    String? mediaDuration,
+    dynamic mediaWaveform,
+    String? content,
+  ) async {
+    AttachmentResult? attachmentResult;
+    if (content != null) {
+      attachmentResult = await _checkAttachment(content);
+    }
+    attachmentResult ??=
         await _attachmentUtil.uploadAttachment(file, messageId, category);
     if (attachmentResult == null) return;
     final duration = mediaDuration != null ? int.parse(mediaDuration) : null;
     final attachmentMessage = AttachmentMessage(
-        attachmentResult.keys,
-        attachmentResult.digest,
-        attachmentResult.attachmentId,
-        mediaMimeType,
-        mediaSize,
-        name,
-        mediaWidth,
-        mediaHeight,
-        thumbImage,
-        duration,
-        mediaWaveform,
-        null);
-    final encoded = await runLoadBalancer(_encode, attachmentMessage);
+      attachmentResult.keys,
+      attachmentResult.digest,
+      attachmentResult.attachmentId,
+      mediaMimeType,
+      mediaSize,
+      name,
+      mediaWidth,
+      mediaHeight,
+      thumbImage,
+      duration,
+      mediaWaveform,
+      null,
+      attachmentResult.createdAt,
+    );
+    final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
     await _messagesDao.updateMessageContent(messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
+  }
+
+  Future<AttachmentResult?> _checkAttachment(String content) async {
+    AttachmentMessage? attachmentMessage;
+    try {
+      attachmentMessage = AttachmentMessage.fromJson(
+          await jsonBase64DecodeWithIsolate(content));
+    } catch (e) {
+      attachmentMessage = null;
+    }
+    if (attachmentMessage == null) {
+      return null;
+    }
+    final createdAt = attachmentMessage.createdAt;
+    if (createdAt != null) {
+      final date = DateTime.tryParse(createdAt);
+      if (within24Hours(date)) {
+        return AttachmentResult(
+          attachmentMessage.attachmentId,
+          attachmentMessage.key,
+          attachmentMessage.digest,
+          attachmentMessage.createdAt,
+        );
+      }
+    }
+    return null;
   }
 }
 
@@ -572,5 +662,3 @@ Future<String?> _getImageThumbnailString(String path) async {
   }
   return thumbImage;
 }
-
-String _encode(Object object) => base64Encode(utf8.encode(jsonEncode(object)));

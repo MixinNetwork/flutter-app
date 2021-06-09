@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/blaze_param.dart';
+import '../blaze/vo/attachment_message.dart';
 import '../blaze/vo/contact_message.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
@@ -754,28 +755,40 @@ class AccountServer {
     }
   }
 
-  Future<String?> downloadAttachment(db.MessageItem message) =>
-      _attachmentUtil.downloadAttachment(
-          content: message.content!,
-          messageId: message.messageId,
-          conversationId: message.conversationId,
-          category: message.type,
-          mimeType: message.mediaMimeType);
+  Future<String?> downloadAttachment(db.MessageItem message) async {
+    AttachmentMessage? attachmentMessage;
+    if (message.content != null) {
+      try {
+        attachmentMessage = AttachmentMessage.fromJson(
+            await jsonBase64DecodeWithIsolate(message.content!));
+      } catch (e) {
+        attachmentMessage = null;
+      }
+    }
+    await _attachmentUtil.downloadAttachment(
+        content: message.content!,
+        messageId: message.messageId,
+        conversationId: message.conversationId,
+        category: message.type,
+        attachmentMessage: attachmentMessage);
+  }
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(
-          message.conversationId,
-          message.messageId,
-          message.type,
-          File(message.mediaUrl!),
-          message.mediaName,
-          message.mediaMimeType!,
-          message.mediaSize!,
-          message.mediaWidth,
-          message.mediaHeight,
-          message.thumbImage,
-          message.mediaDuration,
-          message.mediaWaveform);
+        message.conversationId,
+        message.messageId,
+        message.type,
+        File(message.mediaUrl!),
+        message.mediaName,
+        message.mediaMimeType!,
+        message.mediaSize!,
+        message.mediaWidth,
+        message.mediaHeight,
+        message.thumbImage,
+        message.mediaDuration,
+        message.mediaWaveform,
+        message.content,
+      );
 
   Future<void> addUser(String userId, String? fullName) =>
       _relationship(RelationshipRequest(

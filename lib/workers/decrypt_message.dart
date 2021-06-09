@@ -453,9 +453,7 @@ class DecryptMessage extends Injector {
           conversationId: message.conversationId,
           category: message.category,
           content: message.content!,
-          key: attachment.key,
-          digest: attachment.digest,
-          mimeType: attachment.mimeType,
+          attachmentMessage: attachment,
         ));
       }
     } else if (data.category.isVideo) {
@@ -491,9 +489,7 @@ class DecryptMessage extends Injector {
           conversationId: message.conversationId,
           category: message.category,
           content: message.content!,
-          key: attachment.key,
-          digest: attachment.digest,
-          mimeType: attachment.mimeType,
+          attachmentMessage: attachment,
         ));
       }
     } else if (data.category.isData) {
@@ -525,9 +521,7 @@ class DecryptMessage extends Injector {
           conversationId: message.conversationId,
           category: message.category,
           content: message.content!,
-          key: attachment.key,
-          digest: attachment.digest,
-          mimeType: attachment.mimeType,
+          attachmentMessage: attachment,
         ));
       }
     } else if (data.category.isAudio) {
@@ -559,9 +553,7 @@ class DecryptMessage extends Injector {
         conversationId: message.conversationId,
         category: message.category,
         content: message.content!,
-        key: attachment.key,
-        digest: attachment.digest,
-        mimeType: attachment.mimeType,
+        attachmentMessage: attachment,
       ));
     } else if (data.category.isSticker) {
       final plain = await _decodeWithIsolate(plainText);
