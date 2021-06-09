@@ -47,6 +47,10 @@ class MentionPanelPortalEntry extends HookWidget {
       converter: (state) => state?.isGroup ?? false,
     );
 
+    final mentionState = useBlocState<MentionCubit, MentionState>(
+      when: (state) => state.users.isNotEmpty,
+    );
+
     return FocusableActionDetector(
       enabled: selectable,
       shortcuts: {
@@ -104,7 +108,7 @@ class MentionPanelPortalEntry extends HookWidget {
                 child: child,
               ),
               child: _MentionPanel(
-                mentionCubit: BlocProvider.of<MentionCubit>(context),
+                mentionState: mentionState,
                 onSelect: (User user) => _select(context, user),
               ),
             ),
@@ -131,11 +135,11 @@ class MentionPanelPortalEntry extends HookWidget {
 class _MentionPanel extends StatelessWidget {
   const _MentionPanel({
     Key? key,
-    required this.mentionCubit,
+    required this.mentionState,
     required this.onSelect,
   }) : super(key: key);
 
-  final MentionCubit mentionCubit;
+  final MentionState mentionState;
   final Function(User user) onSelect;
 
   @override
@@ -143,19 +147,15 @@ class _MentionPanel extends StatelessWidget {
         decoration: BoxDecoration(
           color: BrightnessData.themeOf(context).popUp,
         ),
-        child: BlocBuilder<MentionCubit, MentionState>(
-          buildWhen: (a, b) => b.users.isNotEmpty == true,
-          bloc: mentionCubit,
-          builder: (context, MentionState state) => ListView.builder(
-            controller: context.read<MentionCubit>().scrollController,
-            itemCount: state.users.length,
-            shrinkWrap: true,
-            itemBuilder: (BuildContext context, int index) => _MentionItem(
-              user: state.users[index],
-              keyword: state.text,
-              selected: state.index == index,
-              onSelect: onSelect,
-            ),
+        child: ListView.builder(
+          controller: context.read<MentionCubit>().scrollController,
+          itemCount: mentionState.users.length,
+          shrinkWrap: true,
+          itemBuilder: (BuildContext context, int index) => _MentionItem(
+            user: mentionState.users[index],
+            keyword: mentionState.text,
+            selected: mentionState.index == index,
+            onSelect: onSelect,
           ),
         ),
       );
@@ -177,11 +177,9 @@ class _MentionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
-        decoration: BoxDecoration(
-          color: selected
-              ? BrightnessData.themeOf(context).listSelected
-              : Colors.transparent,
-        ),
+        decoration: selected
+            ? BoxDecoration(color: BrightnessData.themeOf(context).listSelected)
+            : null,
         onTap: () => onSelect?.call(user),
         child: Container(
           height: kMentionItemHeight,
