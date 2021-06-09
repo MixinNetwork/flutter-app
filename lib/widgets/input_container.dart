@@ -283,7 +283,7 @@ class _SendTextField extends StatelessWidget {
                   controller: context.watch<TextEditingController>(),
                   style: TextStyle(
                     color: BrightnessData.themeOf(context).text,
-                    fontSize: 14,
+                    fontSize: 16,
                   ),
                   decoration: const InputDecoration(
                       isDense: true,
