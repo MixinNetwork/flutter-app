@@ -1,14 +1,17 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../constants/resources.dart';
 import 'brightness_observer.dart';
+import 'interacter_decorated_box.dart';
 
-class SearchTextField extends StatelessWidget {
+class SearchTextField extends HookWidget {
   const SearchTextField({
     Key? key,
     this.focusNode,
-    this.controller,
+    required this.controller,
     this.onChanged,
     this.fontSize = 14,
     this.hintText,
@@ -16,7 +19,7 @@ class SearchTextField extends StatelessWidget {
   }) : super(key: key);
 
   final FocusNode? focusNode;
-  final TextEditingController? controller;
+  final TextEditingController controller;
   final ValueChanged<String>? onChanged;
   final double fontSize;
 
@@ -41,13 +44,25 @@ class SearchTextField extends StatelessWidget {
     );
     final hintColor = BrightnessData.themeOf(context).secondaryText;
 
+    useEffect(() {
+      void notifyChanged() {
+        onChanged?.call(controller.text);
+      }
+
+      // listen controller state to update onChanged, in case value updated by
+      // controller by onChanged is not called.
+      controller.addListener(notifyChanged);
+      return () {
+        controller.removeListener(notifyChanged);
+      };
+    }, [controller, onChanged]);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: TextField(
         focusNode: focusNode,
         autofocus: autofocus,
         controller: controller,
-        onChanged: onChanged,
         style: TextStyle(
           color: BrightnessData.themeOf(context).text,
           fontSize: fontSize,
@@ -71,6 +86,7 @@ class SearchTextField extends StatelessWidget {
               color: hintColor,
             ),
           ),
+          suffixIcon: _SearchClearIcon(controller),
           contentPadding: const EdgeInsets.only(right: 8),
           hintText: hintText,
           hintStyle: TextStyle(
@@ -80,5 +96,35 @@ class SearchTextField extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _SearchClearIcon extends HookWidget {
+  const _SearchClearIcon(this.controller, {Key? key}) : super(key: key);
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final editingText = useValueListenable(controller);
+    if (editingText.text.isEmpty) {
+      return const SizedBox();
+    } else {
+      return MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: InteractableDecoratedBox(
+          onTap: () {
+            controller.text = '';
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Icon(
+              Icons.close,
+              color: BrightnessData.themeOf(context).secondaryText,
+            ),
+          ),
+        ),
+      );
+    }
   }
 }

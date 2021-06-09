@@ -141,8 +141,10 @@ class ChatInfoPage extends HookWidget {
                             .pushPage(ChatSideCubit.sharedMedia),
                       ),
                       CellItem(
-                        title:
-                            Text(Localization.of(context).searchMessageHistory),
+                        title: Text(
+                          Localization.of(context).searchMessageHistory,
+                          maxLines: 1,
+                        ),
                         onTap: () => context
                             .read<ChatSideCubit>()
                             .pushPage(ChatSideCubit.searchMessageHistory),

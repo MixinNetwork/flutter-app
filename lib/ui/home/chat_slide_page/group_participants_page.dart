@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -51,7 +52,7 @@ class GroupParticipantsPage extends HookWidget {
       [participants],
     );
 
-    final filterKeyWord = useState('');
+    final controller = useTextEditingController();
 
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
@@ -67,14 +68,14 @@ class GroupParticipantsPage extends HookWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SearchTextField(
-              onChanged: (text) => filterKeyWord.value = text,
               hintText: Localization.of(context).groupSearchParticipants,
               autofocus: true,
+              controller: controller,
             ),
           ),
           Expanded(
             child: _ParticipantList(
-              filterKeyword: filterKeyWord.value.trim(),
+              filterKeyword: controller,
               currentUser: currentUser,
               participants: participants,
             ),
@@ -88,14 +89,14 @@ class GroupParticipantsPage extends HookWidget {
 class _ParticipantList extends HookWidget {
   const _ParticipantList({
     Key? key,
-    this.filterKeyword = '',
+    required this.filterKeyword,
     required this.participants,
     required this.currentUser,
   }) : super(key: key);
 
   /// The keyword to filter participants of group.
   /// Empty indicates non filter.
-  final String filterKeyword;
+  final ValueListenable<TextEditingValue> filterKeyword;
 
   final List<ParticipantUser> participants;
 
@@ -103,26 +104,25 @@ class _ParticipantList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final keyword = useValueListenable(filterKeyword).text.trim();
     final filteredParticipants = useMemoized(() {
-      if (filterKeyword.isEmpty) {
+      if (keyword.isEmpty) {
         return participants;
       }
       return participants
           .where((e) =>
-              (e.fullName
-                      ?.toLowerCase()
-                      .contains(filterKeyword.toLowerCase()) ??
+              (e.fullName?.toLowerCase().contains(keyword.toLowerCase()) ??
                   false) ||
-              e.identityNumber.contains(filterKeyword))
+              e.identityNumber.contains(keyword))
           .toList();
-    }, [participants, filterKeyword]);
+    }, [participants, keyword]);
 
     return ListView.builder(
       itemCount: filteredParticipants.length,
       itemBuilder: (context, index) => _ParticipantTile(
         participant: filteredParticipants[index],
         currentUser: currentUser,
-        keyword: filterKeyword,
+        keyword: keyword,
       ),
     );
   }
