@@ -292,10 +292,9 @@ class _SendTextField extends StatelessWidget {
                   }
                 }
 
-                clearClipboardText();
                 final uri = await Pasteboard.uri;
-                clearClipboardText();
                 if (uri != null) {
+                  clearClipboardText();
                   final file =
                       File(uri.toFilePath(windows: Platform.isWindows));
 
