@@ -381,7 +381,7 @@ class _List extends HookWidget {
             childCount: bottom.length,
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 4)),
+        const SliverToBoxAdapter(child: SizedBox(height: 10)),
       ],
     );
   }
