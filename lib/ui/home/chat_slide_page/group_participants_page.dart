@@ -104,7 +104,7 @@ class _ParticipantList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final keyword = useValueListenable(filterKeyword).text;
+    final keyword = useValueListenable(filterKeyword).text.trim();
     final filteredParticipants = useMemoized(() {
       if (keyword.isEmpty) {
         return participants;
