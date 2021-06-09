@@ -149,6 +149,7 @@ class _InputContainer extends HookWidget {
         mentionCubit.send(mention);
       }
 
+      onListener();
       textEditingController.addListener(onListener);
 
       return () {
@@ -259,10 +260,9 @@ class _SendTextField extends StatelessWidget {
             (mentionCubit.state.text?.isNotEmpty ?? true),
         builder: (context, sendable, child) => FocusableActionDetector(
           autofocus: true,
-          shortcuts: {
-            if (sendable)
-              const SingleActivator(LogicalKeyboardKey.enter):
-                  const SendMessageIntent(),
+          enabled: sendable,
+          shortcuts: const {
+            SingleActivator(LogicalKeyboardKey.enter): SendMessageIntent(),
           },
           actions: {
             SendMessageIntent: CallbackAction<Intent>(

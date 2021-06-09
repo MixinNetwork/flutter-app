@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -10,6 +11,7 @@ import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/users_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/sort.dart';
+import '../../../widgets/mention_panel.dart';
 import 'multi_auth_cubit.dart';
 import 'participants_cubit.dart';
 
@@ -76,28 +78,49 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
                     return e.identityNumber.indexOf(a);
                   }));
           }
+
           return MentionState(
             text: a,
             users: users,
-            index: 0,
+            index: listEquals(users.map(_mapper).toList(),
+                    state.users.map(_mapper).toList())
+                ? state.index
+                : 0,
           );
         },
       ).listen(emit),
     );
   }
 
+  String _mapper(User e) => e.userId;
+
   void _jumpToPosition(int index) {
-    const itemHeight = 48;
-    final outUp = itemHeight * index <= scrollController.offset;
-    final outDown =
-        scrollController.position.maxScrollExtent + scrollController.offset <=
-            itemHeight * (index + 1);
-    if (outUp) {
-      scrollController.jumpTo((itemHeight * index).toDouble());
-    } else if (outDown) {
-      scrollController.jumpTo(
-          (itemHeight * (index + 1) - scrollController.position.maxScrollExtent)
-              .toDouble());
+    if (!scrollController.hasClients) return;
+
+    final viewportDimension = scrollController.position.viewportDimension;
+    final offset = scrollController.offset;
+
+    final maxScrollExtent = state.users.length * kMentionItemHeight;
+    final maxValidScrollExtent = maxScrollExtent - viewportDimension;
+
+    final startIndex = offset ~/ kMentionItemHeight;
+    final endIndex =
+        (offset + viewportDimension - kMentionItemHeight) ~/ kMentionItemHeight;
+
+    if (index <= startIndex) {
+      final pixel = (kMentionItemHeight * index -
+              viewportDimension +
+              kMentionItemHeight * 2)
+          .clamp(0, maxValidScrollExtent)
+          .toDouble();
+      scrollController.animateTo(pixel,
+          duration: const Duration(milliseconds: 150), curve: Curves.easeIn);
+    } else if (index >= endIndex) {
+      final pixel = (kMentionItemHeight * index - kMentionItemHeight)
+          .clamp(0, maxValidScrollExtent)
+          .toDouble();
+      scrollController.animateTo(pixel,
+          duration: const Duration(milliseconds: 150), curve: Curves.easeIn);
     }
   }
 
