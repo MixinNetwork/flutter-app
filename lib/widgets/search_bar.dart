@@ -130,7 +130,7 @@ class SearchBar extends StatelessWidget {
                               list
                                   .map(
                                     (e) => CircleConversationRequest(
-                                      action: CircleConversationAction.ADD,
+                                      action: CircleConversationAction.add,
                                       conversationId: e.conversationId,
                                       userId: e.userId,
                                     ),

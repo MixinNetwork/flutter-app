@@ -84,7 +84,7 @@ class AccountServer {
             DioError e,
             ErrorInterceptorHandler handler,
           ) async {
-            if (e is MixinApiError && e.error.code == 401) {
+            if (e is MixinApiError && (e.error as MixinError).code == 401) {
               await signOutAndClear();
               multiAuthCubit.signOut();
             }
@@ -952,7 +952,7 @@ class AccountServer {
   ) async {
     await client.circleApi.updateCircleConversations(circleId, [
       CircleConversationRequest(
-          action: CircleConversationAction.REMOVE,
+          action: CircleConversationAction.remove,
           conversationId: conversationId,
           userId: userId)
     ]);
@@ -994,7 +994,7 @@ class AccountServer {
     try {
       await client.circleApi.deleteCircle(circleId);
     } catch (e) {
-      if (e is! MixinApiError || e.error.code != 404) rethrow;
+      if (e is! MixinApiError || (e.error as MixinError).code != 404) rethrow;
     }
 
     await database.transaction(() async {

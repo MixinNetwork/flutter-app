@@ -79,7 +79,7 @@ class CircleManagerPage extends HookWidget {
                 context,
                 context.read<AccountServer>().createCircle(name!, [
                   CircleConversationRequest(
-                    action: CircleConversationAction.ADD,
+                    action: CircleConversationAction.add,
                     conversationId: conversation!.conversationId,
                     userId: conversation.userId,
                   ),
@@ -166,7 +166,7 @@ class _CircleManagerItem extends StatelessWidget {
                     circleId,
                     [
                       CircleConversationRequest(
-                        action: CircleConversationAction.ADD,
+                        action: CircleConversationAction.add,
                         conversationId: conversation!.conversationId,
                         userId: conversation.userId,
                       ),
