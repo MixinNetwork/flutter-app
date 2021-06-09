@@ -38,33 +38,39 @@ class StoragePage extends HookWidget {
                   children: [
                     CellItem(
                       title: Text(Localization.of(context).photos),
-                      trailing: CupertinoSwitch(
-                        activeColor: BrightnessData.themeOf(context).accent,
-                        value: authState.currentPhotoAutoDownload,
-                        onChanged: (bool value) => context
-                            .read<MultiAuthCubit>()
-                            .setCurrentSetting(photoAutoDownload: value),
-                      ),
+                      trailing: Transform.scale(
+                          scale: 0.7,
+                          child: CupertinoSwitch(
+                            activeColor: BrightnessData.themeOf(context).accent,
+                            value: authState.currentPhotoAutoDownload,
+                            onChanged: (bool value) => context
+                                .read<MultiAuthCubit>()
+                                .setCurrentSetting(photoAutoDownload: value),
+                          )),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).videos),
-                      trailing: CupertinoSwitch(
-                        activeColor: BrightnessData.themeOf(context).accent,
-                        value: authState.currentVideoAutoDownload,
-                        onChanged: (bool value) => context
-                            .read<MultiAuthCubit>()
-                            .setCurrentSetting(videoAutoDownload: value),
-                      ),
+                      trailing: Transform.scale(
+                          scale: 0.7,
+                          child: CupertinoSwitch(
+                            activeColor: BrightnessData.themeOf(context).accent,
+                            value: authState.currentVideoAutoDownload,
+                            onChanged: (bool value) => context
+                                .read<MultiAuthCubit>()
+                                .setCurrentSetting(videoAutoDownload: value),
+                          )),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).files),
-                      trailing: CupertinoSwitch(
-                        activeColor: BrightnessData.themeOf(context).accent,
-                        value: authState.currentFileAutoDownload,
-                        onChanged: (bool value) => context
-                            .read<MultiAuthCubit>()
-                            .setCurrentSetting(fileAutoDownload: value),
-                      ),
+                      trailing: Transform.scale(
+                          scale: 0.7,
+                          child: CupertinoSwitch(
+                            activeColor: BrightnessData.themeOf(context).accent,
+                            value: authState.currentFileAutoDownload,
+                            onChanged: (bool value) => context
+                                .read<MultiAuthCubit>()
+                                .setCurrentSetting(fileAutoDownload: value),
+                          )),
                     ),
                   ],
                 ),

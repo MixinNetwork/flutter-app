@@ -65,27 +65,33 @@ class BackupPage extends HookWidget {
                   children: [
                     CellItem(
                       title: Text(Localization.of(context).autoBackup),
-                      trailing: CupertinoSwitch(
-                        activeColor: BrightnessData.themeOf(context).accent,
-                        value: true,
-                        onChanged: (bool value) {},
-                      ),
+                      trailing: Transform.scale(
+                          scale: 0.7,
+                          child: CupertinoSwitch(
+                            activeColor: BrightnessData.themeOf(context).accent,
+                            value: true,
+                            onChanged: (bool value) {},
+                          )),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).includeFiles),
-                      trailing: CupertinoSwitch(
-                        activeColor: BrightnessData.themeOf(context).accent,
-                        value: true,
-                        onChanged: (bool value) {},
-                      ),
+                      trailing: Transform.scale(
+                          scale: 0.7,
+                          child: CupertinoSwitch(
+                            activeColor: BrightnessData.themeOf(context).accent,
+                            value: true,
+                            onChanged: (bool value) {},
+                          )),
                     ),
                     CellItem(
                       title: Text(Localization.of(context).includeVideos),
-                      trailing: CupertinoSwitch(
-                        activeColor: BrightnessData.themeOf(context).accent,
-                        value: true,
-                        onChanged: (bool value) {},
-                      ),
+                      trailing: Transform.scale(
+                          scale: 0.7,
+                          child: CupertinoSwitch(
+                            activeColor: BrightnessData.themeOf(context).accent,
+                            value: true,
+                            onChanged: (bool value) {},
+                          )),
                     ),
                   ],
                 ),

@@ -28,51 +28,57 @@ class _Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => SingleChildScrollView(
-        child: CellGroup(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20, bottom: 14, top: 24),
-              child: Text(
-                Localization.of(context).settingTheme,
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
-                  fontSize: 14,
+      child: Container(
+          padding: const EdgeInsets.only(top: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(left: 10, bottom: 14),
+                child: Text(
+                  Localization.of(context).settingTheme,
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).secondaryText,
+                    fontSize: 14,
+                  ),
                 ),
               ),
-            ),
-            CellItem(
-              title: RadioItem<Brightness?>(
-                title: Text(Localization.of(context).settingThemeAuto),
-                groupValue: context.watch<SettingCubit>().brightness,
-                onChanged: (value) =>
-                    context.read<SettingCubit>().brightness = value,
-                value: null,
-              ),
-              trailing: null,
-            ),
-            CellItem(
-              title: RadioItem<Brightness?>(
-                title: Text(Localization.of(context).settingThemeLight),
-                groupValue: context.watch<SettingCubit>().brightness,
-                onChanged: (value) =>
-                    context.read<SettingCubit>().brightness = value,
-                value: Brightness.light,
-              ),
-              trailing: null,
-            ),
-            CellItem(
-              title: RadioItem<Brightness?>(
-                title: Text(Localization.of(context).settingThemeNight),
-                groupValue: context.watch<SettingCubit>().brightness,
-                onChanged: (value) =>
-                    context.read<SettingCubit>().brightness = value,
-                value: Brightness.dark,
-              ),
-              trailing: null,
-            ),
-          ],
-        )),
-      );
+              CellGroup(
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CellItem(
+                    title: RadioItem<Brightness?>(
+                      title: Text(Localization.of(context).settingThemeAuto),
+                      groupValue: context.watch<SettingCubit>().brightness,
+                      onChanged: (value) =>
+                          context.read<SettingCubit>().brightness = value,
+                      value: null,
+                    ),
+                    trailing: null,
+                  ),
+                  CellItem(
+                    title: RadioItem<Brightness?>(
+                      title: Text(Localization.of(context).settingThemeLight),
+                      groupValue: context.watch<SettingCubit>().brightness,
+                      onChanged: (value) =>
+                          context.read<SettingCubit>().brightness = value,
+                      value: Brightness.light,
+                    ),
+                    trailing: null,
+                  ),
+                  CellItem(
+                    title: RadioItem<Brightness?>(
+                      title: Text(Localization.of(context).settingThemeNight),
+                      groupValue: context.watch<SettingCubit>().brightness,
+                      onChanged: (value) =>
+                          context.read<SettingCubit>().brightness = value,
+                      value: Brightness.dark,
+                    ),
+                    trailing: null,
+                  ),
+                ],
+              ))
+            ],
+          )));
 }
