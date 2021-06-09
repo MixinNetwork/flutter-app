@@ -35,7 +35,7 @@ Future<void> main() async {
   unawaited(initListener());
 
   ansiColorDisabled = false;
-  runZonedGuarded(() => runApp(App()), (Object error, StackTrace stack) {
+  runZonedGuarded(() => runApp(const App()), (Object error, StackTrace stack) {
     if (kReleaseMode) return;
     e('$error, $stack');
   }, zoneSpecification: ZoneSpecification(
