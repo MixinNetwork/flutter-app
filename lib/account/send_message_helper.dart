@@ -278,7 +278,7 @@ class SendMessageHelper {
   }) async {
     final category =
         isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
-    final encoded = await jsonEncodeWithIsolate(contactMessage);
+    final encoded = await jsonBase64EncodeWithIsolate(contactMessage);
 
     final quoteMessage =
         await _messagesDao.findMessageItemByMessageId(quoteMessageId);
