@@ -7,18 +7,20 @@ part 'attachment_message.g.dart';
 @JsonSerializable()
 class AttachmentMessage {
   AttachmentMessage(
-      this.key,
-      this.digest,
-      this.attachmentId,
-      this.mimeType,
-      this.size,
-      this.name,
-      this.width,
-      this.height,
-      this.thumbnail,
-      this.duration,
-      this.waveform,
-      this.caption);
+    this.key,
+    this.digest,
+    this.attachmentId,
+    this.mimeType,
+    this.size,
+    this.name,
+    this.width,
+    this.height,
+    this.thumbnail,
+    this.duration,
+    this.waveform,
+    this.caption,
+    this.createdAt,
+  );
 
   factory AttachmentMessage.fromJson(Map<String, dynamic> json) =>
       _$AttachmentMessageFromJson(json);
@@ -56,6 +58,8 @@ class AttachmentMessage {
   dynamic waveform;
   @JsonKey(name: 'caption')
   String? caption;
+  @JsonKey(name: 'created_at')
+  String? createdAt;
 
   Map<String, dynamic> toJson() => _$AttachmentMessageToJson(this);
 }

@@ -41,3 +41,15 @@ Future<String> base64EncodeWithIsolate(List<int> input) =>
 
 Future<Uint8List> base64DecodeWithIsolate(String encoded) =>
     runLoadBalancer(base64Decode, encoded);
+
+String _jsonBase64Encode(Object object) =>
+    base64Encode(_utf8Encode(jsonEncode(object)));
+
+Future<String> jsonBase64EncodeWithIsolate(Object object) =>
+    runLoadBalancer(_jsonBase64Encode, object);
+
+dynamic _jsonBase64Decode(String input) =>
+    _jsonDecode(_utf8Decode(base64Decode(input)));
+
+Future<dynamic> jsonBase64DecodeWithIsolate(String input) =>
+    runLoadBalancer(_jsonBase64Decode, input);

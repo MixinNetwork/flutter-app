@@ -20,6 +20,7 @@ AttachmentMessage _$AttachmentMessageFromJson(Map<String, dynamic> json) {
     json['duration'] as int?,
     json['waveform'],
     json['caption'] as String?,
+    json['created_at'] as String?,
   );
 }
 
@@ -37,4 +38,5 @@ Map<String, dynamic> _$AttachmentMessageToJson(AttachmentMessage instance) =>
       'duration': instance.duration,
       'waveform': dynamicToJson(instance.waveform),
       'caption': instance.caption,
+      'created_at': instance.createdAt,
     };
