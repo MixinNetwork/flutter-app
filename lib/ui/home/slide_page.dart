@@ -198,12 +198,12 @@ class _CircleList extends HookWidget {
 
                           final requests = [
                             ...add.map((e) => CircleConversationRequest(
-                                  action: CircleConversationAction.ADD,
+                                  action: CircleConversationAction.add,
                                   conversationId: e.conversationId,
                                   userId: e.userId,
                                 )),
                             ...remove.map((e) => CircleConversationRequest(
-                                  action: CircleConversationAction.REMOVE,
+                                  action: CircleConversationAction.remove,
                                   conversationId: e.conversationId,
                                   userId: e.userId,
                                 ))

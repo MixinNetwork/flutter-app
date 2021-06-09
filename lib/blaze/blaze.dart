@@ -201,7 +201,7 @@ class Blaze {
       connect();
     } catch (e) {
       w('ws ping error: $e');
-      if (e is MixinApiError && e.error.code == 401) return;
+      if (e is MixinApiError && (e.error as MixinError).code == 401) return;
       await Future.delayed(const Duration(seconds: 2));
       _reconnecting = false;
       i('reconnecting set false, ${StackTrace.current}');
