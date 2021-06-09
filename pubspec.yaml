@@ -26,6 +26,10 @@ dependencies:
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
       ref: 7559689382a3afc64a836fa8282155b8b67714fc
+  pasteboard:
+    git:
+      url: https://github.com/MixinNetwork/flutter_pasteboard.git
+      ref: f268c71331b4c248675216965f5cc1141e4e535a
 #         local path
 #    path: ../mixin_bot_sdk_dart
   window_size:

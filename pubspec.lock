@@ -704,6 +704,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
+  pasteboard:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: f268c71331b4c248675216965f5cc1141e4e535a
+      resolved-ref: f268c71331b4c248675216965f5cc1141e4e535a
+      url: "https://github.com/MixinNetwork/flutter_pasteboard.git"
+    source: git
+    version: "0.0.1"
   path:
     dependency: "direct main"
     description:

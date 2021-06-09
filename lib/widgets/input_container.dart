@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -260,13 +262,67 @@ class _SendTextField extends StatelessWidget {
             (mentionCubit.state.text?.isNotEmpty ?? true),
         builder: (context, sendable, child) => FocusableActionDetector(
           autofocus: true,
-          enabled: sendable,
-          shortcuts: const {
-            SingleActivator(LogicalKeyboardKey.enter): SendMessageIntent(),
+          shortcuts: {
+            if (sendable)
+              const SingleActivator(LogicalKeyboardKey.enter):
+                  const SendMessageIntent(),
+            SingleActivator(
+              LogicalKeyboardKey.keyV,
+              meta: Platform.isMacOS,
+              control: !Platform.isMacOS,
+            ): const PasteIntent(),
           },
           actions: {
             SendMessageIntent: CallbackAction<Intent>(
               onInvoke: (Intent intent) => _sendMessage(context),
+            ),
+            PasteIntent: CallbackAction<Intent>(
+              onInvoke: (Intent intent) async {
+                final clipboardData =
+                    await Clipboard.getData(Clipboard.kTextPlain);
+                final clipboardText = clipboardData?.text;
+
+                // Temporary solution, as flutter currently has no way to block paste text.
+                void clearClipboardText() {
+                  if (clipboardText?.isNotEmpty ?? false) {
+                    final textEditingController =
+                        context.read<TextEditingController>();
+                    textEditingController.text = textEditingController.text
+                        .replaceFirst(clipboardText!, '');
+                  }
+                }
+
+                clearClipboardText();
+                final uri = await Pasteboard.uri;
+                clearClipboardText();
+                if (uri != null) {
+                  final file =
+                      File(uri.toFilePath(windows: Platform.isWindows));
+
+                  if (!await file.exists()) return;
+
+                  await _sendFile(context, file.xFile);
+                } else {
+                  final bytes = await Pasteboard.image;
+                  if (bytes == null) return;
+
+                  if ((await _PreviewImage.push(context, bytes: bytes)) !=
+                      true) {
+                    return;
+                  }
+                  final conversationItem =
+                      context.read<ConversationCubit>().state;
+                  if (conversationItem == null) return;
+
+                  await Provider.of<AccountServer>(context, listen: false)
+                      .sendImageMessage(
+                    conversationItem.isPlainConversation,
+                    bytes: bytes,
+                    conversationId: conversationItem.conversationId,
+                    recipientId: conversationItem.userId,
+                  );
+                }
+              },
             ),
           },
           child: AnimatedSize(
@@ -289,6 +345,36 @@ class _SendTextField extends StatelessWidget {
           ),
         ),
       );
+}
+
+Future<void> _sendFile(
+  BuildContext context,
+  XFile file,
+) async {
+  final conversationItem = context.read<ConversationCubit>().state;
+  if (conversationItem == null) return;
+  if (file.isImage) {
+    if ((await _PreviewImage.push(context, xFile: file)) != true) return;
+    return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
+      conversationItem.isPlainConversation,
+      file: file,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  } else if (file.isVideo) {
+    return Provider.of<AccountServer>(context, listen: false).sendVideoMessage(
+      file,
+      conversationItem.isPlainConversation,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  }
+  await Provider.of<AccountServer>(context, listen: false).sendDataMessage(
+    file,
+    conversationItem.isPlainConversation,
+    conversationId: conversationItem.conversationId,
+    recipientId: conversationItem.userId,
+  );
 }
 
 class _QuoteMessage extends StatelessWidget {
@@ -416,139 +502,133 @@ class _FileButton extends StatelessWidget {
           final file = await selectFile();
           if (file == null) return;
 
-          final conversationItem = context.read<ConversationCubit>().state;
-          if (conversationItem == null) return;
-          if (file.isImage) {
-            if ((await _PreviewImage.push(context, file)) != true) return;
-            return Provider.of<AccountServer>(context, listen: false)
-                .sendImageMessage(
-              file,
-              conversationItem.isPlainConversation,
-              conversationId: conversationItem.conversationId,
-              recipientId: conversationItem.userId,
-            );
-          } else if (file.isVideo) {
-            return Provider.of<AccountServer>(context, listen: false)
-                .sendVideoMessage(
-              file,
-              conversationItem.isPlainConversation,
-              conversationId: conversationItem.conversationId,
-              recipientId: conversationItem.userId,
-            );
-          }
-          await Provider.of<AccountServer>(context, listen: false)
-              .sendDataMessage(
-            file,
-            conversationItem.isPlainConversation,
-            conversationId: conversationItem.conversationId,
-            recipientId: conversationItem.userId,
-          );
+          await _sendFile(context, file);
         },
       );
 }
 
-class _PreviewImage extends StatelessWidget {
+class _PreviewImage extends HookWidget {
   const _PreviewImage({
     Key? key,
-    required this.xFile,
-  }) : super(key: key);
+    this.xFile,
+    this.bytes,
+  })  : assert(!(xFile != null && bytes != null)),
+        assert(!(xFile == null && bytes == null)),
+        super(key: key);
 
-  final XFile xFile;
+  final XFile? xFile;
+  final Uint8List? bytes;
 
-  static Future<bool?> push(BuildContext context, XFile xFile) =>
+  static Future<bool?> push(
+    BuildContext context, {
+    XFile? xFile,
+    Uint8List? bytes,
+  }) =>
       Navigator.push<bool>(
         context,
         MaterialPageRoute(
-          builder: (context) => _PreviewImage(xFile: xFile),
+          builder: (context) => _PreviewImage(
+            xFile: xFile,
+            bytes: bytes,
+          ),
           fullscreenDialog: true,
         ),
       );
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationState?, String?>(
-        converter: (state) => state?.conversationId,
-        when: (a, b) => a != b,
-        listener: (context, switched) => Navigator.pop(context, false),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: BrightnessData.themeOf(context).primary,
+  Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (conversationId) => conversationId != null,
+    );
+
+    useValueChanged<String?, void>(conversationId, (_, __) {
+      Navigator.pop(context, false);
+    });
+
+    final image =
+        xFile != null ? Image.file(File(xFile!.path)) : Image.memory(bytes!);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrightnessData.themeOf(context).primary,
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 58,
+            child: Row(
+              children: [
+                ActionButton(
+                  name: Resources.assetsImagesIcCloseSvg,
+                  color: BrightnessData.themeOf(context).icon,
+                  onTap: () => Navigator.pop(context, false),
+                ),
+                Text(
+                  Localization.of(context).preview,
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 58,
-                child: Row(
-                  children: [
-                    ActionButton(
-                      name: Resources.assetsImagesIcCloseSvg,
-                      color: BrightnessData.themeOf(context).icon,
-                      onTap: () => Navigator.pop(context, false),
-                    ),
-                    Text(
-                      Localization.of(context).preview,
-                      style: TextStyle(
-                        color: BrightnessData.themeOf(context).text,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 1,
+                right: 16,
+                left: 16,
+                bottom: 30,
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: BrightnessData.themeOf(context).listSelected,
+                  borderRadius: BorderRadius.circular(8),
+                  border: DashPathBorder.all(
+                    borderSide: BorderSide(
+                      color: BrightnessData.dynamicColor(
+                        context,
+                        const Color.fromRGBO(229, 231, 235, 1),
+                        darkColor: const Color.fromRGBO(255, 255, 255, 0.8),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 1,
-                    right: 16,
-                    left: 16,
-                    bottom: 30,
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: BrightnessData.themeOf(context).listSelected,
-                      borderRadius: BorderRadius.circular(8),
-                      border: DashPathBorder.all(
-                        borderSide: BorderSide(
-                          color: BrightnessData.dynamicColor(
-                            context,
-                            const Color.fromRGBO(229, 231, 235, 1),
-                            darkColor: const Color.fromRGBO(255, 255, 255, 0.8),
-                          ),
-                        ),
-                        dashArray: CircularIntervalList([4, 4]),
-                      ),
-                    ),
-                    child: Image.file(File(xFile.path)),
+                    dashArray: CircularIntervalList([4, 4]),
                   ),
                 ),
+                child: image,
               ),
-              ClipOval(
-                child: InteractableDecoratedBox.color(
-                  onTap: () => Navigator.pop(context, true),
-                  decoration: BoxDecoration(
-                    color: BrightnessData.themeOf(context).accent,
-                  ),
-                  child: SizedBox.fromSize(
-                    size: const Size.square(50),
-                    child: Center(
-                      child: SvgPicture.asset(
-                        Resources.assetsImagesIcArrowRightSvg,
-                        color: BrightnessData.dynamicColor(
-                          context,
-                          const Color.fromRGBO(255, 255, 255, 1),
-                          darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
-        ),
-      );
+          ClipOval(
+            child: InteractableDecoratedBox.color(
+              onTap: () => Navigator.pop(context, true),
+              decoration: BoxDecoration(
+                color: BrightnessData.themeOf(context).accent,
+              ),
+              child: SizedBox.fromSize(
+                size: const Size.square(50),
+                child: Center(
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesIcArrowRightSvg,
+                    color: BrightnessData.dynamicColor(
+                      context,
+                      const Color.fromRGBO(255, 255, 255, 1),
+                      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
 }
 
 class HighlightTextEditingController extends TextEditingController {
@@ -610,4 +690,8 @@ class HighlightTextEditingController extends TextEditingController {
 
 class SendMessageIntent extends Intent {
   const SendMessageIntent();
+}
+
+class PasteIntent extends Intent {
+  const PasteIntent();
 }

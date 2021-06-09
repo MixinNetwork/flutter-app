@@ -15,6 +15,7 @@ analyzer:
     # custom
     - 'lib/generated/**'
     - '**.g.dart'
+#    - 'editable/**'
 
 linter:
   rules:

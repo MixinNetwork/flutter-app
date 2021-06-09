@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:file_selector/file_selector.dart';
@@ -60,27 +61,41 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  Future<void> sendImageMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId) async {
+  Future<void> sendImageMessage({
+    required String conversationId,
+    required String senderId,
+    XFile? file,
+    Uint8List? bytes,
+    required MessageCategory category,
+    String? quoteMessageId,
+  }) async {
     final messageId = const Uuid().v4();
-    final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'image/jpeg';
-    final attachment = _attachmentUtil.getAttachmentFile(
-        category, conversationId, messageId,
-        mimeType: mimeType);
+    final mimeType =
+        file?.mimeType ?? lookupMimeType(file?.path ?? '') ?? 'image/jpeg';
 
-    final bytes = await file.readAsBytes();
+    var attachment = _attachmentUtil.getAttachmentFile(
+      category,
+      conversationId,
+      messageId,
+      mimeType: mimeType,
+    );
+
+    final _bytes = bytes ?? await file!.readAsBytes();
 
     // Only retrieve image bounds info.
-    final imageInfo = findDecoderForData(bytes)?.startDecode(bytes);
+    final imageInfo = findDecoderForData(_bytes)?.startDecode(_bytes);
 
     final imageWidth = imageInfo!.width;
     final imageHeight = imageInfo.height;
 
-    await attachment.create(recursive: true);
-    await File(file.path).copy(attachment.path);
+    attachment = await attachment.create(recursive: true);
+
+    await attachment.writeAsBytes(_bytes.toList());
+
     final attachmentSize = await attachment.length();
     final quoteMessage =
         await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+    final fileName = file?.name ?? '$messageId.png';
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -93,7 +108,7 @@ class SendMessageHelper {
       mediaWidth: imageWidth,
       mediaHeight: imageHeight,
       thumbImage: null,
-      name: file.name,
+      name: fileName,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
       createdAt: DateTime.now(),
@@ -101,8 +116,10 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messagesDao.insert(message, senderId);
-    final thumbImage =
-        await runLoadBalancer(_getImageThumbnailString, file.path);
+    final thumbImage = await runLoadBalancer(
+      _getImageThumbnailString,
+      attachment.path,
+    );
 
     final attachmentResult =
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
@@ -457,11 +474,13 @@ class SendMessageHelper {
       );
     } else if (message.category.isImage) {
       await sendImageMessage(
-          conversationId,
-          senderId,
-          XFile(message.mediaUrl!),
-          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
-          null);
+        conversationId: conversationId,
+        senderId: senderId,
+        file: XFile(message.mediaUrl!),
+        category:
+            isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
+        quoteMessageId: null,
+      );
     } else if (message.category.isVideo) {
       await sendVideoMessage(
           conversationId,

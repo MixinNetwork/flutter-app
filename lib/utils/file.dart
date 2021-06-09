@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 Future<file_selector.XFile?> selectFile() async {
@@ -13,6 +14,14 @@ Future<file_selector.XFile?> selectFile() async {
     mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
     name: xFile.name,
   );
+}
+
+extension FileExtension on File {
+  file_selector.XFile get xFile => file_selector.XFile(
+        path,
+        mimeType: lookupMimeType(path),
+        name: basename(path),
+      );
 }
 
 extension XFileExtension on file_selector.XFile {
