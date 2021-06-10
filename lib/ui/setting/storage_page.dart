@@ -33,6 +33,11 @@ class StoragePage extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CellGroup(
+                cellBackgroundColor: BrightnessData.dynamicColor(
+                  context,
+                  Colors.white,
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -86,6 +91,11 @@ class StoragePage extends HookWidget {
                 ),
               ),
               CellGroup(
+                cellBackgroundColor: BrightnessData.dynamicColor(
+                  context,
+                  Colors.white,
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                ),
                 child: CellItem(
                   title: Text(Localization.of(context).storageUsage),
                   onTap: () => context

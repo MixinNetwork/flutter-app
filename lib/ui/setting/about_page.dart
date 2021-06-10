@@ -84,6 +84,11 @@ class AboutPage extends HookWidget {
               ),
               const SizedBox(height: 50),
               CellGroup(
+                cellBackgroundColor: BrightnessData.dynamicColor(
+                  context,
+                  Colors.white,
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [

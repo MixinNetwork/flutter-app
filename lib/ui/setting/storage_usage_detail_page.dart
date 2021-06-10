@@ -112,6 +112,11 @@ class StorageUsageDetailPage extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CellGroup(
+              cellBackgroundColor: BrightnessData.dynamicColor(
+                context,
+                Colors.white,
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+              ),
               child: Column(
                 children: [
                   CellItem(

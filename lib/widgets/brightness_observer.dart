@@ -57,7 +57,8 @@ class BrightnessData extends InheritedWidget {
 
   @override
   bool updateShouldNotify(covariant BrightnessData oldWidget) =>
-      value != oldWidget.value;
+      value != oldWidget.value ||
+      brightnessThemeData != oldWidget.brightnessThemeData;
 
   static double of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<BrightnessData>()!.value;
@@ -139,4 +140,110 @@ class BrightnessThemeData {
         statusBackground:
             Color.lerp(begin.statusBackground, end.statusBackground, t)!,
       );
+
+  BrightnessThemeData copyWith({
+    Color? primary,
+    Color? accent,
+    Color? text,
+    Color? icon,
+    Color? secondaryText,
+    Color? sidebarSelected,
+    Color? listSelected,
+    Color? chatBackground,
+    Color? background,
+    Color? red,
+    Color? green,
+    Color? warning,
+    Color? highlight,
+    Color? dateTime,
+    Color? encrypt,
+    Color? popUp,
+    Color? statusBackground,
+  }) {
+    if ((primary == null || identical(primary, this.primary)) &&
+        (accent == null || identical(accent, this.accent)) &&
+        (text == null || identical(text, this.text)) &&
+        (icon == null || identical(icon, this.icon)) &&
+        (secondaryText == null ||
+            identical(secondaryText, this.secondaryText)) &&
+        (sidebarSelected == null ||
+            identical(sidebarSelected, this.sidebarSelected)) &&
+        (listSelected == null || identical(listSelected, this.listSelected)) &&
+        (chatBackground == null ||
+            identical(chatBackground, this.chatBackground)) &&
+        (background == null || identical(background, this.background)) &&
+        (red == null || identical(red, this.red)) &&
+        (green == null || identical(green, this.green)) &&
+        (warning == null || identical(warning, this.warning)) &&
+        (highlight == null || identical(highlight, this.highlight)) &&
+        (dateTime == null || identical(dateTime, this.dateTime)) &&
+        (encrypt == null || identical(encrypt, this.encrypt)) &&
+        (popUp == null || identical(popUp, this.popUp)) &&
+        (statusBackground == null ||
+            identical(statusBackground, this.statusBackground))) {
+      return this;
+    }
+    return BrightnessThemeData(
+      primary: primary ?? this.primary,
+      accent: accent ?? this.accent,
+      text: text ?? this.text,
+      icon: icon ?? this.icon,
+      secondaryText: secondaryText ?? this.secondaryText,
+      sidebarSelected: sidebarSelected ?? this.sidebarSelected,
+      listSelected: listSelected ?? this.listSelected,
+      chatBackground: chatBackground ?? this.chatBackground,
+      background: background ?? this.background,
+      red: red ?? this.red,
+      green: green ?? this.green,
+      warning: warning ?? this.warning,
+      highlight: highlight ?? this.highlight,
+      dateTime: dateTime ?? this.dateTime,
+      encrypt: encrypt ?? this.encrypt,
+      popUp: popUp ?? this.popUp,
+      statusBackground: statusBackground ?? this.statusBackground,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is BrightnessThemeData &&
+          runtimeType == other.runtimeType &&
+          primary == other.primary &&
+          accent == other.accent &&
+          text == other.text &&
+          icon == other.icon &&
+          secondaryText == other.secondaryText &&
+          sidebarSelected == other.sidebarSelected &&
+          listSelected == other.listSelected &&
+          chatBackground == other.chatBackground &&
+          background == other.background &&
+          red == other.red &&
+          green == other.green &&
+          warning == other.warning &&
+          highlight == other.highlight &&
+          dateTime == other.dateTime &&
+          encrypt == other.encrypt &&
+          popUp == other.popUp &&
+          statusBackground == other.statusBackground;
+
+  @override
+  int get hashCode =>
+      primary.hashCode ^
+      accent.hashCode ^
+      text.hashCode ^
+      icon.hashCode ^
+      secondaryText.hashCode ^
+      sidebarSelected.hashCode ^
+      listSelected.hashCode ^
+      chatBackground.hashCode ^
+      background.hashCode ^
+      red.hashCode ^
+      green.hashCode ^
+      warning.hashCode ^
+      highlight.hashCode ^
+      dateTime.hashCode ^
+      encrypt.hashCode ^
+      popUp.hashCode ^
+      statusBackground.hashCode;
 }

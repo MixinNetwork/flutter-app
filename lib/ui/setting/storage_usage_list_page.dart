@@ -105,6 +105,11 @@ class _Item extends HookWidget {
       alignment: Alignment.center,
       child: CellGroup(
         padding: EdgeInsets.zero,
+        cellBackgroundColor: BrightnessData.dynamicColor(
+          context,
+          Colors.white,
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
         child: CellItem(
           leading: ConversationAvatarWidget(
             conversationId: item.conversationId,
