@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -68,4 +69,19 @@ T useBlocStateConverter<B extends BlocBase<S>, S, T>({
     initialData: tuple.item2,
     preserveState: preserveState,
   ).data as T;
+}
+
+Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
+  final streamController = useStreamController<T>(keys: [valueNotifier]);
+  useEffect(() {
+    void onListen() {
+      streamController.add(valueNotifier.value);
+    }
+
+    valueNotifier.addListener(onListen);
+    return () {
+      valueNotifier.removeListener(onListen);
+    };
+  }, [valueNotifier]);
+  return streamController.stream.distinct();
 }

@@ -25,10 +25,12 @@ class MentionPanelPortalEntry extends HookWidget {
   const MentionPanelPortalEntry({
     Key? key,
     required this.constraints,
+    required this.textEditingController,
     required this.child,
   }) : super(key: key);
 
   final BoxConstraints constraints;
+  final TextEditingController textEditingController;
   final Widget child;
 
   @override
@@ -37,10 +39,8 @@ class MentionPanelPortalEntry extends HookWidget {
       converter: (state) => state.users.isNotEmpty,
     );
 
-    final selectable = useValueListenable(context.read<TextEditingController>())
-            .composing
-            .composed &&
-        visible;
+    final selectable =
+        useValueListenable(textEditingController).composing.composed && visible;
 
     final isGroup =
         useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
@@ -120,7 +120,6 @@ class MentionPanelPortalEntry extends HookWidget {
   }
 
   void _select(BuildContext context, User user) {
-    final textEditingController = context.read<TextEditingController>();
     textEditingController
       ..text = textEditingController.text
           .replaceFirst(mentionRegExp, '@${user.identityNumber} ')

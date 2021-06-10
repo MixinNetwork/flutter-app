@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -180,13 +181,11 @@ class _InputContainer extends HookWidget {
         BlocProvider.value(
           value: mentionCubit,
         ),
-        ChangeNotifierProvider<TextEditingController>.value(
-          value: textEditingController,
-        )
       ],
       child: LayoutBuilder(
         builder: (context, BoxConstraints constraints) =>
             MentionPanelPortalEntry(
+          textEditingController: textEditingController,
           constraints: constraints,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -213,13 +212,17 @@ class _InputContainer extends HookWidget {
                       const _StickerButton(),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _SendTextField(focusNode: focusNode),
+                        child: _SendTextField(
+                          focusNode: focusNode,
+                          textEditingController: textEditingController,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       ActionButton(
                         name: Resources.assetsImagesIcSendSvg,
                         color: BrightnessData.themeOf(context).icon,
-                        onTap: () => _sendMessage(context),
+                        onTap: () =>
+                            _sendMessage(context, textEditingController),
                       ),
                     ],
                   ),
@@ -233,8 +236,8 @@ class _InputContainer extends HookWidget {
   }
 }
 
-void _sendPostMessage(BuildContext context) {
-  final textEditingController = context.read<TextEditingController>();
+void _sendPostMessage(
+    BuildContext context, TextEditingController textEditingController) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
@@ -246,15 +249,15 @@ void _sendPostMessage(BuildContext context) {
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId);
 
+  textEditingController.text = '';
   context.read<QuoteMessageCubit>().emit(null);
 }
 
-void _sendMessage(BuildContext context) {
-  final textEditingController = context.read<TextEditingController>();
+void _sendMessage(
+    BuildContext context, TextEditingController textEditingController) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
-  textEditingController.text = '';
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
@@ -266,122 +269,158 @@ void _sendMessage(BuildContext context) {
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
       );
 
+  textEditingController.text = '';
   context.read<QuoteMessageCubit>().emit(null);
 }
 
-class _SendTextField extends StatelessWidget {
+class _SendTextField extends HookWidget {
   const _SendTextField({
     required this.focusNode,
+    required this.textEditingController,
   });
 
   final FocusNode focusNode;
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
-    final textEditingController = context.watch<TextEditingController>();
+    final textEditingValueStream =
+        useValueNotifierConvertSteam(textEditingController);
+
+    final mentionStream = context.read<MentionCubit>().stream;
+
+    final sendable = useStream(
+          useMemoized(
+              () => CombineLatestStream([
+                    textEditingValueStream,
+                    mentionStream,
+                  ], (list) {
+                    final textEditingValue = list[0] as TextEditingValue?;
+                    final mentionState = list[1] as MentionState?;
+                    return (textEditingValue?.text.trim().isNotEmpty ??
+                            false) &&
+                        (textEditingValue?.composing.composed ?? false) &&
+                        (mentionState?.text == null);
+                  }).distinct(),
+              [
+                textEditingValueStream,
+                mentionStream,
+              ]),
+        ).data ??
+        true;
+
     return Container(
-        constraints: const BoxConstraints(minHeight: 40),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4)),
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(245, 247, 250, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-          ),
+      constraints: const BoxConstraints(minHeight: 40),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        color: BrightnessData.dynamicColor(
+          context,
+          const Color.fromRGBO(245, 247, 250, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),
-        alignment: Alignment.center,
-        child: Selector2<TextEditingController, MentionCubit, bool>(
-          selector: (context, TextEditingController controller,
-                  MentionCubit mentionCubit) =>
-              controller.text.trim().isNotEmpty == true &&
-              controller.value.composing.composed &&
-              (mentionCubit.state.text?.isEmpty ?? true),
-          builder: (context, sendable, child) => FocusableActionDetector(
-            autofocus: true,
-            shortcuts: {
-              if (sendable)
-                const SingleActivator(LogicalKeyboardKey.enter):
-                    const SendMessageIntent(),
-              SingleActivator(
-                LogicalKeyboardKey.keyV,
-                meta: Platform.isMacOS,
-                control: !Platform.isMacOS,
-              ): const PasteIntent(),
+      ),
+      alignment: Alignment.center,
+      child: FocusableActionDetector(
+        autofocus: true,
+        shortcuts: {
+          if (sendable)
+            const SingleActivator(LogicalKeyboardKey.enter):
+                const SendMessageIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.enter,
+            meta: Platform.isMacOS,
+            shift: true,
+            alt: Platform.isWindows || Platform.isLinux,
+          ): const SendPostMessageIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyV,
+            meta: Platform.isMacOS,
+            control: !Platform.isMacOS,
+          ): const PasteIntent(),
+        },
+        actions: {
+          SendMessageIntent: CallbackAction<Intent>(
+            onInvoke: (Intent intent) =>
+                _sendMessage(context, textEditingController),
+          ),
+          PasteIntent: CallbackAction<Intent>(
+            onInvoke: (Intent intent) async {
+              final clipboardData =
+                  await Clipboard.getData(Clipboard.kTextPlain);
+              final clipboardText = clipboardData?.text;
+
+              // Temporary solution, as flutter currently has no way to block paste text.
+              void clearClipboardText() {
+                if (clipboardText?.isNotEmpty ?? false) {
+                  textEditingController.text = textEditingController.text
+                      .replaceFirst(clipboardText!, '');
+                }
+              }
+
+              final uri = await Pasteboard.uri;
+              if (uri != null) {
+                clearClipboardText();
+                final file = File(uri.toFilePath(windows: Platform.isWindows));
+
+                if (!await file.exists()) return;
+
+                await _sendFile(context, file.xFile);
+              } else {
+                final bytes = await Pasteboard.image;
+                if (bytes == null) return;
+
+                if ((await _PreviewImage.push(context, bytes: bytes)) != true) {
+                  return;
+                }
+                final conversationItem =
+                    context.read<ConversationCubit>().state;
+                if (conversationItem == null) return;
+
+                await Provider.of<AccountServer>(context, listen: false)
+                    .sendImageMessage(
+                  conversationItem.isPlainConversation,
+                  bytes: bytes,
+                  conversationId: conversationItem.conversationId,
+                  recipientId: conversationItem.userId,
+                );
+              }
             },
-            actions: {
-              SendMessageIntent: CallbackAction<Intent>(
-                onInvoke: (Intent intent) => _sendMessage(context),
+          ),
+          SendPostMessageIntent: CallbackAction<Intent>(
+            onInvoke: (_) => _sendPostMessage(context, textEditingController),
+          ),
+        },
+        child: AnimatedSize(
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 200),
+          child: TextField(
+            maxLines: 7,
+            minLines: 1,
+            focusNode: focusNode,
+            controller: textEditingController,
+            style: TextStyle(
+              color: BrightnessData.themeOf(context).text,
+              fontSize: 14,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: Localization.of(context).chatInputHint,
+              hintStyle: TextStyle(
+                color: BrightnessData.themeOf(context).secondaryText,
+                fontSize: 14,
               ),
-              PasteIntent: CallbackAction<Intent>(
-                onInvoke: (Intent intent) async {
-                  final clipboardData =
-                      await Clipboard.getData(Clipboard.kTextPlain);
-                  final clipboardText = clipboardData?.text;
-
-                  // Temporary solution, as flutter currently has no way to block paste text.
-                  void clearClipboardText() {
-                    if (clipboardText?.isNotEmpty ?? false) {
-                      final textEditingController =
-                          context.read<TextEditingController>();
-                      textEditingController.text = textEditingController.text
-                          .replaceFirst(clipboardText!, '');
-                    }
-                  }
-
-                  final uri = await Pasteboard.uri;
-                  if (uri != null) {
-                    clearClipboardText();
-                    final file =
-                        File(uri.toFilePath(windows: Platform.isWindows));
-
-                    if (!await file.exists()) return;
-
-                    await _sendFile(context, file.xFile);
-                  } else {
-                    final bytes = await Pasteboard.image;
-                    if (bytes == null) return;
-
-                    if ((await _PreviewImage.push(context, bytes: bytes)) !=
-                        true) {
-                      return;
-                    }
-                    final conversationItem =
-                        context.read<ConversationCubit>().state;
-                    if (conversationItem == null) return;
-
-                    await Provider.of<AccountServer>(context, listen: false)
-                        .sendImageMessage(
-                      conversationItem.isPlainConversation,
-                      bytes: bytes,
-                      conversationId: conversationItem.conversationId,
-                      recipientId: conversationItem.userId,
-                    );
-                  }
-                },
-              ),
-            },
-            child: AnimatedSize(
-              curve: Curves.easeOut,
-              duration: const Duration(milliseconds: 200),
-              child: TextField(
-                maxLines: 7,
-                minLines: 1,
-                controller: context.watch<TextEditingController>(),
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
-                  fontSize: 14,
-                ),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                ),
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.only(
+                left: 8,
+                top: 8,
+                right: 0,
+                bottom: 8,
               ),
             ),
           ),
         ),
-      );
-  },
+      ),
     );
   }
 }
