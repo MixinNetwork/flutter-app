@@ -167,6 +167,12 @@ class _InputContainer extends HookWidget {
       };
     }, [identityHashCode(textEditingController)]);
 
+    final focusNode = useFocusNode();
+
+    useEffect(() {
+      focusNode.requestFocus(null);
+    }, [conversationId]);
+
     return MultiProvider(
       providers: [
         BlocProvider.value(
@@ -204,8 +210,8 @@ class _InputContainer extends HookWidget {
                       const SizedBox(width: 6),
                       const _StickerButton(),
                       const SizedBox(width: 16),
-                      const Expanded(
-                        child: _SendTextField(),
+                      Expanded(
+                        child: _SendTextField(focusNode: focusNode),
                       ),
                       const SizedBox(width: 16),
                       ActionButton(
@@ -262,7 +268,11 @@ void _sendMessage(BuildContext context) {
 }
 
 class _SendTextField extends StatelessWidget {
-  const _SendTextField();
+  const _SendTextField({
+    required this.focusNode,
+  });
+
+  final FocusNode focusNode;
 
   @override
   Widget build(BuildContext context) {
@@ -288,21 +298,21 @@ class _SendTextField extends StatelessWidget {
             autofocus: true,
             enabled: sendable,
             shortcuts: {
-                const SingleActivator(LogicalKeyboardKey.enter):
-                    const SendMessageIntent(),
+              const SingleActivator(LogicalKeyboardKey.enter):
+                  const SendMessageIntent(),
               SingleActivator(
-                  LogicalKeyboardKey.enter,
-                  meta: Platform.isMacOS,
-                  shift: true,
-                  alt: Platform.isWindows || Platform.isLinux,
-                ): const SendPostMessageIntent()
+                LogicalKeyboardKey.enter,
+                meta: Platform.isMacOS,
+                shift: true,
+                alt: Platform.isWindows || Platform.isLinux,
+              ): const SendPostMessageIntent()
             },
             actions: {
               SendMessageIntent: CallbackAction<Intent>(
                 onInvoke: (Intent intent) => _sendMessage(context),
-                ),
-                SendPostMessageIntent: CallbackAction<Intent>(
-                  onInvoke: (_) => _sendPostMessage(context),
+              ),
+              SendPostMessageIntent: CallbackAction<Intent>(
+                onInvoke: (_) => _sendPostMessage(context),
               ),
             },
             child: AnimatedSize(
@@ -311,23 +321,29 @@ class _SendTextField extends StatelessWidget {
               child: TextField(
                 maxLines: 7,
                 minLines: 1,
-                  autofocus: true,
+                focusNode: focusNode,
+                autofocus: true,
                 controller: textEditingController,
                 style: TextStyle(
                   color: BrightnessData.themeOf(context).text,
                   fontSize: 16,
                 ),
                 decoration: InputDecoration(
-                    isDense: true,
-                    hintText: Localization.of(context).chatInputHint,
-                    hintStyle: TextStyle(
-                      color: BrightnessData.themeOf(context).secondaryText,
-                      fontSize: 14,
-                    ),
-                    enabledBorder: InputBorder.none,
-                    focusedBorder: InputBorder.none,
-                    contentPadding: const EdgeInsets.only(
-                        left: 8, top: 8, right: 0, bottom: 8)),
+                  isDense: true,
+                  hintText: Localization.of(context).chatInputHint,
+                  hintStyle: TextStyle(
+                    color: BrightnessData.themeOf(context).secondaryText,
+                    fontSize: 14,
+                  ),
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  contentPadding: const EdgeInsets.only(
+                    left: 8,
+                    top: 8,
+                    right: 0,
+                    bottom: 8,
+                  ),
+                ),
               ),
             ),
           ),
