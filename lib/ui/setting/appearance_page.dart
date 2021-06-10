@@ -8,6 +8,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/radio.dart';
+import 'widgets/theme.dart';
 
 class AppearancePage extends StatelessWidget {
   const AppearancePage({Key? key}) : super(key: key);
@@ -19,7 +20,10 @@ class AppearancePage extends StatelessWidget {
           title: Text(Localization.of(context).appearance),
           actions: const [],
         ),
-        body: const Align(alignment: Alignment.topCenter, child: _Body()),
+        body: const Align(
+          alignment: Alignment.topCenter,
+          child: SettingPageTheme(child: _Body()),
+        ),
       );
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/ui/setting/widgets/theme.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -20,83 +21,88 @@ class BackupPage extends HookWidget {
           title: Text(Localization.of(context).chatBackup),
           actions: const [],
         ),
-        body: Container(
-          alignment: Alignment.topCenter,
-          padding: const EdgeInsets.only(top: 40),
-          child: Column(
-            children: [
-              SvgPicture.asset(
-                Resources.assetsImagesChatBackupSvg,
-                width: 88,
-                height: 88,
-                color: BrightnessData.themeOf(context).secondaryText,
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: 500,
-                child: Text(
-                  Localization.of(context).chatBackupDescription,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: BrightnessData.themeOf(context).secondaryText,
+        body: SettingPageTheme(
+          child: Container(
+            alignment: Alignment.topCenter,
+            padding: const EdgeInsets.only(top: 40),
+            child: Column(
+              children: [
+                SvgPicture.asset(
+                  Resources.assetsImagesChatBackupSvg,
+                  width: 88,
+                  height: 88,
+                  color: BrightnessData.themeOf(context).secondaryText,
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: 500,
+                  child: Text(
+                    Localization.of(context).chatBackupDescription,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: BrightnessData.themeOf(context).secondaryText,
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              CellGroup(
-                child: CellItem(
-                  title: Text(Localization.of(context).backup),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '',
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 14,
+                const SizedBox(height: 30),
+                CellGroup(
+                  child: CellItem(
+                    title: Text(Localization.of(context).backup),
                   ),
                 ),
-              ),
-              CellGroup(
-                child: Column(
-                  children: [
-                    CellItem(
-                      title: Text(Localization.of(context).autoBackup),
-                      trailing: Transform.scale(
-                          scale: 0.7,
-                          child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
-                            value: true,
-                            onChanged: (bool value) {},
-                          )),
+                Container(
+                  padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    '',
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).secondaryText,
+                      fontSize: 14,
                     ),
-                    CellItem(
-                      title: Text(Localization.of(context).includeFiles),
-                      trailing: Transform.scale(
-                          scale: 0.7,
-                          child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
-                            value: true,
-                            onChanged: (bool value) {},
-                          )),
-                    ),
-                    CellItem(
-                      title: Text(Localization.of(context).includeVideos),
-                      trailing: Transform.scale(
-                          scale: 0.7,
-                          child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
-                            value: true,
-                            onChanged: (bool value) {},
-                          )),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+                CellGroup(
+                  child: Column(
+                    children: [
+                      CellItem(
+                        title: Text(Localization.of(context).autoBackup),
+                        trailing: Transform.scale(
+                            scale: 0.7,
+                            child: CupertinoSwitch(
+                              activeColor:
+                                  BrightnessData.themeOf(context).accent,
+                              value: true,
+                              onChanged: (bool value) {},
+                            )),
+                      ),
+                      CellItem(
+                        title: Text(Localization.of(context).includeFiles),
+                        trailing: Transform.scale(
+                            scale: 0.7,
+                            child: CupertinoSwitch(
+                              activeColor:
+                                  BrightnessData.themeOf(context).accent,
+                              value: true,
+                              onChanged: (bool value) {},
+                            )),
+                      ),
+                      CellItem(
+                        title: Text(Localization.of(context).includeVideos),
+                        trailing: Transform.scale(
+                            scale: 0.7,
+                            child: CupertinoSwitch(
+                              activeColor:
+                                  BrightnessData.themeOf(context).accent,
+                              value: true,
+                              onChanged: (bool value) {},
+                            )),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

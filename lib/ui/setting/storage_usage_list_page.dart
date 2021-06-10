@@ -17,6 +17,7 @@ import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../home/route/responsive_navigator_cubit.dart';
+import 'widgets/theme.dart';
 
 class StorageUsageListPage extends HookWidget {
   const StorageUsageListPage({Key? key}) : super(key: key);
@@ -28,7 +29,7 @@ class StorageUsageListPage extends HookWidget {
           title: Text(Localization.of(context).storageUsage),
           actions: const [],
         ),
-        body: const _Content(),
+        body: const SettingPageTheme(child: _Content()),
       );
 }
 

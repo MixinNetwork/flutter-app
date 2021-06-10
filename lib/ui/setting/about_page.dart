@@ -17,6 +17,7 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/interacter_decorated_box.dart';
+import 'widgets/theme.dart';
 
 class AboutPage extends HookWidget {
   const AboutPage({Key? key}) : super(key: key);
@@ -31,91 +32,95 @@ class AboutPage extends HookWidget {
         title: Text(Localization.of(context).about),
         actions: const [],
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          alignment: Alignment.topCenter,
-          padding: const EdgeInsets.only(top: 40),
-          child: Column(
-            children: [
-              Image.asset(
-                Resources.assetsImagesAboutLogoPng,
-                width: 60,
-                height: 60,
-              ),
-              const SizedBox(height: 24),
-              InteractableDecoratedBox(
-                onTap: () {
-                  if (kReleaseMode) return;
+      body: SettingPageTheme(
+        child: SingleChildScrollView(
+          child: Container(
+            alignment: Alignment.topCenter,
+            padding: const EdgeInsets.only(top: 40),
+            child: Column(
+              children: [
+                Image.asset(
+                  Resources.assetsImagesAboutLogoPng,
+                  width: 60,
+                  height: 60,
+                ),
+                const SizedBox(height: 24),
+                InteractableDecoratedBox(
+                  onTap: () {
+                    if (kReleaseMode) return;
 
-                  Navigator.of(context, rootNavigator: true).push(
-                    MaterialPageRoute(
-                      builder: (context) => MoorDbViewer(SignalDatabase.get),
+                    Navigator.of(context, rootNavigator: true).push(
+                      MaterialPageRoute(
+                        builder: (context) => MoorDbViewer(SignalDatabase.get),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    Localization.of(context).mixinMessenger,
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).text,
+                      fontSize: 18,
                     ),
-                  );
-                },
-                child: Text(
-                  Localization.of(context).mixinMessenger,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 18,
                   ),
                 ),
-              ),
-              // SignalDatabase.get
-              const SizedBox(height: 8),
-              InteractableDecoratedBox(
-                onTap: () {
-                  if (kReleaseMode) return;
+                // SignalDatabase.get
+                const SizedBox(height: 8),
+                InteractableDecoratedBox(
+                  onTap: () {
+                    if (kReleaseMode) return;
 
-                  Navigator.of(context, rootNavigator: true).push(
-                    MaterialPageRoute(
-                      builder: (context) => MoorDbViewer(
-                          context.read<AccountServer>().database.mixinDatabase),
+                    Navigator.of(context, rootNavigator: true).push(
+                      MaterialPageRoute(
+                        builder: (context) => MoorDbViewer(context
+                            .read<AccountServer>()
+                            .database
+                            .mixinDatabase),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    version,
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).secondaryText,
+                      fontSize: 16,
                     ),
-                  );
-                },
-                child: Text(
-                  version,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 16,
                   ),
                 ),
-              ),
-              const SizedBox(height: 50),
-              CellGroup(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CellItem(
-                      title: Text(Localization.of(context).followTwitter),
-                      onTap: () => openUri(
-                          context, 'https://twitter.com/MixinMessenger'),
-                    ),
-                    CellItem(
-                      title: Text(Localization.of(context).followFacebook),
-                      onTap: () =>
-                          openUri(context, 'https://fb.com/MixinMessenger'),
-                    ),
-                    CellItem(
-                      title: Text(Localization.of(context).helpCenter),
-                      onTap: () => openUri(
-                          context, 'https://mixinmessenger.zendesk.com'),
-                    ),
-                    CellItem(
-                      title: Text(Localization.of(context).termsService),
-                      onTap: () =>
-                          openUri(context, 'https://mixin.one/pages/terms'),
-                    ),
-                    CellItem(
-                      title: Text(Localization.of(context).privacyPolicy),
-                      onTap: () =>
-                          openUri(context, 'https://mixin.one/pages/privacy'),
-                    ),
-                  ],
+                const SizedBox(height: 50),
+                CellGroup(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CellItem(
+                        title: Text(Localization.of(context).followTwitter),
+                        onTap: () => openUri(
+                            context, 'https://twitter.com/MixinMessenger'),
+                      ),
+                      CellItem(
+                        title: Text(Localization.of(context).followFacebook),
+                        onTap: () =>
+                            openUri(context, 'https://fb.com/MixinMessenger'),
+                      ),
+                      CellItem(
+                        title: Text(Localization.of(context).helpCenter),
+                        onTap: () => openUri(
+                            context, 'https://mixinmessenger.zendesk.com'),
+                      ),
+                      CellItem(
+                        title: Text(Localization.of(context).termsService),
+                        onTap: () =>
+                            openUri(context, 'https://mixin.one/pages/terms'),
+                      ),
+                      CellItem(
+                        title: Text(Localization.of(context).privacyPolicy),
+                        onTap: () =>
+                            openUri(context, 'https://mixin.one/pages/privacy'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
