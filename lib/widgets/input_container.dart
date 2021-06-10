@@ -262,7 +262,7 @@ class _SendTextField extends StatelessWidget {
                     MentionCubit mentionCubit) =>
                 controller.text.trim().isNotEmpty == true &&
                 controller.value.composing.composed &&
-                (mentionCubit.state.text?.isNotEmpty ?? true),
+                (mentionCubit.state.text?.isEmpty ?? true),
             builder: (context, sendable, child) => FocusableActionDetector(
               autofocus: true,
               enabled: sendable,
