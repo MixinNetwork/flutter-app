@@ -306,6 +306,7 @@ class _SendTextField extends StatelessWidget {
                 child: TextField(
                   maxLines: 7,
                   minLines: 1,
+                  autofocus: true,
                   controller: context.watch<TextEditingController>(),
                   style: TextStyle(
                     color: BrightnessData.themeOf(context).text,
