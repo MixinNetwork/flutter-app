@@ -222,6 +222,22 @@ class _InputContainer extends HookWidget {
   }
 }
 
+void _sendPostMessage(BuildContext context) {
+  final textEditingController = context.read<TextEditingController>();
+  final text = textEditingController.value.text.trim();
+  if (text.isEmpty) return;
+
+  final conversationItem = context.read<ConversationCubit>().state;
+  if (conversationItem == null) return;
+
+  context.read<AccountServer>().sendPostMessage(
+      text, conversationItem.isPlainConversation,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId);
+
+  context.read<QuoteMessageCubit>().emit(null);
+}
+
 void _sendMessage(BuildContext context) {
   final textEditingController = context.read<TextEditingController>();
   final text = textEditingController.value.text.trim();
@@ -266,12 +282,22 @@ class _SendTextField extends StatelessWidget {
             builder: (context, sendable, child) => FocusableActionDetector(
               autofocus: true,
               enabled: sendable,
-              shortcuts: const {
-                SingleActivator(LogicalKeyboardKey.enter): SendMessageIntent(),
+              shortcuts: {
+                const SingleActivator(LogicalKeyboardKey.enter):
+                    const SendMessageIntent(),
+                SingleActivator(
+                  LogicalKeyboardKey.enter,
+                  meta: Platform.isMacOS,
+                  shift: true,
+                  alt: Platform.isWindows || Platform.isLinux,
+                ): const SendPostMessageIntent()
               },
               actions: {
                 SendMessageIntent: CallbackAction<Intent>(
                   onInvoke: (Intent intent) => _sendMessage(context),
+                ),
+                SendPostMessageIntent: CallbackAction<Intent>(
+                  onInvoke: (_) => _sendPostMessage(context),
                 ),
               },
               child: AnimatedSize(
@@ -623,4 +649,8 @@ class HighlightTextEditingController extends TextEditingController {
 
 class SendMessageIntent extends Intent {
   const SendMessageIntent();
+}
+
+class SendPostMessageIntent extends Intent {
+  const SendPostMessageIntent();
 }

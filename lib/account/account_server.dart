@@ -439,6 +439,21 @@ class AccountServer {
     );
   }
 
+  Future<void> sendPostMessage(
+    String content,
+    bool isPlain, {
+    String? conversationId,
+    String? recipientId,
+  }) async {
+    if (content.isEmpty) return;
+    await _sendMessageHelper.sendPostMessage(
+      await _initConversation(conversationId, recipientId),
+      userId,
+      content,
+      isPlain,
+    );
+  }
+
   Future<void> sendImageMessage(XFile image, bool isPlain,
           {String? conversationId,
           String? recipientId,

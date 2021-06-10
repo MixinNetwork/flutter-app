@@ -387,7 +387,7 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  Future<void> _sendPostMessage(String conversationId, String senderId,
+  Future<void> sendPostMessage(String conversationId, String senderId,
       String content, bool isPlain) async {
     final category =
         isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
@@ -570,7 +570,7 @@ class SendMessageHelper {
           message.mediaHeight!,
           isPlain);
     } else if (message.category.isPost) {
-      await _sendPostMessage(
+      await sendPostMessage(
           conversationId, senderId, message.content!, isPlain);
     } else if (message.category.isLocation) {
       await _sendLocationMessage(
