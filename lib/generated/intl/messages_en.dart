@@ -86,6 +86,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatGroupRemove": m4,
         "chatGroupRole":
             MessageLookupByLibrary.simpleMessage("You\'re now an admin"),
+        "chatInputHint":
+            MessageLookupByLibrary.simpleMessage("End to end encrypted"),
         "chatLearn": MessageLookupByLibrary.simpleMessage("Learn more"),
         "chatNotFound":
             MessageLookupByLibrary.simpleMessage("Message not found"),

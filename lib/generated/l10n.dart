@@ -910,6 +910,16 @@ class Localization {
     );
   }
 
+  /// `End to end encrypted`
+  String get chatInputHint {
+    return Intl.message(
+      'End to end encrypted',
+      name: 'chatInputHint',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Create`
   String get create {
     return Intl.message(

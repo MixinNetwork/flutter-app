@@ -285,11 +285,16 @@ class _SendTextField extends StatelessWidget {
                     color: BrightnessData.themeOf(context).text,
                     fontSize: 16,
                   ),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                       isDense: true,
+                      hintText: Localization.of(context).chatInputHint,
+                      hintStyle: TextStyle(
+                        color: BrightnessData.themeOf(context).secondaryText,
+                        fontSize: 14,
+                      ),
                       enabledBorder: InputBorder.none,
                       focusedBorder: InputBorder.none,
-                      contentPadding: EdgeInsets.only(
+                      contentPadding: const EdgeInsets.only(
                           left: 8, top: 8, right: 0, bottom: 8)),
                 ),
               ),

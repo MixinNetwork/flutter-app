@@ -75,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatGroupJoin": m3,
         "chatGroupRemove": m4,
         "chatGroupRole": MessageLookupByLibrary.simpleMessage("你现在成为管理员"),
+        "chatInputHint": MessageLookupByLibrary.simpleMessage("端对端加密"),
         "chatLearn": MessageLookupByLibrary.simpleMessage("了解更多"),
         "chatNotFound": MessageLookupByLibrary.simpleMessage("找不到该消息"),
         "chatNotSupport":
