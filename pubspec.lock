@@ -707,9 +707,11 @@ packages:
   pasteboard:
     dependency: "direct main"
     description:
-      path: "../pasteboard"
-      relative: true
-    source: path
+      path: "."
+      ref: "107f500cb5946d6ca228dbb53b7d7d0bb31c6db2"
+      resolved-ref: "107f500cb5946d6ca228dbb53b7d7d0bb31c6db2"
+      url: "https://github.com/MixinNetwork/flutter_pasteboard.git"
+    source: git
     version: "0.0.1"
   path:
     dependency: "direct main"
