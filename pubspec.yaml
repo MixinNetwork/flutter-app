@@ -25,7 +25,7 @@ dependencies:
   mixin_bot_sdk_dart:
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: 7559689382a3afc64a836fa8282155b8b67714fc
+      ref: e6c982bc00a33e0b9306d192efc6514202056246
   pasteboard:
     #    path: ../pasteboard
     git:
@@ -96,7 +96,7 @@ dependencies:
   moor_db_viewer: ^4.0.0
   blurhash_dart: ^1.0.2
   visibility_detector: ^0.2.0
-  bitsdojo_window: ^0.1.0+1
+  bitsdojo_window: ^0.1.1+1
   ansicolor: ^2.0.1
 
 dev_dependencies:

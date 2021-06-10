@@ -14,7 +14,7 @@ packages:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.1"
+    version: "1.7.0"
   analyzer_plugin_fork:
     dependency: transitive
     description:
@@ -49,21 +49,21 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.6.1"
+    version: "2.7.0"
   bitsdojo_window:
     dependency: "direct main"
     description:
       name: bitsdojo_window
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0+1"
+    version: "0.1.1+1"
   bitsdojo_window_linux:
     dependency: transitive
     description:
       name: bitsdojo_window_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0+1"
+    version: "0.1.1"
   bitsdojo_window_macos:
     dependency: transitive
     description:
@@ -631,7 +631,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.0"
+    version: "1.4.0"
   mime:
     dependency: "direct main"
     description:
@@ -643,8 +643,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: "7559689382a3afc64a836fa8282155b8b67714fc"
-      resolved-ref: "7559689382a3afc64a836fa8282155b8b67714fc"
+      ref: e6c982bc00a33e0b9306d192efc6514202056246
+      resolved-ref: e6c982bc00a33e0b9306d192efc6514202056246
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.1"
@@ -1027,7 +1027,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.0"
   timezone:
     dependency: transitive
     description:

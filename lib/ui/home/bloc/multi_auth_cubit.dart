@@ -4,6 +4,8 @@ import 'package:equatable/equatable.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
+import '../../../utils/logger.dart';
+
 part 'multi_auth_state.dart';
 
 class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
@@ -28,6 +30,27 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
           ...state._auths.where(
               (element) => element.account.userId != authState.account.userId),
           _authState,
+        },
+      ),
+    );
+    currentAccount = authState.account;
+  }
+
+  void updateAccount(Account account) {
+    var authState = state._auths
+        .cast<AuthState?>()
+        .firstWhere((element) => element?.account.userId == account.userId);
+    if (authState == null) {
+      i('update account, but ${account.userId} auth state not found.');
+      return;
+    }
+    authState = authState.copyWith(account: account);
+    emit(
+      MultiAuthState(
+        auths: {
+          ...state._auths.where(
+              (element) => element.account.userId != authState?.account.userId),
+          authState,
         },
       ),
     );

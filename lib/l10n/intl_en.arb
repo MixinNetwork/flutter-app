@@ -85,6 +85,7 @@
   "createGroupConversation": "New Group Conversation",
   "participantsCount": "{count} Participants",
   "conversationName": "Conversation Name",
+  "chatInputHint": "End to end encrypted",
   "create": "Create",
   "searchEmpty": "No chats, \ncontacts or messages found.",
   "more": "more",

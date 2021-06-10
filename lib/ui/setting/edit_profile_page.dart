@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../generated/l10n.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
+import '../../widgets/toast.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 
-class EditProfilePage extends StatelessWidget {
+class EditProfilePage extends HookWidget {
   const EditProfilePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final nameTextEditingController = TextEditingController();
-    final bioTextEditingController = TextEditingController();
+    final nameTextEditingController = useTextEditingController();
+    final bioTextEditingController = useTextEditingController();
+    useEffect(() {
+      context.read<AccountServer>().refreshSelf();
+    });
     return BlocConverter<MultiAuthCubit, MultiAuthState,
         Tuple2<String?, String?>>(
       converter: (state) => Tuple2(
@@ -37,9 +43,16 @@ class EditProfilePage extends StatelessWidget {
           title: Text(Localization.of(context).editProfile),
           actions: [
             MixinButton(
-              onTap: () {},
+              onTap: () {
+                runFutureWithToast(
+                  context,
+                  context.read<AccountServer>().updateAccount(
+                        fullName: nameTextEditingController.text.trim(),
+                        biography: bioTextEditingController.text.trim(),
+                      ),
+                );
+              },
               backgroundTransparent: true,
-              value: 'TODO',
               child: Center(child: Text(Localization.of(context).save)),
             ),
           ],
@@ -153,7 +166,7 @@ class _Item extends StatelessWidget {
           )
         : BrightnessData.dynamicColor(
             context,
-            const Color.fromRGBO(245, 247, 250, 1),
+            const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
           );
 

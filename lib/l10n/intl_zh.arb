@@ -82,6 +82,7 @@
   "createGroupConversation": "创建群组",
   "participantsCount": "共 {count} 人",
   "conversationName": "群组名称",
+  "chatInputHint": "端对端加密",
   "create": "创建",
   "searchEmpty": "找不到联系人或消息。",
   "more": "更多",

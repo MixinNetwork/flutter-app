@@ -6,6 +6,7 @@ import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 
+import '../blaze/vo/attachment_message.dart';
 import '../crypto/attachment/crypto_attachment.dart';
 import '../db/dao/messages_dao.dart';
 import '../db/extension/message_category.dart';
@@ -34,9 +35,7 @@ class AttachmentUtil {
     required String content,
     required String conversationId,
     required MessageCategory category,
-    String? key,
-    String? digest,
-    String? mimeType,
+    AttachmentMessage? attachmentMessage,
   }) async {
     await _messagesDao.updateMediaStatus(MediaStatus.pending, messageId);
 
@@ -57,7 +56,7 @@ class AttachmentUtil {
           conversationId: conversationId,
           messageId: messageId,
           category: category,
-          mimeType: mimeType,
+          mimeType: attachmentMessage?.mimeType,
         );
         await file.create(recursive: true);
         final out = file.openWrite();
@@ -66,8 +65,8 @@ class AttachmentUtil {
           await httpResponse.pipe(out);
 
           if (category.isSignal) {
-            var localKey = key;
-            var localDigest = digest;
+            var localKey = attachmentMessage?.key;
+            var localDigest = attachmentMessage?.digest;
             if (localKey == null || localDigest == null) {
               final message =
                   await _messagesDao.findMessageByMessageId(messageId);
@@ -77,7 +76,7 @@ class AttachmentUtil {
               }
               if (localKey == null || localDigest == null) {
                 throw InvalidKeyException(
-                    'decrypt attachment key: $key, digest: $digest');
+                    'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
               }
             }
             final result = CryptoAttachment().decryptAttachment(
@@ -88,8 +87,15 @@ class AttachmentUtil {
             file.writeAsBytesSync(result);
           }
 
+          final fileSize = await file.length();
+          if (attachmentMessage != null) {
+            final encoded =
+                await jsonBase64EncodeWithIsolate(attachmentMessage);
+            await _messagesDao.updateMessageContent(messageId, encoded);
+          }
+
           await _messagesDao.updateMediaMessageUrl(file.path, messageId);
-          await _messagesDao.updateMediaSize(await file.length(), messageId);
+          await _messagesDao.updateMediaSize(fileSize, messageId);
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
         } catch (e) {
           await out.close();
@@ -159,9 +165,8 @@ class AttachmentUtil {
           return AttachmentResult(
               response.data.attachmentId,
               category.isSignal ? await base64EncodeWithIsolate(keys!) : null,
-              category.isSignal
-                  ? await base64EncodeWithIsolate(digest!)
-                  : null);
+              category.isSignal ? await base64EncodeWithIsolate(digest!) : null,
+              response.data.createdAt);
         } else {
           deleteCryptoTmpFile(category, tmpFile);
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
@@ -249,9 +254,10 @@ class AttachmentUtil {
 }
 
 class AttachmentResult {
-  AttachmentResult(this.attachmentId, this.keys, this.digest);
+  AttachmentResult(this.attachmentId, this.keys, this.digest, this.createdAt);
 
   final String attachmentId;
   final String? keys;
   final String? digest;
+  final String? createdAt;
 }

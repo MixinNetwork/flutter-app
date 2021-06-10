@@ -47,7 +47,7 @@ String? _getUserId(dynamic item) {
 }
 
 bool _isBot(dynamic item) {
-  if (item is ConversationItem) return false;
+  if (item is ConversationItem) return item.isBotConversation;
   if (item is User) return item.isBot;
   throw ArgumentError('must be ConversationItem or User');
 }

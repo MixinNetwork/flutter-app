@@ -47,3 +47,13 @@ bool isSameDay(DateTime? a, DateTime? b) {
   final _b = b.toLocal();
   return _a.year == _b.year && _a.month == _b.month && _a.day == _b.day;
 }
+
+bool within24Hours(DateTime? _dateTime) {
+  if (_dateTime == null) return false;
+  final now = DateTime.now();
+  final offset = now.millisecondsSinceEpoch - _dateTime.millisecondsSinceEpoch;
+  if (offset < 60 * 60 * 1000 * 24) {
+    return true;
+  }
+  return false;
+}

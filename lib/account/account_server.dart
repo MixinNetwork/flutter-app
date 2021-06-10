@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/blaze_param.dart';
+import '../blaze/vo/attachment_message.dart';
 import '../blaze/vo/contact_message.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/plain_json_message.dart';
@@ -46,17 +47,20 @@ import 'account_key_value.dart';
 import 'send_message_helper.dart';
 
 class AccountServer {
+  AccountServer(this.multiAuthCubit);
+
   static String? sid;
 
   set language(String language) =>
       client.dio.options.headers['Accept-Language'] = language;
+
+  final MultiAuthCubit multiAuthCubit;
 
   Future<void> initServer(
     String userId,
     String sessionId,
     String identityNumber,
     String privateKey,
-    MultiAuthCubit multiAuthCubit,
   ) async {
     if (sid == sessionId) return;
     sid = sessionId;
@@ -435,6 +439,21 @@ class AccountServer {
     );
   }
 
+  Future<void> sendPostMessage(
+    String content,
+    bool isPlain, {
+    String? conversationId,
+    String? recipientId,
+  }) async {
+    if (content.isEmpty) return;
+    await _sendMessageHelper.sendPostMessage(
+      await _initConversation(conversationId, recipientId),
+      userId,
+      content,
+      isPlain,
+    );
+  }
+
   Future<void> sendImageMessage(
     bool isPlain, {
     XFile? file,
@@ -569,21 +588,23 @@ class AccountServer {
   }
 
   Future<void> refreshSelf() async {
-    final me = (await client.userApi.getMe()).data;
+    final me = (await client.accountApi.getMe()).data;
     await database.userDao.insert(db.User(
       userId: me.userId,
       identityNumber: me.identityNumber,
-      relationship: me.relationship,
+      relationship:
+          const UserRelationshipJsonConverter().fromJson(me.relationship),
       fullName: me.fullName,
       avatarUrl: me.avatarUrl,
       phone: me.phone,
       isVerified: me.isVerified,
       createdAt: me.createdAt,
       muteUntil: DateTime.tryParse(me.muteUntil),
-      appId: me.app?.appId,
+      appId: null,
       biography: me.biography,
       isScam: me.isScam ? 1 : 0,
     ));
+    multiAuthCubit.updateAccount(me);
   }
 
   Future<void> refreshFriends() async {
@@ -756,28 +777,40 @@ class AccountServer {
     }
   }
 
-  Future<String?> downloadAttachment(db.MessageItem message) =>
-      _attachmentUtil.downloadAttachment(
-          content: message.content!,
-          messageId: message.messageId,
-          conversationId: message.conversationId,
-          category: message.type,
-          mimeType: message.mediaMimeType);
+  Future<String?> downloadAttachment(db.MessageItem message) async {
+    AttachmentMessage? attachmentMessage;
+    if (message.content != null) {
+      try {
+        attachmentMessage = AttachmentMessage.fromJson(
+            await jsonBase64DecodeWithIsolate(message.content!));
+      } catch (e) {
+        attachmentMessage = null;
+      }
+    }
+    await _attachmentUtil.downloadAttachment(
+        content: message.content!,
+        messageId: message.messageId,
+        conversationId: message.conversationId,
+        category: message.type,
+        attachmentMessage: attachmentMessage);
+  }
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
       _sendMessageHelper.reUploadAttachment(
-          message.conversationId,
-          message.messageId,
-          message.type,
-          File(message.mediaUrl!),
-          message.mediaName,
-          message.mediaMimeType!,
-          message.mediaSize!,
-          message.mediaWidth,
-          message.mediaHeight,
-          message.thumbImage,
-          message.mediaDuration,
-          message.mediaWaveform);
+        message.conversationId,
+        message.messageId,
+        message.type,
+        File(message.mediaUrl!),
+        message.mediaName,
+        message.mediaMimeType!,
+        message.mediaSize!,
+        message.mediaWidth,
+        message.mediaHeight,
+        message.thumbImage,
+        message.mediaDuration,
+        message.mediaWaveform,
+        message.content,
+      );
 
   Future<void> addUser(String userId, String? fullName) =>
       _relationship(RelationshipRequest(
@@ -1171,4 +1204,12 @@ class AccountServer {
 
   Future<List<db.User>?> refreshUsers(List<String> ids) =>
       _decryptMessage.refreshUsers(ids);
+
+  Future<void> updateAccount({String? fullName, String? biography}) async {
+    final user = await client.accountApi.update(AccountUpdateRequest(
+      fullName: fullName,
+      biography: biography,
+    ));
+    multiAuthCubit.updateAccount(user.data);
+  }
 }

@@ -31,9 +31,7 @@ import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
 
 class App extends StatelessWidget {
-  App({Key? key}) : super(key: key);
-
-  final accountServer = AccountServer();
+  const App({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +57,14 @@ class App extends StatelessWidget {
               authState.privateKey,
             )),
             create: (BuildContext context) async {
+              final accountServer =
+                  AccountServer(context.read<MultiAuthCubit>());
               try {
                 await accountServer.initServer(
                   authState.account.userId,
                   authState.account.sessionId,
                   authState.account.identityNumber,
                   authState.privateKey,
-                  context.read<MultiAuthCubit>(),
                 );
               } catch (e, s) {
                 w('accountServer.initServer error: $e, $s');

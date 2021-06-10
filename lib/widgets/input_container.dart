@@ -50,6 +50,10 @@ class InputContainer extends HookWidget {
       when: (state) => state != null,
     );
 
+    useEffect(() {
+      context.read<QuoteMessageCubit>().emit(null);
+    }, [conversationId]);
+
     final hasParticipant = useStream(
             useMemoized(() {
               final database = context.read<AccountServer>().database;
@@ -165,68 +169,84 @@ class _InputContainer extends HookWidget {
       };
     }, [identityHashCode(textEditingController)]);
 
-    return BlocProvider.value(
-      value: mentionCubit,
-      child: Builder(
-        builder: (context) =>
-            ChangeNotifierProvider<TextEditingController>.value(
-          key: ValueKey(identityHashCode(textEditingController)),
+    final focusNode = useFocusNode();
+
+    useEffect(() {
+      focusNode.requestFocus(null);
+    }, [conversationId]);
+
+    return MultiProvider(
+      providers: [
+        BlocProvider.value(
+          value: mentionCubit,
+        ),
+        ChangeNotifierProvider<TextEditingController>.value(
           value: textEditingController,
-          child: LayoutBuilder(
-            builder: (context, BoxConstraints constraints) =>
-                MentionPanelPortalEntry(
-              constraints: constraints,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const _QuoteMessage(),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: 56,
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: BrightnessData.themeOf(context).primary,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _FileButton(
-                              actionColor:
-                                  BrightnessData.themeOf(context).icon),
-                          const SizedBox(width: 6),
-                          const _StickerButton(),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                minHeight: 32,
-                              ),
-                              child: const _SendTextField(),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          ActionButton(
-                            name: Resources.assetsImagesIcSendSvg,
-                            color: BrightnessData.themeOf(context).icon,
-                            onTap: () => _sendMessage(context),
-                          ),
-                        ],
-                      ),
-                    ),
+        )
+      ],
+      child: LayoutBuilder(
+        builder: (context, BoxConstraints constraints) =>
+            MentionPanelPortalEntry(
+          constraints: constraints,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const _QuoteMessage(),
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 56,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: BrightnessData.themeOf(context).primary,
                   ),
-                ],
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _FileButton(
+                          actionColor: BrightnessData.themeOf(context).icon),
+                      const SizedBox(width: 6),
+                      const _StickerButton(),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _SendTextField(focusNode: focusNode),
+                      ),
+                      const SizedBox(width: 16),
+                      ActionButton(
+                        name: Resources.assetsImagesIcSendSvg,
+                        color: BrightnessData.themeOf(context).icon,
+                        onTap: () => _sendMessage(context),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
   }
+}
+
+void _sendPostMessage(BuildContext context) {
+  final textEditingController = context.read<TextEditingController>();
+  final text = textEditingController.value.text.trim();
+  if (text.isEmpty) return;
+
+  final conversationItem = context.read<ConversationCubit>().state;
+  if (conversationItem == null) return;
+
+  context.read<AccountServer>().sendPostMessage(
+      text, conversationItem.isPlainConversation,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId);
+
+  context.read<QuoteMessageCubit>().emit(null);
 }
 
 void _sendMessage(BuildContext context) {
@@ -250,100 +270,120 @@ void _sendMessage(BuildContext context) {
 }
 
 class _SendTextField extends StatelessWidget {
-  const _SendTextField();
+  const _SendTextField({
+    required this.focusNode,
+  });
+
+  final FocusNode focusNode;
 
   @override
-  Widget build(BuildContext context) =>
-      Selector2<TextEditingController, MentionCubit, bool>(
-        selector: (context, TextEditingController controller,
-                MentionCubit mentionCubit) =>
-            controller.text.trim().isNotEmpty == true &&
-            controller.value.composing.composed &&
-            (mentionCubit.state.text?.isNotEmpty ?? true),
-        builder: (context, sendable, child) => FocusableActionDetector(
-          autofocus: true,
-          shortcuts: {
-            if (sendable)
-              const SingleActivator(LogicalKeyboardKey.enter):
-                  const SendMessageIntent(),
-            SingleActivator(
-              LogicalKeyboardKey.keyV,
-              meta: Platform.isMacOS,
-              control: !Platform.isMacOS,
-            ): const PasteIntent(),
-          },
-          actions: {
-            SendMessageIntent: CallbackAction<Intent>(
-              onInvoke: (Intent intent) => _sendMessage(context),
-            ),
-            PasteIntent: CallbackAction<Intent>(
-              onInvoke: (Intent intent) async {
-                final clipboardData =
-                    await Clipboard.getData(Clipboard.kTextPlain);
-                final clipboardText = clipboardData?.text;
-
-                // Temporary solution, as flutter currently has no way to block paste text.
-                void clearClipboardText() {
-                  if (clipboardText?.isNotEmpty ?? false) {
-                    final textEditingController =
-                        context.read<TextEditingController>();
-                    textEditingController.text = textEditingController.text
-                        .replaceFirst(clipboardText!, '');
-                  }
-                }
-
-                final uri = await Pasteboard.uri;
-                if (uri != null) {
-                  clearClipboardText();
-                  final file =
-                      File(uri.toFilePath(windows: Platform.isWindows));
-
-                  if (!await file.exists()) return;
-
-                  await _sendFile(context, file.xFile);
-                } else {
-                  final bytes = await Pasteboard.image;
-                  if (bytes == null) return;
-
-                  if ((await _PreviewImage.push(context, bytes: bytes)) !=
-                      true) {
-                    return;
-                  }
-                  final conversationItem =
-                      context.read<ConversationCubit>().state;
-                  if (conversationItem == null) return;
-
-                  await Provider.of<AccountServer>(context, listen: false)
-                      .sendImageMessage(
-                    conversationItem.isPlainConversation,
-                    bytes: bytes,
-                    conversationId: conversationItem.conversationId,
-                    recipientId: conversationItem.userId,
-                  );
-                }
-              },
-            ),
-          },
-          child: AnimatedSize(
-            curve: Curves.easeOut,
-            duration: const Duration(milliseconds: 200),
-            child: TextField(
-              maxLines: 7,
-              minLines: 1,
-              controller: context.watch<TextEditingController>(),
-              style: TextStyle(
-                color: BrightnessData.themeOf(context).text,
-                fontSize: 14,
+  Widget build(BuildContext context) {
+    final textEditingController = context.watch<TextEditingController>();
+    return Container(
+        constraints: const BoxConstraints(minHeight: 40),
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(4)),
+          color: BrightnessData.dynamicColor(
+            context,
+            const Color.fromRGBO(245, 247, 250, 1),
+            darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Selector2<TextEditingController, MentionCubit, bool>(
+          selector: (context, TextEditingController controller,
+                  MentionCubit mentionCubit) =>
+              controller.text.trim().isNotEmpty == true &&
+              controller.value.composing.composed &&
+              (mentionCubit.state.text?.isEmpty ?? true),
+          builder: (context, sendable, child) => FocusableActionDetector(
+            autofocus: true,
+            shortcuts: {
+              if (sendable)
+                const SingleActivator(LogicalKeyboardKey.enter):
+                    const SendMessageIntent(),
+              SingleActivator(
+                LogicalKeyboardKey.keyV,
+                meta: Platform.isMacOS,
+                control: !Platform.isMacOS,
+              ): const PasteIntent(),
+            },
+            actions: {
+              SendMessageIntent: CallbackAction<Intent>(
+                onInvoke: (Intent intent) => _sendMessage(context),
               ),
-              decoration: const InputDecoration(
-                isDense: true,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
+              PasteIntent: CallbackAction<Intent>(
+                onInvoke: (Intent intent) async {
+                  final clipboardData =
+                      await Clipboard.getData(Clipboard.kTextPlain);
+                  final clipboardText = clipboardData?.text;
+
+                  // Temporary solution, as flutter currently has no way to block paste text.
+                  void clearClipboardText() {
+                    if (clipboardText?.isNotEmpty ?? false) {
+                      final textEditingController =
+                          context.read<TextEditingController>();
+                      textEditingController.text = textEditingController.text
+                          .replaceFirst(clipboardText!, '');
+                    }
+                  }
+
+                  final uri = await Pasteboard.uri;
+                  if (uri != null) {
+                    clearClipboardText();
+                    final file =
+                        File(uri.toFilePath(windows: Platform.isWindows));
+
+                    if (!await file.exists()) return;
+
+                    await _sendFile(context, file.xFile);
+                  } else {
+                    final bytes = await Pasteboard.image;
+                    if (bytes == null) return;
+
+                    if ((await _PreviewImage.push(context, bytes: bytes)) !=
+                        true) {
+                      return;
+                    }
+                    final conversationItem =
+                        context.read<ConversationCubit>().state;
+                    if (conversationItem == null) return;
+
+                    await Provider.of<AccountServer>(context, listen: false)
+                        .sendImageMessage(
+                      conversationItem.isPlainConversation,
+                      bytes: bytes,
+                      conversationId: conversationItem.conversationId,
+                      recipientId: conversationItem.userId,
+                    );
+                  }
+                },
+              ),
+            },
+            child: AnimatedSize(
+              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 200),
+              child: TextField(
+                maxLines: 7,
+                minLines: 1,
+                controller: context.watch<TextEditingController>(),
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).text,
+                  fontSize: 14,
+                ),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
               ),
             ),
           ),
         ),
       );
+  },
+    );
+  }
 }
 
 Future<void> _sendFile(
@@ -689,6 +729,10 @@ class HighlightTextEditingController extends TextEditingController {
 
 class SendMessageIntent extends Intent {
   const SendMessageIntent();
+}
+
+class SendPostMessageIntent extends Intent {
+  const SendPostMessageIntent();
 }
 
 class PasteIntent extends Intent {
