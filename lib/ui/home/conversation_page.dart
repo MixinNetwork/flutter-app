@@ -974,39 +974,7 @@ class _Item extends StatelessWidget {
                           ],
                         ),
                         const SizedBox(height: 2),
-                        SizedBox(
-                          height: 20,
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _MessagePreview(
-                                  messageColor: messageColor,
-                                  conversation: conversation,
-                                ),
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  if (conversation.mentionCount > 0)
-                                    _UnreadText(
-                                      conversation: conversation,
-                                      data: '@',
-                                    ),
-                                  if ((conversation.unseenMessageCount ?? 0) >
-                                      0)
-                                    _UnreadText(
-                                      conversation: conversation,
-                                      data:
-                                          '${conversation.unseenMessageCount}',
-                                    ),
-                                  if ((conversation.unseenMessageCount ?? 0) <=
-                                      0)
-                                    _StatusRow(conversation: conversation),
-                                ].joinList(const SizedBox(width: 8)),
-                              ),
-                            ],
-                          ),
-                        ),
+                        _ItemConversationSubtitle(conversation: conversation),
                       ],
                     ),
                   ),
@@ -1018,6 +986,52 @@ class _Item extends StatelessWidget {
       ),
     );
   }
+}
+
+class _ItemConversationSubtitle extends StatelessWidget {
+  const _ItemConversationSubtitle({
+    Key? key,
+    required this.conversation,
+  }) : super(key: key);
+
+  final ConversationItem conversation;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 20,
+        child: Row(
+          children: [
+            Expanded(
+              child: _MessagePreview(
+                messageColor: BrightnessData.themeOf(context).secondaryText,
+                conversation: conversation,
+              ),
+            ),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                if (conversation.mentionCount > 0)
+                  UnreadText(
+                    data: '@',
+                    textColor: const Color.fromRGBO(255, 255, 255, 1),
+                    backgroundColor: BrightnessData.themeOf(context).accent,
+                  ),
+                if ((conversation.unseenMessageCount ?? 0) > 0)
+                  UnreadText(
+                    data: '${conversation.unseenMessageCount}',
+                    textColor: const Color.fromRGBO(255, 255, 255, 1),
+                    backgroundColor:
+                        conversation.muteUntil?.isAfter(DateTime.now()) == true
+                            ? BrightnessData.themeOf(context).secondaryText
+                            : BrightnessData.themeOf(context).accent,
+                  ),
+                if ((conversation.unseenMessageCount ?? 0) <= 0)
+                  _StatusRow(conversation: conversation),
+              ].joinList(const SizedBox(width: 8)),
+            ),
+          ],
+        ),
+      );
 }
 
 class VerifiedOrBotWidget extends StatelessWidget {
@@ -1084,32 +1098,6 @@ class _StatusRow extends StatelessWidget {
       ].joinList(const SizedBox(width: 4)),
     );
   }
-}
-
-class _UnreadText extends StatelessWidget {
-  const _UnreadText({
-    Key? key,
-    required this.conversation,
-    required this.data,
-  }) : super(key: key);
-
-  final ConversationItem conversation;
-  final String data;
-
-  @override
-  Widget build(BuildContext context) => UnreadText(
-        data: data,
-        backgroundColor: conversation.pinTime?.isAfter(DateTime.now()) == true
-            ? BrightnessData.themeOf(context).accent
-            : BrightnessData.themeOf(context).secondaryText,
-        textColor: conversation.pinTime != null
-            ? BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(255, 255, 255, 1),
-                darkColor: const Color.fromRGBO(255, 255, 255, 1),
-              )
-            : BrightnessData.themeOf(context).primary,
-      );
 }
 
 class _MessagePreview extends StatelessWidget {
