@@ -90,6 +90,7 @@ class SearchMessagePage extends HookWidget {
           return SearchMessageItem(
             message: message,
             keyword: keyword,
+            showSender: true,
             onTap: () async => ConversationCubit.selectConversation(
               context,
               message.conversationId,
