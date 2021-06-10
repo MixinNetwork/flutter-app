@@ -191,7 +191,7 @@ class SendMessageHelper {
 
   Future<void> sendStickerMessage(String conversationId, String senderId,
       StickerMessage stickerMessage, MessageCategory category) async {
-    final encoded = await jsonEncodeWithIsolate(stickerMessage);
+    final encoded = await jsonBase64EncodeWithIsolate(stickerMessage);
 
     final message = Message(
       messageId: const Uuid().v4(),
