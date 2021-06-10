@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -62,6 +64,20 @@ class ImagePreviewPage extends HookWidget {
     final current = useState<MessageItem?>(null);
     final prev = useState<MessageItem?>(null);
     final next = useState<MessageItem?>(null);
+
+    useEffect(() {
+      void handleShortcut(RawKeyEvent value) {
+        if (value.logicalKey == LogicalKeyboardKey.keyC &&
+            ((Platform.isMacOS && value.isMetaPressed) ||
+                (!Platform.isMacOS && value.isControlPressed))) {}
+        _copyUrl(context, current.value?.mediaUrl);
+      }
+
+      RawKeyboard.instance.addListener(handleShortcut);
+      return () {
+        RawKeyboard.instance.removeListener(handleShortcut);
+      };
+    });
 
     useEffect(() {
       controller.scaleState = PhotoViewScaleState.initial;
@@ -277,12 +293,11 @@ class _Bar extends StatelessWidget {
             },
           ),
           const SizedBox(width: 12),
-          // todo
-          // ActionButton(
-          //   name: Resources.assetsImagesCopySvg,
-          //   size: 20,
-          //   onTap: () {},
-          // ),
+          ActionButton(
+            name: Resources.assetsImagesCopySvg,
+            size: 20,
+            onTap: () => _copyUrl(context, message.mediaUrl),
+          ),
           const SizedBox(width: 12),
           ActionButton(
             name: Resources.assetsImagesAttachmentDownloadSvg,
@@ -355,4 +370,19 @@ class _Item extends HookWidget {
       ),
     );
   }
+}
+
+Future<void> _copyUrl(BuildContext context, String? filePath) async {
+  if (filePath?.isEmpty ?? true) {
+    return showToastFailed(context, null);
+  }
+  try {
+    await Pasteboard.writeUrl(
+      Uri.file(filePath!, windows: Platform.isWindows).toString(),
+    );
+  } catch (error) {
+    await showToastFailed(context, error);
+    return;
+  }
+  showToastSuccessful(context);
 }
