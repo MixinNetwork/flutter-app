@@ -196,82 +196,77 @@ class ChatPage extends HookWidget {
   }
 }
 
-class ChatContainer extends StatelessWidget {
+class ChatContainer extends HookWidget {
   const ChatContainer({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (context) => QuoteMessageCubit(),
-          ),
-        ],
-        child: Builder(
-          builder: (context) {
-            BlocProvider.of<MessageBloc>(context).limit =
-                MediaQuery.of(context).size.height ~/ 20;
-            return Column(
-              children: [
-                const ChatBar(),
-                Expanded(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: BrightnessData.themeOf(context).chatBackground,
-                      image: DecorationImage(
-                        image: const ExactAssetImage(
-                          Resources.assetsImagesChatBackgroundPng,
-                        ),
-                        fit: BoxFit.cover,
-                        colorFilter: ColorFilter.mode(
-                          BrightnessData.of(context) == 1.0
-                              ? Colors.white.withOpacity(0.02)
-                              : Colors.black.withOpacity(0.03),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                    child: Navigator(
-                      onPopPage: (Route<dynamic> route, dynamic result) =>
-                          route.didPop(result),
-                      pages: [
-                        MaterialPage(
-                          child: Column(
+  Widget build(BuildContext context) {
+    final quoteMessageCubit = useBloc(() => QuoteMessageCubit());
+    BlocProvider.of<MessageBloc>(context).limit =
+        MediaQuery.of(context).size.height ~/ 20;
+    return BlocProvider.value(
+      value: quoteMessageCubit,
+      child: Column(
+        children: [
+          const ChatBar(),
+          Expanded(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: BrightnessData.themeOf(context).chatBackground,
+                image: DecorationImage(
+                  image: const ExactAssetImage(
+                    Resources.assetsImagesChatBackgroundPng,
+                  ),
+                  fit: BoxFit.cover,
+                  colorFilter: ColorFilter.mode(
+                    BrightnessData.of(context) == 1.0
+                        ? Colors.white.withOpacity(0.02)
+                        : Colors.black.withOpacity(0.03),
+                    BlendMode.srcIn,
+                  ),
+                ),
+              ),
+              child: Navigator(
+                onPopPage: (Route<dynamic> route, dynamic result) =>
+                    route.didPop(result),
+                pages: [
+                  MaterialPage(
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: Stack(
                             children: [
-                              Expanded(
-                                child: Stack(
-                                  children: [
-                                    const _NotificationListener(
-                                      child: _List(),
-                                    ),
-                                    Positioned(
-                                      bottom: 16,
-                                      right: 16,
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: const [
-                                          _JumpMentionButton(),
-                                          _JumpCurrentButton(),
-                                        ],
-                                      ),
-                                    ),
+                              const _NotificationListener(
+                                child: _List(),
+                              ),
+                              Positioned(
+                                bottom: 16,
+                                right: 16,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    _JumpMentionButton(),
+                                    _JumpCurrentButton(),
                                   ],
                                 ),
                               ),
-                              const InputContainer(),
                             ],
                           ),
                         ),
+                        const InputContainer(),
                       ],
                     ),
                   ),
-                ),
-              ],
-            );
-          },
-        ),
-      );
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _NotificationListener extends StatelessWidget {

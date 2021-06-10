@@ -48,6 +48,10 @@ class InputContainer extends HookWidget {
       when: (state) => state != null,
     );
 
+    useEffect(() {
+      context.read<QuoteMessageCubit>().emit(null);
+    }, [conversationId]);
+
     final hasParticipant = useStream(
             useMemoized(() {
               final database = context.read<AccountServer>().database;
@@ -163,58 +167,57 @@ class _InputContainer extends HookWidget {
       };
     }, [identityHashCode(textEditingController)]);
 
-    return BlocProvider.value(
-      value: mentionCubit,
-      child: Builder(
-        builder: (context) =>
-            ChangeNotifierProvider<TextEditingController>.value(
-          key: ValueKey(identityHashCode(textEditingController)),
+    return MultiProvider(
+      providers: [
+        BlocProvider.value(
+          value: mentionCubit,
+        ),
+        ChangeNotifierProvider<TextEditingController>.value(
           value: textEditingController,
-          child: LayoutBuilder(
-            builder: (context, BoxConstraints constraints) =>
-                MentionPanelPortalEntry(
-              constraints: constraints,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const _QuoteMessage(),
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: 56,
-                    ),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: BrightnessData.themeOf(context).primary,
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          _FileButton(
-                              actionColor:
-                                  BrightnessData.themeOf(context).icon),
-                          const SizedBox(width: 6),
-                          const _StickerButton(),
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            child: _SendTextField(),
-                          ),
-                          const SizedBox(width: 16),
-                          ActionButton(
-                            name: Resources.assetsImagesIcSendSvg,
-                            color: BrightnessData.themeOf(context).icon,
-                            onTap: () => _sendMessage(context),
-                          ),
-                        ],
-                      ),
-                    ),
+        )
+      ],
+      child: LayoutBuilder(
+        builder: (context, BoxConstraints constraints) =>
+            MentionPanelPortalEntry(
+          constraints: constraints,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const _QuoteMessage(),
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: 56,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: BrightnessData.themeOf(context).primary,
                   ),
-                ],
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _FileButton(
+                          actionColor: BrightnessData.themeOf(context).icon),
+                      const SizedBox(width: 6),
+                      const _StickerButton(),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: _SendTextField(),
+                      ),
+                      const SizedBox(width: 16),
+                      ActionButton(
+                        name: Resources.assetsImagesIcSendSvg,
+                        color: BrightnessData.themeOf(context).icon,
+                        onTap: () => _sendMessage(context),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
@@ -246,62 +249,65 @@ class _SendTextField extends StatelessWidget {
   const _SendTextField();
 
   @override
-  Widget build(BuildContext context) => Container(
-        constraints: const BoxConstraints(minHeight: 40),
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4)),
-          color: BrightnessData.dynamicColor(
-            context,
-            const Color.fromRGBO(245, 247, 250, 1),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
-          ),
+  Widget build(BuildContext context) {
+    final textEditingController = context.watch<TextEditingController>();
+    return Container(
+      constraints: const BoxConstraints(minHeight: 40),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(4)),
+        color: BrightnessData.dynamicColor(
+          context,
+          const Color.fromRGBO(245, 247, 250, 1),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),
-        child: Center(
-          child: Selector2<TextEditingController, MentionCubit, bool>(
-            selector: (context, TextEditingController controller,
-                    MentionCubit mentionCubit) =>
-                controller.text.trim().isNotEmpty == true &&
-                controller.value.composing.composed &&
-                (mentionCubit.state.text?.isNotEmpty ?? true),
-            builder: (context, sendable, child) => FocusableActionDetector(
-              autofocus: true,
-              enabled: sendable,
-              shortcuts: const {
-                SingleActivator(LogicalKeyboardKey.enter): SendMessageIntent(),
-              },
-              actions: {
-                SendMessageIntent: CallbackAction<Intent>(
-                  onInvoke: (Intent intent) => _sendMessage(context),
+      ),
+      child: Center(
+        child: Selector2<TextEditingController, MentionCubit, bool>(
+          selector: (context, TextEditingController controller,
+                  MentionCubit mentionCubit) =>
+              controller.text.trim().isNotEmpty == true &&
+              controller.value.composing.composed &&
+              (mentionCubit.state.text?.isNotEmpty ?? true),
+          builder: (context, sendable, child) => FocusableActionDetector(
+            autofocus: true,
+            enabled: sendable,
+            shortcuts: const {
+              SingleActivator(LogicalKeyboardKey.enter): SendMessageIntent(),
+            },
+            actions: {
+              SendMessageIntent: CallbackAction<Intent>(
+                onInvoke: (Intent intent) => _sendMessage(context),
+              ),
+            },
+            child: AnimatedSize(
+              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 200),
+              child: TextField(
+                maxLines: 7,
+                minLines: 1,
+                controller: textEditingController,
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).text,
+                  fontSize: 16,
                 ),
-              },
-              child: AnimatedSize(
-                curve: Curves.easeOut,
-                duration: const Duration(milliseconds: 200),
-                child: TextField(
-                  maxLines: 7,
-                  minLines: 1,
-                  controller: context.watch<TextEditingController>(),
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 16,
-                  ),
-                  decoration: InputDecoration(
-                      isDense: true,
-                      hintText: Localization.of(context).chatInputHint,
-                      hintStyle: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
-                        fontSize: 14,
-                      ),
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                      contentPadding: const EdgeInsets.only(
-                          left: 8, top: 8, right: 0, bottom: 8)),
-                ),
+                decoration: InputDecoration(
+                    isDense: true,
+                    hintText: Localization.of(context).chatInputHint,
+                    hintStyle: TextStyle(
+                      color: BrightnessData.themeOf(context).secondaryText,
+                      fontSize: 14,
+                    ),
+                    enabledBorder: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    contentPadding: const EdgeInsets.only(
+                        left: 8, top: 8, right: 0, bottom: 8)),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _QuoteMessage extends StatelessWidget {
