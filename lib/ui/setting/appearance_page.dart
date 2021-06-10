@@ -8,7 +8,6 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/radio.dart';
-import 'widgets/theme.dart';
 
 class AppearancePage extends StatelessWidget {
   const AppearancePage({Key? key}) : super(key: key);
@@ -22,7 +21,7 @@ class AppearancePage extends StatelessWidget {
         ),
         body: const Align(
           alignment: Alignment.topCenter,
-          child: SettingPageTheme(child: _Body()),
+          child: _Body(),
         ),
       );
 }
@@ -48,41 +47,47 @@ class _Body extends StatelessWidget {
                 ),
               ),
               CellGroup(
-                  child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CellItem(
-                    title: RadioItem<Brightness?>(
-                      title: Text(Localization.of(context).settingThemeAuto),
-                      groupValue: context.watch<SettingCubit>().brightness,
-                      onChanged: (value) =>
-                          context.read<SettingCubit>().brightness = value,
-                      value: null,
+                cellBackgroundColor: BrightnessData.dynamicColor(
+                  context,
+                  Colors.white,
+                  darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    CellItem(
+                      title: RadioItem<Brightness?>(
+                        title: Text(Localization.of(context).settingThemeAuto),
+                        groupValue: context.watch<SettingCubit>().brightness,
+                        onChanged: (value) =>
+                            context.read<SettingCubit>().brightness = value,
+                        value: null,
+                      ),
+                      trailing: null,
                     ),
-                    trailing: null,
-                  ),
-                  CellItem(
-                    title: RadioItem<Brightness?>(
-                      title: Text(Localization.of(context).settingThemeLight),
-                      groupValue: context.watch<SettingCubit>().brightness,
-                      onChanged: (value) =>
-                          context.read<SettingCubit>().brightness = value,
-                      value: Brightness.light,
+                    CellItem(
+                      title: RadioItem<Brightness?>(
+                        title: Text(Localization.of(context).settingThemeLight),
+                        groupValue: context.watch<SettingCubit>().brightness,
+                        onChanged: (value) =>
+                            context.read<SettingCubit>().brightness = value,
+                        value: Brightness.light,
+                      ),
+                      trailing: null,
                     ),
-                    trailing: null,
-                  ),
-                  CellItem(
-                    title: RadioItem<Brightness?>(
-                      title: Text(Localization.of(context).settingThemeNight),
-                      groupValue: context.watch<SettingCubit>().brightness,
-                      onChanged: (value) =>
-                          context.read<SettingCubit>().brightness = value,
-                      value: Brightness.dark,
+                    CellItem(
+                      title: RadioItem<Brightness?>(
+                        title: Text(Localization.of(context).settingThemeNight),
+                        groupValue: context.watch<SettingCubit>().brightness,
+                        onChanged: (value) =>
+                            context.read<SettingCubit>().brightness = value,
+                        value: Brightness.dark,
+                      ),
+                      trailing: null,
                     ),
-                    trailing: null,
-                  ),
-                ],
-              ))
+                  ],
+                ),
+              )
             ],
           )));
 }

@@ -17,7 +17,6 @@ import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../home/route/responsive_navigator_cubit.dart';
-import 'widgets/theme.dart';
 
 class StorageUsageListPage extends HookWidget {
   const StorageUsageListPage({Key? key}) : super(key: key);
@@ -29,7 +28,7 @@ class StorageUsageListPage extends HookWidget {
           title: Text(Localization.of(context).storageUsage),
           actions: const [],
         ),
-        body: const SettingPageTheme(child: _Content()),
+        body: const _Content(),
       );
 }
 
@@ -106,6 +105,11 @@ class _Item extends HookWidget {
       alignment: Alignment.center,
       child: CellGroup(
         padding: EdgeInsets.zero,
+        cellBackgroundColor: BrightnessData.dynamicColor(
+          context,
+          Colors.white,
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+        ),
         child: CellItem(
           leading: ConversationAvatarWidget(
             conversationId: item.conversationId,

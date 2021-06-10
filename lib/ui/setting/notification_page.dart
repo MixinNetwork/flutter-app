@@ -10,7 +10,6 @@ import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../home/bloc/multi_auth_cubit.dart';
-import 'widgets/theme.dart';
 
 class NotificationPage extends HookWidget {
   const NotificationPage({Key? key}) : super(key: key);
@@ -27,37 +26,40 @@ class NotificationPage extends HookWidget {
         title: Text(Localization.of(context).notification),
         actions: const [],
       ),
-      body: SettingPageTheme(
-        child: Container(
-          alignment: Alignment.topCenter,
-          padding: const EdgeInsets.only(top: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CellGroup(
-                child: CellItem(
-                  title: Text(Localization.of(context).messagePreview),
-                  trailing: CupertinoSwitch(
-                    activeColor: BrightnessData.themeOf(context).accent,
-                    value: currentMessagePreview,
-                    onChanged: (bool value) => context
-                        .read<MultiAuthCubit>()
-                        .setCurrentSetting(messagePreview: value),
-                  ),
+      body: Container(
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.only(top: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CellGroup(
+              cellBackgroundColor: BrightnessData.dynamicColor(
+                context,
+                Colors.white,
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
+              ),
+              child: CellItem(
+                title: Text(Localization.of(context).messagePreview),
+                trailing: CupertinoSwitch(
+                  activeColor: BrightnessData.themeOf(context).accent,
+                  value: currentMessagePreview,
+                  onChanged: (bool value) => context
+                      .read<MultiAuthCubit>()
+                      .setCurrentSetting(messagePreview: value),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-                child: Text(
-                  Localization.of(context).messagePreviewDescription,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 14,
-                  ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
+              child: Text(
+                Localization.of(context).messagePreviewDescription,
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).secondaryText,
+                  fontSize: 14,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

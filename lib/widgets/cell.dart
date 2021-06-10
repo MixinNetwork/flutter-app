@@ -8,16 +8,19 @@ import 'brightness_observer.dart';
 import 'interacter_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
-  const CellGroup({
-    Key? key,
-    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
-    required this.child,
-    this.padding = const EdgeInsets.only(right: 10, left: 10, bottom: 10),
-  }) : super(key: key);
+  const CellGroup(
+      {Key? key,
+      this.borderRadius = const BorderRadius.all(Radius.circular(8)),
+      required this.child,
+      this.padding = const EdgeInsets.only(right: 10, left: 10, bottom: 10),
+      this.cellBackgroundColor})
+      : super(key: key);
 
   final BorderRadius borderRadius;
   final Widget child;
   final EdgeInsetsGeometry padding;
+
+  final Color? cellBackgroundColor;
 
   @override
   Widget build(BuildContext context) => ConstrainedBox(
@@ -26,10 +29,34 @@ class CellGroup extends StatelessWidget {
           padding: padding,
           child: ClipRRect(
             borderRadius: borderRadius,
-            child: child,
+            child: _CellItemStyle(
+              backgroundColor: cellBackgroundColor ??
+                  BrightnessData.themeOf(context).listSelected,
+              child: child,
+            ),
           ),
         ),
       );
+}
+
+class _CellItemStyle extends InheritedWidget {
+  const _CellItemStyle({
+    Key? key,
+    required Widget child,
+    required this.backgroundColor,
+  }) : super(key: key, child: child);
+
+  final Color backgroundColor;
+
+  static _CellItemStyle of(BuildContext context) {
+    final result = context.dependOnInheritedWidgetOfExactType<_CellItemStyle>();
+    assert(result != null, 'No _CellItemStyle found in context');
+    return result!;
+  }
+
+  @override
+  bool updateShouldNotify(_CellItemStyle old) =>
+      old.backgroundColor == backgroundColor;
 }
 
 class CellItem extends StatelessWidget {
@@ -55,7 +82,7 @@ class CellItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dynamicColor = color ?? BrightnessData.themeOf(context).text;
-    final backgroundColor = BrightnessData.themeOf(context).listSelected;
+    final backgroundColor = _CellItemStyle.of(context).backgroundColor;
     var selectedBackgroundColor = backgroundColor;
     if (selected &&
         !context.read<ResponsiveNavigatorCubit>().state.navigationMode) {

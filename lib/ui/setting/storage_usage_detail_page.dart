@@ -19,7 +19,6 @@ import '../../widgets/dialog.dart';
 import '../../widgets/disable.dart';
 import '../../widgets/radio.dart';
 import '../../widgets/toast.dart';
-import 'widgets/theme.dart';
 
 class StorageUsageDetailPage extends HookWidget {
   const StorageUsageDetailPage({
@@ -106,85 +105,88 @@ class StorageUsageDetailPage extends HookWidget {
           ),
         ],
       ),
-      body: SettingPageTheme(
-        child: Container(
-          alignment: Alignment.topCenter,
-          padding: const EdgeInsets.only(top: 40),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CellGroup(
-                child: Column(
-                  children: [
-                    CellItem(
-                      title: RadioItem(
-                        groupValue: true,
-                        value: selected.value.item1,
-                        title: Text(Localization.of(context).photos),
-                        onChanged: (bool value) =>
-                            selected.value = selected.value.withItem1(!value),
-                      ),
-                      description: Text(
-                        photosSize,
-                        style: TextStyle(
-                          color: BrightnessData.themeOf(context).secondaryText,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    CellItem(
-                      title: RadioItem(
-                        groupValue: true,
-                        value: selected.value.item2,
-                        title: Text(Localization.of(context).videos),
-                        onChanged: (bool value) =>
-                            selected.value = selected.value.withItem2(!value),
-                      ),
-                      description: Text(
-                        videosSize,
-                        style: TextStyle(
-                          color: BrightnessData.themeOf(context).secondaryText,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    CellItem(
-                      title: RadioItem(
-                        groupValue: true,
-                        value: selected.value.item3,
-                        title: Text(Localization.of(context).audio),
-                        onChanged: (bool value) =>
-                            selected.value = selected.value.withItem3(!value),
-                      ),
-                      description: Text(
-                        audiosSize,
-                        style: TextStyle(
-                          color: BrightnessData.themeOf(context).secondaryText,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    CellItem(
-                      title: RadioItem(
-                        groupValue: true,
-                        value: selected.value.item4,
-                        title: Text(Localization.of(context).files),
-                        onChanged: (bool value) =>
-                            selected.value = selected.value.withItem4(!value),
-                      ),
-                      description: Text(
-                        filesSize,
-                        style: TextStyle(
-                          color: BrightnessData.themeOf(context).secondaryText,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+      body: Container(
+        alignment: Alignment.topCenter,
+        padding: const EdgeInsets.only(top: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CellGroup(
+              cellBackgroundColor: BrightnessData.dynamicColor(
+                context,
+                Colors.white,
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
               ),
-            ],
-          ),
+              child: Column(
+                children: [
+                  CellItem(
+                    title: RadioItem(
+                      groupValue: true,
+                      value: selected.value.item1,
+                      title: Text(Localization.of(context).photos),
+                      onChanged: (bool value) =>
+                          selected.value = selected.value.withItem1(!value),
+                    ),
+                    description: Text(
+                      photosSize,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  CellItem(
+                    title: RadioItem(
+                      groupValue: true,
+                      value: selected.value.item2,
+                      title: Text(Localization.of(context).videos),
+                      onChanged: (bool value) =>
+                          selected.value = selected.value.withItem2(!value),
+                    ),
+                    description: Text(
+                      videosSize,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  CellItem(
+                    title: RadioItem(
+                      groupValue: true,
+                      value: selected.value.item3,
+                      title: Text(Localization.of(context).audio),
+                      onChanged: (bool value) =>
+                          selected.value = selected.value.withItem3(!value),
+                    ),
+                    description: Text(
+                      audiosSize,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                  CellItem(
+                    title: RadioItem(
+                      groupValue: true,
+                      value: selected.value.item4,
+                      title: Text(Localization.of(context).files),
+                      onChanged: (bool value) =>
+                          selected.value = selected.value.withItem4(!value),
+                    ),
+                    description: Text(
+                      filesSize,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
