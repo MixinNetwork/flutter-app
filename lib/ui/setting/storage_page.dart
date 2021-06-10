@@ -43,7 +43,8 @@ class StoragePage extends HookWidget {
                         trailing: Transform.scale(
                             scale: 0.7,
                             child: CupertinoSwitch(
-                              activeColor: BrightnessData.themeOf(context).accent,
+                              activeColor:
+                                  BrightnessData.themeOf(context).accent,
                               value: authState.currentPhotoAutoDownload,
                               onChanged: (bool value) => context
                                   .read<MultiAuthCubit>()
@@ -55,7 +56,8 @@ class StoragePage extends HookWidget {
                         trailing: Transform.scale(
                             scale: 0.7,
                             child: CupertinoSwitch(
-                              activeColor: BrightnessData.themeOf(context).accent,
+                              activeColor:
+                                  BrightnessData.themeOf(context).accent,
                               value: authState.currentVideoAutoDownload,
                               onChanged: (bool value) => context
                                   .read<MultiAuthCubit>()
@@ -67,7 +69,8 @@ class StoragePage extends HookWidget {
                         trailing: Transform.scale(
                             scale: 0.7,
                             child: CupertinoSwitch(
-                              activeColor: BrightnessData.themeOf(context).accent,
+                              activeColor:
+                                  BrightnessData.themeOf(context).accent,
                               value: authState.currentFileAutoDownload,
                               onChanged: (bool value) => context
                                   .read<MultiAuthCubit>()
