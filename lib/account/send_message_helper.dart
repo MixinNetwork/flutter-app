@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import '../blaze/vo/attachment_message.dart';
 import '../blaze/vo/contact_message.dart';
+import '../blaze/vo/live_message.dart';
 import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
@@ -362,7 +363,7 @@ class SendMessageHelper {
       String senderId,
       String content,
       String mediaUrl,
-      String thumbImage,
+      String thumbUrl,
       int mediaWidth,
       int mediaHeight,
       bool isPlain) async {
@@ -377,7 +378,7 @@ class SendMessageHelper {
       status: MessageStatus.sending,
       createdAt: DateTime.now(),
       mediaUrl: mediaUrl,
-      thumbImage: thumbImage,
+      thumbUrl: thumbUrl,
       mediaWidth: mediaWidth,
       mediaHeight: mediaHeight,
     );
@@ -386,7 +387,7 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  Future<void> _sendPostMessage(String conversationId, String senderId,
+  Future<void> sendPostMessage(String conversationId, String senderId,
       String content, bool isPlain) async {
     final category =
         isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
@@ -556,17 +557,20 @@ class SendMessageHelper {
         isPlain: isPlain,
       );
     } else if (message.category.isLive) {
+      final liveMessage = LiveMessage(message.mediaWidth!, message.mediaHeight!,
+          message.thumbUrl ?? '', message.mediaUrl!);
+      final encoded = await jsonBase64EncodeWithIsolate(liveMessage);
       await _sendLiveMessage(
           conversationId,
           senderId,
-          message.content!,
+          encoded,
           message.mediaUrl!,
-          message.thumbImage!,
+          message.thumbUrl ?? '',
           message.mediaWidth!,
           message.mediaHeight!,
           isPlain);
     } else if (message.category.isPost) {
-      await _sendPostMessage(
+      await sendPostMessage(
           conversationId, senderId, message.content!, isPlain);
     } else if (message.category.isLocation) {
       await _sendLocationMessage(

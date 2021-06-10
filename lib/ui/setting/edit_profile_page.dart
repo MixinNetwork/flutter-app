@@ -166,7 +166,7 @@ class _Item extends StatelessWidget {
           )
         : BrightnessData.dynamicColor(
             context,
-            const Color.fromRGBO(245, 247, 250, 1),
+            const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
           );
 
