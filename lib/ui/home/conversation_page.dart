@@ -321,9 +321,11 @@ class SearchMessageItem extends StatelessWidget {
     required this.message,
     required this.keyword,
     required this.onTap,
+    this.showSender = false,
   }) : super(key: key);
 
   final SearchMessageDetailItem message;
+  final bool showSender;
   final String keyword;
   final VoidCallback onTap;
 
@@ -344,22 +346,32 @@ class SearchMessageItem extends StatelessWidget {
       description = message.content ?? '';
     }
 
+    final avatar = showSender
+        ? AvatarWidget(
+            userId: message.userId,
+            avatarUrl: message.userAvatarUrl,
+            size: 50,
+            name: message.userFullName ?? '',
+          )
+        : ConversationAvatarWidget(
+            conversationId: message.conversationId,
+            fullName: conversationValidName(
+              message.groupName,
+              message.userFullName,
+            ),
+            groupIconUrl: message.groupIconUrl,
+            avatarUrl: message.userAvatarUrl,
+            category: message.category,
+            size: 50,
+          );
     return _SearchItem(
-      avatar: ConversationAvatarWidget(
-        conversationId: message.conversationId,
-        fullName: conversationValidName(
-          message.groupName,
-          message.userFullName,
-        ),
-        groupIconUrl: message.groupIconUrl,
-        avatarUrl: message.userAvatarUrl,
-        category: message.category,
-        size: 50,
-      ),
-      name: conversationValidName(
-        message.groupName,
-        message.userFullName,
-      ),
+      avatar: avatar,
+      name: showSender
+          ? message.userFullName ?? ''
+          : conversationValidName(
+              message.groupName,
+              message.userFullName,
+            ),
       nameHighlight: false,
       keyword: keyword,
       descriptionIcon: icon,

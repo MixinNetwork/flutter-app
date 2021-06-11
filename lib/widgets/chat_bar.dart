@@ -75,9 +75,18 @@ class ChatBar extends HookWidget {
             child: ActionButton(
               name: Resources.assetsImagesIcSearchSvg,
               color: actionColor,
-              onTap: () => context
-                  .read<ChatSideCubit>()
-                  .pushPage(ChatSideCubit.searchMessageHistory),
+              onTap: () {
+                final cubit = context.read<ChatSideCubit>();
+                if (cubit.state.pages.isNotEmpty &&
+                    cubit.state.pages.last.name ==
+                        ChatSideCubit.searchMessageHistory) {
+                  return;
+                }
+                cubit
+                  ..popWhere(
+                      (page) => page.name == ChatSideCubit.searchMessageHistory)
+                  ..pushPage(ChatSideCubit.searchMessageHistory);
+              },
             ),
           ),
           const SizedBox(width: 14),
