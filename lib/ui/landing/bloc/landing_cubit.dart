@@ -10,6 +10,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart' as signal;
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:package_info/package_info.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
@@ -134,7 +135,8 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       // ignore: avoid_dynamic_calls
       final sessionId = msg['session_id'];
       AccountKeyValue.instance.primarySessionId = sessionId;
-
+      final info = await PackageInfo.fromPlatform();
+      final version = '${info.version}(${info.buildNumber})';
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
           // ignore: avoid_dynamic_calls
@@ -145,7 +147,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           platform: 'Desktop',
           purpose: 'SESSION',
           sessionSecret: base64Encode(edKeyPair.publicKey!.bytes),
-          appVersion: '0.0.1',
+          appVersion: version,
           registrationId: registrationId,
           platformVersion: 'OS X 10.15.6',
         ),
