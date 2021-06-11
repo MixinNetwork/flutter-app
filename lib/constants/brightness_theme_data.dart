@@ -10,7 +10,7 @@ const lightBrightnessThemeData = BrightnessThemeData(
   sidebarSelected: Color.fromRGBO(0, 0, 0, 0.08),
   listSelected: Color.fromRGBO(246, 247, 250, 1),
   chatBackground: Color.fromRGBO(237, 238, 238, 1),
-  background: Color.fromRGBO(246, 247, 250, 0.9),
+  background: Color.fromRGBO(246, 247, 250, 1),
   popUp: Color.fromRGBO(255, 255, 255, 1),
   red: Color.fromRGBO(229, 120, 116, 1),
   green: Color.fromRGBO(80, 189, 92, 1),

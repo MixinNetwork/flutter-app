@@ -38,17 +38,23 @@ class PostMessage extends StatelessWidget {
               child: Stack(
                 children: [
                   Builder(
-                    builder: (context) => MarkdownBody(
-                      data: message.thumbImage?.postLengthOptimize() ??
-                          message.content!.postOptimize(),
-                      extensionSet: ExtensionSet.gitHubWeb,
-                      styleSheet: markdownStyleSheet(context),
-                      imageBuilder: (_, __, ___) => const SizedBox(),
-                      onTapLink: (String text, String? href, String title) {
-                        if (href?.isEmpty ?? true) return;
+                    builder: (context) => ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: 64,
+                        minWidth: 128,
+                      ),
+                      child: MarkdownBody(
+                        data: message.thumbImage?.postLengthOptimize() ??
+                            message.content!.postOptimize(),
+                        extensionSet: ExtensionSet.gitHubWeb,
+                        styleSheet: markdownStyleSheet(context),
+                        imageBuilder: (_, __, ___) => const SizedBox(),
+                        onTapLink: (String text, String? href, String title) {
+                          if (href?.isEmpty ?? true) return;
 
-                        openUri(context, href!);
-                      },
+                          openUri(context, href!);
+                        },
+                      ),
                     ),
                   ),
                   Positioned(
