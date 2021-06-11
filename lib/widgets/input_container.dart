@@ -285,21 +285,18 @@ class _SendTextField extends HookWidget {
     final textEditingValueStream =
         useValueNotifierConvertSteam(textEditingController);
 
-    final mentionStream = context.read<MentionCubit>().stream;
+    final mentionCubit = context.read<MentionCubit>();
+    final mentionStream = mentionCubit.stream;
 
     final sendable = useStream(
           useMemoized(
-              () => CombineLatestStream([
-                    textEditingValueStream,
-                    mentionStream,
-                  ], (list) {
-                    final textEditingValue = list[0] as TextEditingValue?;
-                    final mentionState = list[1] as MentionState?;
-                    return (textEditingValue?.text.trim().isNotEmpty ??
-                            false) &&
-                        (textEditingValue?.composing.composed ?? false) &&
-                        (mentionState?.text == null);
-                  }).distinct(),
+              () => Rx.combineLatest2<TextEditingValue, MentionState, bool>(
+                  textEditingValueStream.startWith(textEditingController.value),
+                  mentionStream.startWith(mentionCubit.state),
+                  (textEditingValue, mentionState) =>
+                      (textEditingValue.text.trim().isNotEmpty) &&
+                      (textEditingValue.composing.composed) &&
+                      (mentionState.text == null)).distinct(),
               [
                 textEditingValueStream,
                 mentionStream,

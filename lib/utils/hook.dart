@@ -74,14 +74,12 @@ T useBlocStateConverter<B extends BlocBase<S>, S, T>({
 Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
   final streamController = useStreamController<T>(keys: [valueNotifier]);
   useEffect(() {
-    void onListen() {
-      streamController.add(valueNotifier.value);
-    }
+    void onListen() => streamController.add(valueNotifier.value);
 
     valueNotifier.addListener(onListen);
     return () {
       valueNotifier.removeListener(onListen);
     };
   }, [valueNotifier]);
-  return streamController.stream.distinct();
+  return streamController.stream;
 }
