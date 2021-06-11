@@ -1,6 +1,8 @@
 PODS:
   - bitsdojo_window_macos (0.0.1):
     - FlutterMacOS
+  - desktop_lifecycle (0.0.1):
+    - FlutterMacOS
   - file_selector_macos (0.0.1):
     - FlutterMacOS
   - flutter_app_icon_badge (0.0.1):
@@ -27,6 +29,7 @@ PODS:
 
 DEPENDENCIES:
   - bitsdojo_window_macos (from `Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos`)
+  - desktop_lifecycle (from `Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos`)
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
   - flutter_app_icon_badge (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_icon_badge/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
@@ -45,6 +48,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   bitsdojo_window_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos
+  desktop_lifecycle:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos
   file_selector_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos
   flutter_app_icon_badge:
@@ -68,6 +73,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   bitsdojo_window_macos: 7e9b1bbb09bdce418d9657ead7fc9d824203ff0d
+  desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
   file_selector_macos: ff6dc948d4ddd34e8602a1f60b7d0b4cc6051a47
   flutter_app_icon_badge: 099b018a4b36109fb73874411fb4e8b5febac20e
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4

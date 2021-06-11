@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
@@ -19,12 +20,10 @@ import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
 import 'account_server.dart';
 
-class NotificationService extends WidgetsBindingObserver {
+class NotificationService {
   NotificationService({
     required BuildContext context,
   }) {
-    assert(WidgetsBinding.instance != null);
-    WidgetsBinding.instance!.addObserver(this);
     streamSubscriptions
       ..add(context
           .read<AccountServer>()
@@ -32,7 +31,7 @@ class NotificationService extends WidgetsBindingObserver {
           .messagesDao
           .notificationMessageStream
           .where((event) {
-            if (active) {
+            if (DesktopLifecycle.instance.isActive.value) {
               final conversationState = context.read<ConversationCubit>().state;
               return event.conversationId !=
                   (conversationState?.conversationId ??
@@ -142,15 +141,8 @@ class NotificationService extends WidgetsBindingObserver {
   }
 
   List<StreamSubscription> streamSubscriptions = [];
-  bool active = true;
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    active = state == AppLifecycleState.resumed;
-  }
 
   Future<void> close() async {
     await Future.wait(streamSubscriptions.map((e) => e.cancel()));
-    WidgetsBinding.instance!.removeObserver(this);
   }
 }

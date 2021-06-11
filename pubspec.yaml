@@ -98,6 +98,12 @@ dependencies:
   visibility_detector: ^0.2.0
   bitsdojo_window: ^0.1.1+1
   ansicolor: ^2.0.1
+  desktop_lifecycle:
+#    path: ../flutter-plugins/packages/desktop_lifecycle
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: 18e4e369cdeda9bbf8c4baade20ad951294a26b3
+      path: packages/desktop_lifecycle
 
 dev_dependencies:
   build_runner:
