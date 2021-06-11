@@ -207,9 +207,6 @@ class _InputContainer extends HookWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _FileButton(
-                          actionColor: BrightnessData.themeOf(context).icon),
-                      const SizedBox(width: 6),
                       const _StickerButton(),
                       const SizedBox(width: 16),
                       Expanded(
@@ -365,7 +362,7 @@ class _SendTextField extends HookWidget {
 
                 if (!await file.exists()) return;
 
-                await _sendFile(context, file.xFile);
+                await sendFile(context, file.xFile);
               } else {
                 final bytes = await Pasteboard.image;
                 if (bytes == null) return;
@@ -426,7 +423,7 @@ class _SendTextField extends HookWidget {
   }
 }
 
-Future<void> _sendFile(
+Future<void> sendFile(
   BuildContext context,
   XFile file,
 ) async {
@@ -562,27 +559,6 @@ class _StickerButton extends StatelessWidget {
             ),
           ),
         ),
-      );
-}
-
-class _FileButton extends StatelessWidget {
-  const _FileButton({
-    Key? key,
-    required this.actionColor,
-  }) : super(key: key);
-
-  final Color actionColor;
-
-  @override
-  Widget build(BuildContext context) => ActionButton(
-        name: Resources.assetsImagesIcFileSvg,
-        color: actionColor,
-        onTap: () async {
-          final file = await selectFile();
-          if (file == null) return;
-
-          await _sendFile(context, file);
-        },
       );
 }
 
