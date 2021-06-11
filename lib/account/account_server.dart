@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
@@ -106,6 +107,13 @@ class AccountServer {
     });
 
     start();
+
+    DesktopLifecycle.instance.isActive.addListener(() {
+      final active = DesktopLifecycle.instance.isActive.value;
+      if (active && _activeConversationId != null) {
+        _markRead(_activeConversationId!);
+      }
+    });
   }
 
   Future<void> _initDatabase(
@@ -167,6 +175,8 @@ class AccountServer {
   late SignalProtocol signalProtocol;
 
   final EncryptedProtocol _encryptedProtocol = EncryptedProtocol();
+
+  String? _activeConversationId;
 
   void start() {
     blaze.connect();
@@ -553,10 +563,13 @@ class AccountServer {
 
   void selectConversation(String? conversationId) {
     _decryptMessage.conversationId = conversationId;
-    _markRead(conversationId);
+    _activeConversationId = conversationId;
+    if (conversationId != null) {
+      _markRead(conversationId);
+    }
   }
 
-  Future<void> _markRead(conversationId) async {
+  Future<void> _markRead(String conversationId) async {
     final ids =
         await database.messagesDao.getUnreadMessageIds(conversationId, userId);
     final jobs = ids
