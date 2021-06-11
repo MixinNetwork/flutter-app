@@ -26,6 +26,7 @@ import '../ui/home/bloc/participants_cubit.dart';
 import '../ui/home/bloc/quote_message_cubit.dart';
 import '../utils/file.dart';
 import '../utils/hook.dart';
+import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/text_utils.dart';
 import 'action_button.dart';
@@ -328,14 +329,14 @@ class _SendTextField extends HookWidget {
                 const SendMessageIntent(),
           SingleActivator(
             LogicalKeyboardKey.enter,
-            meta: Platform.isMacOS,
+            meta: kPlatformIsDarwin,
             shift: true,
-            alt: Platform.isWindows || Platform.isLinux,
+            alt: !kPlatformIsDarwin,
           ): const SendPostMessageIntent(),
           SingleActivator(
             LogicalKeyboardKey.keyV,
-            meta: Platform.isMacOS,
-            control: !Platform.isMacOS,
+            meta: kPlatformIsDarwin,
+            control: !kPlatformIsDarwin,
           ): const PasteIntent(),
         },
         actions: {

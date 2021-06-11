@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -12,6 +10,7 @@ import '../db/mixin_database.dart' hide Offset;
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/mention_cubit.dart';
 import '../utils/hook.dart';
+import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/text_utils.dart';
 import 'avatar_view/avatar_view.dart';
@@ -62,7 +61,7 @@ class MentionPanelPortalEntry extends HookWidget {
             const _ListSelectionNextIntent(),
         const SingleActivator(LogicalKeyboardKey.enter):
             const _ListSelectionSelectedIntent(),
-        if (Platform.isMacOS) ...{
+        if (kPlatformIsDarwin) ...{
           const SingleActivator(
             LogicalKeyboardKey.keyN,
             control: true,

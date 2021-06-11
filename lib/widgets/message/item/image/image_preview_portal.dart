@@ -20,6 +20,7 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../ui/home/bloc/conversation_cubit.dart';
+import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
 import '../../../brightness_observer.dart';
@@ -64,20 +65,6 @@ class ImagePreviewPage extends HookWidget {
     final current = useState<MessageItem?>(null);
     final prev = useState<MessageItem?>(null);
     final next = useState<MessageItem?>(null);
-
-    useEffect(() {
-      void handleShortcut(RawKeyEvent value) {
-        if (value.logicalKey == LogicalKeyboardKey.keyC &&
-            ((Platform.isMacOS && value.isMetaPressed) ||
-                (!Platform.isMacOS && value.isControlPressed))) {}
-        _copyUrl(context, current.value?.mediaUrl);
-      }
-
-      RawKeyboard.instance.addListener(handleShortcut);
-      return () {
-        RawKeyboard.instance.removeListener(handleShortcut);
-      };
-    });
 
     useEffect(() {
       controller.scaleState = PhotoViewScaleState.initial;
@@ -143,75 +130,91 @@ class ImagePreviewPage extends HookWidget {
       [conversationId],
     );
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Column(
-        children: [
-          Container(
-            height: 70,
-            decoration: BoxDecoration(
-              color: BrightnessData.themeOf(context).primary,
+    return FocusableActionDetector(
+      shortcuts: {
+        SingleActivator(
+          LogicalKeyboardKey.keyC,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const CopyIntent(),
+      },
+      actions: {
+        CopyIntent: CallbackAction<Intent>(
+          onInvoke: (Intent intent) =>
+              _copyUrl(context, current.value?.mediaUrl),
+        ),
+      },
+      autofocus: true,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Column(
+          children: [
+            Container(
+              height: 70,
+              decoration: BoxDecoration(
+                color: BrightnessData.themeOf(context).primary,
+              ),
+              child: Builder(
+                builder: (context) {
+                  if (current.value == null) return const SizedBox();
+                  return Row(
+                    children: [
+                      const SizedBox(width: 100),
+                      Expanded(
+                        child: _Bar(
+                          message: current.value!,
+                          controller: controller,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-            child: Builder(
-              builder: (context) {
-                if (current.value == null) return const SizedBox();
-                return Row(
-                  children: [
-                    const SizedBox(width: 100),
-                    Expanded(
-                      child: _Bar(
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  if (current.value == null) return const SizedBox();
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _Item(
                         message: current.value!,
                         controller: controller,
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: Builder(
-              builder: (context) {
-                if (current.value == null) return const SizedBox();
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _Item(
-                      message: current.value!,
-                      controller: controller,
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        child: Row(
-                          children: [
-                            if (prev.value != null)
-                              InteractableDecoratedBox(
-                                onTap: () =>
-                                    _messageId.value = prev.value!.messageId,
-                                child: SvgPicture.asset(
-                                  Resources.assetsImagesNextSvg,
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          child: Row(
+                            children: [
+                              if (prev.value != null)
+                                InteractableDecoratedBox(
+                                  onTap: () =>
+                                      _messageId.value = prev.value!.messageId,
+                                  child: SvgPicture.asset(
+                                    Resources.assetsImagesNextSvg,
+                                  ),
                                 ),
-                              ),
-                            const Spacer(),
-                            if (next.value != null)
-                              InteractableDecoratedBox(
-                                onTap: () =>
-                                    _messageId.value = next.value!.messageId,
-                                child: SvgPicture.asset(
-                                  Resources.assetsImagesPrevSvg,
+                              const Spacer(),
+                              if (next.value != null)
+                                InteractableDecoratedBox(
+                                  onTap: () =>
+                                      _messageId.value = next.value!.messageId,
+                                  child: SvgPicture.asset(
+                                    Resources.assetsImagesPrevSvg,
+                                  ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -385,4 +388,8 @@ Future<void> _copyUrl(BuildContext context, String? filePath) async {
     return;
   }
   showToastSuccessful(context);
+}
+
+class CopyIntent extends Intent {
+  const CopyIntent();
 }
