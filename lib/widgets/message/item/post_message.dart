@@ -27,6 +27,11 @@ class PostMessage extends StatelessWidget {
   final bool isCurrentUser;
   final MessageItem message;
 
+  static const _decoration = BoxDecoration(
+    borderRadius: BorderRadius.all(Radius.circular(8)),
+    color: Color.fromRGBO(0, 0, 0, 0.2),
+  );
+
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) => MessageBubble(
@@ -38,36 +43,43 @@ class PostMessage extends StatelessWidget {
               child: Stack(
                 children: [
                   Builder(
-                    builder: (context) => MarkdownBody(
-                      data: message.thumbImage?.postLengthOptimize() ??
-                          message.content!.postOptimize(),
-                      extensionSet: ExtensionSet.gitHubWeb,
-                      styleSheet: markdownStyleSheet(context),
-                      imageBuilder: (_, __, ___) => const SizedBox(),
-                      onTapLink: (String text, String? href, String title) {
-                        if (href?.isEmpty ?? true) return;
+                    builder: (context) => ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: 64,
+                        minWidth: 128,
+                      ),
+                      child: MarkdownBody(
+                        data: message.thumbImage?.postLengthOptimize() ??
+                            message.content!.postOptimize(),
+                        extensionSet: ExtensionSet.gitHubWeb,
+                        styleSheet: markdownStyleSheet(context),
+                        imageBuilder: (_, __, ___) => const SizedBox(),
+                        onTapLink: (String text, String? href, String title) {
+                          if (href?.isEmpty ?? true) return;
 
-                        openUri(context, href!);
-                      },
+                          openUri(context, href!);
+                        },
+                      ),
                     ),
                   ),
                   Positioned(
                     right: 0,
                     top: 0,
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesPostDetailSvg,
-                      width: 20,
-                      height: 20,
+                    child: Container(
+                      decoration: _decoration,
+                      alignment: Alignment.center,
+                      child: SvgPicture.asset(
+                        Resources.assetsImagesPostDetailSvg,
+                        width: 20,
+                        height: 20,
+                      ),
                     ),
                   ),
                   Positioned(
                     right: 0,
                     bottom: 0,
                     child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: const Color.fromRGBO(0, 0, 0, 0.16),
-                      ),
+                      decoration: _decoration,
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
                         vertical: 2,
