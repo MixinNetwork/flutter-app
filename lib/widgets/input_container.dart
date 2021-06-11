@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -23,6 +26,7 @@ import '../ui/home/bloc/participants_cubit.dart';
 import '../ui/home/bloc/quote_message_cubit.dart';
 import '../utils/file.dart';
 import '../utils/hook.dart';
+import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/text_utils.dart';
 import 'action_button.dart';
@@ -178,13 +182,11 @@ class _InputContainer extends HookWidget {
         BlocProvider.value(
           value: mentionCubit,
         ),
-        ChangeNotifierProvider<TextEditingController>.value(
-          value: textEditingController,
-        )
       ],
       child: LayoutBuilder(
         builder: (context, BoxConstraints constraints) =>
             MentionPanelPortalEntry(
+          textEditingController: textEditingController,
           constraints: constraints,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -211,13 +213,17 @@ class _InputContainer extends HookWidget {
                       const _StickerButton(),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: _SendTextField(focusNode: focusNode),
+                        child: _SendTextField(
+                          focusNode: focusNode,
+                          textEditingController: textEditingController,
+                        ),
                       ),
                       const SizedBox(width: 16),
                       ActionButton(
                         name: Resources.assetsImagesIcSendSvg,
                         color: BrightnessData.themeOf(context).icon,
-                        onTap: () => _sendMessage(context),
+                        onTap: () =>
+                            _sendMessage(context, textEditingController),
                       ),
                     ],
                   ),
@@ -231,8 +237,8 @@ class _InputContainer extends HookWidget {
   }
 }
 
-void _sendPostMessage(BuildContext context) {
-  final textEditingController = context.read<TextEditingController>();
+void _sendPostMessage(
+    BuildContext context, TextEditingController textEditingController) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
@@ -244,15 +250,15 @@ void _sendPostMessage(BuildContext context) {
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId);
 
+  textEditingController.text = '';
   context.read<QuoteMessageCubit>().emit(null);
 }
 
-void _sendMessage(BuildContext context) {
-  final textEditingController = context.read<TextEditingController>();
+void _sendMessage(
+    BuildContext context, TextEditingController textEditingController) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
-  textEditingController.text = '';
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
@@ -264,19 +270,46 @@ void _sendMessage(BuildContext context) {
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
       );
 
+  textEditingController.text = '';
   context.read<QuoteMessageCubit>().emit(null);
 }
 
-class _SendTextField extends StatelessWidget {
+class _SendTextField extends HookWidget {
   const _SendTextField({
     required this.focusNode,
+    required this.textEditingController,
   });
 
   final FocusNode focusNode;
+  final TextEditingController textEditingController;
 
   @override
   Widget build(BuildContext context) {
-    final textEditingController = context.watch<TextEditingController>();
+    final textEditingValueStream =
+        useValueNotifierConvertSteam(textEditingController);
+
+    final mentionStream = context.read<MentionCubit>().stream;
+
+    final sendable = useStream(
+          useMemoized(
+              () => CombineLatestStream([
+                    textEditingValueStream,
+                    mentionStream,
+                  ], (list) {
+                    final textEditingValue = list[0] as TextEditingValue?;
+                    final mentionState = list[1] as MentionState?;
+                    return (textEditingValue?.text.trim().isNotEmpty ??
+                            false) &&
+                        (textEditingValue?.composing.composed ?? false) &&
+                        (mentionState?.text == null);
+                  }).distinct(),
+              [
+                textEditingValueStream,
+                mentionStream,
+              ]),
+        ).data ??
+        true;
+
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
@@ -287,63 +320,103 @@ class _SendTextField extends StatelessWidget {
           darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),
       ),
-      child: Center(
-        child: Selector2<TextEditingController, MentionCubit, bool>(
-          selector: (context, TextEditingController controller,
-                  MentionCubit mentionCubit) =>
-              controller.text.trim().isNotEmpty == true &&
-              controller.value.composing.composed &&
-              (mentionCubit.state.text?.isEmpty ?? true),
-          builder: (context, sendable, child) => FocusableActionDetector(
-            autofocus: true,
-            enabled: sendable,
-            shortcuts: {
-              const SingleActivator(LogicalKeyboardKey.enter):
-                  const SendMessageIntent(),
-              SingleActivator(
-                LogicalKeyboardKey.enter,
-                meta: Platform.isMacOS,
-                shift: true,
-                alt: Platform.isWindows || Platform.isLinux,
-              ): const SendPostMessageIntent()
+      alignment: Alignment.center,
+      child: FocusableActionDetector(
+        autofocus: true,
+        shortcuts: {
+          if (sendable)
+            const SingleActivator(LogicalKeyboardKey.enter):
+                const SendMessageIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.enter,
+            meta: kPlatformIsDarwin,
+            shift: true,
+            alt: !kPlatformIsDarwin,
+          ): const SendPostMessageIntent(),
+          SingleActivator(
+            LogicalKeyboardKey.keyV,
+            meta: kPlatformIsDarwin,
+            control: !kPlatformIsDarwin,
+          ): const PasteIntent(),
+        },
+        actions: {
+          SendMessageIntent: CallbackAction<Intent>(
+            onInvoke: (Intent intent) =>
+                _sendMessage(context, textEditingController),
+          ),
+          PasteIntent: CallbackAction<Intent>(
+            onInvoke: (Intent intent) async {
+              final clipboardData =
+                  await Clipboard.getData(Clipboard.kTextPlain);
+              final clipboardText = clipboardData?.text;
+
+              // Temporary solution, as flutter currently has no way to block paste text.
+              void clearClipboardText() {
+                if (clipboardText?.isNotEmpty ?? false) {
+                  textEditingController.text = textEditingController.text
+                      .replaceFirst(clipboardText!, '');
+                }
+              }
+
+              final uri = await Pasteboard.uri;
+              if (uri != null) {
+                clearClipboardText();
+                final file = File(uri.toFilePath(windows: Platform.isWindows));
+
+                if (!await file.exists()) return;
+
+                await _sendFile(context, file.xFile);
+              } else {
+                final bytes = await Pasteboard.image;
+                if (bytes == null) return;
+
+                if ((await _PreviewImage.push(context, bytes: bytes)) != true) {
+                  return;
+                }
+                final conversationItem =
+                    context.read<ConversationCubit>().state;
+                if (conversationItem == null) return;
+
+                await Provider.of<AccountServer>(context, listen: false)
+                    .sendImageMessage(
+                  conversationItem.isPlainConversation,
+                  bytes: bytes,
+                  conversationId: conversationItem.conversationId,
+                  recipientId: conversationItem.userId,
+                );
+              }
             },
-            actions: {
-              SendMessageIntent: CallbackAction<Intent>(
-                onInvoke: (Intent intent) => _sendMessage(context),
+          ),
+          SendPostMessageIntent: CallbackAction<Intent>(
+            onInvoke: (_) => _sendPostMessage(context, textEditingController),
+          ),
+        },
+        child: AnimatedSize(
+          curve: Curves.easeOut,
+          duration: const Duration(milliseconds: 200),
+          child: TextField(
+            maxLines: 7,
+            minLines: 1,
+            focusNode: focusNode,
+            controller: textEditingController,
+            style: TextStyle(
+              color: BrightnessData.themeOf(context).text,
+              fontSize: 14,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: Localization.of(context).chatInputHint,
+              hintStyle: TextStyle(
+                color: BrightnessData.themeOf(context).secondaryText,
+                fontSize: 14,
               ),
-              SendPostMessageIntent: CallbackAction<Intent>(
-                onInvoke: (_) => _sendPostMessage(context),
-              ),
-            },
-            child: AnimatedSize(
-              curve: Curves.easeOut,
-              duration: const Duration(milliseconds: 200),
-              child: TextField(
-                maxLines: 7,
-                minLines: 1,
-                focusNode: focusNode,
-                autofocus: true,
-                controller: textEditingController,
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
-                  fontSize: 16,
-                ),
-                decoration: InputDecoration(
-                  isDense: true,
-                  hintText: Localization.of(context).chatInputHint,
-                  hintStyle: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 14,
-                  ),
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                  contentPadding: const EdgeInsets.only(
-                    left: 8,
-                    top: 8,
-                    right: 0,
-                    bottom: 8,
-                  ),
-                ),
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              contentPadding: const EdgeInsets.only(
+                left: 8,
+                top: 8,
+                right: 0,
+                bottom: 8,
               ),
             ),
           ),
@@ -351,6 +424,36 @@ class _SendTextField extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _sendFile(
+  BuildContext context,
+  XFile file,
+) async {
+  final conversationItem = context.read<ConversationCubit>().state;
+  if (conversationItem == null) return;
+  if (file.isImage) {
+    if ((await _PreviewImage.push(context, xFile: file)) != true) return;
+    return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
+      conversationItem.isPlainConversation,
+      file: file,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  } else if (file.isVideo) {
+    return Provider.of<AccountServer>(context, listen: false).sendVideoMessage(
+      file,
+      conversationItem.isPlainConversation,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  }
+  await Provider.of<AccountServer>(context, listen: false).sendDataMessage(
+    file,
+    conversationItem.isPlainConversation,
+    conversationId: conversationItem.conversationId,
+    recipientId: conversationItem.userId,
+  );
 }
 
 class _QuoteMessage extends StatelessWidget {
@@ -478,139 +581,133 @@ class _FileButton extends StatelessWidget {
           final file = await selectFile();
           if (file == null) return;
 
-          final conversationItem = context.read<ConversationCubit>().state;
-          if (conversationItem == null) return;
-          if (file.isImage) {
-            if ((await _PreviewImage.push(context, file)) != true) return;
-            return Provider.of<AccountServer>(context, listen: false)
-                .sendImageMessage(
-              file,
-              conversationItem.isPlainConversation,
-              conversationId: conversationItem.conversationId,
-              recipientId: conversationItem.userId,
-            );
-          } else if (file.isVideo) {
-            return Provider.of<AccountServer>(context, listen: false)
-                .sendVideoMessage(
-              file,
-              conversationItem.isPlainConversation,
-              conversationId: conversationItem.conversationId,
-              recipientId: conversationItem.userId,
-            );
-          }
-          await Provider.of<AccountServer>(context, listen: false)
-              .sendDataMessage(
-            file,
-            conversationItem.isPlainConversation,
-            conversationId: conversationItem.conversationId,
-            recipientId: conversationItem.userId,
-          );
+          await _sendFile(context, file);
         },
       );
 }
 
-class _PreviewImage extends StatelessWidget {
+class _PreviewImage extends HookWidget {
   const _PreviewImage({
     Key? key,
-    required this.xFile,
-  }) : super(key: key);
+    this.xFile,
+    this.bytes,
+  })  : assert(!(xFile != null && bytes != null)),
+        assert(!(xFile == null && bytes == null)),
+        super(key: key);
 
-  final XFile xFile;
+  final XFile? xFile;
+  final Uint8List? bytes;
 
-  static Future<bool?> push(BuildContext context, XFile xFile) =>
+  static Future<bool?> push(
+    BuildContext context, {
+    XFile? xFile,
+    Uint8List? bytes,
+  }) =>
       Navigator.push<bool>(
         context,
         MaterialPageRoute(
-          builder: (context) => _PreviewImage(xFile: xFile),
+          builder: (context) => _PreviewImage(
+            xFile: xFile,
+            bytes: bytes,
+          ),
           fullscreenDialog: true,
         ),
       );
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConverter<ConversationCubit, ConversationState?, String?>(
-        converter: (state) => state?.conversationId,
-        when: (a, b) => a != b,
-        listener: (context, switched) => Navigator.pop(context, false),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: BrightnessData.themeOf(context).primary,
+  Widget build(BuildContext context) {
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+      converter: (state) => state?.conversationId,
+      when: (conversationId) => conversationId != null,
+    );
+
+    useValueChanged<String?, void>(conversationId, (_, __) {
+      Navigator.pop(context, false);
+    });
+
+    final image =
+        xFile != null ? Image.file(File(xFile!.path)) : Image.memory(bytes!);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: BrightnessData.themeOf(context).primary,
+      ),
+      child: Column(
+        children: [
+          SizedBox(
+            height: 58,
+            child: Row(
+              children: [
+                ActionButton(
+                  name: Resources.assetsImagesIcCloseSvg,
+                  color: BrightnessData.themeOf(context).icon,
+                  onTap: () => Navigator.pop(context, false),
+                ),
+                Text(
+                  Localization.of(context).preview,
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).text,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
           ),
-          child: Column(
-            children: [
-              SizedBox(
-                height: 58,
-                child: Row(
-                  children: [
-                    ActionButton(
-                      name: Resources.assetsImagesIcCloseSvg,
-                      color: BrightnessData.themeOf(context).icon,
-                      onTap: () => Navigator.pop(context, false),
-                    ),
-                    Text(
-                      Localization.of(context).preview,
-                      style: TextStyle(
-                        color: BrightnessData.themeOf(context).text,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 1,
+                right: 16,
+                left: 16,
+                bottom: 30,
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: BrightnessData.themeOf(context).listSelected,
+                  borderRadius: BorderRadius.circular(8),
+                  border: DashPathBorder.all(
+                    borderSide: BorderSide(
+                      color: BrightnessData.dynamicColor(
+                        context,
+                        const Color.fromRGBO(229, 231, 235, 1),
+                        darkColor: const Color.fromRGBO(255, 255, 255, 0.8),
                       ),
                     ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(
-                    top: 1,
-                    right: 16,
-                    left: 16,
-                    bottom: 30,
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: BrightnessData.themeOf(context).listSelected,
-                      borderRadius: BorderRadius.circular(8),
-                      border: DashPathBorder.all(
-                        borderSide: BorderSide(
-                          color: BrightnessData.dynamicColor(
-                            context,
-                            const Color.fromRGBO(229, 231, 235, 1),
-                            darkColor: const Color.fromRGBO(255, 255, 255, 0.8),
-                          ),
-                        ),
-                        dashArray: CircularIntervalList([4, 4]),
-                      ),
-                    ),
-                    child: Image.file(File(xFile.path)),
+                    dashArray: CircularIntervalList([4, 4]),
                   ),
                 ),
+                child: image,
               ),
-              ClipOval(
-                child: InteractableDecoratedBox.color(
-                  onTap: () => Navigator.pop(context, true),
-                  decoration: BoxDecoration(
-                    color: BrightnessData.themeOf(context).accent,
-                  ),
-                  child: SizedBox.fromSize(
-                    size: const Size.square(50),
-                    child: Center(
-                      child: SvgPicture.asset(
-                        Resources.assetsImagesIcArrowRightSvg,
-                        color: BrightnessData.dynamicColor(
-                          context,
-                          const Color.fromRGBO(255, 255, 255, 1),
-                          darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-            ],
+            ),
           ),
-        ),
-      );
+          ClipOval(
+            child: InteractableDecoratedBox.color(
+              onTap: () => Navigator.pop(context, true),
+              decoration: BoxDecoration(
+                color: BrightnessData.themeOf(context).accent,
+              ),
+              child: SizedBox.fromSize(
+                size: const Size.square(50),
+                child: Center(
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesIcArrowRightSvg,
+                    color: BrightnessData.dynamicColor(
+                      context,
+                      const Color.fromRGBO(255, 255, 255, 1),
+                      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
 }
 
 class HighlightTextEditingController extends TextEditingController {
@@ -676,4 +773,8 @@ class SendMessageIntent extends Intent {
 
 class SendPostMessageIntent extends Intent {
   const SendPostMessageIntent();
+}
+
+class PasteIntent extends Intent {
+  const PasteIntent();
 }

@@ -454,16 +454,23 @@ class AccountServer {
     );
   }
 
-  Future<void> sendImageMessage(XFile image, bool isPlain,
-          {String? conversationId,
-          String? recipientId,
-          String? quoteMessageId}) async =>
+  Future<void> sendImageMessage(
+    bool isPlain, {
+    XFile? file,
+    Uint8List? bytes,
+    String? conversationId,
+    String? recipientId,
+    String? quoteMessageId,
+  }) async =>
       _sendMessageHelper.sendImageMessage(
-          await _initConversation(conversationId, recipientId),
-          userId,
-          image,
-          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
-          quoteMessageId);
+        conversationId: await _initConversation(conversationId, recipientId),
+        senderId: userId,
+        file: file,
+        bytes: bytes,
+        category:
+            isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
+        quoteMessageId: quoteMessageId,
+      );
 
   Future<void> sendVideoMessage(XFile video, bool isPlain,
           {String? conversationId,

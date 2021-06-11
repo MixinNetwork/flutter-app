@@ -14,7 +14,7 @@ packages:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.0"
+    version: "1.7.1"
   analyzer_plugin_fork:
     dependency: transitive
     description:
@@ -49,7 +49,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.7.0"
+    version: "2.6.1"
   bitsdojo_window:
     dependency: "direct main"
     description:
@@ -631,7 +631,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.3.0"
   mime:
     dependency: "direct main"
     description:
@@ -704,6 +704,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.2"
+  pasteboard:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: "107f500cb5946d6ca228dbb53b7d7d0bb31c6db2"
+      resolved-ref: "107f500cb5946d6ca228dbb53b7d7d0bb31c6db2"
+      url: "https://github.com/MixinNetwork/flutter_pasteboard.git"
+    source: git
+    version: "0.0.1"
   path:
     dependency: "direct main"
     description:
@@ -1018,7 +1027,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.0"
+    version: "0.3.0"
   timezone:
     dependency: transitive
     description:

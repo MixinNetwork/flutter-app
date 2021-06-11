@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +20,7 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../ui/home/bloc/conversation_cubit.dart';
+import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
 import '../../../brightness_observer.dart';
@@ -127,75 +130,91 @@ class ImagePreviewPage extends HookWidget {
       [conversationId],
     );
 
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Column(
-        children: [
-          Container(
-            height: 70,
-            decoration: BoxDecoration(
-              color: BrightnessData.themeOf(context).primary,
+    return FocusableActionDetector(
+      shortcuts: {
+        SingleActivator(
+          LogicalKeyboardKey.keyC,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const CopyIntent(),
+      },
+      actions: {
+        CopyIntent: CallbackAction<Intent>(
+          onInvoke: (Intent intent) =>
+              _copyUrl(context, current.value?.mediaUrl),
+        ),
+      },
+      autofocus: true,
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Column(
+          children: [
+            Container(
+              height: 70,
+              decoration: BoxDecoration(
+                color: BrightnessData.themeOf(context).primary,
+              ),
+              child: Builder(
+                builder: (context) {
+                  if (current.value == null) return const SizedBox();
+                  return Row(
+                    children: [
+                      const SizedBox(width: 100),
+                      Expanded(
+                        child: _Bar(
+                          message: current.value!,
+                          controller: controller,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-            child: Builder(
-              builder: (context) {
-                if (current.value == null) return const SizedBox();
-                return Row(
-                  children: [
-                    const SizedBox(width: 100),
-                    Expanded(
-                      child: _Bar(
+            Expanded(
+              child: Builder(
+                builder: (context) {
+                  if (current.value == null) return const SizedBox();
+                  return Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      _Item(
                         message: current.value!,
                         controller: controller,
                       ),
-                    ),
-                  ],
-                );
-              },
-            ),
-          ),
-          Expanded(
-            child: Builder(
-              builder: (context) {
-                if (current.value == null) return const SizedBox();
-                return Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    _Item(
-                      message: current.value!,
-                      controller: controller,
-                    ),
-                    Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        child: Row(
-                          children: [
-                            if (prev.value != null)
-                              InteractableDecoratedBox(
-                                onTap: () =>
-                                    _messageId.value = prev.value!.messageId,
-                                child: SvgPicture.asset(
-                                  Resources.assetsImagesNextSvg,
+                      Center(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 30),
+                          child: Row(
+                            children: [
+                              if (prev.value != null)
+                                InteractableDecoratedBox(
+                                  onTap: () =>
+                                      _messageId.value = prev.value!.messageId,
+                                  child: SvgPicture.asset(
+                                    Resources.assetsImagesNextSvg,
+                                  ),
                                 ),
-                              ),
-                            const Spacer(),
-                            if (next.value != null)
-                              InteractableDecoratedBox(
-                                onTap: () =>
-                                    _messageId.value = next.value!.messageId,
-                                child: SvgPicture.asset(
-                                  Resources.assetsImagesPrevSvg,
+                              const Spacer(),
+                              if (next.value != null)
+                                InteractableDecoratedBox(
+                                  onTap: () =>
+                                      _messageId.value = next.value!.messageId,
+                                  child: SvgPicture.asset(
+                                    Resources.assetsImagesPrevSvg,
+                                  ),
                                 ),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -277,12 +296,11 @@ class _Bar extends StatelessWidget {
             },
           ),
           const SizedBox(width: 12),
-          // todo
-          // ActionButton(
-          //   name: Resources.assetsImagesCopySvg,
-          //   size: 20,
-          //   onTap: () {},
-          // ),
+          ActionButton(
+            name: Resources.assetsImagesCopySvg,
+            size: 20,
+            onTap: () => _copyUrl(context, message.mediaUrl),
+          ),
           const SizedBox(width: 12),
           ActionButton(
             name: Resources.assetsImagesAttachmentDownloadSvg,
@@ -355,4 +373,23 @@ class _Item extends HookWidget {
       ),
     );
   }
+}
+
+Future<void> _copyUrl(BuildContext context, String? filePath) async {
+  if (filePath?.isEmpty ?? true) {
+    return showToastFailed(context, null);
+  }
+  try {
+    await Pasteboard.writeUrl(
+      Uri.file(filePath!, windows: Platform.isWindows).toString(),
+    );
+  } catch (error) {
+    await showToastFailed(context, error);
+    return;
+  }
+  showToastSuccessful(context);
+}
+
+class CopyIntent extends Intent {
+  const CopyIntent();
 }
