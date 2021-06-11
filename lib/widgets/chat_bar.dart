@@ -9,11 +9,13 @@ import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/chat_page.dart';
 import '../ui/home/conversation_page.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
+import '../utils/file.dart';
 import '../utils/hook.dart';
 import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
 import 'back_button.dart';
 import 'brightness_observer.dart';
+import 'input_container.dart';
 import 'window/move_window.dart';
 
 class ChatBar extends HookWidget {
@@ -88,6 +90,10 @@ class ChatBar extends HookWidget {
                   ..pushPage(ChatSideCubit.searchMessageHistory);
               },
             ),
+          ),
+          const SizedBox(width: 14),
+          MoveWindowBarrier(
+            child: _FileButton(actionColor: actionColor),
           ),
           const SizedBox(width: 14),
           MoveWindowBarrier(
@@ -233,5 +239,26 @@ class ConversationAvatar extends StatelessWidget {
             return const SizedBox();
           },
         ),
+      );
+}
+
+class _FileButton extends StatelessWidget {
+  const _FileButton({
+    Key? key,
+    required this.actionColor,
+  }) : super(key: key);
+
+  final Color actionColor;
+
+  @override
+  Widget build(BuildContext context) => ActionButton(
+        name: Resources.assetsImagesIcFileSvg,
+        color: actionColor,
+        onTap: () async {
+          final file = await selectFile();
+          if (file == null) return;
+
+          await sendFile(context, file);
+        },
       );
 }
