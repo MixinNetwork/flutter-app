@@ -171,7 +171,7 @@ class _InputContainer extends HookWidget {
       };
     }, [identityHashCode(textEditingController)]);
 
-    final focusNode = useFocusNode();
+    final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
     useEffect(() {
       focusNode.requestFocus(null);
@@ -291,18 +291,27 @@ class _SendTextField extends HookWidget {
     final sendable = useStream(
           useMemoized(
               () => Rx.combineLatest2<TextEditingValue, MentionState, bool>(
-                  textEditingValueStream.startWith(textEditingController.value),
-                  mentionStream.startWith(mentionCubit.state),
-                  (textEditingValue, mentionState) =>
-                      (textEditingValue.text.trim().isNotEmpty) &&
-                      (textEditingValue.composing.composed) &&
-                      (mentionState.text == null)).distinct(),
+                      textEditingValueStream
+                          .startWith(textEditingController.value),
+                      mentionStream.startWith(mentionCubit.state),
+                      (textEditingValue, mentionState) {
+                    final foo = (textEditingValue.text.trim().isNotEmpty) &&
+                        (textEditingValue.composing.composed);
+                    final bar = mentionState.text == null;
+                    final sendable = foo && bar;
+                    print('fuck foo: $foo');
+                    print('fuck bar: $bar');
+                    print('fuck _sendable: $sendable');
+                    return sendable;
+                  }).distinct(),
               [
                 textEditingValueStream,
                 mentionStream,
               ]),
         ).data ??
         true;
+
+    print('fuck sendable: $sendable');
 
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
@@ -316,6 +325,7 @@ class _SendTextField extends HookWidget {
       ),
       alignment: Alignment.center,
       child: FocusableActionDetector(
+        // focusNode: focusNode,
         autofocus: true,
         shortcuts: {
           if (sendable)
