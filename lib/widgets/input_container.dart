@@ -171,7 +171,7 @@ class _InputContainer extends HookWidget {
       };
     }, [identityHashCode(textEditingController)]);
 
-    final focusNode = useFocusNode();
+    final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
     useEffect(() {
       focusNode.requestFocus(null);
@@ -296,7 +296,7 @@ class _SendTextField extends HookWidget {
                   (textEditingValue, mentionState) =>
                       (textEditingValue.text.trim().isNotEmpty) &&
                       (textEditingValue.composing.composed) &&
-                      (mentionState.text == null)).distinct(),
+                      mentionState.text == null).distinct(),
               [
                 textEditingValueStream,
                 mentionStream,
