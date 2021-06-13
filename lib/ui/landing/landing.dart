@@ -35,14 +35,14 @@ class LandingPage extends StatelessWidget {
                 if (status == LandingStatus.init) {
                   return _Loading(
                     title: Localization.of(context).initializing,
-                    message: Localization.of(context).pleaseWait,
+                    message: Localization.of(context).chatInputHint,
                   );
                 }
 
                 if (status == LandingStatus.provisioning) {
                   return _Loading(
                     title: Localization.of(context).provisioning,
-                    message: Localization.current.pleaseWait,
+                    message: Localization.current.chatInputHint,
                   );
                 }
 
