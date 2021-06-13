@@ -8,7 +8,6 @@ Mixin Messenger for macOS, Windows and Linux, powered by [Flutter](https://flutt
 
 ```
 flutter run -d macOS --no-sound-null-safety
-
 ```
 
 # License
