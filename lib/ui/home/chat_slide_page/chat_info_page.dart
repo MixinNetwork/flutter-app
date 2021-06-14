@@ -541,7 +541,7 @@ class ConversationBio extends HookWidget {
     final text = useStream(textStream, initialData: '').data;
     if (text?.isEmpty == true) return const SizedBox();
 
-    return Text(
+    return SelectableText(
       text!,
       style: TextStyle(
         color: BrightnessData.themeOf(context).text,

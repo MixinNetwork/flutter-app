@@ -152,7 +152,7 @@ class ConversationIDOrCount extends HookWidget {
     );
 
     if (!isGroup) {
-      return Text(
+      return SelectableText(
         conversation?.identityNumber ?? '',
         style: textStyle,
       );
@@ -162,7 +162,7 @@ class ConversationIDOrCount extends HookWidget {
       stream: countStream,
       builder: (context, snapshot) {
         final count = snapshot.data;
-        return Text(
+        return SelectableText(
           count != null
               ? Localization.of(context).conversationParticipantsCount(count)
               : '',
@@ -189,7 +189,7 @@ class ConversationName extends StatelessWidget {
         builder: (context, conversation) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            SelectableText(
               conversation?.name ?? '',
               style: TextStyle(
                 color: BrightnessData.themeOf(context).text,
