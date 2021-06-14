@@ -14,8 +14,8 @@ class IdentityDao extends DatabaseAccessor<SignalDatabase>
             ..where((tbl) => tbl.address.equals(address.toString())))
           .getSingleOrNull();
 
-  Future insert(IdentitiesCompanion identitiesCompanion) =>
-      into(db.identities).insert(identitiesCompanion);
+  Future insert(IdentitiesCompanion identitiesCompanion) => into(db.identities)
+      .insert(identitiesCompanion, mode: InsertMode.insertOrReplace);
 
   Future<int> deleteByAddress(String address) =>
       (delete(db.identities)..where((tbl) => tbl.address.equals(address))).go();
