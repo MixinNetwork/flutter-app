@@ -66,7 +66,8 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
           publicKey: identityKey!.serialize(),
           timestamp: DateTime.now().millisecondsSinceEpoch));
       return true;
-    } else if (identity.getIdentityKey() != identityKey) {
+    }
+    if (identity.getIdentityKey() != identityKey) {
       i('Replacing existing identity...$address');
       await identityDao.insert(IdentitiesCompanion.insert(
           address: signalAddress,

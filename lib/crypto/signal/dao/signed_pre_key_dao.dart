@@ -20,6 +20,6 @@ class SignedPreKeyDao extends DatabaseAccessor<SignalDatabase> {
         ..where((tbl) => tbl.prekeyId.equals(signedPreKeyId)))
       .go();
 
-  Future insert(SignedPrekeysCompanion signedPreKey) =>
-      into(db.signedPrekeys).insert(signedPreKey);
+  Future insert(SignedPrekeysCompanion signedPreKey) => into(db.signedPrekeys)
+      .insert(signedPreKey, mode: InsertMode.insertOrReplace);
 }

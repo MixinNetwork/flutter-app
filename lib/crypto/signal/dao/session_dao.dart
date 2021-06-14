@@ -43,6 +43,6 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
   Future insertSession(SessionsCompanion session) async =>
       into(db.sessions).insert(session, mode: InsertMode.insertOrReplace);
 
-  Future insertList(List<SessionsCompanion> list) async =>
-      batch((batch) => batch.insertAll(db.sessions, list));
+  Future insertList(List<SessionsCompanion> list) async => batch((batch) =>
+      batch.insertAll(db.sessions, list, mode: InsertMode.insertOrReplace));
 }
