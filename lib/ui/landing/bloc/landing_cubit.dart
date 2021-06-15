@@ -137,7 +137,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       final sessionId = msg['session_id'];
       AccountKeyValue.instance.primarySessionId = sessionId;
       String? appVersion;
-      if(Platform.isMacOS) {
+      if (Platform.isMacOS) {
         final info = await PackageInfo.fromPlatform();
         appVersion = '${info.version}(${info.buildNumber})';
       }
