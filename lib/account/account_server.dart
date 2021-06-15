@@ -9,6 +9,7 @@ import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/blaze.dart';
@@ -178,17 +179,18 @@ class AccountServer {
 
   String? _activeConversationId;
 
+  bool _floodJobRunning = false;
+
   void start() {
     blaze.connect();
-    database.floodMessagesDao
-        .findFloodMessage()
-        .where((list) => list.isNotEmpty)
-        .asyncMapDrop((list) async {
-      for (final message in list) {
-        await _decryptMessage.process(message);
-      }
-      return list;
-    }).listen((_) {});
+
+    Rx.merge([
+      // runFloodJob when socket connected.
+      blaze.connectedStateStreamController.stream.where((ok) => ok),
+      database.mixinDatabase.tableUpdates(
+        TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
+      )
+    ]).listen((event) => _runFloodJob());
 
     database.jobsDao
         .findAckJobs()
@@ -218,6 +220,28 @@ class AccountServer {
         .listen((_) {});
 
     // database.mock();
+  }
+
+  Future<void> _processFloodJob() async {
+    final floodMessages =
+        await database.floodMessagesDao.findFloodMessage().get();
+    if (floodMessages.isEmpty) {
+      return;
+    }
+    for (final message in floodMessages) {
+      await _decryptMessage.process(message);
+    }
+    await _processFloodJob();
+  }
+
+  void _runFloodJob() {
+    if (_floodJobRunning) {
+      return;
+    }
+    _floodJobRunning = true;
+    _processFloodJob().whenComplete(() {
+      _floodJobRunning = false;
+    });
   }
 
   Future<void> _runAckJob(List<db.Job> jobs) async {
