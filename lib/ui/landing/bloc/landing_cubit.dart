@@ -136,8 +136,11 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       // ignore: avoid_dynamic_calls
       final sessionId = msg['session_id'];
       AccountKeyValue.instance.primarySessionId = sessionId;
-      final info = await PackageInfo.fromPlatform();
-      final version = '${info.version}(${info.buildNumber})';
+      String? appVersion;
+      if(Platform.isMacOS) {
+        final info = await PackageInfo.fromPlatform();
+        appVersion = '${info.version}(${info.buildNumber})';
+      }
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
           // ignore: avoid_dynamic_calls
@@ -148,7 +151,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           platform: 'Desktop',
           purpose: 'SESSION',
           sessionSecret: base64Encode(edKeyPair.publicKey!.bytes),
-          appVersion: version,
+          appVersion: appVersion ?? '0.0.1',
           registrationId: registrationId,
           platformVersion: 'OS X 10.15.6',
         ),
@@ -160,8 +163,8 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
         rsp.data,
         privateKey,
       );
-    } catch (err) {
-      e('$err');
+    } catch (err, s) {
+      e('$err $s');
       return null;
     }
   }
