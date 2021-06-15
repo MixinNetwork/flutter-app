@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/widgets/single_line_ellipsis_overflow_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -1212,14 +1213,12 @@ class _MessageContent extends HookWidget {
           ),
         if (text != null)
           Expanded(
-            child: Text(
+            child: SingleLineEllipsisOverflowText(
               text,
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
             ),
           ),
       ].joinList(const SizedBox(width: 4)),
