@@ -6,7 +6,6 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:isolate/isolate.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 

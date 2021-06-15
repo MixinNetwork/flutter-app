@@ -55,7 +55,7 @@ dependencies:
   #  desktop_window: ^0.4.0
   bloc: ^7.0.0
   flutter_bloc: ^7.0.1
-  equatable: ^2.0.2
+  equatable: ^2.0.3
   intl: ^0.17.0
   flutter_svg: ^0.22.0
   tuple: ^2.0.0
@@ -64,7 +64,7 @@ dependencies:
   rxdart: ^0.27.1
   json_annotation: ^4.0.1
   provider: ^5.0.0
-  isolate: ^2.0.3
+  isolate: ^2.1.0
   dio: ^4.0.0
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   recase: ^4.0.0
@@ -79,12 +79,12 @@ dependencies:
   flutter_portal: ^0.4.0
   flutter_markdown: ^0.6.2
   markdown: ^4.0.0
-  map: ^0.9.0+2
+  map: ^1.0.0
   flutter_local_notifications: ^6.0.0
   flutter_app_icon_badge: ^2.0.0
   flutter_hooks: ^0.17.0
   package_info: ^2.0.2
-  sliver_tools: ^0.2.2
+  sliver_tools: ^0.2.5
   #  photo_view: ^0.11.1
   photo_view:
     git:
