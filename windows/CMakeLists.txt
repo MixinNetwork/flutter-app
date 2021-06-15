@@ -43,6 +43,11 @@ set(FLUTTER_MANAGED_DIR "${CMAKE_CURRENT_SOURCE_DIR}/flutter")
 # Flutter library and tool build rules.
 add_subdirectory(${FLUTTER_MANAGED_DIR})
 
+# Add sqlite3 library. https://pub.dev/packages/sqlite3#manually-providing-sqlite3-libraries
+add_library(sqlite3 SHARED IMPORTED GLOBAL)
+set_property(TARGET sqlite3 PROPERTY IMPORTED_IMPLIB ${CMAKE_CURRENT_SOURCE_DIR}/libs/sqlite3.lib)
+set_property(TARGET sqlite3 PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/sqlite3.dll)
+
 # Application build
 add_subdirectory("runner")
 
@@ -79,6 +84,10 @@ if(PLUGIN_BUNDLED_LIBRARIES)
     DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
     COMPONENT Runtime)
 endif()
+
+install(FILES "$<TARGET_FILE:sqlite3>"
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}"
+  COMPONENT Runtime)
 
 # Fully re-copy the assets directory on each build to avoid having stale files
 # from a previous install.
