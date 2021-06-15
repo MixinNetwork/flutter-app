@@ -69,6 +69,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "cancel": MessageLookupByLibrary.simpleMessage("取消"),
         "change": MessageLookupByLibrary.simpleMessage("更改"),
         "chatBackup": MessageLookupByLibrary.simpleMessage("聊天记录备份"),
+        "chatCheckOnPhone":
+            MessageLookupByLibrary.simpleMessage("不支持此类型消息，请在手机上查看。"),
         "chatGroupAdd": m0,
         "chatGroupCreate": m1,
         "chatGroupExit": m2,

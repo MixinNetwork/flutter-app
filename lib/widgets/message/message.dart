@@ -20,6 +20,7 @@ import '../menu.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
 import 'item/action_card/action_message.dart';
+import 'item/audio_message.dart';
 import 'item/contact_message.dart';
 import 'item/file_message.dart';
 import 'item/image/image_message.dart';
@@ -258,6 +259,13 @@ class MessageItemWidget extends HookWidget {
                     showNip: showNip,
                     message: message,
                     isCurrentUser: isCurrentUser,
+                  );
+                }
+                if (message.type.isAudio) {
+                  return AudioMessage(
+                    showNip: showNip,
+                    isCurrentUser: isCurrentUser,
+                    message: message,
                   );
                 }
                 if (message.type.isRecall) {
