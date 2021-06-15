@@ -1,5 +1,5 @@
 name: flutter_app
-description: A new Flutter project.
+description: A new Flutter project for Mixin Messenger.
 publish_to: none
 
 # The following defines the version and build number for your application.
@@ -42,10 +42,7 @@ dependencies:
   ulid: ^2.0.0
   web_socket_channel: ^2.1.0
   moor: ^4.3.2
-  libsignal_protocol_dart:
-    git:
-      url: https://github.com/MixinNetwork/libsignal_protocol_dart.git
-      ref: 2d858946ca5280f51b1cef85e4aca6510279cd2f
+  libsignal_protocol_dart: ^0.5.0-nullsafety.0
   path_provider: ^2.0.2
   path: ^1.8.0
   hive: ^2.0.4

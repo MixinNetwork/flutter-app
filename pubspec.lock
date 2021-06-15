@@ -593,11 +593,9 @@ packages:
   libsignal_protocol_dart:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "2d858946ca5280f51b1cef85e4aca6510279cd2f"
-      resolved-ref: "2d858946ca5280f51b1cef85e4aca6510279cd2f"
-      url: "https://github.com/MixinNetwork/libsignal_protocol_dart.git"
-    source: git
+      name: libsignal_protocol_dart
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.5.0-nullsafety.0"
   logging:
     dependency: transitive
@@ -791,7 +789,7 @@ packages:
       name: petitparser
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.1.0"
+    version: "4.2.0"
   photo_view:
     dependency: "direct main"
     description:
