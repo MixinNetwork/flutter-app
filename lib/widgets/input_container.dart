@@ -128,11 +128,14 @@ class _InputContainer extends HookWidget {
         useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
       converter: (state) => state?.conversation?.draft,
     );
-
+    final conversationItem = useBlocStateConverter<ConversationCubit,
+        ConversationState?, ConversationItem?>(
+      converter: (state) => state?.conversation,
+    );
     final textEditingController = useMemoized(
       () {
         final textEditingController = HighlightTextEditingController(
-          initialText: draft,
+          initialText: conversationItem?.draft,
           highlightTextStyle: TextStyle(
             color: BrightnessData.themeOf(context).accent,
           ),
@@ -145,7 +148,7 @@ class _InputContainer extends HookWidget {
           );
         return textEditingController;
       },
-      [draft, conversationId],
+      [conversationItem?.draft, conversationId],
     );
 
     useEffect(() {
@@ -162,7 +165,7 @@ class _InputContainer extends HookWidget {
 
       return () {
         textEditingController.removeListener(onListener);
-        if (conversationId != null) {
+        if (conversationId != null && conversationItem != null) {
           context.read<AccountServer>().database.conversationDao.updateDraft(
                 conversationId,
                 textEditingController.text,
