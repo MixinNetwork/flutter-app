@@ -15,10 +15,12 @@ class FloodMessagesDao extends DatabaseAccessor<MixinDatabase>
   Future deleteFloodMessage(FloodMessage message) =>
       delete(db.floodMessages).delete(message);
 
-  Stream<List<FloodMessage>> findFloodMessage() {
-    final query = select(db.floodMessages);
-    return query.watch();
-  }
+  SimpleSelectStatement<FloodMessages, FloodMessage> findFloodMessage() =>
+      select(db.floodMessages)
+        ..orderBy([
+          (u) => OrderingTerm(expression: u.createdAt, mode: OrderingMode.asc)
+        ])
+        ..limit(10);
 
   Future<FloodMessage> findFloodMessageById(String messageId) {
     final query = select(db.floodMessages)
