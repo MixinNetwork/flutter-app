@@ -15,8 +15,8 @@ class SingleLineEllipsisOverflowText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => CustomPaint(
-      painter: _SingleLineEllipsisOverflowPinter(data, style: style),
-    );
+        painter: _SingleLineEllipsisOverflowPinter(data, style: style),
+      );
 }
 
 class _SingleLineEllipsisOverflowPinter extends CustomPainter {
