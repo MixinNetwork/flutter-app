@@ -25,6 +25,7 @@ import '../../utils/datetime_format_utils.dart';
 import '../../utils/hook.dart';
 import '../../utils/list_utils.dart';
 import '../../utils/message_optimize.dart';
+import '../../utils/string_extension.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
@@ -36,7 +37,6 @@ import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message_status_icon.dart';
 import '../../widgets/radio.dart';
 import '../../widgets/search_bar.dart';
-import '../../widgets/single_line_ellipsis_overflow_text.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/unread_text.dart';
 import 'bloc/conversation_cubit.dart';
@@ -1213,12 +1213,14 @@ class _MessageContent extends HookWidget {
           ),
         if (text != null)
           Expanded(
-            child: SingleLineEllipsisOverflowText(
-              text,
+            child: Text(
+              text.overflow,
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
       ].joinList(const SizedBox(width: 4)),

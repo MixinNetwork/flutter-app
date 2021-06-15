@@ -6,6 +6,8 @@ import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
 
 extension StringExtension on String {
+  String get overflow => replaceAll('', '\u{200B}').toString();
+
   String fts5ContentFilter() {
     final text = trim();
     var i = 0;
