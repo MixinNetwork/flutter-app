@@ -411,9 +411,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
       if (state.isLatest) {
         bottom = [...bottom, item];
+        final position = scrollController.position;
         jumpToBottom = currentUserSent ||
-            scrollController.position.pixels ==
-                scrollController.position.maxScrollExtent;
+            (position.hasContentDimensions &&
+                position.pixels == position.maxScrollExtent);
       } else {
         if (currentUserSent) {
           add(_MessageInitEvent());
