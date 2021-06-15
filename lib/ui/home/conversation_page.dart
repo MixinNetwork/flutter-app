@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/widgets/single_line_ellipsis_overflow_text.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -37,6 +36,7 @@ import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message_status_icon.dart';
 import '../../widgets/radio.dart';
 import '../../widgets/search_bar.dart';
+import '../../widgets/single_line_ellipsis_overflow_text.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/unread_text.dart';
 import 'bloc/conversation_cubit.dart';
