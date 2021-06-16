@@ -45,7 +45,7 @@ class SlidePage extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 48),
+                    const SizedBox(height: 72),
                     _Item(
                       asset: Resources.assetsImagesChatSvg,
                       title: Localization.of(context).chats,
