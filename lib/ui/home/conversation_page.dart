@@ -25,6 +25,7 @@ import '../../utils/datetime_format_utils.dart';
 import '../../utils/hook.dart';
 import '../../utils/list_utils.dart';
 import '../../utils/message_optimize.dart';
+import '../../utils/string_extension.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
@@ -1213,7 +1214,7 @@ class _MessageContent extends HookWidget {
         if (text != null)
           Expanded(
             child: Text(
-              text,
+              text.overflow,
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,
