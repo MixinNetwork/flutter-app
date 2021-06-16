@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
@@ -42,7 +41,7 @@ class Sender {
   final String accountId;
   final Database database;
 
-  Future<bool> deliver(BlazeMessage blazeMessage) async {
+  Future<MessageResult> deliver(BlazeMessage blazeMessage) async {
     final params = blazeMessage.params as BlazeMessageParam;
     final cid = params.conversationId;
     if (cid != null) {
@@ -52,35 +51,11 @@ class Sender {
     final bm = await blaze.sendMessage(blazeMessage);
     if (bm == null) {
       await _sleep(1);
-      throw const WebSocketException();
+      return deliver(blazeMessage);
     } else if (bm.error != null) {
       if (bm.error?.code == conversationChecksumInvalidError) {
         final cid = (blazeMessage.params as BlazeMessageParam).conversationId;
-        if (cid != null) {
-          await _syncConversation(cid);
-        }
-        return false;
-      } else if (bm.error?.code == forbidden) {
-        return true;
-      } else {
-        await _sleep(1);
-        d('$blazeMessage \n $bm');
-        return false;
-      }
-    } else {
-      return true;
-    }
-  }
-
-  Future<MessageResult> deliverNoThrow(BlazeMessage blazeMessage) async {
-    final bm = await blaze.sendMessage(blazeMessage);
-    if (bm == null) {
-      await _sleep(1);
-      return deliverNoThrow(blazeMessage);
-    } else if (bm.error != null) {
-      if (bm.error?.code == conversationChecksumInvalidError) {
-        final cid = (blazeMessage.params as BlazeMessageParam).conversationId;
-        d('checksum error: $bm.error?.code  cid:$cid');
+        i('checksum error: ${bm.error?.code}  cid:$cid');
         if (cid != null) {
           await _syncConversation(cid);
         }
@@ -89,7 +64,7 @@ class Sender {
         return MessageResult(true, false);
       } else {
         await _sleep(1);
-        return deliverNoThrow(blazeMessage);
+        return deliver(blazeMessage);
       }
     } else {
       return MessageResult(true, false);
@@ -175,7 +150,7 @@ class Sender {
       if (data != null) {
         final signalKeys = List<SignalKey>.from(
             (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
-        d('signalKeys size: ${signalKeys.length}');
+        i('signalKeys size: ${signalKeys.length}');
         final keys = <BlazeMessageParamSession>[];
         if (signalKeys.isNotEmpty) {
           for (final k in signalKeys) {
@@ -207,16 +182,16 @@ class Sender {
         }
       }
     }
-    d('signalKeyMessages size: ${signalKeyMessages.length}');
+    i('signalKeyMessages size: ${signalKeyMessages.length}');
     if (signalKeyMessages.isEmpty) {
       return;
     }
     final checksum = await getCheckSum(conversationId);
-    d('checksum: $checksum');
+    i('checksum: $checksum');
     final bm = createSignalKeyMessage(createSignalKeyMessageParam(
         conversationId, signalKeyMessages, checksum));
-    final result = await deliverNoThrow(bm);
-    d('result retry:${result.retry}, success: ${result.success}');
+    final result = await deliver(bm);
+    i('result retry:${result.retry}, success: ${result.success}');
     if (result.retry) {
       return checkSessionSenderKey(conversationId);
     }
@@ -391,7 +366,7 @@ class Sender {
     final checksum = await getCheckSum(conversationId);
     final bm = createSignalKeyMessage(createSignalKeyMessageParam(
         conversationId, signalKeyMessages, checksum));
-    final result = await deliverNoThrow(bm);
+    final result = await deliver(bm);
     if (result.retry) {
       return sendSenderKey(conversationId, recipientId, sessionId);
     }
@@ -421,7 +396,7 @@ class Sender {
     );
     final bm = BlazeMessage(
         id: const Uuid().v4(), action: createMessage, params: blazeParam);
-    unawaited(deliverNoThrow(bm));
+    unawaited(deliver(bm));
   }
 
   Future<void> sendProcessSignalKey(

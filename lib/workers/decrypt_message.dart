@@ -983,7 +983,7 @@ class DecryptMessage extends Injector {
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
         sessionId: sessionId));
-    unawaited(_sender.deliverNoThrow(bm));
+    unawaited(_sender.deliver(bm));
     final address = SignalProtocolAddress(recipientId, sessionId.getDeviceId());
     final ratchet = RatchetSenderKeysCompanion.insert(
         groupId: conversationId,
@@ -1006,7 +1006,7 @@ class DecryptMessage extends Injector {
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, userId, encoded,
         sessionId: sessionId));
-    unawaited(_sender.deliverNoThrow(bm));
+    unawaited(_sender.deliver(bm));
     await SignalDatabase.get.ratchetSenderKeyDao.deleteByGroupIdAndSenderId(
         conversationId,
         SignalProtocolAddress(userId, sessionId.getDeviceId()).toString());

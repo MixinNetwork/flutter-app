@@ -288,7 +288,7 @@ class AccountServer {
         conversationId, userId, encode,
         sessionId: primarySessionId));
     try {
-      final result = await _sender.deliverNoThrow(bm);
+      final result = await _sender.deliver(bm);
       if (result.success) {
         await database.jobsDao.deleteJobs(jobIds);
       }
@@ -311,7 +311,7 @@ class AccountServer {
         );
         final blazeMessage = BlazeMessage(
             id: const Uuid().v4(), action: createMessage, params: blazeParam);
-        final result = await _sender.deliverNoThrow(blazeMessage);
+        final result = await _sender.deliver(blazeMessage);
         if (result.success) {
           await database.jobsDao.deleteJobById(e.jobId);
         }
@@ -343,7 +343,7 @@ class AccountServer {
           content = await base64EncodeWithIsolate(list);
         }
         final blazeMessage = _createBlazeMessage(message, content!);
-        result = await _sender.deliverNoThrow(blazeMessage);
+        result = await _sender.deliver(blazeMessage);
       } else if (message.category.isEncrypted) {
         final conversation = await database.conversationDao
             .conversationById(message.conversationId)
@@ -364,7 +364,7 @@ class AccountServer {
         );
         final blazeMessage = _createBlazeMessage(
             message, await base64EncodeWithIsolate(content));
-        result = await _sender.deliverNoThrow(blazeMessage);
+        result = await _sender.deliver(blazeMessage);
       } else if (message.category.isSignal) {
         result = await _sendSignalMessage(message);
       } else {}
@@ -393,7 +393,7 @@ class AccountServer {
               resendMessageId: message.messageId,
               sessionId: message.resendSessionId,
               mentionData: await getMentionData(message.messageId));
-          result = await _sender.deliverNoThrow(encrypted);
+          result = await _sender.deliver(encrypted);
           if (result.success) {
             await database.resendSessionMessagesDao
                 .deleteResendSessionMessageById(message.messageId);
@@ -407,7 +407,7 @@ class AccountServer {
       await _sender.checkConversation(message.conversationId);
     }
     await _sender.checkSessionSenderKey(message.conversationId);
-    return _sender.deliverNoThrow(await encryptNormalMessage(message));
+    return _sender.deliver(await encryptNormalMessage(message));
   }
 
   Future<BlazeMessage> encryptNormalMessage(db.SendingMessage message) async =>
