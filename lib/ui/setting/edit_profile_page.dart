@@ -194,6 +194,8 @@ class _Item extends StatelessWidget {
                   ? BrightnessData.themeOf(context).secondaryText
                   : BrightnessData.themeOf(context).text,
             ),
+            minLines: 1,
+            maxLines: 10,
             decoration: InputDecoration(
               isDense: true,
               border: outlineInputBorder,
