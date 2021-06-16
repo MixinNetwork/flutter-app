@@ -124,6 +124,7 @@ class PostPreview extends StatelessWidget {
             data: message.thumbImage ?? message.content!,
             extensionSet: ExtensionSet.gitHubWeb,
             styleSheet: markdownStyleSheet(context),
+            selectable: true,
             onTapLink: (String text, String? href, String title) =>
                 openUri(context, href!),
           ),
