@@ -167,7 +167,12 @@ class DecryptMessage extends Injector {
             await _processReDecryptMessage(
                 data, composeMessageData.resendMessageId!, plain);
           } else {
-            await _processDecryptSuccess(data, plain, messageStatus);
+            try {
+              await _processDecryptSuccess(data, plain, messageStatus);
+            } on Exception catch (e) {
+              w('_processDecryptSuccess ${data.messageId}, $e');
+              await _insertInvalidMessage(data);
+            }
           }
         }
 

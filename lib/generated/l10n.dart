@@ -650,6 +650,16 @@ class Localization {
     );
   }
 
+  /// `This type of message is not supported, please check on your phone.`
+  String get chatCheckOnPhone {
+    return Intl.message(
+      'This type of message is not supported, please check on your phone.',
+      name: 'chatCheckOnPhone',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Learn more`
   String get chatLearn {
     return Intl.message(
