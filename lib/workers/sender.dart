@@ -80,6 +80,7 @@ class Sender {
     } else if (bm.error != null) {
       if (bm.error?.code == conversationChecksumInvalidError) {
         final cid = (blazeMessage.params as BlazeMessageParam).conversationId;
+        d('checksum error: $bm.error?.code  cid:$cid');
         if (cid != null) {
           await _syncConversation(cid);
         }
