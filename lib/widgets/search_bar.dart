@@ -142,7 +142,6 @@ class SearchBar extends StatelessWidget {
                 builder: (context) => MoveWindowBarrier(
                   child: ActionButton(
                     name: Resources.assetsImagesIcAddSvg,
-                    size: 16,
                     onTapUp: (event) =>
                         context.read<OffsetCubit>().emit(event.globalPosition),
                     padding: const EdgeInsets.all(8),
