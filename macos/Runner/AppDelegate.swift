@@ -6,12 +6,11 @@ class AppDelegate: FlutterAppDelegate {
     private var activity: NSObjectProtocol?
 
     override func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if flag {
-            return false
-        } else {
-            mainFlutterWindow?.makeKeyAndOrderFront(self)
+        if let window = mainFlutterWindow {
+            window.makeKeyAndOrderFront(self)
             return true
         }
+        return false
     }
 
     override func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
