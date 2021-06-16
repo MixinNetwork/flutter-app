@@ -104,7 +104,7 @@ class AccountServer {
 
     Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
-      refreshSignalKeys(client);
+      checkSignalKey(client);
     });
 
     start();
@@ -651,12 +651,7 @@ class AccountServer {
 
   Future<void> pushSignalKeys() async {
     // TODO try 3 times at most
-    final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
-    if (hasPushSignalKeys) {
-      return;
-    }
-    await refreshSignalKeys(client);
-    PrivacyKeyValue.instance.hasPushSignalKeys = true;
+    await checkSignalKey(client);
   }
 
   Future<void> syncSession() async {
