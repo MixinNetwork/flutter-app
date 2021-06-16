@@ -54,7 +54,8 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
           .get();
 
   Future insertAll(List<ParticipantSessionData> list) async {
-    await batch((batch) => batch.insertAll(db.participantSession, list));
+    await batch((batch) => batch.insertAll(db.participantSession, list,
+        mode: InsertMode.insertOrReplace));
   }
 
   Future deleteList(List<ParticipantSessionData> list) async {
