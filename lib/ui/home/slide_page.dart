@@ -27,7 +27,9 @@ class SlidePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
-          // color: BrightnessData.themeOf(context).background,
+          color: BrightnessData.of(context) == 1.0
+              ? Colors.black.withOpacity(0.03)
+              : Colors.white.withOpacity(0.01),
           border: Border(
             right: BorderSide(
               color: BrightnessData.themeOf(context).divider,
