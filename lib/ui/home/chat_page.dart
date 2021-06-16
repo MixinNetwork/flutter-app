@@ -20,6 +20,7 @@ import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message/message.dart';
 import '../../widgets/message/message_bubble.dart';
+import 'bloc/blink_cubit.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/message_bloc.dart';
 import 'bloc/quote_message_cubit.dart';
@@ -123,6 +124,15 @@ class ChatPage extends HookWidget {
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
             bloc: chatSideCubit);
 
+    final tickerProvider = useSingleTickerProvider();
+
+    final blinkCubit = useBloc(
+      () => BlinkCubit(
+        tickerProvider,
+        BrightnessData.themeOf(context).accent.withOpacity(0.5),
+      ),
+    );
+
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
       name: 'chatContainer',
@@ -133,8 +143,9 @@ class ChatPage extends HookWidget {
 
     final windowHeight = MediaQuery.of(context).size.height;
 
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
+        BlocProvider.value(value: blinkCubit),
         BlocProvider.value(value: chatSideCubit),
         BlocProvider(
           create: (context) => SearchConversationKeywordCubit(

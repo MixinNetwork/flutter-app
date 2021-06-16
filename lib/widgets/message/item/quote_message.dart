@@ -12,6 +12,7 @@ import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../generated/l10n.dart';
+import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/markdown.dart';
@@ -250,6 +251,7 @@ class _QuoteMessageBase extends StatelessWidget {
             onTap!();
             return;
           }
+          context.read<BlinkCubit>().blinkByMessageId(messageId);
           context.read<MessageBloc>().scrollTo(messageId);
         },
         behavior: HitTestBehavior.opaque,
