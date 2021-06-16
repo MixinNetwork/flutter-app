@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
+import 'package:flutter/widgets.dart';
 import 'package:ulid/ulid.dart';
 import 'package:uuid/uuid.dart';
 
 extension StringExtension on String {
-  String get overflow => replaceAll('', '\u{200B}').toString();
+  String get overflow => Characters(this)
+      .replaceAll(Characters(''), Characters('\u{200B}'))
+      .toString();
 
   String fts5ContentFilter() {
     final text = trim();
