@@ -81,23 +81,20 @@ class ConversationPage extends HookWidget {
           value: focusNode,
         ),
       ],
-      child: ColoredBox(
-        color: BrightnessData.themeOf(context).background,
-        child: Column(
-          children: [
-            const SearchBar(),
-            if (!hasKeyword)
-              Expanded(
-                child: _List(
-                  key: PageStorageKey(slideCategoryState),
-                ),
+      child: Column(
+        children: [
+          const SearchBar(),
+          if (!hasKeyword)
+            Expanded(
+              child: _List(
+                key: PageStorageKey(slideCategoryState),
               ),
-            if (hasKeyword)
-              const Expanded(
-                child: _SearchList(),
-              ),
-          ],
-        ),
+            ),
+          if (hasKeyword)
+            const Expanded(
+              child: _SearchList(),
+            ),
+        ],
       ),
     );
   }
@@ -395,7 +392,6 @@ class SearchEmpty extends StatelessWidget {
           vertical: 86,
         ),
         width: double.infinity,
-        color: BrightnessData.themeOf(context).primary,
         alignment: Alignment.topCenter,
         child: Text(
           Localization.of(context).searchEmpty,
@@ -516,7 +512,6 @@ class _SearchItem extends StatelessWidget {
         child: Container(
           height: 80,
           width: double.infinity,
-          color: BrightnessData.themeOf(context).primary,
           padding: const EdgeInsets.symmetric(
             horizontal: 12,
             vertical: 12,
@@ -628,7 +623,6 @@ class _SearchHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: BrightnessData.themeOf(context).primary,
         padding: const EdgeInsets.only(
           top: 16,
           bottom: 10,
@@ -846,16 +840,13 @@ class _List extends HookWidget {
       );
     }
 
-    return ColoredBox(
-      color: BrightnessData.themeOf(context).primary,
-      child: Column(
-        children: [
-          _NetworkNotConnect(visible: !connectedState),
-          Expanded(
-            child: child,
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        _NetworkNotConnect(visible: !connectedState),
+        Expanded(
+          child: child,
+        ),
+      ],
     );
   }
 }

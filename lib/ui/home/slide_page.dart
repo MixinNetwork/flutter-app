@@ -25,81 +25,94 @@ class SlidePage extends StatelessWidget {
   const SlidePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MoveWindow(
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: 200,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const SizedBox(height: 48),
-              _Item(
-                asset: Resources.assetsImagesChatSvg,
-                title: Localization.of(context).chats,
-                type: SlideCategoryType.chats,
-              ),
-              const SizedBox(height: 12),
-              _Title(data: Localization.of(context).people),
-              const SizedBox(height: 12),
-              _CategoryList(
-                children: [
-                  _Item(
-                    asset: Resources.assetsImagesSlideContactsSvg,
-                    title: Localization.of(context).contacts,
-                    type: SlideCategoryType.contacts,
-                  ),
-                  _Item(
-                    asset: Resources.assetsImagesGroupSvg,
-                    title: Localization.of(context).group,
-                    type: SlideCategoryType.groups,
-                  ),
-                  _Item(
-                    asset: Resources.assetsImagesBotSvg,
-                    title: Localization.current.bots,
-                    type: SlideCategoryType.bots,
-                  ),
-                  _Item(
-                    asset: Resources.assetsImagesStrangersSvg,
-                    title: Localization.of(context).strangers,
-                    type: SlideCategoryType.strangers,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Expanded(child: _CircleList()),
-              MoveWindowBarrier(
-                child: Builder(
-                  builder: (context) =>
-                      BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
-                    converter: (state) => state.current?.account,
-                    when: (a, b) => b?.fullName != null,
-                    builder: (context, account) => BlocConverter<
-                        SlideCategoryCubit, SlideCategoryState, bool>(
-                      converter: (state) =>
-                          state.type == SlideCategoryType.setting,
-                      builder: (context, selected) {
-                        assert(account != null);
-                        return SelectItem(
-                          icon: AvatarWidget(
-                            avatarUrl: account!.avatarUrl,
-                            size: 30,
-                            name: account.fullName!,
-                            userId: account.userId,
-                          ),
-                          title: account.fullName!,
-                          selected: selected,
-                          onTap: () =>
-                              BlocProvider.of<SlideCategoryCubit>(context)
-                                  .select(SlideCategoryType.setting),
-                        );
-                      },
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: BrightnessData.of(context) == 1.0
+              ? Colors.black.withOpacity(0.03)
+              : Colors.white.withOpacity(0.01),
+          border: Border(
+            right: BorderSide(
+              color: BrightnessData.themeOf(context).divider,
+            ),
+          ),
+        ),
+        child: MoveWindow(
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: 200,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 72),
+                    _Item(
+                      asset: Resources.assetsImagesChatSvg,
+                      title: Localization.of(context).chats,
+                      type: SlideCategoryType.chats,
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
-            ]),
+                    const SizedBox(height: 12),
+                    _Title(data: Localization.of(context).people),
+                    const SizedBox(height: 12),
+                    _CategoryList(
+                      children: [
+                        _Item(
+                          asset: Resources.assetsImagesSlideContactsSvg,
+                          title: Localization.of(context).contacts,
+                          type: SlideCategoryType.contacts,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesGroupSvg,
+                          title: Localization.of(context).group,
+                          type: SlideCategoryType.groups,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesBotSvg,
+                          title: Localization.current.bots,
+                          type: SlideCategoryType.bots,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesStrangersSvg,
+                          title: Localization.of(context).strangers,
+                          type: SlideCategoryType.strangers,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Expanded(child: _CircleList()),
+                    MoveWindowBarrier(
+                      child: Builder(
+                        builder: (context) => BlocConverter<MultiAuthCubit,
+                            MultiAuthState, Account?>(
+                          converter: (state) => state.current?.account,
+                          when: (a, b) => b?.fullName != null,
+                          builder: (context, account) => BlocConverter<
+                              SlideCategoryCubit, SlideCategoryState, bool>(
+                            converter: (state) =>
+                                state.type == SlideCategoryType.setting,
+                            builder: (context, selected) {
+                              assert(account != null);
+                              return SelectItem(
+                                icon: AvatarWidget(
+                                  avatarUrl: account!.avatarUrl,
+                                  size: 30,
+                                  name: account.fullName!,
+                                  userId: account.userId,
+                                ),
+                                title: account.fullName!,
+                                selected: selected,
+                                onTap: () =>
+                                    BlocProvider.of<SlideCategoryCubit>(context)
+                                        .select(SlideCategoryType.setting),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ]),
+            ),
           ),
         ),
       );
