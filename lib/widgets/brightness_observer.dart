@@ -88,6 +88,7 @@ class BrightnessThemeData {
     required this.listSelected,
     required this.chatBackground,
     required this.background,
+    required this.divider,
     required this.red,
     required this.green,
     required this.warning,
@@ -107,6 +108,7 @@ class BrightnessThemeData {
   final Color listSelected;
   final Color chatBackground;
   final Color background;
+  final Color divider;
   final Color red;
   final Color green;
   final Color warning;
@@ -130,6 +132,7 @@ class BrightnessThemeData {
         chatBackground:
             Color.lerp(begin.chatBackground, end.chatBackground, t)!,
         background: Color.lerp(begin.background, end.background, t)!,
+        divider: Color.lerp(begin.divider, end.divider, t)!,
         red: Color.lerp(begin.red, end.red, t)!,
         green: Color.lerp(begin.green, end.green, t)!,
         warning: Color.lerp(begin.warning, end.warning, t)!,
@@ -151,6 +154,7 @@ class BrightnessThemeData {
     Color? listSelected,
     Color? chatBackground,
     Color? background,
+    Color? divider,
     Color? red,
     Color? green,
     Color? warning,
@@ -193,6 +197,7 @@ class BrightnessThemeData {
       listSelected: listSelected ?? this.listSelected,
       chatBackground: chatBackground ?? this.chatBackground,
       background: background ?? this.background,
+      divider: divider ?? this.divider,
       red: red ?? this.red,
       green: green ?? this.green,
       warning: warning ?? this.warning,

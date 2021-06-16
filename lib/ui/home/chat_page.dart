@@ -210,7 +210,16 @@ class ChatContainer extends HookWidget {
       value: quoteMessageCubit,
       child: Column(
         children: [
-          const ChatBar(),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: BrightnessData.themeOf(context).divider,
+                ),
+              ),
+            ),
+            child: const ChatBar(),
+          ),
           Expanded(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -236,23 +245,33 @@ class ChatContainer extends HookWidget {
                     child: Column(
                       children: [
                         Expanded(
-                          child: Stack(
-                            children: [
-                              const _NotificationListener(
-                                child: _List(),
-                              ),
-                              Positioned(
-                                bottom: 16,
-                                right: 16,
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: const [
-                                    _JumpMentionButton(),
-                                    _JumpCurrentButton(),
-                                  ],
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(
+                                  color:
+                                      BrightnessData.themeOf(context).divider,
                                 ),
                               ),
-                            ],
+                            ),
+                            child: Stack(
+                              children: [
+                                const _NotificationListener(
+                                  child: _List(),
+                                ),
+                                Positioned(
+                                  bottom: 16,
+                                  right: 16,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: const [
+                                      _JumpMentionButton(),
+                                      _JumpCurrentButton(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const InputContainer(),
