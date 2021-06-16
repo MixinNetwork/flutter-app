@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
@@ -9,6 +10,9 @@ import 'package:very_good_analysis/very_good_analysis.dart';
 import '../../utils/logger.dart';
 
 abstract class _NotificationManager {
+  final StreamController<Uri> _payloadStreamController =
+      StreamController<Uri>.broadcast();
+
   Future<void> initialize();
 
   Future<void> showNotification({
@@ -17,6 +21,13 @@ abstract class _NotificationManager {
     required Uri uri,
     required int id,
   });
+
+  @protected
+  void onNotificationSelected(Uri uri) => _payloadStreamController.add(uri);
+
+  Stream<Uri> notificationActionEvent(NotificationScheme notificationScheme) =>
+      _payloadStreamController.stream.where(
+          (e) => e.scheme == EnumToString.convertToString(notificationScheme));
 }
 
 class _MacosNotificationManager extends _NotificationManager {
@@ -64,9 +75,10 @@ class _MacosNotificationManager extends _NotificationManager {
 
   Future<dynamic> _onSelectNotification(String? payload) async {
     if (payload?.isEmpty ?? true) return;
-    try {
-      _payloadStreamController.add(Uri.parse(payload!));
-    } catch (_) {}
+    final uri = Uri.tryParse(payload!);
+    if (uri != null) {
+      onNotificationSelected(uri);
+    }
   }
 }
 
@@ -75,6 +87,7 @@ class _LinuxNotificationManager extends _NotificationManager {
   static const kDefaultAction = 'default';
 
   final _client = NotificationsClient();
+
   @override
   Future<void> initialize() async {}
 
@@ -103,7 +116,7 @@ class _LinuxNotificationManager extends _NotificationManager {
 
     unawaited(notification.action.then((action) async {
       if (action == kDefaultAction) {
-        _payloadStreamController.add(uri);
+        onNotificationSelected(uri);
         await notification.close();
       }
     }));
@@ -113,9 +126,6 @@ class _LinuxNotificationManager extends _NotificationManager {
 enum NotificationScheme {
   conversation,
 }
-
-final StreamController<Uri> _payloadStreamController =
-    StreamController<Uri>.broadcast();
 
 _NotificationManager? _notificationManager;
 int _id = 0;
@@ -132,8 +142,8 @@ Future<void> initListener() async {
 }
 
 Stream<Uri> notificationSelectEvent(NotificationScheme notificationScheme) =>
-    _payloadStreamController.stream.where(
-        (e) => e.scheme == EnumToString.convertToString(notificationScheme));
+    _notificationManager?.notificationActionEvent(notificationScheme) ??
+    const Stream.empty();
 
 Future<void> showNotification({
   required String title,
