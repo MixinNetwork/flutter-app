@@ -33,6 +33,7 @@ class FileMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MessageBubble(
+        messageId: message.messageId,
         quoteMessageId: message.quoteId,
         quoteMessageContent: message.quoteContent,
         showNip: showNip,

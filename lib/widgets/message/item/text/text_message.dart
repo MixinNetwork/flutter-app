@@ -75,6 +75,7 @@ class TextMessage extends HookWidget {
     );
 
     return MessageBubble(
+      messageId: message.messageId,
       quoteMessageId: message.quoteId,
       quoteMessageContent: message.quoteContent,
       showNip: showNip,

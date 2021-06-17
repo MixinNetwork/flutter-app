@@ -483,7 +483,7 @@ class _QuoteMessage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: QuoteMessage(
-                        id: message.messageId,
+                        quoteMessageId: message.messageId,
                         message: message,
                       ),
                     ),

@@ -62,6 +62,7 @@ class StickerMessageWidget extends StatelessWidget {
       height = pxToDp(context, assetHeight * 2);
     }
     return MessageBubble(
+      messageId: message.messageId,
       showNip: true,
       isCurrentUser: isCurrentUser,
       showBubble: false,

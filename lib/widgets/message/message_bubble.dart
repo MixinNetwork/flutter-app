@@ -24,6 +24,7 @@ class MessageBubble extends StatelessWidget {
     Key? key,
     required this.isCurrentUser,
     required this.child,
+    required this.messageId,
     this.showNip = true,
     this.showBubble = true,
     this.includeNip = false,
@@ -33,6 +34,7 @@ class MessageBubble extends StatelessWidget {
     this.quoteMessageContent,
   }) : super(key: key);
 
+  final String messageId;
   final Widget child;
   final bool isCurrentUser;
   final bool showNip;
@@ -70,7 +72,8 @@ class MessageBubble extends StatelessWidget {
             _MessageBubbleNipPadding(
               currentUser: isCurrentUser,
               child: QuoteMessage(
-                id: quoteMessageId,
+                messageId: messageId,
+                quoteMessageId: quoteMessageId,
                 content: quoteMessageContent,
               ),
             ),

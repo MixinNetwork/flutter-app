@@ -42,6 +42,7 @@ class VideoMessageWidget extends StatelessWidget {
           final height = width / scale;
 
           return MessageBubble(
+            messageId: message.messageId,
             quoteMessageId: message.quoteId,
             quoteMessageContent: message.quoteContent,
             isCurrentUser: isCurrentUser,

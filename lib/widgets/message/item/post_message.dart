@@ -35,6 +35,7 @@ class PostMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) => MessageBubble(
+          messageId: message.messageId,
           showNip: showNip,
           isCurrentUser: isCurrentUser,
           child: FullScreenPortal(

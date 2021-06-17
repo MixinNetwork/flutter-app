@@ -35,6 +35,7 @@ class LocationMessage extends HookWidget {
       [message.content],
     );
     return MessageBubble(
+      messageId: message.messageId,
       isCurrentUser: isCurrentUser,
       padding: EdgeInsets.zero,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(

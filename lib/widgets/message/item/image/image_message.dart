@@ -34,6 +34,7 @@ class ImageMessageWidget extends StatelessWidget {
         imageWidthInPixel: message.mediaWidth!,
         imageHeightInPixel: message.mediaHeight!,
         builder: (context, width, height) => MessageBubble(
+          messageId: message.messageId,
           quoteMessageId: message.quoteId,
           quoteMessageContent: message.quoteContent,
           isCurrentUser: isCurrentUser,
