@@ -341,6 +341,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       return MessageState(
         top: list.reversed.toList(),
         isLatest: true,
+        isOldest: list.length < limit,
       );
     }
 
@@ -356,19 +357,30 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       final bottomList = await messagesDao
           .afterMessagesByConversationId(rowId, conversationId, _limit)
           .get();
-      final topList = (await messagesDao
+      var topList = (await messagesDao
               .beforeMessagesByConversationId(rowId, conversationId, _limit)
               .get())
           .reversed
           .toList();
+
+      final isLatest = bottomList.length < _limit;
+      final isOldest = topList.length < _limit;
+
+      var center = await messagesDao
+          .messageItemByMessageId(centerMessageId)
+          .getSingleOrNull();
+
+      if (bottomList.isEmpty && center != null) {
+        topList = [...topList, center];
+        center = null;
+      }
+
       return MessageState(
         top: topList,
-        center: await messagesDao
-            .messageItemByMessageId(centerMessageId)
-            .getSingleOrNull(),
+        center: center,
         bottom: bottomList,
-        isLatest: bottomList.length < _limit,
-        isOldest: topList.length < _limit,
+        isLatest: isLatest,
+        isOldest: isOldest,
       );
     });
   }
