@@ -99,7 +99,7 @@ class AccountServer {
           },
         ),
       ],
-      httpLogLevel: kReleaseMode ? HttpLogLevel.none : HttpLogLevel.all,
+      httpLogLevel: HttpLogLevel.none,
     );
     await _initDatabase(privateKey, multiAuthCubit);
 
