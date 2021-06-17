@@ -76,9 +76,7 @@ class _MacosNotificationManager extends _NotificationManager {
   Future<dynamic> _onSelectNotification(String? payload) async {
     if (payload?.isEmpty ?? true) return;
     final uri = Uri.tryParse(payload!);
-    if (uri == null) {
-      return;
-    }
+    if (uri == null) return;
     onNotificationSelected(uri);
   }
 }
@@ -116,10 +114,9 @@ class _LinuxNotificationManager extends _NotificationManager {
         ]);
 
     unawaited(notification.action.then((action) async {
-      if (action == kDefaultAction) {
-        onNotificationSelected(uri);
-        await notification.close();
-      }
+      if (action != kDefaultAction) return;
+      onNotificationSelected(uri);
+      await notification.close();
     }));
   }
 }
