@@ -20,6 +20,7 @@ const lightBrightnessThemeData = BrightnessThemeData(
   dateTime: Color.fromRGBO(213, 211, 243, 1),
   encrypt: Color.fromRGBO(255, 247, 173, 1),
   statusBackground: Color.fromRGBO(255, 255, 255, 0.72),
+  stickerPlaceholderColor: Color.fromRGBO(236, 236, 236, 1),
 );
 
 const darkBrightnessThemeData = BrightnessThemeData(
@@ -41,6 +42,7 @@ const darkBrightnessThemeData = BrightnessThemeData(
   dateTime: Color.fromRGBO(213, 211, 243, 1),
   encrypt: Color.fromRGBO(255, 247, 173, 1),
   statusBackground: Color.fromRGBO(33, 33, 33, 0.7),
+  stickerPlaceholderColor: Color.fromRGBO(40, 44, 48, 1),
 );
 
 final circleColors = [

@@ -363,7 +363,6 @@ class _ActionAddParticipants extends StatelessWidget {
             builder: (context) => ActionButton(
                   name: Resources.assetsImagesIcAddSvg,
                   color: BrightnessData.themeOf(context).icon,
-                  size: 16,
                   onTapUp: (event) =>
                       context.read<OffsetCubit>().emit(event.globalPosition),
                   padding: const EdgeInsets.all(16),

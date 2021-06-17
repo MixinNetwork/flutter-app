@@ -6,12 +6,16 @@ class CacheImage extends StatelessWidget {
     this.src, {
     this.width,
     this.height,
+    this.placeholder,
+    this.errorWidget,
     Key? key,
   }) : super(key: key);
 
   final String src;
   final double? width;
   final double? height;
+  final PlaceholderWidgetBuilder? placeholder;
+  final LoadingErrorWidgetBuilder? errorWidget;
 
   @override
   Widget build(BuildContext context) => CachedNetworkImage(
@@ -19,7 +23,9 @@ class CacheImage extends StatelessWidget {
         width: width,
         height: height,
         fit: BoxFit.cover,
-        fadeInDuration: Duration.zero,
-        fadeOutDuration: Duration.zero,
+        placeholder: placeholder,
+        errorWidget: errorWidget,
+        fadeInDuration: const Duration(milliseconds: 200),
+        fadeOutDuration: const Duration(milliseconds: 400),
       );
 }
