@@ -132,8 +132,6 @@ class Blaze {
       cancelOnError: true,
     );
     _sendListPending();
-
-    connectedStateStreamController.add(true);
   }
 
   Future<void> updateRemoteMessageStatus(

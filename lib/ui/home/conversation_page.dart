@@ -6,7 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
@@ -717,8 +716,7 @@ class _List extends HookWidget {
               .read<AccountServer>()
               .blaze
               .connectedStateStreamController
-              .stream
-              .debounceTime(const Duration(milliseconds: 500)),
+              .stream,
           initialData: true,
         ).data ??
         false;
