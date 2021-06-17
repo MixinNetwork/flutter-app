@@ -11,6 +11,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
+import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
@@ -104,9 +105,10 @@ class AccountServer {
 
     Timer.periodic(const Duration(days: 1), (timer) {
       i('refreshSignalKeys periodic');
-      refreshSignalKeys(client);
+      checkSignalKey(client);
     });
 
+    await checkSignalKeys();
     start();
 
     DesktopLifecycle.instance.isActive.addListener(() {
@@ -649,14 +651,14 @@ class AccountServer {
     await _decryptMessage.insertUpdateUsers(friends);
   }
 
-  Future<void> pushSignalKeys() async {
-    // TODO try 3 times at most
+  Future<void> checkSignalKeys() async {
     final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
     if (hasPushSignalKeys) {
-      return;
+      unawaited(checkSignalKey(client));
+    } else {
+      await refreshSignalKeys(client);
+      PrivacyKeyValue.instance.hasPushSignalKeys = true;
     }
-    await refreshSignalKeys(client);
-    PrivacyKeyValue.instance.hasPushSignalKeys = true;
   }
 
   Future<void> syncSession() async {
