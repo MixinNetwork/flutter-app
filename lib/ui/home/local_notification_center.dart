@@ -76,9 +76,10 @@ class _MacosNotificationManager extends _NotificationManager {
   Future<dynamic> _onSelectNotification(String? payload) async {
     if (payload?.isEmpty ?? true) return;
     final uri = Uri.tryParse(payload!);
-    if (uri != null) {
-      onNotificationSelected(uri);
+    if (uri == null) {
+      return;
     }
+    onNotificationSelected(uri);
   }
 }
 
