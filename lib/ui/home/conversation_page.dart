@@ -1024,10 +1024,9 @@ class _ItemConversationSubtitle extends StatelessWidget {
                   UnreadText(
                     data: '${conversation.unseenMessageCount}',
                     textColor: const Color.fromRGBO(255, 255, 255, 1),
-                    backgroundColor:
-                        conversation.muteUntil?.isAfter(DateTime.now()) == true
-                            ? BrightnessData.themeOf(context).secondaryText
-                            : BrightnessData.themeOf(context).accent,
+                    backgroundColor: conversation.isMute
+                        ? BrightnessData.themeOf(context).secondaryText
+                        : BrightnessData.themeOf(context).accent,
                   ),
                 if ((conversation.unseenMessageCount ?? 0) <= 0)
                   _StatusRow(conversation: conversation),
