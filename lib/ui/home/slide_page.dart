@@ -63,7 +63,7 @@ class SlidePage extends StatelessWidget {
                         ),
                         _Item(
                           asset: Resources.assetsImagesGroupSvg,
-                          title: Localization.of(context).group,
+                          title: Localization.of(context).groups,
                           type: SlideCategoryType.groups,
                         ),
                         _Item(

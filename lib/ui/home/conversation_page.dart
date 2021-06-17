@@ -211,7 +211,7 @@ class _SearchList extends HookWidget {
         if (conversations.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
-              title: Localization.of(context).group,
+              title: Localization.of(context).groups,
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {

@@ -153,7 +153,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "followTwitter":
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
-        "group": MessageLookupByLibrary.simpleMessage("Group"),
         "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
         "groupCantSendDes": MessageLookupByLibrary.simpleMessage(
@@ -176,6 +175,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupPopMenuRemoveParticipants": m11,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
+        "groups": MessageLookupByLibrary.simpleMessage("Groups"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("Help center"),
         "image": MessageLookupByLibrary.simpleMessage("Image"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("Include Files"),

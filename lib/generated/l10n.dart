@@ -130,11 +130,11 @@ class Localization {
     );
   }
 
-  /// `Group`
-  String get group {
+  /// `Groups`
+  String get groups {
     return Intl.message(
-      'Group',
-      name: 'group',
+      'Groups',
+      name: 'groups',
       desc: '',
       args: [],
     );

@@ -7,7 +7,7 @@
   "pageLandingLoginMessage": "Open Mixin Messenger on your phone, scan the qr code on the screen and confirm your login.",
   "pageLandingClickToReload": "CLICK TO RELOAD QR CODE",
   "contacts": "Contacts",
-  "group": "Group",
+  "groups": "Groups",
   "bots": "Bots",
   "strangers": "Strangers",
   "pageRightEmptyMessage": "Select a conversation to start messaging",

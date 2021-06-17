@@ -179,7 +179,7 @@ class _NewConversationConfirm extends HookWidget {
     final textEditingController = useTextEditingController();
     final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(
-      title: Text(Localization.of(context).group),
+      title: Text(Localization.of(context).groups),
       titleMarginBottom: 24,
       content: Column(
         mainAxisSize: MainAxisSize.min,

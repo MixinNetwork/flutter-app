@@ -127,7 +127,6 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("关注我们的 Facebook"),
         "followTwitter": MessageLookupByLibrary.simpleMessage("关注我们的 Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
-        "group": MessageLookupByLibrary.simpleMessage("群组"),
         "groupAdd": MessageLookupByLibrary.simpleMessage("添加成员"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
         "groupCantSendDes":
@@ -148,6 +147,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "groupPopMenuRemoveParticipants": m11,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
+        "groups": MessageLookupByLibrary.simpleMessage("群组"),
         "helpCenter": MessageLookupByLibrary.simpleMessage("帮助中心"),
         "image": MessageLookupByLibrary.simpleMessage("照片"),
         "includeFiles": MessageLookupByLibrary.simpleMessage("包含文件"),
