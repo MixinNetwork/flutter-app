@@ -178,6 +178,12 @@ class _InputContainer extends HookWidget {
 
     useEffect(() {
       focusNode.requestFocus(null);
+      final subscription =
+          context.read<QuoteMessageCubit>().stream.listen((event) {
+        if (event == null) return;
+        focusNode.requestFocus(null);
+      });
+      return subscription.cancel;
     }, [conversationId]);
 
     return MultiProvider(
