@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+import '../../../constants/constants.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../../interacter_decorated_box.dart';
@@ -32,9 +34,8 @@ class TransferMessage extends StatelessWidget {
           status: message.status,
         ),
         child: InteractableDecoratedBox(
-          onTap: () {
-            // TODO
-          },
+          onTap: () => openUri(context,
+              '${mixinProtocolUrls[MixinSchemeHost.snapshots]}/${message.snapshotId}'),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
