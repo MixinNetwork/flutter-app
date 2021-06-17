@@ -221,7 +221,6 @@ class _Home extends HookWidget {
     useEffect(() {
       if (signed) {
         accountServer!
-          ..pushSignalKeys()
           ..refreshSelf()
           ..refreshFriends()
           ..initSticker()

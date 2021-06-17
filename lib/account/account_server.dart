@@ -107,6 +107,7 @@ class AccountServer {
       checkSignalKey(client);
     });
 
+    await pushSignalKeys();
     start();
 
     DesktopLifecycle.instance.isActive.addListener(() {
@@ -650,8 +651,12 @@ class AccountServer {
   }
 
   Future<void> pushSignalKeys() async {
-    // TODO try 3 times at most
+    final hasPushSignalKeys = PrivacyKeyValue.instance.hasPushSignalKeys;
+    if (hasPushSignalKeys) {
+      return;
+    }
     await checkSignalKey(client);
+    PrivacyKeyValue.instance.hasPushSignalKeys = true;
   }
 
   Future<void> syncSession() async {
