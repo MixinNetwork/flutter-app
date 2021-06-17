@@ -420,7 +420,7 @@ packages:
       name: flutter_cache_manager
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.1"
+    version: "3.1.2"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -575,7 +575,7 @@ packages:
       name: isolate
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   js:
     dependency: transitive
     description:
