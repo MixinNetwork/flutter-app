@@ -24,6 +24,7 @@ class ActionMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MessageBubble(
+        messageId: message.messageId,
         isCurrentUser: isCurrentUser,
         showBubble: false,
         padding: EdgeInsets.zero,

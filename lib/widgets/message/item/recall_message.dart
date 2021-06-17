@@ -52,6 +52,7 @@ class RecallMessage extends StatelessWidget {
       status: message.status,
     );
     return MessageBubble(
+      messageId: message.messageId,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       child: MessageLayout(

@@ -33,6 +33,7 @@ class ActionCardMessage extends HookWidget {
       [message.content],
     );
     return MessageBubble(
+      messageId: message.messageId,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(

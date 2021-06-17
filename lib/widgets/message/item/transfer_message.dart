@@ -23,6 +23,7 @@ class TransferMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MessageBubble(
+        messageId: message.messageId,
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: MessageDatetimeAndStatus(

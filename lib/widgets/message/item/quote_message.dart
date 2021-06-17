@@ -14,6 +14,7 @@ import '../../../enum/message_category.dart';
 import '../../../generated/l10n.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
+import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/markdown.dart';
 import '../../avatar_view/avatar_view.dart';
@@ -28,12 +29,14 @@ class QuoteMessage extends HookWidget {
   const QuoteMessage({
     Key? key,
     this.content,
-    this.id,
+    this.quoteMessageId,
+    this.messageId,
     this.message,
   }) : super(key: key);
 
   final String? content;
-  final String? id;
+  final String? quoteMessageId;
+  final String? messageId;
   final MessageItem? message;
 
   @override
@@ -43,7 +46,7 @@ class QuoteMessage extends HookWidget {
       return jsonDecode(content!);
     }, [content]);
 
-    if (id?.isEmpty ?? true) return const SizedBox();
+    if (quoteMessageId?.isEmpty ?? true) return const SizedBox();
     var inputMode = false;
 
     try {
@@ -57,7 +60,8 @@ class QuoteMessage extends HookWidget {
       final MessageCategory type = quote.type;
       if (type.isText) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           description: quote.content!,
@@ -66,7 +70,8 @@ class QuoteMessage extends HookWidget {
       }
       if (type.isImage) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           image: Image.file(
@@ -82,7 +87,8 @@ class QuoteMessage extends HookWidget {
       }
       if (type.isVideo) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           image: ImageByBase64(quote.thumbImage!),
@@ -94,7 +100,8 @@ class QuoteMessage extends HookWidget {
 
       if (type.isLive) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           image: ImageByBase64(quote.thumbImage!),
@@ -106,7 +113,8 @@ class QuoteMessage extends HookWidget {
 
       if (type.isData) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesFileSvg),
@@ -116,7 +124,8 @@ class QuoteMessage extends HookWidget {
       }
       if (type.isPost) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesFileSvg),
@@ -126,7 +135,8 @@ class QuoteMessage extends HookWidget {
       }
       if (type.isLocation) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesLocationSvg),
@@ -136,7 +146,8 @@ class QuoteMessage extends HookWidget {
       }
       if (type.isAudio) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesAudioSvg),
@@ -146,7 +157,8 @@ class QuoteMessage extends HookWidget {
       }
       if (type.isSticker) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           image: CacheImage(quote.assetUrl!),
@@ -157,7 +169,8 @@ class QuoteMessage extends HookWidget {
       }
       if (type.isContact) {
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           image: Padding(
@@ -192,7 +205,8 @@ class QuoteMessage extends HookWidget {
         }
 
         return _QuoteMessageBase(
-          messageId: id!,
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
           icon: SvgPicture.asset(Resources.assetsImagesAppButtonSvg),
@@ -203,7 +217,8 @@ class QuoteMessage extends HookWidget {
     } catch (_) {}
 
     return _QuoteMessageBase(
-      messageId: id!,
+      messageId: messageId,
+      quoteMessageId: quoteMessageId!,
       userId: null,
       description: Localization.of(context).chatNotFound,
       icon: SvgPicture.asset(Resources.assetsImagesRecallSvg),
@@ -217,6 +232,7 @@ class _QuoteMessageBase extends StatelessWidget {
   const _QuoteMessageBase({
     Key? key,
     required this.messageId,
+    required this.quoteMessageId,
     required this.userId,
     this.name,
     required this.description,
@@ -226,7 +242,8 @@ class _QuoteMessageBase extends StatelessWidget {
     this.onTap,
   }) : super(key: key);
 
-  final String messageId;
+  final String? messageId;
+  final String quoteMessageId;
   final String? userId;
   final String? name;
   final String description;
@@ -251,8 +268,9 @@ class _QuoteMessageBase extends StatelessWidget {
             onTap!();
             return;
           }
-          context.read<BlinkCubit>().blinkByMessageId(messageId);
-          context.read<MessageBloc>().scrollTo(messageId);
+          context.read<PendingJumpMessageCubit>().emit(messageId);
+          context.read<BlinkCubit>().blinkByMessageId(quoteMessageId);
+          context.read<MessageBloc>().scrollTo(quoteMessageId);
         },
         behavior: HitTestBehavior.opaque,
         child: Container(

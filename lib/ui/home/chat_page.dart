@@ -23,6 +23,7 @@ import '../../widgets/message/message_bubble.dart';
 import 'bloc/blink_cubit.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/message_bloc.dart';
+import 'bloc/pending_jump_message_cubit.dart';
 import 'bloc/quote_message_cubit.dart';
 import 'chat_slide_page/chat_info_page.dart';
 import 'chat_slide_page/circle_manager_page.dart';
@@ -124,15 +125,6 @@ class ChatPage extends HookWidget {
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
             bloc: chatSideCubit);
 
-    final tickerProvider = useSingleTickerProvider();
-
-    final blinkCubit = useBloc(
-      () => BlinkCubit(
-        tickerProvider,
-        BrightnessData.themeOf(context).accent.withOpacity(0.5),
-      ),
-    );
-
     final chatContainerPage = MaterialPage(
       key: const ValueKey('chatContainer'),
       name: 'chatContainer',
@@ -145,7 +137,6 @@ class ChatPage extends HookWidget {
 
     return MultiProvider(
       providers: [
-        BlocProvider.value(value: blinkCubit),
         BlocProvider.value(value: chatSideCubit),
         BlocProvider(
           create: (context) => SearchConversationKeywordCubit(
@@ -217,8 +208,24 @@ class ChatContainer extends HookWidget {
     final quoteMessageCubit = useBloc(() => QuoteMessageCubit());
     BlocProvider.of<MessageBloc>(context).limit =
         MediaQuery.of(context).size.height ~/ 20;
-    return BlocProvider.value(
-      value: quoteMessageCubit,
+
+    final tickerProvider = useSingleTickerProvider();
+
+    final blinkCubit = useBloc(
+      () => BlinkCubit(
+        tickerProvider,
+        BrightnessData.themeOf(context).accent.withOpacity(0.5),
+      ),
+    );
+
+    final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
+
+    return MultiProvider(
+      providers: [
+        BlocProvider.value(value: blinkCubit),
+        BlocProvider.value(value: quoteMessageCubit),
+        BlocProvider.value(value: pendingJumpMessageCubit),
+      ],
       child: Column(
         children: [
           const ChatBar(),
@@ -433,12 +440,26 @@ class _JumpCurrentButton extends HookWidget {
     final enable =
         (!state.isEmpty && !state.isLatest) || listPositionIsLatest.value;
 
-    if (!enable) return const SizedBox();
+    final pendingJumpMessageCubit = context.read<PendingJumpMessageCubit>();
+
+    if (!enable) {
+      pendingJumpMessageCubit.emit(null);
+      return const SizedBox();
+    }
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: InteractableDecoratedBox(
-        onTap: messageBloc.jumpToCurrent,
+        onTap: () {
+          final messageId = pendingJumpMessageCubit.state;
+          if (messageId != null) {
+            messageBloc.scrollTo(messageId);
+            context.read<BlinkCubit>().blinkByMessageId(messageId);
+            pendingJumpMessageCubit.emit(null);
+            return;
+          }
+          messageBloc.jumpToCurrent();
+        },
         child: ClipOval(
           child: Container(
             height: 40,
