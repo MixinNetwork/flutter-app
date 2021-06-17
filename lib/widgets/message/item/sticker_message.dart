@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/dp_utils.dart';
+import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -61,6 +62,14 @@ class StickerMessageWidget extends StatelessWidget {
       width = pxToDp(context, assetWidth * 2);
       height = pxToDp(context, assetHeight * 2);
     }
+    final placeholder = Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: BrightnessData.themeOf(context).stickerPlaceholderColor,
+        borderRadius: BorderRadius.circular(24),
+      ),
+    );
     return MessageBubble(
       messageId: message.messageId,
       showNip: true,
@@ -85,12 +94,10 @@ class StickerMessageWidget extends StatelessWidget {
               message.assetUrl!,
               height: height,
               width: width,
+              placeholder: (_, __) => placeholder,
             );
           }
-          return SizedBox(
-            height: height,
-            width: width,
-          );
+          return placeholder;
         },
       ),
     );

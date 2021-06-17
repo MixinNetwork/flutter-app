@@ -173,32 +173,35 @@ class AvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final placeholder = SizedBox.fromSize(
+      size: Size.square(size),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: getAvatarColorById(userId),
+        ),
+        child: Center(
+          child: Text(
+            name[0].toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
+    );
+
     Widget child;
     if (avatarUrl?.isNotEmpty == true) {
       child = CacheImage(
         avatarUrl!,
         width: size,
         height: size,
+        placeholder: (_, __) => placeholder,
       );
     } else {
-      child = SizedBox.fromSize(
-        size: Size.square(size),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: getAvatarColorById(userId),
-          ),
-          child: Center(
-            child: Text(
-              name[0].toUpperCase(),
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ),
-      );
+      child = placeholder;
     }
 
     if (clipOval) return ClipOval(child: child);
