@@ -183,43 +183,45 @@ class AccountServer {
 
   bool _floodJobRunning = false;
 
+  final jobSubscribers = <StreamSubscription>{};
+
   void start() {
     blaze.connect();
 
-    Rx.merge([
-      // runFloodJob when socket connected.
-      blaze.connectedStateStreamController.stream.where((ok) => ok),
-      database.mixinDatabase.tableUpdates(
-        TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
-      )
-    ]).listen((event) => _runFloodJob());
-
-    database.jobsDao
-        .findAckJobs()
-        .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(_runAckJob)
-        .listen((_) {});
+    jobSubscribers
+      ..add(Rx.merge([
+        // runFloodJob when socket connected.
+        blaze.connectedStateStreamController.stream.where((ok) => ok),
+        database.mixinDatabase.tableUpdates(
+          TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
+        )
+      ]).listen((event) => _runFloodJob()))
+      ..add(database.jobsDao
+          .findAckJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runAckJob)
+          .listen((_) {}));
 
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId != null) {
-      database.jobsDao
+      jobSubscribers.add(database.jobsDao
           .findSessionAckJobs()
           .where((jobs) => jobs.isNotEmpty == true)
           .asyncMapDrop(_runSessionAckJob)
-          .listen((_) {});
+          .listen((_) {}));
     }
 
-    database.jobsDao
-        .findRecallMessageJobs()
-        .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(_runRecallJob)
-        .listen((_) {});
-
-    database.jobsDao
-        .findSendingJobs()
-        .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(_runSendJob)
-        .listen((_) {});
+    jobSubscribers
+      ..add(database.jobsDao
+          .findRecallMessageJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runRecallJob)
+          .listen((_) {}))
+      ..add(database.jobsDao
+          .findSendingJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runSendJob)
+          .listen((_) {}));
 
     // database.mock();
   }
@@ -452,6 +454,11 @@ class AccountServer {
 
   Future<void> signOutAndClear() async {
     await client.accountApi.logout(LogoutRequest(sessionId));
+    jobSubscribers
+      ..forEach((s) async {
+        await s.cancel();
+      })
+      ..clear();
     await HiveKeyValue.clearKeyValues();
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);
