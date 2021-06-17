@@ -148,9 +148,7 @@ Future<void> showNotification({
   String? body,
   required Uri uri,
 }) async {
-  if (_notificationManager == null) {
-    return;
-  }
+  if (_notificationManager == null) return;
   await _notificationManager!.showNotification(
     title: title,
     uri: uri,
