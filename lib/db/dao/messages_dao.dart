@@ -318,11 +318,26 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         ),
       );
 
-  Future<int> updateMessageContent(String messageId, String encoded) =>
+  Future<int> updateAttachmentMessageContentAndStatus(
+          String messageId, String encoded) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
         db.customUpdate(
           'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
+          variables: [
+            Variable.withString(encoded),
+            Variable.withString(messageId)
+          ],
+          updates: {db.messages},
+          updateKind: UpdateKind.update,
+        ),
+      );
+
+  Future<int> updateMessageContent(String messageId, String encoded) =>
+      _sendInsertOrReplaceEventWithFuture(
+        [messageId],
+        db.customUpdate(
+          'UPDATE messages SET content = ? WHERE message_id = ?',
           variables: [
             Variable.withString(encoded),
             Variable.withString(messageId)

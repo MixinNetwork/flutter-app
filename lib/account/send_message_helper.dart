@@ -144,7 +144,8 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateMessageContent(messageId, encoded);
+    await _messagesDao.updateAttachmentMessageContentAndStatus(
+        messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -203,7 +204,8 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateMessageContent(messageId, encoded);
+    await _messagesDao.updateAttachmentMessageContentAndStatus(
+        messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -282,7 +284,8 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateMessageContent(messageId, encoded);
+    await _messagesDao.updateAttachmentMessageContentAndStatus(
+        messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -371,7 +374,8 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateMessageContent(messageId, encoded);
+    await _messagesDao.updateAttachmentMessageContentAndStatus(
+        messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
 
@@ -636,7 +640,8 @@ class SendMessageHelper {
       attachmentResult.createdAt,
     );
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateMessageContent(messageId, encoded);
+    await _messagesDao.updateAttachmentMessageContentAndStatus(
+        messageId, encoded);
     await _jobsDao.insertSendingJob(messageId, conversationId);
   }
 
