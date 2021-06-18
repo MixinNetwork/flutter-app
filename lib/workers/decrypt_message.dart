@@ -100,7 +100,11 @@ class DecryptMessage extends Injector {
     try {
       var status = MessageStatus.delivered;
       _remoteStatus = MessageStatus.delivered;
-      if (_conversationId == data.conversationId &&
+
+      if (data.userId == accountId) {
+        status = data.status;
+        _remoteStatus = data.status;
+      } else if (_conversationId == data.conversationId &&
           DesktopLifecycle.instance.isActive.value) {
         _remoteStatus = MessageStatus.read;
         status = MessageStatus.read;
@@ -141,10 +145,12 @@ class DecryptMessage extends Injector {
       _remoteStatus = MessageStatus.delivered;
     }
 
-    await _updateRemoteMessageStatus(
-      floodMessage.messageId,
-      _remoteStatus,
-    );
+    if (data.userId != accountId) {
+      await _updateRemoteMessageStatus(
+        floodMessage.messageId,
+        _remoteStatus,
+      );
+    }
 
     await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
@@ -842,7 +848,7 @@ class DecryptMessage extends Injector {
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
     final messageIds = <String>[];
     messages
-        .takeWhile((m) => m.status != 'READ' || m.status != 'MENTION_READ')
+        .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
         .forEach((m) {
       if (m.status == 'MENTION_READ') {
       } else {
