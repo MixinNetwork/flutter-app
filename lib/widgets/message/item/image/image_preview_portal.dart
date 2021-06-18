@@ -292,6 +292,7 @@ class _Bar extends StatelessWidget {
                 message.messageId,
                 isPlain(result.first.isGroup, result.first.isBot),
                 conversationId: result.first.conversationId,
+                recipientId: result.first.userId,
               );
             },
           ),

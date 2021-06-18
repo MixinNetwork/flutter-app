@@ -150,6 +150,7 @@ class MessageItemWidget extends HookWidget {
                               message.messageId,
                               isPlain(result.first.isGroup, result.first.isBot),
                               conversationId: result.first.conversationId,
+                              recipientId: result.first.userId,
                             );
                       },
                     ),
