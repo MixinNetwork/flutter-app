@@ -42,8 +42,8 @@ class SystemMessage extends StatelessWidget {
                 child: Text(
                   generateSystemText(
                     actionName: message.actionName,
-                    senderIsCurrentUser:
-                        message.userId == context.read<AccountServer>().userId,
+                    participantIsCurrentUser: message.participantUserId ==
+                        context.read<AccountServer>().userId,
                     relationship: message.relationship,
                     participantFullName: message.participantFullName,
                     senderFullName: message.userFullName,
@@ -66,7 +66,7 @@ class SystemMessage extends StatelessWidget {
 
 String generateSystemText({
   required MessageAction? actionName,
-  required bool senderIsCurrentUser,
+  required bool participantIsCurrentUser,
   required UserRelationship? relationship,
   required String? participantFullName,
   required String? senderFullName,
@@ -76,14 +76,14 @@ String generateSystemText({
   switch (actionName) {
     case MessageAction.join:
       text = Localization.current.chatGroupJoin(
-        senderIsCurrentUser
+        participantIsCurrentUser
             ? Localization.current.youStart
             : participantFullName ?? '',
       );
       break;
     case MessageAction.exit:
       text = Localization.current.chatGroupExit(
-        senderIsCurrentUser
+        participantIsCurrentUser
             ? Localization.current.youStart
             : participantFullName ?? '',
       );
@@ -93,7 +93,7 @@ String generateSystemText({
         relationship == UserRelationship.me
             ? Localization.current.youStart
             : senderFullName!,
-        senderIsCurrentUser
+        participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
       );
@@ -103,7 +103,7 @@ String generateSystemText({
         relationship == UserRelationship.me
             ? Localization.current.youStart
             : senderFullName!,
-        senderIsCurrentUser
+        participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
       );
