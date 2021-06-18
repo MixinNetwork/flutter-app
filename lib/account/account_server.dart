@@ -454,11 +454,8 @@ class AccountServer {
 
   Future<void> signOutAndClear() async {
     await client.accountApi.logout(LogoutRequest(sessionId));
-    jobSubscribers
-      ..forEach((s) async {
-        await s.cancel();
-      })
-      ..clear();
+    await Future.wait(jobSubscribers.map((s) => s.cancel()));
+    jobSubscribers.clear();
     await HiveKeyValue.clearKeyValues();
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);
