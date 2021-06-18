@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
@@ -9,6 +10,7 @@ import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../utils/hook.dart';
 import '../brightness_observer.dart';
 import '../cache_image.dart';
 import '../interacter_decorated_box.dart';
@@ -17,60 +19,55 @@ import 'bloc/cubit/sticker_cubit.dart';
 
 class StickerPage extends StatelessWidget {
   const StickerPage({
+    required this.tabLength,
     Key? key,
     this.tabController,
-    required this.stickerAlbumsCubit,
   }) : super(key: key);
 
   final TabController? tabController;
-  final StickerAlbumsCubit stickerAlbumsCubit;
+  final int tabLength;
 
   @override
   Widget build(BuildContext context) => Material(
         color: Colors.transparent,
         elevation: 5,
         borderRadius: const BorderRadius.all(Radius.circular(11)),
-        child: Builder(
-          builder: (context) => Container(
-            width: 464,
-            height: 407,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(11),
-              color: BrightnessData.dynamicColor(
-                context,
-                const Color.fromRGBO(255, 255, 255, 1),
-                darkColor: const Color.fromRGBO(62, 65, 72, 1),
-              ),
+        child: Container(
+          width: 464,
+          height: 407,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(11),
+            color: BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(255, 255, 255, 1),
+              darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(11),
-              child: BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-                converter: (state) => (state.length) + 2,
-                builder: (context, tabLength) => Column(
-                  children: [
-                    Expanded(
-                      child: TabBarView(
-                        controller: tabController,
-                        children: List.generate(
-                          tabLength,
-                          (index) => _StickerAlbumPage(index: index),
-                        ),
-                      ),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: Column(
+              children: [
+                Expanded(
+                  child: TabBarView(
+                    controller: tabController,
+                    children: List.generate(
+                      tabLength,
+                      (index) => _StickerAlbumPage(index: index),
                     ),
-                    _StickerAlbumBar(
-                      tabLength: tabLength,
-                      tabController: tabController,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+                _StickerAlbumBar(
+                  tabLength: tabLength,
+                  tabController: tabController,
+                ),
+              ],
             ),
           ),
         ),
       );
 }
 
-class _StickerAlbumPage extends StatelessWidget {
+class _StickerAlbumPage extends HookWidget {
   const _StickerAlbumPage({
     Key? key,
     required this.index,
@@ -86,50 +83,50 @@ class _StickerAlbumPage extends StatelessWidget {
     }
     final updateUsedAt = index != 0;
     final rightClickDelete = index == 1;
-    return BlocProvider(
-      create: (context) {
-        Stream<List<Sticker>> stream;
-        switch (index) {
-          case 0:
-            stream = stickerDao.recentUsedStickers().watch();
-            break;
-          case 1:
-            stream = stickerDao.personalStickers().watch();
-            break;
-          default:
-            stream = stickerDao
-                .stickerByAlbumId(BlocProvider.of<StickerAlbumsCubit>(context)
-                    .state[index - 2]
-                    .albumId)
-                .watch();
-        }
-        return StickerCubit(stream);
-      },
-      child: Builder(
-        builder: (context) => BlocConverter<StickerCubit, List<Sticker>, int>(
-          converter: (state) => state.length,
-          builder: (context, itemCount) => GridView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,
-              mainAxisSpacing: 8,
-              crossAxisSpacing: 8,
-            ),
-            itemCount: itemCount,
-            itemBuilder: (BuildContext context, int index) =>
-                _StickerAlbumPageItem(
-              index: index,
-              updateUsedAt: updateUsedAt,
-              rightClickDelete: rightClickDelete,
-            ),
-          ),
+    final stickerCubit = useBloc(() {
+      Stream<List<Sticker>> stream;
+      switch (index) {
+        case 0:
+          stream = stickerDao.recentUsedStickers().watch();
+          break;
+        case 1:
+          stream = stickerDao.personalStickers().watch();
+          break;
+        default:
+          stream = stickerDao
+              .stickerByAlbumId(BlocProvider.of<StickerAlbumsCubit>(context)
+                  .state[index - 2]
+                  .albumId)
+              .watch();
+      }
+      return StickerCubit(stream);
+    }, keys: [index]);
+
+    final itemCount = useBlocStateConverter<StickerCubit, List<Sticker>, int>(
+      bloc: stickerCubit,
+      converter: (state) => state.length,
+    );
+    return BlocProvider.value(
+      value: stickerCubit,
+      child: GridView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 20),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
+          mainAxisSpacing: 8,
+          crossAxisSpacing: 8,
+        ),
+        itemCount: itemCount,
+        itemBuilder: (BuildContext context, int index) => _StickerAlbumPageItem(
+          index: index,
+          updateUsedAt: updateUsedAt,
+          rightClickDelete: rightClickDelete,
         ),
       ),
     );
   }
 }
 
-class _StickerAlbumPageItem extends StatelessWidget {
+class _StickerAlbumPageItem extends HookWidget {
   const _StickerAlbumPageItem({
     Key? key,
     required this.index,
@@ -142,36 +139,38 @@ class _StickerAlbumPageItem extends StatelessWidget {
   final bool rightClickDelete;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocConverter<StickerCubit, List<Sticker>, Sticker>(
-        converter: (state) => state[index],
-        builder: (BuildContext context, Sticker sticker) =>
-            InteractableDecoratedBox(
-          onTap: () async {
-            final accountServer =
-                Provider.of<AccountServer>(context, listen: false);
-            final conversationItem = context.read<ConversationCubit>().state;
-            if (conversationItem == null) return;
+  Widget build(BuildContext context) {
+    final sticker = useBlocStateConverter<StickerCubit, List<Sticker>, Sticker>(
+      converter: (state) => state[index],
+      keys: [index],
+    );
 
-            await Future.wait([
-              if (updateUsedAt)
-                accountServer.database.stickerDao
-                    .updateUsedAt(sticker.stickerId, DateTime.now()),
-              accountServer.sendStickerMessage(
-                sticker.stickerId,
-                conversationItem.isPlainConversation,
-                conversationId: conversationItem.conversationId,
-                recipientId: conversationItem.user?.userId,
-              ),
-            ]);
-          },
-          onRightClick: (pointerUpEvent) async {
-            if (!rightClickDelete) return;
-            // todo use native context menu.
-          },
-          child: CacheImage(sticker.assetUrl),
-        ),
-      );
+    return InteractableDecoratedBox(
+      onTap: () async {
+        final accountServer =
+            Provider.of<AccountServer>(context, listen: false);
+        final conversationItem = context.read<ConversationCubit>().state;
+        if (conversationItem == null) return;
+
+        await Future.wait([
+          if (updateUsedAt)
+            accountServer.database.stickerDao
+                .updateUsedAt(sticker.stickerId, DateTime.now()),
+          accountServer.sendStickerMessage(
+            sticker.stickerId,
+            conversationItem.isPlainConversation,
+            conversationId: conversationItem.conversationId,
+            recipientId: conversationItem.user?.userId,
+          ),
+        ]);
+      },
+      onRightClick: (pointerUpEvent) async {
+        if (!rightClickDelete) return;
+        // todo use native context menu.
+      },
+      child: CacheImage(sticker.assetUrl),
+    );
+  }
 }
 
 class _StickerAlbumBar extends StatelessWidget {
