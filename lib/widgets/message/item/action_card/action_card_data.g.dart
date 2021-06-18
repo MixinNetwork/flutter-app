@@ -14,6 +14,7 @@ AppCardData _$AppCardDataFromJson(Map<String, dynamic> json) {
     json['description'] as String,
     json['action'] as String,
     json['updated_at'] as String,
+    json['shareable'] as bool? ?? true,
   );
 }
 
@@ -25,4 +26,5 @@ Map<String, dynamic> _$AppCardDataToJson(AppCardData instance) =>
       'description': instance.description,
       'action': instance.action,
       'updated_at': instance.updatedAt,
+      'shareable': instance.shareable,
     };
