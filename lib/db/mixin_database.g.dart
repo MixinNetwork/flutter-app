@@ -11279,7 +11279,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id                   AS messageId,\n       m.conversation_id              AS conversationId,\n       sender.user_id                 AS senderId,\n       sender.full_name               AS senderFullName,\n       m.category                     AS type,\n       m.content                      AS content,\n       m.quote_content                AS quoteContent,\n       m.status                       AS status,\n       c.name                         AS groupName,\n       c.mute_until                   AS muteUntil,\n       conversationOwner.mute_until   AS ownerMuteUntil,\n       conversationOwner.user_id      AS ownerUserId,\n       conversationOwner.full_name    AS ownerFullName,\n       m.created_at                   AS createdAt,\n       c.category                     AS category,\n       m.action                       AS actionName,\n       conversationOwner.relationship AS relationship,\n       pu.full_name                   AS participantFullName\nFROM   messages m\n       INNER JOIN users sender\n               ON m.user_id = sender.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users conversationOwner\n              ON c.owner_id = conversationOwner.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\n       LEFT JOIN users pu\n              ON pu.user_id = m.participant_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        'SELECT m.message_id                   AS messageId,\n       m.conversation_id              AS conversationId,\n       sender.user_id                 AS senderId,\n       sender.full_name               AS senderFullName,\n       m.category                     AS type,\n       m.content                      AS content,\n       m.quote_content                AS quoteContent,\n       m.status                       AS status,\n       c.name                         AS groupName,\n       c.mute_until                   AS muteUntil,\n       conversationOwner.mute_until   AS ownerMuteUntil,\n       conversationOwner.user_id      AS ownerUserId,\n       conversationOwner.full_name    AS ownerFullName,\n       m.created_at                   AS createdAt,\n       c.category                     AS category,\n       m.action                       AS actionName,\n       conversationOwner.relationship AS relationship,\n       pu.full_name                   AS participantFullName,\n       pu.user_id                     AS participantUserId\nFROM   messages m\n       INNER JOIN users sender\n               ON m.user_id = sender.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users conversationOwner\n              ON c.owner_id = conversationOwner.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\n       LEFT JOIN users pu\n              ON pu.user_id = m.participant_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11313,6 +11313,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
         participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String>('participantUserId'),
       );
     });
   }
@@ -13880,6 +13881,7 @@ class NotificationMessage {
   final MessageAction? actionName;
   final UserRelationship? relationship;
   final String? participantFullName;
+  final String participantUserId;
   NotificationMessage({
     required this.messageId,
     required this.conversationId,
@@ -13899,6 +13901,7 @@ class NotificationMessage {
     this.actionName,
     this.relationship,
     this.participantFullName,
+    required this.participantUserId,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -13937,8 +13940,11 @@ class NotificationMessage {
                                                                   $mrjc(
                                                                       relationship
                                                                           .hashCode,
-                                                                      participantFullName
-                                                                          .hashCode))))))))))))))))));
+                                                                      $mrjc(
+                                                                          participantFullName
+                                                                              .hashCode,
+                                                                          participantUserId
+                                                                              .hashCode)))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13960,7 +13966,8 @@ class NotificationMessage {
           other.category == this.category &&
           other.actionName == this.actionName &&
           other.relationship == this.relationship &&
-          other.participantFullName == this.participantFullName);
+          other.participantFullName == this.participantFullName &&
+          other.participantUserId == this.participantUserId);
   @override
   String toString() {
     return (StringBuffer('NotificationMessage(')
@@ -13981,7 +13988,8 @@ class NotificationMessage {
           ..write('category: $category, ')
           ..write('actionName: $actionName, ')
           ..write('relationship: $relationship, ')
-          ..write('participantFullName: $participantFullName')
+          ..write('participantFullName: $participantFullName, ')
+          ..write('participantUserId: $participantUserId')
           ..write(')'))
         .toString();
   }

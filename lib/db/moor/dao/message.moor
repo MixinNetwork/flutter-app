@@ -182,7 +182,8 @@ SELECT m.message_id                   AS messageId,
        c.category                     AS category,
        m.action                       AS actionName,
        conversationOwner.relationship AS relationship,
-       pu.full_name                   AS participantFullName
+       pu.full_name                   AS participantFullName,
+       pu.user_id                     AS participantUserId
 FROM   messages m
        INNER JOIN users sender
                ON m.user_id = sender.user_id

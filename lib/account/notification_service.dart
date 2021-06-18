@@ -82,8 +82,8 @@ class NotificationService {
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
                   actionName: event.actionName,
-                  senderIsCurrentUser:
-                      event.senderId == context.read<AccountServer>().userId,
+                  participantIsCurrentUser: event.participantUserId ==
+                      context.read<AccountServer>().userId,
                   relationship: event.relationship,
                   participantFullName: event.participantFullName,
                   senderFullName: event.senderFullName,
