@@ -11,6 +11,7 @@ class AppCardData {
     this.description,
     this.action,
     this.updatedAt,
+    this.shareable,
   );
 
   factory AppCardData.fromJson(Map<String, dynamic> json) =>
@@ -25,6 +26,9 @@ class AppCardData {
   final String action;
   @JsonKey(name: 'updated_at')
   final String updatedAt;
+
+  @JsonKey(defaultValue: true)
+  final bool shareable;
 
   Map<String, dynamic> toJson() => _$AppCardDataToJson(this);
 }

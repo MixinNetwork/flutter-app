@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -21,6 +23,7 @@ import '../brightness_observer.dart';
 import '../menu.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
+import 'item/action_card/action_card_data.dart';
 import 'item/action_card/action_message.dart';
 import 'item/audio_message.dart';
 import 'item/contact_message.dart';
@@ -132,17 +135,7 @@ class MessageItemWidget extends HookWidget {
                       onTap: () =>
                           context.read<QuoteMessageCubit>().emit(message),
                     ),
-                  if (message.type.isText ||
-                      message.type.isImage ||
-                      message.type.isVideo ||
-                      message.type.isAudio ||
-                      message.type.isData ||
-                      message.type.isSticker ||
-                      message.type.isContact ||
-                      message.type.isLive ||
-                      message.type.isPost ||
-                      message.type.isLocation ||
-                      message.type == MessageCategory.appCard)
+                  if (message.canForward)
                     ContextMenu(
                       title: Localization.of(context).forward,
                       onTap: () async {
@@ -379,4 +372,20 @@ class _UnreadMessageBar extends StatelessWidget {
           ),
         ),
       );
+}
+
+extension _MessageForward on MessageItem {
+  bool get canForward =>
+      type.isText ||
+      type.isImage ||
+      type.isVideo ||
+      type.isAudio ||
+      type.isData ||
+      type.isSticker ||
+      type.isContact ||
+      type.isLive ||
+      type.isPost ||
+      type.isLocation ||
+      (type == MessageCategory.appCard &&
+          AppCardData.fromJson(jsonDecode(content!)).shareable);
 }
