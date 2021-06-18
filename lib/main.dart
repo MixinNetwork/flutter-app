@@ -34,14 +34,27 @@ Future<void> main() async {
   unawaited(initListener());
 
   ansiColorDisabled = false;
-  runZonedGuarded(() => runApp(const App()), (Object error, StackTrace stack) {
-    if (kReleaseMode) return;
-    e('$error, $stack');
-  }, zoneSpecification: ZoneSpecification(
+  runZonedGuarded(
+    () => runApp(const App()),
+    (Object error, StackTrace stack) {
+      if (kReleaseMode) return;
+      e('$error, $stack');
+    },
+    zoneSpecification: ZoneSpecification(
+      handleUncaughtError: (_, __, ___, Object error, StackTrace stack) {
+        if (kReleaseMode) return;
+        wtf('$error, $stack');
+      },
+      errorCallback: (_, __, ___, Object error, StackTrace? stack) {
+        if (kReleaseMode) return;
+        wtf('$error, $stack');
+      },
       print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
-    if (kReleaseMode) return;
-    parent.print(zone, colorizeNonAnsi(line));
-  }));
+        if (kReleaseMode) return;
+        parent.print(zone, colorizeNonAnsi(line));
+      },
+    ),
+  );
 
   doWhenWindowReady(() {
     appWindow.minSize =
