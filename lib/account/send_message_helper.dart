@@ -299,7 +299,7 @@ class SendMessageHelper {
     String conversationId,
     String senderId,
     ContactMessage contactMessage,
-    String shareUserFullName, {
+    String? shareUserFullName, {
     bool isPlain = true,
     String? quoteMessageId,
   }) async {
@@ -581,7 +581,7 @@ class SendMessageHelper {
         conversationId,
         senderId,
         ContactMessage(message.sharedUserId!),
-        message.name!,
+        message.name,
         isPlain: isPlain,
       );
     } else if (message.category.isLive) {
