@@ -540,6 +540,7 @@ class _StickerButton extends HookWidget {
       child: DefaultTabController(
         length: tabLength,
         child: HoverOverlay(
+          delayDuration: const Duration(milliseconds: 50),
           duration: const Duration(milliseconds: 200),
           closeDuration: const Duration(milliseconds: 200),
           closeWaitDuration: const Duration(milliseconds: 300),
