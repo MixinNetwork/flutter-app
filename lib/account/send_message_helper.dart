@@ -230,9 +230,15 @@ class SendMessageHelper {
     await _jobsDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  Future<void> sendDataMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId,
-      {AttachmentResult? attachmentResult}) async {
+  Future<void> sendDataMessage(
+    String conversationId,
+    String senderId,
+    XFile file,
+    MessageCategory category,
+    String? quoteMessageId, {
+    AttachmentResult? attachmentResult,
+    String? name,
+  }) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ??
         lookupMimeType(file.path) ??
@@ -255,7 +261,7 @@ class SendMessageHelper {
       mediaUrl: attachment.path,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
-      name: file.name,
+      name: name ?? file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.pending,
       createdAt: DateTime.now(),
@@ -553,13 +559,14 @@ class SendMessageHelper {
       } else {
         attachmentResult = null;
       }
-      await sendVideoMessage(
+      await sendDataMessage(
         conversationId,
         senderId,
         XFile(message.mediaUrl!),
         category,
         null,
         attachmentResult: attachmentResult,
+        name: message.name,
       );
     } else if (message.category.isSticker) {
       await sendStickerMessage(
