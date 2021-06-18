@@ -20,8 +20,8 @@ class IdentityKeyUtil {
     await db.identityDao.insert(identity);
   }
 
-  static Future<IdentityKeyPair> getIdentityKeyPair(SignalDatabase db) async =>
+  static Future<IdentityKeyPair?> getIdentityKeyPair(SignalDatabase db) async =>
       db.identityDao
           .getLocalIdentity()
-          .then((value) => value.getIdentityKeyPair());
+          .then((value) => value?.getIdentityKeyPair());
 }
