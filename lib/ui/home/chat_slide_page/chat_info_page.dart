@@ -201,7 +201,8 @@ class ChatInfoPage extends HookWidget {
                         description: muting
                             ? Text(
                                 DateFormat('yyyy/MM/dd, hh:mm a').format(
-                                    conversation.conversation!.validMuteUntil!),
+                                    conversation.conversation!.validMuteUntil!
+                                        .toLocal()),
                                 style: TextStyle(
                                   color: BrightnessData.themeOf(context)
                                       .secondaryText,

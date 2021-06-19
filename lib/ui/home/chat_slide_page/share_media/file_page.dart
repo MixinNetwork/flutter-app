@@ -142,7 +142,7 @@ class FilePage extends HookWidget {
                       color: BrightnessData.themeOf(context).primary,
                       padding: const EdgeInsets.all(10),
                       child: Text(
-                        DateFormat.yMMMd().format(e.key),
+                        DateFormat.yMMMd().format(e.key.toLocal()),
                         style: TextStyle(
                           fontSize: 14,
                           color: BrightnessData.themeOf(context).secondaryText,
