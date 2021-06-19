@@ -15,7 +15,6 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../account/account_server.dart';
-import '../bloc/bloc_converter.dart';
 import '../constants/resources.dart';
 import '../db/mixin_database.dart' hide Offset;
 import '../generated/l10n.dart';
@@ -514,58 +513,62 @@ class _QuoteMessage extends StatelessWidget {
       );
 }
 
-class _StickerButton extends StatelessWidget {
+class _StickerButton extends HookWidget {
   const _StickerButton({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-        create: (context) => StickerAlbumsCubit(context
-            .read<AccountServer>()
-            .database
-            .stickerAlbumsDao
-            .systemAlbums()
-            .watch()),
-        child: Builder(
-          builder: (context) =>
-              BlocConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
-            converter: (state) => (state.length) + 2,
-            builder: (context, tabLength) => DefaultTabController(
-              length: tabLength,
-              child: Builder(
-                builder: (context) => HoverOverlay(
-                  duration: const Duration(milliseconds: 200),
-                  closeDuration: const Duration(milliseconds: 200),
-                  closeWaitDuration: const Duration(milliseconds: 300),
-                  inCurve: Curves.easeOut,
-                  outCurve: Curves.easeOut,
-                  portalBuilder: (context, progress, child) => Opacity(
-                    opacity: progress,
-                    child: child,
-                  ),
-                  childAnchor: Alignment.topCenter,
-                  portalAnchor: Alignment.bottomCenter,
-                  portal: Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: StickerPage(
-                      stickerAlbumsCubit:
-                          BlocProvider.of<StickerAlbumsCubit>(context),
-                      tabController: DefaultTabController.of(context),
-                    ),
-                  ),
-                  child: InteractableDecoratedBox(
-                    child: ActionButton(
-                      name: Resources.assetsImagesIcStickerSvg,
-                      color: BrightnessData.themeOf(context).icon,
-                    ),
-                  ),
-                ),
-              ),
+  Widget build(BuildContext context) {
+    final stickerAlbumsCubit = useBloc(
+      () => StickerAlbumsCubit(context
+          .read<AccountServer>()
+          .database
+          .stickerAlbumsDao
+          .systemAlbums()
+          .watch()),
+    );
+
+    final tabLength =
+        useBlocStateConverter<StickerAlbumsCubit, List<StickerAlbum>, int>(
+      bloc: stickerAlbumsCubit,
+      converter: (state) => (state.length) + 2,
+    );
+
+    return BlocProvider.value(
+      value: stickerAlbumsCubit,
+      child: DefaultTabController(
+        length: tabLength,
+        child: HoverOverlay(
+          delayDuration: const Duration(milliseconds: 50),
+          duration: const Duration(milliseconds: 200),
+          closeDuration: const Duration(milliseconds: 200),
+          closeWaitDuration: const Duration(milliseconds: 300),
+          inCurve: Curves.easeOut,
+          outCurve: Curves.easeOut,
+          portalBuilder: (context, progress, child) => Opacity(
+            opacity: progress,
+            child: child,
+          ),
+          childAnchor: Alignment.topCenter,
+          portalAnchor: Alignment.bottomCenter,
+          portal: Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: StickerPage(
+              tabController: DefaultTabController.of(context),
+              tabLength: tabLength,
+            ),
+          ),
+          child: InteractableDecoratedBox(
+            child: ActionButton(
+              name: Resources.assetsImagesIcStickerSvg,
+              color: BrightnessData.themeOf(context).icon,
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _PreviewImage extends HookWidget {
