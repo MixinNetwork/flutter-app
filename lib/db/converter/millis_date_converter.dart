@@ -6,7 +6,7 @@ class MillisDateConverter extends TypeConverter<DateTime, int> {
   @override
   DateTime? mapToDart(int? fromDb) {
     if (fromDb == null) return null;
-    return DateTime.fromMillisecondsSinceEpoch(fromDb, isUtc: true).toLocal();
+    return DateTime.fromMillisecondsSinceEpoch(fromDb, isUtc: true);
   }
 
   @override

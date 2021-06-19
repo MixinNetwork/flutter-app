@@ -112,7 +112,7 @@ class EditProfilePage extends HookWidget {
                 converter: (state) {
                   final createdAt = state.current?.account.createdAt;
                   if (createdAt == null) return null;
-                  return DateFormat.yMMMd().format(createdAt);
+                  return DateFormat.yMMMd().format(createdAt.toLocal());
                 },
                 when: (a, b) => b != null,
                 builder: (context, createdAt) => Text(
