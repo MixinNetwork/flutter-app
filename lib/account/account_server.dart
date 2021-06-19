@@ -6,6 +6,7 @@ import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
 import 'package:rxdart/rxdart.dart';
@@ -107,7 +108,15 @@ class AccountServer {
       checkSignalKey(client);
     });
 
-    await checkSignalKeys();
+    try {
+      await checkSignalKeys();
+    } on InvalidKeyException catch (e, s) {
+      w('$e, $s');
+      await signOutAndClear();
+      multiAuthCubit.signOut();
+      return;
+    }
+
     start();
 
     DesktopLifecycle.instance.isActive.addListener(() {
@@ -182,43 +191,45 @@ class AccountServer {
 
   bool _floodJobRunning = false;
 
+  final jobSubscribers = <StreamSubscription>{};
+
   void start() {
     blaze.connect();
 
-    Rx.merge([
-      // runFloodJob when socket connected.
-      blaze.connectedStateStreamController.stream.where((ok) => ok),
-      database.mixinDatabase.tableUpdates(
-        TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
-      )
-    ]).listen((event) => _runFloodJob());
-
-    database.jobsDao
-        .findAckJobs()
-        .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(_runAckJob)
-        .listen((_) {});
+    jobSubscribers
+      ..add(Rx.merge([
+        // runFloodJob when socket connected.
+        blaze.connectedStateStreamController.stream.where((ok) => ok),
+        database.mixinDatabase.tableUpdates(
+          TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
+        )
+      ]).listen((event) => _runFloodJob()))
+      ..add(database.jobsDao
+          .findAckJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runAckJob)
+          .listen((_) {}));
 
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId != null) {
-      database.jobsDao
+      jobSubscribers.add(database.jobsDao
           .findSessionAckJobs()
           .where((jobs) => jobs.isNotEmpty == true)
           .asyncMapDrop(_runSessionAckJob)
-          .listen((_) {});
+          .listen((_) {}));
     }
 
-    database.jobsDao
-        .findRecallMessageJobs()
-        .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(_runRecallJob)
-        .listen((_) {});
-
-    database.jobsDao
-        .findSendingJobs()
-        .where((jobs) => jobs.isNotEmpty == true)
-        .asyncMapDrop(_runSendJob)
-        .listen((_) {});
+    jobSubscribers
+      ..add(database.jobsDao
+          .findRecallMessageJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runRecallJob)
+          .listen((_) {}))
+      ..add(database.jobsDao
+          .findSendingJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runSendJob)
+          .listen((_) {}));
 
     // database.mock();
   }
@@ -451,6 +462,8 @@ class AccountServer {
 
   Future<void> signOutAndClear() async {
     await client.accountApi.logout(LogoutRequest(sessionId));
+    await Future.wait(jobSubscribers.map((s) => s.cancel()));
+    jobSubscribers.clear();
     await HiveKeyValue.clearKeyValues();
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);

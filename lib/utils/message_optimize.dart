@@ -89,7 +89,6 @@ String? messagePreviewIcon(
   String? icon;
 
   if (messageStatus == MessageStatus.failed) {
-    icon = Resources.assetsImagesSendingSvg;
   } else if (messageCategory.isText) {
   } else if (messageCategory == MessageCategory.systemAccountSnapshot) {
     icon = Resources.assetsImagesTransferSvg;

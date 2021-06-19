@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -28,7 +29,19 @@ class Blaze {
     this.privateKey,
     this.database,
     this.client,
-  );
+  ) {
+    connectivitySubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) {
+      if (result != ConnectivityResult.none) {
+        _reconnect();
+        return;
+      }
+
+      _disconnect();
+      _reconnecting = false;
+    });
+  }
 
   final String userId;
   final String sessionId;
@@ -46,17 +59,26 @@ class Blaze {
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
+  StreamSubscription? connectivitySubscription;
 
   final transactions = <String, WebSocketTransaction>{};
 
-  void connect() {
+  Future<void> connect() async {
+    i('reconnecting set false, ${StackTrace.current}');
+    _reconnecting = false;
+
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      return _disconnect();
+    }
+
     i('ws connect');
     _token ??= signAuthTokenWithEdDSA(
         userId, sessionId, privateKey, scp, 'GET', '/', '');
     try {
       _connect(_token!);
     } catch (_) {
-      _reconnect();
+      await _reconnect();
     }
   }
 
@@ -66,7 +88,7 @@ class Blaze {
       _host,
       protocols: ['Mixin-Blaze-1'],
       headers: {'Authorization': 'Bearer $token'},
-      pingInterval: const Duration(seconds: 4),
+      pingInterval: const Duration(seconds: 10),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
@@ -148,11 +170,7 @@ class Blaze {
   Future<void> _sendListPending() async {
     final offset =
         await database.floodMessagesDao.getLastBlazeMessageCreatedAt();
-    // ignore: prefer_typing_uninitialized_variables
-    var param = '';
-    if (offset != null) {
-      param = '$offset';
-    }
+    final param = offset?.toIso8601String();
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     d('blaze send: ${m.toJson()}');
     await _sendGZip(m);
@@ -165,6 +183,7 @@ class Blaze {
 
   void _disconnect() {
     i('ws _disconnect');
+    connectedStateStreamController.add(false);
     transactions.clear();
     subscription?.cancel();
     channel?.sink.close();
@@ -186,7 +205,6 @@ class Blaze {
   Future<void> _reconnect() async {
     i('_reconnect reconnecting: $_reconnecting start: ${StackTrace.current}');
     if (_reconnecting) return;
-    connectedStateStreamController.add(false);
     _reconnecting = true;
     _host = _host == _wsHost1 ? _wsHost2 : _wsHost1;
 
@@ -194,9 +212,7 @@ class Blaze {
       _disconnect();
       await client.accountApi.getMe();
       i('http ping');
-      _reconnecting = false;
-      i('reconnecting set false, ${StackTrace.current}');
-      connect();
+      await connect();
     } catch (e) {
       w('ws ping error: $e');
       if (e is MixinApiError && (e.error as MixinError).code == 401) return;
@@ -210,6 +226,7 @@ class Blaze {
   void dispose() {
     _disposed = true;
     _disconnect();
+    connectivitySubscription?.cancel();
     connectedStateStreamController.close();
   }
 }

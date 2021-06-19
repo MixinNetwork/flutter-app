@@ -30,7 +30,7 @@ class BlazeMessageParamOffset {
       _$BlazeMessageParamOffsetFromJson(json);
 
   @JsonKey(name: 'offset')
-  String offset;
+  String? offset;
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamOffsetToJson(this);
 }

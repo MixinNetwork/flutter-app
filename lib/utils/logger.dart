@@ -1,6 +1,10 @@
 import 'package:ansicolor/ansicolor.dart';
 import 'package:flutter/foundation.dart';
 
+// ignore_for_file: avoid_print
+
+const kLogMode = !kReleaseMode;
+
 const _verbosePrefix = '[V]';
 const _debugPrefix = '[D]';
 const _infoPrefix = '[I]';
@@ -25,25 +29,30 @@ String colorizeNonAnsi(String message) {
 }
 
 void v(String message) {
-  debugPrint(_verbosePen('$_verbosePrefix $message'));
+  if (!kLogMode) return;
+  print(_verbosePen('$_verbosePrefix $message'));
 }
 
 void d(String message) {
-  debugPrint(_debugPen('$_debugPrefix $message'));
+  if (!kLogMode) return;
+  print(_debugPen('$_debugPrefix $message'));
 }
 
 void i(String message) {
-  debugPrint(_infoPen('$_infoPrefix $message'));
+  if (!kLogMode) return;
+  print(_infoPen('$_infoPrefix $message'));
 }
 
 void w(String message) {
-  debugPrint(_warningPen('$_warningPrefix $message'));
+  if (!kLogMode) return;
+  print(_warningPen('$_warningPrefix $message'));
 }
 
 void e(String message) {
-  debugPrint(_errorPen('$_errorPrefix $message'));
+  if (!kLogMode) return;
+  print(_errorPen('$_errorPrefix $message'));
 }
 
 void wtf(String message) {
-  debugPrint(_wtfPen('$_wtfPrefix $message'));
+  print(_wtfPen('$_wtfPrefix $message'));
 }
