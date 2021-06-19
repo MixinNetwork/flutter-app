@@ -20,7 +20,7 @@ class IdentityDao extends DatabaseAccessor<SignalDatabase>
   Future<int> deleteByAddress(String address) =>
       (delete(db.identities)..where((tbl) => tbl.address.equals(address))).go();
 
-  Future<Identitie> getLocalIdentity() async =>
+  Future<Identitie?> getLocalIdentity() async =>
       (select(db.identities)..where((tbl) => tbl.address.equals('-1')))
-          .getSingle();
+          .getSingleOrNull();
 }
