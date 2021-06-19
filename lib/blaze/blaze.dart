@@ -66,7 +66,7 @@ class Blaze {
       _host,
       protocols: ['Mixin-Blaze-1'],
       headers: {'Authorization': 'Bearer $token'},
-      pingInterval: const Duration(seconds: 4),
+      pingInterval: const Duration(seconds: 10),
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
@@ -148,11 +148,7 @@ class Blaze {
   Future<void> _sendListPending() async {
     final offset =
         await database.floodMessagesDao.getLastBlazeMessageCreatedAt();
-    // ignore: prefer_typing_uninitialized_variables
-    var param = '';
-    if (offset != null) {
-      param = '$offset';
-    }
+    final param = offset?.toIso8601String();
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     d('blaze send: ${m.toJson()}');
     await _sendGZip(m);
