@@ -716,7 +716,8 @@ class _List extends HookWidget {
               .read<AccountServer>()
               .blaze
               .connectedStateStreamController
-              .stream,
+              .stream
+              .distinct(),
           initialData: true,
         ).data ??
         false;
