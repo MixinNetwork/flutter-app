@@ -7,6 +7,7 @@ import Foundation
 
 import bitsdojo_window_macos
 import desktop_lifecycle
+import device_info_plus_macos
 import file_selector_macos
 import flutter_app_icon_badge
 import flutter_local_notifications
@@ -20,6 +21,7 @@ import window_size
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   BitsdojoWindowPlugin.register(with: registry.registrar(forPlugin: "BitsdojoWindowPlugin"))
   DesktopLifecyclePlugin.register(with: registry.registrar(forPlugin: "DesktopLifecyclePlugin"))
+  DeviceInfoPlusMacosPlugin.register(with: registry.registrar(forPlugin: "DeviceInfoPlusMacosPlugin"))
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
   FlutterAppIconBadgePlugin.register(with: registry.registrar(forPlugin: "FlutterAppIconBadgePlugin"))
   FlutterLocalNotificationsPlugin.register(with: registry.registrar(forPlugin: "FlutterLocalNotificationsPlugin"))

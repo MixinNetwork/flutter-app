@@ -19,6 +19,7 @@ import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
 import '../../../utils/logger.dart';
+import '../../../utils/platform.dart';
 import '../../home/bloc/multi_auth_cubit.dart';
 
 part 'landing_state.dart';
@@ -136,11 +137,9 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       // ignore: avoid_dynamic_calls
       final sessionId = msg['session_id'];
       AccountKeyValue.instance.primarySessionId = sessionId;
-      String? appVersion;
-      if (Platform.isMacOS) {
-        final info = await PackageInfo.fromPlatform();
-        appVersion = '${info.version}(${info.buildNumber})';
-      }
+      final info = await PackageInfo.fromPlatform();
+      final appVersion = '${info.version}(${info.buildNumber})';
+      final platformVersion = await getPlatformVersion();
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
           // ignore: avoid_dynamic_calls
@@ -148,12 +147,12 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           // ignore: avoid_dynamic_calls
           userId: msg['user_id'],
           sessionId: sessionId,
-          platform: 'Desktop',
           purpose: 'SESSION',
           sessionSecret: base64Encode(edKeyPair.publicKey!.bytes),
-          appVersion: appVersion ?? '0.0.1',
+          appVersion: appVersion,
           registrationId: registrationId,
-          platformVersion: 'OS X 10.15.6',
+          platform: 'Desktop',
+          platformVersion: platformVersion,
         ),
       );
 
