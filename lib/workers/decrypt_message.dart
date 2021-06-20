@@ -112,10 +112,7 @@ class DecryptMessage extends Injector {
       var status = MessageStatus.delivered;
       _remoteStatus = MessageStatus.delivered;
 
-      if (data.userId == accountId) {
-        status = data.status;
-        _remoteStatus = data.status;
-      } else if (_conversationId == data.conversationId &&
+      if (_conversationId == data.conversationId &&
           DesktopLifecycle.instance.isActive.value) {
         _remoteStatus = MessageStatus.read;
         status = MessageStatus.read;
@@ -156,12 +153,10 @@ class DecryptMessage extends Injector {
       _remoteStatus = MessageStatus.delivered;
     }
 
-    if (data.userId != accountId) {
-      await _updateRemoteMessageStatus(
-        floodMessage.messageId,
-        _remoteStatus,
-      );
-    }
+    await _updateRemoteMessageStatus(
+      floodMessage.messageId,
+      _remoteStatus,
+    );
 
     await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
