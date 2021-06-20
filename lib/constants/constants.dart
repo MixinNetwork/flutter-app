@@ -9,6 +9,7 @@ const sendingMessage = 'SENDING_MESSAGE';
 const recallMessage = 'RECALL_MESSAGE';
 const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
+const createCall = 'CREATE_CALL';
 const listPendingMessage = 'LIST_PENDING_MESSAGES';
 const resendKey = 'RESEND_KEY';
 const noKey = 'NO_KEY';

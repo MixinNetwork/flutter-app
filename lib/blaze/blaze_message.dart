@@ -43,6 +43,13 @@ class BlazeMessage {
   MixinError? error;
 
   Map<String, dynamic> toJson() => _$BlazeMessageToJson(this);
+
+  // ignore: prefer_expression_function_bodies
+  bool isReceiveMessageAction() {
+    return action == createMessage ||
+        action == acknowledgeMessageReceipt ||
+        action == createCall;
+  }
 }
 
 BlazeMessage createParamBlazeMessage(BlazeMessageParam param) =>

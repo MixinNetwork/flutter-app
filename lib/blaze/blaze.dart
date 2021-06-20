@@ -94,12 +94,12 @@ class Blaze {
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
         connectedStateStreamController.add(true);
-
-        d('blazeMessage: ${blazeMessage.toJson()}');
+        d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == errorAction &&
             blazeMessage.error?.code == 401) {
           await _reconnect();
+          return;
         }
 
         if (blazeMessage.error == null) {
@@ -118,29 +118,9 @@ class Blaze {
           }
         }
 
-        BlazeMessageData? data;
-        try {
-          data = BlazeMessageData.fromJson(blazeMessage.data);
-        } catch (e) {
-          d('blazeMessage not a BlazeMessageData');
-          return;
-        }
-        if (blazeMessage.action == createMessage) {
-          if (data.userId == userId && data.category == null) {
-            await makeMessageStatus(data.messageId, data.status);
-          } else {
-            await database.floodMessagesDao.insert(FloodMessage(
-                messageId: data.messageId,
-                data: await jsonEncodeWithIsolate(data),
-                createdAt: data.createdAt));
-          }
-        } else if (blazeMessage.action == acknowledgeMessageReceipt) {
-          await makeMessageStatus(data.messageId, data.status);
-        } else {
-          await database.jobsDao.insertNoReplace(createAckJob(
-              acknowledgeMessageReceipts,
-              data.messageId,
-              MessageStatus.delivered));
+        if (blazeMessage.data != null &&
+            blazeMessage.isReceiveMessageAction()) {
+          await handleReceiveMessage(blazeMessage);
         }
       },
       onError: (error, s) {
@@ -154,6 +134,32 @@ class Blaze {
       cancelOnError: true,
     );
     _sendListPending();
+  }
+
+  Future<void> handleReceiveMessage(BlazeMessage blazeMessage) async {
+    BlazeMessageData? data;
+    try {
+      data = BlazeMessageData.fromJson(blazeMessage.data);
+    } catch (e) {
+      d('blazeMessage not a BlazeMessageData');
+      return;
+    }
+    if (blazeMessage.action == acknowledgeMessageReceipt) {
+      await makeMessageStatus(data.messageId, data.status);
+      // TODO insert offset
+    } else if (blazeMessage.action == createMessage) {
+      if (data.userId == userId && data.category == null) {
+        await makeMessageStatus(data.messageId, data.status);
+      } else {
+        await database.floodMessagesDao.insert(FloodMessage(
+            messageId: data.messageId,
+            data: await jsonEncodeWithIsolate(data),
+            createdAt: data.createdAt));
+      }
+    } else {
+      await database.jobsDao.insertNoReplace(createAckJob(
+          acknowledgeMessageReceipts, data.messageId, MessageStatus.delivered));
+    }
   }
 
   Future<void> updateRemoteMessageStatus(
