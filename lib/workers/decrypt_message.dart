@@ -93,10 +93,21 @@ class DecryptMessage extends Injector {
 
   late MessageStatus _remoteStatus;
 
+  Future<bool> isExistMessage(String messageId) async {
+    final message =
+        await database.messagesDao.findMessageByMessageId(messageId);
+    return message != null;
+  }
+
   Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
         await jsonDecodeWithIsolate(floodMessage.data));
     d('DecryptMessage process data: ${data.toJson()}');
+    if (await isExistMessage(data.messageId)) {
+      await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
+      await database.floodMessagesDao.deleteFloodMessage(floodMessage);
+      return;
+    }
     try {
       var status = MessageStatus.delivered;
       _remoteStatus = MessageStatus.delivered;
