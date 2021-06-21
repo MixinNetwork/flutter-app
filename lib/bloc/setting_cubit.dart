@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:equatable/equatable.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:provider/provider.dart';
 
 class SettingState extends Equatable {
   const SettingState({this.brightness = 0});
@@ -75,4 +78,13 @@ class SettingCubit extends HydratedCubit<SettingState> {
 
   @override
   Map<String, dynamic> toJson(SettingState state) => state.toMap();
+}
+
+extension SameBrightness on BuildContext {
+  bool get sameBrightness {
+    if (!Platform.isMacOS) return false;
+    final platformBrightness = MediaQuery.of(this).platformBrightness;
+    return (watch<SettingCubit>().brightness ?? platformBrightness) ==
+        platformBrightness;
+  }
 }

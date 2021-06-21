@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/bloc/setting_cubit.dart';
 import 'package:provider/provider.dart';
 
 import '../../bloc/bloc_converter.dart';
@@ -32,7 +33,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: BrightnessData.themeOf(context).primary,
+        backgroundColor: context.sameBrightness
+            ? Colors.transparent
+            : BrightnessData.themeOf(context).primary,
         body: SizePolicyRow(
           children: [
             SizePolicyData(
