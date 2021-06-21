@@ -7,7 +7,7 @@ import '../ui/home/bloc/conversation_cubit.dart';
 
 extension ActionUtils on BuildContext {
   bool openAction(String actionText) {
-    if (actionText.startsWith('input:/')) {
+    if (actionText.startsWith('input:')) {
       final content = actionText.substring(6).trim();
       final conversationItem = read<ConversationCubit>().state;
       if (content.isNotEmpty == true && conversationItem != null) {
