@@ -114,6 +114,7 @@ class DecryptMessage extends Injector {
         // _remoteStatus = MessageStatus.read;
         // status = MessageStatus.read;
       }
+      _remoteStatus = MessageStatus.delivered;
 
       await syncConversion(data.conversationId);
       final category = data.category;
