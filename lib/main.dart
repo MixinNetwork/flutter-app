@@ -45,10 +45,6 @@ Future<void> main() async {
         if (!kLogMode) return;
         wtf('$error, $stack');
       },
-      errorCallback: (_, __, ___, Object error, StackTrace? stack) {
-        if (!kLogMode) return;
-        wtf('$error, $stack');
-      },
       print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         if (!kLogMode) return;
         parent.print(zone, colorizeNonAnsi(line));
