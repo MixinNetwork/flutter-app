@@ -8,7 +8,6 @@ import '../../../../utils/action_utils.dart';
 import '../../../../utils/color_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../brightness_observer.dart';
-import '../../../interacter_decorated_box.dart';
 import '../../message_bubble.dart';
 import 'action_data.dart';
 
@@ -23,40 +22,33 @@ class ActionMessage extends StatelessWidget {
   final bool isCurrentUser;
 
   @override
-  Widget build(BuildContext context) => MessageBubble(
-        messageId: message.messageId,
-        isCurrentUser: isCurrentUser,
-        showBubble: false,
-        padding: EdgeInsets.zero,
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(left: 8, bottom: 4),
         child: Wrap(
           spacing: 10,
           runSpacing: 8,
           children: List<Widget>.from(
             // ignore: avoid_dynamic_calls
             jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
-                  (e) => InteractableDecoratedBox.color(
-                    onTap: () {
+                  (e) => ElevatedButton(
+                    onPressed: () {
                       // ignore: avoid_dynamic_calls
                       if (context.openAction(e.action)) return;
                       // ignore: avoid_dynamic_calls
                       openUri(context, e.action);
                     },
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: BrightnessData.themeOf(context).primary,
+                    style: ElevatedButton.styleFrom(
+                      primary: BrightnessData.themeOf(context).primary,
                     ),
+                    // ignore: avoid_dynamic_calls
                     child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        // ignore: avoid_dynamic_calls
-                        e.label,
-                        style: TextStyle(
-                          fontSize: 15,
-                          // ignore: avoid_dynamic_calls
-                          color: colorHex(e.color) ?? Colors.black,
-                        ),
-                      ),
-                    ),
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        child: Text(e.label,
+                            style: TextStyle(
+                              fontSize: 15,
+                              // ignore: avoid_dynamic_calls
+                              color: colorHex(e.color) ?? Colors.black,
+                            ))),
                   ),
                 ),
           ),
