@@ -11,6 +11,7 @@ import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/color_utils.dart';
+import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/dialog.dart';
@@ -59,37 +60,35 @@ class CircleManagerPage extends HookWidget {
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).background,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).circleTitle(name)),
+        title: Text(Localization.of(context).circles),
         actions: [
-          MixinButton(
-            backgroundTransparent: true,
-            onTap: () async {
-              final conversation = context.read<ConversationCubit>().state;
-              if (conversation?.conversationId.isEmpty ?? true) return;
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ActionButton(
+              name: Resources.assetsImagesIcAddSvg,
+              onTap: () async {
+                final conversation = context.read<ConversationCubit>().state;
+                if (conversation?.conversationId.isEmpty ?? true) return;
 
-              final name = await showMixinDialog<String>(
-                context: context,
-                child: EditDialog(
-                  title: Text(Localization.of(context).circles),
-                  hintText: Localization.of(context).editCircleName,
-                ),
-              );
-
-              await runFutureWithToast(
-                context,
-                context.read<AccountServer>().createCircle(name!, [
-                  CircleConversationRequest(
-                    action: CircleConversationAction.add,
-                    conversationId: conversation!.conversationId,
-                    userId: conversation.userId,
+                final name = await showMixinDialog<String>(
+                  context: context,
+                  child: EditDialog(
+                    title: Text(Localization.of(context).circles),
+                    hintText: Localization.of(context).editCircleName,
                   ),
-                ]),
-              );
-            },
-            child: SvgPicture.asset(
-              Resources.assetsImagesIcAddSvg,
-              width: 16,
-              height: 16,
+                );
+
+                await runFutureWithToast(
+                  context,
+                  context.read<AccountServer>().createCircle(name!, [
+                    CircleConversationRequest(
+                      action: CircleConversationAction.add,
+                      conversationId: conversation!.conversationId,
+                      userId: conversation.userId,
+                    ),
+                  ]),
+                );
+              },
             ),
           ),
         ],
