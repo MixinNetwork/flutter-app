@@ -61,391 +61,381 @@ class ChatInfoPage extends HookWidget {
     final isGroupConversation = conversation.isGroup!;
     final muting = conversation.conversation?.isMute == true;
 
-    return Column(
-      children: [
-        MixinAppBar(
-          actions: [
-            ActionButton(
-              name: Resources.assetsImagesIcCloseSvg,
-              color: BrightnessData.themeOf(context).icon,
-              onTap: () => Navigator.pop(context),
+    return Scaffold(
+      appBar: MixinAppBar(
+        actions: [
+          ActionButton(
+            name: Resources.assetsImagesIcCloseSvg,
+            color: BrightnessData.themeOf(context).icon,
+            onTap: () => Navigator.pop(context),
+          ),
+        ],
+      ),
+      backgroundColor: BrightnessData.themeOf(context).popUp,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 8),
+            const ConversationAvatar(size: 90),
+            const SizedBox(height: 10),
+            const ConversationName(fontSize: 18),
+            const SizedBox(height: 4),
+            const ConversationIDOrCount(fontSize: 12),
+            _AddToContactsButton(conversation),
+            const SizedBox(height: 12),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 36),
+              child: const ConversationBio(fontSize: 14),
             ),
-          ],
-        ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const SizedBox(height: 8),
-                const ConversationAvatar(size: 90),
-                const SizedBox(height: 10),
-                const ConversationName(fontSize: 18),
-                const SizedBox(height: 4),
-                const ConversationIDOrCount(fontSize: 12),
-                _AddToContactsButton(conversation),
-                const SizedBox(height: 12),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 36),
-                  child: const ConversationBio(fontSize: 14),
+            const SizedBox(height: 32),
+            if (isGroupConversation)
+              CellGroup(
+                child: CellItem(
+                  title: Text(
+                    Localization.of(context).groupParticipants,
+                  ),
+                  onTap: () => context
+                      .read<ChatSideCubit>()
+                      .pushPage(ChatSideCubit.participants),
                 ),
-                const SizedBox(height: 32),
-                if (isGroupConversation)
-                  CellGroup(
-                    child: CellItem(
-                      title: Text(
-                        Localization.of(context).groupParticipants,
-                      ),
-                      onTap: () => context
-                          .read<ChatSideCubit>()
-                          .pushPage(ChatSideCubit.participants),
-                    ),
-                  ),
-                if (!isGroupConversation)
-                  CellGroup(
-                    child: CellItem(
-                      title: Text(Localization.of(context).shareContact),
-                      onTap: () async {
-                        final result = await showConversationSelector(
-                          context: context,
-                          singleSelect: true,
-                          title: Localization.of(context).shareContact,
-                          onlyContact: false,
-                        );
+              ),
+            if (!isGroupConversation)
+              CellGroup(
+                child: CellItem(
+                  title: Text(Localization.of(context).shareContact),
+                  onTap: () async {
+                    final result = await showConversationSelector(
+                      context: context,
+                      singleSelect: true,
+                      title: Localization.of(context).shareContact,
+                      onlyContact: false,
+                    );
 
-                        if (result.isEmpty) return;
-                        final conversationId = result[0].conversationId;
+                    if (result.isEmpty) return;
+                    final conversationId = result[0].conversationId;
 
-                        assert(!(result[0].isGroup && result[0].userId != null),
-                            'group conversation should not contains userId!');
+                    assert(!(result[0].isGroup && result[0].userId != null),
+                        'group conversation should not contains userId!');
 
-                        await runFutureWithToast(
-                            context,
-                            accountServer.sendContactMessage(
-                              conversation.userId!,
-                              conversation.name!,
-                              isPlain(result.first.isGroup, result.first.isBot),
-                              conversationId: conversationId,
-                              recipientId: result[0].userId,
-                            ));
-                      },
-                    ),
-                  ),
-                CellGroup(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CellItem(
-                        title: Text(Localization.of(context).sharedMedia),
-                        onTap: () => context
-                            .read<ChatSideCubit>()
-                            .pushPage(ChatSideCubit.sharedMedia),
-                      ),
-                      CellItem(
-                        title: Text(
-                          Localization.of(context).searchMessageHistory,
-                          maxLines: 1,
-                        ),
-                        onTap: () => context
-                            .read<ChatSideCubit>()
-                            .pushPage(ChatSideCubit.searchMessageHistory),
-                      ),
-                    ],
-                  ),
+                    await runFutureWithToast(
+                        context,
+                        accountServer.sendContactMessage(
+                          conversation.userId!,
+                          conversation.name!,
+                          isPlain(result.first.isGroup, result.first.isBot),
+                          conversationId: conversationId,
+                          recipientId: result[0].userId,
+                        ));
+                  },
                 ),
-                if (isGroupConversation &&
-                    (userParticipant?.role == ParticipantRole.owner ||
-                        userParticipant?.role == ParticipantRole.admin))
-                  CellGroup(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Builder(builder: (context) {
-                          final announcementTitle =
-                              announcement?.isEmpty ?? true
-                                  ? Localization.of(context).addAnnouncement
-                                  : Localization.of(context).editAnnouncement;
-                          return CellItem(
-                            title: Text(announcementTitle),
-                            onTap: () async {
-                              final result = await showMixinDialog<String>(
-                                context: context,
-                                child: EditDialog(
-                                  title: Text(announcementTitle),
-                                  editText: announcement ?? '',
-                                ),
-                              );
-                              if (result == null) return;
-
-                              await runFutureWithToast(
-                                context,
-                                context
-                                    .read<AccountServer>()
-                                    .editGroupAnnouncement(
-                                      conversation.conversationId,
-                                      result,
-                                    ),
-                              );
-                            },
-                          );
-                        }),
-                      ],
-                    ),
+              ),
+            CellGroup(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CellItem(
+                    title: Text(Localization.of(context).sharedMedia),
+                    onTap: () => context
+                        .read<ChatSideCubit>()
+                        .pushPage(ChatSideCubit.sharedMedia),
                   ),
-                CellGroup(
-                  child: Column(
-                    children: [
-                      CellItem(
-                        title: Text(muting
-                            ? Localization.of(context).unMute
-                            : Localization.of(context).muted),
-                        description: muting
-                            ? Text(
-                                DateFormat('yyyy/MM/dd, hh:mm a').format(
-                                    conversation.conversation!.validMuteUntil!
-                                        .toLocal()),
-                                style: TextStyle(
-                                  color: BrightnessData.themeOf(context)
-                                      .secondaryText,
-                                  fontSize: 14,
-                                ),
-                              )
-                            : null,
-                        trailing: null,
+                  CellItem(
+                    title: Text(
+                      Localization.of(context).searchMessageHistory,
+                      maxLines: 1,
+                    ),
+                    onTap: () => context
+                        .read<ChatSideCubit>()
+                        .pushPage(ChatSideCubit.searchMessageHistory),
+                  ),
+                ],
+              ),
+            ),
+            if (isGroupConversation &&
+                (userParticipant?.role == ParticipantRole.owner ||
+                    userParticipant?.role == ParticipantRole.admin))
+              CellGroup(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Builder(builder: (context) {
+                      final announcementTitle = announcement?.isEmpty ?? true
+                          ? Localization.of(context).addAnnouncement
+                          : Localization.of(context).editAnnouncement;
+                      return CellItem(
+                        title: Text(announcementTitle),
                         onTap: () async {
-                          final isGroup = conversation.isGroup ?? false;
-                          if (muting) {
-                            await runFutureWithToast(
-                              context,
-                              context.read<AccountServer>().unMuteConversation(
-                                    conversationId: isGroup
-                                        ? conversation.conversationId
-                                        : null,
-                                    userId:
-                                        isGroup ? null : conversation.userId,
-                                  ),
-                            );
-                            return;
-                          }
-
-                          final result = await showMixinDialog<int?>(
-                              context: context, child: const MuteDialog());
+                          final result = await showMixinDialog<String>(
+                            context: context,
+                            child: EditDialog(
+                              title: Text(announcementTitle),
+                              editText: announcement ?? '',
+                            ),
+                          );
                           if (result == null) return;
 
                           await runFutureWithToast(
-                              context,
-                              context.read<AccountServer>().muteConversation(
-                                    result,
-                                    conversationId: isGroup
-                                        ? conversation.conversationId
-                                        : null,
-                                    userId:
-                                        isGroup ? null : conversation.userId,
-                                  ));
-                        },
-                      ),
-                      if (!isGroupConversation)
-                        CellItem(
-                          title: Text(Localization.of(context).editName),
-                          trailing: null,
-                          onTap: () async {
-                            final name = await showMixinDialog<String>(
-                              context: context,
-                              child: EditDialog(
-                                editText: conversation.name ?? '',
-                                title: Text(Localization.of(context).editName),
-                                hintText:
-                                    Localization.of(context).conversationName,
-                                positiveAction: Localization.of(context).change,
-                              ),
-                            );
-                            if (name?.isEmpty ?? true) return;
-
-                            await runFutureWithToast(
-                              context,
-                              accountServer.editContactName(
-                                  conversation.userId!, name!),
-                            );
-                          },
-                        ),
-                    ],
-                  ),
-                ),
-                CellGroup(
-                  child: CellItem(
-                    title: Text(Localization.of(context).circles),
-                    description: const _CircleNames(),
-                    onTap: () => context.read<ChatSideCubit>().pushPage(
-                          ChatSideCubit.circles,
-                          arguments: Tuple2<String, String>(
-                            conversation.name!,
-                            conversation.conversationId,
-                          ),
-                        ),
-                  ),
-                ),
-                CellGroup(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (conversation.relationship ==
-                          UserRelationship.blocking)
-                        CellItem(
-                          title: Text(Localization.of(context).unblock),
-                          color: BrightnessData.themeOf(context).red,
-                          trailing: null,
-                          onTap: () async {
-                            final result = await showConfirmMixinDialog(
-                              context,
-                              Localization.of(context).unblock,
-                            );
-                            if (!result) return;
-
-                            await runFutureWithToast(
-                              context,
-                              accountServer.unblockUser(conversation.userId!),
-                            );
-                          },
-                        ),
-                      if (!isGroupConversation && !conversation.isStranger!)
-                        Builder(builder: (context) {
-                          final title = conversation.isBot!
-                              ? Localization.of(context).removeBot
-                              : Localization.of(context).removeContact;
-                          return CellItem(
-                            title: Text(title),
-                            color: BrightnessData.themeOf(context).red,
-                            trailing: null,
-                            onTap: () async {
-                              final result = await showConfirmMixinDialog(
-                                context,
-                                title,
-                              );
-                              if (!result) return;
-
-                              await runFutureWithToast(
-                                context,
-                                accountServer.removeUser(conversation.userId!),
-                              );
-                            },
-                          );
-                        }),
-                      if (conversation.isStranger!)
-                        CellItem(
-                          title: Text(Localization.of(context).block),
-                          color: BrightnessData.themeOf(context).red,
-                          trailing: null,
-                          onTap: () async {
-                            final result = await showConfirmMixinDialog(
-                              context,
-                              Localization.of(context).block,
-                            );
-                            if (!result) return;
-
-                            await runFutureWithToast(
-                              context,
-                              accountServer.blockUser(conversation.userId!),
-                            );
-                          },
-                        ),
-                      CellItem(
-                        title: Text(Localization.of(context).clearChat),
-                        color: BrightnessData.themeOf(context).red,
-                        trailing: null,
-                        onTap: () async {
-                          final result = await showConfirmMixinDialog(
                             context,
-                            Localization.of(context).clearChat,
+                            context.read<AccountServer>().editGroupAnnouncement(
+                                  conversation.conversationId,
+                                  result,
+                                ),
                           );
-                          if (!result) return;
-
-                          await accountServer.database.messagesDao
-                              .deleteMessageByConversationId(
-                                  conversation.conversationId);
-                          context.read<MessageBloc>().reload();
                         },
-                      ),
-                      if (conversation.isGroup!)
-                        if (userParticipant != null)
-                          CellItem(
-                            title: Text(Localization.of(context).exitGroup),
-                            color: BrightnessData.themeOf(context).red,
-                            trailing: null,
-                            onTap: () async {
-                              final result = await showConfirmMixinDialog(
-                                context,
-                                Localization.of(context).exitGroup,
-                              );
-                              if (!result) return;
-
-                              await runFutureWithToast(
-                                context,
-                                accountServer
-                                    .exitGroup(conversation.conversationId),
-                              );
-                            },
-                          )
-                        else
-                          CellItem(
-                            title: Text(Localization.of(context).deleteGroup),
-                            color: BrightnessData.themeOf(context).red,
-                            trailing: null,
-                            onTap: () async {
-                              final result = await showConfirmMixinDialog(
-                                context,
-                                Localization.of(context).deleteGroup,
-                              );
-                              if (!result) return;
-
-                              await context
-                                  .read<AccountServer>()
-                                  .database
-                                  .messagesDao
-                                  .deleteMessageByConversationId(
-                                      conversation.conversationId);
-                              await context
-                                  .read<AccountServer>()
-                                  .database
-                                  .conversationDao
-                                  .deleteConversation(
-                                    conversation.conversationId,
-                                  );
-                              if (context
-                                      .read<ConversationCubit>()
-                                      .state
-                                      ?.conversationId ==
-                                  conversation.conversationId) {
-                                context.read<ConversationCubit>().unselected();
-                              }
-                            },
-                          ),
-                    ],
-                  ),
+                      );
+                    }),
+                  ],
                 ),
-                if (!isGroupConversation)
-                  CellGroup(
-                    child: CellItem(
-                      title: Text(Localization.of(context).report),
+              ),
+            CellGroup(
+              child: Column(
+                children: [
+                  CellItem(
+                    title: Text(muting
+                        ? Localization.of(context).unMute
+                        : Localization.of(context).muted),
+                    description: muting
+                        ? Text(
+                            DateFormat('yyyy/MM/dd, hh:mm a').format(
+                                conversation.conversation!.validMuteUntil!
+                                    .toLocal()),
+                            style: TextStyle(
+                              color:
+                                  BrightnessData.themeOf(context).secondaryText,
+                              fontSize: 14,
+                            ),
+                          )
+                        : null,
+                    trailing: null,
+                    onTap: () async {
+                      final isGroup = conversation.isGroup ?? false;
+                      if (muting) {
+                        await runFutureWithToast(
+                          context,
+                          context.read<AccountServer>().unMuteConversation(
+                                conversationId: isGroup
+                                    ? conversation.conversationId
+                                    : null,
+                                userId: isGroup ? null : conversation.userId,
+                              ),
+                        );
+                        return;
+                      }
+
+                      final result = await showMixinDialog<int?>(
+                          context: context, child: const MuteDialog());
+                      if (result == null) return;
+
+                      await runFutureWithToast(
+                          context,
+                          context.read<AccountServer>().muteConversation(
+                                result,
+                                conversationId: isGroup
+                                    ? conversation.conversationId
+                                    : null,
+                                userId: isGroup ? null : conversation.userId,
+                              ));
+                    },
+                  ),
+                  if (!isGroupConversation)
+                    CellItem(
+                      title: Text(Localization.of(context).editName),
+                      trailing: null,
+                      onTap: () async {
+                        final name = await showMixinDialog<String>(
+                          context: context,
+                          child: EditDialog(
+                            editText: conversation.name ?? '',
+                            title: Text(Localization.of(context).editName),
+                            hintText: Localization.of(context).conversationName,
+                            positiveAction: Localization.of(context).change,
+                          ),
+                        );
+                        if (name?.isEmpty ?? true) return;
+
+                        await runFutureWithToast(
+                          context,
+                          accountServer.editContactName(
+                              conversation.userId!, name!),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+            CellGroup(
+              child: CellItem(
+                title: Text(Localization.of(context).circles),
+                description: const _CircleNames(),
+                onTap: () => context.read<ChatSideCubit>().pushPage(
+                      ChatSideCubit.circles,
+                      arguments: Tuple2<String, String>(
+                        conversation.name!,
+                        conversation.conversationId,
+                      ),
+                    ),
+              ),
+            ),
+            CellGroup(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (conversation.relationship == UserRelationship.blocking)
+                    CellItem(
+                      title: Text(Localization.of(context).unblock),
                       color: BrightnessData.themeOf(context).red,
                       trailing: null,
                       onTap: () async {
                         final result = await showConfirmMixinDialog(
                           context,
-                          Localization.of(context).reportWarning,
+                          Localization.of(context).unblock,
                         );
                         if (!result) return;
 
                         await runFutureWithToast(
                           context,
-                          accountServer.report(conversation.conversationId),
+                          accountServer.unblockUser(conversation.userId!),
                         );
                       },
                     ),
+                  if (!isGroupConversation && !conversation.isStranger!)
+                    Builder(builder: (context) {
+                      final title = conversation.isBot!
+                          ? Localization.of(context).removeBot
+                          : Localization.of(context).removeContact;
+                      return CellItem(
+                        title: Text(title),
+                        color: BrightnessData.themeOf(context).red,
+                        trailing: null,
+                        onTap: () async {
+                          final result = await showConfirmMixinDialog(
+                            context,
+                            title,
+                          );
+                          if (!result) return;
+
+                          await runFutureWithToast(
+                            context,
+                            accountServer.removeUser(conversation.userId!),
+                          );
+                        },
+                      );
+                    }),
+                  if (conversation.isStranger!)
+                    CellItem(
+                      title: Text(Localization.of(context).block),
+                      color: BrightnessData.themeOf(context).red,
+                      trailing: null,
+                      onTap: () async {
+                        final result = await showConfirmMixinDialog(
+                          context,
+                          Localization.of(context).block,
+                        );
+                        if (!result) return;
+
+                        await runFutureWithToast(
+                          context,
+                          accountServer.blockUser(conversation.userId!),
+                        );
+                      },
+                    ),
+                  CellItem(
+                    title: Text(Localization.of(context).clearChat),
+                    color: BrightnessData.themeOf(context).red,
+                    trailing: null,
+                    onTap: () async {
+                      final result = await showConfirmMixinDialog(
+                        context,
+                        Localization.of(context).clearChat,
+                      );
+                      if (!result) return;
+
+                      await accountServer.database.messagesDao
+                          .deleteMessageByConversationId(
+                              conversation.conversationId);
+                      context.read<MessageBloc>().reload();
+                    },
                   ),
-              ],
+                  if (conversation.isGroup!)
+                    if (userParticipant != null)
+                      CellItem(
+                        title: Text(Localization.of(context).exitGroup),
+                        color: BrightnessData.themeOf(context).red,
+                        trailing: null,
+                        onTap: () async {
+                          final result = await showConfirmMixinDialog(
+                            context,
+                            Localization.of(context).exitGroup,
+                          );
+                          if (!result) return;
+
+                          await runFutureWithToast(
+                            context,
+                            accountServer
+                                .exitGroup(conversation.conversationId),
+                          );
+                        },
+                      )
+                    else
+                      CellItem(
+                        title: Text(Localization.of(context).deleteGroup),
+                        color: BrightnessData.themeOf(context).red,
+                        trailing: null,
+                        onTap: () async {
+                          final result = await showConfirmMixinDialog(
+                            context,
+                            Localization.of(context).deleteGroup,
+                          );
+                          if (!result) return;
+
+                          await context
+                              .read<AccountServer>()
+                              .database
+                              .messagesDao
+                              .deleteMessageByConversationId(
+                                  conversation.conversationId);
+                          await context
+                              .read<AccountServer>()
+                              .database
+                              .conversationDao
+                              .deleteConversation(
+                                conversation.conversationId,
+                              );
+                          if (context
+                                  .read<ConversationCubit>()
+                                  .state
+                                  ?.conversationId ==
+                              conversation.conversationId) {
+                            context.read<ConversationCubit>().unselected();
+                          }
+                        },
+                      ),
+                ],
+              ),
             ),
-          ),
+            if (!isGroupConversation)
+              CellGroup(
+                child: CellItem(
+                  title: Text(Localization.of(context).report),
+                  color: BrightnessData.themeOf(context).red,
+                  trailing: null,
+                  onTap: () async {
+                    final result = await showConfirmMixinDialog(
+                      context,
+                      Localization.of(context).reportWarning,
+                    );
+                    if (!result) return;
+
+                    await runFutureWithToast(
+                      context,
+                      accountServer.report(conversation.conversationId),
+                    );
+                  },
+                ),
+              ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
