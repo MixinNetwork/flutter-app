@@ -163,32 +163,38 @@ class ChatPage extends HookWidget {
             chatSideCubit.updateNavigationMode(navigationMode);
 
             final hasPage = navigatorState.pages.isNotEmpty;
+            final showSide = navigationMode || hasPage;
             return Row(
               children: [
                 if (!navigationMode)
-                  SizedBox(
-                    width: boxConstraints.maxWidth -
-                        (hasPage ? kChatSidePageWidth : 0),
+                  Expanded(
                     child: chatContainerPage.child,
                   ),
-                if (navigationMode || hasPage)
-                  SizedBox(
-                    width: navigationMode
-                        ? boxConstraints.maxWidth
-                        : kChatSidePageWidth,
-                    child: ClipRect(
-                      child: Navigator(
-                        onPopPage: (Route<dynamic> route, dynamic result) {
-                          chatSideCubit.onPopPage();
-                          return route.didPop(result);
-                        },
-                        pages: [
-                          if (navigationMode) chatContainerPage,
-                          ...navigatorState.pages,
-                        ],
-                      ),
-                    ),
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  alignment: AlignmentDirectional.centerStart,
+                  child: SizedBox(
+                    width: showSide
+                        ? (navigationMode
+                            ? boxConstraints.maxWidth
+                            : kChatSidePageWidth)
+                        : 0,
+                    height: boxConstraints.maxHeight,
+                    child: showSide
+                        ? Navigator(
+                            onPopPage: (Route<dynamic> route, dynamic result) {
+                              chatSideCubit.onPopPage();
+                              return route.didPop(result);
+                            },
+                            pages: [
+                              if (navigationMode) chatContainerPage,
+                              ...navigatorState.pages,
+                            ],
+                          )
+                        : null,
                   ),
+                ),
               ],
             );
           },
