@@ -162,43 +162,116 @@ class ChatPage extends HookWidget {
                 (kResponsiveNavigationMinWidth + kChatSidePageWidth);
             chatSideCubit.updateNavigationMode(navigationMode);
 
-            final hasPage = navigatorState.pages.isNotEmpty;
-            final showSide = navigationMode || hasPage;
             return Row(
               children: [
                 if (!navigationMode)
                   Expanded(
                     child: chatContainerPage.child,
                   ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  alignment: AlignmentDirectional.centerStart,
-                  child: SizedBox(
-                    width: showSide
-                        ? (navigationMode
-                            ? boxConstraints.maxWidth
-                            : kChatSidePageWidth)
-                        : 0,
-                    height: boxConstraints.maxHeight,
-                    child: showSide
-                        ? Navigator(
-                            onPopPage: (Route<dynamic> route, dynamic result) {
-                              chatSideCubit.onPopPage();
-                              return route.didPop(result);
-                            },
-                            pages: [
-                              if (navigationMode) chatContainerPage,
-                              ...navigatorState.pages,
-                            ],
-                          )
-                        : null,
+                _SideRouter(
+                  chatSideCubit: chatSideCubit,
+                  constraints: boxConstraints,
+                  child: Navigator(
+                    onPopPage: (Route<dynamic> route, dynamic result) {
+                      chatSideCubit.onPopPage();
+                      return route.didPop(result);
+                    },
+                    pages: [
+                      if (navigationMode) chatContainerPage,
+                      ...navigatorState.pages,
+                    ],
                   ),
                 ),
               ],
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _SideRouter extends StatelessWidget {
+  const _SideRouter({
+    Key? key,
+    required this.chatSideCubit,
+    required this.child,
+    required this.constraints,
+  }) : super(key: key);
+
+  final ChatSideCubit chatSideCubit;
+
+  final Widget child;
+
+  final BoxConstraints constraints;
+
+  @override
+  Widget build(BuildContext context) {
+    final navigationMode = chatSideCubit.state.navigationMode;
+    if (navigationMode) {
+      return SizedBox(
+        width: constraints.maxWidth,
+        child: child,
+      );
+    } else {
+      return _AnimatedChatSlide(
+        constraints: constraints,
+        chatSideCubit: chatSideCubit,
+        child: child,
+      );
+    }
+  }
+}
+
+class _AnimatedChatSlide extends HookWidget {
+  const _AnimatedChatSlide({
+    Key? key,
+    required this.chatSideCubit,
+    required this.child,
+    required this.constraints,
+  }) : super(key: key);
+
+  final ChatSideCubit chatSideCubit;
+
+  final Widget child;
+
+  final BoxConstraints constraints;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasPage = chatSideCubit.state.pages.isNotEmpty;
+
+    final controller = useAnimationController(
+      duration: const Duration(milliseconds: 300),
+      lowerBound: 0,
+      upperBound: 1,
+    );
+
+    useEffect(() {
+      if (hasPage) {
+        controller.forward();
+      } else {
+        controller.reverse();
+      }
+    }, [hasPage, controller]);
+
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, child) => SizedBox(
+        width: kChatSidePageWidth *
+            Curves.easeInOut.transform(
+              controller.value,
+            ),
+        height: constraints.maxHeight,
+        child: controller.value != 0 ? child : null,
+      ),
+      child: OverflowBox(
+        alignment: AlignmentDirectional.centerStart,
+        maxHeight: constraints.maxHeight,
+        minHeight: constraints.maxHeight,
+        maxWidth: kChatSidePageWidth,
+        minWidth: kChatSidePageWidth,
+        child: child,
       ),
     );
   }
