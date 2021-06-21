@@ -14,6 +14,8 @@ class MainFlutterWindow: BitsdojoWindow {
         self.titleVisibility = .hidden
         self.titlebarAppearsTransparent = true
         self.isReleasedWhenClosed = false
+        self.styleMask = [self.styleMask, NSWindow.StyleMask.fullSizeContentView]
+        self.isOpaque = false
         
         if #available(macOS 10.14, *) {
             // Adding a NSVisualEffectView to act as a translucent background
