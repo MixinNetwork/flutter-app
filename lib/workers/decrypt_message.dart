@@ -114,8 +114,8 @@ class DecryptMessage extends Injector {
 
       if (_conversationId == data.conversationId &&
           DesktopLifecycle.instance.isActive.value) {
-        _remoteStatus = MessageStatus.read;
-        status = MessageStatus.read;
+        // _remoteStatus = MessageStatus.read;
+        // status = MessageStatus.read;
       }
 
       await syncConversion(data.conversationId);
@@ -223,8 +223,10 @@ class DecryptMessage extends Injector {
     if (data.category == MessageCategory.plainJson) {
       final plainJsonMessage =
           PlainJsonMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
-      if (plainJsonMessage.action == acknowledgeMessageReceipts &&
-          plainJsonMessage.ackMessages?.isNotEmpty == true) {
+      if (plainJsonMessage.action == acknowledgeMessageReceipts) {
+        if (plainJsonMessage.ackMessages?.isNotEmpty != true) {
+          return;
+        }
         await _markMessageStatus(plainJsonMessage.ackMessages!);
       } else if (plainJsonMessage.action == resendMessages) {
         await _processResendMessage(data, plainJsonMessage);
@@ -845,19 +847,16 @@ class DecryptMessage extends Injector {
     }
     await database.jobsDao.insertNoReplace(
         createAckJob(acknowledgeMessageReceipts, messageId, status));
-    if (status == MessageStatus.read) {
-      await database.jobsDao
-          .insert(createAckJob(createMessage, messageId, MessageStatus.read));
-    }
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
     final messageIds = <String>[];
     messages
         .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
-        .forEach((m) {
+        .forEach((m) async {
       if (m.status == 'MENTION_READ') {
-      } else {
+        await database.messageMentionsDao.markMentionRead(m.messageId);
+      } else if (m.status == 'READ') {
         messageIds.add(m.messageId);
       }
     });

@@ -10,6 +10,7 @@ const recallMessage = 'RECALL_MESSAGE';
 const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
 const createCall = 'CREATE_CALL';
+const createKraken = 'CREATE_KRAKEN';
 const listPendingMessage = 'LIST_PENDING_MESSAGES';
 const resendKey = 'RESEND_KEY';
 const noKey = 'NO_KEY';
