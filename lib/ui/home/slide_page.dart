@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/bloc/setting_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -7,6 +6,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
+import '../../bloc/setting_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
@@ -28,7 +28,8 @@ class SlidePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Color color;
-    if (!context.sameBrightness) {
+    final sameBrightness = context.sameBrightness;
+    if (!sameBrightness) {
       color = BrightnessData.themeOf(context).primary;
     } else {
       color = BrightnessData.of(context) == 1.0
@@ -38,11 +39,13 @@ class SlidePage extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: color,
-        border: Border(
-          right: BorderSide(
-            color: BrightnessData.themeOf(context).divider,
-          ),
-        ),
+        border: sameBrightness
+            ? null
+            : Border(
+                right: BorderSide(
+                  color: BrightnessData.themeOf(context).divider,
+                ),
+              ),
       ),
       child: MoveWindow(
         behavior: HitTestBehavior.opaque,

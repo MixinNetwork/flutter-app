@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/bloc/setting_cubit.dart';
 import 'package:provider/provider.dart';
 
 import '../../bloc/bloc_converter.dart';
+import '../../bloc/setting_cubit.dart';
 import '../../generated/l10n.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/brightness_observer.dart';
