@@ -16,6 +16,7 @@ import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../utils/color_utils.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/markdown.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../brightness_observer.dart';
@@ -99,12 +100,19 @@ class QuoteMessage extends HookWidget {
       }
 
       if (type.isLive) {
+        final placeholder = quote.thumbImage != null
+            ? ImageByBase64(quote.thumbImage!)
+            : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
-          image: ImageByBase64(quote.thumbImage!),
+          image: CacheImage(
+            quote.thumbUrl,
+            placeholder: (_, __) => placeholder,
+            errorWidget: (_, __, ___) => placeholder,
+          ),
           icon: SvgPicture.asset(Resources.assetsImagesLiveSvg),
           description: Localization.of(context).live,
           inputMode: inputMode,
@@ -214,7 +222,9 @@ class QuoteMessage extends HookWidget {
           inputMode: inputMode,
         );
       }
-    } catch (_) {}
+    } catch (e, s) {
+      w('quote message error: $e, $s');
+    }
 
     return _QuoteMessageBase(
       messageId: messageId,
