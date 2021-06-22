@@ -67,11 +67,11 @@ K _$enumDecode<K, V>(
 }
 
 const _$MessageStatusEnumMap = {
+  MessageStatus.failed: 'FAILED',
+  MessageStatus.unknown: 'UNKNOWN',
   MessageStatus.pending: 'PENDING',
   MessageStatus.sending: 'SENDING',
   MessageStatus.sent: 'SENT',
   MessageStatus.delivered: 'DELIVERED',
   MessageStatus.read: 'READ',
-  MessageStatus.failed: 'FAILED',
-  MessageStatus.unknown: 'UNKNOWN',
 };

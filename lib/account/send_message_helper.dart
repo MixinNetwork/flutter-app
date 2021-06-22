@@ -17,6 +17,7 @@ import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../db/dao/jobs_dao.dart';
 import '../db/dao/messages_dao.dart';
+import '../db/dao/participants_dao.dart';
 import '../db/extension/message.dart' show QueteMessage;
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
@@ -26,13 +27,20 @@ import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
 import '../utils/datetime_format_utils.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/reg_exp_utils.dart';
 
 const _kEnableImageBlurHashThumb = false;
 
 class SendMessageHelper {
-  SendMessageHelper(this._messagesDao, this._jobsDao, this._attachmentUtil);
+  SendMessageHelper(
+    this._messagesDao,
+    this._jobsDao,
+    this._participantsDao,
+    this._attachmentUtil,
+  );
 
   final MessagesDao _messagesDao;
+  final ParticipantsDao _participantsDao;
   final JobsDao _jobsDao;
   final AttachmentUtil _attachmentUtil;
 
@@ -43,10 +51,20 @@ class SendMessageHelper {
     String content, {
     String? quoteMessageId,
   }) async {
-    final category =
+    var category =
         isPlain ? MessageCategory.plainText : MessageCategory.signalText;
     final quoteMessage =
         await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+
+    String? recipientId;
+    final botNumber = botNumberStartRegExp.firstMatch(content)?[1];
+    if (botNumber?.isNotEmpty == true) {
+      recipientId = await _participantsDao
+          .userIdByIdentityNumber(conversationId, botNumber!)
+          .getSingleOrNull();
+      category = recipientId != null ? MessageCategory.plainText : category;
+    }
+
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -60,7 +78,11 @@ class SendMessageHelper {
     );
 
     await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _jobsDao.insertSendingJob(
+      message.messageId,
+      conversationId,
+      recipientId,
+    );
   }
 
   Future<void> sendImageMessage({
