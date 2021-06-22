@@ -242,7 +242,18 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
             .get();
         final ids =
             list.where((element) => element != null).cast<String>().toList();
-        await markMessageRead(userId, ids);
+        final markMessageReadIds = await (db.selectOnly(db.messages)
+              ..addColumns([db.messages.messageId])
+              ..where(db.messages.conversationId.equals(conversationId) &
+                  db.messages.userId.equals(userId) &
+                  db.messages.status.isIn(['SENT', 'DELIVERED'])))
+            .map((row) => row.read(db.messages.messageId))
+            .get();
+        await markMessageRead(
+            userId,
+            markMessageReadIds
+                .where((element) => element != null)
+                .cast<String>());
         await takeUnseen(userId, conversationId);
         return ids;
       });
