@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/account/account_server.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/messages_dao.dart';
 import '../../../db/database.dart';
