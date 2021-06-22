@@ -23,43 +23,57 @@ class ActionMessage extends StatelessWidget {
   final bool isCurrentUser;
 
   @override
-  Widget build(BuildContext context) => MessageBubble(
-        messageId: message.messageId,
-        isCurrentUser: isCurrentUser,
-        showBubble: false,
-        padding: EdgeInsets.zero,
-        child: Wrap(
-          spacing: 10,
-          runSpacing: 8,
-          children: List<Widget>.from(
-            // ignore: avoid_dynamic_calls
-            jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
-                  (e) => InteractableDecoratedBox.color(
-                    onTap: () {
-                      // ignore: avoid_dynamic_calls
-                      if (context.openAction(e.action)) return;
-                      // ignore: avoid_dynamic_calls
-                      openUri(context, e.action);
-                    },
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: BrightnessData.themeOf(context).primary,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Text(
-                        // ignore: avoid_dynamic_calls
-                        e.label,
-                        style: TextStyle(
-                          fontSize: 15,
+  Widget build(BuildContext context) {
+    final bubbleClipper = BubbleClipper(
+      currentUser: false,
+      showNip: false,
+      nipPadding: false,
+    );
+
+    return MessageBubble(
+      messageId: message.messageId,
+      isCurrentUser: isCurrentUser,
+      showBubble: false,
+      padding: EdgeInsets.zero,
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 6,
+        children: List<Widget>.from(
+          // ignore: avoid_dynamic_calls
+          jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
+                (e) => InteractableDecoratedBox.color(
+                  cursor: MaterialStateMouseCursor.clickable,
+                  onTap: () {
+                    // ignore: avoid_dynamic_calls
+                    if (context.openAction(e.action)) return;
+                    // ignore: avoid_dynamic_calls
+                    openUri(context, e.action);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(1),
+                    child: CustomPaint(
+                      painter: BubblePainter(
+                        color: BrightnessData.themeOf(context).primary,
+                        clipper: bubbleClipper,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Text(
                           // ignore: avoid_dynamic_calls
-                          color: colorHex(e.color) ?? Colors.black,
+                          e.label,
+                          style: TextStyle(
+                            fontSize: 15,
+                            // ignore: avoid_dynamic_calls
+                            color: colorHex(e.color) ?? Colors.black,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-          ),
+              ),
         ),
-      );
+      ),
+    );
+  }
 }
