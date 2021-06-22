@@ -18,6 +18,7 @@ class ConversationFilterState extends Equatable {
         friends,
         bots,
         keyword,
+        recentConversations,
       ];
 
   ConversationFilterState copyWith({
