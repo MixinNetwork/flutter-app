@@ -180,7 +180,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     Iterable<String> messageIds,
   ) async {
     final result = await (db.update(db.messages)
-          ..where((tbl) => tbl.messageId.isIn(messageIds)))
+          ..where((tbl) =>
+              tbl.messageId.isIn(messageIds) &
+              tbl.status.equals('FAILED').not()))
         .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
     return result;
