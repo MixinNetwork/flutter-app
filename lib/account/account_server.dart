@@ -122,7 +122,7 @@ class AccountServer {
     DesktopLifecycle.instance.isActive.addListener(() {
       final active = DesktopLifecycle.instance.isActive.value;
       if (active && _activeConversationId != null) {
-        _markRead(_activeConversationId!);
+        markRead(_activeConversationId!);
       }
     });
   }
@@ -603,13 +603,14 @@ class AccountServer {
     _decryptMessage.conversationId = conversationId;
     _activeConversationId = conversationId;
     if (conversationId != null) {
-      _markRead(conversationId);
+      markRead(conversationId);
     }
   }
 
-  Future<void> _markRead(String conversationId) async {
+  Future<void> markRead(String conversationId) async {
     final ids =
         await database.messagesDao.getUnreadMessageIds(conversationId, userId);
+    if (ids.isEmpty) return;
     final jobs = ids
         .map((id) =>
             createAckJob(acknowledgeMessageReceipts, id, MessageStatus.read))

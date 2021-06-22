@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/account/account_server.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
 
@@ -153,6 +154,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     required this.limit,
     required this.database,
     required this.mentionCache,
+    required this.accountServer,
   }) : super(const MessageState()) {
     add(_MessageInitEvent(
       centerMessageId: conversationCubit.state?.initIndexMessageId,
@@ -187,6 +189,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final ConversationCubit conversationCubit;
   final Database database;
   final MentionCache mentionCache;
+  final AccountServer accountServer;
   int limit;
 
   MessagesDao get messagesDao => database.messagesDao;
@@ -484,8 +487,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         ...messageState.top,
       ];
     }
-    return messageState.copyWith(
+    final _messageState = messageState.copyWith(
       top: top,
     );
+    accountServer.markRead(conversationCubit.state!.conversationId);
+    return _messageState;
   }
 }

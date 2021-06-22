@@ -176,15 +176,11 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> markMessageRead(String userId, List<String> messageIds) async {
-    var arrayStartIndex = 1;
-    final expandedMessageIds = $expandVar(arrayStartIndex, messageIds.length);
-    arrayStartIndex += messageIds.length;
-    return db.customUpdate(
-      'UPDATE messages SET status = \'READ\' WHERE message_id IN ($expandedMessageIds) AND status != \'FAILED\'',
-      variables: [for (var $ in messageIds) Variable<String>($)],
-      updates: {db.messages},
-      updateKind: UpdateKind.update,
-    );
+    final result = await (db.update(db.messages)
+      ..where((tbl) => tbl.messageId.isIn(messageIds)))
+        .write(const MessagesCompanion(status: Value(MessageStatus.read)));
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+    return result;
   }
 
   Future<List<String>> findConversationIdsByMessages(
