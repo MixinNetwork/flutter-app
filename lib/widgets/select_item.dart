@@ -33,6 +33,7 @@ class SelectItem extends StatelessWidget {
           : boxDecoration,
       child: LayoutBuilder(builder: (context, boxConstraints) {
         final hideTitle = boxConstraints.maxWidth < 75;
+        final hideUnreadText = boxConstraints.maxWidth < 100;
         return Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -50,7 +51,7 @@ class SelectItem extends StatelessWidget {
                     ),
                   ),
                 ),
-              if (count > 0)
+              if (count > 0 && !hideUnreadText)
                 UnreadText(
                   data: '$count',
                   backgroundColor: BrightnessData.dynamicColor(

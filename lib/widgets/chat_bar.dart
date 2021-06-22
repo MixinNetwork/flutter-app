@@ -43,69 +43,69 @@ class ChatBar extends HookWidget {
       behavior: HitTestBehavior.opaque,
       child: Padding(
         padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
-        child: Row(children: [
-          Builder(
-            builder: (context) => navigationMode
-                ? MoveWindowBarrier(
-                    child: MixinBackButton(
-                      color: actionColor,
-                      onTap: () =>
-                          context.read<ConversationCubit>().unselected(),
-                    ),
-                  )
-                : const SizedBox(width: 16),
-          ),
-          Expanded(
-            flex: 1,
-            child: Row(
-              children: [
-                const ConversationAvatar(),
-                const SizedBox(width: 10),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    ConversationName(),
-                    SizedBox(height: 4),
-                    ConversationIDOrCount(),
-                  ],
-                ),
-              ],
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Builder(
+              builder: (context) => navigationMode
+                  ? MoveWindowBarrier(
+                      child: MixinBackButton(
+                        color: actionColor,
+                        onTap: () =>
+                            context.read<ConversationCubit>().unselected(),
+                      ),
+                    )
+                  : const SizedBox(width: 16),
             ),
-          ),
-          MoveWindowBarrier(
-            child: ActionButton(
-              name: Resources.assetsImagesIcSearchSvg,
-              color: actionColor,
-              onTap: () {
-                final cubit = context.read<ChatSideCubit>();
-                if (cubit.state.pages.isNotEmpty &&
-                    cubit.state.pages.last.name ==
-                        ChatSideCubit.searchMessageHistory) {
-                  return;
-                }
-                cubit
-                  ..popWhere(
-                      (page) => page.name == ChatSideCubit.searchMessageHistory)
-                  ..pushPage(ChatSideCubit.searchMessageHistory);
-              },
+            const ConversationAvatar(),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: const [
+                  ConversationName(),
+                  SizedBox(height: 4),
+                  MoveWindowBarrier(
+                    child: ConversationIDOrCount(),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: 14),
-          MoveWindowBarrier(
-            child: _FileButton(actionColor: actionColor),
-          ),
-          const SizedBox(width: 14),
-          MoveWindowBarrier(
-            child: ActionButton(
-              name: Resources.assetsImagesIcScreenSvg,
-              color: hasSidePage
-                  ? BrightnessData.themeOf(context).accent
-                  : actionColor,
-              onTap: chatSideCubit.toggleInfoPage,
+            MoveWindowBarrier(
+              child: ActionButton(
+                name: Resources.assetsImagesIcSearchSvg,
+                color: actionColor,
+                onTap: () {
+                  final cubit = context.read<ChatSideCubit>();
+                  if (cubit.state.pages.isNotEmpty &&
+                      cubit.state.pages.last.name ==
+                          ChatSideCubit.searchMessageHistory) {
+                    return;
+                  }
+                  cubit
+                    ..popWhere((page) =>
+                        page.name == ChatSideCubit.searchMessageHistory)
+                    ..pushPage(ChatSideCubit.searchMessageHistory);
+                },
+              ),
             ),
-          ),
-        ]),
+            const SizedBox(width: 14),
+            MoveWindowBarrier(
+              child: _FileButton(actionColor: actionColor),
+            ),
+            const SizedBox(width: 14),
+            MoveWindowBarrier(
+              child: ActionButton(
+                name: Resources.assetsImagesIcScreenSvg,
+                color: hasSidePage
+                    ? BrightnessData.themeOf(context).accent
+                    : actionColor,
+                onTap: chatSideCubit.toggleInfoPage,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -189,12 +189,16 @@ class ConversationName extends StatelessWidget {
         builder: (context, conversation) => Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SelectableText(
-              conversation?.name ?? '',
-              style: TextStyle(
-                color: BrightnessData.themeOf(context).text,
-                fontSize: fontSize,
-                height: 1,
+            Flexible(
+              child: SelectableText(
+                conversation?.name ?? '',
+                style: TextStyle(
+                  color: BrightnessData.themeOf(context).text,
+                  fontSize: fontSize,
+                  height: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                maxLines: 1,
               ),
             ),
             VerifiedOrBotWidget(
