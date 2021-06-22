@@ -24,7 +24,7 @@ Map<String, dynamic> _$BlazeMessageParamSessionToJson(
 BlazeMessageParamOffset _$BlazeMessageParamOffsetFromJson(
     Map<String, dynamic> json) {
   return BlazeMessageParamOffset(
-    offset: json['offset'] as String,
+    offset: json['offset'] as String?,
   );
 }
 

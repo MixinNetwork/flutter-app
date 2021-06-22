@@ -345,18 +345,34 @@ class AccountServer {
 
       MessageResult? result;
 
-      if (message.category.isPlain ||
-          message.category == MessageCategory.appCard) {
-        var content = message.content;
-        if (message.category == MessageCategory.appCard ||
-            message.category == MessageCategory.plainPost ||
-            message.category == MessageCategory.plainText) {
+      var category = message.category;
+      var content = message.content;
+
+      String? recipientId;
+      if (category.isText && content?.isNotEmpty == true) {
+        final botNumber = botNumberStartRegExp.firstMatch(content!)?[1];
+        if (botNumber?.isNotEmpty == true) {
+          recipientId = await database.participantsDao
+              .userIdByIdentityNumber(message.conversationId, botNumber!)
+              .getSingleOrNull();
+          category = recipientId != null ? MessageCategory.plainText : category;
+        }
+      }
+
+      if (category.isPlain || category == MessageCategory.appCard) {
+        if (category == MessageCategory.appCard ||
+            category.isPost ||
+            category.isText) {
           final list = await utf8EncodeWithIsolate(content!);
           content = await base64EncodeWithIsolate(list);
         }
-        final blazeMessage = _createBlazeMessage(message, content!);
+        final blazeMessage = _createBlazeMessage(
+          message,
+          content!,
+          forceCategory: category,
+        );
         result = await _sender.deliver(blazeMessage);
-      } else if (message.category.isEncrypted) {
+      } else if (category.isEncrypted) {
         final conversation = await database.conversationDao
             .conversationById(message.conversationId)
             .getSingleOrNull();
@@ -375,9 +391,11 @@ class AccountServer {
           participantSessionKey.sessionId,
         );
         final blazeMessage = _createBlazeMessage(
-            message, await base64EncodeWithIsolate(content));
+          message,
+          await base64EncodeWithIsolate(content),
+        );
         result = await _sender.deliver(blazeMessage);
-      } else if (message.category.isSignal) {
+      } else if (category.isSignal) {
         result = await _sendSignalMessage(message);
       } else {}
 
@@ -448,16 +466,26 @@ class AccountServer {
     return database.userDao.findMultiUserIdsByIdentityNumbers(ids);
   }
 
-  BlazeMessage _createBlazeMessage(db.SendingMessage message, String data) {
+  BlazeMessage _createBlazeMessage(
+    db.SendingMessage message,
+    String data, {
+    MessageCategory? forceCategory,
+    String? recipientId,
+  }) {
     final blazeParam = BlazeMessageParam(
-        conversationId: message.conversationId,
-        messageId: message.messageId,
-        category: message.category,
-        data: data,
-        quoteMessageId: message.quoteMessageId);
+      conversationId: message.conversationId,
+      recipientId: recipientId,
+      messageId: message.messageId,
+      category: forceCategory ?? message.category,
+      data: data,
+      quoteMessageId: message.quoteMessageId,
+    );
 
     return BlazeMessage(
-        id: const Uuid().v4(), action: createMessage, params: blazeParam);
+      id: const Uuid().v4(),
+      action: createMessage,
+      params: blazeParam,
+    );
   }
 
   Future<void> signOutAndClear() async {

@@ -10789,6 +10789,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<String> userIdByIdentityNumber(
+      String conversationId, String identityNumber) {
+    return customSelect(
+        'SELECT u.user_id FROM users u INNER JOIN participants p ON p.user_id = u.user_id\n        WHERE p.conversation_id = :conversationId AND u.identity_number = :identityNumber',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(identityNumber)
+        ],
+        readsFrom: {
+          users,
+          participants
+        }).map((QueryRow row) => row.read<String>('user_id'));
+  }
+
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
