@@ -8,7 +8,6 @@ import '../../../../utils/action_utils.dart';
 import '../../../../utils/color_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../brightness_observer.dart';
-import '../../message_bubble.dart';
 import 'action_data.dart';
 
 class ActionMessage extends StatelessWidget {
@@ -39,10 +38,14 @@ class ActionMessage extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       primary: BrightnessData.themeOf(context).primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8), // <-- Radius
+                      ),
                     ),
                     // ignore: avoid_dynamic_calls
                     child: Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        padding: const EdgeInsets.only(top: 6, bottom: 6),
+                        // ignore: avoid_dynamic_calls
                         child: Text(e.label,
                             style: TextStyle(
                               fontSize: 15,
