@@ -345,8 +345,8 @@ class AccountServer {
       String? recipientId;
       final json = jsonDecode(job.blazeMessage!);
       if (json is Map && json.length == 2) {
-        messageId = json['messageId']!;
-        recipientId = json['recipientId'];
+        messageId = json['message_id']!;
+        recipientId = json['recipient_id'];
       } else {
         messageId = job.blazeMessage!;
       }

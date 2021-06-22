@@ -22,8 +22,8 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
           action: sendingMessage,
           priority: 5,
           blazeMessage: jsonEncode({
-            'messageId': messageId,
-            'recipientId': recipientId,
+            'message_id': messageId,
+            'recipient_id': recipientId,
           }),
           conversationId: conversationId,
           createdAt: DateTime.now(),
