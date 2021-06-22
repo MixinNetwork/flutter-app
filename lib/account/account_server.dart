@@ -134,7 +134,11 @@ class AccountServer {
     _attachmentUtil =
         await AttachmentUtil.init(client, database.messagesDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
-        database.messagesDao, database.jobsDao, _attachmentUtil);
+      database.messagesDao,
+      database.jobsDao,
+      database.participantsDao,
+      _attachmentUtil,
+    );
     blaze = Blaze(
       userId,
       sessionId,
@@ -336,8 +340,18 @@ class AccountServer {
   Future<void> _runSendJob(List<db.Job> jobs) async {
     final futures =
         jobs.where((element) => element.blazeMessage != null).map((job) async {
-      final message =
-          await database.messagesDao.sendingMessage(job.blazeMessage!);
+      assert(job.blazeMessage != null);
+      String messageId;
+      String? recipientId;
+      final json = jsonDecode(job.blazeMessage!);
+      if (json is Map) {
+        messageId = json['messageId']!;
+        recipientId = json['recipientId'];
+      } else {
+        messageId = job.blazeMessage!;
+      }
+
+      final message = await database.messagesDao.sendingMessage(messageId);
       if (message == null) {
         await database.jobsDao.deleteJobById(job.jobId);
         return;
@@ -345,19 +359,8 @@ class AccountServer {
 
       MessageResult? result;
 
-      var category = message.category;
+      final category = message.category;
       var content = message.content;
-
-      String? recipientId;
-      if (category.isText && content?.isNotEmpty == true) {
-        final botNumber = botNumberStartRegExp.firstMatch(content!)?[1];
-        if (botNumber?.isNotEmpty == true) {
-          recipientId = await database.participantsDao
-              .userIdByIdentityNumber(message.conversationId, botNumber!)
-              .getSingleOrNull();
-          category = recipientId != null ? MessageCategory.plainText : category;
-        }
-      }
 
       if (category.isPlain || category == MessageCategory.appCard) {
         if (category == MessageCategory.appCard ||

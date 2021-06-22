@@ -5,6 +5,8 @@ import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter_app/db/dao/participants_dao.dart';
+import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:uuid/uuid.dart';
@@ -30,9 +32,15 @@ import '../utils/load_balancer_utils.dart';
 const _kEnableImageBlurHashThumb = false;
 
 class SendMessageHelper {
-  SendMessageHelper(this._messagesDao, this._jobsDao, this._attachmentUtil);
+  SendMessageHelper(
+    this._messagesDao,
+    this._jobsDao,
+    this._participantsDao,
+    this._attachmentUtil,
+  );
 
   final MessagesDao _messagesDao;
+  final ParticipantsDao _participantsDao;
   final JobsDao _jobsDao;
   final AttachmentUtil _attachmentUtil;
 
@@ -43,10 +51,20 @@ class SendMessageHelper {
     String content, {
     String? quoteMessageId,
   }) async {
-    final category =
+    var category =
         isPlain ? MessageCategory.plainText : MessageCategory.signalText;
     final quoteMessage =
         await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+
+    String? recipientId;
+    final botNumber = botNumberStartRegExp.firstMatch(content)?[1];
+    if (botNumber?.isNotEmpty == true) {
+      recipientId = await _participantsDao
+          .userIdByIdentityNumber(conversationId, botNumber!)
+          .getSingleOrNull();
+      category = recipientId != null ? MessageCategory.plainText : category;
+    }
+
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -60,7 +78,11 @@ class SendMessageHelper {
     );
 
     await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _jobsDao.insertSendingJob(
+      message.messageId,
+      conversationId,
+      recipientId,
+    );
   }
 
   Future<void> sendImageMessage({

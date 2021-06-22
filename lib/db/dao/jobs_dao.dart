@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,15 +14,22 @@ class JobsDao extends DatabaseAccessor<MixinDatabase> with _$JobsDaoMixin {
 
   Future<int> insert(Job job) => into(db.jobs).insertOnConflictUpdate(job);
 
-  Future<int> insertSendingJob(String messageId, String conversationId) =>
-      insert(Job(
+  Future<int> insertSendingJob(String messageId, String conversationId,
+          [String? recipientId]) =>
+      insert(
+        Job(
           jobId: const Uuid().v4(),
           action: sendingMessage,
           priority: 5,
-          blazeMessage: messageId,
+          blazeMessage: jsonEncode({
+            'messageId': messageId,
+            'recipientId': recipientId,
+          }),
           conversationId: conversationId,
           createdAt: DateTime.now(),
-          runCount: 0));
+          runCount: 0,
+        ),
+      );
 
   Future deleteJob(Job job) => delete(db.jobs).delete(job);
 
