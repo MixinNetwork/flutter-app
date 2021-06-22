@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -109,11 +108,6 @@ class DecryptMessage extends Injector {
       return;
     }
     try {
-      if (_conversationId == data.conversationId &&
-          DesktopLifecycle.instance.isActive.value) {
-        // _remoteStatus = MessageStatus.read;
-        // status = MessageStatus.read;
-      }
       _remoteStatus = MessageStatus.delivered;
 
       await syncConversion(data.conversationId);

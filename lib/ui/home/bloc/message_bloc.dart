@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -490,7 +491,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final _messageState = messageState.copyWith(
       top: top,
     );
-    accountServer.markRead(conversationCubit.state!.conversationId);
+    if (DesktopLifecycle.instance.isActive.value) {
+      accountServer.markRead(conversationCubit.state!.conversationId);
+    }
     return _messageState;
   }
 }
