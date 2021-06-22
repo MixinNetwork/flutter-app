@@ -57,3 +57,13 @@ bool within24Hours(DateTime? _dateTime) {
   }
   return false;
 }
+
+int getEpochNanoFromString(String timestamp) {
+  final dateTime = DateTime.tryParse(timestamp);
+  if (dateTime == null) {
+    return 0;
+  }
+  return getEpochNano(dateTime);
+}
+
+int getEpochNano(DateTime dateTime) => dateTime.microsecondsSinceEpoch * 1000;
