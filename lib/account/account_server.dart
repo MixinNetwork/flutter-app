@@ -121,9 +121,8 @@ class AccountServer {
 
     DesktopLifecycle.instance.isActive.addListener(() {
       final active = DesktopLifecycle.instance.isActive.value;
-      if (active && _activeConversationId != null) {
-        markRead(_activeConversationId!);
-      }
+      if (!active || _activeConversationId == null) return;
+      markRead(_activeConversationId!);
     });
   }
 
@@ -602,9 +601,6 @@ class AccountServer {
   void selectConversation(String? conversationId) {
     _decryptMessage.conversationId = conversationId;
     _activeConversationId = conversationId;
-    if (conversationId != null) {
-      markRead(conversationId);
-    }
   }
 
   Future<void> markRead(String conversationId) async {
