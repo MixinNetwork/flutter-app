@@ -42,6 +42,7 @@ class ActionMessage extends StatelessWidget {
           // ignore: avoid_dynamic_calls
           jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
                 (e) => InteractableDecoratedBox.color(
+                  cursor: MaterialStateMouseCursor.clickable,
                   onTap: () {
                     // ignore: avoid_dynamic_calls
                     if (context.openAction(e.action)) return;
