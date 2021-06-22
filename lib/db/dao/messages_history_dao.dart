@@ -14,4 +14,8 @@ class MessagesHistoryDao extends DatabaseAccessor<MixinDatabase>
 
   Future deleteMessagesHistory(MessagesHistoryData messagesHistory) =>
       delete(db.messagesHistory).delete(messagesHistory);
+
+  Selectable<MessagesHistoryData> findMessageHistoryById(String messageId) =>
+      select(db.messagesHistory)
+        ..where((tbl) => tbl.messageId.equals(messageId));
 }

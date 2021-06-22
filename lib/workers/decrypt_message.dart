@@ -93,9 +93,16 @@ class DecryptMessage extends Injector {
   late MessageStatus _remoteStatus;
 
   Future<bool> isExistMessage(String messageId) async {
-    final message =
-        await database.messagesDao.findMessageByMessageId(messageId);
-    return message != null;
+    final id = await database.messagesDao
+        .findMessageIdByMessageId(messageId)
+        .getSingleOrNull();
+    if (id != null) {
+      return true;
+    }
+    final messageHistory = await database.messagesHistoryDao
+        .findMessageHistoryById(messageId)
+        .getSingleOrNull();
+    return messageHistory != null;
   }
 
   Future<void> process(FloodMessage floodMessage) async {
@@ -116,6 +123,8 @@ class DecryptMessage extends Injector {
         d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
           _remoteStatus = MessageStatus.read;
+          await database.messagesHistoryDao
+              .insert(MessagesHistoryData(messageId: data.messageId));
         }
         await _processSignalMessage(data);
       } else if (category.isPlain) {
@@ -169,6 +178,8 @@ class DecryptMessage extends Injector {
           if (composeMessageData.resendMessageId != null) {
             await _processReDecryptMessage(
                 data, composeMessageData.resendMessageId!, plain);
+            await database.messagesHistoryDao
+                .insert(MessagesHistoryData(messageId: data.messageId));
           } else {
             try {
               await _processDecryptSuccess(data, plain);
@@ -226,6 +237,8 @@ class DecryptMessage extends Injector {
               data, ProcessSignalKeyAction.resendKey));
         }
       }
+      await database.messagesHistoryDao
+          .insert(MessagesHistoryData(messageId: data.messageId));
     } else if (data.category == MessageCategory.plainText ||
         data.category == MessageCategory.plainImage ||
         data.category == MessageCategory.plainVideo ||
@@ -376,6 +389,8 @@ class DecryptMessage extends Injector {
     final recallMessage =
         RecallMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
     await database.messagesDao.recallMessage(recallMessage.messageId);
+    await database.messagesHistoryDao
+        .insert(MessagesHistoryData(messageId: data.messageId));
   }
 
   Future<Message> _generateMessage(

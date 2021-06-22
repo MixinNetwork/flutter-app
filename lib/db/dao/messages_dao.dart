@@ -261,6 +261,10 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<Message?> findMessageByMessageId(String messageId) =>
       db.findMessageByMessageId(messageId).getSingleOrNull();
 
+  Selectable<String> findMessageIdByMessageId(String messageId) =>
+      (select(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+          .map((row) => row.messageId);
+
   Future<Message?> findMessageByMessageIdAndUserId(
           String messageId, String userId) =>
       (select(db.messages)
