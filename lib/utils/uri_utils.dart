@@ -49,5 +49,5 @@ Future<bool> openUri(BuildContext context, String text) async {
     }
   }
 
-  return launch(text);
+  return launch(uri.toString());
 }
