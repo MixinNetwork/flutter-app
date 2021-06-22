@@ -187,7 +187,7 @@ class ConversationName extends StatelessWidget {
         buildWhen: (previous, current) =>
             current != null && current != previous,
         builder: (context, conversation) => Row(
-          mainAxisSize: MainAxisSize.max,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Flexible(
               child: SelectableText(
