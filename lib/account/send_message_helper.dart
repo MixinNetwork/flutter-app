@@ -301,7 +301,7 @@ class SendMessageHelper {
       attachmentResult.attachmentId,
       mimeType,
       attachmentSize,
-      file.name,
+      name ?? file.name,
       null,
       null,
       null,
@@ -581,6 +581,7 @@ class SendMessageHelper {
       } else {
         attachmentResult = null;
       }
+
       await sendDataMessage(
         conversationId,
         senderId,
