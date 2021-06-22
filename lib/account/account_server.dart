@@ -359,24 +359,23 @@ class AccountServer {
 
       MessageResult? result;
 
-      final category = message.category;
       var content = message.content;
 
-      if (category.isPlain || category == MessageCategory.appCard) {
-        if (category == MessageCategory.appCard ||
-            category.isPost ||
-            category.isText) {
+      if (message.category.isPlain ||
+          message.category == MessageCategory.appCard) {
+        if (message.category == MessageCategory.appCard ||
+            message.category.isPost ||
+            message.category.isText) {
           final list = await utf8EncodeWithIsolate(content!);
           content = await base64EncodeWithIsolate(list);
         }
         final blazeMessage = _createBlazeMessage(
           message,
           content!,
-          forceCategory: category,
           recipientId: recipientId,
         );
         result = await _sender.deliver(blazeMessage);
-      } else if (category.isEncrypted) {
+      } else if (message.category.isEncrypted) {
         final conversation = await database.conversationDao
             .conversationById(message.conversationId)
             .getSingleOrNull();
@@ -399,7 +398,7 @@ class AccountServer {
           await base64EncodeWithIsolate(content),
         );
         result = await _sender.deliver(blazeMessage);
-      } else if (category.isSignal) {
+      } else if (message.category.isSignal) {
         result = await _sendSignalMessage(message);
       } else {}
 
@@ -473,14 +472,13 @@ class AccountServer {
   BlazeMessage _createBlazeMessage(
     db.SendingMessage message,
     String data, {
-    MessageCategory? forceCategory,
     String? recipientId,
   }) {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
       recipientId: recipientId,
       messageId: message.messageId,
-      category: forceCategory ?? message.category,
+      category: message.category,
       data: data,
       quoteMessageId: message.quoteMessageId,
     );
