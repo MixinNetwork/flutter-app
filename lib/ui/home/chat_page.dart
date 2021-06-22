@@ -145,6 +145,7 @@ class ChatPage extends HookWidget {
         ),
         BlocProvider(
           create: (context) => MessageBloc(
+            accountServer: context.read<AccountServer>(),
             database: context.read<AccountServer>().database,
             conversationCubit: context.read<ConversationCubit>(),
             mentionCache: context.read<MentionCache>(),

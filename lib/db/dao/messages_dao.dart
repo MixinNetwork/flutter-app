@@ -175,30 +175,27 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
     );
   }
 
-  Future<int> markMessageRead(String userId, List<String> messageIds) async {
-    var arrayStartIndex = 1;
-    final expandedMessageIds = $expandVar(arrayStartIndex, messageIds.length);
-    arrayStartIndex += messageIds.length;
-    return db.customUpdate(
-      'UPDATE messages SET status = \'READ\' WHERE message_id IN ($expandedMessageIds) AND status != \'FAILED\'',
-      variables: [for (var $ in messageIds) Variable<String>($)],
-      updates: {db.messages},
-      updateKind: UpdateKind.update,
-    );
+  Future<int> markMessageRead(
+    String userId,
+    Iterable<String> messageIds,
+  ) async {
+    final result = await (db.update(db.messages)
+          ..where((tbl) =>
+              tbl.messageId.isIn(messageIds) &
+              tbl.status.equals('FAILED').not()))
+        .write(const MessagesCompanion(status: Value(MessageStatus.read)));
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+    return result;
   }
 
   Future<List<String>> findConversationIdsByMessages(
       List<String> messageIds) async {
-    var arrayStartIndex = 1;
-    final expandedMessageIds = $expandVar(arrayStartIndex, messageIds.length);
-    arrayStartIndex += messageIds.length;
-    return db
-        .customSelect(
-          'SELECT DISTINCT conversation_id FROM messages WHERE message_id IN ($expandedMessageIds)',
-          variables: [for (var $ in messageIds) Variable<String>($)],
-        )
-        .map((row) => row.read<String>('conversation_id'))
+    final future = await (db.selectOnly(db.messages, distinct: true)
+          ..addColumns([db.messages.conversationId])
+          ..where(db.messages.messageId.isIn(messageIds)))
+        .map((row) => row.read(db.messages.conversationId))
         .get();
+    return future.where((element) => element != null).cast<String>().toList();
   }
 
   Selectable<MessageItem> messagesByConversationId(
@@ -236,29 +233,19 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<List<String>> getUnreadMessageIds(
           String conversationId, String userId) =>
       db.transaction(() async {
-        final list = await db
-            .customSelect(
-                'SELECT message_id FROM messages WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\') ORDER BY created_at ASC',
-                readsFrom: {
-                  db.messages
-                },
-                variables: [
-                  Variable.withString(conversationId),
-                  Variable.withString(userId)
-                ])
-            .map((row) => row.read<String>('message_id'))
+        final list = await (db.selectOnly(db.messages)
+              ..addColumns([db.messages.messageId])
+              ..where(db.messages.conversationId.equals(conversationId) &
+                  db.messages.userId.equals(userId).not() &
+                  db.messages.status.isIn(['SENT', 'DELIVERED'])))
+            .map((row) => row.read(db.messages.messageId))
             .get();
-        await db.customUpdate(
-          'UPDATE messages SET status = \'READ\' WHERE conversation_id = ? AND user_id != ? AND status IN (\'SENT\', \'DELIVERED\')',
-          variables: [
-            Variable.withString(conversationId),
-            Variable.withString(userId)
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        );
+        final ids =
+            list.where((element) => element != null).cast<String>().toList();
+        if (ids.isEmpty) return ids;
+        await markMessageRead(userId, ids);
         await takeUnseen(userId, conversationId);
-        return list;
+        return ids;
       });
 
   Future<QuoteMessageItem?> findMessageItemById(

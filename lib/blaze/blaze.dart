@@ -156,6 +156,10 @@ class Blaze {
             data: await jsonEncodeWithIsolate(data),
             createdAt: data.createdAt));
       }
+    } else if (blazeMessage.action == createCall ||
+        blazeMessage.action == createKraken) {
+      await database.jobsDao.insertNoReplace(createAckJob(
+          acknowledgeMessageReceipts, data.messageId, MessageStatus.read));
     } else {
       await database.jobsDao.insertNoReplace(createAckJob(
           acknowledgeMessageReceipts, data.messageId, MessageStatus.delivered));

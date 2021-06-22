@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -109,14 +108,7 @@ class DecryptMessage extends Injector {
       return;
     }
     try {
-      var status = MessageStatus.delivered;
       _remoteStatus = MessageStatus.delivered;
-
-      if (_conversationId == data.conversationId &&
-          DesktopLifecycle.instance.isActive.value) {
-        _remoteStatus = MessageStatus.read;
-        status = MessageStatus.read;
-      }
 
       await syncConversion(data.conversationId);
       final category = data.category;
@@ -125,21 +117,21 @@ class DecryptMessage extends Injector {
         if (data.category == MessageCategory.signalKey) {
           _remoteStatus = MessageStatus.read;
         }
-        await _processSignalMessage(data, status);
+        await _processSignalMessage(data);
       } else if (category.isPlain) {
         d('DecryptMessage isPlain');
-        await _processPlainMessage(data, status);
+        await _processPlainMessage(data);
       } else if (category.isEncrypted) {
         d('DecryptMessage isEncrypted');
-        await _processEncryptedMessage(data, status);
+        await _processEncryptedMessage(data);
       } else if (category.isSystem) {
         d('DecryptMessage isSystem');
         _remoteStatus = MessageStatus.read;
-        await _processSystemMessage(data, status);
+        await _processSystemMessage(data);
       } else if (category == MessageCategory.appButtonGroup ||
           category == MessageCategory.appCard) {
         d('DecryptMessage isApp');
-        await _processApp(data, status);
+        await _processApp(data);
       } else if (category == MessageCategory.messageRecall) {
         d('DecryptMessage isMessageRecall');
         _remoteStatus = MessageStatus.read;
@@ -161,8 +153,7 @@ class DecryptMessage extends Injector {
     await database.floodMessagesDao.deleteFloodMessage(floodMessage);
   }
 
-  Future<void> _processSignalMessage(
-      BlazeMessageData data, MessageStatus messageStatus) async {
+  Future<void> _processSignalMessage(BlazeMessageData data) async {
     final deviceId = data.sessionId.getDeviceId();
     final composeMessageData = _signalProtocol.decodeMessageData(data.data);
     try {
@@ -180,7 +171,7 @@ class DecryptMessage extends Injector {
                 data, composeMessageData.resendMessageId!, plain);
           } else {
             try {
-              await _processDecryptSuccess(data, plain, messageStatus);
+              await _processDecryptSuccess(data, plain);
             } on Exception catch (e) {
               w('_processDecryptSuccess ${data.messageId}, $e');
               await _insertInvalidMessage(data);
@@ -218,13 +209,14 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processPlainMessage(
-      BlazeMessageData data, MessageStatus status) async {
+  Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
       final plainJsonMessage =
           PlainJsonMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
-      if (plainJsonMessage.action == acknowledgeMessageReceipts &&
-          plainJsonMessage.ackMessages?.isNotEmpty == true) {
+      if (plainJsonMessage.action == acknowledgeMessageReceipts) {
+        if (plainJsonMessage.ackMessages?.isNotEmpty != true) {
+          return;
+        }
         await _markMessageStatus(plainJsonMessage.ackMessages!);
       } else if (plainJsonMessage.action == resendMessages) {
         await _processResendMessage(data, plainJsonMessage);
@@ -244,12 +236,11 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.plainLive ||
         data.category == MessageCategory.plainPost ||
         data.category == MessageCategory.plainLocation) {
-      await _processDecryptSuccess(data, data.data, status);
+      await _processDecryptSuccess(data, data.data);
     }
   }
 
-  Future<void> _processEncryptedMessage(
-      BlazeMessageData data, MessageStatus status) async {
+  Future<void> _processEncryptedMessage(BlazeMessageData data) async {
     try {
       final decryptedContent = _encryptedProtocol.decryptMessage(_privateKey,
           Uuid.parse(_sessionId), await base64DecodeWithIsolate(data.data));
@@ -258,7 +249,7 @@ class DecryptMessage extends Injector {
       } else {
         final plainText = await utf8DecodeWithIsolate(decryptedContent);
         try {
-          await _processDecryptSuccess(data, plainText, status);
+          await _processDecryptSuccess(data, plainText);
         } catch (e) {
           // todo insertInvalidMessage
         }
@@ -312,12 +303,11 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processSystemMessage(
-      BlazeMessageData data, MessageStatus status) async {
+  Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
           await _jsonDecodeWithIsolate(data.data));
-      await _processSystemConversationMessage(data, systemMessage, status);
+      await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
       final systemMessage =
           SystemUserMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
@@ -333,17 +323,16 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processApp(BlazeMessageData data, MessageStatus status) async {
+  Future<void> _processApp(BlazeMessageData data) async {
     d('data.conversationId: ${data.conversationId}, _conversationId: $_conversationId');
     if (data.category == MessageCategory.appButtonGroup) {
-      await _processAppButton(data, status);
+      await _processAppButton(data);
     } else if (data.category == MessageCategory.appCard) {
-      await _processAppCard(data, status);
+      await _processAppCard(data);
     }
   }
 
-  Future<void> _processAppButton(
-      BlazeMessageData data, MessageStatus status) async {
+  Future<void> _processAppButton(BlazeMessageData data) async {
     final content = await _decodeWithIsolate(data.data);
     // final apps = (await _decodeWithIsolate(data.data) as List)
     //     .map((e) =>
@@ -356,14 +345,13 @@ class DecryptMessage extends Injector {
       userId: data.senderId,
       category: data.category!,
       content: content,
-      status: status,
+      status: data.status,
       createdAt: data.createdAt,
     );
     await database.messagesDao.insert(message, accountId);
   }
 
-  Future<void> _processAppCard(
-      BlazeMessageData data, MessageStatus status) async {
+  Future<void> _processAppCard(BlazeMessageData data) async {
     await refreshUsers(<String>[data.userId]);
     final content = await _decodeWithIsolate(data.data);
     final appCard = AppCard.fromJson(await jsonDecodeWithIsolate(content));
@@ -373,7 +361,7 @@ class DecryptMessage extends Injector {
       userId: data.senderId,
       category: data.category!,
       content: content,
-      status: status,
+      status: data.status,
       createdAt: data.createdAt,
     );
     await database.appsDao.findUserById(appCard.appId).then((app) {
@@ -409,7 +397,6 @@ class DecryptMessage extends Injector {
   Future<void> _processDecryptSuccess(
     BlazeMessageData data,
     String plainText,
-    MessageStatus status,
   ) async {
     await refreshUsers(<String>[data.senderId]);
 
@@ -428,7 +415,7 @@ class DecryptMessage extends Injector {
               userId: data.senderId,
               category: data.category!,
               content: plain,
-              status: status,
+              status: data.status,
               createdAt: data.createdAt,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent));
@@ -460,7 +447,7 @@ class DecryptMessage extends Injector {
               thumbImage: attachment.thumbnail,
               mediaKey: attachment.key,
               mediaDigest: attachment.digest,
-              status: status,
+              status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
@@ -496,7 +483,7 @@ class DecryptMessage extends Injector {
               thumbImage: attachment.thumbnail,
               mediaKey: attachment.key,
               mediaDigest: attachment.digest,
-              status: status,
+              status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
@@ -528,7 +515,7 @@ class DecryptMessage extends Injector {
               mediaSize: attachment.size,
               mediaKey: attachment.key,
               mediaDigest: attachment.digest,
-              status: status,
+              status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
@@ -561,7 +548,7 @@ class DecryptMessage extends Injector {
               mediaKey: attachment.key,
               mediaDigest: attachment.digest,
               mediaWaveform: attachment.waveform,
-              status: status,
+              status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.pending,
               quoteMessageId: data.quoteMessageId,
@@ -592,7 +579,7 @@ class DecryptMessage extends Injector {
           name: stickerMessage.name,
           stickerId: stickerMessage.stickerId,
           albumId: stickerMessage.albumId,
-          status: status,
+          status: data.status,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isContact) {
@@ -610,7 +597,7 @@ class DecryptMessage extends Injector {
               content: plainText,
               name: user?.fullName,
               sharedUserId: contactMessage.userId,
-              status: status,
+              status: data.status,
               createdAt: data.createdAt,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent));
@@ -628,7 +615,7 @@ class DecryptMessage extends Injector {
           mediaHeight: liveMessage.height,
           mediaUrl: liveMessage.url,
           thumbUrl: liveMessage.thumbUrl,
-          status: status,
+          status: data.status,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isLocation) {
@@ -658,7 +645,7 @@ class DecryptMessage extends Injector {
           userId: data.senderId,
           category: data.category!,
           content: plain,
-          status: status,
+          status: data.status,
           createdAt: data.createdAt);
       await database.messagesDao.insert(message, accountId);
     } else if (data.category.isPost) {
@@ -674,15 +661,15 @@ class DecryptMessage extends Injector {
         userId: data.senderId,
         category: data.category!,
         content: plain,
-        status: status,
+        status: data.status,
         createdAt: data.createdAt,
       );
       await database.messagesDao.insert(message, accountId);
     }
   }
 
-  Future<void> _processSystemConversationMessage(BlazeMessageData data,
-      SystemConversationMessage systemMessage, MessageStatus status) async {
+  Future<void> _processSystemConversationMessage(
+      BlazeMessageData data, SystemConversationMessage systemMessage) async {
     if (systemMessage.action != MessageAction.update) {
       await syncConversion(data.conversationId);
     }
@@ -701,7 +688,7 @@ class DecryptMessage extends Injector {
         category: data.category!,
         content: '',
         createdAt: data.createdAt,
-        status: status,
+        status: data.status,
         action: systemMessage.action,
         participantId: systemMessage.participantId);
     if (systemMessage.action == MessageAction.add ||
@@ -845,19 +832,16 @@ class DecryptMessage extends Injector {
     }
     await database.jobsDao.insertNoReplace(
         createAckJob(acknowledgeMessageReceipts, messageId, status));
-    if (status == MessageStatus.read) {
-      await database.jobsDao
-          .insert(createAckJob(createMessage, messageId, MessageStatus.read));
-    }
   }
 
   Future<void> _markMessageStatus(List<BlazeAckMessage> messages) async {
     final messageIds = <String>[];
     messages
         .where((m) => m.status == 'READ' || m.status == 'MENTION_READ')
-        .forEach((m) {
+        .forEach((m) async {
       if (m.status == 'MENTION_READ') {
-      } else {
+        await database.messageMentionsDao.markMentionRead(m.messageId);
+      } else if (m.status == 'READ') {
         messageIds.add(m.messageId);
       }
     });

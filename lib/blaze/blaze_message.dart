@@ -48,7 +48,8 @@ class BlazeMessage {
   bool isReceiveMessageAction() {
     return action == createMessage ||
         action == acknowledgeMessageReceipt ||
-        action == createCall;
+        action == createCall ||
+        action == createKraken;
   }
 }
 
