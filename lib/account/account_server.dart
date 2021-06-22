@@ -370,6 +370,7 @@ class AccountServer {
           message,
           content!,
           forceCategory: category,
+          recipientId: recipientId,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (category.isEncrypted) {
