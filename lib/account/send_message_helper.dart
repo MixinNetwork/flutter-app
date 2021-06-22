@@ -5,8 +5,6 @@ import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter_app/db/dao/participants_dao.dart';
-import 'package:flutter_app/utils/reg_exp_utils.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:uuid/uuid.dart';
@@ -19,6 +17,7 @@ import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../db/dao/jobs_dao.dart';
 import '../db/dao/messages_dao.dart';
+import '../db/dao/participants_dao.dart';
 import '../db/extension/message.dart' show QueteMessage;
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
@@ -28,6 +27,7 @@ import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
 import '../utils/datetime_format_utils.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/reg_exp_utils.dart';
 
 const _kEnableImageBlurHashThumb = false;
 
