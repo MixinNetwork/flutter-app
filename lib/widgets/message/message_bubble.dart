@@ -83,7 +83,7 @@ class MessageBubble extends StatelessWidget {
       );
     }
 
-    final clipper = _BubbleClipper(
+    final clipper = BubbleClipper(
       currentUser: isCurrentUser,
       showNip: showNip,
     );
@@ -95,7 +95,7 @@ class MessageBubble extends StatelessWidget {
 
     if (showBubble) {
       _child = CustomPaint(
-        painter: _BubblePainter(
+        painter: BubblePainter(
           color: showBubble ? bubbleColor : Colors.transparent,
           clipper: clipper,
         ),
@@ -147,19 +147,23 @@ class _MessageBubbleNipPadding extends StatelessWidget {
       );
 }
 
-class _BubbleClipper extends CustomClipper<Path> with EquatableMixin {
-  _BubbleClipper({
+class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
+  BubbleClipper({
     required this.currentUser,
     required this.showNip,
+    this.nipPadding = true,
   });
 
   final bool currentUser;
   final bool showNip;
+  final bool nipPadding;
 
   @override
   Path getClip(Size size) {
-    final bubblePath = _bubblePath(Size(size.width - _nipWidth, size.height))
-        .shift(Offset(currentUser ? 0 : _nipWidth, 0));
+    final nipWidth = nipPadding ? _nipWidth : 0.0;
+
+    final bubblePath = _bubblePath(Size(size.width - nipWidth, size.height))
+        .shift(Offset(currentUser ? 0 : nipWidth, 0));
 
     if (!showNip) return bubblePath;
 
@@ -217,14 +221,14 @@ class _BubbleClipper extends CustomClipper<Path> with EquatableMixin {
   }
 
   @override
-  bool shouldReclip(covariant _BubbleClipper oldClipper) => this != oldClipper;
+  bool shouldReclip(covariant BubbleClipper oldClipper) => this != oldClipper;
 
   @override
   List<Object?> get props => [currentUser, showNip];
 }
 
-class _BubblePainter extends CustomPainter with EquatableMixin {
-  _BubblePainter({
+class BubblePainter extends CustomPainter with EquatableMixin {
+  BubblePainter({
     required this.clipper,
     required Color color,
     this.elevation = 0.6,
@@ -251,7 +255,7 @@ class _BubblePainter extends CustomPainter with EquatableMixin {
   }
 
   @override
-  bool shouldRepaint(covariant _BubblePainter oldDelegate) =>
+  bool shouldRepaint(covariant BubblePainter oldDelegate) =>
       this != oldDelegate;
 
   @override
