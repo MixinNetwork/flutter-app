@@ -67,7 +67,7 @@ class CellItem extends StatelessWidget {
     this.color,
     this.onTap,
     this.selected = false,
-    this.trailing = const _Arrow(),
+    this.trailing = const Arrow(),
     this.description,
   }) : super(key: key);
 
@@ -138,8 +138,8 @@ class CellItem extends StatelessWidget {
   }
 }
 
-class _Arrow extends StatelessWidget {
-  const _Arrow({
+class Arrow extends StatelessWidget {
+  const Arrow({
     Key? key,
   }) : super(key: key);
 

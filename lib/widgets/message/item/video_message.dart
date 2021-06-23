@@ -15,7 +15,6 @@ import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/uri_utils.dart';
-import '../../brightness_observer.dart';
 import '../../image.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
@@ -123,9 +122,9 @@ class VideoMessageWidget extends StatelessWidget {
                                 padding: const EdgeInsets.all(4),
                                 child: Text(
                                   formatVideoDuration(duration),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 12,
-                                    color: BrightnessData.themeOf(context).text,
+                                    color: Colors.white,
                                   ),
                                 ),
                               ),
@@ -152,6 +151,7 @@ class VideoMessageWidget extends StatelessWidget {
                               isCurrentUser: isCurrentUser,
                               createdAt: message.createdAt,
                               status: message.status,
+                              color: Colors.white,
                               isSecret: message.isSignal,
                             ),
                           ),

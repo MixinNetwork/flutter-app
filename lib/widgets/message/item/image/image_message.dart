@@ -116,6 +116,7 @@ class ImageMessageWidget extends StatelessWidget {
                             isCurrentUser: isCurrentUser,
                             createdAt: message.createdAt,
                             status: message.status,
+                            color: Colors.white,
                             isSecret: message.isSignal,
                           ),
                         ),
