@@ -198,11 +198,11 @@ class Blaze {
     }
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
-      final blazeMessages = <BlazeMessageData>[];
       // ignore: avoid_dynamic_calls
-      response.data.forEach((itemJson) {
-        blazeMessages.add(BlazeMessageData.fromJson(itemJson));
-      });
+      final List<BlazeMessageData> blazeMessages = response.data
+          .map<BlazeMessageData>(
+              (itemJson) => BlazeMessageData.fromJson(itemJson))
+          .toList();
       if (blazeMessages.isEmpty) {
         break;
       }

@@ -93,15 +93,12 @@ class DecryptMessage extends Injector {
   late MessageStatus _remoteStatus;
 
   Future<bool> isExistMessage(String messageId) async {
-    final id = await database.messagesDao
-        .findMessageIdByMessageId(messageId)
-        .getSingleOrNull();
+    final id = await database.messagesDao.findMessageIdByMessageId(messageId);
     if (id != null) {
       return true;
     }
-    final messageHistory = await database.messagesHistoryDao
-        .findMessageHistoryById(messageId)
-        .getSingleOrNull();
+    final messageHistory =
+        await database.messagesHistoryDao.findMessageHistoryById(messageId);
     return messageHistory != null;
   }
 
