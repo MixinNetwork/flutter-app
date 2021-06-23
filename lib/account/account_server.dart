@@ -856,15 +856,26 @@ class AccountServer {
   }
 
   Future<String?> downloadAttachment(db.MessageItem message) async {
-    AttachmentMessage? attachmentMessage;
-    if (message.content != null) {
-      try {
-        attachmentMessage = AttachmentMessage.fromJson(
-            await jsonBase64DecodeWithIsolate(message.content!));
-      } catch (e) {
-        attachmentMessage = null;
-      }
+    final m =
+        await database.messagesDao.findMessageByMessageId(message.messageId);
+    if (m == null) {
+      return null;
     }
+    final attachmentMessage = AttachmentMessage(
+      m.mediaKey,
+      m.mediaDigest,
+      m.content!,
+      m.mediaMimeType!,
+      m.mediaSize!,
+      m.name,
+      m.mediaWidth,
+      m.mediaHeight,
+      m.thumbImage,
+      int.tryParse(m.mediaDuration ?? '0'),
+      m.mediaWaveform,
+      null,
+      null,
+    );
     await _attachmentUtil.downloadAttachment(
         content: message.content!,
         messageId: message.messageId,
