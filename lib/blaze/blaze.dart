@@ -195,6 +195,8 @@ class Blaze {
     var status = 0;
     if (offset != null) {
       status = getEpochNanoFromString(offset);
+    } else {
+      status = getEpochNano(DateTime.now());
     }
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
