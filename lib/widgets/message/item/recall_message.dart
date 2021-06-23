@@ -30,7 +30,7 @@ class RecallMessage extends StatelessWidget {
       children: [
         SvgPicture.asset(
           Resources.assetsImagesRecallSvg,
-          color: BrightnessData.themeOf(context).text,
+          color: BrightnessData.themeOf(context).secondaryText,
           width: 16,
           height: 16,
         ),
