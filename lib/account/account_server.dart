@@ -1290,4 +1290,7 @@ class AccountServer {
     ));
     multiAuthCubit.updateAccount(user.data);
   }
+
+  bool cancelProgressAttachmentJob(String messageId) =>
+      _attachmentUtil.cancelProgressAttachmentJob(messageId);
 }
