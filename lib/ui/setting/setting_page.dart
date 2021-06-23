@@ -91,6 +91,7 @@ class SettingPage extends StatelessWidget {
                   context.read<MultiAuthCubit>().signOut();
                 },
                 color: BrightnessData.themeOf(context).red,
+                enableTrailingArrow: false,
               ),
             ),
           ],
@@ -106,6 +107,7 @@ class _Item extends StatelessWidget {
     this.pageName,
     this.color,
     this.onTap,
+    this.enableTrailingArrow = true,
   }) : super(key: key);
 
   final String assetName;
@@ -113,6 +115,7 @@ class _Item extends StatelessWidget {
   final String? pageName;
   final Color? color;
   final VoidCallback? onTap;
+  final bool enableTrailingArrow;
 
   @override
   Widget build(BuildContext context) =>
@@ -125,7 +128,7 @@ class _Item extends StatelessWidget {
             assetName,
             width: 24,
             height: 24,
-            color: BrightnessData.themeOf(context).text,
+            color: color ?? BrightnessData.themeOf(context).text,
           ),
           title: Text(title),
           color: color,
@@ -141,6 +144,7 @@ class _Item extends StatelessWidget {
 
             onTap?.call();
           },
+          trailing: enableTrailingArrow ? const Arrow() : null,
         ),
       );
 }

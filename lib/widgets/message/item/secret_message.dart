@@ -11,10 +11,7 @@ class SecretMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
-          ),
+          padding: const EdgeInsets.only(left: 8, right: 8, bottom: 4),
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
