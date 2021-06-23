@@ -2,6 +2,6 @@
      xmlns="http://www.w3.org/2000/svg">
   <path
     d="M9.95795 14.2833L14.9077 9.33353M4.21217 12.2904L8.85136 14.2787C9.32339 14.4809 9.69951 14.8571 9.90181 15.3291L11.89 19.9683C12.5971 21.6181 14.9514 21.5734 15.5952 19.8979L21.0426 5.72216C21.664 4.10502 20.0754 2.51642 18.4583 3.13785L4.28261 8.58523C2.60708 9.2291 2.56233 11.5833 4.21217 12.2904Z"
-    stroke="white" stroke-opacity="0.9" stroke-width="2" stroke-linecap="round"
+    stroke="white" stroke-opacity="1" stroke-width="2" stroke-linecap="round"
     stroke-linejoin="round"/>
 </svg>
