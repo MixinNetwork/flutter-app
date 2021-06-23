@@ -61,6 +61,8 @@ class FileMessage extends StatelessWidget {
               );
               if (path?.isEmpty ?? true) return;
               await File(message.mediaUrl!).copy(path!);
+            } else if(message.mediaStatus == MediaStatus.pending) {
+              context.read<AccountServer>().cancelProgressAttachmentJob(message.messageId);
             }
           },
           child: Row(
