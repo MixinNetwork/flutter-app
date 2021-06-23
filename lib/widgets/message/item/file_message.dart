@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
 import '../../../account/account_server.dart';
+import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../generated/l10n.dart';
@@ -42,6 +43,7 @@ class FileMessage extends StatelessWidget {
           isCurrentUser: isCurrentUser,
           createdAt: message.createdAt,
           status: message.status,
+          isSecret: message.isSignal,
         ),
         child: InteractableDecoratedBox(
           onTap: () async {

@@ -17,23 +17,51 @@ class MessageDatetimeAndStatus extends StatelessWidget {
     required this.createdAt,
     required this.status,
     this.color,
+    required this.isSecret,
   }) : super(key: key);
 
   final bool isCurrentUser;
   final DateTime createdAt;
   final Color? color;
   final MessageStatus status;
+  final bool isSecret;
 
   @override
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (isSecret)
+            Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: _SecretIcon(
+                color: color,
+              ),
+            ),
           _MessageDatetime(
             dateTime: createdAt,
             color: color,
           ),
           if (isCurrentUser) _MessageStatusWidget(status: status),
         ],
+      );
+}
+
+class _SecretIcon extends StatelessWidget {
+  const _SecretIcon({Key? key, this.color}) : super(key: key);
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) => SvgPicture.asset(
+        Resources.assetsImagesChatSecretSvg,
+        width: 8,
+        height: 8,
+        color: color ??
+            BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(131, 145, 158, 1),
+              darkColor: const Color.fromRGBO(128, 131, 134, 1),
+            ),
       );
 }
 

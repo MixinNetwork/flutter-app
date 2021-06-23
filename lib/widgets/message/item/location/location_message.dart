@@ -8,6 +8,7 @@ import 'package:latlng/latlng.dart';
 import 'package:map/map.dart';
 
 import '../../../../constants/resources.dart';
+import '../../../../db/extension/message.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../cache_image.dart';
@@ -42,6 +43,7 @@ class LocationMessage extends HookWidget {
         isCurrentUser: isCurrentUser,
         createdAt: message.createdAt,
         status: message.status,
+        isSecret: message.isSignal,
       ),
       showNip: showNip,
       includeNip: true,

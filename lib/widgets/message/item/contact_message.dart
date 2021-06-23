@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../ui/home/conversation_page.dart';
@@ -33,6 +34,7 @@ class ContactMessage extends StatelessWidget {
           isCurrentUser: isCurrentUser,
           createdAt: message.createdAt,
           status: message.status,
+          isSecret: message.isSignal,
         ),
         child: InteractableDecoratedBox(
           onTap: () => ConversationCubit.selectUser(

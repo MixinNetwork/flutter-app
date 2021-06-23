@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
@@ -34,6 +35,7 @@ class AudioMessage extends StatelessWidget {
       isCurrentUser: isCurrentUser,
       createdAt: message.createdAt,
       status: message.status,
+      isSecret: message.isSignal,
     );
     return MessageBubble(
       messageId: message.messageId,

@@ -25,6 +25,9 @@ class Resources {
   static const String assetsImagesChatBackupSvg =
       'assets/images/chat_backup.svg';
 
+  static const String assetsImagesChatSecretSvg =
+      'assets/images/chat_secret.svg';
+
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
 
   static const String assetsImagesCircleAddSvg = 'assets/images/circle_add.svg';
@@ -151,9 +154,6 @@ class Resources {
       'assets/images/post_detail.svg';
 
   static const String assetsImagesPrevSvg = 'assets/images/prev.svg';
-
-  static const String assetsImagesQuoteBorderSvg =
-      'assets/images/quote_border.svg';
 
   static const String assetsImagesReadSvg = 'assets/images/read.svg';
 

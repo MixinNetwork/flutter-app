@@ -8,6 +8,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../account/account_server.dart';
+import '../../../../db/extension/message.dart';
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../enum/media_status.dart';
 import '../../../image.dart';
@@ -115,6 +116,7 @@ class ImageMessageWidget extends StatelessWidget {
                             isCurrentUser: isCurrentUser,
                             createdAt: message.createdAt,
                             status: message.status,
+                            isSecret: message.isSignal,
                           ),
                         ),
                       ),
