@@ -56,7 +56,12 @@ class _MessageDatetime extends HookWidget {
       text,
       style: TextStyle(
         fontSize: 10,
-        color: color ?? Colors.white,
+        color: color ??
+            BrightnessData.dynamicColor(
+              context,
+              const Color.fromRGBO(131, 145, 158, 1),
+              darkColor: const Color.fromRGBO(128, 131, 134, 1),
+            ),
       ),
     );
   }
