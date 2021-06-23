@@ -21,18 +21,19 @@ class MessageDayTime extends HookWidget {
       converter: (dateTime) => formatDateTimeOfDay(this.dateTime),
       keys: [dateTime],
     );
-    return Container(
-      height: 60,
-      alignment: Alignment.center,
-      child: Container(
-        height: 22,
-        width: 90,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: BrightnessData.themeOf(context).dateTime,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16, bottom: 10),
+        child: Container(
+          height: 22,
+          width: 90,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: BrightnessData.themeOf(context).dateTime,
+          ),
+          alignment: Alignment.center,
+          child: Text(dateTimeString),
         ),
-        alignment: Alignment.center,
-        child: Text(dateTimeString),
       ),
     );
   }

@@ -28,7 +28,7 @@ class BackupPage extends HookWidget {
               SvgPicture.asset(
                 Resources.assetsImagesChatBackupSvg,
                 width: 88,
-                height: 88,
+                height: 58,
                 color: BrightnessData.themeOf(context).secondaryText,
               ),
               const SizedBox(height: 20),
@@ -52,17 +52,6 @@ class BackupPage extends HookWidget {
                 ),
                 child: CellItem(
                   title: Text(Localization.of(context).backup),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  '',
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 14,
-                  ),
                 ),
               ),
               CellGroup(

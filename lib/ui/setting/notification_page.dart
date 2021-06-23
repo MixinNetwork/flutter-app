@@ -33,6 +33,7 @@ class NotificationPage extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CellGroup(
+              padding: const EdgeInsets.only(right: 10, left: 10),
               cellBackgroundColor: BrightnessData.dynamicColor(
                 context,
                 Colors.white,

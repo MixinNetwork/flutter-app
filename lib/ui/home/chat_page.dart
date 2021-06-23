@@ -169,6 +169,11 @@ class ChatPage extends HookWidget {
                   Expanded(
                     child: chatContainerPage.child,
                   ),
+                if (!navigationMode)
+                  Container(
+                    width: 1,
+                    color: BrightnessData.themeOf(context).divider,
+                  ),
                 _SideRouter(
                   chatSideCubit: chatSideCubit,
                   constraints: boxConstraints,

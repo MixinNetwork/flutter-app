@@ -50,6 +50,8 @@ class QuoteMessage extends HookWidget {
     if (quoteMessageId?.isEmpty ?? true) return const SizedBox();
     var inputMode = false;
 
+    final iconColor = BrightnessData.themeOf(context).secondaryText;
+
     try {
       late dynamic quote;
       if (message != null) {
@@ -81,7 +83,10 @@ class QuoteMessage extends HookWidget {
             errorBuilder: (_, __, ___) =>
                 ImageByBlurHashOrBase64(imageData: quote.thumbImage),
           ),
-          icon: SvgPicture.asset(Resources.assetsImagesImageSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesImageSvg,
+            color: iconColor,
+          ),
           description: Localization.of(context).image,
           inputMode: inputMode,
         );
@@ -93,7 +98,10 @@ class QuoteMessage extends HookWidget {
           userId: quote.userId,
           name: quote.userFullName,
           image: ImageByBase64(quote.thumbImage!),
-          icon: SvgPicture.asset(Resources.assetsImagesVideoSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesVideoSvg,
+            color: iconColor,
+          ),
           description: Localization.of(context).video,
           inputMode: inputMode,
         );
@@ -113,7 +121,10 @@ class QuoteMessage extends HookWidget {
             placeholder: (_, __) => placeholder,
             errorWidget: (_, __, ___) => placeholder,
           ),
-          icon: SvgPicture.asset(Resources.assetsImagesLiveSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesLiveSvg,
+            color: iconColor,
+          ),
           description: Localization.of(context).live,
           inputMode: inputMode,
         );
@@ -125,7 +136,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
-          icon: SvgPicture.asset(Resources.assetsImagesFileSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesFileSvg,
+            color: iconColor,
+          ),
           description: quote.mediaName ?? Localization.of(context).file,
           inputMode: inputMode,
         );
@@ -136,7 +150,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
-          icon: SvgPicture.asset(Resources.assetsImagesFileSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesFileSvg,
+            color: iconColor,
+          ),
           description: (quote.content! as String).postOptimizeMarkdown,
           inputMode: inputMode,
         );
@@ -147,7 +164,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
-          icon: SvgPicture.asset(Resources.assetsImagesLocationSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesLocationSvg,
+            color: iconColor,
+          ),
           description: Localization.of(context).location,
           inputMode: inputMode,
         );
@@ -158,7 +178,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
-          icon: SvgPicture.asset(Resources.assetsImagesAudioSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesAudioSvg,
+            color: iconColor,
+          ),
           description: Localization.of(context).audio,
           inputMode: inputMode,
         );
@@ -170,7 +193,10 @@ class QuoteMessage extends HookWidget {
           userId: quote.userId,
           name: quote.userFullName,
           image: CacheImage(quote.assetUrl!),
-          icon: SvgPicture.asset(Resources.assetsImagesStickerSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesStickerSvg,
+            color: iconColor,
+          ),
           description: Localization.of(context).sticker,
           inputMode: inputMode,
         );
@@ -190,7 +216,10 @@ class QuoteMessage extends HookWidget {
               avatarUrl: quote.sharedUserAvatarUrl,
             ),
           ),
-          icon: SvgPicture.asset(Resources.assetsImagesContactSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesContactSvg,
+            color: iconColor,
+          ),
           description: quote.sharedUserIdentityNumber,
           inputMode: inputMode,
         );
@@ -217,7 +246,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
-          icon: SvgPicture.asset(Resources.assetsImagesAppButtonSvg),
+          icon: SvgPicture.asset(
+            Resources.assetsImagesAppButtonSvg,
+            color: iconColor,
+          ),
           description: description ?? Localization.of(context).extensions,
           inputMode: inputMode,
         );
@@ -231,7 +263,10 @@ class QuoteMessage extends HookWidget {
       quoteMessageId: quoteMessageId!,
       userId: null,
       description: Localization.of(context).chatNotFound,
-      icon: SvgPicture.asset(Resources.assetsImagesRecallSvg),
+      icon: SvgPicture.asset(
+        Resources.assetsImagesRecallSvg,
+        color: iconColor,
+      ),
       inputMode: inputMode,
       onTap: () {},
     );
