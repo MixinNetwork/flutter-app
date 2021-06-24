@@ -66,7 +66,11 @@ class MessageDatetimeAndStatus extends StatelessWidget {
             dateTime: message.createdAt,
             color: color,
           ),
-          if (isCurrentUser) _MessageStatusWidget(status: message.status),
+          if (isCurrentUser)
+            _MessageStatusWidget(
+              status: message.status,
+              color: color,
+            ),
         ],
       );
 }
@@ -126,17 +130,16 @@ class _MessageDatetime extends HookWidget {
 }
 
 class _MessageStatusWidget extends StatelessWidget {
-  const _MessageStatusWidget({
-    Key? key,
-    required this.status,
-  }) : super(key: key);
+  const _MessageStatusWidget({Key? key, required this.status, this.color})
+      : super(key: key);
 
   final MessageStatus status;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     var assetName = Resources.assetsImagesSendingSvg;
-    var color = BrightnessData.themeOf(context).secondaryText;
+    var color = this.color ?? BrightnessData.themeOf(context).secondaryText;
     switch (status) {
       case MessageStatus.sent:
         assetName = Resources.assetsImagesSentSvg;
