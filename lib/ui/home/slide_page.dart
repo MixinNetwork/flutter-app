@@ -101,9 +101,13 @@ class SlidePage extends StatelessWidget {
                                 ),
                                 title: account.fullName!,
                                 selected: selected,
-                                onTap: () =>
-                                    BlocProvider.of<SlideCategoryCubit>(context)
-                                        .select(SlideCategoryType.setting),
+                                onTap: () {
+                                  BlocProvider.of<SlideCategoryCubit>(context)
+                                      .select(SlideCategoryType.setting);
+                                  if (ModalRoute.of(context)?.canPop == true) {
+                                    Navigator.pop(context);
+                                  }
+                                },
                               );
                             },
                           ),
@@ -263,11 +267,15 @@ class _CircleList extends HookWidget {
                         color: getCircleColorById(circle.circleId),
                       ),
                       title: circle.name,
-                      onTap: () =>
-                          BlocProvider.of<SlideCategoryCubit>(context).select(
-                        SlideCategoryType.circle,
-                        circle.circleId,
-                      ),
+                      onTap: () {
+                        BlocProvider.of<SlideCategoryCubit>(context).select(
+                          SlideCategoryType.circle,
+                          circle.circleId,
+                        );
+                        if (ModalRoute.of(context)?.canPop == true) {
+                          Navigator.pop(context);
+                        }
+                      },
                       selected: selected,
                       count: circle.unseenMessageCount ?? 0,
                     ),
@@ -324,10 +332,15 @@ class _Item extends StatelessWidget {
               color: BrightnessData.themeOf(context).text,
             ),
             title: title,
-            onTap: () => BlocProvider.of<SlideCategoryCubit>(context).select(
-              type,
-              title,
-            ),
+            onTap: () {
+              BlocProvider.of<SlideCategoryCubit>(context).select(
+                type,
+                title,
+              );
+              if (ModalRoute.of(context)?.canPop == true) {
+                Navigator.pop(context);
+              }
+            },
             selected: selected,
           ),
         ),
