@@ -310,8 +310,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     int limit, [
     String? centerMessageId,
   ]) async {
+    final conversation = conversationCubit.state?.conversation;
     final _centerMessageId = centerMessageId ??
-        conversationCubit.state?.conversation?.lastReadMessageId;
+        ((conversation?.unseenMessageCount ?? 0) > 0
+            ? conversation?.lastReadMessageId
+            : null);
 
     final state = await _messagesByConversationId(
       conversationId,
