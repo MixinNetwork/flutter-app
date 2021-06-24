@@ -454,7 +454,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Selectable<int> fuzzySearchMessageCount(String keyword) =>
-      db.fuzzySearchMessageCount(keyword);
+      db.fuzzySearchMessageCount(
+        keyword.trim().escapeSql().joinStar().replaceQuotationMark(),
+      );
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId({
     required String conversationId,
@@ -471,7 +473,10 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<int> fuzzySearchMessageCountByConversationId(
           String keyword, String conversationId) =>
-      db.fuzzySearchMessageCountByConversationId(conversationId, keyword);
+      db.fuzzySearchMessageCountByConversationId(
+        conversationId,
+        keyword.trim().escapeSql().joinStar().replaceQuotationMark(),
+      );
 
   Selectable<MessageItem> mediaMessagesBefore(
           int rowid, String conversationId, int limit) =>
