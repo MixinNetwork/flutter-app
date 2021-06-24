@@ -162,26 +162,31 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     ConversationItem? _conversation;
     String? lastReadMessageId;
+    bool? hasUnreadMessage;
     if (state?.conversationId == conversationId) {
       _conversation = state?.conversation;
-      lastReadMessageId = state?.lastReadMessageId;
+
+      hasUnreadMessage = (_conversation?.unseenMessageCount ?? 0) > 0;
+      if (hasUnreadMessage) {
+        lastReadMessageId = state?.lastReadMessageId;
+      }
     }
 
     _conversation = conversation ??
         _conversation ??
         await _conversationItem(context, conversationId);
 
+    hasUnreadMessage ??= (_conversation?.unseenMessageCount ?? 0) > 0;
+
     if (_conversation == null) {
       return showToastFailed(context, null);
     }
 
-    final _initIndexMessageId =
-        initIndexMessageId ?? _conversation.lastReadMessageId;
+    final _initIndexMessageId = initIndexMessageId ??
+        (hasUnreadMessage ? _conversation.lastReadMessageId : null);
 
-    lastReadMessageId = lastReadMessageId ??
-        ((_conversation.unseenMessageCount ?? 0) > 0
-            ? _initIndexMessageId
-            : null);
+    lastReadMessageId =
+        lastReadMessageId ?? (hasUnreadMessage ? _initIndexMessageId : null);
 
     final conversationState = ConversationState(
       conversationId: conversationId,
