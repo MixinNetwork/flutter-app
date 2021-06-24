@@ -242,8 +242,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
             .get();
         final ids =
             list.where((element) => element != null).cast<String>().toList();
-        if (ids.isEmpty) return ids;
-        await markMessageRead(userId, ids);
+        if (ids.isNotEmpty) {
+          await markMessageRead(userId, ids);
+        }
         await takeUnseen(userId, conversationId);
         return ids;
       });
