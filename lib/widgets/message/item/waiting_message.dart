@@ -54,8 +54,7 @@ class WaitingMessage extends StatelessWidget {
     );
     final dateAndStatus = MessageDatetimeAndStatus(
       isCurrentUser: isCurrentUser,
-      createdAt: message.createdAt,
-      status: message.status,
+      message: message,
     );
     return MessageBubble(
       messageId: message.messageId,
