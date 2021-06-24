@@ -70,6 +70,7 @@ class ChatInfoPage extends HookWidget {
             onTap: () => Navigator.pop(context),
           ),
         ],
+        backgroundColor: BrightnessData.themeOf(context).popUp,
       ),
       backgroundColor: BrightnessData.themeOf(context).popUp,
       body: SingleChildScrollView(
