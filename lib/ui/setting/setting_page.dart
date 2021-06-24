@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
@@ -8,95 +10,127 @@ import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
+import '../../widgets/action_button.dart';
+import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/window/move_window.dart';
 import '../home/bloc/multi_auth_cubit.dart';
+import '../home/home.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
-class SettingPage extends StatelessWidget {
+class SettingPage extends HookWidget {
   const SettingPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 64,
-              child: MoveWindow(behavior: HitTestBehavior.opaque),
-            ),
-            const _UserProfile(),
-            const SizedBox(height: 24),
-            Column(
+  Widget build(BuildContext context) {
+    final hasDrawer = context.watch<HasDrawerValueNotifier>();
+
+    Widget? leading;
+    if (hasDrawer.value) {
+      leading = ActionButton(
+        onTapUp: (event) => Scaffold.of(context).openDrawer(),
+        padding: const EdgeInsets.all(8),
+        child: Icon(
+          Icons.menu,
+          size: 20,
+          color: BrightnessData.themeOf(context).icon,
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        MixinAppBar(
+          leading: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 150),
+            child: leading ?? const SizedBox(),
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
               children: [
-                CellGroup(
-                  child: _Item(
-                    assetName: Resources.assetsImagesIcProfileSvg,
-                    pageName: ResponsiveNavigatorCubit.editProfilePage,
-                    title: Localization.of(context).editProfile,
-                  ),
+                const SizedBox(
+                  height: 48,
+                  child: MoveWindow(behavior: HitTestBehavior.opaque),
+                ),
+                const _UserProfile(),
+                const SizedBox(height: 24),
+                Column(
+                  children: [
+                    CellGroup(
+                      child: _Item(
+                        assetName: Resources.assetsImagesIcProfileSvg,
+                        pageName: ResponsiveNavigatorCubit.editProfilePage,
+                        title: Localization.of(context).editProfile,
+                      ),
+                    ),
+                    CellGroup(
+                      child: Column(
+                        children: [
+                          _Item(
+                            assetName: Resources.assetsImagesIcNotificationSvg,
+                            pageName: ResponsiveNavigatorCubit.notificationPage,
+                            title: Localization.of(context).notification,
+                          ),
+                          _Item(
+                            assetName: Resources.assetsImagesIcBackupSvg,
+                            pageName: ResponsiveNavigatorCubit.chatBackupPage,
+                            title: Localization.of(context).chatBackup,
+                          ),
+                          _Item(
+                            assetName: Resources.assetsImagesIcStorageUsageSvg,
+                            pageName: ResponsiveNavigatorCubit
+                                .dataAndStorageUsagePage,
+                            title: Localization.of(context).dataAndStorageUsage,
+                          ),
+                          _Item(
+                            assetName: Resources.assetsImagesIcAppearanceSvg,
+                            pageName: ResponsiveNavigatorCubit.appearancePage,
+                            title: Localization.of(context).appearance,
+                          ),
+                          _Item(
+                            assetName: Resources.assetsImagesIcAboutSvg,
+                            pageName: ResponsiveNavigatorCubit.aboutPage,
+                            title: Localization.of(context).about,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
                 CellGroup(
-                  child: Column(
-                    children: [
-                      _Item(
-                        assetName: Resources.assetsImagesIcNotificationSvg,
-                        pageName: ResponsiveNavigatorCubit.notificationPage,
-                        title: Localization.of(context).notification,
-                      ),
-                      _Item(
-                        assetName: Resources.assetsImagesIcBackupSvg,
-                        pageName: ResponsiveNavigatorCubit.chatBackupPage,
-                        title: Localization.of(context).chatBackup,
-                      ),
-                      _Item(
-                        assetName: Resources.assetsImagesIcStorageUsageSvg,
-                        pageName:
-                            ResponsiveNavigatorCubit.dataAndStorageUsagePage,
-                        title: Localization.of(context).dataAndStorageUsage,
-                      ),
-                      _Item(
-                        assetName: Resources.assetsImagesIcAppearanceSvg,
-                        pageName: ResponsiveNavigatorCubit.appearancePage,
-                        title: Localization.of(context).appearance,
-                      ),
-                      _Item(
-                        assetName: Resources.assetsImagesIcAboutSvg,
-                        pageName: ResponsiveNavigatorCubit.aboutPage,
-                        title: Localization.of(context).about,
-                      ),
-                    ],
+                  child: _Item(
+                    assetName: Resources.assetsImagesIcSignOutSvg,
+                    title: Localization.of(context).signOut,
+                    onTap: () async {
+                      await runFutureWithToast(
+                        context,
+                        () async {
+                          try {
+                            final accountServer = context.read<AccountServer>();
+                            await accountServer.signOutAndClear();
+                          } catch (e) {
+                            if (e is! MixinApiError) rethrow;
+                          }
+                        }(),
+                      );
+                      context.read<MultiAuthCubit>().signOut();
+                    },
+                    color: BrightnessData.themeOf(context).red,
+                    enableTrailingArrow: false,
                   ),
                 ),
               ],
             ),
-            CellGroup(
-              child: _Item(
-                assetName: Resources.assetsImagesIcSignOutSvg,
-                title: Localization.of(context).signOut,
-                onTap: () async {
-                  await runFutureWithToast(
-                    context,
-                    () async {
-                      try {
-                        final accountServer = context.read<AccountServer>();
-                        await accountServer.signOutAndClear();
-                      } catch (e) {
-                        if (e is! MixinApiError) rethrow;
-                      }
-                    }(),
-                  );
-                  context.read<MultiAuthCubit>().signOut();
-                },
-                color: BrightnessData.themeOf(context).red,
-                enableTrailingArrow: false,
-              ),
-            ),
-          ],
+          ),
         ),
-      );
+      ],
+    );
+  }
 }
 
 class _Item extends StatelessWidget {
