@@ -569,8 +569,6 @@ class _StickerButton extends HookWidget {
               ),
             );
           },
-          // childAnchor: Alignment.topCenter,
-          // portalAnchor: Alignment.bottomCenter,
           portal: Padding(
             padding: const EdgeInsets.all(8),
             child: StickerPage(
