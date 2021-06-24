@@ -520,6 +520,8 @@ class _StickerButton extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final key = useMemoized(() => GlobalKey());
+
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(context
           .read<AccountServer>()
@@ -540,20 +542,35 @@ class _StickerButton extends HookWidget {
       child: DefaultTabController(
         length: tabLength,
         child: HoverOverlay(
+          key: key,
           delayDuration: const Duration(milliseconds: 50),
           duration: const Duration(milliseconds: 200),
           closeDuration: const Duration(milliseconds: 200),
           closeWaitDuration: const Duration(milliseconds: 300),
           inCurve: Curves.easeOut,
           outCurve: Curves.easeOut,
-          portalBuilder: (context, progress, child) => Opacity(
-            opacity: progress,
-            child: child,
-          ),
-          childAnchor: Alignment.topCenter,
-          portalAnchor: Alignment.bottomCenter,
+          portalBuilder: (context, progress, child) {
+            final renderBox =
+                key.currentContext?.findRenderObject() as RenderBox?;
+            final offset = renderBox?.localToGlobal(Offset.zero);
+
+            if (renderBox == null || offset == null || !renderBox.hasSize) {
+              return const SizedBox();
+            }
+
+            final size = renderBox.size;
+            return Opacity(
+              opacity: progress,
+              child: CustomSingleChildLayout(
+                delegate: _StickerPagePositionedLayoutDelegate(
+                  position: offset + Offset(size.width / 2, 0),
+                ),
+                child: child,
+              ),
+            );
+          },
           portal: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
+            padding: const EdgeInsets.all(8),
             child: StickerPage(
               tabController: DefaultTabController.of(context),
               tabLength: tabLength,
@@ -569,6 +586,28 @@ class _StickerButton extends HookWidget {
       ),
     );
   }
+}
+
+class _StickerPagePositionedLayoutDelegate extends SingleChildLayoutDelegate {
+  _StickerPagePositionedLayoutDelegate({
+    required this.position,
+  });
+
+  final Offset position;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.loose(constraints.biggest);
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) => Offset(
+      (position.dx - childSize.width / 2).clamp(0, size.width),
+      position.dy - childSize.height);
+
+  @override
+  bool shouldRelayout(
+          covariant _StickerPagePositionedLayoutDelegate oldDelegate) =>
+      position != oldDelegate.position;
 }
 
 class _PreviewImage extends HookWidget {
