@@ -57,25 +57,29 @@ class ActionCardMessage extends HookWidget {
               ),
             ),
             const SizedBox(width: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  appCardData.title,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 14,
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    appCardData.title,
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).text,
+                      fontSize: 14,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Text(
-                  appCardData.description,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                    fontSize: 12,
+                  Text(
+                    appCardData.description,
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).secondaryText,
+                      fontSize: 12,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
