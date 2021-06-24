@@ -70,8 +70,7 @@ class TextMessage extends HookWidget {
     );
     final dateAndStatus = MessageDatetimeAndStatus(
       isCurrentUser: isCurrentUser,
-      createdAt: message.createdAt,
-      status: message.status,
+      message: message,
     );
 
     return MessageBubble(

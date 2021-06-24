@@ -9,11 +9,13 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
     Key? key,
     this.title,
     this.actions = const [],
+    this.backgroundColor,
     this.leading,
   }) : super(key: key);
 
   final Widget? title;
   final List<Widget> actions;
+  final Color? backgroundColor;
   final Widget? leading;
 
   @override
@@ -43,7 +45,8 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
             .toList(),
         elevation: 0,
         centerTitle: true,
-        backgroundColor: BrightnessData.themeOf(context).primary,
+        backgroundColor:
+            backgroundColor ?? BrightnessData.themeOf(context).primary,
         leading: MoveWindowBarrier(
           child: Builder(
             builder: (context) => ModalRoute.of(context)?.canPop ?? false

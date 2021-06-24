@@ -261,6 +261,13 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<Message?> findMessageByMessageId(String messageId) =>
       db.findMessageByMessageId(messageId).getSingleOrNull();
 
+  Future<String?> findMessageIdByMessageId(String messageId) =>
+      (db.selectOnly(db.messages)
+            ..addColumns([db.messages.messageId])
+            ..where(db.messages.messageId.equals(messageId)))
+          .map((row) => row.read(db.messages.messageId))
+          .getSingleOrNull();
+
   Future<Message?> findMessageByMessageIdAndUserId(
           String messageId, String userId) =>
       (select(db.messages)
@@ -447,7 +454,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Selectable<int> fuzzySearchMessageCount(String keyword) =>
-      db.fuzzySearchMessageCount(keyword);
+      db.fuzzySearchMessageCount(
+        keyword.trim().escapeSql().joinStar().replaceQuotationMark(),
+      );
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId({
     required String conversationId,
@@ -464,7 +473,10 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<int> fuzzySearchMessageCountByConversationId(
           String keyword, String conversationId) =>
-      db.fuzzySearchMessageCountByConversationId(conversationId, keyword);
+      db.fuzzySearchMessageCountByConversationId(
+        conversationId,
+        keyword.trim().escapeSql().joinStar().replaceQuotationMark(),
+      );
 
   Selectable<MessageItem> mediaMessagesBefore(
           int rowid, String conversationId, int limit) =>

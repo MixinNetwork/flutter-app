@@ -30,8 +30,7 @@ class TransferMessage extends StatelessWidget {
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: MessageDatetimeAndStatus(
           isCurrentUser: isCurrentUser,
-          createdAt: message.createdAt,
-          status: message.status,
+          message: message,
         ),
         child: InteractableDecoratedBox(
           onTap: () => openUri(context,

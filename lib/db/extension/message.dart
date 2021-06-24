@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import '../../enum/message_category.dart';
 import '../converter/media_status_type_converter.dart';
 import '../converter/message_category_type_converter.dart';
 import '../converter/message_status_type_converter.dart';
@@ -8,6 +9,9 @@ import '../mixin_database.dart';
 
 extension Message on MessageItem {
   bool get isLottie => assetType?.toLowerCase() == 'json';
+
+  bool get isSignal =>
+      const MessageCategoryJsonConverter().toJson(type)!.startsWith('SIGNAL_');
 }
 
 extension QueteMessage on QuoteMessageItem {
