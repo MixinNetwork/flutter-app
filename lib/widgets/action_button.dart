@@ -8,7 +8,8 @@ import 'interacter_decorated_box.dart';
 
 class ActionButton extends StatelessWidget {
   const ActionButton({
-    required this.name,
+    this.name,
+    this.child,
     this.onTap,
     this.onTapUp,
     this.padding = const EdgeInsets.all(8),
@@ -18,9 +19,11 @@ class ActionButton extends StatelessWidget {
     this.onExit,
     this.onHover,
     Key? key,
-  }) : super(key: key);
+  })  : assert(name != null || child != null),
+        super(key: key);
 
-  final String name;
+  final String? name;
+  final Widget? child;
   final VoidCallback? onTap;
   final GestureTapUpCallback? onTapUp;
   final EdgeInsets padding;
@@ -31,26 +34,32 @@ class ActionButton extends StatelessWidget {
   final PointerHoverEventListener? onHover;
 
   @override
-  Widget build(BuildContext context) => InteractableDecoratedBox.color(
-        onTap: onTap,
-        onTapUp: onTapUp,
-        onEnter: onEnter,
-        onExit: onExit,
-        onHover: onHover,
-        decoration: const BoxDecoration(shape: BoxShape.circle),
-        hoveringColor: BrightnessData.dynamicColor(
-          context,
-          const Color.fromRGBO(0, 0, 0, 0.03),
-          darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
-        ),
-        child: Padding(
-          padding: padding,
-          child: SvgPicture.asset(
-            name,
-            width: size,
-            height: size,
-            color: color,
-          ),
-        ),
+  Widget build(BuildContext context) {
+    var _child = child;
+    if (name?.isNotEmpty ?? false) {
+      _child = SvgPicture.asset(
+        name!,
+        width: size,
+        height: size,
+        color: color,
       );
+    }
+    return InteractableDecoratedBox.color(
+      onTap: onTap,
+      onTapUp: onTapUp,
+      onEnter: onEnter,
+      onExit: onExit,
+      onHover: onHover,
+      decoration: const BoxDecoration(shape: BoxShape.circle),
+      hoveringColor: BrightnessData.dynamicColor(
+        context,
+        const Color.fromRGBO(0, 0, 0, 0.03),
+        darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
+      ),
+      child: Padding(
+        padding: padding,
+        child: _child,
+      ),
+    );
+  }
 }
