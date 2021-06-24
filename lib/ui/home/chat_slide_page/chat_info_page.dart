@@ -64,11 +64,12 @@ class ChatInfoPage extends HookWidget {
     return Scaffold(
       appBar: MixinAppBar(
         actions: [
-          ActionButton(
-            name: Resources.assetsImagesIcCloseSvg,
-            color: BrightnessData.themeOf(context).icon,
-            onTap: () => Navigator.pop(context),
-          ),
+          if (ModalRoute.of(context)?.canPop != true)
+            ActionButton(
+              name: Resources.assetsImagesIcCloseSvg,
+              color: BrightnessData.themeOf(context).icon,
+              onTap: () => Navigator.pop(context),
+            ),
         ],
         backgroundColor: BrightnessData.themeOf(context).popUp,
       ),
