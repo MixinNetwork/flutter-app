@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../../db/extension/message.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/action_utils.dart';
 import '../../../../utils/uri_utils.dart';
@@ -39,9 +38,7 @@ class ActionCardMessage extends HookWidget {
       isCurrentUser: isCurrentUser,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
         isCurrentUser: isCurrentUser,
-        createdAt: message.createdAt,
-        status: message.status,
-        isSecret: message.isSignal,
+        message: message,
       ),
       child: InteractableDecoratedBox(
         onTap: () {

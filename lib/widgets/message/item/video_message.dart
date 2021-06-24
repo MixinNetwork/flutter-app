@@ -10,7 +10,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
-import '../../../db/extension/message.dart';
 import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
@@ -149,10 +148,8 @@ class VideoMessageWidget extends StatelessWidget {
                             ),
                             child: MessageDatetimeAndStatus(
                               isCurrentUser: isCurrentUser,
-                              createdAt: message.createdAt,
-                              status: message.status,
                               color: Colors.white,
-                              isSecret: message.isSignal,
+                              message: message,
                             ),
                           ),
                         ),

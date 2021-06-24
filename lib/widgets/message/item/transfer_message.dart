@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
 import '../../../constants/constants.dart';
-import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
@@ -31,9 +30,7 @@ class TransferMessage extends StatelessWidget {
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: MessageDatetimeAndStatus(
           isCurrentUser: isCurrentUser,
-          createdAt: message.createdAt,
-          status: message.status,
-          isSecret: message.isSignal,
+          message: message,
         ),
         child: InteractableDecoratedBox(
           onTap: () => openUri(context,

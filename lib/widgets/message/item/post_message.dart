@@ -6,7 +6,6 @@ import 'package:markdown/markdown.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/markdown.dart';
 import '../../../utils/uri_utils.dart';
@@ -88,10 +87,8 @@ class PostMessage extends StatelessWidget {
                       ),
                       child: MessageDatetimeAndStatus(
                         isCurrentUser: isCurrentUser,
-                        createdAt: message.createdAt,
                         color: const Color.fromRGBO(255, 255, 255, 1),
-                        status: message.status,
-                        isSecret: message.isSignal,
+                        message: message,
                       ),
                     ),
                   ),

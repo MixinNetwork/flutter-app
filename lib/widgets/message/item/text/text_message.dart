@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../../db/extension/message.dart';
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../ui/home/chat_page.dart';
 import '../../../../utils/hook.dart';
@@ -71,9 +70,7 @@ class TextMessage extends HookWidget {
     );
     final dateAndStatus = MessageDatetimeAndStatus(
       isCurrentUser: isCurrentUser,
-      createdAt: message.createdAt,
-      status: message.status,
-      isSecret: message.isSignal,
+      message: message,
     );
 
     return MessageBubble(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lottie/lottie.dart';
 
-import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/dp_utils.dart';
 import '../../brightness_observer.dart';
@@ -78,9 +77,7 @@ class StickerMessageWidget extends StatelessWidget {
       showBubble: false,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
         isCurrentUser: isCurrentUser,
-        createdAt: message.createdAt,
-        status: message.status,
-        isSecret: message.isSignal,
+        message: message,
       ),
       child: Builder(
         builder: (context) {

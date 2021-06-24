@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/extension/message.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
@@ -49,9 +48,7 @@ class RecallMessage extends StatelessWidget {
     );
     final dateAndStatus = MessageDatetimeAndStatus(
       isCurrentUser: isCurrentUser,
-      createdAt: message.createdAt,
-      status: message.status,
-      isSecret: message.isSignal,
+      message: message,
     );
     return MessageBubble(
       messageId: message.messageId,

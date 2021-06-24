@@ -25,6 +25,9 @@ class Resources {
   static const String assetsImagesChatBackupSvg =
       'assets/images/chat_backup.svg';
 
+  static const String assetsImagesChatRepresentativeSvg =
+      'assets/images/chat_representative.svg';
+
   static const String assetsImagesChatSecretSvg =
       'assets/images/chat_secret.svg';
 
