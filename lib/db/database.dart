@@ -7,6 +7,8 @@ import 'dao/flood_messages_dao.dart';
 import 'dao/jobs_dao.dart';
 import 'dao/message_mentions_dao.dart';
 import 'dao/messages_dao.dart';
+import 'dao/messages_history_dao.dart';
+import 'dao/offsets_dao.dart';
 import 'dao/participant_session_dao.dart';
 import 'dao/participants_dao.dart';
 import 'dao/resend_session_messages_dao.dart';
@@ -26,8 +28,10 @@ class Database {
     circleConversationDao = CircleConversationDao(mixinDatabase);
     floodMessagesDao = FloodMessagesDao(mixinDatabase);
     messagesDao = MessagesDao(mixinDatabase);
+    messagesHistoryDao = MessagesHistoryDao(mixinDatabase);
     messageMentionsDao = MessageMentionsDao(mixinDatabase);
     jobsDao = JobsDao(mixinDatabase);
+    offsetsDao = OffsetsDao(mixinDatabase);
     participantsDao = ParticipantsDao(mixinDatabase);
     resendSessionMessagesDao = ResendSessionMessagesDao(mixinDatabase);
     snapshotsDao = SnapshotsDao(mixinDatabase);
@@ -51,6 +55,8 @@ class Database {
 
   late final MessagesDao messagesDao;
 
+  late final MessagesHistoryDao messagesHistoryDao;
+
   late final MessageMentionsDao messageMentionsDao;
 
   late final ConversationsDao conversationDao;
@@ -62,6 +68,8 @@ class Database {
   late final FloodMessagesDao floodMessagesDao;
 
   late final JobsDao jobsDao;
+
+  late final OffsetsDao offsetsDao;
 
   late final ParticipantsDao participantsDao;
 

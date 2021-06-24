@@ -48,3 +48,5 @@ const mixinProtocolUrls = {
 
 const int hour1 = 1000 * 60 * 60;
 const int hours24 = hour1 * 24;
+
+const statusOffset = 'messages_status_offset';

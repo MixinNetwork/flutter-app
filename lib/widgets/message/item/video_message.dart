@@ -152,9 +152,8 @@ class VideoMessageWidget extends StatelessWidget {
                             ),
                             child: MessageDatetimeAndStatus(
                               isCurrentUser: isCurrentUser,
-                              createdAt: message.createdAt,
-                              status: message.status,
                               color: Colors.white,
+                              message: message,
                             ),
                           ),
                         ),

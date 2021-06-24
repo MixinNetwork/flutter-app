@@ -77,8 +77,7 @@ class StickerMessageWidget extends StatelessWidget {
       showBubble: false,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
         isCurrentUser: isCurrentUser,
-        createdAt: message.createdAt,
-        status: message.status,
+        message: message,
       ),
       child: Builder(
         builder: (context) {

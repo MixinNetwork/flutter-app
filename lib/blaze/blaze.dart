@@ -13,6 +13,7 @@ import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
 import '../utils/dao_extension.dart';
+import '../utils/datetime_format_utils.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import 'blaze_message.dart';
@@ -133,6 +134,7 @@ class Blaze {
       },
       cancelOnError: true,
     );
+    _refreshOffset();
     _sendListPending();
   }
 
@@ -146,7 +148,8 @@ class Blaze {
     }
     if (blazeMessage.action == acknowledgeMessageReceipt) {
       await makeMessageStatus(data.messageId, data.status);
-      // TODO insert offset
+      await database.offsetsDao.insert(Offset(
+          key: statusOffset, timestamp: data.updatedAt.toIso8601String()));
     } else if (blazeMessage.action == createMessage) {
       if (data.userId == userId && data.category == null) {
         await makeMessageStatus(data.messageId, data.status);
@@ -184,6 +187,38 @@ class Blaze {
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     d('blaze send: ${m.toJson()}');
     await _sendGZip(m);
+  }
+
+  Future<void> _refreshOffset() async {
+    final offset =
+        await database.offsetsDao.findStatusOffset().getSingleOrNull();
+    var status = 0;
+    if (offset != null) {
+      status = getEpochNanoFromString(offset);
+    } else {
+      status = getEpochNano(DateTime.now());
+    }
+    for (;;) {
+      final response = await client.messageApi.messageStatusOffset(status);
+      // ignore: avoid_dynamic_calls
+      final List<BlazeMessageData> blazeMessages = response.data
+          .map<BlazeMessageData>(
+              (itemJson) => BlazeMessageData.fromJson(itemJson))
+          .toList();
+      if (blazeMessages.isEmpty) {
+        break;
+      }
+      await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
+        await makeMessageStatus(m.messageId, m.status);
+        await database.offsetsDao.insert(Offset(
+            key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
+      });
+      final lastUpdateAt = getEpochNano(blazeMessages.last.updatedAt);
+      if (lastUpdateAt == status) {
+        break;
+      }
+      status = lastUpdateAt;
+    }
   }
 
   Future<void> _sendGZip(BlazeMessage msg) async {
