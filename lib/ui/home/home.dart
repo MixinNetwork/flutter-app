@@ -20,7 +20,7 @@ const kSlidePageMinWidth = 80.0;
 // chat category and chat list max width
 const kSlidePageMaxWidth = 160.0;
 // chat page min width, message list, setting page etc.
-const kResponsiveNavigationMinWidth = 460.0;
+const kResponsiveNavigationMinWidth = 300.0;
 // conversation list fixed width, conversation list, setting list etc.
 const kConversationListWidth = 300.0;
 // chat side page fixed width, chat info page etc.
