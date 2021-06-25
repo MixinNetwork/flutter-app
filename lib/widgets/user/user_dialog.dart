@@ -148,7 +148,7 @@ class _BioText extends HookWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: ExtendedText(
-            biography.overflow,
+            expand.value ? biography : biography.overflow,
             style: TextStyle(
               color: BrightnessData.themeOf(context).text,
               fontSize: 14,
