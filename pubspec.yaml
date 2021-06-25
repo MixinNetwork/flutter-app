@@ -102,6 +102,7 @@ dependencies:
   desktop_notifications: ^0.5.0
   connectivity_plus: ^1.0.3
   async: ^2.7.0
+  extended_text: ^7.0.0
 
 dev_dependencies:
   build_runner:

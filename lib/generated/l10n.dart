@@ -1849,6 +1849,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Mixin ID: {mixinId}`
+  String contactMixinId(Object mixinId) {
+    return Intl.message(
+      'Mixin ID: $mixinId',
+      name: 'contactMixinId',
+      desc: '',
+      args: [mixinId],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

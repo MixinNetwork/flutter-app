@@ -1291,8 +1291,8 @@ class AccountServer {
         )
       ]);
 
-  Future<List<db.User>?> refreshUsers(List<String> ids) =>
-      _decryptMessage.refreshUsers(ids);
+  Future<List<db.User>?> refreshUsers(List<String> ids, {bool force = false}) =>
+      _decryptMessage.refreshUsers(ids, force: force);
 
   Future<void> updateAccount({String? fullName, String? biography}) async {
     final user = await client.accountApi.update(AccountUpdateRequest(

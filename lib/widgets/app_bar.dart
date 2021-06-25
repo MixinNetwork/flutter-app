@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'back_button.dart';
 import 'brightness_observer.dart';
+import 'buttons.dart';
 import 'window/move_window.dart';
 
 class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
