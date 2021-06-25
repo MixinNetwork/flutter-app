@@ -177,15 +177,17 @@ class ChatPage extends HookWidget {
                 _SideRouter(
                   chatSideCubit: chatSideCubit,
                   constraints: boxConstraints,
-                  child: Navigator(
-                    onPopPage: (Route<dynamic> route, dynamic result) {
-                      chatSideCubit.onPopPage();
-                      return route.didPop(result);
-                    },
-                    pages: [
-                      if (navigationMode) chatContainerPage,
-                      ...navigatorState.pages,
-                    ],
+                  child: ClipRect(
+                    child: Navigator(
+                      onPopPage: (Route<dynamic> route, dynamic result) {
+                        chatSideCubit.onPopPage();
+                        return route.didPop(result);
+                      },
+                      pages: [
+                        if (navigationMode) chatContainerPage,
+                        ...navigatorState.pages,
+                      ],
+                    ),
                   ),
                 ),
               ],
