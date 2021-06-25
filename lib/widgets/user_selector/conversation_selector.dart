@@ -285,7 +285,7 @@ class _ConversationSelector extends HookWidget {
                   prefixIcon: Padding(
                     padding: const EdgeInsetsDirectional.only(end: 8.0),
                     child: SvgPicture.asset(
-                      Resources.assetsImagesIcSearchSvg,
+                      Resources.assetsImagesIcSearchSmallSvg,
                       color: BrightnessData.themeOf(context).secondaryText,
                     ),
                   ),

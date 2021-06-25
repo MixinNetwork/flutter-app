@@ -82,7 +82,7 @@ class SearchTextField extends HookWidget {
           prefixIcon: Padding(
             padding: const EdgeInsets.only(left: 16, right: 8),
             child: SvgPicture.asset(
-              Resources.assetsImagesIcSearchSvg,
+              Resources.assetsImagesIcSearchSmallSvg,
               color: hintColor,
             ),
           ),
