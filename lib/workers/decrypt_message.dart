@@ -806,13 +806,14 @@ class DecryptMessage extends Injector {
     if (exists == null) {
       final a =
           (await client.assetApi.getAssetById(snapshotMessage.assetId)).data;
-      final asset = Asset(
+      final asset = db.Asset(
           assetId: a.assetId,
           symbol: a.symbol,
           name: a.name,
           iconUrl: a.iconUrl,
           balance: a.balance,
-          destination: a.destination,
+          // TODO
+          destination: a.destination!,
           priceBtc: a.priceBtc,
           priceUsd: a.priceUsd,
           chainId: a.chainId,
