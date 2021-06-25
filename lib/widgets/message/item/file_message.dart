@@ -10,6 +10,7 @@ import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
 import '../../../account/account_server.dart';
+import '../../../constants/brightness_theme_data.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../generated/l10n.dart';
@@ -89,7 +90,7 @@ class FileMessage extends StatelessWidget {
 
                   return DecoratedBox(
                     decoration: BoxDecoration(
-                      color: BrightnessData.themeOf(context).listSelected,
+                      color: BrightnessData.themeOf(context).statusBackground,
                     ),
                     child: SizedBox.fromSize(
                       size: const Size.square(38),
@@ -108,8 +109,8 @@ class FileMessage extends StatelessWidget {
                             extension,
                             style: TextStyle(
                               fontSize: 12,
-                              color:
-                                  BrightnessData.themeOf(context).secondaryText,
+                              // force light style
+                              color: lightBrightnessThemeData.secondaryText,
                             ),
                           );
                         }),

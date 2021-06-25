@@ -100,7 +100,9 @@ class MediaPage extends HookWidget {
           children: [
             SvgPicture.asset(
               Resources.assetsImagesEmptyImageSvg,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: BrightnessData.themeOf(context)
+                  .secondaryText
+                  .withOpacity(0.4),
             ),
             const SizedBox(height: 24),
             Text(

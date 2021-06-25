@@ -557,7 +557,7 @@ class _BaseItem extends StatelessWidget {
                   )
               ],
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 16,
                 color: BrightnessData.themeOf(context).text,
               ),
             ),

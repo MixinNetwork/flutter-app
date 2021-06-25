@@ -109,16 +109,14 @@ class MessageBubble extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          ConstrainedBox(
-            constraints: const BoxConstraints(
-              minWidth: 42,
-              minHeight: 38,
-            ),
-            child: _child,
-          ),
+          _child,
           if (outerTimeAndStatusWidget != null)
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              padding: const EdgeInsets.only(
+                right: 10,
+                left: 10,
+                top: 4,
+              ),
               child: outerTimeAndStatusWidget,
             ),
         ],

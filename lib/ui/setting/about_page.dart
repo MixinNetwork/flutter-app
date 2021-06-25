@@ -29,7 +29,6 @@ class AboutPage extends HookWidget {
       backgroundColor: BrightnessData.themeOf(context).background,
       appBar: MixinAppBar(
         title: Text(Localization.of(context).about),
-        actions: const [],
       ),
       body: SingleChildScrollView(
         child: Container(

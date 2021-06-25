@@ -18,7 +18,6 @@ class BackupPage extends HookWidget {
         backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
           title: Text(Localization.of(context).chatBackup),
-          actions: const [],
         ),
         body: Container(
           alignment: Alignment.topCenter,
@@ -29,7 +28,9 @@ class BackupPage extends HookWidget {
                 Resources.assetsImagesChatBackupSvg,
                 width: 88,
                 height: 58,
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: BrightnessData.themeOf(context)
+                    .secondaryText
+                    .withOpacity(0.4),
               ),
               const SizedBox(height: 20),
               SizedBox(

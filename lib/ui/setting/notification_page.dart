@@ -24,7 +24,6 @@ class NotificationPage extends HookWidget {
       backgroundColor: BrightnessData.themeOf(context).background,
       appBar: MixinAppBar(
         title: Text(Localization.of(context).notification),
-        actions: const [],
       ),
       body: Container(
         alignment: Alignment.topCenter,
