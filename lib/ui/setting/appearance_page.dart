@@ -17,7 +17,6 @@ class AppearancePage extends StatelessWidget {
         backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
           title: Text(Localization.of(context).appearance),
-          actions: const [],
         ),
         body: const Align(
           alignment: Alignment.topCenter,

@@ -26,13 +26,20 @@ class MessageDayTime extends HookWidget {
         padding: const EdgeInsets.only(top: 16, bottom: 10),
         child: Container(
           height: 22,
-          width: 90,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             color: BrightnessData.themeOf(context).dateTime,
           ),
-          alignment: Alignment.center,
-          child: Text(dateTimeString),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minWidth: 64,
+            ),
+            child: Text(
+              dateTimeString,
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ),
     );

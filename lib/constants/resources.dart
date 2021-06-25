@@ -103,6 +103,9 @@ class Resources {
 
   static const String assetsImagesIcSearchSvg = 'assets/images/ic_search.svg';
 
+  static const String assetsImagesIcSearchSmallSvg =
+      'assets/images/ic_search_small.svg';
+
   static const String assetsImagesIcSendSvg = 'assets/images/ic_send.svg';
 
   static const String assetsImagesIcSignOutSvg =

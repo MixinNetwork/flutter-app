@@ -97,7 +97,9 @@ class PostPage extends HookWidget {
           children: [
             SvgPicture.asset(
               Resources.assetsImagesEmptyFileSvg,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: BrightnessData.themeOf(context)
+                  .secondaryText
+                  .withOpacity(0.4),
             ),
             const SizedBox(height: 24),
             Text(
@@ -189,8 +191,9 @@ class _Item extends StatelessWidget {
               child: Stack(
                 children: [
                   MarkdownBody(
-                    data: message.thumbImage?.postLengthOptimize() ??
-                        message.content!.postOptimize(),
+                    data: message.content!
+                        .postOptimize(10)
+                        .postLengthOptimize(256),
                     extensionSet: ExtensionSet.gitHubWeb,
                     styleSheet: markdownStyleSheet(context),
                     imageBuilder: (_, __, ___) => const SizedBox(),

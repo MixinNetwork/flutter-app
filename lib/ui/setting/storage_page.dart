@@ -23,7 +23,6 @@ class StoragePage extends HookWidget {
       backgroundColor: BrightnessData.themeOf(context).background,
       appBar: MixinAppBar(
         title: Text(Localization.of(context).dataAndStorageUsage),
-        actions: const [],
       ),
       body: SingleChildScrollView(
         child: Container(

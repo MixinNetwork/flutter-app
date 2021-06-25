@@ -16,12 +16,14 @@ import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../../../account/account_server.dart';
 import '../../../../bloc/paging/load_more_paging.dart';
+import '../../../../constants/brightness_theme_data.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/media_status.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../utils/hook.dart';
+import '../../../../utils/string_extension.dart';
 import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/status.dart';
@@ -101,7 +103,9 @@ class FilePage extends HookWidget {
           children: [
             SvgPicture.asset(
               Resources.assetsImagesEmptyFileSvg,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: BrightnessData.themeOf(context)
+                  .secondaryText
+                  .withOpacity(0.4),
             ),
             const SizedBox(height: 24),
             Text(
@@ -223,7 +227,7 @@ class _Item extends StatelessWidget {
 
                     return DecoratedBox(
                       decoration: BoxDecoration(
-                        color: BrightnessData.themeOf(context).listSelected,
+                        color: BrightnessData.themeOf(context).statusBackground,
                       ),
                       child: Center(
                         child: Builder(builder: (context) {
@@ -240,8 +244,7 @@ class _Item extends StatelessWidget {
                             extension,
                             style: TextStyle(
                               fontSize: 16,
-                              color:
-                                  BrightnessData.themeOf(context).secondaryText,
+                              color: lightBrightnessThemeData.secondaryText,
                             ),
                           );
                         }),
@@ -256,11 +259,12 @@ class _Item extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    message.mediaName ?? '',
+                    message.mediaName?.overflow ?? '',
                     style: TextStyle(
                       fontSize: 16,
                       color: BrightnessData.themeOf(context).text,
                     ),
+                    maxLines: 1,
                   ),
                   Text(
                     filesize(message.mediaSize),

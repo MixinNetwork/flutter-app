@@ -26,7 +26,6 @@ class StorageUsageListPage extends HookWidget {
         backgroundColor: BrightnessData.themeOf(context).background,
         appBar: MixinAppBar(
           title: Text(Localization.of(context).storageUsage),
-          actions: const [],
         ),
         body: const _Content(),
       );

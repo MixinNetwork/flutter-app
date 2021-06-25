@@ -1078,28 +1078,21 @@ class _StatusRow extends StatelessWidget {
   final ConversationItem conversation;
 
   @override
-  Widget build(BuildContext context) {
-    final dynamicColor = BrightnessData.dynamicColor(
-      context,
-      const Color.fromRGBO(229, 231, 235, 1),
-      darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-    );
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        if (conversation.isMute)
-          SvgPicture.asset(
-            Resources.assetsImagesMuteSvg,
-            color: dynamicColor,
-          ),
-        if (conversation.pinTime != null)
-          SvgPicture.asset(
-            Resources.assetsImagesPinSvg,
-            color: dynamicColor,
-          ),
-      ].joinList(const SizedBox(width: 4)),
-    );
-  }
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          if (conversation.isMute)
+            SvgPicture.asset(
+              Resources.assetsImagesMuteSvg,
+              color: BrightnessData.themeOf(context).secondaryText,
+            ),
+          if (conversation.pinTime != null)
+            SvgPicture.asset(
+              Resources.assetsImagesPinSvg,
+              color: BrightnessData.themeOf(context).secondaryText,
+            ),
+        ].joinList(const SizedBox(width: 4)),
+      );
 }
 
 class _MessagePreview extends StatelessWidget {

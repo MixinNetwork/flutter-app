@@ -8,15 +8,16 @@ import 'package:markdown/markdown.dart';
 import '../widgets/brightness_observer.dart';
 
 extension MarkdownExtension on String {
-  String postLengthOptimize() {
-    if (length > 1024) {
-      return substring(0, 1024);
+  String postLengthOptimize([int target = 1024]) {
+    if (length > target) {
+      return substring(0, target);
     } else {
       return this;
     }
   }
 
-  String postOptimize() => split('\n').take(20).join('\n').postLengthOptimize();
+  String postOptimize([int lines = 20]) =>
+      split('\n').take(lines).join('\n').postLengthOptimize();
 
   String get postOptimizeMarkdown {
     final lines = const LineSplitter().convert(postOptimize());

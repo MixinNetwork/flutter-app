@@ -4,6 +4,6 @@
         transform="rotate(-45 15.4351 16.6777)" fill="white"/>
   <path fill-rule="evenodd" clip-rule="evenodd"
         d="M16.8492 16.6779C19.9734 13.5537 19.9734 8.48834 16.8492 5.36414C13.725 2.23995 8.65971 2.23995 5.53552 5.36414C2.41132 8.48834 2.41132 13.5537 5.53552 16.6779C8.65971 19.802 13.725 19.802 16.8492 16.6779Z"
-        stroke="white" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round"/>
+        stroke="white" stroke-opacity="0.9" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

@@ -62,34 +62,31 @@ class CircleManagerPage extends HookWidget {
       appBar: MixinAppBar(
         title: Text(Localization.of(context).circles),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: ActionButton(
-              name: Resources.assetsImagesIcAddSvg,
-              onTap: () async {
-                final conversation = context.read<ConversationCubit>().state;
-                if (conversation?.conversationId.isEmpty ?? true) return;
+          ActionButton(
+            name: Resources.assetsImagesIcAddSvg,
+            onTap: () async {
+              final conversation = context.read<ConversationCubit>().state;
+              if (conversation?.conversationId.isEmpty ?? true) return;
 
-                final name = await showMixinDialog<String>(
-                  context: context,
-                  child: EditDialog(
-                    title: Text(Localization.of(context).circles),
-                    hintText: Localization.of(context).editCircleName,
+              final name = await showMixinDialog<String>(
+                context: context,
+                child: EditDialog(
+                  title: Text(Localization.of(context).circles),
+                  hintText: Localization.of(context).editCircleName,
+                ),
+              );
+
+              await runFutureWithToast(
+                context,
+                context.read<AccountServer>().createCircle(name!, [
+                  CircleConversationRequest(
+                    action: CircleConversationAction.add,
+                    conversationId: conversation!.conversationId,
+                    userId: conversation.userId,
                   ),
-                );
-
-                await runFutureWithToast(
-                  context,
-                  context.read<AccountServer>().createCircle(name!, [
-                    CircleConversationRequest(
-                      action: CircleConversationAction.add,
-                      conversationId: conversation!.conversationId,
-                      userId: conversation.userId,
-                    ),
-                  ]),
-                );
-              },
-            ),
+                ]),
+              );
+            },
           ),
         ],
       ),
@@ -198,15 +195,16 @@ class _CircleManagerItem extends StatelessWidget {
                 alignment: Alignment.center,
                 child: SvgPicture.asset(
                   Resources.assetsImagesCircleSvg,
-                  width: 18,
-                  height: 18,
+                  width: 24,
+                  height: 24,
                   color: getCircleColorById(circleId),
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 8),
             Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,

@@ -540,6 +540,7 @@ class ConversationBio extends HookWidget {
         color: BrightnessData.themeOf(context).text,
         fontSize: fontSize,
       ),
+      textAlign: TextAlign.center,
     );
   }
 }

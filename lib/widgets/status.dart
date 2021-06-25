@@ -20,15 +20,16 @@ class StatusPending extends StatelessWidget {
                 size: const Size.square(10),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: BrightnessData.themeOf(context).text,
+                    color: BrightnessData.themeOf(context).accent,
                   ),
                 ),
               ),
             ),
             CircularProgressIndicator(
               strokeWidth: 2,
-              valueColor:
-                  AlwaysStoppedAnimation(BrightnessData.themeOf(context).text),
+              valueColor: AlwaysStoppedAnimation(
+                BrightnessData.themeOf(context).accent,
+              ),
             ),
           ],
         ),
@@ -61,7 +62,7 @@ class StatusDownload extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesDownloadSvg,
-            color: BrightnessData.themeOf(context).text,
+            color: BrightnessData.themeOf(context).accent,
           ),
         ),
       );
@@ -77,7 +78,7 @@ class StatusUpload extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesUploadSvg,
-            color: BrightnessData.themeOf(context).text,
+            color: BrightnessData.themeOf(context).accent,
           ),
         ),
       );
