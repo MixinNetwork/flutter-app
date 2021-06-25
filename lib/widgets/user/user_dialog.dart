@@ -10,6 +10,7 @@ import '../../generated/l10n.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat_page.dart';
 import '../../ui/home/conversation_page.dart';
+import '../../utils/string_extension.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../brightness_observer.dart';
@@ -147,7 +148,7 @@ class _BioText extends HookWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
           child: ExtendedText(
-            biography,
+            biography.overflow,
             style: TextStyle(
               color: BrightnessData.themeOf(context).text,
               fontSize: 14,
