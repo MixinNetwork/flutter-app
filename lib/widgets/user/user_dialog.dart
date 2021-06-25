@@ -187,70 +187,70 @@ class _UserProfileButtonBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isSelf = user.userId == context.read<AccountServer>().userId;
     return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        ActionButton(
+          name: Resources.assetsImagesInviteShareSvg,
+          size: 24,
+          onTap: () async {
+            final result = await showConversationSelector(
+              context: context,
+              singleSelect: true,
+              title: Localization.of(context).shareContact,
+              onlyContact: false,
+            );
+
+            if (result.isEmpty) return;
+            final conversationId = result[0].conversationId;
+
+            assert(!(result[0].isGroup && result[0].userId != null),
+                'group conversation should not contains userId!');
+
+            await runFutureWithToast(
+              context,
+              context.read<AccountServer>().sendContactMessage(
+                    user.userId,
+                    user.fullName!,
+                    isPlain(result.first.isGroup, result.first.isBot),
+                    conversationId: conversationId,
+                    recipientId: result[0].userId,
+                  ),
+            );
+          },
+          color: BrightnessData.themeOf(context).icon,
+        ),
+        if (!isSelf)
           ActionButton(
-            name: Resources.assetsImagesInviteShareSvg,
+            name: Resources.assetsImagesChatSvg,
             size: 24,
             onTap: () async {
-              final result = await showConversationSelector(
-                context: context,
-                singleSelect: true,
-                title: Localization.of(context).shareContact,
-                onlyContact: false,
-              );
-
-              if (result.isEmpty) return;
-              final conversationId = result[0].conversationId;
-
-              assert(!(result[0].isGroup && result[0].userId != null),
-                  'group conversation should not contains userId!');
-
-              await runFutureWithToast(
+              if (user.userId == context.read<AccountServer>().userId) {
+                // skip self.
+                return;
+              }
+              await ConversationCubit.selectUser(
                 context,
-                context.read<AccountServer>().sendContactMessage(
-                      user.userId,
-                      user.fullName!,
-                      isPlain(result.first.isGroup, result.first.isBot),
-                      conversationId: conversationId,
-                      recipientId: result[0].userId,
-                    ),
+                user.userId,
               );
+              Navigator.pop(context);
             },
             color: BrightnessData.themeOf(context).icon,
           ),
-          if (!isSelf)
-            ActionButton(
-              name: Resources.assetsImagesChatSvg,
-              size: 24,
-              onTap: () async {
-                if (user.userId == context.read<AccountServer>().userId) {
-                  // skip self.
-                  return;
-                }
-                await ConversationCubit.selectUser(
-                  context,
-                  user.userId,
-                );
-                Navigator.pop(context);
-              },
-              color: BrightnessData.themeOf(context).icon,
-            ),
-          if (!isSelf)
-            ActionButton(
-              name: Resources.assetsImagesInformationSvg,
-              size: 24,
-              onTap: () async {
-                await ConversationCubit.selectUser(
-                  context,
-                  user.userId,
-                  initialChatSidePage: ChatSideCubit.infoPage,
-                );
-                Navigator.pop(context);
-              },
-              color: BrightnessData.themeOf(context).icon,
-            )
-        ],
-      );
+        if (!isSelf)
+          ActionButton(
+            name: Resources.assetsImagesInformationSvg,
+            size: 24,
+            onTap: () async {
+              await ConversationCubit.selectUser(
+                context,
+                user.userId,
+                initialChatSidePage: ChatSideCubit.infoPage,
+              );
+              Navigator.pop(context);
+            },
+            color: BrightnessData.themeOf(context).icon,
+          )
+      ],
+    );
   }
 }
