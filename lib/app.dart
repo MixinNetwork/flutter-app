@@ -186,6 +186,15 @@ class _App extends StatelessWidget {
             supportedLocales: [
               ...Localization.delegate.supportedLocales,
             ],
+            theme: ThemeData(
+              pageTransitionsTheme: const PageTransitionsTheme(
+                builders: <TargetPlatform, PageTransitionsBuilder>{
+                  TargetPlatform.linux: FadeUpwardsPageTransitionsBuilder(),
+                  TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+                  TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
+                },
+              ),
+            ),
             builder: (context, child) {
               try {
                 Provider.of<AccountServer>(context).language =
