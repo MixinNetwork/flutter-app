@@ -13,8 +13,8 @@ import '../utils/file.dart';
 import '../utils/hook.dart';
 import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
-import 'back_button.dart';
 import 'brightness_observer.dart';
+import 'buttons.dart';
 import 'input_container.dart';
 import 'window/move_window.dart';
 

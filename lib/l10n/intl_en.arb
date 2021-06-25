@@ -178,5 +178,6 @@
   "groupInviteInfo": "Anyone with Mixin can follow this link to join this group. Only share it with people you trust.",
   "groupInviteShare": "Share Link",
   "groupInviteCopy": "Copy Link",
-  "groupInviteReset": "Reset Link"
+  "groupInviteReset": "Reset Link",
+  "contactMixinId": "Mixin ID: {mixinId}"
 }

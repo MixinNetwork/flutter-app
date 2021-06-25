@@ -25,6 +25,7 @@ class ConversationState extends Equatable {
     this.conversation,
     this.user,
     required this.refreshKey,
+    this.initialSidePage,
   });
 
   final String conversationId;
@@ -34,6 +35,8 @@ class ConversationState extends Equatable {
   final ConversationItem? conversation;
   final User? user;
   final Object refreshKey;
+
+  final String? initialSidePage;
 
   bool get isLoaded => conversation != null || user != null;
 
@@ -69,6 +72,7 @@ class ConversationState extends Equatable {
         user,
         lastReadMessageId,
         refreshKey,
+        initialSidePage,
       ];
 
   ConversationState copyWith({
@@ -80,6 +84,7 @@ class ConversationState extends Equatable {
     final ConversationItem? conversation,
     final User? user,
     final Object? refreshKey,
+    final String? initialSidePage,
   }) =>
       ConversationState(
         conversationId: conversationId ?? this.conversationId,
@@ -89,6 +94,7 @@ class ConversationState extends Equatable {
         user: user ?? this.user,
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         refreshKey: refreshKey ?? this.refreshKey,
+        initialSidePage: initialSidePage ?? this.initialSidePage,
       );
 }
 
@@ -155,6 +161,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String conversationId, {
     ConversationItem? conversation,
     String? initIndexMessageId,
+    String? initialChatSidePage,
   }) async {
     final accountServer = context.read<AccountServer>();
     final conversationCubit = context.read<ConversationCubit>();
@@ -194,6 +201,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       initIndexMessageId: _initIndexMessageId,
       lastReadMessageId: lastReadMessageId,
       userId: _conversation.isGroupConversation ? null : _conversation.ownerId,
+      initialSidePage: initialChatSidePage,
       refreshKey: Object(),
     );
 
@@ -208,6 +216,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     BuildContext context,
     String userId, {
     User? user,
+    String? initialChatSidePage,
   }) async {
     final accountServer = context.read<AccountServer>();
     final conversationCubit = context.read<ConversationCubit>();
@@ -222,6 +231,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           context,
           conversationId,
           conversation: conversation,
+          initialChatSidePage: initialChatSidePage,
         );
       }
     }
@@ -238,6 +248,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       conversationId: conversationId,
       userId: userId,
       user: _user,
+      initialSidePage: initialChatSidePage,
       refreshKey: Object(),
     ));
 

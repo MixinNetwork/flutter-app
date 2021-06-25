@@ -21,6 +21,7 @@ import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
 import '../../../widgets/toast.dart';
+import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
 import '../conversation_page.dart';
@@ -143,60 +144,49 @@ class _ParticipantTile extends StatelessWidget {
   final String keyword;
 
   @override
-  Widget build(BuildContext context) {
-    final self = participant.userId == currentUser?.userId;
-    return _ParticipantMenuEntry(
-      participant: participant,
-      currentUser: currentUser,
-      child: ListTile(
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        leading: AvatarWidget(
-          size: 50,
-          avatarUrl: participant.avatarUrl,
-          userId: participant.userId,
-          name: participant.fullName ?? '?',
-        ),
-        title: Row(
-          children: [
-            Flexible(
-              child: HighlightText(
-                participant.fullName ?? '?',
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
-                  fontSize: 16,
+  Widget build(BuildContext context) => _ParticipantMenuEntry(
+        participant: participant,
+        currentUser: currentUser,
+        child: ListTile(
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+          leading: AvatarWidget(
+            size: 50,
+            avatarUrl: participant.avatarUrl,
+            userId: participant.userId,
+            name: participant.fullName ?? '?',
+          ),
+          title: Row(
+            children: [
+              Flexible(
+                child: HighlightText(
+                  participant.fullName ?? '?',
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).text,
+                    fontSize: 16,
+                  ),
+                  highlightTextSpans: [
+                    HighlightTextSpan(
+                      keyword,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).accent,
+                      ),
+                    )
+                  ],
                 ),
-                highlightTextSpans: [
-                  HighlightTextSpan(
-                    keyword,
-                    style: TextStyle(
-                      color: BrightnessData.themeOf(context).accent,
-                    ),
-                  )
-                ],
               ),
-            ),
-            VerifiedOrBotWidget(
-              isBot: participant.appId != null,
-              verified: participant.isVerified,
-            ),
-          ],
+              VerifiedOrBotWidget(
+                isBot: participant.appId != null,
+                verified: participant.isVerified,
+              ),
+            ],
+          ),
+          onTap: () {
+            showUserDialog(context, participant.userId);
+          },
+          trailing: _RoleWidget(role: participant.role),
         ),
-        onTap: () {
-          // skip self
-          if (self) {
-            return;
-          }
-          ConversationCubit.selectUser(
-            context,
-            participant.userId,
-          );
-        },
-        onLongPress: () {},
-        trailing: _RoleWidget(role: participant.role),
-      ),
-    );
-  }
+      );
 }
 
 class _ParticipantMenuEntry extends StatelessWidget {

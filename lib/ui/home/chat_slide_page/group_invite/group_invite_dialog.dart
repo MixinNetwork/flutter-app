@@ -8,9 +8,9 @@ import '../../../../account/account_server.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../generated/l10n.dart';
-import '../../../../widgets/action_button.dart';
 import '../../../../widgets/avatar_view/avatar_view.dart';
 import '../../../../widgets/brightness_observer.dart';
+import '../../../../widgets/buttons.dart';
 import '../../../../widgets/dialog.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/toast.dart';
@@ -72,7 +72,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
                     alignment: Alignment.topRight,
                     child: Padding(
                       padding: EdgeInsets.only(right: 30.0, top: 20),
-                      child: _CloseButton(),
+                      child: MixinCloseButton(),
                     )),
               ],
             )));
@@ -138,17 +138,6 @@ class _GroupInviteBody extends StatelessWidget {
           const SizedBox(height: 61),
           _ActionButtons(conversation: conversation),
         ],
-      );
-}
-
-class _CloseButton extends StatelessWidget {
-  const _CloseButton({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => ActionButton(
-        name: Resources.assetsImagesIcCloseSvg,
-        color: BrightnessData.themeOf(context).icon,
-        onTap: () => Navigator.pop(context),
       );
 }
 

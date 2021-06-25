@@ -114,13 +114,19 @@ class ChatPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final chatContainerPageKey = useMemoized(() => GlobalKey());
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-    );
+    final conversationState =
+        useBlocState<ConversationCubit, ConversationState?>();
     final chatSideCubit = useBloc(() => ChatSideCubit(), keys: [
-      conversationId,
+      conversationState?.conversationId,
     ]);
+
+    final initialSidePage = conversationState?.initialSidePage;
+    useEffect(() {
+      if (initialSidePage != null) {
+        chatSideCubit.pushPage(initialSidePage);
+      }
+    }, [initialSidePage, chatSideCubit]);
+
     final navigatorState =
         useBlocState<ChatSideCubit, ResponsiveNavigatorState>(
             bloc: chatSideCubit);

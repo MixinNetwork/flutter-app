@@ -33,21 +33,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m6(name) => "${name}的圈子";
 
-  static String m7(count) => "${count} 个会话";
+  static String m7(mixinId) => "Mixin ID: ${mixinId}";
 
-  static String m9(count) => "${count} 成员";
+  static String m8(count) => "${count} 个会话";
 
-  static String m10(name) => "发送消息至 ${name}";
+  static String m10(count) => "${count} 成员";
 
-  static String m11(name) => "移除 ${name}";
+  static String m11(name) => "发送消息至 ${name}";
 
-  static String m12(name) => "确定删除${name}圈子吗？";
+  static String m12(name) => "移除 ${name}";
 
-  static String m13(date) => "${date}加入";
+  static String m13(name) => "确定删除${name}圈子吗？";
 
-  static String m14(count) => "共 ${count} 人";
+  static String m14(date) => "${date}加入";
 
-  static String m15(count) => "${count} 条相关的消息";
+  static String m15(count) => "共 ${count} 人";
+
+  static String m16(count) => "${count} 条相关的消息";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -93,13 +95,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "clearChat": MessageLookupByLibrary.simpleMessage("清空聊天记录"),
         "confirm": MessageLookupByLibrary.simpleMessage("确定"),
         "contact": MessageLookupByLibrary.simpleMessage("联系人"),
+        "contactMixinId": m7,
         "contacts": MessageLookupByLibrary.simpleMessage("联系人"),
         "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ 添加机器人"),
         "conversationAddContact":
             MessageLookupByLibrary.simpleMessage("+ 添加联系人"),
-        "conversationCount": m7,
+        "conversationCount": m8,
         "conversationName": MessageLookupByLibrary.simpleMessage("群组名称"),
-        "conversationParticipantsCount": m9,
+        "conversationParticipantsCount": m10,
         "copy": MessageLookupByLibrary.simpleMessage("复制"),
         "create": MessageLookupByLibrary.simpleMessage("创建"),
         "createCircle": MessageLookupByLibrary.simpleMessage("创建圈子"),
@@ -143,8 +146,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("撤销管理员身份"),
         "groupPopMenuMakeAdmin":
             MessageLookupByLibrary.simpleMessage("设定为群组管理员"),
-        "groupPopMenuMessage": m10,
-        "groupPopMenuRemoveParticipants": m11,
+        "groupPopMenuMessage": m11,
+        "groupPopMenuRemoveParticipants": m12,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "groups": MessageLookupByLibrary.simpleMessage("群组"),
@@ -183,8 +186,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("没有媒体"),
         "noPost": MessageLookupByLibrary.simpleMessage("没有文章"),
         "notification": MessageLookupByLibrary.simpleMessage("通知"),
-        "pageDeleteCircle": m12,
-        "pageEditProfileJoin": m13,
+        "pageDeleteCircle": m13,
+        "pageEditProfileJoin": m14,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -193,7 +196,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "通过 QrCode 登录 Mixin Messenger"),
         "pageRightEmptyMessage":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
-        "participantsCount": m14,
+        "participantsCount": m15,
         "people": MessageLookupByLibrary.simpleMessage("通讯录"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
@@ -213,7 +216,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
-        "searchRelatedMessage": m15,
+        "searchRelatedMessage": m16,
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

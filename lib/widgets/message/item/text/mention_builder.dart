@@ -5,11 +5,11 @@ import 'package:provider/provider.dart';
 
 import '../../../../db/dao/users_dao.dart';
 import '../../../../db/mixin_database.dart';
-import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/reg_exp_utils.dart';
 import '../../../brightness_observer.dart';
 import '../../../high_light_text.dart';
+import '../../../user/user_dialog.dart';
 
 class MentionCache {
   MentionCache(this._userDao);
@@ -158,10 +158,7 @@ class MentionBuilder extends HookWidget {
             style: TextStyle(
               color: BrightnessData.themeOf(context).accent,
             ),
-            onTap: () => ConversationCubit.selectUser(
-              context,
-              entry.value.userId,
-            ),
+            onTap: () => showUserDialog(context, entry.value.userId),
           ),
         );
       },
