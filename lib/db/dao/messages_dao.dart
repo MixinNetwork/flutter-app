@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:moor/moor.dart';
 
 import '../../enum/media_status.dart';
+import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
+import '../../utils/load_balancer_utils.dart';
 import '../../utils/string_extension.dart';
+import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../converter/message_status_type_converter.dart';
 import '../database_event_bus.dart';
 import '../extension/message_category.dart';
@@ -67,27 +70,14 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insert(Message message, String userId) async {
     final result = await db.transaction(() async {
       final futures = <Future>[
-        into(db.messages).insertOnConflictUpdate(message)
-      ];
-      if (message.category.isText) {
-        final content = message.content!.fts5ContentFilter();
-        futures.add(
-          insertFts(
-            message.messageId,
-            message.conversationId,
-            content,
-            message.createdAt,
-            message.userId,
-          ),
-        );
-      }
-      futures.add(
+        into(db.messages).insertOnConflictUpdate(message),
+        _insertMessageFts(message),
         db.conversationsDao.updateLastMessageId(
           message.conversationId,
           message.messageId,
           message.createdAt,
         ),
-      );
+      ];
       return (await Future.wait(futures))[0];
     });
     await takeUnseen(userId, message.conversationId);
@@ -98,6 +88,30 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
 
   Future<void> insertCompanion(MessagesCompanion messagesCompanion) async =>
       into(db.messages).insert(messagesCompanion);
+
+  Future<void> _insertMessageFts(Message message) async {
+    String? ftsContent;
+    if (message.category.isText || message.category.isPost) {
+      ftsContent = message.content;
+    } else if (message.category.isData) {
+      ftsContent = message.name;
+    } else if (message.category.isContact) {
+      ftsContent = message.name;
+    } else if (message.category == MessageCategory.appCard) {
+      final appCard =
+          AppCardData.fromJson(await jsonDecodeWithIsolate(message.content!));
+      ftsContent = '${appCard.title} ${appCard.description}';
+    }
+    if (ftsContent != null) {
+      await insertFts(
+        message.messageId,
+        message.conversationId,
+        ftsContent.joinWhiteSpace(),
+        message.createdAt,
+        message.userId,
+      );
+    }
+  }
 
   Future<int> insertFts(String messageId, String conversationId, String content,
           DateTime createdAt, String userId) =>

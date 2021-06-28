@@ -134,5 +134,7 @@ extension SqlStringExt on String {
 
   String joinStar() => joinWithCharacter('*');
 
+  String joinWhiteSpace() => joinWithCharacter(' ');
+
   String replaceQuotationMark() => replaceAll('"', '');
 }
