@@ -82,6 +82,7 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
         widget.onExit?.call(event);
       },
       child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTapDown: (_) => setState(() {
           tapDowning = true;
         }),

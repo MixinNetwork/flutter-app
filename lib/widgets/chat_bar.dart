@@ -16,6 +16,7 @@ import 'avatar_view/avatar_view.dart';
 import 'brightness_observer.dart';
 import 'buttons.dart';
 import 'input_container.dart';
+import 'interacter_decorated_box.dart';
 import 'window/move_window.dart';
 
 class ChatBar extends HookWidget {
@@ -27,12 +28,6 @@ class ChatBar extends HookWidget {
   Widget build(BuildContext context) {
     final actionColor = BrightnessData.themeOf(context).icon;
     final chatSideCubit = context.read<ChatSideCubit>();
-
-    final hasSidePage =
-        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, bool>(
-      bloc: chatSideCubit,
-      converter: (state) => state.pages.isNotEmpty,
-    );
 
     final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
         ResponsiveNavigatorState, bool>(
@@ -46,31 +41,41 @@ class ChatBar extends HookWidget {
         child: Row(
           mainAxisSize: MainAxisSize.max,
           children: [
-            Builder(
-              builder: (context) => navigationMode
-                  ? MoveWindowBarrier(
-                      child: MixinBackButton(
-                        color: actionColor,
-                        onTap: () =>
-                            context.read<ConversationCubit>().unselected(),
-                      ),
-                    )
-                  : const SizedBox(width: 16),
-            ),
-            const ConversationAvatar(),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  ConversationName(),
-                  SizedBox(height: 4),
-                  MoveWindowBarrier(
-                    child: ConversationIDOrCount(),
-                  ),
-                ],
+            MoveWindowBarrier(
+              child: InteractableDecoratedBox(
+                onTap: chatSideCubit.toggleInfoPage,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Builder(
+                      builder: (context) => navigationMode
+                          ? MixinBackButton(
+                              color: actionColor,
+                              onTap: () => context
+                                  .read<ConversationCubit>()
+                                  .unselected(),
+                            )
+                          : const SizedBox(width: 16),
+                    ),
+                    const ConversationAvatar(),
+                    const SizedBox(width: 10),
+                    Column(
+                      mainAxisSize: MainAxisSize.max,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        ConversationName(),
+                        SizedBox(height: 4),
+                        ConversationIDOrCount(
+                          selectable: false,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
+            ),
+            const Expanded(
+              child: SizedBox(),
             ),
             MoveWindowBarrier(
               child: ActionButton(
@@ -94,16 +99,6 @@ class ChatBar extends HookWidget {
             MoveWindowBarrier(
               child: _FileButton(actionColor: actionColor),
             ),
-            const SizedBox(width: 14),
-            MoveWindowBarrier(
-              child: ActionButton(
-                name: Resources.assetsImagesIcScreenSvg,
-                color: hasSidePage
-                    ? BrightnessData.themeOf(context).accent
-                    : actionColor,
-                onTap: chatSideCubit.toggleInfoPage,
-              ),
-            ),
           ],
         ),
       ),
@@ -115,9 +110,11 @@ class ConversationIDOrCount extends HookWidget {
   const ConversationIDOrCount({
     Key? key,
     this.fontSize = 14,
+    this.selectable = true,
   }) : super(key: key);
 
   final double fontSize;
+  final bool selectable;
 
   @override
   Widget build(BuildContext context) {
@@ -151,8 +148,17 @@ class ConversationIDOrCount extends HookWidget {
       height: 1,
     );
 
+    Widget textWidget(
+      String data, {
+      TextStyle? style,
+    }) {
+      if (selectable) return SelectableText(data, style: style);
+
+      return Text(data, style: style);
+    }
+
     if (!isGroup) {
-      return SelectableText(
+      return textWidget(
         conversation?.identityNumber ?? '',
         style: textStyle,
       );
@@ -162,7 +168,7 @@ class ConversationIDOrCount extends HookWidget {
       stream: countStream,
       builder: (context, snapshot) {
         final count = snapshot.data;
-        return SelectableText(
+        return textWidget(
           count != null
               ? Localization.of(context).conversationParticipantsCount(count)
               : '',
