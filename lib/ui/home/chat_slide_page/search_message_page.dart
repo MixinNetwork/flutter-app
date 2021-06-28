@@ -28,11 +28,13 @@ class SearchMessagePage extends HookWidget {
   Widget build(BuildContext context) {
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
 
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    );
+    final conversationId = useMemoized(() {
+      final conversationId =
+          context.read<ConversationCubit>().state?.conversationId;
+      assert(conversationId != null);
+      return conversationId!;
+    });
+
     final searchMessageBloc =
         useBloc<AnonymousPagingBloc<SearchMessageDetailItem>>(
       () => AnonymousPagingBloc<SearchMessageDetailItem>(
@@ -44,7 +46,7 @@ class SearchMessagePage extends HookWidget {
               .read<AccountServer>()
               .database
               .messagesDao
-              .fuzzySearchMessageCountByConversationId(keyword, conversationId!)
+              .fuzzySearchMessageCountByConversationId(keyword, conversationId)
               .getSingle();
         },
         queryRange: (int limit, int offset) async {
@@ -54,7 +56,7 @@ class SearchMessagePage extends HookWidget {
               .database
               .messagesDao
               .fuzzySearchMessageByConversationId(
-                  conversationId: conversationId!,
+                  conversationId: conversationId,
                   query: keyword,
                   limit: limit,
                   offset: offset)

@@ -5,7 +5,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
-import 'package:tuple/tuple.dart';
 
 import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
@@ -289,10 +288,10 @@ class ChatInfoPage extends HookWidget {
                 description: const _CircleNames(),
                 onTap: () => context.read<ChatSideCubit>().pushPage(
                       ChatSideCubit.circles,
-                      arguments: Tuple2<String, String>(
-                        conversation.name!,
-                        conversationId,
-                      ),
+                      // arguments: Tuple2<String, String>(
+                      //   conversation.name!,
+                      //   conversationId,
+                      // ),
                     ),
               ),
             ),

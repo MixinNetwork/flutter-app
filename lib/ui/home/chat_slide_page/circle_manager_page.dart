@@ -21,15 +21,17 @@ import '../bloc/conversation_cubit.dart';
 class CircleManagerPage extends HookWidget {
   const CircleManagerPage({
     Key? key,
-    required this.name,
-    required this.conversationId,
   }) : super(key: key);
-
-  final String name;
-  final String conversationId;
 
   @override
   Widget build(BuildContext context) {
+    final conversationId = useMemoized(() {
+      final state = context.read<ConversationCubit>().state;
+      final conversationId = state?.conversationId;
+      assert(conversationId != null);
+      return conversationId;
+    })!;
+
     final circles = useStream<List<ConversationCircleManagerItem>>(
           useMemoized(
             () => context

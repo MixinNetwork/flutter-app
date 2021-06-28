@@ -22,25 +22,21 @@ import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/image.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/image/image_preview_portal.dart';
-import '../../bloc/conversation_cubit.dart';
 import '../../chat_page.dart';
 
 class MediaPage extends HookWidget {
   const MediaPage({
     Key? key,
     required this.maxHeight,
+    required this.conversationId,
   }) : super(key: key);
 
   final double maxHeight;
+  final String conversationId;
 
   @override
   Widget build(BuildContext context) {
     final column = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    )!;
     final navigationMode = context.read<ChatSideCubit>().state.navigationMode;
     final size = column * (navigationMode ? 4 : 3);
 

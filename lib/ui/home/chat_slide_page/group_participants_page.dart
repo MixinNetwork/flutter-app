@@ -11,7 +11,6 @@ import '../../../bloc/simple_cubit.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
-import '../../../utils/hook.dart';
 import '../../../utils/list_utils.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
@@ -33,15 +32,16 @@ class GroupParticipantsPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-            converter: (state) => state?.conversationId,
-            when: (conversationId) => conversationId != null);
-    assert(conversationId != null);
+    final conversationId = useMemoized(() {
+      final conversationId =
+          context.read<ConversationCubit>().state?.conversationId;
+      assert(conversationId != null);
+      return conversationId!;
+    });
 
     final participants = useStream(useMemoized(() {
           final dao = context.read<AccountServer>().database.participantsDao;
-          return dao.watchParticipants(conversationId!);
+          return dao.watchParticipants(conversationId);
         }, [conversationId])).data ??
         const <ParticipantUser>[];
 

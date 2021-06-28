@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:provider/provider.dart';
 
 import '../../../generated/l10n.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/brightness_observer.dart';
+import '../bloc/conversation_cubit.dart';
 import 'share_media/file_page.dart';
 import 'share_media/media_page.dart';
 import 'share_media/post_page.dart';
@@ -14,6 +16,13 @@ class SharedMediaPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final conversationId = useMemoized(() {
+      final conversationId =
+          context.read<ConversationCubit>().state?.conversationId;
+      assert(conversationId != null);
+      return conversationId!;
+    });
+
     final selectedIndex = useState(0);
     return Scaffold(
       backgroundColor: BrightnessData.themeOf(context).primary,
@@ -28,9 +37,18 @@ class SharedMediaPage extends HookWidget {
                   IndexedStack(
                 index: selectedIndex.value,
                 children: [
-                  MediaPage(maxHeight: constraints.maxHeight),
-                  PostPage(maxHeight: constraints.maxHeight),
-                  FilePage(maxHeight: constraints.maxHeight),
+                  MediaPage(
+                    conversationId: conversationId,
+                    maxHeight: constraints.maxHeight,
+                  ),
+                  PostPage(
+                    conversationId: conversationId,
+                    maxHeight: constraints.maxHeight,
+                  ),
+                  FilePage(
+                    conversationId: conversationId,
+                    maxHeight: constraints.maxHeight,
+                  ),
                 ],
               ),
             ),

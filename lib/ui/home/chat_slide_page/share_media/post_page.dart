@@ -21,24 +21,20 @@ import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/full_screen_portal.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/post_message.dart';
-import '../../bloc/conversation_cubit.dart';
 
 class PostPage extends HookWidget {
   const PostPage({
     Key? key,
     required this.maxHeight,
+    required this.conversationId,
   }) : super(key: key);
 
   final double maxHeight;
+  final String conversationId;
 
   @override
   Widget build(BuildContext context) {
     final size = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    )!;
 
     final messagesDao = context.read<AccountServer>().database.messagesDao;
 

@@ -27,25 +27,20 @@ import '../../../../utils/string_extension.dart';
 import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/status.dart';
-import '../../bloc/conversation_cubit.dart';
 
 class FilePage extends HookWidget {
   const FilePage({
     Key? key,
     required this.maxHeight,
+    required this.conversationId,
   }) : super(key: key);
 
   final double maxHeight;
+  final String conversationId;
 
   @override
   Widget build(BuildContext context) {
     final size = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    )!;
-
     final messagesDao = context.read<AccountServer>().database.messagesDao;
 
     final mediaCubit = useBloc(
