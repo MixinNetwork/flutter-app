@@ -1,4 +1,5 @@
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
+    hide User, transaction;
 import 'package:moor/moor.dart';
 
 import '../mixin_database.dart';

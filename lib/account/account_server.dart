@@ -91,7 +91,8 @@ class AccountServer {
             DioError e,
             ErrorInterceptorHandler handler,
           ) async {
-            if (e is MixinApiError && (e.error as MixinError).code == 401) {
+            if (e is MixinApiError &&
+                (e.error as MixinError).code == authentication) {
               await signOutAndClear();
               multiAuthCubit.signOut();
             }
@@ -1123,7 +1124,9 @@ class AccountServer {
     try {
       await client.circleApi.deleteCircle(circleId);
     } catch (e) {
-      if (e is! MixinApiError || (e.error as MixinError).code != 404) rethrow;
+      if (e is! MixinApiError || (e.error as MixinError).code != notFound) {
+        rethrow;
+      }
     }
 
     await database.transaction(() async {

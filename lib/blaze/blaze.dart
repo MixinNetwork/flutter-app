@@ -98,7 +98,7 @@ class Blaze {
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == errorAction &&
-            blazeMessage.error?.code == 401) {
+            blazeMessage.error?.code == authentication) {
           await _reconnect();
           return;
         }
@@ -260,7 +260,10 @@ class Blaze {
       await connect();
     } catch (e) {
       w('ws ping error: $e');
-      if (e is MixinApiError && (e.error as MixinError).code == 401) return;
+      if (e is MixinApiError &&
+          (e.error as MixinError).code == authentication) {
+        return;
+      }
       await Future.delayed(const Duration(seconds: 2));
       _reconnecting = false;
       i('reconnecting set false, ${StackTrace.current}');
