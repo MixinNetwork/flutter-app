@@ -11,6 +11,7 @@ import '../ui/home/conversation_page.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
 import '../utils/file.dart';
 import '../utils/hook.dart';
+import '../utils/string_extension.dart';
 import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
 import 'brightness_observer.dart';
@@ -38,52 +39,67 @@ class ChatBar extends HookWidget {
       when: (state) => state?.isLoaded == true,
     )!;
 
+    MoveWindowBarrier toggleInfoPageWrapper({
+      required Widget child,
+      behavior = HitTestBehavior.opaque,
+    }) =>
+        MoveWindowBarrier(
+          child: InteractableDecoratedBox(
+            onTap: chatSideCubit.toggleInfoPage,
+            child: child,
+          ),
+        );
+
     return Padding(
       padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
-          MoveWindowBarrier(
-            child: InteractableDecoratedBox(
-              onTap: chatSideCubit.toggleInfoPage,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Builder(
-                    builder: (context) => navigationMode
-                        ? MixinBackButton(
-                            color: actionColor,
-                            onTap: () =>
-                                context.read<ConversationCubit>().unselected(),
-                          )
-                        : const SizedBox(width: 16),
-                  ),
-                  ConversationAvatar(
-                    conversationState: conversation,
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      IgnorePointer(
-                        child: ConversationName(
-                          conversationState: conversation,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      IgnorePointer(
-                          child: ConversationIDOrCount(
-                        conversationState: conversation,
-                      )),
-                    ],
-                  ),
-                ],
-              ),
+          Builder(
+            builder: (context) => navigationMode
+                ? MoveWindowBarrier(
+                    child: MixinBackButton(
+                      color: actionColor,
+                      onTap: () =>
+                          context.read<ConversationCubit>().unselected(),
+                    ),
+                  )
+                : const SizedBox(width: 16),
+          ),
+          toggleInfoPageWrapper(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ConversationAvatar(
+                  conversationState: conversation,
+                ),
+                const SizedBox(width: 10),
+              ],
             ),
           ),
-          const Expanded(
-            child: SizedBox(),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IgnorePointer(
+                  child: ConversationName(
+                    conversationState: conversation,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                IgnorePointer(
+                  child: ConversationIDOrCount(
+                    conversationState: conversation,
+                  ),
+                ),
+              ].map((e) => toggleInfoPageWrapper(
+                        child: e,
+                        behavior: HitTestBehavior.deferToChild,
+                      ))
+                  .toList()
+              ,
+            ),
           ),
           MoveWindowBarrier(
             child: ActionButton(
@@ -190,7 +206,7 @@ class ConversationName extends StatelessWidget {
         children: [
           Flexible(
             child: SelectableText(
-              conversationState.name ?? '',
+              conversationState.name?.overflow ?? '',
               style: TextStyle(
                 color: BrightnessData.themeOf(context).text,
                 fontSize: fontSize,
