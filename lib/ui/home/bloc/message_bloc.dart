@@ -68,6 +68,15 @@ class _MessageInsertOrReplaceEvent extends _MessageEvent {
   List<Object> get props => [data];
 }
 
+class _MessageDeleteEvent extends _MessageEvent {
+  _MessageDeleteEvent(this.messageId);
+
+  final String messageId;
+
+  @override
+  List<Object> get props => [messageId];
+}
+
 class MessageState extends Equatable {
   const MessageState({
     this.top = const [],
@@ -146,6 +155,32 @@ class MessageState extends Equatable {
         isOldest: isOldest,
         lastReadMessageId: lastReadMessageId,
       );
+
+  MessageState removeMessage(String messageId) {
+    if (center?.messageId == messageId) {
+      return copyWith(
+        center: null,
+      );
+    }
+
+    var message =
+        top.firstWhereOrNull((message) => message.messageId == messageId);
+    if (message != null) {
+      return copyWith(
+        top: top.toList()..remove(message),
+      );
+    }
+
+    message =
+        bottom.firstWhereOrNull((message) => message.messageId == messageId);
+    if (message != null) {
+      return copyWith(
+        top: bottom.toList()..remove(message),
+      );
+    }
+
+    return this;
+  }
 }
 
 class MessageBloc extends Bloc<_MessageEvent, MessageState>
@@ -184,6 +219,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       messagesDao.insertOrReplaceMessageStream
           .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
     );
+
+    addSubscription(messagesDao.deleteMessageIdStream
+        .listen((messageId) => add(_MessageDeleteEvent(messageId))));
   }
 
   final ScrollController scrollController = ScrollController();
@@ -228,6 +266,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         refreshKey: Object(),
         lastReadMessageId: event.lastReadMessageId,
       ));
+    } else if (event is _MessageDeleteEvent) {
+      final messageState = state.removeMessage(event.messageId);
+      yield _pretreatment(messageState);
     } else {
       if (event is _MessageLoadMoreEvent) {
         if (event is _MessageLoadAfterEvent) {

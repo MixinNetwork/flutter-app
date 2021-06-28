@@ -175,6 +175,9 @@ class MessageItemWidget extends HookWidget {
                   ContextMenu(
                     title: Localization.of(context).deleteForMe,
                     isDestructiveAction: true,
+                    onTap: () => context
+                        .read<AccountServer>()
+                        .deleteMessage(message.messageId),
                   ),
                 ],
                 builder: (BuildContext context) {
