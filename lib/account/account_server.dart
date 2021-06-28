@@ -1304,4 +1304,7 @@ class AccountServer {
 
   bool cancelProgressAttachmentJob(String messageId) =>
       _attachmentUtil.cancelProgressAttachmentJob(messageId);
+
+  Future<void> deleteMessage(String messageId) =>
+      database.messagesDao.deleteMessage(messageId);
 }

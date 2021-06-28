@@ -52,6 +52,9 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       .where((event) => event != null)
       .cast<NotificationMessage>();
 
+  late Stream<String> deleteMessageIdStream =
+      db.eventBus.watch<String>(DatabaseEvent.delete);
+
   Future<T> _sendInsertOrReplaceEventWithFuture<T>(
     List<String> messageIds,
     Future<T> future,
@@ -103,7 +106,18 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
         updates: {db.messagesFts},
       );
 
-  Future deleteMessage(Message message) => delete(db.messages).delete(message);
+  Future<void> deleteMessage(String messageId) async {
+    await db.transaction(() async {
+      await Future.wait([
+        (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
+            .go(),
+        (delete(db.messagesFts)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .go(),
+      ]);
+    });
+    db.eventBus.send(DatabaseEvent.delete, messageId);
+  }
 
   Future<void> deleteMessageByConversationId(String conversationId) =>
       (delete(db.messages)
