@@ -56,8 +56,7 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
         return const MaterialPage(
           key: ValueKey(circles),
           name: circles,
-          child: CircleManagerPage(
-          ),
+          child: CircleManagerPage(),
         );
       case searchMessageHistory:
         return const MaterialPage(
