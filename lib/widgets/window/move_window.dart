@@ -62,7 +62,7 @@ class GlobalMoveWindow extends StatelessWidget {
             alignment: Alignment.topCenter,
             child: SizedBox(
               height: 28.0,
-              child: MoveWindow(behavior: HitTestBehavior.opaque),
+              child: MoveWindow(),
             ),
           ),
         ],

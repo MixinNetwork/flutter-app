@@ -32,17 +32,25 @@ class ChatInfoPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final conversationId = useMemoized(() {
+      final conversationId =
+          context.read<ConversationCubit>().state?.conversationId;
+      assert(conversationId != null);
+      return conversationId!;
+    });
+
     final conversation = useBlocState<ConversationCubit, ConversationState?>(
-      when: (state) => state?.isLoaded ?? false,
+      when: (state) =>
+          state?.isLoaded == true && state?.conversationId == conversationId,
     )!;
 
     final accountServer = context.read<AccountServer>();
     final userParticipant = useStream<Participant?>(
       useMemoized(
         () => accountServer.database.conversationDao
-            .participantById(conversation.conversationId, accountServer.userId)
+            .participantById(conversationId, accountServer.userId)
             .watchSingleOrNull(),
-        [conversation.conversationId, accountServer.userId],
+        [conversationId, accountServer.userId],
       ),
       initialData: null,
     ).data;
@@ -52,7 +60,7 @@ class ChatInfoPage extends HookWidget {
                 .read<AccountServer>()
                 .database
                 .conversationDao
-                .announcement(conversation.conversationId)
+                .announcement(conversationId)
                 .watchSingle()),
             initialData: null)
         .data;
@@ -78,16 +86,30 @@ class ChatInfoPage extends HookWidget {
         child: Column(
           children: [
             const SizedBox(height: 8),
-            const ConversationAvatar(size: 90),
+            ConversationAvatar(
+              conversationState: conversation,
+              size: 90,
+            ),
             const SizedBox(height: 10),
-            const ConversationName(fontSize: 18),
+            ConversationName(
+              conversationState: conversation,
+              fontSize: 18,
+            ),
             const SizedBox(height: 4),
-            const ConversationIDOrCount(fontSize: 12),
+            ConversationIDOrCount(
+              conversationState: conversation,
+              fontSize: 12,
+            ),
             _AddToContactsButton(conversation),
             const SizedBox(height: 12),
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 36),
-              child: const ConversationBio(fontSize: 14),
+              child: ConversationBio(
+                conversationId: conversationId,
+                userId: conversation.userId,
+                isGroup: conversation.isGroup!,
+                fontSize: 14,
+              ),
             ),
             const SizedBox(height: 32),
             if (isGroupConversation)
@@ -179,7 +201,7 @@ class ChatInfoPage extends HookWidget {
                           await runFutureWithToast(
                             context,
                             context.read<AccountServer>().editGroupAnnouncement(
-                                  conversation.conversationId,
+                                  conversationId,
                                   result,
                                 ),
                           );
@@ -215,9 +237,7 @@ class ChatInfoPage extends HookWidget {
                         await runFutureWithToast(
                           context,
                           context.read<AccountServer>().unMuteConversation(
-                                conversationId: isGroup
-                                    ? conversation.conversationId
-                                    : null,
+                                conversationId: isGroup ? conversationId : null,
                                 userId: isGroup ? null : conversation.userId,
                               ),
                         );
@@ -232,9 +252,7 @@ class ChatInfoPage extends HookWidget {
                           context,
                           context.read<AccountServer>().muteConversation(
                                 result,
-                                conversationId: isGroup
-                                    ? conversation.conversationId
-                                    : null,
+                                conversationId: isGroup ? conversationId : null,
                                 userId: isGroup ? null : conversation.userId,
                               ));
                     },
@@ -273,7 +291,7 @@ class ChatInfoPage extends HookWidget {
                       ChatSideCubit.circles,
                       arguments: Tuple2<String, String>(
                         conversation.name!,
-                        conversation.conversationId,
+                        conversationId,
                       ),
                     ),
               ),
@@ -353,8 +371,7 @@ class ChatInfoPage extends HookWidget {
                       if (!result) return;
 
                       await accountServer.database.messagesDao
-                          .deleteMessageByConversationId(
-                              conversation.conversationId);
+                          .deleteMessageByConversationId(conversationId);
                       context.read<MessageBloc>().reload();
                     },
                   ),
@@ -373,8 +390,7 @@ class ChatInfoPage extends HookWidget {
 
                           await runFutureWithToast(
                             context,
-                            accountServer
-                                .exitGroup(conversation.conversationId),
+                            accountServer.exitGroup(conversationId),
                           );
                         },
                       )
@@ -394,20 +410,19 @@ class ChatInfoPage extends HookWidget {
                               .read<AccountServer>()
                               .database
                               .messagesDao
-                              .deleteMessageByConversationId(
-                                  conversation.conversationId);
+                              .deleteMessageByConversationId(conversationId);
                           await context
                               .read<AccountServer>()
                               .database
                               .conversationDao
                               .deleteConversation(
-                                conversation.conversationId,
+                                conversationId,
                               );
                           if (context
                                   .read<ConversationCubit>()
                                   .state
                                   ?.conversationId ==
-                              conversation.conversationId) {
+                              conversationId) {
                             context.read<ConversationCubit>().unselected();
                           }
                         },
@@ -430,7 +445,7 @@ class ChatInfoPage extends HookWidget {
 
                     await runFutureWithToast(
                       context,
-                      accountServer.report(conversation.conversationId),
+                      accountServer.report(conversationId),
                     );
                   },
                 ),
@@ -502,33 +517,30 @@ class ConversationBio extends HookWidget {
   const ConversationBio({
     Key? key,
     this.fontSize = 14,
+    required this.conversationId,
+    required this.userId,
+    required this.isGroup,
   }) : super(key: key);
 
   final double fontSize;
+  final String conversationId;
+  final String? userId;
+  final bool isGroup;
 
   @override
   Widget build(BuildContext context) {
-    final conversation = useBlocState<ConversationCubit, ConversationState?>(
-      when: (state) => state?.isLoaded ?? false,
-    )!;
-
     final textStream = useMemoized(() {
       final database = context.read<AccountServer>().database;
-      if (!conversation.isLoaded) {
-        return () async* {
-          yield '';
-        }();
-      }
-      if (conversation.isGroup!) {
+      if (isGroup) {
         return database.conversationDao
-            .announcement(conversation.conversationId)
+            .announcement(conversationId)
             .watchSingle();
       }
-      return database.userDao.biography(conversation.userId!).watchSingle();
+      return database.userDao.biography(userId!).watchSingle();
     }, [
-      conversation.isLoaded,
-      conversation.conversationId,
-      conversation.userId,
+      conversationId,
+      userId,
+      isGroup,
     ]);
 
     final text = useStream(textStream, initialData: '').data;

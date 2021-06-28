@@ -34,73 +34,80 @@ class ChatBar extends HookWidget {
       converter: (state) => state.navigationMode,
     );
 
-    return MoveWindow(
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            MoveWindowBarrier(
-              child: InteractableDecoratedBox(
-                onTap: chatSideCubit.toggleInfoPage,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Builder(
-                      builder: (context) => navigationMode
-                          ? MixinBackButton(
-                              color: actionColor,
-                              onTap: () => context
-                                  .read<ConversationCubit>()
-                                  .unselected(),
-                            )
-                          : const SizedBox(width: 16),
-                    ),
-                    const ConversationAvatar(),
-                    const SizedBox(width: 10),
-                    Column(
-                      mainAxisSize: MainAxisSize.max,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        ConversationName(),
-                        SizedBox(height: 4),
-                        ConversationIDOrCount(
-                          selectable: false,
+    final conversation = useBlocState<ConversationCubit, ConversationState?>(
+      when: (state) => state?.isLoaded == true,
+    )!;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          MoveWindowBarrier(
+            child: InteractableDecoratedBox(
+              onTap: chatSideCubit.toggleInfoPage,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Builder(
+                    builder: (context) => navigationMode
+                        ? MixinBackButton(
+                            color: actionColor,
+                            onTap: () =>
+                                context.read<ConversationCubit>().unselected(),
+                          )
+                        : const SizedBox(width: 16),
+                  ),
+                  ConversationAvatar(
+                    conversationState: conversation,
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IgnorePointer(
+                        child: ConversationName(
+                          conversationState: conversation,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                      const SizedBox(height: 4),
+                      IgnorePointer(
+                          child: ConversationIDOrCount(
+                        conversationState: conversation,
+                      )),
+                    ],
+                  ),
+                ],
               ),
             ),
-            const Expanded(
-              child: SizedBox(),
+          ),
+          const Expanded(
+            child: SizedBox(),
+          ),
+          MoveWindowBarrier(
+            child: ActionButton(
+              name: Resources.assetsImagesIcSearchSvg,
+              color: actionColor,
+              onTap: () {
+                final cubit = context.read<ChatSideCubit>();
+                if (cubit.state.pages.isNotEmpty &&
+                    cubit.state.pages.last.name ==
+                        ChatSideCubit.searchMessageHistory) {
+                  return;
+                }
+                cubit
+                  ..popWhere(
+                      (page) => page.name == ChatSideCubit.searchMessageHistory)
+                  ..pushPage(ChatSideCubit.searchMessageHistory);
+              },
             ),
-            MoveWindowBarrier(
-              child: ActionButton(
-                name: Resources.assetsImagesIcSearchSvg,
-                color: actionColor,
-                onTap: () {
-                  final cubit = context.read<ChatSideCubit>();
-                  if (cubit.state.pages.isNotEmpty &&
-                      cubit.state.pages.last.name ==
-                          ChatSideCubit.searchMessageHistory) {
-                    return;
-                  }
-                  cubit
-                    ..popWhere((page) =>
-                        page.name == ChatSideCubit.searchMessageHistory)
-                    ..pushPage(ChatSideCubit.searchMessageHistory);
-                },
-              ),
-            ),
-            const SizedBox(width: 14),
-            MoveWindowBarrier(
-              child: _FileButton(actionColor: actionColor),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 14),
+          MoveWindowBarrier(
+            child: _FileButton(actionColor: actionColor),
+          ),
+        ],
       ),
     );
   }
@@ -110,18 +117,15 @@ class ConversationIDOrCount extends HookWidget {
   const ConversationIDOrCount({
     Key? key,
     this.fontSize = 14,
-    this.selectable = true,
+    required this.conversationState,
   }) : super(key: key);
 
   final double fontSize;
-  final bool selectable;
+  final ConversationState? conversationState;
 
   @override
   Widget build(BuildContext context) {
-    final conversation = useBlocState<ConversationCubit, ConversationState?>(
-        when: (state) => state?.isLoaded ?? false);
-
-    final isGroup = conversation?.isGroup ?? false;
+    final isGroup = conversationState?.isGroup ?? false;
 
     final countStream = useMemoized(
       () {
@@ -130,14 +134,14 @@ class ConversationIDOrCount extends HookWidget {
               .read<AccountServer>()
               .database
               .conversationDao
-              .conversationParticipantsCount(conversation!.conversationId)
+              .conversationParticipantsCount(conversationState!.conversationId)
               .watchSingle();
         }
 
         return const Stream<int>.empty();
       },
       [
-        conversation?.conversationId,
+        conversationState?.conversationId,
         isGroup,
       ],
     );
@@ -148,18 +152,9 @@ class ConversationIDOrCount extends HookWidget {
       height: 1,
     );
 
-    Widget textWidget(
-      String data, {
-      TextStyle? style,
-    }) {
-      if (selectable) return SelectableText(data, style: style);
-
-      return Text(data, style: style);
-    }
-
     if (!isGroup) {
-      return textWidget(
-        conversation?.identityNumber ?? '',
+      return SelectableText(
+        conversationState?.identityNumber ?? '',
         style: textStyle,
       );
     }
@@ -168,7 +163,7 @@ class ConversationIDOrCount extends HookWidget {
       stream: countStream,
       builder: (context, snapshot) {
         final count = snapshot.data;
-        return textWidget(
+        return SelectableText(
           count != null
               ? Localization.of(context).conversationParticipantsCount(count)
               : '',
@@ -183,36 +178,33 @@ class ConversationName extends StatelessWidget {
   const ConversationName({
     Key? key,
     this.fontSize = 16,
+    required this.conversationState,
   }) : super(key: key);
 
   final double fontSize;
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<ConversationCubit, ConversationState?>(
-        buildWhen: (previous, current) =>
-            current != null && current != previous,
-        builder: (context, conversation) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: SelectableText(
-                conversation?.name ?? '',
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
-                  fontSize: fontSize,
-                  height: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                maxLines: 1,
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: SelectableText(
+              conversationState.name ?? '',
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).text,
+                fontSize: fontSize,
+                height: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+              maxLines: 1,
             ),
-            VerifiedOrBotWidget(
-              verified: conversation?.isVerified ?? false,
-              isBot: conversation?.isBot ?? false,
-            ),
-          ],
-        ),
+          ),
+          VerifiedOrBotWidget(
+            verified: conversationState.isVerified,
+            isBot: conversationState.isBot ?? false,
+          ),
+        ],
       );
 }
 
@@ -220,29 +212,30 @@ class ConversationAvatar extends StatelessWidget {
   const ConversationAvatar({
     Key? key,
     this.size = 36,
+    required this.conversationState,
   }) : super(key: key);
 
   final double size;
+  final ConversationState? conversationState;
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
         size: Size.square(size),
-        child: BlocBuilder<ConversationCubit, ConversationState?>(
-          buildWhen: (a, b) => b?.isLoaded ?? false,
-          builder: (context, state) {
-            if (state?.conversation != null) {
+        child: Builder(
+          builder: (context) {
+            if (conversationState?.conversation != null) {
               return ConversationAvatarWidget(
                 size: size,
-                conversation: state!.conversation,
+                conversation: conversationState!.conversation,
               );
             }
 
-            if (state?.user != null) {
+            if (conversationState?.user != null) {
               return AvatarWidget(
                 size: size,
-                userId: state!.user!.userId,
-                avatarUrl: state.user!.avatarUrl,
-                name: state.name!,
+                userId: conversationState!.user!.userId,
+                avatarUrl: conversationState!.user!.avatarUrl,
+                name: conversationState!.name!,
               );
             }
 
