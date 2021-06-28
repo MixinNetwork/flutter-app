@@ -54,10 +54,10 @@ Future<void> main() async {
   );
 
   doWhenWindowReady(() {
+    appWindow.minSize =
+        const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
     // The macOS handle content size in native.
     if (!Platform.isMacOS) {
-      appWindow.minSize =
-          const Size(kSlidePageMinWidth + kResponsiveNavigationMinWidth, 480);
       appWindow.size = const Size(1280, 750);
       // FIXME remove this when the issues fixed.
       // https://github.com/bitsdojo/bitsdojo_window/issues/72
