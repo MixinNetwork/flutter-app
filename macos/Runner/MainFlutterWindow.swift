@@ -17,6 +17,9 @@ class MainFlutterWindow: BitsdojoWindow {
     self.isOpaque = false
     self.backgroundColor = NSColor(calibratedWhite: 1.0, alpha: 0.5)
     self.isReleasedWhenClosed = false
+    
+    self.setContentSize(NSSize(width: 1280, height: 750))
+    self.setFrameAutosaveName("mixin_messenger")
 
     super.awakeFromNib()
   }
