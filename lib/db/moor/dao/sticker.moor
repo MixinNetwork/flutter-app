@@ -11,4 +11,4 @@ FROM   sticker_albums sa
        INNER JOIN stickers s
                ON sr.sticker_id = s.sticker_id
 WHERE  sa.category = 'PERSONAL'
-ORDER  BY s.created_at;
+ORDER  BY s.created_at DESC;

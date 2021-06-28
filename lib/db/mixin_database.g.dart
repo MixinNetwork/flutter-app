@@ -10715,7 +10715,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<Sticker> personalStickers() {
     return customSelect(
-        'SELECT s.*\nFROM   sticker_albums sa\n       INNER JOIN sticker_relationships sr\n               ON sr.album_id = sa.album_id\n       INNER JOIN stickers s\n               ON sr.sticker_id = s.sticker_id\nWHERE  sa.category = \'PERSONAL\'\nORDER  BY s.created_at',
+        'SELECT s.*\nFROM   sticker_albums sa\n       INNER JOIN sticker_relationships sr\n               ON sr.album_id = sa.album_id\n       INNER JOIN stickers s\n               ON sr.sticker_id = s.sticker_id\nWHERE  sa.category = \'PERSONAL\'\nORDER  BY s.created_at DESC',
         variables: [],
         readsFrom: {
           stickerAlbums,
