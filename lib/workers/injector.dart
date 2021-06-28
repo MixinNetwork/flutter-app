@@ -111,7 +111,7 @@ class Injector {
     }
     final queryUsers = ids.where((id) => !existsUserIds.contains(id)).toList();
     if (queryUsers.isEmpty) {
-      return null;
+      return database.userDao.usersByIn(ids).get();
     }
     return _fetchUsers(queryUsers);
   }
