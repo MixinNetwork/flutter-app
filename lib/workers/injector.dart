@@ -105,15 +105,23 @@ class Injector {
       return _fetchUsers(ids);
     }
 
-    final existsUserIds = await database.userDao.userIdsByIn(ids).get();
-    if (existsUserIds.isEmpty) {
-      await _fetchUsers(ids);
+    final existsUsers = await database.userDao.usersByIn(ids).get();
+    if (existsUsers.isEmpty) {
+      return _fetchUsers(ids);
     }
-    final queryUsers = ids.where((id) => !existsUserIds.contains(id)).toList();
-    if (queryUsers.isEmpty) {
-      return database.userDao.usersByIn(ids).get();
+
+    if (existsUsers.length == ids.length) {
+      return existsUsers;
     }
-    return _fetchUsers(queryUsers);
+
+    final existsUsersIds = existsUsers.map((e) => e.userId).toSet();
+    final queryUsers = ids.where((id) => !existsUsersIds.contains(id)).toList();
+    assert(queryUsers.isNotEmpty);
+
+    return [
+      ...existsUsers,
+      ...?await _fetchUsers(queryUsers),
+    ];
   }
 
   Future<List<db.User>?> _fetchUsers(List<String> ids) async {
