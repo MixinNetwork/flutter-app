@@ -321,6 +321,13 @@ class _Bar extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesIcCloseBigSvg,
+            color: BrightnessData.themeOf(context).secondaryText,
+            size: 20,
+            onTap: () => Navigator.pop(context),
+          ),
           const SizedBox(width: 24),
         ],
       );
