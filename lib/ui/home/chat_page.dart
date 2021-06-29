@@ -116,9 +116,13 @@ class ChatPage extends HookWidget {
     final chatContainerPageKey = useMemoized(() => GlobalKey());
     final conversationState =
         useBlocState<ConversationCubit, ConversationState?>();
+
     final chatSideCubit = useBloc(() => ChatSideCubit(), keys: [
       conversationState?.conversationId,
     ]);
+    final searchConversationKeywordCubit = useBloc(
+        () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
+        keys: [conversationState?.conversationId]);
 
     final initialSidePage = conversationState?.initialSidePage;
     useEffect(() {
@@ -144,11 +148,7 @@ class ChatPage extends HookWidget {
     return MultiProvider(
       providers: [
         BlocProvider.value(value: chatSideCubit),
-        BlocProvider(
-          create: (context) => SearchConversationKeywordCubit(
-            chatSideCubit: chatSideCubit,
-          ),
-        ),
+        BlocProvider.value(value: searchConversationKeywordCubit),
         BlocProvider(
           create: (context) => MessageBloc(
             accountServer: context.read<AccountServer>(),

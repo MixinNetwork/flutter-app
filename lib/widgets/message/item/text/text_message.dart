@@ -28,22 +28,57 @@ class TextMessage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final keywordTextStyle = TextStyle(
+      backgroundColor: BrightnessData.themeOf(context).highlight,
+    );
+
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
 
     final highlightTextSpans = useMemoized(
-      () => <HighlightTextSpan>[
-        ...uriRegExp.allMatches(message.content!).map(
-              (e) => HighlightTextSpan(
-                e[0]!,
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).accent,
-                ),
-                onTap: () => openUri(context, e[0]!),
+      () => uriRegExp.allMatches(message.content!).map(
+            (e) => HighlightTextSpan(
+              e[0]!,
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).accent,
               ),
+              onTap: () => openUri(context, e[0]!),
             ),
-      ],
+          ),
       [message.content],
     );
+
+    final keywordHighlightTextSpans = useMemoized(
+        () => keyword.trim().isEmpty
+            ? highlightTextSpans
+            : highlightTextSpans.fold<Set<HighlightTextSpan>>({},
+                (previousValue, element) {
+                element.text.splitMapJoin(
+                  RegExp(keyword, caseSensitive: false),
+                  onMatch: (match) {
+                    previousValue.add(
+                      HighlightTextSpan(
+                        match[0]!,
+                        onTap: element.onTap,
+                        style: keywordTextStyle.merge(element.style),
+                      ),
+                    );
+                    return '';
+                  },
+                  onNonMatch: (text) {
+                    previousValue.add(
+                      HighlightTextSpan(
+                        text,
+                        onTap: element.onTap,
+                        style: element.style,
+                      ),
+                    );
+                    return '';
+                  },
+                );
+
+                return previousValue;
+              }).toList(),
+        [keyword]);
 
     final content = Builder(
       builder: (context) => MentionBuilder(
@@ -52,13 +87,11 @@ class TextMessage extends HookWidget {
             HighlightSelectableText(
           newContent!,
           highlightTextSpans: [
+            ...keywordHighlightTextSpans,
             HighlightTextSpan(
               keyword,
-              style: TextStyle(
-                backgroundColor: BrightnessData.themeOf(context).highlight,
-              ),
+              style: keywordTextStyle,
             ),
-            ...highlightTextSpans,
             ...mentionHighlightTextSpans,
           ],
           style: TextStyle(

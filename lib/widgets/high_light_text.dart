@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -96,8 +97,8 @@ class HighlightSelectableText extends StatelessWidget {
       );
 }
 
-class HighlightTextSpan {
-  HighlightTextSpan(
+class HighlightTextSpan extends Equatable {
+  const HighlightTextSpan(
     this.text, {
     this.onTap,
     this.style,
@@ -106,4 +107,10 @@ class HighlightTextSpan {
   final String text;
   final VoidCallback? onTap;
   final TextStyle? style;
+
+  @override
+  List<Object?> get props => [
+        text,
+        style,
+      ];
 }
