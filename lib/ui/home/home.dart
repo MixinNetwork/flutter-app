@@ -9,6 +9,7 @@ import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/empty.dart';
 import '../setting/setting_page.dart';
+import 'bloc/conversation_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
 import 'route/responsive_navigator.dart';
@@ -173,6 +174,7 @@ class _CenterPage extends StatelessWidget {
             });
 
             if (isSetting && !responsiveNavigatorCubit.state.navigationMode) {
+              context.read<ConversationCubit>().unselected();
               responsiveNavigatorCubit
                   .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);
             }

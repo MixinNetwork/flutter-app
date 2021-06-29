@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../db/mixin_database.dart';
-import '../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../ui/home/conversation_page.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
+import '../../user/user_dialog.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
@@ -34,7 +34,7 @@ class ContactMessage extends StatelessWidget {
           message: message,
         ),
         child: InteractableDecoratedBox(
-          onTap: () => ConversationCubit.selectUser(
+          onTap: () => showUserDialog(
             context,
             message.sharedUserId!,
           ),
