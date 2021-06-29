@@ -88,9 +88,6 @@ class HighlightSelectableText extends StatelessWidget {
         TextSpan(
           children: _buildSpan(text, highlightTextSpans, style),
         ),
-        style: const TextStyle(
-          height: 1,
-        ),
         maxLines: maxLines,
         textWidthBasis: TextWidthBasis.longestLine,
         toolbarOptions: const ToolbarOptions(),
