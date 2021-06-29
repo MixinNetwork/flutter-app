@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
@@ -385,7 +386,25 @@ class DecryptMessage extends Injector {
   Future<void> _processRecallMessage(BlazeMessageData data) async {
     final recallMessage =
         RecallMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
+    final message = await database.messagesDao
+        .findMessageByMessageId(recallMessage.messageId);
+    if (message?.category.isAttachment == true) {
+      final file = File(message!.mediaUrl!);
+      final exists = await file.exists();
+      if (exists) {
+        await file.delete();
+      }
+    }
     await database.messagesDao.recallMessage(recallMessage.messageId);
+    await database.messageMentionsDao
+        .deleteMessageMentionByMessageId(recallMessage.messageId);
+    final quoteMessage = await database.messagesDao
+        .findMessageItemById(data.conversationId, recallMessage.messageId);
+    if (quoteMessage != null) {
+      await database.messagesDao.updateQuoteContentByQuoteId(
+          data.conversationId, recallMessage.messageId, quoteMessage.toJson());
+    }
+    await database.messagesDao.deleteFtsByMessageId(recallMessage.messageId);
     await database.messagesHistoryDao
         .insert(MessagesHistoryData(messageId: data.messageId));
   }

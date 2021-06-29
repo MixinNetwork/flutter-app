@@ -135,6 +135,7 @@ class AccountServer {
         await AttachmentUtil.init(client, database.messagesDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
       database.messagesDao,
+      database.messageMentionsDao,
       database.jobsDao,
       database.participantsDao,
       _attachmentUtil,

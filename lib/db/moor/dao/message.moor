@@ -56,6 +56,9 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
 findMessageStatusById:
 SELECT status FROM messages WHERE message_id = :messageId;
 
+updateQuoteContentByQuoteId:
+UPDATE messages SET quote_content = :content WHERE conversation_id = :conversationId AND quote_message_id = :messageId;
+
 sendingMessage AS SendingMessage:
 SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type,
       m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key,
@@ -463,3 +466,9 @@ SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id
         WHERE m.message_id = :messageId
         ORDER BY m.created_at ASC
         LIMIT 1;
+
+deleteMessageMentionByMessageId:        
+DELETE FROM message_mentions WHERE message_id = :messageId;
+
+deleteFtsByMessageId:
+DELETE FROM messages_fts WHERE message_id = :messageId;
