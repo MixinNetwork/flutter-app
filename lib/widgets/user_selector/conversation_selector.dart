@@ -8,6 +8,7 @@ import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../account/account_server.dart';
 import '../../bloc/simple_cubit.dart';
+import '../../constants/brightness_theme_data.dart';
 import '../../constants/resources.dart';
 import '../../crypto/uuid/uuid.dart';
 import '../../db/extension/conversation.dart';
@@ -319,47 +320,8 @@ class _ConversationSelector extends HookWidget {
                               Stack(
                                 children: [
                                   _getAvatarWidget(selected[index]),
-                                  Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: GestureDetector(
-                                      onTap: () => selectItem(selected[index]),
-                                      child: Container(
-                                        width: 22,
-                                        height: 22,
-                                        decoration: BoxDecoration(
-                                          color: BrightnessData.dynamicColor(
-                                            context,
-                                            const Color.fromRGBO(
-                                                255, 255, 255, 1),
-                                            darkColor: const Color.fromRGBO(
-                                                62, 65, 72, 1),
-                                          ),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Container(
-                                            height: 16,
-                                            width: 16,
-                                            decoration: BoxDecoration(
-                                              color: BrightnessData.themeOf(
-                                                      context)
-                                                  .secondaryText,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Center(
-                                              child: SvgPicture.asset(
-                                                Resources
-                                                    .assetsImagesSmallCloseSvg,
-                                                color: BrightnessData.themeOf(
-                                                        context)
-                                                    .text,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                  _AvatarSmallCloseIcon(
+                                    onTap: () => selectItem(selected[index]),
                                   ),
                                 ],
                               ),
@@ -459,6 +421,52 @@ class _ConversationSelector extends HookWidget {
       ),
     );
   }
+}
+
+class _AvatarSmallCloseIcon extends StatelessWidget {
+  const _AvatarSmallCloseIcon({
+    Key? key,
+    required this.onTap,
+  }) : super(key: key);
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Positioned(
+        top: 0,
+        right: 0,
+        child: GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: 22,
+            height: 22,
+            decoration: BoxDecoration(
+              color: BrightnessData.themeOf(context).popUp,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Container(
+                height: 16,
+                width: 16,
+                decoration: BoxDecoration(
+                  color: BrightnessData.dynamicColor(
+                    context,
+                    darkBrightnessThemeData.divider,
+                    darkColor: const Color.fromRGBO(142, 141, 143, 1),
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesSmallCloseSvg,
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
 
 class _Section extends StatelessWidget {
