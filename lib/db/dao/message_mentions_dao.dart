@@ -17,6 +17,9 @@ class MessageMentionsDao extends DatabaseAccessor<MixinDatabase>
   Future deleteMessageMention(MessageMention messageMention) =>
       delete(db.messageMentions).delete(messageMention);
 
+  Future<int> deleteMessageMentionByMessageId(String messageId) =>
+      db.deleteMessageMentionByMessageId(messageId);
+
   Future<void> parseMentionData(
     String content,
     String messageId,

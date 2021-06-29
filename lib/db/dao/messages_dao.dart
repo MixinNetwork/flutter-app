@@ -326,20 +326,23 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       )).map((row) => row.read<int>('count(message_id)')).getSingle();
 
   Future<int> updateQuoteContentByQuoteId(
-          String conversationId, String messageId, String content) =>
-      _sendInsertOrReplaceEventWithFuture(
-        [messageId],
-        db.customUpdate(
-          'UPDATE messages SET quote_content = :content WHERE conversation_id = :conversationId AND quote_message_id = :messageId',
-          variables: [
-            Variable.withString(conversationId),
-            Variable.withString(messageId),
-            Variable.withString(content),
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        ),
-      );
+      String conversationId, String quoteMessageId, String content) async {
+    final messageIds = await _findMessageIdByQuoteMessageId(quoteMessageId);
+    return _sendInsertOrReplaceEventWithFuture(
+        messageIds,
+        db.updateQuoteContentByQuoteId(
+            content, conversationId, quoteMessageId));
+  }
+
+  Future<List<String>> _findMessageIdByQuoteMessageId(
+      String quoteMessageId) async {
+    final future = await (db.selectOnly(db.messages, distinct: true)
+          ..addColumns([db.messages.messageId])
+          ..where(db.messages.quoteMessageId.equals(quoteMessageId)))
+        .map((row) => row.read(db.messages.messageId))
+        .get();
+    return future.where((element) => element != null).cast<String>().toList();
+  }
 
   Future<int> updateAttachmentMessageContentAndStatus(
           String messageId, String encoded) =>
@@ -548,4 +551,7 @@ class MessagesDao extends DatabaseAccessor<MixinDatabase>
       );
 
   Selectable<int> messageRowId(String messageId) => db.messageRowId(messageId);
+
+  Future<int> deleteFtsByMessageId(String messageId) =>
+      db.deleteFtsByMessageId(messageId);
 }

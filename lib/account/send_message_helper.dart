@@ -16,6 +16,7 @@ import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../db/dao/jobs_dao.dart';
+import '../db/dao/message_mentions_dao.dart';
 import '../db/dao/messages_dao.dart';
 import '../db/dao/participants_dao.dart';
 import '../db/extension/message.dart' show QueteMessage;
@@ -34,12 +35,14 @@ const _kEnableImageBlurHashThumb = false;
 class SendMessageHelper {
   SendMessageHelper(
     this._messagesDao,
+    this._messageMentionsDao,
     this._jobsDao,
     this._participantsDao,
     this._attachmentUtil,
   );
 
   final MessagesDao _messagesDao;
+  final MessageMentionsDao _messageMentionsDao;
   final ParticipantsDao _participantsDao;
   final JobsDao _jobsDao;
   final AttachmentUtil _attachmentUtil;
@@ -493,6 +496,22 @@ class SendMessageHelper {
   Future<void> sendRecallMessage(
       String conversationId, List<String> messageIds) async {
     messageIds.forEach((messageId) async {
+      final message = await _messagesDao.findMessageByMessageId(messageId);
+      if (message?.category.isAttachment == true) {
+        final file = File(message!.mediaUrl!);
+        final exists = await file.exists();
+        if (exists) {
+          await file.delete();
+        }
+      }
+      await _messagesDao.recallMessage(messageId);
+      await _messageMentionsDao.deleteMessageMentionByMessageId(messageId);
+      final quoteMessage =
+          await _messagesDao.findMessageItemById(conversationId, messageId);
+      if (quoteMessage != null) {
+        await _messagesDao.updateQuoteContentByQuoteId(
+            conversationId, messageId, quoteMessage.toJson());
+      }
       await _jobsDao.insert(Job(
           conversationId: conversationId,
           jobId: const Uuid().v4(),
@@ -502,6 +521,7 @@ class SendMessageHelper {
           createdAt: DateTime.now(),
           runCount: 0));
       await _messagesDao.recallMessage(messageId);
+      await _messagesDao.deleteFtsByMessageId(messageId);
     });
   }
 
