@@ -205,7 +205,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("隐私政策"),
-        "provisioning": MessageLookupByLibrary.simpleMessage("处理中"),
+        "provisioning": MessageLookupByLibrary.simpleMessage("加载中"),
         "recentConversations": MessageLookupByLibrary.simpleMessage("最近聊天"),
         "removeBot": MessageLookupByLibrary.simpleMessage("删除机器人"),
         "removeContact": MessageLookupByLibrary.simpleMessage("删除联系人"),

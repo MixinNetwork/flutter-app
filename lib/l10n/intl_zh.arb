@@ -1,6 +1,6 @@
 {
   "initializing": "初始化",
-  "provisioning": "处理中",
+  "provisioning": "加载中",
   "pleaseWait": "请稍等一下",
   "pageLandingLoginTitle": "通过 QrCode 登录 Mixin Messenger",
   "pageLandingLoginMessage": "打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。",
