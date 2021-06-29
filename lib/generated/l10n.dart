@@ -1300,10 +1300,10 @@ class Localization {
     );
   }
 
-  /// `Search Conversation`
+  /// `Search`
   String get searchMessageHistory {
     return Intl.message(
-      'Search Conversation',
+      'Search',
       name: 'searchMessageHistory',
       desc: '',
       args: [],

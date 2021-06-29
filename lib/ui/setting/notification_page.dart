@@ -40,12 +40,15 @@ class NotificationPage extends HookWidget {
               ),
               child: CellItem(
                 title: Text(Localization.of(context).messagePreview),
-                trailing: CupertinoSwitch(
-                  activeColor: BrightnessData.themeOf(context).accent,
-                  value: currentMessagePreview,
-                  onChanged: (bool value) => context
-                      .read<MultiAuthCubit>()
-                      .setCurrentSetting(messagePreview: value),
+                trailing: Transform.scale(
+                  scale: 0.7,
+                  child: CupertinoSwitch(
+                    activeColor: BrightnessData.themeOf(context).accent,
+                    value: currentMessagePreview,
+                    onChanged: (bool value) => context
+                        .read<MultiAuthCubit>()
+                        .setCurrentSetting(messagePreview: value),
+                  ),
                 ),
               ),
             ),
