@@ -44,6 +44,7 @@ class SettingPage extends HookWidget {
     return Column(
       children: [
         MixinAppBar(
+          backgroundColor: Colors.transparent,
           leading: AnimatedSwitcher(
             duration: const Duration(milliseconds: 150),
             child: leading ?? const SizedBox(),
