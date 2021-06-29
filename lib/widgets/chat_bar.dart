@@ -93,12 +93,12 @@ class ChatBar extends HookWidget {
                     conversationState: conversation,
                   ),
                 ),
-              ].map((e) => toggleInfoPageWrapper(
+              ]
+                  .map((e) => toggleInfoPageWrapper(
                         child: e,
                         behavior: HitTestBehavior.deferToChild,
                       ))
-                  .toList()
-              ,
+                  .toList(),
             ),
           ),
           MoveWindowBarrier(
