@@ -53,16 +53,10 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           child: ChatInfoPage(),
         );
       case circles:
-        if (arguments == null || arguments is! Tuple2<String, String>) {
-          throw ArgumentError('Invalid route');
-        }
-        return MaterialPage(
-          key: const ValueKey(circles),
+        return const MaterialPage(
+          key: ValueKey(circles),
           name: circles,
-          child: CircleManagerPage(
-            name: arguments.item1,
-            conversationId: arguments.item2,
-          ),
+          child: CircleManagerPage(),
         );
       case searchMessageHistory:
         return const MaterialPage(

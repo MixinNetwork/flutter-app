@@ -23,6 +23,7 @@ class InteracterBuilder extends StatefulWidget {
     this.onExit,
     this.onHover,
     this.cursor = MouseCursor.defer,
+    this.behavior = HitTestBehavior.opaque,
   }) : super(key: key);
 
   final Function(BuildContext context, InteracteStatus status,
@@ -38,6 +39,7 @@ class InteracterBuilder extends StatefulWidget {
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;
   final MouseCursor cursor;
+  final HitTestBehavior? behavior;
 
   @override
   _InteracterBuilderState createState() => _InteracterBuilderState();
@@ -82,6 +84,7 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
         widget.onExit?.call(event);
       },
       child: GestureDetector(
+        behavior: widget.behavior,
         onTapDown: (_) => setState(() {
           tapDowning = true;
         }),
@@ -133,6 +136,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onExit,
     this.onHover,
     this.cursor = MouseCursor.defer,
+    this.behavior = HitTestBehavior.opaque,
   })  : _decoration = decoration,
         super(key: key);
 
@@ -153,6 +157,7 @@ class InteractableDecoratedBox extends StatelessWidget {
     this.onExit,
     this.onHover,
     this.cursor = MouseCursor.defer,
+    this.behavior = HitTestBehavior.opaque,
   })  : _decoration = decoration ?? const BoxDecoration(),
         hoveringDecoration = hoveringColor != null
             ? decoration?.copyWith(color: hoveringColor)
@@ -178,8 +183,8 @@ class InteractableDecoratedBox extends StatelessWidget {
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;
-
   final MouseCursor cursor;
+  final HitTestBehavior? behavior;
 
   @override
   Widget build(BuildContext context) => InteracterBuilder(
@@ -192,6 +197,7 @@ class InteractableDecoratedBox extends StatelessWidget {
         onExit: onExit,
         onHover: onHover,
         cursor: cursor,
+        behavior: behavior,
         builder: (BuildContext context, InteracteStatus status,
                 InteracteStatus lastStatus, Widget? child) =>
             TweenAnimationBuilder<Decoration>(

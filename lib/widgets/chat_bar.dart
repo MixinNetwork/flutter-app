@@ -11,11 +11,13 @@ import '../ui/home/conversation_page.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
 import '../utils/file.dart';
 import '../utils/hook.dart';
+import '../utils/string_extension.dart';
 import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
 import 'brightness_observer.dart';
 import 'buttons.dart';
 import 'input_container.dart';
+import 'interacter_decorated_box.dart';
 import 'window/move_window.dart';
 
 class ChatBar extends HookWidget {
@@ -28,84 +30,100 @@ class ChatBar extends HookWidget {
     final actionColor = BrightnessData.themeOf(context).icon;
     final chatSideCubit = context.read<ChatSideCubit>();
 
-    final hasSidePage =
-        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, bool>(
-      bloc: chatSideCubit,
-      converter: (state) => state.pages.isNotEmpty,
-    );
-
     final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
         ResponsiveNavigatorState, bool>(
       converter: (state) => state.navigationMode,
     );
 
-    return MoveWindow(
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Builder(
-              builder: (context) => navigationMode
-                  ? MoveWindowBarrier(
-                      child: MixinBackButton(
-                        color: actionColor,
-                        onTap: () =>
-                            context.read<ConversationCubit>().unselected(),
-                      ),
-                    )
-                  : const SizedBox(width: 16),
+    final conversation = useBlocState<ConversationCubit, ConversationState?>(
+      when: (state) => state?.isLoaded == true,
+    )!;
+
+    MoveWindowBarrier toggleInfoPageWrapper({
+      required Widget child,
+      behavior = HitTestBehavior.opaque,
+    }) =>
+        MoveWindowBarrier(
+          child: InteractableDecoratedBox(
+            onTap: chatSideCubit.toggleInfoPage,
+            child: child,
+          ),
+        );
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Builder(
+            builder: (context) => navigationMode
+                ? MoveWindowBarrier(
+                    child: MixinBackButton(
+                      color: actionColor,
+                      onTap: () =>
+                          context.read<ConversationCubit>().unselected(),
+                    ),
+                  )
+                : const SizedBox(width: 16),
+          ),
+          toggleInfoPageWrapper(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ConversationAvatar(
+                  conversationState: conversation,
+                ),
+                const SizedBox(width: 10),
+              ],
             ),
-            const ConversationAvatar(),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  ConversationName(),
-                  SizedBox(height: 4),
-                  MoveWindowBarrier(
-                    child: ConversationIDOrCount(),
+          ),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IgnorePointer(
+                  child: ConversationName(
+                    conversationState: conversation,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 4),
+                IgnorePointer(
+                  child: ConversationIDOrCount(
+                    conversationState: conversation,
+                  ),
+                ),
+              ]
+                  .map((e) => toggleInfoPageWrapper(
+                        child: e,
+                        behavior: HitTestBehavior.deferToChild,
+                      ))
+                  .toList(),
             ),
-            MoveWindowBarrier(
-              child: ActionButton(
-                name: Resources.assetsImagesIcSearchSvg,
-                color: actionColor,
-                onTap: () {
-                  final cubit = context.read<ChatSideCubit>();
-                  if (cubit.state.pages.isNotEmpty &&
-                      cubit.state.pages.last.name ==
-                          ChatSideCubit.searchMessageHistory) {
-                    return;
-                  }
-                  cubit
-                    ..popWhere((page) =>
-                        page.name == ChatSideCubit.searchMessageHistory)
-                    ..pushPage(ChatSideCubit.searchMessageHistory);
-                },
-              ),
+          ),
+          MoveWindowBarrier(
+            child: ActionButton(
+              name: Resources.assetsImagesIcSearchSvg,
+              color: actionColor,
+              onTap: () {
+                final cubit = context.read<ChatSideCubit>();
+                if (cubit.state.pages.isNotEmpty &&
+                    cubit.state.pages.last.name ==
+                        ChatSideCubit.searchMessageHistory) {
+                  return;
+                }
+                cubit
+                  ..popWhere(
+                      (page) => page.name == ChatSideCubit.searchMessageHistory)
+                  ..pushPage(ChatSideCubit.searchMessageHistory);
+              },
             ),
-            const SizedBox(width: 14),
-            MoveWindowBarrier(
-              child: _FileButton(actionColor: actionColor),
-            ),
-            const SizedBox(width: 14),
-            MoveWindowBarrier(
-              child: ActionButton(
-                name: Resources.assetsImagesIcScreenSvg,
-                color: hasSidePage
-                    ? BrightnessData.themeOf(context).accent
-                    : actionColor,
-                onTap: chatSideCubit.toggleInfoPage,
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(width: 14),
+          MoveWindowBarrier(
+            child: _FileButton(actionColor: actionColor),
+          ),
+        ],
       ),
     );
   }
@@ -115,16 +133,15 @@ class ConversationIDOrCount extends HookWidget {
   const ConversationIDOrCount({
     Key? key,
     this.fontSize = 14,
+    required this.conversationState,
   }) : super(key: key);
 
   final double fontSize;
+  final ConversationState? conversationState;
 
   @override
   Widget build(BuildContext context) {
-    final conversation = useBlocState<ConversationCubit, ConversationState?>(
-        when: (state) => state?.isLoaded ?? false);
-
-    final isGroup = conversation?.isGroup ?? false;
+    final isGroup = conversationState?.isGroup ?? false;
 
     final countStream = useMemoized(
       () {
@@ -133,14 +150,14 @@ class ConversationIDOrCount extends HookWidget {
               .read<AccountServer>()
               .database
               .conversationDao
-              .conversationParticipantsCount(conversation!.conversationId)
+              .conversationParticipantsCount(conversationState!.conversationId)
               .watchSingle();
         }
 
         return const Stream<int>.empty();
       },
       [
-        conversation?.conversationId,
+        conversationState?.conversationId,
         isGroup,
       ],
     );
@@ -153,7 +170,7 @@ class ConversationIDOrCount extends HookWidget {
 
     if (!isGroup) {
       return SelectableText(
-        conversation?.identityNumber ?? '',
+        conversationState?.identityNumber ?? '',
         style: textStyle,
       );
     }
@@ -177,36 +194,33 @@ class ConversationName extends StatelessWidget {
   const ConversationName({
     Key? key,
     this.fontSize = 16,
+    required this.conversationState,
   }) : super(key: key);
 
   final double fontSize;
+  final ConversationState conversationState;
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<ConversationCubit, ConversationState?>(
-        buildWhen: (previous, current) =>
-            current != null && current != previous,
-        builder: (context, conversation) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: SelectableText(
-                conversation?.name ?? '',
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
-                  fontSize: fontSize,
-                  height: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                maxLines: 1,
+  Widget build(BuildContext context) => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: SelectableText(
+              conversationState.name?.overflow ?? '',
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).text,
+                fontSize: fontSize,
+                height: 1,
+                overflow: TextOverflow.ellipsis,
               ),
+              maxLines: 1,
             ),
-            VerifiedOrBotWidget(
-              verified: conversation?.isVerified ?? false,
-              isBot: conversation?.isBot ?? false,
-            ),
-          ],
-        ),
+          ),
+          VerifiedOrBotWidget(
+            verified: conversationState.isVerified,
+            isBot: conversationState.isBot ?? false,
+          ),
+        ],
       );
 }
 
@@ -214,29 +228,30 @@ class ConversationAvatar extends StatelessWidget {
   const ConversationAvatar({
     Key? key,
     this.size = 36,
+    required this.conversationState,
   }) : super(key: key);
 
   final double size;
+  final ConversationState? conversationState;
 
   @override
   Widget build(BuildContext context) => SizedBox.fromSize(
         size: Size.square(size),
-        child: BlocBuilder<ConversationCubit, ConversationState?>(
-          buildWhen: (a, b) => b?.isLoaded ?? false,
-          builder: (context, state) {
-            if (state?.conversation != null) {
+        child: Builder(
+          builder: (context) {
+            if (conversationState?.conversation != null) {
               return ConversationAvatarWidget(
                 size: size,
-                conversation: state!.conversation,
+                conversation: conversationState!.conversation,
               );
             }
 
-            if (state?.user != null) {
+            if (conversationState?.user != null) {
               return AvatarWidget(
                 size: size,
-                userId: state!.user!.userId,
-                avatarUrl: state.user!.avatarUrl,
-                name: state.name!,
+                userId: conversationState!.user!.userId,
+                avatarUrl: conversationState!.user!.avatarUrl,
+                name: conversationState!.name!,
               );
             }
 
