@@ -304,7 +304,7 @@ class _SendTextField extends HookWidget {
                   (textEditingValue, mentionState) =>
                       (textEditingValue.text.trim().isNotEmpty) &&
                       (textEditingValue.composing.composed) &&
-                      mentionState.text == null).distinct(),
+                      mentionState.users.isEmpty).distinct(),
               [
                 textEditingValueStream,
                 mentionStream,
