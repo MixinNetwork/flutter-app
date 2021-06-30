@@ -78,7 +78,7 @@ class ChatInfoPage extends HookWidget {
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
               color: BrightnessData.themeOf(context).icon,
-              onTap: () => Navigator.pop(context),
+              onTap: () => context.read<ChatSideCubit>().onPopPage(),
             ),
         ],
         backgroundColor: BrightnessData.themeOf(context).popUp,

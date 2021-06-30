@@ -114,7 +114,7 @@ class SearchMessagePage extends HookWidget {
               color: BrightnessData.themeOf(context).icon,
               onTap: () {
                 context.read<SearchConversationKeywordCubit>().emit('');
-                Navigator.pop(context);
+                context.read<ChatSideCubit>().onPopPage();
               },
             ),
         ],
