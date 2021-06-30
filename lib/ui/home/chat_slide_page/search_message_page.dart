@@ -111,6 +111,7 @@ class SearchMessagePage extends HookWidget {
           if (!Navigator.of(context).canPop())
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
+              color: BrightnessData.themeOf(context).icon,
               onTap: () {
                 context.read<SearchConversationKeywordCubit>().emit('');
                 Navigator.pop(context);

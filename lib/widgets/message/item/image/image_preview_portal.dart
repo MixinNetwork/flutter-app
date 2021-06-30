@@ -263,7 +263,7 @@ class _Bar extends StatelessWidget {
           const Spacer(),
           ActionButton(
             name: Resources.assetsImagesZoomInSvg,
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: BrightnessData.themeOf(context).icon,
             size: 20,
             onTap: () => controller.scaleState = PhotoViewScaleState.covering,
           ),
@@ -271,14 +271,14 @@ class _Bar extends StatelessWidget {
           ActionButton(
             name: Resources.assetsImagesZoomOutSvg,
             size: 20,
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: BrightnessData.themeOf(context).icon,
             onTap: () => controller.scaleState = PhotoViewScaleState.initial,
           ),
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesShareSvg,
             size: 20,
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: BrightnessData.themeOf(context).icon,
             onTap: () async {
               final accountServer = context.read<AccountServer>();
               final result = await showConversationSelector(
@@ -299,14 +299,14 @@ class _Bar extends StatelessWidget {
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesCopySvg,
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: BrightnessData.themeOf(context).icon,
             size: 20,
             onTap: () => _copyUrl(context, message.mediaUrl),
           ),
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesAttachmentDownloadSvg,
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: BrightnessData.themeOf(context).icon,
             size: 20,
             onTap: () async {
               if (message.mediaUrl?.isEmpty ?? true) return;
@@ -324,7 +324,7 @@ class _Bar extends StatelessWidget {
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesIcCloseBigSvg,
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: BrightnessData.themeOf(context).icon,
             size: 20,
             onTap: () => Navigator.pop(context),
           ),
