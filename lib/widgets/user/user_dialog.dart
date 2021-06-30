@@ -123,9 +123,9 @@ class _UserProfileBody extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _BioText(biography: user.biography ?? ''),
-          const SizedBox(height: 30),
-          _UserProfileButtonBar(user: user),
           const Spacer(),
+          _UserProfileButtonBar(user: user),
+          const SizedBox(height: 72),
         ],
       );
 }
@@ -142,7 +142,11 @@ class _BioText extends HookWidget {
   Widget build(BuildContext context) {
     final expand = useState(false);
     return ConstrainedBox(
-      constraints: const BoxConstraints(maxHeight: 74, minHeight: 0),
+      constraints: const BoxConstraints(
+        maxHeight: 74,
+        minHeight: 0,
+        minWidth: 160,
+      ),
       child: SingleChildScrollView(
         physics: expand.value ? null : const NeverScrollableScrollPhysics(),
         child: Padding(
@@ -187,71 +191,74 @@ class _UserProfileButtonBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSelf = user.userId == context.read<AccountServer>().userId;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ActionButton(
-          name: Resources.assetsImagesInviteShareSvg,
-          size: 24,
-          onTap: () async {
-            final result = await showConversationSelector(
-              context: context,
-              singleSelect: true,
-              title: Localization.of(context).shareContact,
-              onlyContact: false,
-            );
-
-            if (result.isEmpty) return;
-            final conversationId = result[0].conversationId;
-
-            assert(!(result[0].isGroup && result[0].userId != null),
-                'group conversation should not contains userId!');
-
-            await runFutureWithToast(
-              context,
-              context.read<AccountServer>().sendContactMessage(
-                    user.userId,
-                    user.fullName!,
-                    isPlain(result.first.isGroup, result.first.isBot),
-                    conversationId: conversationId,
-                    recipientId: result[0].userId,
-                  ),
-            );
-          },
-          color: BrightnessData.themeOf(context).icon,
-        ),
-        if (!isSelf)
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 45),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
           ActionButton(
-            name: Resources.assetsImagesChatSvg,
-            size: 24,
+            name: Resources.assetsImagesInviteShareSvg,
+            size: 30,
             onTap: () async {
-              if (user.userId == context.read<AccountServer>().userId) {
-                // skip self.
-                return;
-              }
-              await ConversationCubit.selectUser(
-                context,
-                user.userId,
+              final result = await showConversationSelector(
+                context: context,
+                singleSelect: true,
+                title: Localization.of(context).shareContact,
+                onlyContact: false,
               );
-              Navigator.pop(context);
+
+              if (result.isEmpty) return;
+              final conversationId = result[0].conversationId;
+
+              assert(!(result[0].isGroup && result[0].userId != null),
+                  'group conversation should not contains userId!');
+
+              await runFutureWithToast(
+                context,
+                context.read<AccountServer>().sendContactMessage(
+                      user.userId,
+                      user.fullName!,
+                      isPlain(result.first.isGroup, result.first.isBot),
+                      conversationId: conversationId,
+                      recipientId: result[0].userId,
+                    ),
+              );
             },
             color: BrightnessData.themeOf(context).icon,
           ),
-        if (!isSelf)
-          ActionButton(
-            name: Resources.assetsImagesInformationSvg,
-            size: 24,
-            onTap: () async {
-              await ConversationCubit.selectUser(
-                context,
-                user.userId,
-                initialChatSidePage: ChatSideCubit.infoPage,
-              );
-              Navigator.pop(context);
-            },
-            color: BrightnessData.themeOf(context).icon,
-          )
-      ],
+          if (!isSelf)
+            ActionButton(
+              name: Resources.assetsImagesChatSvg,
+              size: 30,
+              onTap: () async {
+                if (user.userId == context.read<AccountServer>().userId) {
+                  // skip self.
+                  return;
+                }
+                await ConversationCubit.selectUser(
+                  context,
+                  user.userId,
+                );
+                Navigator.pop(context);
+              },
+              color: BrightnessData.themeOf(context).icon,
+            ),
+          if (!isSelf)
+            ActionButton(
+              name: Resources.assetsImagesInformationSvg,
+              size: 30,
+              onTap: () async {
+                await ConversationCubit.selectUser(
+                  context,
+                  user.userId,
+                  initialChatSidePage: ChatSideCubit.infoPage,
+                );
+                Navigator.pop(context);
+              },
+              color: BrightnessData.themeOf(context).icon,
+            )
+        ],
+      ),
     );
   }
 }
