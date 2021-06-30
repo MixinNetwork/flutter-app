@@ -278,15 +278,17 @@ class _AnimatedChatSlide extends HookWidget {
         height: constraints.maxHeight,
         child: controller.value != 0 ? child : null,
       ),
-      child: OverflowBox(
-        alignment: AlignmentDirectional.centerStart,
-        maxHeight: constraints.maxHeight,
-        minHeight: constraints.maxHeight,
-        maxWidth: kChatSidePageWidth,
-        minWidth: kChatSidePageWidth,
-        child: Navigator(
-          pages: _pages.value,
-          onPopPage: onPopPage,
+      child: ClipRect(
+        child: OverflowBox(
+          alignment: AlignmentDirectional.centerStart,
+          maxHeight: constraints.maxHeight,
+          minHeight: constraints.maxHeight,
+          maxWidth: kChatSidePageWidth,
+          minWidth: kChatSidePageWidth,
+          child: Navigator(
+            pages: _pages.value,
+            onPopPage: onPopPage,
+          ),
         ),
       ),
     );
