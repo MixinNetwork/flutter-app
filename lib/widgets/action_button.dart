@@ -50,7 +50,8 @@ class ActionButton extends StatelessWidget {
       onEnter: onEnter,
       onExit: onExit,
       onHover: onHover,
-      decoration: const BoxDecoration(shape: BoxShape.circle),
+      decoration: BoxDecoration(
+          shape: BoxShape.circle, color: Colors.blue.withOpacity(0.0)),
       hoveringColor: BrightnessData.dynamicColor(
         context,
         const Color.fromRGBO(0, 0, 0, 0.03),
@@ -58,7 +59,7 @@ class ActionButton extends StatelessWidget {
       ),
       child: Padding(
         padding: padding,
-        child: _child,
+        child: Container(color: Colors.red.withOpacity(0.0), child: _child),
       ),
     );
   }
