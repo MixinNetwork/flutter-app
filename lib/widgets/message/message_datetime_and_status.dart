@@ -19,13 +19,11 @@ bool _isRepresentative(
   MessageItem message,
   ConversationState? conversation,
   String userId,
-) {
-  assert(conversation != null);
-  return conversation != null &&
-      (conversation.isBot ?? false) &&
-      (conversation.user?.userId != message.userId) &&
-      (message.userId != userId);
-}
+) =>
+    conversation != null &&
+    (conversation.isBot ?? false) &&
+    (conversation.user?.userId != message.userId) &&
+    (message.userId != userId);
 
 class MessageDatetimeAndStatus extends StatelessWidget {
   const MessageDatetimeAndStatus({
