@@ -38,7 +38,7 @@ dependencies:
   ulid: ^2.0.0
   web_socket_channel: ^2.1.0
   moor: ^4.3.2
-  mixin_bot_sdk_dart: ^0.0.2
+  mixin_bot_sdk_dart: ^0.0.6
   libsignal_protocol_dart: ^0.5.1-nullsafety.0
   path_provider: ^2.0.2
   path: ^1.8.0
