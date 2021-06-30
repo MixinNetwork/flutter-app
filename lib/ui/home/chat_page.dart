@@ -177,18 +177,14 @@ class ChatPage extends HookWidget {
                 _SideRouter(
                   chatSideCubit: chatSideCubit,
                   constraints: boxConstraints,
-                  child: ClipRect(
-                    child: Navigator(
-                      onPopPage: (Route<dynamic> route, dynamic result) {
-                        chatSideCubit.onPopPage();
-                        return route.didPop(result);
-                      },
-                      pages: [
-                        if (navigationMode) chatContainerPage,
-                        ...navigatorState.pages,
-                      ],
-                    ),
-                  ),
+                  onPopPage: (Route<dynamic> route, dynamic result) {
+                    chatSideCubit.onPopPage();
+                    return route.didPop(result);
+                  },
+                  pages: [
+                    if (navigationMode) chatContainerPage,
+                    ...navigatorState.pages,
+                  ],
                 ),
               ],
             );
@@ -203,13 +199,16 @@ class _SideRouter extends StatelessWidget {
   const _SideRouter({
     Key? key,
     required this.chatSideCubit,
-    required this.child,
+    required this.pages,
+    this.onPopPage,
     required this.constraints,
   }) : super(key: key);
 
   final ChatSideCubit chatSideCubit;
 
-  final Widget child;
+  final List<Page<dynamic>> pages;
+
+  final PopPageCallback? onPopPage;
 
   final BoxConstraints constraints;
 
@@ -219,13 +218,16 @@ class _SideRouter extends StatelessWidget {
     if (navigationMode) {
       return SizedBox(
         width: constraints.maxWidth,
-        child: child,
+        child: Navigator(
+          pages: pages,
+          onPopPage: onPopPage,
+        ),
       );
     } else {
       return _AnimatedChatSlide(
         constraints: constraints,
-        chatSideCubit: chatSideCubit,
-        child: child,
+        pages: pages,
+        onPopPage: onPopPage,
       );
     }
   }
@@ -234,34 +236,37 @@ class _SideRouter extends StatelessWidget {
 class _AnimatedChatSlide extends HookWidget {
   const _AnimatedChatSlide({
     Key? key,
-    required this.chatSideCubit,
-    required this.child,
+    required this.pages,
     required this.constraints,
+    required this.onPopPage,
   }) : super(key: key);
 
-  final ChatSideCubit chatSideCubit;
+  final List<Page<dynamic>> pages;
 
-  final Widget child;
+  final PopPageCallback? onPopPage;
 
   final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
-    final hasPage = chatSideCubit.state.pages.isNotEmpty;
-
     final controller = useAnimationController(
       duration: const Duration(milliseconds: 300),
       lowerBound: 0,
       upperBound: 1,
     );
 
+    final _pages = useState(<Page<dynamic>>[]);
+
     useEffect(() {
-      if (hasPage) {
+      if (pages.isNotEmpty) {
+        _pages.value = pages;
         controller.forward();
       } else {
-        controller.reverse();
+        controller.reverse().whenComplete(() {
+          _pages.value = pages;
+        });
       }
-    }, [hasPage, controller]);
+    }, [pages, controller]);
 
     return AnimatedBuilder(
       animation: controller,
@@ -279,7 +284,10 @@ class _AnimatedChatSlide extends HookWidget {
         minHeight: constraints.maxHeight,
         maxWidth: kChatSidePageWidth,
         minWidth: kChatSidePageWidth,
-        child: child,
+        child: Navigator(
+          pages: _pages.value,
+          onPopPage: onPopPage,
+        ),
       ),
     );
   }
