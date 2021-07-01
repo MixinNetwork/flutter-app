@@ -127,10 +127,12 @@ class _InputContainer extends HookWidget {
         useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
       converter: (state) => state?.conversation?.draft,
     );
+
     final conversationItem = useBlocStateConverter<ConversationCubit,
         ConversationState?, ConversationItem?>(
       converter: (state) => state?.conversation,
     );
+
     final textEditingController = useMemoized(
       () {
         final textEditingController = HighlightTextEditingController(
@@ -150,28 +152,22 @@ class _InputContainer extends HookWidget {
       [conversationItem?.draft, conversationId],
     );
 
+    final textEditingValueStream =
+        useValueNotifierConvertSteam(textEditingController);
+
     useEffect(() {
-      var text = textEditingController.text;
-
-      void onListener() {
-        text = textEditingController.text;
-        final mention = mentionRegExp.firstMatch(text)?[1];
-        mentionCubit.send(mention);
-      }
-
-      onListener();
-      textEditingController.addListener(onListener);
-
+      mentionCubit.setTextEditingValueStream(
+        textEditingValueStream,
+        textEditingController.value,
+      );
       return () {
-        textEditingController.removeListener(onListener);
-        if (conversationId != null && conversationItem != null) {
-          context.read<AccountServer>().database.conversationDao.updateDraft(
-                conversationId,
-                textEditingController.text,
-              );
-        }
+        if (conversationId == null || conversationItem == null) return;
+        context.read<AccountServer>().database.conversationDao.updateDraft(
+              conversationId,
+              textEditingController.text,
+            );
       };
-    }, [identityHashCode(textEditingController)]);
+    }, [identityHashCode(textEditingValueStream)]);
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
