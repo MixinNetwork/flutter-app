@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
@@ -10,6 +11,7 @@ import 'package:rxdart/rxdart.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/users_dao.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/sort.dart';
 import '../../../widgets/mention_panel.dart';
 import 'multi_auth_cubit.dart';
@@ -46,16 +48,34 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
     required this.userDao,
     required this.multiAuthCubit,
     required this.participantsCubit,
-  }) : super(const MentionState()) {
+  }) : super(const MentionState());
+
+  Future<void> setTextEditingValueStream(
+    Stream<TextEditingValue> textEditingValueStream,
+    TextEditingValue initialValue,
+  ) async {
+    await Future.forEach<StreamSubscription?>(
+      subscriptions,
+      (subscription) => subscription?.cancel(),
+    );
+    subscriptions.clear();
+
+    final mentionTextStream =
+        textEditingValueStream.startWith(initialValue).map((event) {
+      final text = event.text.substring(0, max(event.selection.baseOffset, 0));
+      return mentionRegExp.firstMatch(text)?[1];
+    }).asBroadcastStream();
+
     addSubscription(
-      streamController.stream.distinct().listen((index) {
+      mentionTextStream.distinct().listen((index) {
         if (!scrollController.hasClients) return;
         scrollController.jumpTo(0);
       }),
     );
+
     addSubscription(
       Rx.combineLatest2<String?, List<User>, MentionState>(
-        streamController.stream,
+        mentionTextStream,
         participantsCubit.stream,
         (a, b) {
           late List<User> users;
@@ -127,17 +147,13 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
   final UserDao userDao;
   final MultiAuthCubit multiAuthCubit;
   final ParticipantsCubit participantsCubit;
-  final streamController = StreamController<String?>.broadcast();
   final scrollController = ScrollController();
 
   @override
   Future<void> close() async {
-    await streamController.close();
     scrollController.dispose();
     await super.close();
   }
-
-  void send(String? keyword) => streamController.add(keyword);
 
   void next() {
     final index = math.min(state.index + 1, state.users.length - 1);
