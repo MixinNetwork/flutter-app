@@ -430,12 +430,14 @@ class _SendTextField extends HookWidget {
 
 Future<void> sendFile(
   BuildContext context,
-  XFile file,
-) async {
+  XFile file, {
+  bool showImagePreview = true,
+}) async {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
   if (file.isImage) {
-    if ((await _PreviewImage.push(context, xFile: file)) != true) return;
+    if (showImagePreview &&
+        (await _PreviewImage.push(context, xFile: file)) != true) return;
     return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
       conversationItem.isPlainConversation,
       file: file,

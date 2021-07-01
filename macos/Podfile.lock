@@ -4,6 +4,8 @@ PODS:
   - connectivity_plus_macos (0.0.1):
     - FlutterMacOS
     - Reachability
+  - desktop_drop (0.0.1):
+    - FlutterMacOS
   - desktop_lifecycle (0.0.1):
     - FlutterMacOS
   - device_info_plus_macos (0.0.1):
@@ -36,6 +38,7 @@ PODS:
 DEPENDENCIES:
   - bitsdojo_window_macos (from `Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos`)
   - connectivity_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos`)
+  - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
   - desktop_lifecycle (from `Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos`)
   - device_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos`)
   - file_selector_macos (from `Flutter/ephemeral/.symlinks/plugins/file_selector_macos/macos`)
@@ -59,6 +62,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos
   connectivity_plus_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos
+  desktop_drop:
+    :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
   desktop_lifecycle:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos
   device_info_plus_macos:
@@ -87,6 +92,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   bitsdojo_window_macos: 7e9b1bbb09bdce418d9657ead7fc9d824203ff0d
   connectivity_plus_macos: 3da1605dc99d44cf06fb6852de4ed26ecef3cabc
+  desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
   file_selector_macos: ff6dc948d4ddd34e8602a1f60b7d0b4cc6051a47

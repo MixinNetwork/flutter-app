@@ -302,6 +302,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.5.2"
+  desktop_drop:
+    dependency: "direct main"
+    description:
+      path: "packages/desktop_drop"
+      ref: "7826195b827ad273fe9ee098c1afe9b70bf23894"
+      resolved-ref: "7826195b827ad273fe9ee098c1afe9b70bf23894"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
+    version: "0.0.1"
   desktop_lifecycle:
     dependency: "direct main"
     description:

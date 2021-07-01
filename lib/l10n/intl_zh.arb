@@ -174,5 +174,6 @@
   "groupInviteShare": "分享邀请链接",
   "groupInviteCopy": "复制邀请链接",
   "groupInviteReset": "重置邀请链接",
-  "contactMixinId": "Mixin ID: {mixinId}"
+  "contactMixinId": "Mixin ID: {mixinId}",
+  "chatDragHint": "拖放文件到此处"
 }
