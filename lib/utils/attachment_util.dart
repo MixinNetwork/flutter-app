@@ -34,7 +34,8 @@ class AttachmentUtil {
 
   final Dio _dio = Dio(
     BaseOptions(
-      connectTimeout: 10 * 1000,
+      connectTimeout: 15 * 1000,
+      receiveTimeout: 15 * 1000,
     ),
   );
   final _messageIdCancelTokenMap = <String, CancelToken?>{};
@@ -108,12 +109,14 @@ class AttachmentUtil {
           await _messagesDao.updateMediaMessageUrl(file.path, messageId);
           await _messagesDao.updateMediaSize(fileSize, messageId);
           await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
-        } catch (e) {
+        } catch (err) {
+          e(err.toString());
           await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
         }
         return file.absolute.path;
       }
-    } catch (e) {
+    } catch (er) {
+      e(er.toString());
       await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
     } finally {
       _messageIdCancelTokenMap[messageId] = null;
