@@ -124,20 +124,12 @@ class _InputContainer extends HookWidget {
           (state?.isLoaded ?? false) ? state?.conversationId : null,
     );
 
-    final draft =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversation?.draft,
-    );
-
-    final conversationItem = useBlocStateConverter<ConversationCubit,
-        ConversationState?, ConversationItem?>(
-      converter: (state) => state?.conversation,
-    );
-
     final textEditingController = useMemoized(
       () {
+        final draft =
+            context.read<ConversationCubit>().state?.conversation?.draft;
         final textEditingController = HighlightTextEditingController(
-          initialText: conversationItem?.draft,
+          initialText: draft,
           highlightTextStyle: TextStyle(
             color: BrightnessData.themeOf(context).accent,
           ),
@@ -150,7 +142,7 @@ class _InputContainer extends HookWidget {
           );
         return textEditingController;
       },
-      [conversationItem?.draft, conversationId],
+      [conversationId],
     );
 
     final textEditingValueStream =
@@ -161,14 +153,21 @@ class _InputContainer extends HookWidget {
         textEditingValueStream,
         textEditingController.value,
       );
-      return () {
-        if (conversationId == null || conversationItem == null) return;
-        context.read<AccountServer>().database.conversationDao.updateDraft(
-              conversationId,
-              textEditingController.text,
-            );
-      };
     }, [identityHashCode(textEditingValueStream)]);
+
+    useEffect(
+        () => () {
+              if (conversationId == null) return;
+              context
+                  .read<AccountServer>()
+                  .database
+                  .conversationDao
+                  .updateDraft(
+                    conversationId,
+                    textEditingController.text,
+                  );
+            },
+        [conversationId]);
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
