@@ -23,6 +23,7 @@ import '../ui/home/bloc/mention_cubit.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/participants_cubit.dart';
 import '../ui/home/bloc/quote_message_cubit.dart';
+import '../utils/callback_text_editing_action.dart';
 import '../utils/file.dart';
 import '../utils/hook.dart';
 import '../utils/platform.dart';
@@ -342,23 +343,12 @@ class _SendTextField extends HookWidget {
             onInvoke: (Intent intent) =>
                 _sendMessage(context, textEditingController),
           ),
-          PasteIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) async {
-              final clipboardData =
-                  await Clipboard.getData(Clipboard.kTextPlain);
-              final clipboardText = clipboardData?.text;
-
-              // Temporary solution, as flutter currently has no way to block paste text.
-              void clearClipboardText() {
-                if (clipboardText?.isNotEmpty ?? false) {
-                  textEditingController.text = textEditingController.text
-                      .replaceFirst(clipboardText!, '');
-                }
-              }
-
+          PasteIntent: CallbackTextEditingAction<Intent>(
+            onInvoke: (Intent intent,
+                TextEditingActionTarget? textEditingActionTarget,
+                [_]) async {
               final uri = await Pasteboard.uri;
               if (uri != null) {
-                clearClipboardText();
                 final file = File(uri.toFilePath(windows: Platform.isWindows));
 
                 if (!await file.exists()) return;
@@ -366,7 +356,10 @@ class _SendTextField extends HookWidget {
                 await sendFile(context, file.xFile);
               } else {
                 final bytes = await Pasteboard.image;
-                if (bytes == null) return;
+                if (bytes == null) {
+                  return textEditingActionTarget!.renderEditable
+                      .pasteText(SelectionChangedCause.keyboard);
+                }
 
                 if ((await _PreviewImage.push(context, bytes: bytes)) != true) {
                   return;
