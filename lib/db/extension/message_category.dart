@@ -13,6 +13,7 @@ extension MessageCategoryExtension on MessageCategory? {
         MessageCategory.plainPost,
         MessageCategory.plainJson,
         MessageCategory.plainLocation,
+        MessageCategory.plainTranscript,
       }.any((element) => element == this);
 
   bool get isSystem => {
@@ -34,6 +35,7 @@ extension MessageCategoryExtension on MessageCategory? {
         MessageCategory.encryptedLive,
         MessageCategory.encryptedPost,
         MessageCategory.encryptedLocation,
+        MessageCategory.encryptedTranscript,
       }.any((element) => element == this);
 
   bool get isSignal => {
@@ -48,6 +50,7 @@ extension MessageCategoryExtension on MessageCategory? {
         MessageCategory.signalLive,
         MessageCategory.signalPost,
         MessageCategory.signalLocation,
+        MessageCategory.signalTranscript,
       }.any((element) => element == this);
 
   bool get isCall => {
@@ -158,6 +161,12 @@ extension MessageCategoryExtension on MessageCategory? {
         MessageCategory.encryptedContact,
       }.any((element) => element == this);
 
+  bool get isTranscript => {
+        MessageCategory.signalTranscript,
+        MessageCategory.plainTranscript,
+        MessageCategory.encryptedTranscript,
+      }.any((element) => element == this);
+
   bool get isMedia => isData || isImage || isVideo;
 
   bool get isAttachment => isData || isImage || isVideo || isAudio;
@@ -188,6 +197,7 @@ extension MessageCategoryExtension on MessageCategory? {
         MessageCategory.signalLive,
         MessageCategory.signalPost,
         MessageCategory.signalLocation,
+        MessageCategory.signalTranscript,
         MessageCategory.plainText,
         MessageCategory.plainImage,
         MessageCategory.plainVideo,
@@ -198,6 +208,9 @@ extension MessageCategoryExtension on MessageCategory? {
         MessageCategory.plainLive,
         MessageCategory.plainPost,
         MessageCategory.plainLocation,
+        MessageCategory.plainTranscript,
         MessageCategory.appCard,
       }.any((element) => element == this);
+
+  bool get notSupportedYet => isAudio || isTranscript;
 }

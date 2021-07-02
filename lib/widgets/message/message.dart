@@ -269,8 +269,8 @@ class MessageItemWidget extends HookWidget {
                       isCurrentUser: isCurrentUser,
                     );
                   }
-                  if (message.type.isAudio) {
-                    return AudioMessage(
+                  if (message.type.notSupportedYet) {
+                    return NotSupportedMessage(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
