@@ -165,7 +165,7 @@ class _InputContainer extends HookWidget {
 
     useEffect(
         () => () {
-              if (conversationId == null || conversationItem == null) return;
+              if (conversationId == null) return;
               context
                   .read<AccountServer>()
                   .database
