@@ -390,10 +390,10 @@ class Localization {
     );
   }
 
-  /// `UnPin`
+  /// `Unpin`
   String get unPin {
     return Intl.message(
-      'UnPin',
+      'Unpin',
       name: 'unPin',
       desc: '',
       args: [],
@@ -420,10 +420,10 @@ class Localization {
     );
   }
 
-  /// `UnMute`
+  /// `Unmute`
   String get unMute {
     return Intl.message(
-      'UnMute',
+      'Unmute',
       name: 'unMute',
       desc: '',
       args: [],
@@ -1050,10 +1050,10 @@ class Localization {
     );
   }
 
-  /// `Muted`
+  /// `Mute`
   String get muted {
     return Intl.message(
-      'Muted',
+      'Mute',
       name: 'muted',
       desc: '',
       args: [],
