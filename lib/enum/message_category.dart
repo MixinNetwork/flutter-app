@@ -12,6 +12,7 @@ enum MessageCategory {
   signalLive,
   signalPost,
   signalLocation,
+  signalTranscript,
   plainText,
   plainImage,
   plainVideo,
@@ -23,6 +24,7 @@ enum MessageCategory {
   plainPost,
   plainJson,
   plainLocation,
+  plainTranscript,
   messageRecall,
   stranger,
   secret,
@@ -61,6 +63,7 @@ enum MessageCategory {
   encryptedLive,
   encryptedPost,
   encryptedLocation,
+  encryptedTranscript,
 }
 
 class MessageCategoryJsonConverter extends EnumJsonConverter<MessageCategory> {
