@@ -153,7 +153,7 @@ class Blaze {
     } else if (blazeMessage.action == createMessage) {
       if (data.userId == userId && data.category == null) {
         await makeMessageStatus(data.messageId, data.status);
-      } else {
+      } else if (data.conversationId.isNotEmpty) {
         await database.floodMessagesDao.insert(FloodMessage(
             messageId: data.messageId,
             data: await jsonEncodeWithIsolate(data),
