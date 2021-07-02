@@ -1859,6 +1859,16 @@ class Localization {
       args: [mixinId],
     );
   }
+
+  /// `Drag and drop files here`
+  String get chatDragHint {
+    return Intl.message(
+      'Drag and drop files here',
+      name: 'chatDragHint',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
