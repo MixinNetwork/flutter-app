@@ -61,10 +61,17 @@ enum MessageCategory {
   encryptedLive,
   encryptedPost,
   encryptedLocation,
+  unknown,
 }
 
 class MessageCategoryJsonConverter extends EnumJsonConverter<MessageCategory> {
   const MessageCategoryJsonConverter();
   @override
   List<MessageCategory> enumValues() => MessageCategory.values;
+
+  @override
+  String get unknownJson => MessageCategory.unknown.toString().toUpperCase();
+
+  @override
+  MessageCategory get unknownEnumValue => MessageCategory.unknown;
 }
