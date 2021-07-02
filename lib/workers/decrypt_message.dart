@@ -257,7 +257,8 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.plainSticker ||
         data.category == MessageCategory.plainLive ||
         data.category == MessageCategory.plainPost ||
-        data.category == MessageCategory.plainLocation) {
+        data.category == MessageCategory.plainLocation ||
+        data.category == MessageCategory.plainTranscript) {
       await _processDecryptSuccess(data, data.data);
     }
   }
@@ -693,6 +694,23 @@ class DecryptMessage extends Injector {
     } else if (data.category.isPost) {
       String plain;
       if (data.category == MessageCategory.signalPost) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
+      final message = Message(
+        messageId: data.messageId,
+        conversationId: data.conversationId,
+        userId: data.senderId,
+        category: data.category!,
+        content: plain,
+        status: data.status,
+        createdAt: data.createdAt,
+      );
+      await database.messagesDao.insert(message, accountId);
+    } else if (data.category.isTranscript) {
+      String plain;
+      if (data.category == MessageCategory.signalTranscript) {
         plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);

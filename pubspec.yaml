@@ -99,6 +99,12 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 18e4e369cdeda9bbf8c4baade20ad951294a26b3
       path: packages/desktop_lifecycle
+  desktop_drop:
+#     path: ../flutter-plugins/packages/desktop_drop
+    git:
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: 7826195b827ad273fe9ee098c1afe9b70bf23894
+      path: packages/desktop_drop
   desktop_notifications: ^0.5.0
   connectivity_plus: ^1.0.3
   async: ^2.7.0

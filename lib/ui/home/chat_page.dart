@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,11 +13,14 @@ import '../../account/account_server.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../bloc/subscribe_mixin.dart';
 import '../../constants/resources.dart';
+import '../../generated/l10n.dart';
+import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../utils/list_utils.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/chat_bar.dart';
 import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
+import '../../widgets/dash_path_border.dart';
 import '../../widgets/input_container.dart';
 import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/message/item/text/mention_builder.dart';
@@ -357,40 +363,42 @@ class ChatContainer extends HookWidget {
                     route.didPop(result),
                 pages: [
                   MaterialPage(
-                    child: Column(
-                      children: [
-                        Expanded(
-                          child: DecoratedBox(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                bottom: BorderSide(
-                                  color:
-                                      BrightnessData.themeOf(context).divider,
-                                ),
-                              ),
-                            ),
-                            child: Stack(
-                              children: [
-                                const _NotificationListener(
-                                  child: _List(),
-                                ),
-                                Positioned(
-                                  bottom: 16,
-                                  right: 16,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: const [
-                                      _JumpMentionButton(),
-                                      _JumpCurrentButton(),
-                                    ],
+                    child: _ChatDropOverlay(
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color:
+                                        BrightnessData.themeOf(context).divider,
                                   ),
                                 ),
-                              ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  const _NotificationListener(
+                                    child: _List(),
+                                  ),
+                                  Positioned(
+                                    bottom: 16,
+                                    right: 16,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        _JumpMentionButton(),
+                                        _JumpCurrentButton(),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        const InputContainer(),
-                      ],
+                          const InputContainer(),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -693,4 +701,68 @@ class _JumpMentionButton extends HookWidget {
       ),
     );
   }
+}
+
+class _ChatDropOverlay extends HookWidget {
+  const _ChatDropOverlay({
+    Key? key,
+    required this.child,
+  }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final dragging = useState(false);
+    return DropTarget(
+      onDragEntered: () => dragging.value = true,
+      onDragExited: () => dragging.value = false,
+      onDragDone: (urls) async {
+        for (final uri in urls) {
+          final file = File(uri.toFilePath(windows: Platform.isWindows));
+          if (!await file.exists()) {
+            continue;
+          }
+          // ignore: unawaited_futures
+          sendFile(context, file.xFile, showImagePreview: false);
+        }
+      },
+      child: Stack(
+        children: [
+          child,
+          if (dragging.value) const _ChatDragIndicator(),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChatDragIndicator extends StatelessWidget {
+  const _ChatDragIndicator({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(color: BrightnessData.themeOf(context).popUp),
+        child: Container(
+          margin: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+              color: BrightnessData.themeOf(context).listSelected,
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              border: DashPathBorder.all(
+                borderSide: BorderSide(
+                  color: BrightnessData.themeOf(context).divider,
+                ),
+                dashArray: CircularIntervalList([4, 4]),
+              )),
+          child: Center(
+            child: Text(
+              Localization.of(context).chatDragHint,
+              style: TextStyle(
+                fontSize: 14,
+                color: BrightnessData.themeOf(context).text,
+              ),
+            ),
+          ),
+        ),
+      );
 }

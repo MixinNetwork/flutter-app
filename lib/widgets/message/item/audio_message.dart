@@ -9,8 +9,8 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
 
-class AudioMessage extends StatelessWidget {
-  const AudioMessage({
+class NotSupportedMessage extends StatelessWidget {
+  const NotSupportedMessage({
     Key? key,
     required this.showNip,
     required this.isCurrentUser,

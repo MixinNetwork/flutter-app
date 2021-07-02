@@ -179,5 +179,6 @@
   "groupInviteShare": "Share Link",
   "groupInviteCopy": "Copy Link",
   "groupInviteReset": "Reset Link",
-  "contactMixinId": "Mixin ID: {mixinId}"
+  "contactMixinId": "Mixin ID: {mixinId}",
+  "chatDragHint": "Drag and drop files here"
 }

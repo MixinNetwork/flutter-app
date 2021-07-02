@@ -83,6 +83,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Back up your chat history to iCloud so if you lose your iPhone or switch to a new one, your chat history is safe. You can restore your chat history when you reinstall MixinMessenger. messenger you back up are encryption while in icloud."),
         "chatCheckOnPhone": MessageLookupByLibrary.simpleMessage(
             "This type of message is not supported, please check on your phone."),
+        "chatDragHint":
+            MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
         "chatGroupAdd": m0,
         "chatGroupCreate": m1,
         "chatGroupExit": m2,

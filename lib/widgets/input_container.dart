@@ -23,6 +23,7 @@ import '../ui/home/bloc/mention_cubit.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/participants_cubit.dart';
 import '../ui/home/bloc/quote_message_cubit.dart';
+import '../utils/callback_text_editing_action.dart';
 import '../utils/file.dart';
 import '../utils/hook.dart';
 import '../utils/platform.dart';
@@ -127,10 +128,12 @@ class _InputContainer extends HookWidget {
         useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
       converter: (state) => state?.conversation?.draft,
     );
+
     final conversationItem = useBlocStateConverter<ConversationCubit,
         ConversationState?, ConversationItem?>(
       converter: (state) => state?.conversation,
     );
+
     final textEditingController = useMemoized(
       () {
         final textEditingController = HighlightTextEditingController(
@@ -150,28 +153,22 @@ class _InputContainer extends HookWidget {
       [conversationItem?.draft, conversationId],
     );
 
+    final textEditingValueStream =
+        useValueNotifierConvertSteam(textEditingController);
+
     useEffect(() {
-      var text = textEditingController.text;
-
-      void onListener() {
-        text = textEditingController.text;
-        final mention = mentionRegExp.firstMatch(text)?[1];
-        mentionCubit.send(mention);
-      }
-
-      onListener();
-      textEditingController.addListener(onListener);
-
+      mentionCubit.setTextEditingValueStream(
+        textEditingValueStream,
+        textEditingController.value,
+      );
       return () {
-        textEditingController.removeListener(onListener);
-        if (conversationId != null && conversationItem != null) {
-          context.read<AccountServer>().database.conversationDao.updateDraft(
-                conversationId,
-                textEditingController.text,
-              );
-        }
+        if (conversationId == null || conversationItem == null) return;
+        context.read<AccountServer>().database.conversationDao.updateDraft(
+              conversationId,
+              textEditingController.text,
+            );
       };
-    }, [identityHashCode(textEditingController)]);
+    }, [identityHashCode(textEditingValueStream)]);
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
@@ -346,23 +343,12 @@ class _SendTextField extends HookWidget {
             onInvoke: (Intent intent) =>
                 _sendMessage(context, textEditingController),
           ),
-          PasteIntent: CallbackAction<Intent>(
-            onInvoke: (Intent intent) async {
-              final clipboardData =
-                  await Clipboard.getData(Clipboard.kTextPlain);
-              final clipboardText = clipboardData?.text;
-
-              // Temporary solution, as flutter currently has no way to block paste text.
-              void clearClipboardText() {
-                if (clipboardText?.isNotEmpty ?? false) {
-                  textEditingController.text = textEditingController.text
-                      .replaceFirst(clipboardText!, '');
-                }
-              }
-
+          PasteIntent: CallbackTextEditingAction<Intent>(
+            onInvoke: (Intent intent,
+                TextEditingActionTarget? textEditingActionTarget,
+                [_]) async {
               final uri = await Pasteboard.uri;
               if (uri != null) {
-                clearClipboardText();
                 final file = File(uri.toFilePath(windows: Platform.isWindows));
 
                 if (!await file.exists()) return;
@@ -370,7 +356,10 @@ class _SendTextField extends HookWidget {
                 await sendFile(context, file.xFile);
               } else {
                 final bytes = await Pasteboard.image;
-                if (bytes == null) return;
+                if (bytes == null) {
+                  return textEditingActionTarget!.renderEditable
+                      .pasteText(SelectionChangedCause.keyboard);
+                }
 
                 if ((await _PreviewImage.push(context, bytes: bytes)) != true) {
                   return;
@@ -430,12 +419,14 @@ class _SendTextField extends HookWidget {
 
 Future<void> sendFile(
   BuildContext context,
-  XFile file,
-) async {
+  XFile file, {
+  bool showImagePreview = true,
+}) async {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
   if (file.isImage) {
-    if ((await _PreviewImage.push(context, xFile: file)) != true) return;
+    if (showImagePreview &&
+        (await _PreviewImage.push(context, xFile: file)) != true) return;
     return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
       conversationItem.isPlainConversation,
       file: file,
