@@ -161,14 +161,21 @@ class _InputContainer extends HookWidget {
         textEditingValueStream,
         textEditingController.value,
       );
-      return () {
-        if (conversationId == null || conversationItem == null) return;
-        context.read<AccountServer>().database.conversationDao.updateDraft(
-              conversationId,
-              textEditingController.text,
-            );
-      };
     }, [identityHashCode(textEditingValueStream)]);
+
+    useEffect(
+        () => () {
+              if (conversationId == null || conversationItem == null) return;
+              context
+                  .read<AccountServer>()
+                  .database
+                  .conversationDao
+                  .updateDraft(
+                    conversationId,
+                    textEditingController.text,
+                  );
+            },
+        [conversationId]);
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
