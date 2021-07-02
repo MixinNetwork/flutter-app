@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/ui/home/chat/files_preview.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -18,10 +20,8 @@ import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../utils/list_utils.dart';
 import '../../widgets/brightness_observer.dart';
-import '../../widgets/chat_bar.dart';
 import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../widgets/dash_path_border.dart';
-import '../../widgets/input_container.dart';
 import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message/message.dart';
@@ -31,6 +31,8 @@ import 'bloc/conversation_cubit.dart';
 import 'bloc/message_bloc.dart';
 import 'bloc/pending_jump_message_cubit.dart';
 import 'bloc/quote_message_cubit.dart';
+import 'chat/chat_bar.dart';
+import 'chat/input_container.dart';
 import 'chat_slide_page/chat_info_page.dart';
 import 'chat_slide_page/circle_manager_page.dart';
 import 'chat_slide_page/group_participants_page.dart';
@@ -718,14 +720,18 @@ class _ChatDropOverlay extends HookWidget {
       onDragEntered: () => dragging.value = true,
       onDragExited: () => dragging.value = false,
       onDragDone: (urls) async {
+        final files = <XFile>[];
         for (final uri in urls) {
           final file = File(uri.toFilePath(windows: Platform.isWindows));
           if (!await file.exists()) {
             continue;
           }
-          // ignore: unawaited_futures
-          sendFile(context, file.xFile, showImagePreview: false);
+          files.add(file.xFile);
         }
+        if (files.isEmpty) {
+          return;
+        }
+        showFilesPreviewDialog(context, files);
       },
       child: Stack(
         children: [

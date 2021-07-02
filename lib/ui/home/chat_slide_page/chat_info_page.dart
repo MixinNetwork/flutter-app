@@ -19,13 +19,13 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/cell.dart';
-import '../../../widgets/chat_bar.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
+import '../chat/chat_bar.dart';
 import '../chat_page.dart';
 import '../conversation_page.dart';
 
