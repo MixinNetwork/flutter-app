@@ -129,15 +129,11 @@ class _InputContainer extends HookWidget {
       converter: (state) => state?.conversation?.draft,
     );
 
-    final conversationItem = useBlocStateConverter<ConversationCubit,
-        ConversationState?, ConversationItem?>(
-      converter: (state) => state?.conversation,
-    );
-
     final textEditingController = useMemoized(
       () {
         final textEditingController = HighlightTextEditingController(
-          initialText: conversationItem?.draft,
+          initialText:
+              context.read<ConversationCubit>().state?.conversation?.draft,
           highlightTextStyle: TextStyle(
             color: BrightnessData.themeOf(context).accent,
           ),
@@ -150,7 +146,7 @@ class _InputContainer extends HookWidget {
           );
         return textEditingController;
       },
-      [conversationItem?.draft, conversationId],
+      [conversationId],
     );
 
     final textEditingValueStream =
