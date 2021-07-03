@@ -6,8 +6,7 @@ import '../mixin_database.dart';
 part 'offset_dao.g.dart';
 
 @UseDao(tables: [Offsets])
-class OffsetDao extends DatabaseAccessor<MixinDatabase>
-    with _$OffsetDaoMixin {
+class OffsetDao extends DatabaseAccessor<MixinDatabase> with _$OffsetDaoMixin {
   OffsetDao(MixinDatabase db) : super(db);
 
   Future<int> insert(Offset offset) =>

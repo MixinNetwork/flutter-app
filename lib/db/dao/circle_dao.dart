@@ -5,8 +5,7 @@ import '../mixin_database.dart';
 part 'circle_dao.g.dart';
 
 @UseDao(tables: [Circles])
-class CircleDao extends DatabaseAccessor<MixinDatabase>
-    with _$CircleDaoMixin {
+class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
   CircleDao(MixinDatabase db) : super(db);
 
   Future<void> insertUpdate(Circle circle) async {
