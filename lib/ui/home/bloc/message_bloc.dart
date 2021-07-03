@@ -9,7 +9,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
-import '../../../db/dao/messages_dao.dart';
+import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -231,7 +231,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final AccountServer accountServer;
   int limit;
 
-  MessagesDao get messagesDao => database.messagesDao;
+  MessageDao get messagesDao => database.messagesDao;
 
   Future<void> _preCacheMention(MessageState state) async {
     final set = {...state.top, state.center, ...state.bottom};

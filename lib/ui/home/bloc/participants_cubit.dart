@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 
 import '../../../bloc/subscribe_mixin.dart';
-import '../../../db/dao/users_dao.dart';
+import '../../../db/dao/user_dao.dart';
 import '../../../db/mixin_database.dart';
 import 'conversation_cubit.dart';
 

@@ -15,10 +15,10 @@ import '../blaze/vo/live_message.dart';
 import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
-import '../db/dao/jobs_dao.dart';
-import '../db/dao/message_mentions_dao.dart';
-import '../db/dao/messages_dao.dart';
-import '../db/dao/participants_dao.dart';
+import '../db/dao/job_dao.dart';
+import '../db/dao/message_mention_dao.dart';
+import '../db/dao/message_dao.dart';
+import '../db/dao/participant_dao.dart';
 import '../db/extension/message.dart' show QueteMessage;
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
@@ -41,10 +41,10 @@ class SendMessageHelper {
     this._attachmentUtil,
   );
 
-  final MessagesDao _messagesDao;
-  final MessageMentionsDao _messageMentionsDao;
-  final ParticipantsDao _participantsDao;
-  final JobsDao _jobsDao;
+  final MessageDao _messagesDao;
+  final MessageMentionDao _messageMentionsDao;
+  final ParticipantDao _participantsDao;
+  final JobDao _jobsDao;
   final AttachmentUtil _attachmentUtil;
 
   Future<void> sendTextMessage(

@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../bloc/subscribe_mixin.dart';
-import '../../../db/dao/users_dao.dart';
+import '../../../db/dao/user_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/sort.dart';

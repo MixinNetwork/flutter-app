@@ -10464,38 +10464,38 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final StickerRelationships stickerRelationships =
       StickerRelationships(this);
   late final Stickers stickers = Stickers(this);
-  late final AddressesDao addressesDao = AddressesDao(this as MixinDatabase);
-  late final AppsDao appsDao = AppsDao(this as MixinDatabase);
-  late final AssetsDao assetsDao = AssetsDao(this as MixinDatabase);
+  late final AddressDao addressDao = AddressDao(this as MixinDatabase);
+  late final AppDao appDao = AppDao(this as MixinDatabase);
+  late final AssetDao assetDao = AssetDao(this as MixinDatabase);
   late final CircleConversationDao circleConversationDao =
       CircleConversationDao(this as MixinDatabase);
-  late final CirclesDao circlesDao = CirclesDao(this as MixinDatabase);
-  late final ConversationsDao conversationsDao =
-      ConversationsDao(this as MixinDatabase);
-  late final FloodMessagesDao floodMessagesDao =
-      FloodMessagesDao(this as MixinDatabase);
-  late final HyperlinksDao hyperlinksDao = HyperlinksDao(this as MixinDatabase);
-  late final JobsDao jobsDao = JobsDao(this as MixinDatabase);
-  late final MessageMentionsDao messageMentionsDao =
-      MessageMentionsDao(this as MixinDatabase);
-  late final MessagesDao messagesDao = MessagesDao(this as MixinDatabase);
-  late final MessagesHistoryDao messagesHistoryDao =
-      MessagesHistoryDao(this as MixinDatabase);
-  late final OffsetsDao offsetsDao = OffsetsDao(this as MixinDatabase);
-  late final ParticipantsDao participantsDao =
-      ParticipantsDao(this as MixinDatabase);
+  late final CircleDao circleDao = CircleDao(this as MixinDatabase);
+  late final ConversationDao conversationDao =
+      ConversationDao(this as MixinDatabase);
+  late final FloodMessageDao floodMessageDao =
+      FloodMessageDao(this as MixinDatabase);
+  late final HyperlinkDao hyperlinkDao = HyperlinkDao(this as MixinDatabase);
+  late final JobDao jobDao = JobDao(this as MixinDatabase);
+  late final MessageMentionDao messageMentionDao =
+      MessageMentionDao(this as MixinDatabase);
+  late final MessageDao messageDao = MessageDao(this as MixinDatabase);
+  late final MessageHistoryDao messageHistoryDao =
+      MessageHistoryDao(this as MixinDatabase);
+  late final OffsetDao offsetDao = OffsetDao(this as MixinDatabase);
+  late final ParticipantDao participantDao =
+      ParticipantDao(this as MixinDatabase);
   late final ParticipantSessionDao participantSessionDao =
       ParticipantSessionDao(this as MixinDatabase);
-  late final ResendSessionMessagesDao resendSessionMessagesDao =
-      ResendSessionMessagesDao(this as MixinDatabase);
-  late final SentSessionSenderKeysDao sentSessionSenderKeysDao =
-      SentSessionSenderKeysDao(this as MixinDatabase);
-  late final SnapshotsDao snapshotsDao = SnapshotsDao(this as MixinDatabase);
+  late final ResendSessionMessageDao resendSessionMessageDao =
+      ResendSessionMessageDao(this as MixinDatabase);
+  late final SentSessionSenderKeyDao sentSessionSenderKeyDao =
+      SentSessionSenderKeyDao(this as MixinDatabase);
+  late final SnapshotDao snapshotDao = SnapshotDao(this as MixinDatabase);
   late final StickerDao stickerDao = StickerDao(this as MixinDatabase);
-  late final StickerAlbumsDao stickerAlbumsDao =
-      StickerAlbumsDao(this as MixinDatabase);
-  late final StickerRelationshipsDao stickerRelationshipsDao =
-      StickerRelationshipsDao(this as MixinDatabase);
+  late final StickerAlbumDao stickerAlbumDao =
+      StickerAlbumDao(this as MixinDatabase);
+  late final StickerRelationshipDao stickerRelationshipDao =
+      StickerRelationshipDao(this as MixinDatabase);
   late final UserDao userDao = UserDao(this as MixinDatabase);
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(

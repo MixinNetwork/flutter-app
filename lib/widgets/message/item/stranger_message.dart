@@ -47,7 +47,7 @@ class StrangerMessage extends StatelessWidget {
                   final app = await context
                       .read<AccountServer>()
                       .database
-                      .appsDao
+                      .appDao
                       .findUserById(message.appId!);
                   if (app == null) return;
                   await openUri(context, app.homeUri);

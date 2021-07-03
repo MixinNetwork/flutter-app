@@ -376,7 +376,7 @@ class DecryptMessage extends Injector {
       status: data.status,
       createdAt: data.createdAt,
     );
-    await database.appsDao.findUserById(appCard.appId).then((app) {
+    await database.appDao.findUserById(appCard.appId).then((app) {
       if (app == null || app.updatedAt != appCard.updatedAt) {
         refreshUsers(<String>[appCard.appId]);
       }

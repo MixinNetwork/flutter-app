@@ -155,7 +155,7 @@ class Injector {
       await database.userDao.insert(user);
       final app = e.app;
       if (app != null) {
-        await database.appsDao.insert(
+        await database.appDao.insert(
           db.App(
             appId: app.appId,
             appNumber: app.appNumber,

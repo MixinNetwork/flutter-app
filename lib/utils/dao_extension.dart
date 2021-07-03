@@ -1,7 +1,7 @@
-import '../db/dao/jobs_dao.dart';
+import '../db/dao/job_dao.dart';
 import '../db/mixin_database.dart';
 
-extension JobsDaoExtension on JobsDao {
+extension JobsDaoExtension on JobDao {
   Future<void> insertNoReplace(Job job) async {
     final exists = await findAckJobById(job.jobId);
     if (exists == null) {

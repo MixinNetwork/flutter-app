@@ -10,7 +10,7 @@ import 'package:path/path.dart' as p;
 
 import '../blaze/vo/attachment_message.dart';
 import '../crypto/attachment/crypto_attachment.dart';
-import '../db/dao/messages_dao.dart';
+import '../db/dao/message_dao.dart';
 import '../db/extension/message_category.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
@@ -29,7 +29,7 @@ class AttachmentUtil {
   }
 
   final String mediaPath;
-  final MessagesDao _messagesDao;
+  final MessageDao _messagesDao;
   final Client _client;
 
   final Dio _dio = Dio(
@@ -253,7 +253,7 @@ class AttachmentUtil {
       p.join(mediaPath, 'Files', conversationId);
 
   static Future<AttachmentUtil> init(
-      Client client, MessagesDao messagesDao, String identityNumber) async {
+      Client client, MessageDao messagesDao, String identityNumber) async {
     final documentDirectory = await getMixinDocumentsDirectory();
     final mediaDirectory =
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
