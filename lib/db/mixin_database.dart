@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
 // These imports are only needed to open the database
 import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
@@ -33,18 +32,18 @@ import 'dao/conversation_dao.dart';
 import 'dao/flood_message_dao.dart';
 import 'dao/hyperlink_dao.dart';
 import 'dao/job_dao.dart';
-import 'dao/message_mention_dao.dart';
 import 'dao/message_dao.dart';
 import 'dao/message_history_dao.dart';
+import 'dao/message_mention_dao.dart';
 import 'dao/offset_dao.dart';
-import 'dao/participant_session_dao.dart';
 import 'dao/participant_dao.dart';
+import 'dao/participant_session_dao.dart';
 import 'dao/resend_session_message_dao.dart';
 import 'dao/sent_session_sender_key_dao.dart';
 import 'dao/snapshot_dao.dart';
 import 'dao/sticker_album_dao.dart';
-import 'dao/sticker_relationship_dao.dart';
 import 'dao/sticker_dao.dart';
+import 'dao/sticker_relationship_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
 
