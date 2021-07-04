@@ -441,7 +441,11 @@ class AccountServer {
       await _sender.checkConversation(message.conversationId);
     }
     await _sender.checkSessionSenderKey(message.conversationId);
-    return _sender.deliver(await encryptNormalMessage(message));
+    result = await _sender.deliver(await encryptNormalMessage(message));
+    if (result.success == false && result.retry == true) {
+      return _sendSignalMessage(message);
+    }
+    return result;
   }
 
   Future<BlazeMessage> encryptNormalMessage(db.SendingMessage message) async =>
