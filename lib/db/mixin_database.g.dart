@@ -10408,9 +10408,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexJobsAction = Index('index_jobs_action',
       'CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action");');
   late final Conversations conversations = Conversations(this);
-  late final Index indexConversationsCategoryStatusPinTimeCreatedAt = Index(
-      'index_conversations_category_status_pin_time_created_at',
-      'CREATE INDEX IF NOT EXISTS index_conversations_category_status_pin_time_created_at ON conversations (category, status, pin_time, created_at);');
+  late final Index indexConversationsPinTimeLastMessageCreatedAt = Index(
+      'index_conversations_pin_time_last_message_created_at',
+      'CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);');
   late final Messages messages = Messages(this);
   late final Index indexMessagesConversationId = Index(
       'index_messages_conversation_id',
@@ -12841,7 +12841,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         jobs,
         indexJobsAction,
         conversations,
-        indexConversationsCategoryStatusPinTimeCreatedAt,
+        indexConversationsPinTimeLastMessageCreatedAt,
         messages,
         indexMessagesConversationId,
         indexMessagesConversationIdCreatedAt,

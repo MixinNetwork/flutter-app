@@ -61,7 +61,7 @@ CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relat
 
 CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action");
 
-CREATE INDEX IF NOT EXISTS index_conversations_category_status_pin_time_created_at ON conversations (category, status, pin_time, created_at);
+CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);
 
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id ON messages (conversation_id);
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at);

@@ -110,7 +110,7 @@ class MixinDatabase extends _$MixinDatabase {
                 'index_conversations_category_status_pin_time_created_at', ''));
             await m.createIndex(Index(
               'index_conversations_pin_time_last_message_created_at',
-              'CREATE INDEX IF NOT EXISTS index_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);',
+              'CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);',
             ));
           }
         },
