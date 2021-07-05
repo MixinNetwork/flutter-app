@@ -176,5 +176,6 @@
   "groupInviteReset": "重置邀请链接",
   "contactMixinId": "Mixin ID: {mixinId}",
   "chatDragHint": "拖放文件到此处",
-  "chatDragMoreFile": "添加文件"
+  "chatDragMoreFile": "添加文件",
+  "send": "发送"
 }

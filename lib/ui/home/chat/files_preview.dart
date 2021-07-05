@@ -6,21 +6,24 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/constants/brightness_theme_data.dart';
-import 'package:flutter_app/constants/resources.dart';
-import 'package:flutter_app/generated/l10n.dart';
-import 'package:flutter_app/utils/file.dart';
-import 'package:flutter_app/utils/string_extension.dart';
-import 'package:flutter_app/widgets/action_button.dart';
-import 'package:flutter_app/widgets/brightness_observer.dart';
-import 'package:flutter_app/widgets/dash_path_border.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as path;
+import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../../account/account_server.dart';
+import '../../../constants/brightness_theme_data.dart';
+import '../../../constants/resources.dart';
+import '../../../generated/l10n.dart';
+import '../../../utils/file.dart';
+import '../../../utils/string_extension.dart';
+import '../../../widgets/action_button.dart';
+import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
+import '../bloc/conversation_cubit.dart';
 
 Future<void> showFilesPreviewDialog(
     BuildContext context, List<XFile> files) async {
@@ -70,14 +73,12 @@ class _FilesPreviewDialog extends HookWidget {
       }
     }
 
-    final previousIndex = usePrevious(currentTab.value);
+    final previousTab = usePrevious(currentTab.value);
 
     useEffect(() {
-      if (previousIndex == null) {
-        if (hasImage) {
-          currentTab.value = _TabType.image;
-          return;
-        }
+      if (previousTab == null && hasImage) {
+        currentTab.value = _TabType.image;
+      } else if (previousTab == null && !hasImage) {
         currentTab.value = _TabType.files;
       } else if (!hasImage && currentTab.value == _TabType.image) {
         currentTab.value = _TabType.files;
@@ -162,10 +163,51 @@ class _FilesPreviewDialog extends HookWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 32),
+              Align(
+                alignment: Alignment.center,
+                child: MixinButton(
+                  backgroundTransparent: true,
+                  child: Text(Localization.of(context).send),
+                  onTap: () {
+                    for (final file in files.value) {
+                      _sendFile(context, file);
+                    }
+                    Navigator.pop(context);
+                  },
+                ),
+              ),
+              const SizedBox(height: 32),
             ],
           )),
     );
   }
+}
+
+Future<void> _sendFile(BuildContext context, XFile file) async {
+  final conversationItem = context.read<ConversationCubit>().state;
+  if (conversationItem == null) return;
+  if (file.isImage) {
+    return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
+      conversationItem.isPlainConversation,
+      file: file,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  } else if (file.isVideo) {
+    return Provider.of<AccountServer>(context, listen: false).sendVideoMessage(
+      file,
+      conversationItem.isPlainConversation,
+      conversationId: conversationItem.conversationId,
+      recipientId: conversationItem.userId,
+    );
+  }
+  await Provider.of<AccountServer>(context, listen: false).sendDataMessage(
+    file,
+    conversationItem.isPlainConversation,
+    conversationId: conversationItem.conversationId,
+    recipientId: conversationItem.userId,
+  );
 }
 
 class _AnimatedFileTile extends HookWidget {
@@ -209,7 +251,7 @@ class _AnimatedFileTile extends HookWidget {
                   firstCurve: Curves.easeInOut,
                   secondCurve: Curves.easeInOut,
                   sizeCurve: Curves.easeInOut,
-                  duration: const Duration(milliseconds: 150))
+                  duration: const Duration(milliseconds: 300))
               : _TileNormalFile(
                   file: file,
                   onDelete: () => onDelete?.call(file),
@@ -336,50 +378,56 @@ class _TileBigImage extends HookWidget {
     return MouseRegion(
       onEnter: (_) => showDelete.value = true,
       onExit: (_) => showDelete.value = false,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 200),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.file(
-              File(file.path),
-              fit: BoxFit.fitWidth,
-              errorBuilder: (_, __, ___) => const SizedBox(),
-            ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: AnimatedCrossFade(
-                firstChild: const SizedBox(),
-                alignment: Alignment.center,
-                secondChild: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withOpacity(0.28),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                  )),
-                  child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: ActionButton(
-                      color: Colors.white,
-                      name: Resources.assetsImagesDeleteSvg,
-                      padding: const EdgeInsets.all(10.0),
-                      size: 24,
-                      onTap: onDelete,
-                    ),
-                  ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxHeight: 200),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.file(
+                  File(file.path),
+                  fit: BoxFit.fitWidth,
+                  errorBuilder: (_, __, ___) => const SizedBox(),
                 ),
-                crossFadeState: !showDelete.value
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-                duration: const Duration(milliseconds: 150),
-              ),
-            )
-          ],
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: AnimatedCrossFade(
+                    firstChild: const SizedBox(),
+                    alignment: Alignment.center,
+                    secondChild: Container(
+                      height: 50,
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.28),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      )),
+                      child: Align(
+                        alignment: Alignment.bottomRight,
+                        child: ActionButton(
+                          color: Colors.white,
+                          name: Resources.assetsImagesDeleteSvg,
+                          padding: const EdgeInsets.all(10.0),
+                          size: 24,
+                          onTap: onDelete,
+                        ),
+                      ),
+                    ),
+                    crossFadeState: !showDelete.value
+                        ? CrossFadeState.showFirst
+                        : CrossFadeState.showSecond,
+                    duration: const Duration(milliseconds: 150),
+                  ),
+                )
+              ],
+            ),
+          ),
         ),
       ),
     );

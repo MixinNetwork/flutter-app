@@ -219,6 +219,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
         "searchRelatedMessage": m16,
+        "send": MessageLookupByLibrary.simpleMessage("发送"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

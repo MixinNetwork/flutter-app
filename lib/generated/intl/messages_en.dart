@@ -256,6 +256,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
         "searchRelatedMessage": m16,
+        "send": MessageLookupByLibrary.simpleMessage("send"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),

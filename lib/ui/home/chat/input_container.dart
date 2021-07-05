@@ -1,8 +1,5 @@
-import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -11,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pasteboard/pasteboard.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -26,7 +25,6 @@ import '../../../utils/reg_exp_utils.dart';
 import '../../../utils/text_utils.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/brightness_observer.dart';
-import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/mention_panel.dart';
@@ -38,6 +36,7 @@ import '../bloc/mention_cubit.dart';
 import '../bloc/multi_auth_cubit.dart';
 import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
+import 'files_preview.dart';
 
 class InputContainer extends HookWidget {
   const InputContainer({
@@ -351,8 +350,7 @@ class _SendTextField extends HookWidget {
                 final file = File(uri.toFilePath(windows: Platform.isWindows));
 
                 if (!await file.exists()) return;
-
-                await sendFile(context, file.xFile);
+                await showFilesPreviewDialog(context, [file.xFile]);
               } else {
                 final bytes = await Pasteboard.image;
                 if (bytes == null) {
@@ -360,20 +358,14 @@ class _SendTextField extends HookWidget {
                       .pasteText(SelectionChangedCause.keyboard);
                 }
 
-                if ((await _PreviewImage.push(context, bytes: bytes)) != true) {
-                  return;
+                final tempDir = await getTemporaryDirectory();
+                final file = File(path.join(tempDir.path,
+                    'mixin_image_${DateTime.now().millisecondsSinceEpoch}.png'));
+                if (await file.exists()) {
+                  await file.delete();
                 }
-                final conversationItem =
-                    context.read<ConversationCubit>().state;
-                if (conversationItem == null) return;
-
-                await Provider.of<AccountServer>(context, listen: false)
-                    .sendImageMessage(
-                  conversationItem.isPlainConversation,
-                  bytes: bytes,
-                  conversationId: conversationItem.conversationId,
-                  recipientId: conversationItem.userId,
-                );
+                await file.writeAsBytes(bytes);
+                await showFilesPreviewDialog(context, [file.xFile]);
               }
             },
           ),
@@ -414,38 +406,6 @@ class _SendTextField extends HookWidget {
       ),
     );
   }
-}
-
-Future<void> sendFile(
-  BuildContext context,
-  XFile file, {
-  bool showImagePreview = true,
-}) async {
-  final conversationItem = context.read<ConversationCubit>().state;
-  if (conversationItem == null) return;
-  if (file.isImage) {
-    if (showImagePreview &&
-        (await _PreviewImage.push(context, xFile: file)) != true) return;
-    return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
-      conversationItem.isPlainConversation,
-      file: file,
-      conversationId: conversationItem.conversationId,
-      recipientId: conversationItem.userId,
-    );
-  } else if (file.isVideo) {
-    return Provider.of<AccountServer>(context, listen: false).sendVideoMessage(
-      file,
-      conversationItem.isPlainConversation,
-      conversationId: conversationItem.conversationId,
-      recipientId: conversationItem.userId,
-    );
-  }
-  await Provider.of<AccountServer>(context, listen: false).sendDataMessage(
-    file,
-    conversationItem.isPlainConversation,
-    conversationId: conversationItem.conversationId,
-    recipientId: conversationItem.userId,
-  );
 }
 
 class _QuoteMessage extends StatelessWidget {
@@ -598,130 +558,6 @@ class _StickerPagePositionedLayoutDelegate extends SingleChildLayoutDelegate {
   bool shouldRelayout(
           covariant _StickerPagePositionedLayoutDelegate oldDelegate) =>
       position != oldDelegate.position;
-}
-
-class _PreviewImage extends HookWidget {
-  const _PreviewImage({
-    Key? key,
-    this.xFile,
-    this.bytes,
-  })  : assert(!(xFile != null && bytes != null)),
-        assert(!(xFile == null && bytes == null)),
-        super(key: key);
-
-  final XFile? xFile;
-  final Uint8List? bytes;
-
-  static Future<bool?> push(
-    BuildContext context, {
-    XFile? xFile,
-    Uint8List? bytes,
-  }) =>
-      Navigator.push<bool>(
-        context,
-        MaterialPageRoute(
-          builder: (context) => _PreviewImage(
-            xFile: xFile,
-            bytes: bytes,
-          ),
-          fullscreenDialog: true,
-        ),
-      );
-
-  @override
-  Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    );
-
-    useValueChanged<String?, void>(conversationId, (_, __) {
-      Navigator.pop(context, false);
-    });
-
-    final image =
-        xFile != null ? Image.file(File(xFile!.path)) : Image.memory(bytes!);
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: BrightnessData.themeOf(context).primary,
-      ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 58,
-            child: Row(
-              children: [
-                ActionButton(
-                  name: Resources.assetsImagesIcCloseSvg,
-                  color: BrightnessData.themeOf(context).icon,
-                  onTap: () => Navigator.pop(context, false),
-                ),
-                Text(
-                  Localization.of(context).preview,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.only(
-                top: 1,
-                right: 16,
-                left: 16,
-                bottom: 30,
-              ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: BrightnessData.themeOf(context).listSelected,
-                  borderRadius: BorderRadius.circular(8),
-                  border: DashPathBorder.all(
-                    borderSide: BorderSide(
-                      color: BrightnessData.dynamicColor(
-                        context,
-                        const Color.fromRGBO(229, 231, 235, 1),
-                        darkColor: const Color.fromRGBO(255, 255, 255, 0.8),
-                      ),
-                    ),
-                    dashArray: CircularIntervalList([4, 4]),
-                  ),
-                ),
-                child: image,
-              ),
-            ),
-          ),
-          ClipOval(
-            child: InteractableDecoratedBox.color(
-              onTap: () => Navigator.pop(context, true),
-              decoration: BoxDecoration(
-                color: BrightnessData.themeOf(context).accent,
-              ),
-              child: SizedBox.fromSize(
-                size: const Size.square(50),
-                child: Center(
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesIcArrowRightSvg,
-                    color: BrightnessData.dynamicColor(
-                      context,
-                      const Color.fromRGBO(255, 255, 255, 1),
-                      darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
 }
 
 class HighlightTextEditingController extends TextEditingController {

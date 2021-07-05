@@ -6,14 +6,16 @@ import 'package:path/path.dart' as p;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-Future<file_selector.XFile?> selectFile() async {
-  final xFile = await file_selector.openFile();
-  if (xFile == null) return null;
-  return file_selector.XFile(
-    xFile.path,
-    mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
-    name: xFile.name,
-  );
+Future<List<file_selector.XFile>> selectFiles() async {
+  final files = await file_selector.openFiles();
+  if (files.isEmpty) return const [];
+  return files
+      .map((xFile) => file_selector.XFile(
+            xFile.path,
+            mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
+            name: xFile.name,
+          ))
+      .toList();
 }
 
 extension FileExtension on File {

@@ -181,5 +181,6 @@
   "groupInviteReset": "Reset Link",
   "contactMixinId": "Mixin ID: {mixinId}",
   "chatDragHint": "Drag and drop files here",
-  "chatDragMoreFile": "Add Item"
+  "chatDragMoreFile": "Add Item",
+  "send": "send"
 }
