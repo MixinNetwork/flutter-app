@@ -109,7 +109,7 @@ class MixinDatabase extends _$MixinDatabase {
             await m.drop(Index(
                 'index_conversations_category_status_pin_time_created_at', ''));
             await m.createIndex(Index(
-              'index_pin_time_last_message_created_at',
+              'index_conversations_pin_time_last_message_created_at',
               'CREATE INDEX IF NOT EXISTS index_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);',
             ));
           }
