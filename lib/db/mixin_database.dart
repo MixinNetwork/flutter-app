@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
 // These imports are only needed to open the database
 import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
@@ -91,17 +92,29 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   final eventBus = DataBaseEventBus();
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(beforeOpen: (_) async {
-        if (executor.dialect == SqlDialect.sqlite) {
-          await customStatement('PRAGMA journal_mode=WAL');
-          await customStatement('PRAGMA foreign_keys=ON');
-        }
-      });
+  MigrationStrategy get migration => MigrationStrategy(
+        beforeOpen: (_) async {
+          if (executor.dialect == SqlDialect.sqlite) {
+            await customStatement('PRAGMA journal_mode=WAL');
+            await customStatement('PRAGMA foreign_keys=ON');
+          }
+        },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from == 1) {
+            await m.drop(Index(
+                'index_conversations_category_status_pin_time_created_at', ''));
+            await m.createIndex(Index(
+              'index_pin_time_last_message_created_at',
+              'CREATE INDEX IF NOT EXISTS index_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);',
+            ));
+          }
+        },
+      );
 }
 
 LazyDatabase _openConnection(File dbFile) =>
