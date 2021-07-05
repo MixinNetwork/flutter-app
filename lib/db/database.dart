@@ -22,22 +22,22 @@ import 'mixin_database.dart';
 class Database {
   Database(this.mixinDatabase) {
     appDao = AppDao(mixinDatabase);
-    assetsDao = AssetDao(mixinDatabase);
+    assetDao = AssetDao(mixinDatabase);
     conversationDao = ConversationDao(mixinDatabase);
-    circlesDao = CircleDao(mixinDatabase);
+    circleDao = CircleDao(mixinDatabase);
     circleConversationDao = CircleConversationDao(mixinDatabase);
-    floodMessagesDao = FloodMessageDao(mixinDatabase);
-    messagesDao = MessageDao(mixinDatabase);
+    floodMessageDao = FloodMessageDao(mixinDatabase);
+    messageDao = MessageDao(mixinDatabase);
     messagesHistoryDao = MessageHistoryDao(mixinDatabase);
-    messageMentionsDao = MessageMentionDao(mixinDatabase);
-    jobsDao = JobDao(mixinDatabase);
-    offsetsDao = OffsetDao(mixinDatabase);
-    participantsDao = ParticipantDao(mixinDatabase);
-    resendSessionMessagesDao = ResendSessionMessageDao(mixinDatabase);
-    snapshotsDao = SnapshotDao(mixinDatabase);
+    messageMentionDao = MessageMentionDao(mixinDatabase);
+    jobDao = JobDao(mixinDatabase);
+    offsetDao = OffsetDao(mixinDatabase);
+    participantDao = ParticipantDao(mixinDatabase);
+    resendSessionMessageDao = ResendSessionMessageDao(mixinDatabase);
+    snapshotDao = SnapshotDao(mixinDatabase);
     stickerDao = StickerDao(mixinDatabase);
-    stickerAlbumsDao = StickerAlbumDao(mixinDatabase);
-    stickerRelationshipsDao = StickerRelationshipDao(mixinDatabase);
+    stickerAlbumDao = StickerAlbumDao(mixinDatabase);
+    stickerRelationshipDao = StickerRelationshipDao(mixinDatabase);
     participantSessionDao = ParticipantSessionDao(mixinDatabase);
     userDao = UserDao(mixinDatabase);
   }
@@ -51,39 +51,39 @@ class Database {
 
   late final AppDao appDao;
 
-  late final AssetDao assetsDao;
+  late final AssetDao assetDao;
 
-  late final MessageDao messagesDao;
+  late final MessageDao messageDao;
 
   late final MessageHistoryDao messagesHistoryDao;
 
-  late final MessageMentionDao messageMentionsDao;
+  late final MessageMentionDao messageMentionDao;
 
   late final ConversationDao conversationDao;
 
-  late final CircleDao circlesDao;
+  late final CircleDao circleDao;
 
   late final CircleConversationDao circleConversationDao;
 
-  late final FloodMessageDao floodMessagesDao;
+  late final FloodMessageDao floodMessageDao;
 
-  late final JobDao jobsDao;
+  late final JobDao jobDao;
 
-  late final OffsetDao offsetsDao;
+  late final OffsetDao offsetDao;
 
-  late final ParticipantDao participantsDao;
+  late final ParticipantDao participantDao;
 
   late final ParticipantSessionDao participantSessionDao;
 
-  late final ResendSessionMessageDao resendSessionMessagesDao;
+  late final ResendSessionMessageDao resendSessionMessageDao;
 
-  late final SnapshotDao snapshotsDao;
+  late final SnapshotDao snapshotDao;
 
   late final StickerDao stickerDao;
 
-  late final StickerAlbumDao stickerAlbumsDao;
+  late final StickerAlbumDao stickerAlbumDao;
 
-  late final StickerRelationshipDao stickerRelationshipsDao;
+  late final StickerRelationshipDao stickerRelationshipDao;
 
   late final UserDao userDao;
 

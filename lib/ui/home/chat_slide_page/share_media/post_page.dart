@@ -36,19 +36,19 @@ class PostPage extends HookWidget {
   Widget build(BuildContext context) {
     final size = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
 
-    final messagesDao = context.read<AccountServer>().database.messagesDao;
+    final messageDao = context.read<AccountServer>().database.messageDao;
 
     final mediaCubit = useBloc(
       () => LoadMorePagingBloc<MessageItem>(
         reloadData: () =>
-            messagesDao.postMessages(conversationId, size, 0).get(),
+            messageDao.postMessages(conversationId, size, 0).get(),
         loadMoreData: (list) async {
           if (list.isEmpty) return [];
           final last = list.last;
           final rowId =
-              await messagesDao.messageRowId(last.messageId).getSingleOrNull();
+              await messageDao.messageRowId(last.messageId).getSingleOrNull();
           if (rowId == null) return [];
-          final items = await messagesDao
+          final items = await messageDao
               .postMessagesBefore(rowId, conversationId, size)
               .get();
           return [...list, ...items];
@@ -58,7 +58,7 @@ class PostPage extends HookWidget {
       keys: [conversationId],
     );
     useEffect(
-      () => messagesDao.insertOrReplaceMessageStream
+      () => messageDao.insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;

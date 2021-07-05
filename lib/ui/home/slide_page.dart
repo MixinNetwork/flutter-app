@@ -133,7 +133,7 @@ class _CircleList extends HookWidget {
       useMemoized(() => context
           .read<AccountServer>()
           .database
-          .circlesDao
+          .circleDao
           .allCircles()
           .watch()),
       initialData: [],
