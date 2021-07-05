@@ -2,17 +2,18 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:archive/archive_io.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/utils/platform.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mime/mime.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
@@ -21,6 +22,8 @@ import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/file.dart';
+import '../../../utils/load_balancer_utils.dart';
+import '../../../utils/platform.dart';
 import '../../../utils/string_extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/brightness_observer.dart';
@@ -41,11 +44,15 @@ Future<void> showFilesPreviewDialog(
 typedef _FileDeleteCallback = void Function(XFile);
 typedef _FileAddCallback = void Function(List<XFile>);
 
+const _kDefaultArchiveName = 'Archive.zip';
+
 enum _TabType { image, files, zip }
 
 class _FilesPreviewDialog extends HookWidget {
-  const _FilesPreviewDialog({Key? key, required this.initialFiles})
-      : super(key: key);
+  const _FilesPreviewDialog({
+    Key? key,
+    required this.initialFiles,
+  }) : super(key: key);
 
   final List<XFile> initialFiles;
 
@@ -172,11 +179,25 @@ class _FilesPreviewDialog extends HookWidget {
                 child: MixinButton(
                   backgroundTransparent: true,
                   child: Text(Localization.of(context).send),
-                  onTap: () {
-                    for (final file in files.value) {
-                      _sendFile(context, file);
+                  onTap: () async {
+                    if (currentTab.value != _TabType.zip) {
+                      for (final file in files.value) {
+                        unawaited(_sendFile(context, file));
+                      }
+                      Navigator.pop(context);
+                    } else {
+                      final zipFilePath = await runLoadBalancer(_archiveFiles, [
+                        (await getTemporaryDirectory()).path,
+                        ...files.value.map((e) => e.path),
+                      ]);
+                      unawaited(_sendFile(
+                        context,
+                        XFile(zipFilePath,
+                            mimeType: lookupMimeType(zipFilePath),
+                            name: _kDefaultArchiveName),
+                      ));
+                      Navigator.pop(context);
                     }
-                    Navigator.pop(context);
                   },
                 ),
               ),
@@ -185,6 +206,19 @@ class _FilesPreviewDialog extends HookWidget {
           )),
     );
   }
+}
+
+Future<String> _archiveFiles(List<String> paths) async {
+  assert(paths.length > 1, 'paths[0] should be temp file dir');
+  final outPath = path.join(
+      paths[0], 'mixin_archive_${DateTime.now().millisecondsSinceEpoch}.zip');
+  final encoder = ZipFileEncoder()..create(outPath);
+  paths.removeAt(0);
+  for (final filePath in paths) {
+    encoder.addFile(File(filePath), path.basename(filePath));
+  }
+  encoder.close();
+  return outPath;
 }
 
 Future<void> _sendFile(BuildContext context, XFile file) async {
@@ -309,9 +343,45 @@ class _PageZip extends StatelessWidget {
   const _PageZip({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return Container();
-  }
+  Widget build(BuildContext context) => Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(width: 30),
+              const _FileIcon(extension: 'ZIP'),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _kDefaultArchiveName,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).text,
+                        fontSize: 16,
+                        height: 1.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      Localization.of(context).archivedFolder,
+                      style: TextStyle(
+                        color: BrightnessData.themeOf(context).secondaryText,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 30),
+            ],
+          )
+        ],
+      );
 }
 
 typedef FileItemBuilder = Widget Function(
@@ -438,21 +508,9 @@ class _TileBigImage extends HookWidget {
 }
 
 class _FileIcon extends StatelessWidget {
-  const _FileIcon({Key? key, required this.file}) : super(key: key);
+  const _FileIcon({Key? key, required this.extension}) : super(key: key);
 
-  final XFile file;
-
-  String _getFileExtension() {
-    var extension = path.extension(file.path).toUpperCase();
-    if (extension.isNotEmpty) {
-      return extension.substring(1);
-    }
-    extension = extensionFromMime(file.mimeType!).toUpperCase();
-    if (extension.isNotEmpty) {
-      return extension;
-    }
-    return 'FILE';
-  }
+  final String extension;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -464,7 +522,7 @@ class _FileIcon extends StatelessWidget {
         ),
         child: Center(
           child: Text(
-            _getFileExtension(),
+            extension,
             style: TextStyle(
               fontSize: 16,
               // force light style
@@ -479,15 +537,24 @@ class _TileNormalFile extends HookWidget {
   const _TileNormalFile({
     Key? key,
     required this.file,
-    this.enableHorizontalPadding = true,
     required this.onDelete,
   }) : super(key: key);
 
   final XFile file;
 
-  final bool enableHorizontalPadding;
-
   final VoidCallback onDelete;
+
+  static String _getFileExtension(XFile file) {
+    var extension = path.extension(file.path).toUpperCase();
+    if (extension.isNotEmpty) {
+      return extension.substring(1);
+    }
+    extension = extensionFromMime(file.mimeType!).toUpperCase();
+    if (extension.isNotEmpty) {
+      return extension;
+    }
+    return 'FILE';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -498,8 +565,8 @@ class _TileNormalFile extends HookWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (enableHorizontalPadding) const SizedBox(width: 30),
-          _FileIcon(file: file),
+          const SizedBox(width: 30),
+          _FileIcon(extension: _getFileExtension(file)),
           const SizedBox(width: 16),
           Expanded(
             child: Column(

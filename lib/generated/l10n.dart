@@ -1889,6 +1889,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `archived folder`
+  String get archivedFolder {
+    return Intl.message(
+      'archived folder',
+      name: 'archivedFolder',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

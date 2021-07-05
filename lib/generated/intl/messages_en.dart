@@ -65,6 +65,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add group description"),
         "addContact": MessageLookupByLibrary.simpleMessage("Add contact"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
+        "archivedFolder":
+            MessageLookupByLibrary.simpleMessage("archived folder"),
         "audio": MessageLookupByLibrary.simpleMessage("Audio"),
         "audios": MessageLookupByLibrary.simpleMessage("Audios"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("Auto Backup"),

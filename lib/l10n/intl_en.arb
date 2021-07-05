@@ -182,5 +182,6 @@
   "contactMixinId": "Mixin ID: {mixinId}",
   "chatDragHint": "Drag and drop files here",
   "chatDragMoreFile": "Add Item",
-  "send": "send"
+  "send": "send",
+  "archivedFolder": "archived folder"
 }

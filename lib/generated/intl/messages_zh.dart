@@ -59,6 +59,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addAnnouncement": MessageLookupByLibrary.simpleMessage("添加群公告"),
         "addContact": MessageLookupByLibrary.simpleMessage("添加联系人"),
         "appearance": MessageLookupByLibrary.simpleMessage("显示偏好"),
+        "archivedFolder": MessageLookupByLibrary.simpleMessage("存档文件夹"),
         "audio": MessageLookupByLibrary.simpleMessage("语音"),
         "audios": MessageLookupByLibrary.simpleMessage("音频"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("自动备份"),
