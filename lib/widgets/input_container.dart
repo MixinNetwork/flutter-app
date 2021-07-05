@@ -346,6 +346,10 @@ class _SendTextField extends HookWidget {
             onInvoke: (Intent intent,
                 TextEditingActionTarget? textEditingActionTarget,
                 [_]) async {
+              if (!Platform.isMacOS) {
+                return textEditingActionTarget!.renderEditable
+                    .pasteText(SelectionChangedCause.keyboard);
+              }
               final uri = await Pasteboard.uri;
               if (uri != null) {
                 final file = File(uri.toFilePath(windows: Platform.isWindows));
