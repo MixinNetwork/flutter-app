@@ -81,5 +81,7 @@ Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
       valueNotifier.removeListener(onListen);
     };
   }, [valueNotifier]);
-  return streamController.stream;
+
+  final stream = useMemoized(() => streamController.stream, [valueNotifier]);
+  return stream;
 }
