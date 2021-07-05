@@ -6,9 +6,12 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_app/utils/platform.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mime/mime.dart';
+import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart' as path;
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -133,7 +136,7 @@ class _FilesPreviewDialog extends HookWidget {
               ),
               const SizedBox(height: 4),
               Expanded(
-                child: _ChatDropOverlay(
+                child: _FileInputOverlay(
                   onFileAdded: (fileAdded) {
                     final currentFiles = files.value.map((e) => e.path).toSet();
                     fileAdded.removeWhere((e) => currentFiles.contains(e.path));
@@ -542,8 +545,8 @@ class _TileNormalFile extends HookWidget {
   }
 }
 
-class _ChatDropOverlay extends HookWidget {
-  const _ChatDropOverlay({
+class _FileInputOverlay extends HookWidget {
+  const _FileInputOverlay({
     Key? key,
     required this.child,
     required this.onFileAdded,
@@ -556,31 +559,62 @@ class _ChatDropOverlay extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final dragging = useState(false);
-    return DropTarget(
-      onDragEntered: () => dragging.value = true,
-      onDragExited: () => dragging.value = false,
-      onDragDone: (urls) async {
-        final files = <XFile>[];
-        for (final uri in urls) {
-          final file = File(uri.toFilePath(windows: Platform.isWindows));
-          if (!await file.exists()) {
-            continue;
-          }
-          files.add(file.xFile);
-        }
-        if (files.isEmpty) {
-          return;
-        }
-        onFileAdded(files);
+    return FocusableActionDetector(
+      autofocus: true,
+      shortcuts: {
+        SingleActivator(
+          LogicalKeyboardKey.keyV,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _PasteFileOrImageIntent(),
       },
-      child: Stack(
-        children: [
-          child,
-          if (dragging.value) const _ChatDragIndicator(),
-        ],
+      actions: {
+        _PasteFileOrImageIntent: CallbackAction<Intent>(onInvoke: (_) async {
+          final uri = await Pasteboard.uri;
+          if (uri != null) {
+            final file = File(uri.toFilePath(windows: Platform.isWindows));
+            if (!await file.exists()) return;
+            onFileAdded([file.xFile]);
+          } else {
+            final bytes = await Pasteboard.image;
+            if (bytes == null) return;
+            final file = await saveBytesToTempFile(
+                bytes, 'mixin_paste_board_image', '.png');
+            if (file == null) return;
+            onFileAdded([file.xFile]);
+          }
+        })
+      },
+      child: DropTarget(
+        onDragEntered: () => dragging.value = true,
+        onDragExited: () => dragging.value = false,
+        onDragDone: (urls) async {
+          final files = <XFile>[];
+          for (final uri in urls) {
+            final file = File(uri.toFilePath(windows: Platform.isWindows));
+            if (!await file.exists()) {
+              continue;
+            }
+            files.add(file.xFile);
+          }
+          if (files.isEmpty) {
+            return;
+          }
+          onFileAdded(files);
+        },
+        child: Stack(
+          children: [
+            child,
+            if (dragging.value) const _ChatDragIndicator(),
+          ],
+        ),
       ),
     );
   }
+}
+
+class _PasteFileOrImageIntent extends Intent {
+  const _PasteFileOrImageIntent();
 }
 
 class _ChatDragIndicator extends StatelessWidget {

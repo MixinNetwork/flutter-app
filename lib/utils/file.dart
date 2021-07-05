@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart' as file_selector;
+import 'package:flutter_app/utils/logger.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:path/path.dart';
@@ -73,4 +75,25 @@ Future<Directory> getMixinDocumentsDirectory() {
     return Future.value(Directory(p.join(home!, '.mixin')));
   }
   return getApplicationDocumentsDirectory();
+}
+
+Future<File?> saveBytesToTempFile(
+  Uint8List bytes,
+  String prefix, [
+  String? suffix,
+]) async {
+  final tempDir = await getTemporaryDirectory();
+
+  try {
+    final file = File(p.join(tempDir.path,
+        '${prefix}_${DateTime.now().millisecondsSinceEpoch}$suffix'));
+    if (await file.exists()) {
+      await file.delete();
+    }
+    await file.writeAsBytes(bytes);
+    return file;
+  } catch (error, stack) {
+    e('failed to save bytes to temp file. $error $stack');
+    return null;
+  }
 }

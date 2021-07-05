@@ -8,8 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:path/path.dart' as path;
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -357,14 +355,9 @@ class _SendTextField extends HookWidget {
                   return textEditingActionTarget!.renderEditable
                       .pasteText(SelectionChangedCause.keyboard);
                 }
-
-                final tempDir = await getTemporaryDirectory();
-                final file = File(path.join(tempDir.path,
-                    'mixin_image_${DateTime.now().millisecondsSinceEpoch}.png'));
-                if (await file.exists()) {
-                  await file.delete();
-                }
-                await file.writeAsBytes(bytes);
+                final file = await saveBytesToTempFile(
+                    bytes, 'mixin_paste_board_image', '.png');
+                if (file == null) return;
                 await showFilesPreviewDialog(context, [file.xFile]);
               }
             },
