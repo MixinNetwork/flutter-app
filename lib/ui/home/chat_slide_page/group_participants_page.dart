@@ -40,7 +40,7 @@ class GroupParticipantsPage extends HookWidget {
     });
 
     final participants = useStream(useMemoized(() {
-          final dao = context.read<AccountServer>().database.participantsDao;
+          final dao = context.read<AccountServer>().database.participantDao;
           return dao.watchParticipants(conversationId);
         }, [conversationId])).data ??
         const <ParticipantUser>[];

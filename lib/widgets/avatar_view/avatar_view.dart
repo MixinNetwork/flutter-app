@@ -48,7 +48,7 @@ class ConversationAvatarWidget extends HookWidget {
                 return context
                     .read<AccountServer>()
                     .database
-                    .participantsDao
+                    .participantDao
                     .participantsAvatar(_conversationId!)
                     .watch()
                     .map((event) => _category == ConversationCategory.contact

@@ -380,7 +380,7 @@ class ChatInfoPage extends HookWidget {
                       );
                       if (!result) return;
 
-                      await accountServer.database.messagesDao
+                      await accountServer.database.messageDao
                           .deleteMessageByConversationId(conversationId);
                       context.read<MessageBloc>().reload();
                     },
@@ -419,7 +419,7 @@ class ChatInfoPage extends HookWidget {
                           await context
                               .read<AccountServer>()
                               .database
-                              .messagesDao
+                              .messageDao
                               .deleteMessageByConversationId(conversationId);
                           await context
                               .read<AccountServer>()
@@ -483,7 +483,7 @@ class _CircleNames extends HookWidget {
             () => context
                 .read<AccountServer>()
                 .database
-                .circlesDao
+                .circleDao
                 .circlesNameByConversationId(conversationId ?? '')
                 .watch()
                 .where((event) => event.isNotEmpty),

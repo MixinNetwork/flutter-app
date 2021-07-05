@@ -63,7 +63,7 @@ class InputContainer extends HookWidget {
                 database.conversationDao
                     .conversationItem(conversationId!)
                     .watchSingleOrNull(),
-                database.participantsDao
+                database.participantDao
                     .findParticipantById(
                       conversationId,
                       context
@@ -516,7 +516,7 @@ class _StickerButton extends HookWidget {
       () => StickerAlbumsCubit(context
           .read<AccountServer>()
           .database
-          .stickerAlbumsDao
+          .stickerAlbumDao
           .systemAlbums()
           .watch()),
     );

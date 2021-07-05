@@ -79,7 +79,7 @@ class ImagePreviewPage extends HookWidget {
         context
             .read<AccountServer>()
             .database
-            .messagesDao
+            .messageDao
             .messageItemByMessageId(_messageId.value)
             .getSingleOrNull()
             .then((value) => current.value = value);
@@ -87,16 +87,16 @@ class ImagePreviewPage extends HookWidget {
     }, [_messageId.value]);
 
     useEffect(() {
-      final messagesDao = context.read<AccountServer>().database.messagesDao;
+      final messageDao = context.read<AccountServer>().database.messageDao;
       () async {
         final rowId =
-            await messagesDao.messageRowId(_messageId.value).getSingleOrNull();
+            await messageDao.messageRowId(_messageId.value).getSingleOrNull();
         if (rowId == null) return;
 
-        prev.value = await messagesDao
+        prev.value = await messageDao
             .mediaMessagesBefore(rowId, conversationId, 1)
             .getSingleOrNull();
-        next.value = await messagesDao
+        next.value = await messageDao
             .mediaMessagesAfter(rowId, conversationId, 1)
             .getSingleOrNull();
       }();
@@ -106,7 +106,7 @@ class ImagePreviewPage extends HookWidget {
       () => context
           .read<AccountServer>()
           .database
-          .messagesDao
+          .messageDao
           .insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {

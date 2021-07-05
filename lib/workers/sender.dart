@@ -246,7 +246,7 @@ class Sender {
         userId: c.userId,
         role: c.role,
         createdAt: c.createdAt!)));
-    await database.participantsDao.replaceAll(conversationId, participants);
+    await database.participantDao.replaceAll(conversationId, participants);
     if (conversation.participantSessions != null) {
       await _syncParticipantSession(
           conversationId, conversation.participantSessions!);
@@ -411,7 +411,7 @@ class Sender {
     } else if (action == ProcessSignalKeyAction.removeParticipant) {
       final pid = participantId!;
       await database.transaction(() async {
-        await database.participantsDao
+        await database.participantDao
             .deleteByCIdAndPId(data.conversationId, pid);
         await database.participantSessionDao
             .deleteByCIdAndPId(data.conversationId, pid);
