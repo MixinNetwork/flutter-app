@@ -1869,6 +1869,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Add Item`
+  String get chatDragMoreFile {
+    return Intl.message(
+      'Add Item',
+      name: 'chatDragMoreFile',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

@@ -85,6 +85,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "This type of message is not supported, please check on your phone."),
         "chatDragHint":
             MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
+        "chatDragMoreFile": MessageLookupByLibrary.simpleMessage("Add Item"),
         "chatGroupAdd": m0,
         "chatGroupCreate": m1,
         "chatGroupExit": m2,

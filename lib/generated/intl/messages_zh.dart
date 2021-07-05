@@ -74,6 +74,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatCheckOnPhone":
             MessageLookupByLibrary.simpleMessage("不支持此类型消息，请在手机上查看。"),
         "chatDragHint": MessageLookupByLibrary.simpleMessage("拖放文件到此处"),
+        "chatDragMoreFile": MessageLookupByLibrary.simpleMessage("添加文件"),
         "chatGroupAdd": m0,
         "chatGroupCreate": m1,
         "chatGroupExit": m2,

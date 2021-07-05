@@ -716,6 +716,7 @@ class _ChatDropOverlay extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final dragging = useState(false);
+    final enable = useState(true);
     return DropTarget(
       onDragEntered: () => dragging.value = true,
       onDragExited: () => dragging.value = false,
@@ -731,8 +732,11 @@ class _ChatDropOverlay extends HookWidget {
         if (files.isEmpty) {
           return;
         }
-        showFilesPreviewDialog(context, files);
+        enable.value = false;
+        await showFilesPreviewDialog(context, files);
+        enable.value = true;
       },
+      enable: enable.value,
       child: Stack(
         children: [
           child,
