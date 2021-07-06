@@ -27,6 +27,7 @@ import '../../../utils/platform.dart';
 import '../../../utils/string_extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/buttons.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../bloc/conversation_cubit.dart';
@@ -137,94 +138,108 @@ class _FilesPreviewDialog extends HookWidget {
           width: 480,
           height: 600,
           color: BrightnessData.themeOf(context).popUp,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Stack(
             children: [
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.only(left: 15),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _Tab(
-                      assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                      onTap: () => currentTab.value = _TabType.image,
-                      selected: currentTab.value == _TabType.image,
-                      show: hasImage,
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _Tab(
+                          assetName: Resources.assetsImagesFilePreviewImagesSvg,
+                          onTap: () => currentTab.value = _TabType.image,
+                          selected: currentTab.value == _TabType.image,
+                          show: hasImage,
+                        ),
+                        _Tab(
+                          assetName: Resources.assetsImagesFilePreviewFilesSvg,
+                          onTap: () => currentTab.value = _TabType.files,
+                          selected: currentTab.value == _TabType.files,
+                        ),
+                        _Tab(
+                          assetName: Resources.assetsImagesFilePreviewZipSvg,
+                          onTap: () => currentTab.value = _TabType.zip,
+                          selected: currentTab.value == _TabType.zip,
+                          show: showZipTab,
+                        ),
+                      ],
                     ),
-                    _Tab(
-                      assetName: Resources.assetsImagesFilePreviewFilesSvg,
-                      onTap: () => currentTab.value = _TabType.files,
-                      selected: currentTab.value == _TabType.files,
-                    ),
-                    _Tab(
-                      assetName: Resources.assetsImagesFilePreviewZipSvg,
-                      onTap: () => currentTab.value = _TabType.zip,
-                      selected: currentTab.value == _TabType.zip,
-                      show: showZipTab,
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 4),
-              Expanded(
-                child: _FileInputOverlay(
-                  onFileAdded: (fileAdded) {
-                    final currentFiles = files.value.map((e) => e.path).toSet();
-                    fileAdded.removeWhere((e) => currentFiles.contains(e.path));
-                    files.value = (files.value..addAll(fileAdded)).toList();
-                    for (var i = 0; i < fileAdded.length; i++) {
-                      onFileAddedStream.add(currentFiles.length + i);
-                    }
-                  },
-                  child: IndexedStack(
-                    sizing: StackFit.expand,
-                    index: currentTab.value == _TabType.zip ? 1 : 0,
-                    children: [
-                      _AnimatedListBuilder(
-                          files: files.value,
-                          onFileAdded: onFileAddedStream.stream,
-                          onFileDeleted: onFileRemovedStream.stream,
-                          builder: (context, file, animation) =>
-                              _AnimatedFileTile(
-                                key: ValueKey(file),
-                                file: file,
-                                animation: animation,
-                                onDelete: removeFile,
-                                showBigImage: showAsBigImage,
-                              )),
-                      const _PageZip(),
-                    ],
                   ),
-                ),
+                  const SizedBox(height: 4),
+                  Expanded(
+                    child: _FileInputOverlay(
+                      onFileAdded: (fileAdded) {
+                        final currentFiles =
+                            files.value.map((e) => e.path).toSet();
+                        fileAdded
+                            .removeWhere((e) => currentFiles.contains(e.path));
+                        files.value = (files.value..addAll(fileAdded)).toList();
+                        for (var i = 0; i < fileAdded.length; i++) {
+                          onFileAddedStream.add(currentFiles.length + i);
+                        }
+                      },
+                      child: IndexedStack(
+                        sizing: StackFit.expand,
+                        index: currentTab.value == _TabType.zip ? 1 : 0,
+                        children: [
+                          _AnimatedListBuilder(
+                              files: files.value,
+                              onFileAdded: onFileAddedStream.stream,
+                              onFileDeleted: onFileRemovedStream.stream,
+                              builder: (context, file, animation) =>
+                                  _AnimatedFileTile(
+                                    key: ValueKey(file),
+                                    file: file,
+                                    animation: animation,
+                                    onDelete: removeFile,
+                                    showBigImage: showAsBigImage,
+                                  )),
+                          const _PageZip(),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Align(
+                    alignment: Alignment.center,
+                    child: MixinButton(
+                      backgroundTransparent: true,
+                      child: Text(Localization.of(context).send),
+                      onTap: () async {
+                        if (currentTab.value != _TabType.zip) {
+                          for (final file in files.value) {
+                            unawaited(_sendFile(context, file));
+                          }
+                          Navigator.pop(context);
+                        } else {
+                          final zipFilePath =
+                              await runLoadBalancer(_archiveFiles, [
+                            (await getTemporaryDirectory()).path,
+                            ...files.value.map((e) => e.path),
+                          ]);
+                          unawaited(_sendFile(
+                            context,
+                            await _File.createFromPath(zipFilePath),
+                          ));
+                          Navigator.pop(context);
+                        }
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                ],
               ),
-              const SizedBox(height: 32),
-              Align(
-                alignment: Alignment.center,
-                child: MixinButton(
-                  backgroundTransparent: true,
-                  child: Text(Localization.of(context).send),
-                  onTap: () async {
-                    if (currentTab.value != _TabType.zip) {
-                      for (final file in files.value) {
-                        unawaited(_sendFile(context, file));
-                      }
-                      Navigator.pop(context);
-                    } else {
-                      final zipFilePath = await runLoadBalancer(_archiveFiles, [
-                        (await getTemporaryDirectory()).path,
-                        ...files.value.map((e) => e.path),
-                      ]);
-                      unawaited(_sendFile(
-                        context,
-                        await _File.createFromPath(zipFilePath),
-                      ));
-                      Navigator.pop(context);
-                    }
-                  },
+              const Align(
+                alignment: AlignmentDirectional.topEnd,
+                child: Padding(
+                  padding: EdgeInsets.all(22),
+                  child: MixinCloseButton(),
                 ),
-              ),
-              const SizedBox(height: 32),
+              )
             ],
           )),
     );
