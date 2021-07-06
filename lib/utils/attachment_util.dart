@@ -10,7 +10,7 @@ import 'package:path/path.dart' as p;
 
 import '../blaze/vo/attachment_message.dart';
 import '../crypto/attachment/crypto_attachment.dart';
-import '../db/dao/messages_dao.dart';
+import '../db/dao/message_dao.dart';
 import '../db/extension/message_category.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
@@ -20,7 +20,7 @@ import 'load_balancer_utils.dart';
 import 'logger.dart';
 
 class AttachmentUtil {
-  AttachmentUtil(this._client, this._messagesDao, this.mediaPath) {
+  AttachmentUtil(this._client, this._messageDao, this.mediaPath) {
     (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
         (client) {
       client.badCertificateCallback =
@@ -29,7 +29,7 @@ class AttachmentUtil {
   }
 
   final String mediaPath;
-  final MessagesDao _messagesDao;
+  final MessageDao _messageDao;
   final Client _client;
 
   final Dio _dio = Dio(
@@ -48,7 +48,7 @@ class AttachmentUtil {
     AttachmentMessage? attachmentMessage,
   }) async {
     assert(_messageIdCancelTokenMap[messageId] == null);
-    await _messagesDao.updateMediaStatus(MediaStatus.pending, messageId);
+    await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
 
     try {
       final response = await _client.attachmentApi.getAttachment(content);
@@ -81,7 +81,7 @@ class AttachmentUtil {
             var localDigest = attachmentMessage?.digest;
             if (localKey == null || localDigest == null) {
               final message =
-                  await _messagesDao.findMessageByMessageId(messageId);
+                  await _messageDao.findMessageByMessageId(messageId);
               if (message != null) {
                 localKey = message.mediaKey;
                 localDigest = message.mediaDigest;
@@ -103,21 +103,21 @@ class AttachmentUtil {
           if (attachmentMessage != null) {
             final encoded =
                 await jsonBase64EncodeWithIsolate(attachmentMessage);
-            await _messagesDao.updateMessageContent(messageId, encoded);
+            await _messageDao.updateMessageContent(messageId, encoded);
           }
 
-          await _messagesDao.updateMediaMessageUrl(file.path, messageId);
-          await _messagesDao.updateMediaSize(fileSize, messageId);
-          await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
+          await _messageDao.updateMediaMessageUrl(file.path, messageId);
+          await _messageDao.updateMediaSize(fileSize, messageId);
+          await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
         } catch (err) {
           e(err.toString());
-          await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
+          await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
         }
         return file.absolute.path;
       }
     } catch (er) {
       e(er.toString());
-      await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
+      await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
     } finally {
       _messageIdCancelTokenMap[messageId] = null;
     }
@@ -126,7 +126,7 @@ class AttachmentUtil {
   Future<AttachmentResult?> uploadAttachment(
       File file, String messageId, MessageCategory category) async {
     assert(_messageIdCancelTokenMap[messageId] == null);
-    await _messagesDao.updateMediaStatus(MediaStatus.pending, messageId);
+    await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
 
     try {
       final response = await _client.attachmentApi.postAttachment();
@@ -167,7 +167,7 @@ class AttachmentUtil {
 
         if (httpResponse.statusCode == 200) {
           deleteCryptoTmpFile(category, tmpFile);
-          await _messagesDao.updateMediaStatus(MediaStatus.done, messageId);
+          await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
           return AttachmentResult(
               response.data.attachmentId,
               category.isSignal ? await base64EncodeWithIsolate(keys!) : null,
@@ -175,16 +175,16 @@ class AttachmentUtil {
               response.data.createdAt);
         } else {
           deleteCryptoTmpFile(category, tmpFile);
-          await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
+          await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;
         }
       } else {
-        await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
+        await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
         return null;
       }
     } catch (e) {
       w(e.toString());
-      await _messagesDao.updateMediaStatus(MediaStatus.canceled, messageId);
+      await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
       return null;
     } finally {
       _messageIdCancelTokenMap[messageId] = null;
@@ -253,11 +253,11 @@ class AttachmentUtil {
       p.join(mediaPath, 'Files', conversationId);
 
   static Future<AttachmentUtil> init(
-      Client client, MessagesDao messagesDao, String identityNumber) async {
+      Client client, MessageDao messageDao, String identityNumber) async {
     final documentDirectory = await getMixinDocumentsDirectory();
     final mediaDirectory =
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
-    return AttachmentUtil(client, messagesDao, mediaDirectory.path);
+    return AttachmentUtil(client, messageDao, mediaDirectory.path);
   }
 
   bool cancelProgressAttachmentJob(String messageId) {

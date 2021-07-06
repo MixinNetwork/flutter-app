@@ -84,7 +84,7 @@ class Injector {
 
   Future<void> refreshParticipants(String conversationId,
       List<db.Participant> remote, List<UserSession>? userSessions) async {
-    await database.participantsDao.replaceAll(conversationId, remote);
+    await database.participantDao.replaceAll(conversationId, remote);
     final participantSessions = <db.ParticipantSessionData>[];
     userSessions?.forEach((u) {
       participantSessions.add(db.ParticipantSessionData(
@@ -155,7 +155,7 @@ class Injector {
       await database.userDao.insert(user);
       final app = e.app;
       if (app != null) {
-        await database.appsDao.insert(
+        await database.appDao.insert(
           db.App(
             appId: app.appId,
             appNumber: app.appNumber,
@@ -199,7 +199,7 @@ class Injector {
     if (circleId == null) {
       final res = await client.circleApi.getCircles();
       res.data.forEach((circle) async {
-        await database.circlesDao.insertUpdate(db.Circle(
+        await database.circleDao.insertUpdate(db.Circle(
             circleId: circle.circleId,
             name: circle.name,
             createdAt: circle.createdAt,
@@ -208,7 +208,7 @@ class Injector {
       });
     } else {
       final circle = (await client.circleApi.getCircle(circleId)).data;
-      await database.circlesDao.insertUpdate(db.Circle(
+      await database.circleDao.insertUpdate(db.Circle(
           circleId: circle.circleId,
           name: circle.name,
           createdAt: circle.createdAt,

@@ -28,7 +28,7 @@ class NotificationService {
       ..add(context
           .read<AccountServer>()
           .database
-          .messagesDao
+          .messageDao
           .notificationMessageStream
           .where((event) {
             if (DesktopLifecycle.instance.isActive.value) {

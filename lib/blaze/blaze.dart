@@ -148,23 +148,23 @@ class Blaze {
     }
     if (blazeMessage.action == acknowledgeMessageReceipt) {
       await makeMessageStatus(data.messageId, data.status);
-      await database.offsetsDao.insert(Offset(
+      await database.offsetDao.insert(Offset(
           key: statusOffset, timestamp: data.updatedAt.toIso8601String()));
     } else if (blazeMessage.action == createMessage) {
       if (data.userId == userId && data.category == null) {
         await makeMessageStatus(data.messageId, data.status);
       } else if (data.conversationId.isNotEmpty) {
-        await database.floodMessagesDao.insert(FloodMessage(
+        await database.floodMessageDao.insert(FloodMessage(
             messageId: data.messageId,
             data: await jsonEncodeWithIsolate(data),
             createdAt: data.createdAt));
       }
     } else if (blazeMessage.action == createCall ||
         blazeMessage.action == createKraken) {
-      await database.jobsDao.insertNoReplace(createAckJob(
+      await database.jobDao.insertNoReplace(createAckJob(
           acknowledgeMessageReceipts, data.messageId, MessageStatus.read));
     } else {
-      await database.jobsDao.insertNoReplace(createAckJob(
+      await database.jobDao.insertNoReplace(createAckJob(
           acknowledgeMessageReceipts, data.messageId, MessageStatus.delivered));
     }
   }
@@ -174,15 +174,15 @@ class Blaze {
 
   Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
-        await database.messagesDao.findMessageStatusById(messageId);
+        await database.messageDao.findMessageStatusById(messageId);
     if (currentStatus != null && currentStatus.index < status.index) {
-      await database.messagesDao.updateMessageStatusById(messageId, status);
+      await database.messageDao.updateMessageStatusById(messageId, status);
     }
   }
 
   Future<void> _sendListPending() async {
     final offset =
-        await database.floodMessagesDao.getLastBlazeMessageCreatedAt();
+        await database.floodMessageDao.getLastBlazeMessageCreatedAt();
     final param = offset?.toIso8601String();
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     d('blaze send: ${m.toJson()}');
@@ -191,7 +191,7 @@ class Blaze {
 
   Future<void> _refreshOffset() async {
     final offset =
-        await database.offsetsDao.findStatusOffset().getSingleOrNull();
+        await database.offsetDao.findStatusOffset().getSingleOrNull();
     var status = 0;
     if (offset != null) {
       status = getEpochNanoFromString(offset);
@@ -210,7 +210,7 @@ class Blaze {
       }
       await Future.forEach<BlazeMessageData>(blazeMessages, (m) async {
         await makeMessageStatus(m.messageId, m.status);
-        await database.offsetsDao.insert(Offset(
+        await database.offsetDao.insert(Offset(
             key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
       });
       final lastUpdateAt = getEpochNano(blazeMessages.last.updatedAt);

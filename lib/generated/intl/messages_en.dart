@@ -208,7 +208,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "mute8hours": MessageLookupByLibrary.simpleMessage("8 Hours"),
         "muteTitle":
             MessageLookupByLibrary.simpleMessage("Mute notifications for…"),
-        "muted": MessageLookupByLibrary.simpleMessage("Muted"),
+        "muted": MessageLookupByLibrary.simpleMessage("Mute"),
         "name": MessageLookupByLibrary.simpleMessage("Name"),
         "networkConnectionFailed":
             MessageLookupByLibrary.simpleMessage("Network connection failed"),
@@ -277,8 +277,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "today": MessageLookupByLibrary.simpleMessage("Today"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
-        "unMute": MessageLookupByLibrary.simpleMessage("UnMute"),
-        "unPin": MessageLookupByLibrary.simpleMessage("UnPin"),
+        "unMute": MessageLookupByLibrary.simpleMessage("Unmute"),
+        "unPin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
         "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),

@@ -15,10 +15,10 @@ import '../blaze/vo/live_message.dart';
 import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
-import '../db/dao/jobs_dao.dart';
-import '../db/dao/message_mentions_dao.dart';
-import '../db/dao/messages_dao.dart';
-import '../db/dao/participants_dao.dart';
+import '../db/dao/job_dao.dart';
+import '../db/dao/message_dao.dart';
+import '../db/dao/message_mention_dao.dart';
+import '../db/dao/participant_dao.dart';
 import '../db/extension/message.dart' show QueteMessage;
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
@@ -34,17 +34,17 @@ const _kEnableImageBlurHashThumb = false;
 
 class SendMessageHelper {
   SendMessageHelper(
-    this._messagesDao,
-    this._messageMentionsDao,
-    this._jobsDao,
-    this._participantsDao,
+    this._messageDao,
+    this._messageMentionDao,
+    this._jobDao,
+    this._participantDao,
     this._attachmentUtil,
   );
 
-  final MessagesDao _messagesDao;
-  final MessageMentionsDao _messageMentionsDao;
-  final ParticipantsDao _participantsDao;
-  final JobsDao _jobsDao;
+  final MessageDao _messageDao;
+  final MessageMentionDao _messageMentionDao;
+  final ParticipantDao _participantDao;
+  final JobDao _jobDao;
   final AttachmentUtil _attachmentUtil;
 
   Future<void> sendTextMessage(
@@ -57,12 +57,12 @@ class SendMessageHelper {
     var category =
         isPlain ? MessageCategory.plainText : MessageCategory.signalText;
     final quoteMessage =
-        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+        await _messageDao.findMessageItemByMessageId(quoteMessageId);
 
     String? recipientId;
     final botNumber = botNumberStartRegExp.firstMatch(content)?[1];
     if (botNumber?.isNotEmpty == true) {
-      recipientId = await _participantsDao
+      recipientId = await _participantDao
           .userIdByIdentityNumber(conversationId, botNumber!)
           .getSingleOrNull();
       category = recipientId != null ? MessageCategory.plainText : category;
@@ -80,8 +80,8 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(
+    await _messageDao.insert(message, senderId);
+    await _jobDao.insertSendingJob(
       message.messageId,
       conversationId,
       recipientId,
@@ -122,7 +122,7 @@ class SendMessageHelper {
 
     final attachmentSize = await attachment.length();
     final quoteMessage =
-        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+        await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final fileName = file?.name ?? '$messageId.png';
     final message = Message(
       messageId: messageId,
@@ -143,7 +143,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messagesDao.insert(message, senderId);
+    await _messageDao.insert(message, senderId);
     final thumbImage = await runLoadBalancer(
       _getImageThumbnailString,
       attachment.path,
@@ -169,9 +169,9 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateAttachmentMessageContentAndStatus(
+    await _messageDao.updateAttachmentMessageContentAndStatus(
         messageId, encoded);
-    await _jobsDao.insertSendingJob(messageId, conversationId);
+    await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
   Future<void> sendVideoMessage(String conversationId, String senderId,
@@ -186,7 +186,7 @@ class SendMessageHelper {
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
     final quoteMessage =
-        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+        await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -207,7 +207,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messagesDao.insert(message, senderId);
+    await _messageDao.insert(message, senderId);
     // ignore: parameter_assignments
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
@@ -229,9 +229,9 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateAttachmentMessageContentAndStatus(
+    await _messageDao.updateAttachmentMessageContentAndStatus(
         messageId, encoded);
-    await _jobsDao.insertSendingJob(messageId, conversationId);
+    await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
   Future<void> sendStickerMessage(String conversationId, String senderId,
@@ -251,8 +251,8 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _messageDao.insert(message, senderId);
+    await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> sendDataMessage(
@@ -276,7 +276,7 @@ class SendMessageHelper {
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
     final quoteMessage =
-        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+        await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -293,7 +293,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messagesDao.insert(message, senderId);
+    await _messageDao.insert(message, senderId);
     // ignore: parameter_assignments
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
@@ -315,9 +315,9 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateAttachmentMessageContentAndStatus(
+    await _messageDao.updateAttachmentMessageContentAndStatus(
         messageId, encoded);
-    await _jobsDao.insertSendingJob(messageId, conversationId);
+    await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
   Future<void> sendContactMessage(
@@ -333,7 +333,7 @@ class SendMessageHelper {
     final encoded = await jsonBase64EncodeWithIsolate(contactMessage);
 
     final quoteMessage =
-        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+        await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -347,8 +347,8 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _messageDao.insert(message, senderId);
+    await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> sendAudioMessage(String conversationId, String senderId,
@@ -364,7 +364,7 @@ class SendMessageHelper {
     await File(file.path).copy(attachment.path);
     final attachmentSize = await attachment.length();
     final quoteMessage =
-        await _messagesDao.findMessageItemByMessageId(quoteMessageId);
+        await _messageDao.findMessageItemByMessageId(quoteMessageId);
     final message = Message(
       messageId: messageId,
       conversationId: conversationId,
@@ -383,7 +383,7 @@ class SendMessageHelper {
       quoteMessageId: quoteMessageId,
       quoteContent: quoteMessage?.toJson(),
     );
-    await _messagesDao.insert(message, senderId);
+    await _messageDao.insert(message, senderId);
     // ignore: parameter_assignments
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
@@ -405,9 +405,9 @@ class SendMessageHelper {
     );
 
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateAttachmentMessageContentAndStatus(
+    await _messageDao.updateAttachmentMessageContentAndStatus(
         messageId, encoded);
-    await _jobsDao.insertSendingJob(messageId, conversationId);
+    await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
   Future<void> _sendLiveMessage(
@@ -435,8 +435,8 @@ class SendMessageHelper {
       mediaHeight: mediaHeight,
     );
 
-    await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _messageDao.insert(message, senderId);
+    await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> sendPostMessage(String conversationId, String senderId,
@@ -453,8 +453,8 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _messageDao.insert(message, senderId);
+    await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> _sendLocationMessage(String conversationId, String senderId,
@@ -472,8 +472,8 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _messageDao.insert(message, senderId);
+    await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> _sendAppCardMessage(
@@ -489,14 +489,14 @@ class SendMessageHelper {
       createdAt: DateTime.now(),
     );
 
-    await _messagesDao.insert(message, senderId);
-    await _jobsDao.insertSendingJob(message.messageId, conversationId);
+    await _messageDao.insert(message, senderId);
+    await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
   Future<void> sendRecallMessage(
       String conversationId, List<String> messageIds) async {
     messageIds.forEach((messageId) async {
-      final message = await _messagesDao.findMessageByMessageId(messageId);
+      final message = await _messageDao.findMessageByMessageId(messageId);
       if (message?.category.isAttachment == true) {
         final file = File(message!.mediaUrl!);
         final exists = await file.exists();
@@ -504,15 +504,15 @@ class SendMessageHelper {
           await file.delete();
         }
       }
-      await _messagesDao.recallMessage(messageId);
-      await _messageMentionsDao.deleteMessageMentionByMessageId(messageId);
+      await _messageDao.recallMessage(messageId);
+      await _messageMentionDao.deleteMessageMentionByMessageId(messageId);
       final quoteMessage =
-          await _messagesDao.findMessageItemById(conversationId, messageId);
+          await _messageDao.findMessageItemById(conversationId, messageId);
       if (quoteMessage != null) {
-        await _messagesDao.updateQuoteContentByQuoteId(
+        await _messageDao.updateQuoteContentByQuoteId(
             conversationId, messageId, quoteMessage.toJson());
       }
-      await _jobsDao.insert(Job(
+      await _jobDao.insert(Job(
           conversationId: conversationId,
           jobId: const Uuid().v4(),
           action: recallMessage,
@@ -520,8 +520,8 @@ class SendMessageHelper {
           blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
           createdAt: DateTime.now(),
           runCount: 0));
-      await _messagesDao.recallMessage(messageId);
-      await _messagesDao.deleteFtsByMessageId(messageId);
+      await _messageDao.recallMessage(messageId);
+      await _messageDao.deleteFtsByMessageId(messageId);
     });
   }
 
@@ -531,7 +531,7 @@ class SendMessageHelper {
     String forwardMessageId, {
     bool isPlain = true,
   }) async {
-    final message = await _messagesDao.findMessageByMessageId(forwardMessageId);
+    final message = await _messageDao.findMessageByMessageId(forwardMessageId);
     if (message == null) {
       return;
     } else if (message.category.isText) {
@@ -690,9 +690,9 @@ class SendMessageHelper {
       attachmentResult.createdAt,
     );
     final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
-    await _messagesDao.updateAttachmentMessageContentAndStatus(
+    await _messageDao.updateAttachmentMessageContentAndStatus(
         messageId, encoded);
-    await _jobsDao.insertSendingJob(messageId, conversationId);
+    await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
   Future<AttachmentResult?> _checkAttachment(String content) async {

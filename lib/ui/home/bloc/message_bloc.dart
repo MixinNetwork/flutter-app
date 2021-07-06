@@ -9,7 +9,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/subscribe_mixin.dart';
-import '../../../db/dao/messages_dao.dart';
+import '../../../db/dao/message_dao.dart';
 import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
@@ -216,11 +216,11 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     );
 
     addSubscription(
-      messagesDao.insertOrReplaceMessageStream
+      messageDao.insertOrReplaceMessageStream
           .listen((state) => add(_MessageInsertOrReplaceEvent(state))),
     );
 
-    addSubscription(messagesDao.deleteMessageIdStream
+    addSubscription(messageDao.deleteMessageIdStream
         .listen((messageId) => add(_MessageDeleteEvent(messageId))));
   }
 
@@ -231,7 +231,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
   final AccountServer accountServer;
   int limit;
 
-  MessagesDao get messagesDao => database.messagesDao;
+  MessageDao get messageDao => database.messageDao;
 
   Future<void> _preCacheMention(MessageState state) async {
     final set = {...state.top, state.center, ...state.bottom};
@@ -307,8 +307,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final topMessageId = state.topMessage?.messageId;
     assert(topMessageId != null);
     final list = await database.transaction(() async {
-      final rowId = await messagesDao.messageRowId(topMessageId!).getSingle();
-      return messagesDao
+      final rowId = await messageDao.messageRowId(topMessageId!).getSingle();
+      return messageDao
           .beforeMessagesByConversationId(rowId, conversationId, limit)
           .get();
     });
@@ -328,9 +328,8 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final bottomMessageId = state.bottomMessage?.messageId;
     assert(bottomMessageId != null);
     final list = await database.transaction(() async {
-      final rowId =
-          await messagesDao.messageRowId(bottomMessageId!).getSingle();
-      return messagesDao
+      final rowId = await messageDao.messageRowId(bottomMessageId!).getSingle();
+      return messageDao
           .afterMessagesByConversationId(rowId, conversationId, limit)
           .get();
     });
@@ -378,7 +377,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     String? centerMessageId,
   }) async {
     Future<MessageState> recentMessages() async {
-      final list = await messagesDao
+      final list = await messageDao
           .messagesByConversationId(
             conversationId,
             limit,
@@ -397,15 +396,15 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
     return database.transaction(() async {
       final rowId =
-          await messagesDao.messageRowId(centerMessageId).getSingleOrNull();
+          await messageDao.messageRowId(centerMessageId).getSingleOrNull();
       if (rowId == null) {
         return recentMessages();
       }
       final _limit = limit ~/ 2;
-      final bottomList = await messagesDao
+      final bottomList = await messageDao
           .afterMessagesByConversationId(rowId, conversationId, _limit)
           .get();
-      var topList = (await messagesDao
+      var topList = (await messageDao
               .beforeMessagesByConversationId(rowId, conversationId, _limit)
               .get())
           .reversed
@@ -414,7 +413,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       final isLatest = bottomList.length < _limit;
       final isOldest = topList.length < _limit;
 
-      var center = await messagesDao
+      var center = await messageDao
           .messageItemByMessageId(centerMessageId)
           .getSingleOrNull();
 

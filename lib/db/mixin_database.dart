@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
 // These imports are only needed to open the database
 import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
@@ -24,28 +23,28 @@ import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
 import 'converter/user_relationship_converter.dart';
-import 'dao/addresses_dao.dart';
-import 'dao/apps_dao.dart';
-import 'dao/assets_dao.dart';
-import 'dao/circle_conversations_dao.dart';
-import 'dao/circles_dao.dart';
-import 'dao/conversations_dao.dart';
-import 'dao/flood_messages_dao.dart';
-import 'dao/hyperlinks_dao.dart';
-import 'dao/jobs_dao.dart';
-import 'dao/message_mentions_dao.dart';
-import 'dao/messages_dao.dart';
-import 'dao/messages_history_dao.dart';
-import 'dao/offsets_dao.dart';
+import 'dao/address_dao.dart';
+import 'dao/app_dao.dart';
+import 'dao/asset_dao.dart';
+import 'dao/circle_conversation_dao.dart';
+import 'dao/circle_dao.dart';
+import 'dao/conversation_dao.dart';
+import 'dao/flood_message_dao.dart';
+import 'dao/hyperlink_dao.dart';
+import 'dao/job_dao.dart';
+import 'dao/message_dao.dart';
+import 'dao/message_history_dao.dart';
+import 'dao/message_mention_dao.dart';
+import 'dao/offset_dao.dart';
+import 'dao/participant_dao.dart';
 import 'dao/participant_session_dao.dart';
-import 'dao/participants_dao.dart';
-import 'dao/resend_session_messages_dao.dart';
-import 'dao/sent_session_sender_keys_dao.dart';
-import 'dao/snapshots_dao.dart';
-import 'dao/sticker_albums_dao.dart';
-import 'dao/sticker_relationships_dao.dart';
-import 'dao/stickers_dao.dart';
-import 'dao/users_dao.dart';
+import 'dao/resend_session_message_dao.dart';
+import 'dao/sent_session_sender_key_dao.dart';
+import 'dao/snapshot_dao.dart';
+import 'dao/sticker_album_dao.dart';
+import 'dao/sticker_dao.dart';
+import 'dao/sticker_relationship_dao.dart';
+import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
 
 part 'mixin_database.g.dart';
@@ -63,27 +62,27 @@ part 'mixin_database.g.dart';
     'moor/dao/flood.moor',
   },
   daos: [
-    AddressesDao,
-    AppsDao,
-    AssetsDao,
+    AddressDao,
+    AppDao,
+    AssetDao,
     CircleConversationDao,
-    CirclesDao,
-    ConversationsDao,
-    FloodMessagesDao,
-    HyperlinksDao,
-    JobsDao,
-    MessageMentionsDao,
-    MessagesDao,
-    MessagesHistoryDao,
-    OffsetsDao,
-    ParticipantsDao,
+    CircleDao,
+    ConversationDao,
+    FloodMessageDao,
+    HyperlinkDao,
+    JobDao,
+    MessageMentionDao,
+    MessageDao,
+    MessageHistoryDao,
+    OffsetDao,
+    ParticipantDao,
     ParticipantSessionDao,
-    ResendSessionMessagesDao,
-    SentSessionSenderKeysDao,
-    SnapshotsDao,
+    ResendSessionMessageDao,
+    SentSessionSenderKeyDao,
+    SnapshotDao,
     StickerDao,
-    StickerAlbumsDao,
-    StickerRelationshipsDao,
+    StickerAlbumDao,
+    StickerRelationshipDao,
     UserDao,
   ],
   queries: {},
