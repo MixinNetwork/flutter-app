@@ -112,6 +112,27 @@ class MixinDatabase extends _$MixinDatabase {
               'index_conversations_pin_time_last_message_created_at',
               'CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);',
             ));
+            await m.drop(Index('index_participants_conversation_id', ''));
+            await m.drop(Index('index_participants_created_at', ''));
+            await m.drop(Index('index_users_full_name', ''));
+            await m.drop(Index('index_snapshots_asset_id', ''));
+            await m.drop(Index(
+                'index_messages_conversation_id_user_id_status_created_at',
+                ''));
+            await m.drop(
+                Index('index_messages_conversation_id_status_user_id', ''));
+            await m.createIndex(Index(
+              'index_messages_conversation_id_category',
+              'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category ON messages(conversation_id, category);',
+            ));
+            await m.createIndex(Index(
+              'index_messages_conversation_id_quote_message_id',
+              'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id);',
+            ));
+            await m.createIndex(Index(
+              'index_messages_conversation_id_status_user_id_created_at',
+              'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id_created_at ON messages (conversation_id, status, user_id, created_at);',
+            ));
           }
         },
       );

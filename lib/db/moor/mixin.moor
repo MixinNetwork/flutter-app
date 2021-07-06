@@ -63,17 +63,15 @@ CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action");
 
 CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);
 
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category ON messages(conversation_id, category);
+
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id);
+
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id_created_at ON messages (conversation_id, status,user_id, created_at);
+
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id ON messages (conversation_id);
+
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at);
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id ON messages (conversation_id, status, user_id);
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_user_id_status_created_at ON messages (conversation_id, user_id, status, created_at);
-
-CREATE INDEX IF NOT EXISTS index_participants_conversation_id ON participants (conversation_id);
-CREATE INDEX IF NOT EXISTS index_participants_created_at ON participants (created_at);
-
-CREATE INDEX IF NOT EXISTS index_snapshots_asset_id ON snapshots (asset_id);
-
-CREATE INDEX IF NOT EXISTS index_users_full_name ON users (full_name);
 
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at  WHERE conversation_id = new.conversation_id; END;
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;
