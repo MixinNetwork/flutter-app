@@ -36,13 +36,38 @@ Future<void> showFilesPreviewDialog(
   await showMixinDialog(
     context: context,
     child: _FilesPreviewDialog(
-      initialFiles: files,
+      initialFiles: await Future.wait(files.map(
+        (e) async => _File(e, await e.length()),
+      )),
     ),
   );
 }
 
-typedef _FileDeleteCallback = void Function(XFile);
-typedef _FileAddCallback = void Function(List<XFile>);
+/// We need this view object to keep the value of file#length.
+class _File {
+  _File(this.file, this.length);
+
+  static Future<_File> createFromPath(String path) {
+    final file = File(path);
+    return createFromFile(file);
+  }
+
+  static Future<_File> createFromFile(File file) async =>
+      _File(file.xFile, await file.length());
+
+  final XFile file;
+
+  String get path => file.path;
+
+  String? get mimeType => file.mimeType;
+
+  final int length;
+
+  bool get isImage => file.isImage;
+}
+
+typedef _FileDeleteCallback = void Function(_File);
+typedef _FileAddCallback = void Function(List<_File>);
 
 const _kDefaultArchiveName = 'Archive.zip';
 
@@ -54,7 +79,7 @@ class _FilesPreviewDialog extends HookWidget {
     required this.initialFiles,
   }) : super(key: key);
 
-  final List<XFile> initialFiles;
+  final List<_File> initialFiles;
 
   @override
   Widget build(BuildContext context) {
@@ -72,9 +97,9 @@ class _FilesPreviewDialog extends HookWidget {
     final onFileAddedStream =
         useMemoized(() => StreamController<int>.broadcast());
     final onFileRemovedStream =
-        useMemoized(() => StreamController<Tuple2<int, XFile>>.broadcast());
+        useMemoized(() => StreamController<Tuple2<int, _File>>.broadcast());
 
-    void removeFile(XFile file) {
+    void removeFile(_File file) {
       final index = files.value.indexOf(file);
       files.value = (files.value..removeAt(index)).toList();
       onFileRemovedStream.add(Tuple2(index, file));
@@ -192,9 +217,7 @@ class _FilesPreviewDialog extends HookWidget {
                       ]);
                       unawaited(_sendFile(
                         context,
-                        XFile(zipFilePath,
-                            mimeType: lookupMimeType(zipFilePath),
-                            name: _kDefaultArchiveName),
+                        await _File.createFromPath(zipFilePath),
                       ));
                       Navigator.pop(context);
                     }
@@ -221,26 +244,27 @@ Future<String> _archiveFiles(List<String> paths) async {
   return outPath;
 }
 
-Future<void> _sendFile(BuildContext context, XFile file) async {
+Future<void> _sendFile(BuildContext context, _File file) async {
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
-  if (file.isImage) {
+  final xFile = file.file;
+  if (xFile.isImage) {
     return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
       conversationItem.isPlainConversation,
-      file: file,
+      file: xFile,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
     );
-  } else if (file.isVideo) {
+  } else if (xFile.isVideo) {
     return Provider.of<AccountServer>(context, listen: false).sendVideoMessage(
-      file,
+      xFile,
       conversationItem.isPlainConversation,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
     );
   }
   await Provider.of<AccountServer>(context, listen: false).sendDataMessage(
-    file,
+    xFile,
     conversationItem.isPlainConversation,
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
@@ -256,7 +280,7 @@ class _AnimatedFileTile extends HookWidget {
     required this.showBigImage,
   }) : super(key: key);
 
-  final XFile file;
+  final _File file;
   final Animation<double> animation;
 
   final _FileDeleteCallback? onDelete;
@@ -385,7 +409,7 @@ class _PageZip extends StatelessWidget {
 }
 
 typedef FileItemBuilder = Widget Function(
-    BuildContext, XFile, Animation<double>);
+    BuildContext, _File, Animation<double>);
 
 class _AnimatedListBuilder extends HookWidget {
   const _AnimatedListBuilder({
@@ -396,9 +420,9 @@ class _AnimatedListBuilder extends HookWidget {
     required this.builder,
   }) : super(key: key);
 
-  final List<XFile> files;
+  final List<_File> files;
   final Stream<int> onFileAdded;
-  final Stream<Tuple2<int, XFile>> onFileDeleted;
+  final Stream<Tuple2<int, _File>> onFileDeleted;
 
   final FileItemBuilder builder;
 
@@ -438,7 +462,7 @@ class _TileBigImage extends HookWidget {
     required this.onDelete,
   }) : super(key: key);
 
-  final XFile file;
+  final _File file;
 
   final VoidCallback onDelete;
 
@@ -455,51 +479,52 @@ class _TileBigImage extends HookWidget {
         padding: const EdgeInsets.symmetric(horizontal: 30),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(6),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 200),
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.file(
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              ConstrainedBox(
+                constraints: const BoxConstraints(
+                  maxHeight: 420,
+                  minWidth: 420,
+                  maxWidth: 420,
+                ),
+                child: Image.file(
                   File(file.path),
                   fit: BoxFit.fitWidth,
                   errorBuilder: (_, __, ___) => const SizedBox(),
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: AnimatedCrossFade(
-                    firstChild: const SizedBox(),
-                    alignment: Alignment.center,
-                    secondChild: Container(
-                      height: 50,
-                      decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.28),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      )),
-                      child: Align(
-                        alignment: Alignment.bottomRight,
-                        child: ActionButton(
-                          color: Colors.white,
-                          name: Resources.assetsImagesDeleteSvg,
-                          padding: const EdgeInsets.all(10.0),
-                          size: 24,
-                          onTap: onDelete,
-                        ),
-                      ),
+              ),
+              AnimatedCrossFade(
+                firstChild: const SizedBox(),
+                alignment: Alignment.center,
+                secondChild: Container(
+                  height: 50,
+                  decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.28),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  )),
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: ActionButton(
+                      color: Colors.white,
+                      name: Resources.assetsImagesDeleteSvg,
+                      padding: const EdgeInsets.all(10.0),
+                      size: 24,
+                      onTap: onDelete,
                     ),
-                    crossFadeState: !showDelete.value
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
-                    duration: const Duration(milliseconds: 150),
                   ),
-                )
-              ],
-            ),
+                ),
+                crossFadeState: !showDelete.value
+                    ? CrossFadeState.showFirst
+                    : CrossFadeState.showSecond,
+                duration: const Duration(milliseconds: 150),
+              )
+            ],
           ),
         ),
       ),
@@ -540,14 +565,15 @@ class _TileNormalFile extends HookWidget {
     required this.onDelete,
   }) : super(key: key);
 
-  final XFile file;
+  final _File file;
 
   final VoidCallback onDelete;
 
-  static String _getFileExtension(XFile file) {
+  static String _getFileExtension(_File file) {
+    // FIXME
     var extension = path.extension(file.path).toUpperCase();
     if (extension.isNotEmpty) {
-      return extension.substring(1);
+      extension = extension.substring(1);
     }
     extension = extensionFromMime(file.mimeType!).toUpperCase();
     if (extension.isNotEmpty) {
@@ -584,15 +610,13 @@ class _TileNormalFile extends HookWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 4),
-                FutureBuilder<int>(
-                    future: file.length(),
-                    builder: (context, length) =>
-                        Text(filesize(length.data ?? 0, 0),
-                            style: TextStyle(
-                              color:
-                                  BrightnessData.themeOf(context).secondaryText,
-                              fontSize: 14,
-                            ))),
+                Text(
+                  filesize(file.length, 0),
+                  style: TextStyle(
+                    color: BrightnessData.themeOf(context).secondaryText,
+                    fontSize: 14,
+                  ),
+                ),
               ],
             ),
           ),
@@ -641,14 +665,14 @@ class _FileInputOverlay extends HookWidget {
           if (uri != null) {
             final file = File(uri.toFilePath(windows: Platform.isWindows));
             if (!await file.exists()) return;
-            onFileAdded([file.xFile]);
+            onFileAdded([await _File.createFromFile(file)]);
           } else {
             final bytes = await Pasteboard.image;
             if (bytes == null) return;
             final file = await saveBytesToTempFile(
                 bytes, 'mixin_paste_board_image', '.png');
             if (file == null) return;
-            onFileAdded([file.xFile]);
+            onFileAdded([await _File.createFromFile(file)]);
           }
         })
       },
@@ -656,13 +680,13 @@ class _FileInputOverlay extends HookWidget {
         onDragEntered: () => dragging.value = true,
         onDragExited: () => dragging.value = false,
         onDragDone: (urls) async {
-          final files = <XFile>[];
+          final files = <_File>[];
           for (final uri in urls) {
             final file = File(uri.toFilePath(windows: Platform.isWindows));
             if (!await file.exists()) {
               continue;
             }
-            files.add(file.xFile);
+            files.add(await _File.createFromFile(file));
           }
           if (files.isEmpty) {
             return;
