@@ -37,7 +37,7 @@ class CircleManagerPage extends HookWidget {
             () => context
                 .read<AccountServer>()
                 .database
-                .circlesDao
+                .circleDao
                 .circleByConversationId(conversationId)
                 .watch(),
             [conversationId],
@@ -50,7 +50,7 @@ class CircleManagerPage extends HookWidget {
             () => context
                 .read<AccountServer>()
                 .database
-                .circlesDao
+                .circleDao
                 .otherCircleByConversationId(conversationId)
                 .watch(),
             [conversationId],

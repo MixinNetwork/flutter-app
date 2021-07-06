@@ -40,19 +40,19 @@ class MediaPage extends HookWidget {
     final navigationMode = context.read<ChatSideCubit>().state.navigationMode;
     final size = column * (navigationMode ? 4 : 3);
 
-    final messagesDao = context.read<AccountServer>().database.messagesDao;
+    final messageDao = context.read<AccountServer>().database.messageDao;
 
     final mediaCubit = useBloc(
       () => LoadMorePagingBloc<MessageItem>(
         reloadData: () =>
-            messagesDao.mediaMessages(conversationId, size, 0).get(),
+            messageDao.mediaMessages(conversationId, size, 0).get(),
         loadMoreData: (list) async {
           if (list.isEmpty) return [];
           final last = list.last;
           final rowId =
-              await messagesDao.messageRowId(last.messageId).getSingleOrNull();
+              await messageDao.messageRowId(last.messageId).getSingleOrNull();
           if (rowId == null) return [];
-          final items = await messagesDao
+          final items = await messageDao
               .mediaMessagesBefore(rowId, conversationId, size)
               .get();
           return [...list, ...items];
@@ -62,7 +62,7 @@ class MediaPage extends HookWidget {
       keys: [conversationId],
     );
     useEffect(
-      () => messagesDao.insertOrReplaceMessageStream
+      () => messageDao.insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;

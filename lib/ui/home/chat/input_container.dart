@@ -60,7 +60,7 @@ class InputContainer extends HookWidget {
                 database.conversationDao
                     .conversationItem(conversationId!)
                     .watchSingleOrNull(),
-                database.participantsDao
+                database.participantDao
                     .findParticipantById(
                       conversationId,
                       context
@@ -343,6 +343,10 @@ class _SendTextField extends HookWidget {
             onInvoke: (Intent intent,
                 TextEditingActionTarget? textEditingActionTarget,
                 [_]) async {
+              if (!Platform.isMacOS) {
+                return textEditingActionTarget!.renderEditable
+                    .pasteText(SelectionChangedCause.keyboard);
+              }
               final uri = await Pasteboard.uri;
               if (uri != null) {
                 final file = File(uri.toFilePath(windows: Platform.isWindows));
@@ -469,7 +473,7 @@ class _StickerButton extends HookWidget {
       () => StickerAlbumsCubit(context
           .read<AccountServer>()
           .database
-          .stickerAlbumsDao
+          .stickerAlbumDao
           .systemAlbums()
           .watch()),
     );

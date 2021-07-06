@@ -45,7 +45,7 @@ class SearchMessagePage extends HookWidget {
           return context
               .read<AccountServer>()
               .database
-              .messagesDao
+              .messageDao
               .fuzzySearchMessageCountByConversationId(keyword, conversationId)
               .getSingle();
         },
@@ -54,7 +54,7 @@ class SearchMessagePage extends HookWidget {
           return context
               .read<AccountServer>()
               .database
-              .messagesDao
+              .messageDao
               .fuzzySearchMessageByConversationId(
                   conversationId: conversationId,
                   query: keyword,
@@ -69,7 +69,7 @@ class SearchMessagePage extends HookWidget {
       () => context
           .read<AccountServer>()
           .database
-          .messagesDao
+          .messageDao
           .searchMessageUpdateEvent
           .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
           .cancel,

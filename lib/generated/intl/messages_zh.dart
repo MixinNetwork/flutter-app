@@ -192,11 +192,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "pageDeleteCircle": m13,
         "pageEditProfileJoin": m14,
         "pageLandingClickToReload":
-            MessageLookupByLibrary.simpleMessage("点击重新加载 QrCode"),
+            MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
-            "打开手机上的 Mixin Messenger，扫描屏幕上的 QrCode，确认登录。"),
-        "pageLandingLoginTitle": MessageLookupByLibrary.simpleMessage(
-            "通过 QrCode 登录 Mixin Messenger"),
+            "打开手机上的 Mixin Messenger，扫描屏幕上的二维码，确认登录。"),
+        "pageLandingLoginTitle":
+            MessageLookupByLibrary.simpleMessage("通过二维码登录 Mixin Messenger"),
         "pageRightEmptyMessage":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
         "participantsCount": m15,

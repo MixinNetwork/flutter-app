@@ -627,7 +627,7 @@ class _JumpMentionButton extends HookWidget {
               () => context
                   .read<AccountServer>()
                   .database
-                  .messageMentionsDao
+                  .messageMentionDao
                   .unreadMentionMessageByConversationId(conversationId)
                   .watch(),
               [conversationId]),

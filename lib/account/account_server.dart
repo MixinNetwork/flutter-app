@@ -132,12 +132,12 @@ class AccountServer {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
-        await AttachmentUtil.init(client, database.messagesDao, identityNumber);
+        await AttachmentUtil.init(client, database.messageDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
-      database.messagesDao,
-      database.messageMentionsDao,
-      database.jobsDao,
-      database.participantsDao,
+      database.messageDao,
+      database.messageMentionDao,
+      database.jobDao,
+      database.participantDao,
       _attachmentUtil,
     );
     blaze = Blaze(
@@ -209,7 +209,7 @@ class AccountServer {
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
       ]).listen((event) => _runFloodJob()))
-      ..add(database.jobsDao
+      ..add(database.jobDao
           .findAckJobs()
           .where((jobs) => jobs.isNotEmpty == true)
           .asyncMapDrop(_runAckJob)
@@ -217,7 +217,7 @@ class AccountServer {
 
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId != null) {
-      jobSubscribers.add(database.jobsDao
+      jobSubscribers.add(database.jobDao
           .findSessionAckJobs()
           .where((jobs) => jobs.isNotEmpty == true)
           .asyncMapDrop(_runSessionAckJob)
@@ -225,12 +225,12 @@ class AccountServer {
     }
 
     jobSubscribers
-      ..add(database.jobsDao
+      ..add(database.jobDao
           .findRecallMessageJobs()
           .where((jobs) => jobs.isNotEmpty == true)
           .asyncMapDrop(_runRecallJob)
           .listen((_) {}))
-      ..add(database.jobsDao
+      ..add(database.jobDao
           .findSendingJobs()
           .where((jobs) => jobs.isNotEmpty == true)
           .asyncMapDrop(_runSendJob)
@@ -241,7 +241,7 @@ class AccountServer {
 
   Future<void> _processFloodJob() async {
     final floodMessages =
-        await database.floodMessagesDao.findFloodMessage().get();
+        await database.floodMessageDao.findFloodMessage().get();
     if (floodMessages.isEmpty) {
       return;
     }
@@ -275,7 +275,7 @@ class AccountServer {
     final jobIds = jobs.map((e) => e.jobId).toList();
     try {
       await client.messageApi.acknowledgements(ack);
-      await database.jobsDao.deleteJobs(jobIds);
+      await database.jobDao.deleteJobs(jobIds);
     } catch (e, s) {
       w('Send ack error: $e, stack: $s');
     }
@@ -283,7 +283,7 @@ class AccountServer {
 
   Future<void> _runSessionAckJob(List<db.Job> jobs) async {
     final conversationId =
-        await database.participantsDao.findJoinedConversationId(userId);
+        await database.participantDao.findJoinedConversationId(userId);
     if (conversationId == null) {
       return;
     }
@@ -307,7 +307,7 @@ class AccountServer {
     try {
       final result = await _sender.deliver(bm);
       if (result.success) {
-        await database.jobsDao.deleteJobs(jobIds);
+        await database.jobDao.deleteJobs(jobIds);
       }
     } catch (e, s) {
       w('Send session ack error: $e, stack: $s');
@@ -330,7 +330,7 @@ class AccountServer {
             id: const Uuid().v4(), action: createMessage, params: blazeParam);
         final result = await _sender.deliver(blazeMessage);
         if (result.success) {
-          await database.jobsDao.deleteJobById(e.jobId);
+          await database.jobDao.deleteJobById(e.jobId);
         }
       },
     );
@@ -352,9 +352,9 @@ class AccountServer {
         messageId = job.blazeMessage!;
       }
 
-      final message = await database.messagesDao.sendingMessage(messageId);
+      final message = await database.messageDao.sendingMessage(messageId);
       if (message == null) {
-        await database.jobsDao.deleteJobById(job.jobId);
+        await database.jobDao.deleteJobById(job.jobId);
         return;
       }
 
@@ -404,11 +404,11 @@ class AccountServer {
       } else {}
 
       if (result?.success ?? false) {
-        await database.messagesDao
+        await database.messageDao
             .updateMessageStatusById(message.messageId, MessageStatus.sent);
         await database.conversationDao.updateConversationStatusById(
             message.conversationId, ConversationStatus.success);
-        await database.jobsDao.deleteJobById(job.jobId);
+        await database.jobDao.deleteJobById(job.jobId);
       }
     });
 
@@ -429,7 +429,7 @@ class AccountServer {
               mentionData: await getMentionData(message.messageId));
           result = await _sender.deliver(encrypted);
           if (result.success) {
-            await database.resendSessionMessagesDao
+            await database.resendSessionMessageDao
                 .deleteResendSessionMessageById(message.messageId);
           }
         }
@@ -641,13 +641,13 @@ class AccountServer {
 
   Future<void> markRead(String conversationId) async {
     final ids =
-        await database.messagesDao.getUnreadMessageIds(conversationId, userId);
+        await database.messageDao.getUnreadMessageIds(conversationId, userId);
     if (ids.isEmpty) return;
     final jobs = ids
         .map((id) =>
             createAckJob(acknowledgeMessageReceipts, id, MessageStatus.read))
         .toList();
-    await database.jobsDao.insertAll(jobs);
+    await database.jobDao.insertAll(jobs);
     await _createReadSessionMessage(ids);
   }
 
@@ -659,7 +659,7 @@ class AccountServer {
     final jobs = messageIds
         .map((id) => createAckJob(createMessage, id, MessageStatus.read))
         .toList();
-    await database.jobsDao.insertAll(jobs);
+    await database.jobDao.insertAll(jobs);
   }
 
   Future<void> stop() async {
@@ -752,7 +752,7 @@ class AccountServer {
       }
     }
 
-    final participants = await database.participantsDao.getAllParticipants();
+    final participants = await database.participantDao.getAllParticipants();
     final newParticipantSessions = <db.ParticipantSessionData>[];
     participants.forEach((p) {
       final sessionId = userSessionMap[p.userId];
@@ -778,7 +778,7 @@ class AccountServer {
 
     final res = await client.accountApi.getStickerAlbums();
     res.data.forEach((item) async {
-      await database.stickerAlbumsDao.insert(db.StickerAlbum(
+      await database.stickerAlbumDao.insert(db.StickerAlbum(
           albumId: item.albumId,
           name: item.name,
           iconUrl: item.iconUrl,
@@ -804,7 +804,7 @@ class AccountServer {
     refreshUserIdSet.clear();
     final res = await client.circleApi.getCircles();
     res.data.forEach((circle) async {
-      await database.circlesDao.insertUpdate(db.Circle(
+      await database.circleDao.insertUpdate(db.Circle(
           circleId: circle.circleId,
           name: circle.name,
           createdAt: circle.createdAt,
@@ -855,7 +855,7 @@ class AccountServer {
         ));
       });
 
-      await database.stickerRelationshipsDao.insertAll(relationships);
+      await database.stickerRelationshipDao.insertAll(relationships);
     } catch (e, s) {
       w('Update sticker albums error: $e, stack: $s');
     }
@@ -863,7 +863,7 @@ class AccountServer {
 
   Future<String?> downloadAttachment(db.MessageItem message) async {
     final m =
-        await database.messagesDao.findMessageByMessageId(message.messageId);
+        await database.messageDao.findMessageByMessageId(message.messageId);
     if (m == null) {
       return null;
     }
@@ -1018,7 +1018,7 @@ class AccountServer {
     final response =
         await client.circleApi.createCircle(CircleName(name: name));
 
-    await database.circlesDao.insertUpdate(
+    await database.circleDao.insertUpdate(
       db.Circle(
         circleId: response.data.circleId,
         name: response.data.name,
@@ -1037,7 +1037,7 @@ class AccountServer {
       circleId,
       CircleName(name: name),
     );
-    await database.circlesDao.insertUpdate(db.Circle(
+    await database.circleDao.insertUpdate(db.Circle(
       circleId: response.data.circleId,
       name: response.data.name,
       createdAt: response.data.createdAt,
@@ -1060,11 +1060,11 @@ class AccountServer {
             createdAt: DateTime.now(),
             ownerId: recipientId,
             status: ConversationStatus.start));
-        await database.participantsDao.insert(db.Participant(
+        await database.participantDao.insert(db.Participant(
             conversationId: conversationId,
             userId: userId,
             createdAt: DateTime.now()));
-        await database.participantsDao.insert(db.Participant(
+        await database.participantDao.insert(db.Participant(
             conversationId: conversationId,
             userId: recipientId,
             createdAt: DateTime.now()));
@@ -1135,7 +1135,7 @@ class AccountServer {
     }
 
     await database.transaction(() async {
-      await database.circlesDao.deleteCircleById(circleId);
+      await database.circleDao.deleteCircleById(circleId);
       await database.circleConversationDao.deleteByCircleId(circleId);
     });
   }
@@ -1284,8 +1284,8 @@ class AccountServer {
 
   Future<void> markMentionRead(String messageId, String conversationId) =>
       Future.wait([
-        database.messageMentionsDao.markMentionRead(messageId),
-        database.jobsDao.insert(
+        database.messageMentionDao.markMentionRead(messageId),
+        database.jobDao.insert(
           db.Job(
             jobId: const Uuid().v4(),
             action: createMessage,
@@ -1314,5 +1314,5 @@ class AccountServer {
       _attachmentUtil.cancelProgressAttachmentJob(messageId);
 
   Future<void> deleteMessage(String messageId) =>
-      database.messagesDao.deleteMessage(messageId);
+      database.messageDao.deleteMessage(messageId);
 }

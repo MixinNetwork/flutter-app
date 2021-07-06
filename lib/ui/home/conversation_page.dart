@@ -131,7 +131,7 @@ class _SearchList extends HookWidget {
               if (keyword.trim().isEmpty) {
                 yield [];
               } else {
-                yield* accountServer.database.messagesDao
+                yield* accountServer.database.messageDao
                     .fuzzySearchMessage(query: keyword, limit: 4)
                     .watch();
               }
@@ -422,7 +422,7 @@ class _SearchMessageList extends HookWidget {
         queryCount: () => context
             .read<AccountServer>()
             .database
-            .messagesDao
+            .messageDao
             .fuzzySearchMessageCount(keyword)
             .getSingle(),
         queryRange: (int limit, int offset) async {
@@ -430,7 +430,7 @@ class _SearchMessageList extends HookWidget {
           return context
               .read<AccountServer>()
               .database
-              .messagesDao
+              .messageDao
               .fuzzySearchMessage(query: keyword, limit: limit, offset: offset)
               .get();
         },
@@ -441,7 +441,7 @@ class _SearchMessageList extends HookWidget {
       () => context
           .read<AccountServer>()
           .database
-          .messagesDao
+          .messageDao
           .searchMessageUpdateEvent
           .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
           .cancel,
