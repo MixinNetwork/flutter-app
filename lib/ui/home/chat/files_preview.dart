@@ -95,10 +95,8 @@ class _FilesPreviewDialog extends HookWidget {
 
     final currentTab = useState(_TabType.files);
 
-    final onFileAddedStream =
-        useMemoized(() => StreamController<int>.broadcast());
-    final onFileRemovedStream =
-        useMemoized(() => StreamController<Tuple2<int, _File>>.broadcast());
+    final onFileAddedStream = useStreamController<int>();
+    final onFileRemovedStream = useStreamController<Tuple2<int, _File>>();
 
     void removeFile(_File file) {
       final index = files.value.indexOf(file);
