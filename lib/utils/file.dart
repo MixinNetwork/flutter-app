@@ -2,11 +2,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart' as file_selector;
-import 'package:flutter_app/utils/logger.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+
+import 'logger.dart';
 
 Future<List<file_selector.XFile>> selectFiles() async {
   final files = await file_selector.openFiles();
