@@ -305,9 +305,11 @@ packages:
   desktop_drop:
     dependency: "direct main"
     description:
-      path: "../flutter-plugins/packages/desktop_drop"
-      relative: true
-    source: path
+      path: "packages/desktop_drop"
+      ref: affa029c0ba4cd22a5dff2d32c612fa2c60567ef
+      resolved-ref: affa029c0ba4cd22a5dff2d32c612fa2c60567ef
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
+    source: git
     version: "0.0.1"
   desktop_lifecycle:
     dependency: "direct main"
