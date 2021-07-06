@@ -54,11 +54,9 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
     Stream<TextEditingValue> textEditingValueStream,
     TextEditingValue initialValue,
   ) async {
-    await Future.forEach<StreamSubscription?>(
-      subscriptions,
-      (subscription) => subscription?.cancel(),
-    );
-    subscriptions.clear();
+    subscriptions
+      ..forEach((subscription) => subscription?.cancel())
+      ..clear();
 
     final mentionTextStream =
         textEditingValueStream.startWith(initialValue).map((event) {
