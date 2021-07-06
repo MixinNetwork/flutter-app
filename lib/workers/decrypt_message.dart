@@ -127,7 +127,7 @@ class DecryptMessage extends Injector {
           status: data.status,
           createdAt: data.createdAt,
         );
-        await database.messagesDao.insert(message, accountId);
+        await database.messageDao.insert(message, accountId);
       } else if (category.isSignal) {
         d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
