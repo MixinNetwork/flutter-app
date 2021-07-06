@@ -208,6 +208,9 @@ class _InputContainer extends HookWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
+                      _FileButton(
+                          actionColor: BrightnessData.themeOf(context).icon),
+                      const SizedBox(width: 6),
                       const _StickerButton(),
                       const SizedBox(width: 16),
                       Expanded(
@@ -457,6 +460,26 @@ class _QuoteMessage extends StatelessWidget {
             },
           ),
         ),
+      );
+}
+
+class _FileButton extends StatelessWidget {
+  const _FileButton({
+    Key? key,
+    required this.actionColor,
+  }) : super(key: key);
+
+  final Color actionColor;
+
+  @override
+  Widget build(BuildContext context) => ActionButton(
+        name: Resources.assetsImagesIcFileSvg,
+        color: actionColor,
+        onTap: () async {
+          final files = await selectFiles();
+          if (files.isEmpty) return;
+          await showFilesPreviewDialog(context, files);
+        },
       );
 }
 
