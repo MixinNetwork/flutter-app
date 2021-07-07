@@ -123,6 +123,8 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createIndex(indexMessagesConversationIdQuoteMessageId);
             await m
                 .createIndex(indexMessagesConversationIdStatusUserIdCreatedAt);
+            await m.createIndex(indexMessageMentionsConversationId);
+            await m.createIndex(indexUsersRelationshipFullName);
           }
         },
       );
