@@ -208,10 +208,8 @@ class _FilesPreviewDialog extends HookWidget {
                   const SizedBox(height: 32),
                   Align(
                     alignment: Alignment.center,
-                    child: MixinButton(
-                      backgroundTransparent: true,
-                      child: Text(Localization.of(context).send),
-                      onTap: () async {
+                    child: ElevatedButton(
+                      onPressed: () async {
                         if (currentTab.value != _TabType.zip) {
                           for (final file in files.value) {
                             unawaited(_sendFile(context, file));
@@ -230,6 +228,11 @@ class _FilesPreviewDialog extends HookWidget {
                           Navigator.pop(context);
                         }
                       },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.only(
+                            left: 32, top: 18, bottom: 18, right: 32),
+                      ),
+                      child: Text(Localization.of(context).send.toUpperCase()),
                     ),
                   ),
                   const SizedBox(height: 32),
