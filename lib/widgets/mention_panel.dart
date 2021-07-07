@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -119,12 +121,21 @@ class MentionPanelPortalEntry extends HookWidget {
   }
 
   void _select(BuildContext context, User user) {
+    final selectionOffset = max(textEditingController.selection.baseOffset, 0);
+    final text = textEditingController.text;
+
+    final beforeSelectionOffset = text
+        .substring(0, selectionOffset)
+        .replaceFirst(mentionRegExp, '@${user.identityNumber} ');
+    final afterSelectionOffset = text.substring(selectionOffset, text.length);
+
+    final newText = beforeSelectionOffset + afterSelectionOffset;
+
     textEditingController
-      ..text = textEditingController.text
-          .replaceFirst(mentionRegExp, '@${user.identityNumber} ')
+      ..text = newText
       ..selection = TextSelection.fromPosition(
         TextPosition(
-          offset: textEditingController.text.length,
+          offset: beforeSelectionOffset.length,
         ),
       );
   }
