@@ -559,11 +559,11 @@ class AccountServer {
           {String? conversationId,
           String? recipientId,
           String? quoteMessageId}) async =>
-      _sendMessageHelper.sendVideoMessage(
+      _sendMessageHelper.sendDataMessage(
           await _initConversation(conversationId, recipientId),
           userId,
           video,
-          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo,
+          isPlain ? MessageCategory.plainData : MessageCategory.signalData,
           quoteMessageId);
 
   Future<void> sendAudioMessage(XFile audio, bool isPlain,
