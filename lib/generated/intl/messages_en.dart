@@ -259,6 +259,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
         "searchRelatedMessage": m16,
         "send": MessageLookupByLibrary.simpleMessage("send"),
+        "sendArchived": MessageLookupByLibrary.simpleMessage(
+            "Archived all files in one zip file"),
+        "sendQuick": MessageLookupByLibrary.simpleMessage("Send quickly"),
+        "sendWithoutCompression":
+            MessageLookupByLibrary.simpleMessage("Send without compression"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),

@@ -221,6 +221,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
         "searchRelatedMessage": m16,
         "send": MessageLookupByLibrary.simpleMessage("发送"),
+        "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
+        "sendQuick": MessageLookupByLibrary.simpleMessage("快速发送"),
+        "sendWithoutCompression":
+            MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

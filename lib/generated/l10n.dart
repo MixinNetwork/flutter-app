@@ -1899,6 +1899,36 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Send quickly`
+  String get sendQuick {
+    return Intl.message(
+      'Send quickly',
+      name: 'sendQuick',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send without compression`
+  String get sendWithoutCompression {
+    return Intl.message(
+      'Send without compression',
+      name: 'sendWithoutCompression',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Archived all files in one zip file`
+  String get sendArchived {
+    return Intl.message(
+      'Archived all files in one zip file',
+      name: 'sendArchived',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
