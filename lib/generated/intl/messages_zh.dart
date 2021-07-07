@@ -59,6 +59,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addAnnouncement": MessageLookupByLibrary.simpleMessage("添加群公告"),
         "addContact": MessageLookupByLibrary.simpleMessage("添加联系人"),
         "appearance": MessageLookupByLibrary.simpleMessage("显示偏好"),
+        "archivedFolder": MessageLookupByLibrary.simpleMessage("存档文件夹"),
         "audio": MessageLookupByLibrary.simpleMessage("语音"),
         "audios": MessageLookupByLibrary.simpleMessage("音频"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("自动备份"),
@@ -74,6 +75,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "chatCheckOnPhone":
             MessageLookupByLibrary.simpleMessage("不支持此类型消息，请在手机上查看。"),
         "chatDragHint": MessageLookupByLibrary.simpleMessage("拖放文件到此处"),
+        "chatDragMoreFile": MessageLookupByLibrary.simpleMessage("添加文件"),
         "chatGroupAdd": m0,
         "chatGroupCreate": m1,
         "chatGroupExit": m2,
@@ -218,6 +220,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
         "searchRelatedMessage": m16,
+        "send": MessageLookupByLibrary.simpleMessage("发送"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

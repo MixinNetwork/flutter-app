@@ -2,23 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../account/account_server.dart';
-import '../constants/resources.dart';
-import '../generated/l10n.dart';
-import '../ui/home/bloc/conversation_cubit.dart';
-import '../ui/home/chat_page.dart';
-import '../ui/home/conversation_page.dart';
-import '../ui/home/route/responsive_navigator_cubit.dart';
-import '../utils/file.dart';
-import '../utils/hook.dart';
-import '../utils/string_extension.dart';
-import 'action_button.dart';
-import 'avatar_view/avatar_view.dart';
-import 'brightness_observer.dart';
-import 'buttons.dart';
-import 'input_container.dart';
-import 'interacter_decorated_box.dart';
-import 'window/move_window.dart';
+import '../../../account/account_server.dart';
+import '../../../constants/resources.dart';
+import '../../../generated/l10n.dart';
+import '../../../utils/hook.dart';
+import '../../../utils/string_extension.dart';
+import '../../../widgets/action_button.dart';
+import '../../../widgets/avatar_view/avatar_view.dart';
+import '../../../widgets/brightness_observer.dart';
+import '../../../widgets/buttons.dart';
+import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/window/move_window.dart';
+import '../bloc/conversation_cubit.dart';
+import '../chat_page.dart';
+import '../conversation_page.dart';
+import '../route/responsive_navigator_cubit.dart';
 
 class ChatBar extends HookWidget {
   const ChatBar({
@@ -118,10 +116,6 @@ class ChatBar extends HookWidget {
                   ..pushPage(ChatSideCubit.searchMessageHistory);
               },
             ),
-          ),
-          const SizedBox(width: 14),
-          MoveWindowBarrier(
-            child: _FileButton(actionColor: actionColor),
           ),
         ],
       ),
@@ -258,26 +252,5 @@ class ConversationAvatar extends StatelessWidget {
             return const SizedBox();
           },
         ),
-      );
-}
-
-class _FileButton extends StatelessWidget {
-  const _FileButton({
-    Key? key,
-    required this.actionColor,
-  }) : super(key: key);
-
-  final Color actionColor;
-
-  @override
-  Widget build(BuildContext context) => ActionButton(
-        name: Resources.assetsImagesIcFileSvg,
-        color: actionColor,
-        onTap: () async {
-          final file = await selectFile();
-          if (file == null) return;
-
-          await sendFile(context, file);
-        },
       );
 }

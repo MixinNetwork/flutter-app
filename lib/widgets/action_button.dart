@@ -58,7 +58,7 @@ class ActionButton extends StatelessWidget {
       ),
       child: Padding(
         padding: padding,
-        child: _child,
+        child: SizedBox.square(dimension: size, child: _child),
       ),
     );
   }

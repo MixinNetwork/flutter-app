@@ -65,6 +65,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Add group description"),
         "addContact": MessageLookupByLibrary.simpleMessage("Add contact"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
+        "archivedFolder":
+            MessageLookupByLibrary.simpleMessage("archived folder"),
         "audio": MessageLookupByLibrary.simpleMessage("Audio"),
         "audios": MessageLookupByLibrary.simpleMessage("Audios"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("Auto Backup"),
@@ -85,6 +87,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "This type of message is not supported, please check on your phone."),
         "chatDragHint":
             MessageLookupByLibrary.simpleMessage("Drag and drop files here"),
+        "chatDragMoreFile": MessageLookupByLibrary.simpleMessage("Add Item"),
         "chatGroupAdd": m0,
         "chatGroupCreate": m1,
         "chatGroupExit": m2,
@@ -255,6 +258,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
         "searchRelatedMessage": m16,
+        "send": MessageLookupByLibrary.simpleMessage("send"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),

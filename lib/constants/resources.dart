@@ -53,6 +53,8 @@ class Resources {
   static const String assetsImagesDarkSenderNipBubblePng =
       'assets/images/dark_sender_nip_bubble.png';
 
+  static const String assetsImagesDeleteSvg = 'assets/images/delete.svg';
+
   static const String assetsImagesDeliveredSvg = 'assets/images/delivered.svg';
 
   static const String assetsImagesDownloadSvg = 'assets/images/download.svg';
@@ -68,6 +70,15 @@ class Resources {
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 
   static const String assetsImagesFileSvg = 'assets/images/file.svg';
+
+  static const String assetsImagesFilePreviewFilesSvg =
+      'assets/images/file_preview_files.svg';
+
+  static const String assetsImagesFilePreviewImagesSvg =
+      'assets/images/file_preview_images.svg';
+
+  static const String assetsImagesFilePreviewZipSvg =
+      'assets/images/file_preview_zip.svg';
 
   static const String assetsImagesGifStickerSvg =
       'assets/images/gif_sticker.svg';

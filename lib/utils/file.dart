@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:mime/mime.dart';
@@ -6,14 +7,18 @@ import 'package:path/path.dart' as p;
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-Future<file_selector.XFile?> selectFile() async {
-  final xFile = await file_selector.openFile();
-  if (xFile == null) return null;
-  return file_selector.XFile(
-    xFile.path,
-    mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
-    name: xFile.name,
-  );
+import 'logger.dart';
+
+Future<List<file_selector.XFile>> selectFiles() async {
+  final files = await file_selector.openFiles();
+  if (files.isEmpty) return const [];
+  return files
+      .map((xFile) => file_selector.XFile(
+            xFile.path,
+            mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
+            name: xFile.name,
+          ))
+      .toList();
 }
 
 extension FileExtension on File {
@@ -71,4 +76,25 @@ Future<Directory> getMixinDocumentsDirectory() {
     return Future.value(Directory(p.join(home!, '.mixin')));
   }
   return getApplicationDocumentsDirectory();
+}
+
+Future<File?> saveBytesToTempFile(
+  Uint8List bytes,
+  String prefix, [
+  String? suffix,
+]) async {
+  final tempDir = await getTemporaryDirectory();
+
+  try {
+    final file = File(p.join(tempDir.path,
+        '${prefix}_${DateTime.now().millisecondsSinceEpoch}$suffix'));
+    if (await file.exists()) {
+      await file.delete();
+    }
+    await file.writeAsBytes(bytes);
+    return file;
+  } catch (error, stack) {
+    e('failed to save bytes to temp file. $error $stack');
+    return null;
+  }
 }
