@@ -93,7 +93,7 @@ class SendMessageHelper {
     required String senderId,
     XFile? file,
     Uint8List? bytes,
-    required MessageCategory category,
+    required String category,
     String? quoteMessageId,
     AttachmentResult? attachmentResult,
   }) async {
@@ -175,7 +175,7 @@ class SendMessageHelper {
   }
 
   Future<void> sendVideoMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId,
+      XFile file, String category, String? quoteMessageId,
       {AttachmentResult? attachmentResult}) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
@@ -235,7 +235,7 @@ class SendMessageHelper {
   }
 
   Future<void> sendStickerMessage(String conversationId, String senderId,
-      StickerMessage stickerMessage, MessageCategory category) async {
+      StickerMessage stickerMessage, String category) async {
     final encoded = await jsonBase64EncodeWithIsolate(stickerMessage);
 
     final message = Message(
@@ -259,7 +259,7 @@ class SendMessageHelper {
     String conversationId,
     String senderId,
     XFile file,
-    MessageCategory category,
+    String category,
     String? quoteMessageId, {
     AttachmentResult? attachmentResult,
     String? name,
@@ -352,7 +352,7 @@ class SendMessageHelper {
   }
 
   Future<void> sendAudioMessage(String conversationId, String senderId,
-      XFile file, MessageCategory category, String? quoteMessageId,
+      XFile file, String category, String? quoteMessageId,
       {AttachmentResult? attachmentResult}) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'audio/ogg';
@@ -654,7 +654,7 @@ class SendMessageHelper {
   Future<void> reUploadAttachment(
     String conversationId,
     String messageId,
-    MessageCategory category,
+    String category,
     File file,
     String? name,
     String mediaMimeType,

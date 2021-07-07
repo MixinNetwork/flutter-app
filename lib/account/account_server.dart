@@ -28,7 +28,6 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
-import '../db/converter/message_category_type_converter.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
@@ -464,7 +463,7 @@ class AccountServer {
                 MessageCategory.plainText,
                 MessageCategory.encryptedText,
                 MessageCategory.signalText
-              ].map((e) => const MessageCategoryTypeConverter().mapToSql(e)))))
+              ])))
         .map((row) => row.read(messages.content))
         .getSingleOrNull();
 

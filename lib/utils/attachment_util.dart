@@ -13,7 +13,6 @@ import '../crypto/attachment/crypto_attachment.dart';
 import '../db/dao/message_dao.dart';
 import '../db/extension/message_category.dart';
 import '../enum/media_status.dart';
-import '../enum/message_category.dart';
 import 'crypto_util.dart';
 import 'file.dart';
 import 'load_balancer_utils.dart';
@@ -44,7 +43,7 @@ class AttachmentUtil {
     required String messageId,
     required String content,
     required String conversationId,
-    required MessageCategory category,
+    required String category,
     AttachmentMessage? attachmentMessage,
   }) async {
     assert(_messageIdCancelTokenMap[messageId] == null);
@@ -124,7 +123,7 @@ class AttachmentUtil {
   }
 
   Future<AttachmentResult?> uploadAttachment(
-      File file, String messageId, MessageCategory category) async {
+      File file, String messageId, String category) async {
     assert(_messageIdCancelTokenMap[messageId] == null);
     await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
 
@@ -191,14 +190,14 @@ class AttachmentUtil {
     }
   }
 
-  void deleteCryptoTmpFile(MessageCategory category, File file) {
+  void deleteCryptoTmpFile(String category, File file) {
     if (category.isSignal) {
       file.delete();
     }
   }
 
   File getAttachmentFile(
-      MessageCategory category, String conversationId, String messageId,
+      String category, String conversationId, String messageId,
       {String? mimeType}) {
     assert(category.isAttachment);
     String path;
@@ -234,7 +233,7 @@ class AttachmentUtil {
   File _getAttachmentFile({
     required String messageId,
     required String conversationId,
-    required MessageCategory category,
+    required String category,
     String? mimeType,
   }) =>
       getAttachmentFile(category, conversationId, messageId,

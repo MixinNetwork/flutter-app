@@ -12,14 +12,12 @@ import 'package:path/path.dart' as p;
 
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
-import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/file.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
 import 'converter/media_status_type_converter.dart';
 import 'converter/message_action_converter.dart';
-import 'converter/message_category_type_converter.dart';
 import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';

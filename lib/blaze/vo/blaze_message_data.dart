@@ -1,12 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
 
-import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 
 part 'blaze_message_data.g.dart';
 
 @JsonSerializable()
-@MessageCategoryJsonConverter()
 class BlazeMessageData {
   BlazeMessageData(
     this.conversationId,
@@ -33,7 +31,7 @@ class BlazeMessageData {
   @JsonKey(name: 'message_id')
   String messageId;
   @JsonKey(name: 'category')
-  MessageCategory? category;
+  String? category;
   @JsonKey(name: 'data')
   String data;
   @JsonKey(name: 'status')
