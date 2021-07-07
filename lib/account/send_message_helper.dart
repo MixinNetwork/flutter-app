@@ -560,14 +560,14 @@ class SendMessageHelper {
       );
     } else if (message.category.isVideo) {
       final category =
-          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
+          isPlain ? MessageCategory.plainData : MessageCategory.signalData;
       AttachmentResult? attachmentResult;
       if (message.category == category && message.content != null) {
         attachmentResult = await _checkAttachment(message.content!);
       } else {
         attachmentResult = null;
       }
-      await sendVideoMessage(
+      await sendDataMessage(
         conversationId,
         senderId,
         XFile(message.mediaUrl!),
