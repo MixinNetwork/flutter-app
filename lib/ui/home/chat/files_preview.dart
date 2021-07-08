@@ -149,17 +149,21 @@ class _FilesPreviewDialog extends HookWidget {
                       children: [
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewImagesSvg,
+                          tooltip: Localization.of(context).sendQuick,
                           onTap: () => currentTab.value = _TabType.image,
                           selected: currentTab.value == _TabType.image,
                           show: hasImage,
                         ),
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewFilesSvg,
+                          tooltip:
+                              Localization.of(context).sendWithoutCompression,
                           onTap: () => currentTab.value = _TabType.files,
                           selected: currentTab.value == _TabType.files,
                         ),
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewZipSvg,
+                          tooltip: Localization.of(context).sendArchived,
                           onTap: () => currentTab.value = _TabType.zip,
                           selected: currentTab.value == _TabType.zip,
                           show: showZipTab,
@@ -204,10 +208,8 @@ class _FilesPreviewDialog extends HookWidget {
                   const SizedBox(height: 32),
                   Align(
                     alignment: Alignment.center,
-                    child: MixinButton(
-                      backgroundTransparent: true,
-                      child: Text(Localization.of(context).send),
-                      onTap: () async {
+                    child: ElevatedButton(
+                      onPressed: () async {
                         if (currentTab.value != _TabType.zip) {
                           for (final file in files.value) {
                             unawaited(_sendFile(context, file));
@@ -226,6 +228,11 @@ class _FilesPreviewDialog extends HookWidget {
                           Navigator.pop(context);
                         }
                       },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.only(
+                            left: 32, top: 18, bottom: 18, right: 32),
+                      ),
+                      child: Text(Localization.of(context).send.toUpperCase()),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -340,12 +347,15 @@ class _Tab extends StatelessWidget {
   const _Tab({
     Key? key,
     required this.assetName,
+    required this.tooltip,
     required this.onTap,
     this.selected = false,
     this.show = true,
   }) : super(key: key);
 
   final String assetName;
+
+  final String tooltip;
 
   final VoidCallback onTap;
 
@@ -362,14 +372,19 @@ class _Tab extends StatelessWidget {
                 onTap: onTap,
                 child: Padding(
                   padding: const EdgeInsets.all(15),
-                  child: SvgPicture.asset(
-                    assetName,
-                    color: selected
-                        ? BrightnessData.themeOf(context).accent
-                        : BrightnessData.themeOf(context).icon,
-                    width: 24,
-                    height: 24,
-                  ),
+                  child: Tooltip(
+                      message: tooltip,
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                      ),
+                      child: SvgPicture.asset(
+                        assetName,
+                        color: selected
+                            ? BrightnessData.themeOf(context).accent
+                            : BrightnessData.themeOf(context).icon,
+                        width: 24,
+                        height: 24,
+                      )),
                 ),
               )
             : const SizedBox(),
