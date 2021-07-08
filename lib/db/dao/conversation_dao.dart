@@ -47,14 +47,13 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       (select(db.conversations)
         ..where((tbl) => tbl.conversationId.equals(conversationId)));
 
-  Expression<bool?> _baseConversationItemWhere(
-          Conversations conversation,
-          Users? owner,
+  Expression<bool?> _baseConversationItemWhere(Conversations conversation,
+          [Users? owner,
           Messages? message,
           Users? lastMessageSender,
           Snapshots? snapshot,
-          Users? participant) =>
-      conversation.status.isNotNull();
+          Users? participant]) =>
+      conversation.status.isBiggerOrEqualValue(2);
 
   OrderBy _baseConversationItemOrder(
           Conversations conversation,
@@ -75,8 +74,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           Expression<bool?> Function(Conversations conversation, Users owner)
               where) =>
       db.baseConversationItemCount((conversation, owner) =>
-          _baseConversationItemWhere(
-              conversation, owner, null, null, null, null) &
+          _baseConversationItemWhere(conversation, owner) &
           where(conversation, owner));
 
   Selectable<ConversationItem> _baseConversationItems(
@@ -135,8 +133,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           Users? lastMessageSender,
           Snapshots? snapshot,
           Users? participant) =>
-      conversation.category.equals('CONTACT') &
-      owner.relationship.equals('FRIEND') &
+      conversation.category.equalsValue(ConversationCategory.contact) &
+      owner.relationship.equalsValue(UserRelationship.friend) &
       owner.appId.isNull();
 
   Selectable<int> contactConversationCount() =>
@@ -159,8 +157,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           Users? lastMessageSender,
           Snapshots? snapshot,
           Users? participant) =>
-      conversation.category.equals('CONTACT') &
-      owner.relationship.equals('STRANGER') &
+      conversation.category.equalsValue(ConversationCategory.contact) &
+      owner.relationship.equalsValue(UserRelationship.stranger) &
       owner.appId.isNull();
 
   Selectable<int> strangerConversationCount() =>
@@ -183,7 +181,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           Users? lastMessageSender,
           Snapshots? snapshot,
           Users? participant) =>
-      conversation.category.equals('GROUP');
+      conversation.category.equalsValue(ConversationCategory.contact);
 
   Selectable<int> groupConversationCount() =>
       _baseConversationItemCount((conversation, owner) =>
@@ -205,7 +203,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           Users? lastMessageSender,
           Snapshots? snapshot,
           Users? participant) =>
-      conversation.category.equals('CONTACT') & owner.appId.isNotNull();
+      conversation.category.equalsValue(ConversationCategory.contact) & owner.appId.isNotNull();
 
   Selectable<int> botConversationCount() =>
       _baseConversationItemCount((conversation, owner) =>
@@ -236,8 +234,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   Selectable<int> conversationsCountByCircleId(String circleId) =>
       db.baseConversationItemCountWithCircleConversation(
           (circleConversation, conversation, owner) =>
-              _baseConversationItemWhere(
-                  conversation, owner, null, null, null, null) &
+              _baseConversationItemWhere(conversation, owner) &
               circleConversation.circleId.equals(circleId));
 
   Selectable<ConversationItem> conversationsByCircleId(

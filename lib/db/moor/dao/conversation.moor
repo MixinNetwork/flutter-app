@@ -24,7 +24,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     lastMessage.status AS messageStatus,
     lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName, participant.user_id AS participantUserId,
-    (SELECT count(*)
+    (SELECT COUNT(1)
      FROM message_mentions messageMention
      WHERE messageMention.conversation_id = conversation.conversation_id AND
          messageMention.has_read = 0) as mentionCount,
@@ -64,7 +64,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     lastMessage.status AS messageStatus,
     lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
     participant.full_name AS participantFullName, participant.user_id AS participantUserId,
-    (SELECT count(*)
+    (SELECT COUNT(1)
      FROM message_mentions messageMention
      WHERE messageMention.conversation_id = conversation.conversation_id AND
          messageMention.has_read = 0) as mentionCount,

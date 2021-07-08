@@ -195,7 +195,6 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     lastReadMessageId =
         lastReadMessageId ?? (hasUnreadMessage ? _initIndexMessageId : null);
 
-    print('fuck _conversation: $_conversation');
     final conversationState = ConversationState(
       conversationId: conversationId,
       conversation: _conversation,

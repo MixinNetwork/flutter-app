@@ -12,3 +12,5 @@ class _MaxLimit extends Limit {
 }
 
 const ignoreWhere = CustomExpression<bool>('true');
+
+const ignoreOrderBy = OrderBy([]);

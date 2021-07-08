@@ -12,6 +12,7 @@ import '../converter/message_status_type_converter.dart';
 import '../database_event_bus.dart';
 import '../extension/message_category.dart';
 import '../mixin_database.dart';
+import '../util/util.dart';
 
 part 'message_dao.g.dart';
 
@@ -45,9 +46,17 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
       .asyncMap(
-        (event) => db.messagesByMessageIds(event.toList()).get(),
-      )
-      .distinct();
+    (event) {
+      final ids = event.toList();
+      return _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.messageId.isIn(ids),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(ids.length, 0)).get();
+    },
+  ).distinct();
 
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.insert)
@@ -57,6 +66,62 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   late Stream<String> deleteMessageIdStream =
       db.eventBus.watch<String>(DatabaseEvent.delete);
+
+  Selectable<MessageItem> _baseMessageItems(
+    Expression<bool?> Function(
+            Messages message,
+            Users sender,
+            Users participant,
+            Snapshots snapshot,
+            Assets asset,
+            Stickers sticker,
+            Hyperlinks hyperlink,
+            Users sharedUser,
+            Conversations conversation,
+            MessageMentions messageMention)
+        where,
+    Limit Function(
+            Messages message,
+            Users sender,
+            Users participant,
+            Snapshots snapshot,
+            Assets asset,
+            Stickers sticker,
+            Hyperlinks hyperlink,
+            Users sharedUser,
+            Conversations conversation,
+            MessageMentions messageMention)
+        limit, {
+    OrderBy Function(
+            Messages message,
+            Users sender,
+            Users participant,
+            Snapshots snapshot,
+            Assets asset,
+            Stickers sticker,
+            Hyperlinks hyperlink,
+            Users sharedUser,
+            Conversations conversation,
+            MessageMentions messageMention)?
+        order,
+  }) =>
+      db.baseMessageItems(
+          where,
+          (message, sender, participant, snapshot, asset, sticker, hyperlink,
+                  sharedUser, conversation, messageMention) =>
+              order?.call(
+                  message,
+                  sender,
+                  participant,
+                  snapshot,
+                  asset,
+                  sticker,
+                  hyperlink,
+                  sharedUser,
+                  conversation,
+                  messageMention) ??
+              OrderBy([OrderingTerm.desc(message.createdAt)]),
+          limit);
 
   Future<T> _sendInsertOrReplaceEventWithFuture<T>(
     List<String> messageIds,
@@ -210,7 +275,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final result = await (db.update(db.messages)
           ..where((tbl) =>
               tbl.messageId.isIn(messageIds) &
-              tbl.status.equals('FAILED').not()))
+              tbl.status.equalsValue(MessageStatus.failed).not()))
         .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
     return result;
@@ -231,22 +296,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int limit, [
     int offset = 0,
   ]) =>
-      db.messagesByConversationId(
-        conversationId,
-        offset,
-        limit,
-      );
-
-  Selectable<MessageItem> beforeMessagesByConversationId(
-          int rowId, String conversationId, int limit) =>
-      db.beforeMessagesByConversationId(rowId, conversationId, limit);
-
-  Selectable<MessageItem> afterMessagesByConversationId(
-          int rowId, String conversationId, int limit) =>
-      db.afterMessagesByConversationId(rowId, conversationId, limit);
-
-  Selectable<MessageItem> messageItemByMessageId(String messageId) =>
-      db.messageItemByMessageId(messageId);
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, offset));
 
   Selectable<int> messageCountByConversationId(String conversationId) {
     final countExp = countAll();
@@ -279,16 +335,38 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<QuoteMessageItem?> findMessageItemById(
           String conversationId, String messageId) =>
-      db.findMessageItemById(conversationId, messageId).getSingleOrNull();
+      db
+          .baseQuoteMessageItem(
+              (message, sender, sticker, shareUser, messageMention) =>
+                  message.conversationId.equals(conversationId) &
+                  message.messageId.equals(messageId) &
+                  message.status.equalsValue(MessageStatus.failed).not(),
+              (message, sender, sticker, shareUser, messageMention) =>
+                  ignoreOrderBy,
+              (message, sender, sticker, shareUser, messageMention) =>
+                  Limit(1, 0))
+          .getSingleOrNull();
 
   Future<QuoteMessageItem?> findMessageItemByMessageId(
       String? messageId) async {
     if (messageId == null) return null;
-    return db.findMessageItemByMessageId(messageId).getSingleOrNull();
+    return db
+        .baseQuoteMessageItem(
+            (message, sender, sticker, shareUser, messageMention) =>
+                message.messageId.equals(messageId) &
+                message.status.equalsValue(MessageStatus.failed).not(),
+            (message, sender, sticker, shareUser, messageMention) =>
+                ignoreOrderBy,
+            (message, sender, sticker, shareUser, messageMention) =>
+                Limit(1, 0))
+        .getSingleOrNull();
   }
 
   Future<Message?> findMessageByMessageId(String messageId) =>
-      db.findMessageByMessageId(messageId).getSingleOrNull();
+      (db.select(db.messages)
+            ..where((tbl) => tbl.messageId.equals(messageId))
+            ..limit(1))
+          .getSingleOrNull();
 
   Future<String?> findMessageIdByMessageId(String messageId) =>
       (db.selectOnly(db.messages)
@@ -306,32 +384,38 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   Future<List<String>> findFailedMessages(
           String conversationId, String userId) async =>
-      db
-          .customSelect(
-              'SELECT message_id FROM messages WHERE conversation_id = ? AND user_id = ? AND status = \'FAILED\' ORDER BY created_at DESC LIMIT 1000',
-              variables: [
-                Variable.withString(conversationId),
-                Variable.withString(userId)
-              ])
-          .map((row) => row.read<String>('message_id'))
-          .get();
+      (db.selectOnly(db.messages)
+            ..addColumns([db.messages.messageId])
+            ..where(db.messages.conversationId.equals(conversationId) &
+                db.messages.userId.equals(userId) &
+                db.messages.status.equalsValue(MessageStatus.failed))
+            ..orderBy([OrderingTerm.desc(db.messages.createdAt)])
+            ..limit(1000))
+          .map((row) {
+        final string = row.read(db.messages.messageId);
+        assert(string != null);
+        return string!;
+      }).get();
 
   Future<int> countMessageByQuoteId(String conversationId, String messageId) =>
-      (db.customSelect(
-        'SELECT count(message_id) FROM messages WHERE conversation_id = :conversationId AND quote_message_id = :messageId AND quote_content IS NULL',
-        variables: [
-          Variable.withString(conversationId),
-          Variable.withString(messageId),
-        ],
-      )).map((row) => row.read<int>('count(message_id)')).getSingle();
+      (db.selectOnly(db.messages)
+            ..addColumns([db.messages.messageId.count()])
+            ..where(db.messages.conversationId.equals(conversationId) &
+                db.messages.quoteMessageId.equals(messageId) &
+                db.messages.quoteContent.isNull()))
+          .map((row) => row.read(db.messages.messageId.count()))
+          .getSingle();
 
   Future<int> updateQuoteContentByQuoteId(
       String conversationId, String quoteMessageId, String content) async {
     final messageIds = await _findMessageIdByQuoteMessageId(quoteMessageId);
     return _sendInsertOrReplaceEventWithFuture(
         messageIds,
-        db.updateQuoteContentByQuoteId(
-            content, conversationId, quoteMessageId));
+        (db.update(db.messages)
+              ..where((tbl) =>
+                  tbl.conversationId.equals(conversationId) &
+                  tbl.quoteMessageId.equals(quoteMessageId)))
+            .write(MessagesCompanion(quoteContent: Value(content))));
   }
 
   Future<List<String>> _findMessageIdByQuoteMessageId(
@@ -345,49 +429,37 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> updateAttachmentMessageContentAndStatus(
-          String messageId, String encoded) =>
+          String messageId, String content) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.customUpdate(
-          'UPDATE messages SET content = ?, media_status = \'DONE\', status = \'SENDING\' WHERE message_id = ?',
-          variables: [
-            Variable.withString(encoded),
-            Variable.withString(messageId)
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        ),
+        (db.update(db.messages)
+              ..where((tbl) =>
+                  tbl.mediaStatus.equalsValue(MediaStatus.done) &
+                  tbl.status.equalsValue(MessageStatus.sending) &
+                  tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(content: Value(content))),
       );
 
-  Future<int> updateMessageContent(String messageId, String encoded) =>
+  Future<int> updateMessageContent(String messageId, String content) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.customUpdate(
-          'UPDATE messages SET content = ? WHERE message_id = ?',
-          variables: [
-            Variable.withString(encoded),
-            Variable.withString(messageId)
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        ),
+        (db.update(db.messages)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(content: Value(content))),
       );
 
   Future<int> updateMessageContentAndStatus(
           String messageId, String content, MessageStatus status) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.customUpdate(
-          'UPDATE messages SET content = :content, status = :status WHERE message_id = :id AND category != \'MESSAGE_RECALL\'',
-          variables: [
-            Variable.withString(content),
-            Variable.withString(
-                const MessageStatusTypeConverter().mapToSql(status)!),
-            Variable.withString(messageId),
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        ),
+        (db.update(db.messages)
+              ..where((tbl) =>
+                  tbl.messageId.equals(messageId) &
+                  tbl.category.equals(MessageCategory.messageRecall).not()))
+            .write(MessagesCompanion(
+          content: Value(content),
+          status: Value(status),
+        )),
       );
 
   Future<int> updateAttachmentMessage(
@@ -402,74 +474,197 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           String messageId, MessageStatus status, String stickerId) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.customUpdate(
-          'UPDATE messages SET sticker_id = :stickerId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
-          variables: [
-            Variable.withString(stickerId),
-            Variable.withString(
-                const MessageStatusTypeConverter().mapToSql(status)!),
-            Variable.withString(messageId),
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        ),
+        (db.update(db.messages)
+              ..where((tbl) =>
+                  tbl.messageId.equals(messageId) &
+                  tbl.category.equals(MessageCategory.messageRecall).not()))
+            .write(MessagesCompanion(
+          stickerId: Value(stickerId),
+          status: Value(status),
+        )),
       );
 
   Future<int> updateContactMessage(
           String messageId, MessageStatus status, String sharedUserId) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.customUpdate(
-          'UPDATE messages SET shared_user_id = :sharedUserId, status = :status WHERE message_id = :messageId AND category != \'MESSAGE_RECALL\'',
-          variables: [
-            Variable.withString(sharedUserId),
-            Variable.withString(
-                const MessageStatusTypeConverter().mapToSql(status)!),
-            Variable.withString(messageId),
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        ),
+        (db.update(db.messages)
+              ..where((tbl) =>
+                  tbl.messageId.equals(messageId) &
+                  tbl.category.equals(MessageCategory.messageRecall).not()))
+            .write(MessagesCompanion(
+          sharedUserId: Value(sharedUserId),
+          status: Value(status),
+        )),
       );
 
   Future<int> updateLiveMessage(String messageId, int width, int height,
           String url, String thumbUrl, MessageStatus status) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        db.customUpdate(
-          '''
-    UPDATE messages SET media_width = :width, media_height = :height, media_url=:url, thumb_url = :thumbUrl, status = :status 
-    WHERE message_id = :messageId AND category != 'SIGNAL_LIVE'
-    ''',
-          variables: [
-            Variable.withInt(width),
-            Variable.withInt(height),
-            Variable.withString(url),
-            Variable.withString(thumbUrl),
-            Variable.withString(
-                const MessageStatusTypeConverter().mapToSql(status)!),
-            Variable.withString(messageId),
-          ],
-          updates: {db.messages},
-          updateKind: UpdateKind.update,
-        ),
+        (db.update(db.messages)
+              ..where((tbl) =>
+                  tbl.messageId.equals(messageId) &
+                  tbl.category.equals(MessageCategory.signalLive).not()))
+            .write(MessagesCompanion(
+          mediaWidth: Value(width),
+          mediaHeight: Value(height),
+          mediaUrl: Value(url),
+          thumbUrl: Value(thumbUrl),
+          status: Value(status),
+        )),
       );
-
-  Selectable<int> mediaMessageRowIdByConversationId(
-    String conversationId,
-    String messageId,
-  ) =>
-      db.mediaMessageRowIdByConversationId(conversationId, messageId);
-
-  Selectable<int> mediaMessagesCount(String conversationId) =>
-      db.mediaMessagesCount(conversationId);
 
   Selectable<MessageItem> mediaMessages(
           String conversationId, int limit, int offset) =>
-      db.mediaMessages(conversationId, offset, limit);
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              message.category.isIn(['SIGNAL_IMAGE', 'PLAIN_IMAGE']),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, offset));
+
+  Selectable<MessageItem> mediaMessagesBefore(
+          int rowId, String conversationId, int limit) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
+              message.conversationId.equals(conversationId) &
+              message.category.isIn(['SIGNAL_IMAGE', 'PLAIN_IMAGE']),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, 0));
+
+  Selectable<MessageItem> mediaMessagesAfter(
+          int rowId, String conversationId, int limit) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              CustomExpression<bool>('${message.aliasedName}.rowid > $rowId') &
+              message.category.isIn(['SIGNAL_IMAGE', 'PLAIN_IMAGE']),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, 0),
+          order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              OrderBy([OrderingTerm.asc(message.createdAt)]));
+
+  Selectable<MessageItem> postMessages(
+          String conversationId, int limit, int offset) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, offset));
+
+  Selectable<MessageItem> postMessagesBefore(
+          int rowId, String conversationId, int limit) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
+              message.category.isIn(['SIGNAL_POST', 'PLAIN_POST']),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, 0));
+
+  Selectable<MessageItem> fileMessages(
+          String conversationId, int limit, int offset) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, offset));
+
+  Selectable<MessageItem> fileMessagesBefore(
+          int rowId, String conversationId, int limit) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId') &
+              message.category.isIn(['SIGNAL_DATA', 'PLAIN_DATA']),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, 0));
+
+  Selectable<MessageItem> beforeMessagesByConversationId(
+          int rowId, String conversationId, int limit) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              CustomExpression<bool>('${message.aliasedName}.rowid < $rowId'),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, 0));
+
+  Selectable<MessageItem> afterMessagesByConversationId(
+          int rowId, String conversationId, int limit,
+          {bool orEqual = false}) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.conversationId.equals(conversationId) &
+              CustomExpression<bool>(
+                  '${message.aliasedName}.rowid >${orEqual ? '=' : ''} $rowId'),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(limit, 0),
+          order: (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              OrderBy([OrderingTerm.asc(message.createdAt)]));
+
+  Selectable<MessageItem> messageItemByMessageId(
+          String messageId) =>
+      _baseMessageItems(
+          (message, _, __, ___, ____, _____, ______, _______, ________,
+                  _________) =>
+              message.messageId.equals(messageId),
+          (_, __, ___, ____, _____, ______, _______, ________, _________,
+                  __________) =>
+              Limit(1, 0));
 
   Future<void> recallMessage(String messageId) async {
-    await db.recallMessage(messageId);
+    await (db.update(db.messages)
+          ..where((tbl) => tbl.messageId.equals(messageId)))
+        .write(const MessagesCompanion(
+      category: Value(MessageCategory.messageRecall),
+      content: Value(null),
+      mediaUrl: Value(null),
+      mediaMimeType: Value(null),
+      mediaSize: Value(null),
+      mediaDuration: Value(null),
+      mediaWidth: Value(null),
+      mediaHeight: Value(null),
+      mediaHash: Value(null),
+      thumbImage: Value(null),
+      mediaKey: Value(null),
+      mediaDigest: Value(null),
+      mediaStatus: Value(null),
+      action: Value(null),
+      participantId: Value(null),
+      snapshotId: Value(null),
+      hyperlink: Value(null),
+      name: Value(null),
+      albumId: Value(null),
+      stickerId: Value(null),
+      sharedUserId: Value(null),
+      mediaWaveform: Value(null),
+      quoteMessageId: Value(null),
+      quoteContent: Value(null),
+    ));
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
   }
@@ -510,48 +705,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         keyword.trim().escapeSql().joinStar().replaceQuotationMark(),
       );
 
-  Selectable<MessageItem> mediaMessagesBefore(
-          int rowid, String conversationId, int limit) =>
-      db.mediaMessagesBefore(
-        rowid,
-        conversationId,
-        limit,
-      );
-
-  Selectable<MessageItem> mediaMessagesAfter(
-          int rowid, String conversationId, int limit) =>
-      db.mediaMessagesAfter(
-        rowid,
-        conversationId,
-        limit,
-      );
-
-  Selectable<MessageItem> postMessages(
-          String conversationId, int limit, int offset) =>
-      db.postMessages(conversationId, offset, limit);
-
-  Selectable<MessageItem> postMessagesBefore(
-          int rowid, String conversationId, int limit) =>
-      db.postMessagesBefore(
-        rowid,
-        conversationId,
-        limit,
-      );
-
-  Selectable<MessageItem> fileMessages(
-          String conversationId, int limit, int offset) =>
-      db.fileMessages(conversationId, offset, limit);
-
-  Selectable<MessageItem> fileMessagesBefore(
-          int rowid, String conversationId, int limit) =>
-      db.fileMessagesBefore(
-        rowid,
-        conversationId,
-        limit,
-      );
-
   Selectable<int> messageRowId(String messageId) => db.messageRowId(messageId);
 
   Future<int> deleteFtsByMessageId(String messageId) =>
-      db.deleteFtsByMessageId(messageId);
+      (db.delete(db.messagesFts)
+            ..where((tbl) => tbl.messageId.equals(messageId)))
+          .go();
 }
