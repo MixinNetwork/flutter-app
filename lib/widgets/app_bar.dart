@@ -53,7 +53,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         leading: MoveWindowBarrier(
           child: Builder(
             builder: (context) => ModalRoute.of(context)?.canPop ?? false
-                ? const MixinBackButton()
+                ? const Center(child: MixinBackButton())
                 : leading ?? const SizedBox(width: 56),
           ),
         ),

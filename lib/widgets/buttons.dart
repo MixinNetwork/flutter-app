@@ -19,6 +19,7 @@ class MixinBackButton extends StatelessWidget {
         child: ActionButton(
           name: Resources.assetsImagesIcBackSvg,
           color: color ?? BrightnessData.themeOf(context).icon,
+          size: 24,
           onTap: () {
             if (onTap != null) return onTap?.call();
             Navigator.pop(context);
