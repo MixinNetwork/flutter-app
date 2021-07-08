@@ -355,7 +355,7 @@ class _ActionAddParticipants extends StatelessWidget {
                   color: BrightnessData.themeOf(context).icon,
                   onTapUp: (event) =>
                       context.read<OffsetCubit>().emit(event.globalPosition),
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(8),
                 )),
       );
 }
