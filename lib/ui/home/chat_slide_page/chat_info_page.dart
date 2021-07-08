@@ -49,7 +49,7 @@ class ChatInfoPage extends HookWidget {
     final accountServer = context.read<AccountServer>();
     final userParticipant = useStream<Participant?>(
       useMemoized(
-        () => accountServer.database.conversationDao
+        () => accountServer.database.participantDao
             .participantById(conversationId, accountServer.userId)
             .watchSingleOrNull(),
         [conversationId, accountServer.userId],

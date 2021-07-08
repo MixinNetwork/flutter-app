@@ -145,23 +145,27 @@ class Job extends DataClass implements Insertable<Job> {
           {String? jobId,
           String? action,
           DateTime? createdAt,
-          int? orderId,
+          Value<int?> orderId = const Value.absent(),
           int? priority,
-          String? userId,
-          String? blazeMessage,
-          String? conversationId,
-          String? resendMessageId,
+          Value<String?> userId = const Value.absent(),
+          Value<String?> blazeMessage = const Value.absent(),
+          Value<String?> conversationId = const Value.absent(),
+          Value<String?> resendMessageId = const Value.absent(),
           int? runCount}) =>
       Job(
         jobId: jobId ?? this.jobId,
         action: action ?? this.action,
         createdAt: createdAt ?? this.createdAt,
-        orderId: orderId ?? this.orderId,
+        orderId: orderId.present ? orderId.value : this.orderId,
         priority: priority ?? this.priority,
-        userId: userId ?? this.userId,
-        blazeMessage: blazeMessage ?? this.blazeMessage,
-        conversationId: conversationId ?? this.conversationId,
-        resendMessageId: resendMessageId ?? this.resendMessageId,
+        userId: userId.present ? userId.value : this.userId,
+        blazeMessage:
+            blazeMessage.present ? blazeMessage.value : this.blazeMessage,
+        conversationId:
+            conversationId.present ? conversationId.value : this.conversationId,
+        resendMessageId: resendMessageId.present
+            ? resendMessageId.value
+            : this.resendMessageId,
         runCount: runCount ?? this.runCount,
       );
   @override
@@ -366,78 +370,61 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
   final String? _alias;
   Jobs(this._db, [this._alias]);
   final VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
-  late final GeneratedTextColumn jobId = _constructJobId();
-  GeneratedTextColumn _constructJobId() {
-    return GeneratedTextColumn('job_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> jobId = GeneratedColumn<String?>(
+      'job_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _actionMeta = const VerificationMeta('action');
-  late final GeneratedTextColumn action = _constructAction();
-  GeneratedTextColumn _constructAction() {
-    return GeneratedTextColumn('action', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> action = GeneratedColumn<String?>(
+      'action', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Jobs.$converter0);
   final VerificationMeta _orderIdMeta = const VerificationMeta('orderId');
-  late final GeneratedIntColumn orderId = _constructOrderId();
-  GeneratedIntColumn _constructOrderId() {
-    return GeneratedIntColumn('order_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> orderId = GeneratedColumn<int?>(
+      'order_id', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _priorityMeta = const VerificationMeta('priority');
-  late final GeneratedIntColumn priority = _constructPriority();
-  GeneratedIntColumn _constructPriority() {
-    return GeneratedIntColumn('priority', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> priority = GeneratedColumn<int?>(
+      'priority', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _blazeMessageMeta =
       const VerificationMeta('blazeMessage');
-  late final GeneratedTextColumn blazeMessage = _constructBlazeMessage();
-  GeneratedTextColumn _constructBlazeMessage() {
-    return GeneratedTextColumn('blaze_message', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> blazeMessage = GeneratedColumn<String?>(
+      'blaze_message', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _resendMessageIdMeta =
       const VerificationMeta('resendMessageId');
-  late final GeneratedTextColumn resendMessageId = _constructResendMessageId();
-  GeneratedTextColumn _constructResendMessageId() {
-    return GeneratedTextColumn('resend_message_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> resendMessageId =
+      GeneratedColumn<String?>('resend_message_id', aliasedName, true,
+          typeName: 'TEXT',
+          requiredDuringInsert: false,
+          $customConstraints: '');
   final VerificationMeta _runCountMeta = const VerificationMeta('runCount');
-  late final GeneratedIntColumn runCount = _constructRunCount();
-  GeneratedIntColumn _constructRunCount() {
-    return GeneratedIntColumn('run_count', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> runCount = GeneratedColumn<int?>(
+      'run_count', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [
         jobId,
@@ -452,11 +439,9 @@ class Jobs extends Table with TableInfo<Jobs, Job> {
         runCount
       ];
   @override
-  Jobs get asDslTable => this;
+  String get aliasedName => _alias ?? 'jobs';
   @override
-  String get $tableName => _alias ?? 'jobs';
-  @override
-  final String actualTableName = 'jobs';
+  String get actualTableName => 'jobs';
   @override
   VerificationContext validateIntegrity(Insertable<Job> instance,
       {bool isInserting = false}) {
@@ -775,40 +760,48 @@ class Conversation extends DataClass implements Insertable<Conversation> {
 
   Conversation copyWith(
           {String? conversationId,
-          String? ownerId,
-          ConversationCategory? category,
-          String? name,
-          String? iconUrl,
-          String? announcement,
-          String? codeUrl,
-          String? payType,
+          Value<String?> ownerId = const Value.absent(),
+          Value<ConversationCategory?> category = const Value.absent(),
+          Value<String?> name = const Value.absent(),
+          Value<String?> iconUrl = const Value.absent(),
+          Value<String?> announcement = const Value.absent(),
+          Value<String?> codeUrl = const Value.absent(),
+          Value<String?> payType = const Value.absent(),
           DateTime? createdAt,
-          DateTime? pinTime,
-          String? lastMessageId,
-          DateTime? lastMessageCreatedAt,
-          String? lastReadMessageId,
-          int? unseenMessageCount,
+          Value<DateTime?> pinTime = const Value.absent(),
+          Value<String?> lastMessageId = const Value.absent(),
+          Value<DateTime?> lastMessageCreatedAt = const Value.absent(),
+          Value<String?> lastReadMessageId = const Value.absent(),
+          Value<int?> unseenMessageCount = const Value.absent(),
           ConversationStatus? status,
-          String? draft,
-          DateTime? muteUntil}) =>
+          Value<String?> draft = const Value.absent(),
+          Value<DateTime?> muteUntil = const Value.absent()}) =>
       Conversation(
         conversationId: conversationId ?? this.conversationId,
-        ownerId: ownerId ?? this.ownerId,
-        category: category ?? this.category,
-        name: name ?? this.name,
-        iconUrl: iconUrl ?? this.iconUrl,
-        announcement: announcement ?? this.announcement,
-        codeUrl: codeUrl ?? this.codeUrl,
-        payType: payType ?? this.payType,
+        ownerId: ownerId.present ? ownerId.value : this.ownerId,
+        category: category.present ? category.value : this.category,
+        name: name.present ? name.value : this.name,
+        iconUrl: iconUrl.present ? iconUrl.value : this.iconUrl,
+        announcement:
+            announcement.present ? announcement.value : this.announcement,
+        codeUrl: codeUrl.present ? codeUrl.value : this.codeUrl,
+        payType: payType.present ? payType.value : this.payType,
         createdAt: createdAt ?? this.createdAt,
-        pinTime: pinTime ?? this.pinTime,
-        lastMessageId: lastMessageId ?? this.lastMessageId,
-        lastMessageCreatedAt: lastMessageCreatedAt ?? this.lastMessageCreatedAt,
-        lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
-        unseenMessageCount: unseenMessageCount ?? this.unseenMessageCount,
+        pinTime: pinTime.present ? pinTime.value : this.pinTime,
+        lastMessageId:
+            lastMessageId.present ? lastMessageId.value : this.lastMessageId,
+        lastMessageCreatedAt: lastMessageCreatedAt.present
+            ? lastMessageCreatedAt.value
+            : this.lastMessageCreatedAt,
+        lastReadMessageId: lastReadMessageId.present
+            ? lastReadMessageId.value
+            : this.lastReadMessageId,
+        unseenMessageCount: unseenMessageCount.present
+            ? unseenMessageCount.value
+            : this.unseenMessageCount,
         status: status ?? this.status,
-        draft: draft ?? this.draft,
-        muteUntil: muteUntil ?? this.muteUntil,
+        draft: draft.present ? draft.value : this.draft,
+        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
       );
   @override
   String toString() {
@@ -1129,132 +1122,101 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   Conversations(this._db, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _ownerIdMeta = const VerificationMeta('ownerId');
-  late final GeneratedTextColumn ownerId = _constructOwnerId();
-  GeneratedTextColumn _constructOwnerId() {
-    return GeneratedTextColumn('owner_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> ownerId = GeneratedColumn<String?>(
+      'owner_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
-  late final GeneratedTextColumn category = _constructCategory();
-  GeneratedTextColumn _constructCategory() {
-    return GeneratedTextColumn('category', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<ConversationCategory, String?>
+      category = GeneratedColumn<String?>('category', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<ConversationCategory>(Conversations.$converter0);
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn('name', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
-  late final GeneratedTextColumn iconUrl = _constructIconUrl();
-  GeneratedTextColumn _constructIconUrl() {
-    return GeneratedTextColumn('icon_url', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
+      'icon_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _announcementMeta =
       const VerificationMeta('announcement');
-  late final GeneratedTextColumn announcement = _constructAnnouncement();
-  GeneratedTextColumn _constructAnnouncement() {
-    return GeneratedTextColumn('announcement', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> announcement = GeneratedColumn<String?>(
+      'announcement', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _codeUrlMeta = const VerificationMeta('codeUrl');
-  late final GeneratedTextColumn codeUrl = _constructCodeUrl();
-  GeneratedTextColumn _constructCodeUrl() {
-    return GeneratedTextColumn('code_url', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> codeUrl = GeneratedColumn<String?>(
+      'code_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _payTypeMeta = const VerificationMeta('payType');
-  late final GeneratedTextColumn payType = _constructPayType();
-  GeneratedTextColumn _constructPayType() {
-    return GeneratedTextColumn('pay_type', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> payType = GeneratedColumn<String?>(
+      'pay_type', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Conversations.$converter1);
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
-  late final GeneratedIntColumn pinTime = _constructPinTime();
-  GeneratedIntColumn _constructPinTime() {
-    return GeneratedIntColumn('pin_time', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> pinTime =
+      GeneratedColumn<int?>('pin_time', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Conversations.$converter2);
   final VerificationMeta _lastMessageIdMeta =
       const VerificationMeta('lastMessageId');
-  late final GeneratedTextColumn lastMessageId = _constructLastMessageId();
-  GeneratedTextColumn _constructLastMessageId() {
-    return GeneratedTextColumn('last_message_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> lastMessageId = GeneratedColumn<String?>(
+      'last_message_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _lastMessageCreatedAtMeta =
       const VerificationMeta('lastMessageCreatedAt');
-  late final GeneratedIntColumn lastMessageCreatedAt =
-      _constructLastMessageCreatedAt();
-  GeneratedIntColumn _constructLastMessageCreatedAt() {
-    return GeneratedIntColumn('last_message_created_at', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?>
+      lastMessageCreatedAt = GeneratedColumn<int?>(
+              'last_message_created_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Conversations.$converter3);
   final VerificationMeta _lastReadMessageIdMeta =
       const VerificationMeta('lastReadMessageId');
-  late final GeneratedTextColumn lastReadMessageId =
-      _constructLastReadMessageId();
-  GeneratedTextColumn _constructLastReadMessageId() {
-    return GeneratedTextColumn('last_read_message_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> lastReadMessageId =
+      GeneratedColumn<String?>('last_read_message_id', aliasedName, true,
+          typeName: 'TEXT',
+          requiredDuringInsert: false,
+          $customConstraints: '');
   final VerificationMeta _unseenMessageCountMeta =
       const VerificationMeta('unseenMessageCount');
-  late final GeneratedIntColumn unseenMessageCount =
-      _constructUnseenMessageCount();
-  GeneratedIntColumn _constructUnseenMessageCount() {
-    return GeneratedIntColumn('unseen_message_count', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> unseenMessageCount = GeneratedColumn<int?>(
+      'unseen_message_count', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  late final GeneratedIntColumn status = _constructStatus();
-  GeneratedIntColumn _constructStatus() {
-    return GeneratedIntColumn('status', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<ConversationStatus, int?> status =
+      GeneratedColumn<int?>('status', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<ConversationStatus>(Conversations.$converter4);
   final VerificationMeta _draftMeta = const VerificationMeta('draft');
-  late final GeneratedTextColumn draft = _constructDraft();
-  GeneratedTextColumn _constructDraft() {
-    return GeneratedTextColumn('draft', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> draft = GeneratedColumn<String?>(
+      'draft', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  late final GeneratedIntColumn muteUntil = _constructMuteUntil();
-  GeneratedIntColumn _constructMuteUntil() {
-    return GeneratedIntColumn('mute_until', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
+      GeneratedColumn<int?>('mute_until', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Conversations.$converter5);
   @override
   List<GeneratedColumn> get $columns => [
         conversationId,
@@ -1276,11 +1238,9 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
         muteUntil
       ];
   @override
-  Conversations get asDslTable => this;
+  String get aliasedName => _alias ?? 'conversations';
   @override
-  String get $tableName => _alias ?? 'conversations';
-  @override
-  final String actualTableName = 'conversations';
+  String get actualTableName => 'conversations';
   @override
   VerificationContext validateIntegrity(Insertable<Conversation> instance,
       {bool isInserting = false}) {
@@ -1757,63 +1717,70 @@ class Message extends DataClass implements Insertable<Message> {
           String? conversationId,
           String? userId,
           String? category,
-          String? content,
-          String? mediaUrl,
-          String? mediaMimeType,
-          int? mediaSize,
-          String? mediaDuration,
-          int? mediaWidth,
-          int? mediaHeight,
-          String? mediaHash,
-          String? thumbImage,
-          String? mediaKey,
-          String? mediaDigest,
-          MediaStatus? mediaStatus,
+          Value<String?> content = const Value.absent(),
+          Value<String?> mediaUrl = const Value.absent(),
+          Value<String?> mediaMimeType = const Value.absent(),
+          Value<int?> mediaSize = const Value.absent(),
+          Value<String?> mediaDuration = const Value.absent(),
+          Value<int?> mediaWidth = const Value.absent(),
+          Value<int?> mediaHeight = const Value.absent(),
+          Value<String?> mediaHash = const Value.absent(),
+          Value<String?> thumbImage = const Value.absent(),
+          Value<String?> mediaKey = const Value.absent(),
+          Value<String?> mediaDigest = const Value.absent(),
+          Value<MediaStatus?> mediaStatus = const Value.absent(),
           MessageStatus? status,
           DateTime? createdAt,
-          MessageAction? action,
-          String? participantId,
-          String? snapshotId,
-          String? hyperlink,
-          String? name,
-          String? albumId,
-          String? stickerId,
-          String? sharedUserId,
-          String? mediaWaveform,
-          String? quoteMessageId,
-          String? quoteContent,
-          String? thumbUrl}) =>
+          Value<MessageAction?> action = const Value.absent(),
+          Value<String?> participantId = const Value.absent(),
+          Value<String?> snapshotId = const Value.absent(),
+          Value<String?> hyperlink = const Value.absent(),
+          Value<String?> name = const Value.absent(),
+          Value<String?> albumId = const Value.absent(),
+          Value<String?> stickerId = const Value.absent(),
+          Value<String?> sharedUserId = const Value.absent(),
+          Value<String?> mediaWaveform = const Value.absent(),
+          Value<String?> quoteMessageId = const Value.absent(),
+          Value<String?> quoteContent = const Value.absent(),
+          Value<String?> thumbUrl = const Value.absent()}) =>
       Message(
         messageId: messageId ?? this.messageId,
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
         category: category ?? this.category,
-        content: content ?? this.content,
-        mediaUrl: mediaUrl ?? this.mediaUrl,
-        mediaMimeType: mediaMimeType ?? this.mediaMimeType,
-        mediaSize: mediaSize ?? this.mediaSize,
-        mediaDuration: mediaDuration ?? this.mediaDuration,
-        mediaWidth: mediaWidth ?? this.mediaWidth,
-        mediaHeight: mediaHeight ?? this.mediaHeight,
-        mediaHash: mediaHash ?? this.mediaHash,
-        thumbImage: thumbImage ?? this.thumbImage,
-        mediaKey: mediaKey ?? this.mediaKey,
-        mediaDigest: mediaDigest ?? this.mediaDigest,
-        mediaStatus: mediaStatus ?? this.mediaStatus,
+        content: content.present ? content.value : this.content,
+        mediaUrl: mediaUrl.present ? mediaUrl.value : this.mediaUrl,
+        mediaMimeType:
+            mediaMimeType.present ? mediaMimeType.value : this.mediaMimeType,
+        mediaSize: mediaSize.present ? mediaSize.value : this.mediaSize,
+        mediaDuration:
+            mediaDuration.present ? mediaDuration.value : this.mediaDuration,
+        mediaWidth: mediaWidth.present ? mediaWidth.value : this.mediaWidth,
+        mediaHeight: mediaHeight.present ? mediaHeight.value : this.mediaHeight,
+        mediaHash: mediaHash.present ? mediaHash.value : this.mediaHash,
+        thumbImage: thumbImage.present ? thumbImage.value : this.thumbImage,
+        mediaKey: mediaKey.present ? mediaKey.value : this.mediaKey,
+        mediaDigest: mediaDigest.present ? mediaDigest.value : this.mediaDigest,
+        mediaStatus: mediaStatus.present ? mediaStatus.value : this.mediaStatus,
         status: status ?? this.status,
         createdAt: createdAt ?? this.createdAt,
-        action: action ?? this.action,
-        participantId: participantId ?? this.participantId,
-        snapshotId: snapshotId ?? this.snapshotId,
-        hyperlink: hyperlink ?? this.hyperlink,
-        name: name ?? this.name,
-        albumId: albumId ?? this.albumId,
-        stickerId: stickerId ?? this.stickerId,
-        sharedUserId: sharedUserId ?? this.sharedUserId,
-        mediaWaveform: mediaWaveform ?? this.mediaWaveform,
-        quoteMessageId: quoteMessageId ?? this.quoteMessageId,
-        quoteContent: quoteContent ?? this.quoteContent,
-        thumbUrl: thumbUrl ?? this.thumbUrl,
+        action: action.present ? action.value : this.action,
+        participantId:
+            participantId.present ? participantId.value : this.participantId,
+        snapshotId: snapshotId.present ? snapshotId.value : this.snapshotId,
+        hyperlink: hyperlink.present ? hyperlink.value : this.hyperlink,
+        name: name.present ? name.value : this.name,
+        albumId: albumId.present ? albumId.value : this.albumId,
+        stickerId: stickerId.present ? stickerId.value : this.stickerId,
+        sharedUserId:
+            sharedUserId.present ? sharedUserId.value : this.sharedUserId,
+        mediaWaveform:
+            mediaWaveform.present ? mediaWaveform.value : this.mediaWaveform,
+        quoteMessageId:
+            quoteMessageId.present ? quoteMessageId.value : this.quoteMessageId,
+        quoteContent:
+            quoteContent.present ? quoteContent.value : this.quoteContent,
+        thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
       );
   @override
   String toString() {
@@ -2307,226 +2274,156 @@ class Messages extends Table with TableInfo<Messages, Message> {
   final String? _alias;
   Messages(this._db, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
-  late final GeneratedTextColumn category = _constructCategory();
-  GeneratedTextColumn _constructCategory() {
-    return GeneratedTextColumn('category', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
+      'category', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _contentMeta = const VerificationMeta('content');
-  late final GeneratedTextColumn content = _constructContent();
-  GeneratedTextColumn _constructContent() {
-    return GeneratedTextColumn('content', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> content = GeneratedColumn<String?>(
+      'content', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaUrlMeta = const VerificationMeta('mediaUrl');
-  late final GeneratedTextColumn mediaUrl = _constructMediaUrl();
-  GeneratedTextColumn _constructMediaUrl() {
-    return GeneratedTextColumn('media_url', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> mediaUrl = GeneratedColumn<String?>(
+      'media_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaMimeTypeMeta =
       const VerificationMeta('mediaMimeType');
-  late final GeneratedTextColumn mediaMimeType = _constructMediaMimeType();
-  GeneratedTextColumn _constructMediaMimeType() {
-    return GeneratedTextColumn('media_mime_type', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> mediaMimeType = GeneratedColumn<String?>(
+      'media_mime_type', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaSizeMeta = const VerificationMeta('mediaSize');
-  late final GeneratedIntColumn mediaSize = _constructMediaSize();
-  GeneratedIntColumn _constructMediaSize() {
-    return GeneratedIntColumn('media_size', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> mediaSize = GeneratedColumn<int?>(
+      'media_size', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaDurationMeta =
       const VerificationMeta('mediaDuration');
-  late final GeneratedTextColumn mediaDuration = _constructMediaDuration();
-  GeneratedTextColumn _constructMediaDuration() {
-    return GeneratedTextColumn('media_duration', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> mediaDuration = GeneratedColumn<String?>(
+      'media_duration', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaWidthMeta = const VerificationMeta('mediaWidth');
-  late final GeneratedIntColumn mediaWidth = _constructMediaWidth();
-  GeneratedIntColumn _constructMediaWidth() {
-    return GeneratedIntColumn('media_width', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> mediaWidth = GeneratedColumn<int?>(
+      'media_width', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaHeightMeta =
       const VerificationMeta('mediaHeight');
-  late final GeneratedIntColumn mediaHeight = _constructMediaHeight();
-  GeneratedIntColumn _constructMediaHeight() {
-    return GeneratedIntColumn('media_height', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> mediaHeight = GeneratedColumn<int?>(
+      'media_height', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaHashMeta = const VerificationMeta('mediaHash');
-  late final GeneratedTextColumn mediaHash = _constructMediaHash();
-  GeneratedTextColumn _constructMediaHash() {
-    return GeneratedTextColumn('media_hash', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> mediaHash = GeneratedColumn<String?>(
+      'media_hash', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _thumbImageMeta = const VerificationMeta('thumbImage');
-  late final GeneratedTextColumn thumbImage = _constructThumbImage();
-  GeneratedTextColumn _constructThumbImage() {
-    return GeneratedTextColumn('thumb_image', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> thumbImage = GeneratedColumn<String?>(
+      'thumb_image', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaKeyMeta = const VerificationMeta('mediaKey');
-  late final GeneratedTextColumn mediaKey = _constructMediaKey();
-  GeneratedTextColumn _constructMediaKey() {
-    return GeneratedTextColumn('media_key', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> mediaKey = GeneratedColumn<String?>(
+      'media_key', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaDigestMeta =
       const VerificationMeta('mediaDigest');
-  late final GeneratedTextColumn mediaDigest = _constructMediaDigest();
-  GeneratedTextColumn _constructMediaDigest() {
-    return GeneratedTextColumn('media_digest', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> mediaDigest = GeneratedColumn<String?>(
+      'media_digest', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaStatusMeta =
       const VerificationMeta('mediaStatus');
-  late final GeneratedTextColumn mediaStatus = _constructMediaStatus();
-  GeneratedTextColumn _constructMediaStatus() {
-    return GeneratedTextColumn('media_status', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<MediaStatus, String?>
+      mediaStatus = GeneratedColumn<String?>('media_status', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<MediaStatus>(Messages.$converter0);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  late final GeneratedTextColumn status = _constructStatus();
-  GeneratedTextColumn _constructStatus() {
-    return GeneratedTextColumn('status', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<MessageStatus, String?> status =
+      GeneratedColumn<String?>('status', aliasedName, false,
+              typeName: 'TEXT',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<MessageStatus>(Messages.$converter1);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Messages.$converter2);
   final VerificationMeta _actionMeta = const VerificationMeta('action');
-  late final GeneratedTextColumn action = _constructAction();
-  GeneratedTextColumn _constructAction() {
-    return GeneratedTextColumn('action', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<MessageAction, String?> action =
+      GeneratedColumn<String?>('action', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<MessageAction>(Messages.$converter3);
   final VerificationMeta _participantIdMeta =
       const VerificationMeta('participantId');
-  late final GeneratedTextColumn participantId = _constructParticipantId();
-  GeneratedTextColumn _constructParticipantId() {
-    return GeneratedTextColumn('participant_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> participantId = GeneratedColumn<String?>(
+      'participant_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _snapshotIdMeta = const VerificationMeta('snapshotId');
-  late final GeneratedTextColumn snapshotId = _constructSnapshotId();
-  GeneratedTextColumn _constructSnapshotId() {
-    return GeneratedTextColumn('snapshot_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> snapshotId = GeneratedColumn<String?>(
+      'snapshot_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _hyperlinkMeta = const VerificationMeta('hyperlink');
-  late final GeneratedTextColumn hyperlink = _constructHyperlink();
-  GeneratedTextColumn _constructHyperlink() {
-    return GeneratedTextColumn('hyperlink', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> hyperlink = GeneratedColumn<String?>(
+      'hyperlink', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn('name', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
-  late final GeneratedTextColumn albumId = _constructAlbumId();
-  GeneratedTextColumn _constructAlbumId() {
-    return GeneratedTextColumn('album_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
+      'album_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
-  late final GeneratedTextColumn stickerId = _constructStickerId();
-  GeneratedTextColumn _constructStickerId() {
-    return GeneratedTextColumn('sticker_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
+      'sticker_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _sharedUserIdMeta =
       const VerificationMeta('sharedUserId');
-  late final GeneratedTextColumn sharedUserId = _constructSharedUserId();
-  GeneratedTextColumn _constructSharedUserId() {
-    return GeneratedTextColumn('shared_user_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> sharedUserId = GeneratedColumn<String?>(
+      'shared_user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaWaveformMeta =
       const VerificationMeta('mediaWaveform');
-  late final GeneratedTextColumn mediaWaveform = _constructMediaWaveform();
-  GeneratedTextColumn _constructMediaWaveform() {
-    return GeneratedTextColumn('media_waveform', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> mediaWaveform = GeneratedColumn<String?>(
+      'media_waveform', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _quoteMessageIdMeta =
       const VerificationMeta('quoteMessageId');
-  late final GeneratedTextColumn quoteMessageId = _constructQuoteMessageId();
-  GeneratedTextColumn _constructQuoteMessageId() {
-    return GeneratedTextColumn('quote_message_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> quoteMessageId = GeneratedColumn<String?>(
+      'quote_message_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _quoteContentMeta =
       const VerificationMeta('quoteContent');
-  late final GeneratedTextColumn quoteContent = _constructQuoteContent();
-  GeneratedTextColumn _constructQuoteContent() {
-    return GeneratedTextColumn('quote_content', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> quoteContent = GeneratedColumn<String?>(
+      'quote_content', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _thumbUrlMeta = const VerificationMeta('thumbUrl');
-  late final GeneratedTextColumn thumbUrl = _constructThumbUrl();
-  GeneratedTextColumn _constructThumbUrl() {
-    return GeneratedTextColumn('thumb_url', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> thumbUrl = GeneratedColumn<String?>(
+      'thumb_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         messageId,
@@ -2561,11 +2458,9 @@ class Messages extends Table with TableInfo<Messages, Message> {
         thumbUrl
       ];
   @override
-  Messages get asDslTable => this;
+  String get aliasedName => _alias ?? 'messages';
   @override
-  String get $tableName => _alias ?? 'messages';
-  @override
-  final String actualTableName = 'messages';
+  String get actualTableName => 'messages';
   @override
   VerificationContext validateIntegrity(Insertable<Message> instance,
       {bool isInserting = false}) {
@@ -2805,11 +2700,13 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
   }
 
   MessageMention copyWith(
-          {String? messageId, String? conversationId, bool? hasRead}) =>
+          {String? messageId,
+          String? conversationId,
+          Value<bool?> hasRead = const Value.absent()}) =>
       MessageMention(
         messageId: messageId ?? this.messageId,
         conversationId: conversationId ?? this.conversationId,
-        hasRead: hasRead ?? this.hasRead,
+        hasRead: hasRead.present ? hasRead.value : this.hasRead,
       );
   @override
   String toString() {
@@ -2903,35 +2800,28 @@ class MessageMentions extends Table
   final String? _alias;
   MessageMentions(this._db, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _hasReadMeta = const VerificationMeta('hasRead');
-  late final GeneratedBoolColumn hasRead = _constructHasRead();
-  GeneratedBoolColumn _constructHasRead() {
-    return GeneratedBoolColumn('has_read', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<bool?> hasRead = GeneratedColumn<bool?>(
+      'has_read', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [messageId, conversationId, hasRead];
   @override
-  MessageMentions get asDslTable => this;
+  String get aliasedName => _alias ?? 'message_mentions';
   @override
-  String get $tableName => _alias ?? 'message_mentions';
-  @override
-  final String actualTableName = 'message_mentions';
+  String get actualTableName => 'message_mentions';
   @override
   VerificationContext validateIntegrity(Insertable<MessageMention> instance,
       {bool isInserting = false}) {
@@ -3160,31 +3050,32 @@ class User extends DataClass implements Insertable<User> {
   User copyWith(
           {String? userId,
           String? identityNumber,
-          UserRelationship? relationship,
-          String? fullName,
-          String? avatarUrl,
-          String? phone,
-          bool? isVerified,
-          DateTime? createdAt,
-          DateTime? muteUntil,
-          int? hasPin,
-          String? appId,
-          String? biography,
-          int? isScam}) =>
+          Value<UserRelationship?> relationship = const Value.absent(),
+          Value<String?> fullName = const Value.absent(),
+          Value<String?> avatarUrl = const Value.absent(),
+          Value<String?> phone = const Value.absent(),
+          Value<bool?> isVerified = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<DateTime?> muteUntil = const Value.absent(),
+          Value<int?> hasPin = const Value.absent(),
+          Value<String?> appId = const Value.absent(),
+          Value<String?> biography = const Value.absent(),
+          Value<int?> isScam = const Value.absent()}) =>
       User(
         userId: userId ?? this.userId,
         identityNumber: identityNumber ?? this.identityNumber,
-        relationship: relationship ?? this.relationship,
-        fullName: fullName ?? this.fullName,
-        avatarUrl: avatarUrl ?? this.avatarUrl,
-        phone: phone ?? this.phone,
-        isVerified: isVerified ?? this.isVerified,
-        createdAt: createdAt ?? this.createdAt,
-        muteUntil: muteUntil ?? this.muteUntil,
-        hasPin: hasPin ?? this.hasPin,
-        appId: appId ?? this.appId,
-        biography: biography ?? this.biography,
-        isScam: isScam ?? this.isScam,
+        relationship:
+            relationship.present ? relationship.value : this.relationship,
+        fullName: fullName.present ? fullName.value : this.fullName,
+        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
+        phone: phone.present ? phone.value : this.phone,
+        isVerified: isVerified.present ? isVerified.value : this.isVerified,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
+        hasPin: hasPin.present ? hasPin.value : this.hasPin,
+        appId: appId.present ? appId.value : this.appId,
+        biography: biography.present ? biography.value : this.biography,
+        isScam: isScam.present ? isScam.value : this.isScam,
       );
   @override
   String toString() {
@@ -3433,98 +3324,72 @@ class Users extends Table with TableInfo<Users, User> {
   final String? _alias;
   Users(this._db, [this._alias]);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _identityNumberMeta =
       const VerificationMeta('identityNumber');
-  late final GeneratedTextColumn identityNumber = _constructIdentityNumber();
-  GeneratedTextColumn _constructIdentityNumber() {
-    return GeneratedTextColumn('identity_number', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> identityNumber = GeneratedColumn<String?>(
+      'identity_number', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _relationshipMeta =
       const VerificationMeta('relationship');
-  late final GeneratedTextColumn relationship = _constructRelationship();
-  GeneratedTextColumn _constructRelationship() {
-    return GeneratedTextColumn('relationship', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<UserRelationship, String?>
+      relationship = GeneratedColumn<String?>('relationship', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<UserRelationship>(Users.$converter0);
   final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
-  late final GeneratedTextColumn fullName = _constructFullName();
-  GeneratedTextColumn _constructFullName() {
-    return GeneratedTextColumn('full_name', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> fullName = GeneratedColumn<String?>(
+      'full_name', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _avatarUrlMeta = const VerificationMeta('avatarUrl');
-  late final GeneratedTextColumn avatarUrl = _constructAvatarUrl();
-  GeneratedTextColumn _constructAvatarUrl() {
-    return GeneratedTextColumn('avatar_url', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> avatarUrl = GeneratedColumn<String?>(
+      'avatar_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _phoneMeta = const VerificationMeta('phone');
-  late final GeneratedTextColumn phone = _constructPhone();
-  GeneratedTextColumn _constructPhone() {
-    return GeneratedTextColumn('phone', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> phone = GeneratedColumn<String?>(
+      'phone', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
-  late final GeneratedBoolColumn isVerified = _constructIsVerified();
-  GeneratedBoolColumn _constructIsVerified() {
-    return GeneratedBoolColumn('is_verified', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<bool?> isVerified = GeneratedColumn<bool?>(
+      'is_verified', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Users.$converter1);
   final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  late final GeneratedIntColumn muteUntil = _constructMuteUntil();
-  GeneratedIntColumn _constructMuteUntil() {
-    return GeneratedIntColumn('mute_until', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
+      GeneratedColumn<int?>('mute_until', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Users.$converter2);
   final VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
-  late final GeneratedIntColumn hasPin = _constructHasPin();
-  GeneratedIntColumn _constructHasPin() {
-    return GeneratedIntColumn('has_pin', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> hasPin = GeneratedColumn<int?>(
+      'has_pin', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedTextColumn appId = _constructAppId();
-  GeneratedTextColumn _constructAppId() {
-    return GeneratedTextColumn('app_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
+      'app_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _biographyMeta = const VerificationMeta('biography');
-  late final GeneratedTextColumn biography = _constructBiography();
-  GeneratedTextColumn _constructBiography() {
-    return GeneratedTextColumn('biography', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> biography = GeneratedColumn<String?>(
+      'biography', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _isScamMeta = const VerificationMeta('isScam');
-  late final GeneratedIntColumn isScam = _constructIsScam();
-  GeneratedIntColumn _constructIsScam() {
-    return GeneratedIntColumn('is_scam', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> isScam = GeneratedColumn<int?>(
+      'is_scam', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         userId,
@@ -3542,11 +3407,9 @@ class Users extends Table with TableInfo<Users, User> {
         isScam
       ];
   @override
-  Users get asDslTable => this;
+  String get aliasedName => _alias ?? 'users';
   @override
-  String get $tableName => _alias ?? 'users';
-  @override
-  final String actualTableName = 'users';
+  String get actualTableName => 'users';
   @override
   VerificationContext validateIntegrity(Insertable<User> instance,
       {bool isInserting = false}) {
@@ -3773,26 +3636,26 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           {String? addressId,
           String? type,
           String? assetId,
-          String? publicKey,
-          String? label,
+          Value<String?> publicKey = const Value.absent(),
+          Value<String?> label = const Value.absent(),
           DateTime? updatedAt,
           String? reserve,
           String? fee,
-          String? accountName,
-          String? accountTag,
-          String? dust}) =>
+          Value<String?> accountName = const Value.absent(),
+          Value<String?> accountTag = const Value.absent(),
+          Value<String?> dust = const Value.absent()}) =>
       Addresse(
         addressId: addressId ?? this.addressId,
         type: type ?? this.type,
         assetId: assetId ?? this.assetId,
-        publicKey: publicKey ?? this.publicKey,
-        label: label ?? this.label,
+        publicKey: publicKey.present ? publicKey.value : this.publicKey,
+        label: label.present ? label.value : this.label,
         updatedAt: updatedAt ?? this.updatedAt,
         reserve: reserve ?? this.reserve,
         fee: fee ?? this.fee,
-        accountName: accountName ?? this.accountName,
-        accountTag: accountTag ?? this.accountTag,
-        dust: dust ?? this.dust,
+        accountName: accountName.present ? accountName.value : this.accountName,
+        accountTag: accountTag.present ? accountTag.value : this.accountTag,
+        dust: dust.present ? dust.value : this.dust,
       );
   @override
   String toString() {
@@ -4012,83 +3875,63 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
   final String? _alias;
   Addresses(this._db, [this._alias]);
   final VerificationMeta _addressIdMeta = const VerificationMeta('addressId');
-  late final GeneratedTextColumn addressId = _constructAddressId();
-  GeneratedTextColumn _constructAddressId() {
-    return GeneratedTextColumn('address_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> addressId = GeneratedColumn<String?>(
+      'address_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
-  late final GeneratedTextColumn type = _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _assetIdMeta = const VerificationMeta('assetId');
-  late final GeneratedTextColumn assetId = _constructAssetId();
-  GeneratedTextColumn _constructAssetId() {
-    return GeneratedTextColumn('asset_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> assetId = GeneratedColumn<String?>(
+      'asset_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
-  late final GeneratedTextColumn publicKey = _constructPublicKey();
-  GeneratedTextColumn _constructPublicKey() {
-    return GeneratedTextColumn('public_key', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> publicKey = GeneratedColumn<String?>(
+      'public_key', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _labelMeta = const VerificationMeta('label');
-  late final GeneratedTextColumn label = _constructLabel();
-  GeneratedTextColumn _constructLabel() {
-    return GeneratedTextColumn('label', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> label = GeneratedColumn<String?>(
+      'label', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  late final GeneratedIntColumn updatedAt = _constructUpdatedAt();
-  GeneratedIntColumn _constructUpdatedAt() {
-    return GeneratedIntColumn('updated_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> updatedAt =
+      GeneratedColumn<int?>('updated_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Addresses.$converter0);
   final VerificationMeta _reserveMeta = const VerificationMeta('reserve');
-  late final GeneratedTextColumn reserve = _constructReserve();
-  GeneratedTextColumn _constructReserve() {
-    return GeneratedTextColumn('reserve', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> reserve = GeneratedColumn<String?>(
+      'reserve', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _feeMeta = const VerificationMeta('fee');
-  late final GeneratedTextColumn fee = _constructFee();
-  GeneratedTextColumn _constructFee() {
-    return GeneratedTextColumn('fee', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> fee = GeneratedColumn<String?>(
+      'fee', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _accountNameMeta =
       const VerificationMeta('accountName');
-  late final GeneratedTextColumn accountName = _constructAccountName();
-  GeneratedTextColumn _constructAccountName() {
-    return GeneratedTextColumn('account_name', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> accountName = GeneratedColumn<String?>(
+      'account_name', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _accountTagMeta = const VerificationMeta('accountTag');
-  late final GeneratedTextColumn accountTag = _constructAccountTag();
-  GeneratedTextColumn _constructAccountTag() {
-    return GeneratedTextColumn('account_tag', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> accountTag = GeneratedColumn<String?>(
+      'account_tag', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _dustMeta = const VerificationMeta('dust');
-  late final GeneratedTextColumn dust = _constructDust();
-  GeneratedTextColumn _constructDust() {
-    return GeneratedTextColumn('dust', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> dust = GeneratedColumn<String?>(
+      'dust', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         addressId,
@@ -4104,11 +3947,9 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
         dust
       ];
   @override
-  Addresses get asDslTable => this;
+  String get aliasedName => _alias ?? 'addresses';
   @override
-  String get $tableName => _alias ?? 'addresses';
-  @override
-  final String actualTableName = 'addresses';
+  String get actualTableName => 'addresses';
   @override
   VerificationContext validateIntegrity(Insertable<Addresse> instance,
       {bool isInserting = false}) {
@@ -4352,13 +4193,13 @@ class App extends DataClass implements Insertable<App> {
           String? redirectUri,
           String? name,
           String? iconUrl,
-          String? category,
+          Value<String?> category = const Value.absent(),
           String? description,
           String? appSecret,
-          String? capabilities,
+          Value<String?> capabilities = const Value.absent(),
           String? creatorId,
-          String? resourcePatterns,
-          DateTime? updatedAt}) =>
+          Value<String?> resourcePatterns = const Value.absent(),
+          Value<DateTime?> updatedAt = const Value.absent()}) =>
       App(
         appId: appId ?? this.appId,
         appNumber: appNumber ?? this.appNumber,
@@ -4366,13 +4207,16 @@ class App extends DataClass implements Insertable<App> {
         redirectUri: redirectUri ?? this.redirectUri,
         name: name ?? this.name,
         iconUrl: iconUrl ?? this.iconUrl,
-        category: category ?? this.category,
+        category: category.present ? category.value : this.category,
         description: description ?? this.description,
         appSecret: appSecret ?? this.appSecret,
-        capabilities: capabilities ?? this.capabilities,
+        capabilities:
+            capabilities.present ? capabilities.value : this.capabilities,
         creatorId: creatorId ?? this.creatorId,
-        resourcePatterns: resourcePatterns ?? this.resourcePatterns,
-        updatedAt: updatedAt ?? this.updatedAt,
+        resourcePatterns: resourcePatterns.present
+            ? resourcePatterns.value
+            : this.resourcePatterns,
+        updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
       );
   @override
   String toString() {
@@ -4627,101 +4471,84 @@ class Apps extends Table with TableInfo<Apps, App> {
   final String? _alias;
   Apps(this._db, [this._alias]);
   final VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedTextColumn appId = _constructAppId();
-  GeneratedTextColumn _constructAppId() {
-    return GeneratedTextColumn('app_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
+      'app_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _appNumberMeta = const VerificationMeta('appNumber');
-  late final GeneratedTextColumn appNumber = _constructAppNumber();
-  GeneratedTextColumn _constructAppNumber() {
-    return GeneratedTextColumn('app_number', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> appNumber = GeneratedColumn<String?>(
+      'app_number', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _homeUriMeta = const VerificationMeta('homeUri');
-  late final GeneratedTextColumn homeUri = _constructHomeUri();
-  GeneratedTextColumn _constructHomeUri() {
-    return GeneratedTextColumn('home_uri', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> homeUri = GeneratedColumn<String?>(
+      'home_uri', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _redirectUriMeta =
       const VerificationMeta('redirectUri');
-  late final GeneratedTextColumn redirectUri = _constructRedirectUri();
-  GeneratedTextColumn _constructRedirectUri() {
-    return GeneratedTextColumn('redirect_uri', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> redirectUri = GeneratedColumn<String?>(
+      'redirect_uri', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn('name', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
-  late final GeneratedTextColumn iconUrl = _constructIconUrl();
-  GeneratedTextColumn _constructIconUrl() {
-    return GeneratedTextColumn('icon_url', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
+      'icon_url', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
-  late final GeneratedTextColumn category = _constructCategory();
-  GeneratedTextColumn _constructCategory() {
-    return GeneratedTextColumn('category', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
+      'category', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
-  late final GeneratedTextColumn description = _constructDescription();
-  GeneratedTextColumn _constructDescription() {
-    return GeneratedTextColumn('description', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
+      'description', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _appSecretMeta = const VerificationMeta('appSecret');
-  late final GeneratedTextColumn appSecret = _constructAppSecret();
-  GeneratedTextColumn _constructAppSecret() {
-    return GeneratedTextColumn('app_secret', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> appSecret = GeneratedColumn<String?>(
+      'app_secret', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _capabilitiesMeta =
       const VerificationMeta('capabilities');
-  late final GeneratedTextColumn capabilities = _constructCapabilities();
-  GeneratedTextColumn _constructCapabilities() {
-    return GeneratedTextColumn('capabilities', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> capabilities = GeneratedColumn<String?>(
+      'capabilities', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _creatorIdMeta = const VerificationMeta('creatorId');
-  late final GeneratedTextColumn creatorId = _constructCreatorId();
-  GeneratedTextColumn _constructCreatorId() {
-    return GeneratedTextColumn('creator_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> creatorId = GeneratedColumn<String?>(
+      'creator_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _resourcePatternsMeta =
       const VerificationMeta('resourcePatterns');
-  late final GeneratedTextColumn resourcePatterns =
-      _constructResourcePatterns();
-  GeneratedTextColumn _constructResourcePatterns() {
-    return GeneratedTextColumn('resource_patterns', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> resourcePatterns =
+      GeneratedColumn<String?>('resource_patterns', aliasedName, true,
+          typeName: 'TEXT',
+          requiredDuringInsert: false,
+          $customConstraints: '');
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
-  late final GeneratedIntColumn updatedAt = _constructUpdatedAt();
-  GeneratedIntColumn _constructUpdatedAt() {
-    return GeneratedIntColumn('updated_at', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> updatedAt =
+      GeneratedColumn<int?>('updated_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Apps.$converter0);
   @override
   List<GeneratedColumn> get $columns => [
         appId,
@@ -4739,11 +4566,9 @@ class Apps extends Table with TableInfo<Apps, App> {
         updatedAt
       ];
   @override
-  Apps get asDslTable => this;
+  String get aliasedName => _alias ?? 'apps';
   @override
-  String get $tableName => _alias ?? 'apps';
-  @override
-  final String actualTableName = 'apps';
+  String get actualTableName => 'apps';
   @override
   VerificationContext validateIntegrity(Insertable<App> instance,
       {bool isInserting = false}) {
@@ -5004,14 +4829,14 @@ class Asset extends DataClass implements Insertable<Asset> {
           String? iconUrl,
           String? balance,
           String? destination,
-          String? tag,
+          Value<String?> tag = const Value.absent(),
           String? priceBtc,
           String? priceUsd,
           String? chainId,
           String? changeUsd,
           String? changeBtc,
           int? confirmations,
-          String? assetKey}) =>
+          Value<String?> assetKey = const Value.absent()}) =>
       Asset(
         assetId: assetId ?? this.assetId,
         symbol: symbol ?? this.symbol,
@@ -5019,14 +4844,14 @@ class Asset extends DataClass implements Insertable<Asset> {
         iconUrl: iconUrl ?? this.iconUrl,
         balance: balance ?? this.balance,
         destination: destination ?? this.destination,
-        tag: tag ?? this.tag,
+        tag: tag.present ? tag.value : this.tag,
         priceBtc: priceBtc ?? this.priceBtc,
         priceUsd: priceUsd ?? this.priceUsd,
         chainId: chainId ?? this.chainId,
         changeUsd: changeUsd ?? this.changeUsd,
         changeBtc: changeBtc ?? this.changeBtc,
         confirmations: confirmations ?? this.confirmations,
-        assetKey: assetKey ?? this.assetKey,
+        assetKey: assetKey.present ? assetKey.value : this.assetKey,
       );
   @override
   String toString() {
@@ -5298,104 +5123,87 @@ class Assets extends Table with TableInfo<Assets, Asset> {
   final String? _alias;
   Assets(this._db, [this._alias]);
   final VerificationMeta _assetIdMeta = const VerificationMeta('assetId');
-  late final GeneratedTextColumn assetId = _constructAssetId();
-  GeneratedTextColumn _constructAssetId() {
-    return GeneratedTextColumn('asset_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> assetId = GeneratedColumn<String?>(
+      'asset_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _symbolMeta = const VerificationMeta('symbol');
-  late final GeneratedTextColumn symbol = _constructSymbol();
-  GeneratedTextColumn _constructSymbol() {
-    return GeneratedTextColumn('symbol', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> symbol = GeneratedColumn<String?>(
+      'symbol', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn('name', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
-  late final GeneratedTextColumn iconUrl = _constructIconUrl();
-  GeneratedTextColumn _constructIconUrl() {
-    return GeneratedTextColumn('icon_url', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
+      'icon_url', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _balanceMeta = const VerificationMeta('balance');
-  late final GeneratedTextColumn balance = _constructBalance();
-  GeneratedTextColumn _constructBalance() {
-    return GeneratedTextColumn('balance', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> balance = GeneratedColumn<String?>(
+      'balance', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _destinationMeta =
       const VerificationMeta('destination');
-  late final GeneratedTextColumn destination = _constructDestination();
-  GeneratedTextColumn _constructDestination() {
-    return GeneratedTextColumn('destination', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> destination = GeneratedColumn<String?>(
+      'destination', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _tagMeta = const VerificationMeta('tag');
-  late final GeneratedTextColumn tag = _constructTag();
-  GeneratedTextColumn _constructTag() {
-    return GeneratedTextColumn('tag', $tableName, true, $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> tag = GeneratedColumn<String?>(
+      'tag', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _priceBtcMeta = const VerificationMeta('priceBtc');
-  late final GeneratedTextColumn priceBtc = _constructPriceBtc();
-  GeneratedTextColumn _constructPriceBtc() {
-    return GeneratedTextColumn('price_btc', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> priceBtc = GeneratedColumn<String?>(
+      'price_btc', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _priceUsdMeta = const VerificationMeta('priceUsd');
-  late final GeneratedTextColumn priceUsd = _constructPriceUsd();
-  GeneratedTextColumn _constructPriceUsd() {
-    return GeneratedTextColumn('price_usd', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> priceUsd = GeneratedColumn<String?>(
+      'price_usd', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _chainIdMeta = const VerificationMeta('chainId');
-  late final GeneratedTextColumn chainId = _constructChainId();
-  GeneratedTextColumn _constructChainId() {
-    return GeneratedTextColumn('chain_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> chainId = GeneratedColumn<String?>(
+      'chain_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _changeUsdMeta = const VerificationMeta('changeUsd');
-  late final GeneratedTextColumn changeUsd = _constructChangeUsd();
-  GeneratedTextColumn _constructChangeUsd() {
-    return GeneratedTextColumn('change_usd', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> changeUsd = GeneratedColumn<String?>(
+      'change_usd', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _changeBtcMeta = const VerificationMeta('changeBtc');
-  late final GeneratedTextColumn changeBtc = _constructChangeBtc();
-  GeneratedTextColumn _constructChangeBtc() {
-    return GeneratedTextColumn('change_btc', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> changeBtc = GeneratedColumn<String?>(
+      'change_btc', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _confirmationsMeta =
       const VerificationMeta('confirmations');
-  late final GeneratedIntColumn confirmations = _constructConfirmations();
-  GeneratedIntColumn _constructConfirmations() {
-    return GeneratedIntColumn('confirmations', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> confirmations = GeneratedColumn<int?>(
+      'confirmations', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _assetKeyMeta = const VerificationMeta('assetKey');
-  late final GeneratedTextColumn assetKey = _constructAssetKey();
-  GeneratedTextColumn _constructAssetKey() {
-    return GeneratedTextColumn('asset_key', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> assetKey = GeneratedColumn<String?>(
+      'asset_key', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         assetId,
@@ -5414,11 +5222,9 @@ class Assets extends Table with TableInfo<Assets, Asset> {
         assetKey
       ];
   @override
-  Assets get asDslTable => this;
+  String get aliasedName => _alias ?? 'assets';
   @override
-  String get $tableName => _alias ?? 'assets';
-  @override
-  final String actualTableName = 'assets';
+  String get actualTableName => 'assets';
   @override
   VerificationContext validateIntegrity(Insertable<Asset> instance,
       {bool isInserting = false}) {
@@ -5618,15 +5424,15 @@ class CircleConversation extends DataClass
   CircleConversation copyWith(
           {String? conversationId,
           String? circleId,
-          String? userId,
+          Value<String?> userId = const Value.absent(),
           DateTime? createdAt,
-          DateTime? pinTime}) =>
+          Value<DateTime?> pinTime = const Value.absent()}) =>
       CircleConversation(
         conversationId: conversationId ?? this.conversationId,
         circleId: circleId ?? this.circleId,
-        userId: userId ?? this.userId,
+        userId: userId.present ? userId.value : this.userId,
         createdAt: createdAt ?? this.createdAt,
-        pinTime: pinTime ?? this.pinTime,
+        pinTime: pinTime.present ? pinTime.value : this.pinTime,
       );
   @override
   String toString() {
@@ -5754,49 +5560,42 @@ class CircleConversations extends Table
   CircleConversations(this._db, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _circleIdMeta = const VerificationMeta('circleId');
-  late final GeneratedTextColumn circleId = _constructCircleId();
-  GeneratedTextColumn _constructCircleId() {
-    return GeneratedTextColumn('circle_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> circleId = GeneratedColumn<String?>(
+      'circle_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(CircleConversations.$converter0);
   final VerificationMeta _pinTimeMeta = const VerificationMeta('pinTime');
-  late final GeneratedIntColumn pinTime = _constructPinTime();
-  GeneratedIntColumn _constructPinTime() {
-    return GeneratedIntColumn('pin_time', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> pinTime =
+      GeneratedColumn<int?>('pin_time', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(CircleConversations.$converter1);
   @override
   List<GeneratedColumn> get $columns =>
       [conversationId, circleId, userId, createdAt, pinTime];
   @override
-  CircleConversations get asDslTable => this;
+  String get aliasedName => _alias ?? 'circle_conversations';
   @override
-  String get $tableName => _alias ?? 'circle_conversations';
-  @override
-  final String actualTableName = 'circle_conversations';
+  String get actualTableName => 'circle_conversations';
   @override
   VerificationContext validateIntegrity(Insertable<CircleConversation> instance,
       {bool isInserting = false}) {
@@ -5923,12 +5722,12 @@ class Circle extends DataClass implements Insertable<Circle> {
           {String? circleId,
           String? name,
           DateTime? createdAt,
-          DateTime? orderedAt}) =>
+          Value<DateTime?> orderedAt = const Value.absent()}) =>
       Circle(
         circleId: circleId ?? this.circleId,
         name: name ?? this.name,
         createdAt: createdAt ?? this.createdAt,
-        orderedAt: orderedAt ?? this.orderedAt,
+        orderedAt: orderedAt.present ? orderedAt.value : this.orderedAt,
       );
   @override
   String toString() {
@@ -6037,41 +5836,37 @@ class Circles extends Table with TableInfo<Circles, Circle> {
   final String? _alias;
   Circles(this._db, [this._alias]);
   final VerificationMeta _circleIdMeta = const VerificationMeta('circleId');
-  late final GeneratedTextColumn circleId = _constructCircleId();
-  GeneratedTextColumn _constructCircleId() {
-    return GeneratedTextColumn('circle_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> circleId = GeneratedColumn<String?>(
+      'circle_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn('name', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Circles.$converter0);
   final VerificationMeta _orderedAtMeta = const VerificationMeta('orderedAt');
-  late final GeneratedIntColumn orderedAt = _constructOrderedAt();
-  GeneratedIntColumn _constructOrderedAt() {
-    return GeneratedIntColumn('ordered_at', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> orderedAt =
+      GeneratedColumn<int?>('ordered_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Circles.$converter1);
   @override
   List<GeneratedColumn> get $columns => [circleId, name, createdAt, orderedAt];
   @override
-  Circles get asDslTable => this;
+  String get aliasedName => _alias ?? 'circles';
   @override
-  String get $tableName => _alias ?? 'circles';
-  @override
-  final String actualTableName = 'circles';
+  String get actualTableName => 'circles';
   @override
   VerificationContext validateIntegrity(Insertable<Circle> instance,
       {bool isInserting = false}) {
@@ -6272,34 +6067,30 @@ class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
   final String? _alias;
   FloodMessages(this._db, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _dataMeta = const VerificationMeta('data');
-  late final GeneratedTextColumn data = _constructData();
-  GeneratedTextColumn _constructData() {
-    return GeneratedTextColumn('data', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> data = GeneratedColumn<String?>(
+      'data', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(FloodMessages.$converter0);
   @override
   List<GeneratedColumn> get $columns => [messageId, data, createdAt];
   @override
-  FloodMessages get asDslTable => this;
+  String get aliasedName => _alias ?? 'flood_messages';
   @override
-  String get $tableName => _alias ?? 'flood_messages';
-  @override
-  final String actualTableName = 'flood_messages';
+  String get actualTableName => 'flood_messages';
   @override
   VerificationContext validateIntegrity(Insertable<FloodMessage> instance,
       {bool isInserting = false}) {
@@ -6425,14 +6216,16 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
           {String? hyperlink,
           String? siteName,
           String? siteTitle,
-          String? siteDescription,
-          String? siteImage}) =>
+          Value<String?> siteDescription = const Value.absent(),
+          Value<String?> siteImage = const Value.absent()}) =>
       Hyperlink(
         hyperlink: hyperlink ?? this.hyperlink,
         siteName: siteName ?? this.siteName,
         siteTitle: siteTitle ?? this.siteTitle,
-        siteDescription: siteDescription ?? this.siteDescription,
-        siteImage: siteImage ?? this.siteImage,
+        siteDescription: siteDescription.present
+            ? siteDescription.value
+            : this.siteDescription,
+        siteImage: siteImage.present ? siteImage.value : this.siteImage,
       );
   @override
   String toString() {
@@ -6556,50 +6349,41 @@ class Hyperlinks extends Table with TableInfo<Hyperlinks, Hyperlink> {
   final String? _alias;
   Hyperlinks(this._db, [this._alias]);
   final VerificationMeta _hyperlinkMeta = const VerificationMeta('hyperlink');
-  late final GeneratedTextColumn hyperlink = _constructHyperlink();
-  GeneratedTextColumn _constructHyperlink() {
-    return GeneratedTextColumn('hyperlink', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> hyperlink = GeneratedColumn<String?>(
+      'hyperlink', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _siteNameMeta = const VerificationMeta('siteName');
-  late final GeneratedTextColumn siteName = _constructSiteName();
-  GeneratedTextColumn _constructSiteName() {
-    return GeneratedTextColumn('site_name', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> siteName = GeneratedColumn<String?>(
+      'site_name', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _siteTitleMeta = const VerificationMeta('siteTitle');
-  late final GeneratedTextColumn siteTitle = _constructSiteTitle();
-  GeneratedTextColumn _constructSiteTitle() {
-    return GeneratedTextColumn('site_title', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> siteTitle = GeneratedColumn<String?>(
+      'site_title', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _siteDescriptionMeta =
       const VerificationMeta('siteDescription');
-  late final GeneratedTextColumn siteDescription = _constructSiteDescription();
-  GeneratedTextColumn _constructSiteDescription() {
-    return GeneratedTextColumn('site_description', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> siteDescription =
+      GeneratedColumn<String?>('site_description', aliasedName, true,
+          typeName: 'TEXT',
+          requiredDuringInsert: false,
+          $customConstraints: '');
   final VerificationMeta _siteImageMeta = const VerificationMeta('siteImage');
-  late final GeneratedTextColumn siteImage = _constructSiteImage();
-  GeneratedTextColumn _constructSiteImage() {
-    return GeneratedTextColumn('site_image', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> siteImage = GeneratedColumn<String?>(
+      'site_image', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns =>
       [hyperlink, siteName, siteTitle, siteDescription, siteImage];
   @override
-  Hyperlinks get asDslTable => this;
+  String get aliasedName => _alias ?? 'hyperlinks';
   @override
-  String get $tableName => _alias ?? 'hyperlinks';
-  @override
-  final String actualTableName = 'hyperlinks';
+  String get actualTableName => 'hyperlinks';
   @override
   VerificationContext validateIntegrity(Insertable<Hyperlink> instance,
       {bool isInserting = false}) {
@@ -6919,57 +6703,36 @@ class MessagesFts extends Table
   final String? _alias;
   MessagesFts(this._db, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, false,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
   final VerificationMeta _contentMeta = const VerificationMeta('content');
-  late final GeneratedTextColumn content = _constructContent();
-  GeneratedTextColumn _constructContent() {
-    return GeneratedTextColumn('content', $tableName, false,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> content = GeneratedColumn<String?>(
+      'content', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedTextColumn createdAt = _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> createdAt = GeneratedColumn<String?>(
+      'created_at', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
   final VerificationMeta _reservedIntMeta =
       const VerificationMeta('reservedInt');
-  late final GeneratedTextColumn reservedInt = _constructReservedInt();
-  GeneratedTextColumn _constructReservedInt() {
-    return GeneratedTextColumn('reserved_int', $tableName, false,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> reservedInt = GeneratedColumn<String?>(
+      'reserved_int', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
   final VerificationMeta _reservedTextMeta =
       const VerificationMeta('reservedText');
-  late final GeneratedTextColumn reservedText = _constructReservedText();
-  GeneratedTextColumn _constructReservedText() {
-    return GeneratedTextColumn('reserved_text', $tableName, false,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> reservedText = GeneratedColumn<String?>(
+      'reserved_text', aliasedName, false,
+      typeName: 'TEXT', requiredDuringInsert: true, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         messageId,
@@ -6981,11 +6744,9 @@ class MessagesFts extends Table
         reservedText
       ];
   @override
-  MessagesFts get asDslTable => this;
+  String get aliasedName => _alias ?? 'messages_fts';
   @override
-  String get $tableName => _alias ?? 'messages_fts';
-  @override
-  final String actualTableName = 'messages_fts';
+  String get actualTableName => 'messages_fts';
   @override
   VerificationContext validateIntegrity(Insertable<MessagesFt> instance,
       {bool isInserting = false}) {
@@ -7168,20 +6929,17 @@ class MessagesHistory extends Table
   final String? _alias;
   MessagesHistory(this._db, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [messageId];
   @override
-  MessagesHistory get asDslTable => this;
+  String get aliasedName => _alias ?? 'messages_history';
   @override
-  String get $tableName => _alias ?? 'messages_history';
-  @override
-  final String actualTableName = 'messages_history';
+  String get actualTableName => 'messages_history';
   @override
   VerificationContext validateIntegrity(
       Insertable<MessagesHistoryData> instance,
@@ -7341,27 +7099,23 @@ class Offsets extends Table with TableInfo<Offsets, Offset> {
   final String? _alias;
   Offsets(this._db, [this._alias]);
   final VerificationMeta _keyMeta = const VerificationMeta('key');
-  late final GeneratedTextColumn key = _constructKey();
-  GeneratedTextColumn _constructKey() {
-    return GeneratedTextColumn('key', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> key = GeneratedColumn<String?>(
+      'key', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
-  late final GeneratedTextColumn timestamp = _constructTimestamp();
-  GeneratedTextColumn _constructTimestamp() {
-    return GeneratedTextColumn('timestamp', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> timestamp = GeneratedColumn<String?>(
+      'timestamp', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [key, timestamp];
   @override
-  Offsets get asDslTable => this;
+  String get aliasedName => _alias ?? 'offsets';
   @override
-  String get $tableName => _alias ?? 'offsets';
-  @override
-  final String actualTableName = 'offsets';
+  String get actualTableName => 'offsets';
   @override
   VerificationContext validateIntegrity(Insertable<Offset> instance,
       {bool isInserting = false}) {
@@ -7500,16 +7254,17 @@ class ParticipantSessionData extends DataClass
           {String? conversationId,
           String? userId,
           String? sessionId,
-          int? sentToServer,
-          DateTime? createdAt,
-          String? publicKey}) =>
+          Value<int?> sentToServer = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<String?> publicKey = const Value.absent()}) =>
       ParticipantSessionData(
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
         sessionId: sessionId ?? this.sessionId,
-        sentToServer: sentToServer ?? this.sentToServer,
-        createdAt: createdAt ?? this.createdAt,
-        publicKey: publicKey ?? this.publicKey,
+        sentToServer:
+            sentToServer.present ? sentToServer.value : this.sentToServer,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        publicKey: publicKey.present ? publicKey.value : this.publicKey,
       );
   @override
   String toString() {
@@ -7652,57 +7407,46 @@ class ParticipantSession extends Table
   ParticipantSession(this._db, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _sessionIdMeta = const VerificationMeta('sessionId');
-  late final GeneratedTextColumn sessionId = _constructSessionId();
-  GeneratedTextColumn _constructSessionId() {
-    return GeneratedTextColumn('session_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> sessionId = GeneratedColumn<String?>(
+      'session_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _sentToServerMeta =
       const VerificationMeta('sentToServer');
-  late final GeneratedIntColumn sentToServer = _constructSentToServer();
-  GeneratedIntColumn _constructSentToServer() {
-    return GeneratedIntColumn('sent_to_server', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> sentToServer = GeneratedColumn<int?>(
+      'sent_to_server', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(ParticipantSession.$converter0);
   final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
-  late final GeneratedTextColumn publicKey = _constructPublicKey();
-  GeneratedTextColumn _constructPublicKey() {
-    return GeneratedTextColumn('public_key', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> publicKey = GeneratedColumn<String?>(
+      'public_key', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns =>
       [conversationId, userId, sessionId, sentToServer, createdAt, publicKey];
   @override
-  ParticipantSession get asDslTable => this;
+  String get aliasedName => _alias ?? 'participant_session';
   @override
-  String get $tableName => _alias ?? 'participant_session';
-  @override
-  final String actualTableName = 'participant_session';
+  String get actualTableName => 'participant_session';
   @override
   VerificationContext validateIntegrity(
       Insertable<ParticipantSessionData> instance,
@@ -7837,12 +7581,12 @@ class Participant extends DataClass implements Insertable<Participant> {
   Participant copyWith(
           {String? conversationId,
           String? userId,
-          ParticipantRole? role,
+          Value<ParticipantRole?> role = const Value.absent(),
           DateTime? createdAt}) =>
       Participant(
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
-        role: role ?? this.role,
+        role: role.present ? role.value : this.role,
         createdAt: createdAt ?? this.createdAt,
       );
   @override
@@ -7953,42 +7697,38 @@ class Participants extends Table with TableInfo<Participants, Participant> {
   Participants(this._db, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _roleMeta = const VerificationMeta('role');
-  late final GeneratedTextColumn role = _constructRole();
-  GeneratedTextColumn _constructRole() {
-    return GeneratedTextColumn('role', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<ParticipantRole, String?> role =
+      GeneratedColumn<String?>('role', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<ParticipantRole>(Participants.$converter0);
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Participants.$converter1);
   @override
   List<GeneratedColumn> get $columns =>
       [conversationId, userId, role, createdAt];
   @override
-  Participants get asDslTable => this;
+  String get aliasedName => _alias ?? 'participants';
   @override
-  String get $tableName => _alias ?? 'participants';
-  @override
-  final String actualTableName = 'participants';
+  String get actualTableName => 'participants';
   @override
   VerificationContext validateIntegrity(Insertable<Participant> instance,
       {bool isInserting = false}) {
@@ -8255,49 +7995,43 @@ class ResendSessionMessages extends Table
   final String? _alias;
   ResendSessionMessages(this._db, [this._alias]);
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _sessionIdMeta = const VerificationMeta('sessionId');
-  late final GeneratedTextColumn sessionId = _constructSessionId();
-  GeneratedTextColumn _constructSessionId() {
-    return GeneratedTextColumn('session_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> sessionId = GeneratedColumn<String?>(
+      'session_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  late final GeneratedIntColumn status = _constructStatus();
-  GeneratedIntColumn _constructStatus() {
-    return GeneratedIntColumn('status', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> status = GeneratedColumn<int?>(
+      'status', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(ResendSessionMessages.$converter0);
   @override
   List<GeneratedColumn> get $columns =>
       [messageId, userId, sessionId, status, createdAt];
   @override
-  ResendSessionMessages get asDslTable => this;
+  String get aliasedName => _alias ?? 'resend_session_messages';
   @override
-  String get $tableName => _alias ?? 'resend_session_messages';
-  @override
-  final String actualTableName = 'resend_session_messages';
+  String get actualTableName => 'resend_session_messages';
   @override
   VerificationContext validateIntegrity(
       Insertable<ResendSessionMessage> instance,
@@ -8449,15 +8183,15 @@ class SentSessionSenderKey extends DataClass
           String? userId,
           String? sessionId,
           int? sentToServer,
-          int? senderKeyId,
-          DateTime? createdAt}) =>
+          Value<int?> senderKeyId = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent()}) =>
       SentSessionSenderKey(
         conversationId: conversationId ?? this.conversationId,
         userId: userId ?? this.userId,
         sessionId: sessionId ?? this.sessionId,
         sentToServer: sentToServer ?? this.sentToServer,
-        senderKeyId: senderKeyId ?? this.senderKeyId,
-        createdAt: createdAt ?? this.createdAt,
+        senderKeyId: senderKeyId.present ? senderKeyId.value : this.senderKeyId,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
       );
   @override
   String toString() {
@@ -8601,58 +8335,49 @@ class SentSessionSenderKeys extends Table
   SentSessionSenderKeys(this._db, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
-  late final GeneratedTextColumn conversationId = _constructConversationId();
-  GeneratedTextColumn _constructConversationId() {
-    return GeneratedTextColumn('conversation_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _sessionIdMeta = const VerificationMeta('sessionId');
-  late final GeneratedTextColumn sessionId = _constructSessionId();
-  GeneratedTextColumn _constructSessionId() {
-    return GeneratedTextColumn('session_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> sessionId = GeneratedColumn<String?>(
+      'session_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _sentToServerMeta =
       const VerificationMeta('sentToServer');
-  late final GeneratedIntColumn sentToServer = _constructSentToServer();
-  GeneratedIntColumn _constructSentToServer() {
-    return GeneratedIntColumn('sent_to_server', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> sentToServer = GeneratedColumn<int?>(
+      'sent_to_server', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _senderKeyIdMeta =
       const VerificationMeta('senderKeyId');
-  late final GeneratedIntColumn senderKeyId = _constructSenderKeyId();
-  GeneratedIntColumn _constructSenderKeyId() {
-    return GeneratedIntColumn('sender_key_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> senderKeyId = GeneratedColumn<int?>(
+      'sender_key_id', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(SentSessionSenderKeys.$converter0);
   @override
   List<GeneratedColumn> get $columns =>
       [conversationId, userId, sessionId, sentToServer, senderKeyId, createdAt];
   @override
-  SentSessionSenderKeys get asDslTable => this;
+  String get aliasedName => _alias ?? 'sent_session_sender_keys';
   @override
-  String get $tableName => _alias ?? 'sent_session_sender_keys';
-  @override
-  final String actualTableName = 'sent_session_sender_keys';
+  String get actualTableName => 'sent_session_sender_keys';
   @override
   VerificationContext validateIntegrity(
       Insertable<SentSessionSenderKey> instance,
@@ -8868,24 +8593,27 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
           String? assetId,
           String? amount,
           DateTime? createdAt,
-          String? opponentId,
-          String? transactionHash,
-          String? sender,
-          String? receiver,
-          String? memo,
-          int? confirmations}) =>
+          Value<String?> opponentId = const Value.absent(),
+          Value<String?> transactionHash = const Value.absent(),
+          Value<String?> sender = const Value.absent(),
+          Value<String?> receiver = const Value.absent(),
+          Value<String?> memo = const Value.absent(),
+          Value<int?> confirmations = const Value.absent()}) =>
       Snapshot(
         snapshotId: snapshotId ?? this.snapshotId,
         type: type ?? this.type,
         assetId: assetId ?? this.assetId,
         amount: amount ?? this.amount,
         createdAt: createdAt ?? this.createdAt,
-        opponentId: opponentId ?? this.opponentId,
-        transactionHash: transactionHash ?? this.transactionHash,
-        sender: sender ?? this.sender,
-        receiver: receiver ?? this.receiver,
-        memo: memo ?? this.memo,
-        confirmations: confirmations ?? this.confirmations,
+        opponentId: opponentId.present ? opponentId.value : this.opponentId,
+        transactionHash: transactionHash.present
+            ? transactionHash.value
+            : this.transactionHash,
+        sender: sender.present ? sender.value : this.sender,
+        receiver: receiver.present ? receiver.value : this.receiver,
+        memo: memo.present ? memo.value : this.memo,
+        confirmations:
+            confirmations.present ? confirmations.value : this.confirmations,
       );
   @override
   String toString() {
@@ -9104,84 +8832,64 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   final String? _alias;
   Snapshots(this._db, [this._alias]);
   final VerificationMeta _snapshotIdMeta = const VerificationMeta('snapshotId');
-  late final GeneratedTextColumn snapshotId = _constructSnapshotId();
-  GeneratedTextColumn _constructSnapshotId() {
-    return GeneratedTextColumn('snapshot_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> snapshotId = GeneratedColumn<String?>(
+      'snapshot_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _typeMeta = const VerificationMeta('type');
-  late final GeneratedTextColumn type = _constructType();
-  GeneratedTextColumn _constructType() {
-    return GeneratedTextColumn('type', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> type = GeneratedColumn<String?>(
+      'type', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _assetIdMeta = const VerificationMeta('assetId');
-  late final GeneratedTextColumn assetId = _constructAssetId();
-  GeneratedTextColumn _constructAssetId() {
-    return GeneratedTextColumn('asset_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> assetId = GeneratedColumn<String?>(
+      'asset_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _amountMeta = const VerificationMeta('amount');
-  late final GeneratedTextColumn amount = _constructAmount();
-  GeneratedTextColumn _constructAmount() {
-    return GeneratedTextColumn('amount', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> amount = GeneratedColumn<String?>(
+      'amount', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Snapshots.$converter0);
   final VerificationMeta _opponentIdMeta = const VerificationMeta('opponentId');
-  late final GeneratedTextColumn opponentId = _constructOpponentId();
-  GeneratedTextColumn _constructOpponentId() {
-    return GeneratedTextColumn('opponent_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> opponentId = GeneratedColumn<String?>(
+      'opponent_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _transactionHashMeta =
       const VerificationMeta('transactionHash');
-  late final GeneratedTextColumn transactionHash = _constructTransactionHash();
-  GeneratedTextColumn _constructTransactionHash() {
-    return GeneratedTextColumn('transaction_hash', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> transactionHash =
+      GeneratedColumn<String?>('transaction_hash', aliasedName, true,
+          typeName: 'TEXT',
+          requiredDuringInsert: false,
+          $customConstraints: '');
   final VerificationMeta _senderMeta = const VerificationMeta('sender');
-  late final GeneratedTextColumn sender = _constructSender();
-  GeneratedTextColumn _constructSender() {
-    return GeneratedTextColumn('sender', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> sender = GeneratedColumn<String?>(
+      'sender', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _receiverMeta = const VerificationMeta('receiver');
-  late final GeneratedTextColumn receiver = _constructReceiver();
-  GeneratedTextColumn _constructReceiver() {
-    return GeneratedTextColumn('receiver', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> receiver = GeneratedColumn<String?>(
+      'receiver', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _memoMeta = const VerificationMeta('memo');
-  late final GeneratedTextColumn memo = _constructMemo();
-  GeneratedTextColumn _constructMemo() {
-    return GeneratedTextColumn('memo', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> memo = GeneratedColumn<String?>(
+      'memo', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _confirmationsMeta =
       const VerificationMeta('confirmations');
-  late final GeneratedIntColumn confirmations = _constructConfirmations();
-  GeneratedIntColumn _constructConfirmations() {
-    return GeneratedIntColumn('confirmations', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> confirmations = GeneratedColumn<int?>(
+      'confirmations', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         snapshotId,
@@ -9197,11 +8905,9 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
         confirmations
       ];
   @override
-  Snapshots get asDslTable => this;
+  String get aliasedName => _alias ?? 'snapshots';
   @override
-  String get $tableName => _alias ?? 'snapshots';
-  @override
-  final String actualTableName = 'snapshots';
+  String get actualTableName => 'snapshots';
   @override
   VerificationContext validateIntegrity(Insertable<Snapshot> instance,
       {bool isInserting = false}) {
@@ -9582,62 +9288,56 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
   final String? _alias;
   StickerAlbums(this._db, [this._alias]);
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
-  late final GeneratedTextColumn albumId = _constructAlbumId();
-  GeneratedTextColumn _constructAlbumId() {
-    return GeneratedTextColumn('album_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
+      'album_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn('name', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
-  late final GeneratedTextColumn iconUrl = _constructIconUrl();
-  GeneratedTextColumn _constructIconUrl() {
-    return GeneratedTextColumn('icon_url', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
+      'icon_url', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$converter0);
   final VerificationMeta _updateAtMeta = const VerificationMeta('updateAt');
-  late final GeneratedIntColumn updateAt = _constructUpdateAt();
-  GeneratedIntColumn _constructUpdateAt() {
-    return GeneratedIntColumn('update_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> updateAt =
+      GeneratedColumn<int?>('update_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$converter1);
   final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedTextColumn userId = _constructUserId();
-  GeneratedTextColumn _constructUserId() {
-    return GeneratedTextColumn('user_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _categoryMeta = const VerificationMeta('category');
-  late final GeneratedTextColumn category = _constructCategory();
-  GeneratedTextColumn _constructCategory() {
-    return GeneratedTextColumn('category', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
+      'category', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _descriptionMeta =
       const VerificationMeta('description');
-  late final GeneratedTextColumn description = _constructDescription();
-  GeneratedTextColumn _constructDescription() {
-    return GeneratedTextColumn('description', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
+      'description', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [
         albumId,
@@ -9650,11 +9350,9 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
         description
       ];
   @override
-  StickerAlbums get asDslTable => this;
+  String get aliasedName => _alias ?? 'sticker_albums';
   @override
-  String get $tableName => _alias ?? 'sticker_albums';
-  @override
-  final String actualTableName = 'sticker_albums';
+  String get actualTableName => 'sticker_albums';
   @override
   VerificationContext validateIntegrity(Insertable<StickerAlbum> instance,
       {bool isInserting = false}) {
@@ -9855,27 +9553,23 @@ class StickerRelationships extends Table
   final String? _alias;
   StickerRelationships(this._db, [this._alias]);
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
-  late final GeneratedTextColumn albumId = _constructAlbumId();
-  GeneratedTextColumn _constructAlbumId() {
-    return GeneratedTextColumn('album_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
+      'album_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
-  late final GeneratedTextColumn stickerId = _constructStickerId();
-  GeneratedTextColumn _constructStickerId() {
-    return GeneratedTextColumn('sticker_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
+      'sticker_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [albumId, stickerId];
   @override
-  StickerRelationships get asDslTable => this;
+  String get aliasedName => _alias ?? 'sticker_relationships';
   @override
-  String get $tableName => _alias ?? 'sticker_relationships';
-  @override
-  final String actualTableName = 'sticker_relationships';
+  String get actualTableName => 'sticker_relationships';
   @override
   VerificationContext validateIntegrity(
       Insertable<StickerRelationship> instance,
@@ -10035,24 +9729,24 @@ class Sticker extends DataClass implements Insertable<Sticker> {
 
   Sticker copyWith(
           {String? stickerId,
-          String? albumId,
+          Value<String?> albumId = const Value.absent(),
           String? name,
           String? assetUrl,
           String? assetType,
           int? assetWidth,
           int? assetHeight,
           DateTime? createdAt,
-          DateTime? lastUseAt}) =>
+          Value<DateTime?> lastUseAt = const Value.absent()}) =>
       Sticker(
         stickerId: stickerId ?? this.stickerId,
-        albumId: albumId ?? this.albumId,
+        albumId: albumId.present ? albumId.value : this.albumId,
         name: name ?? this.name,
         assetUrl: assetUrl ?? this.assetUrl,
         assetType: assetType ?? this.assetType,
         assetWidth: assetWidth ?? this.assetWidth,
         assetHeight: assetHeight ?? this.assetHeight,
         createdAt: createdAt ?? this.createdAt,
-        lastUseAt: lastUseAt ?? this.lastUseAt,
+        lastUseAt: lastUseAt.present ? lastUseAt.value : this.lastUseAt,
       );
   @override
   String toString() {
@@ -10244,69 +9938,60 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   final String? _alias;
   Stickers(this._db, [this._alias]);
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
-  late final GeneratedTextColumn stickerId = _constructStickerId();
-  GeneratedTextColumn _constructStickerId() {
-    return GeneratedTextColumn('sticker_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
+      'sticker_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
-  late final GeneratedTextColumn albumId = _constructAlbumId();
-  GeneratedTextColumn _constructAlbumId() {
-    return GeneratedTextColumn('album_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
+      'album_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedTextColumn name = _constructName();
-  GeneratedTextColumn _constructName() {
-    return GeneratedTextColumn('name', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _assetUrlMeta = const VerificationMeta('assetUrl');
-  late final GeneratedTextColumn assetUrl = _constructAssetUrl();
-  GeneratedTextColumn _constructAssetUrl() {
-    return GeneratedTextColumn('asset_url', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> assetUrl = GeneratedColumn<String?>(
+      'asset_url', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _assetTypeMeta = const VerificationMeta('assetType');
-  late final GeneratedTextColumn assetType = _constructAssetType();
-  GeneratedTextColumn _constructAssetType() {
-    return GeneratedTextColumn('asset_type', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> assetType = GeneratedColumn<String?>(
+      'asset_type', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _assetWidthMeta = const VerificationMeta('assetWidth');
-  late final GeneratedIntColumn assetWidth = _constructAssetWidth();
-  GeneratedIntColumn _constructAssetWidth() {
-    return GeneratedIntColumn('asset_width', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> assetWidth = GeneratedColumn<int?>(
+      'asset_width', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _assetHeightMeta =
       const VerificationMeta('assetHeight');
-  late final GeneratedIntColumn assetHeight = _constructAssetHeight();
-  GeneratedIntColumn _constructAssetHeight() {
-    return GeneratedIntColumn('asset_height', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> assetHeight = GeneratedColumn<int?>(
+      'asset_height', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedIntColumn createdAt = _constructCreatedAt();
-  GeneratedIntColumn _constructCreatedAt() {
-    return GeneratedIntColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Stickers.$converter0);
   final VerificationMeta _lastUseAtMeta = const VerificationMeta('lastUseAt');
-  late final GeneratedIntColumn lastUseAt = _constructLastUseAt();
-  GeneratedIntColumn _constructLastUseAt() {
-    return GeneratedIntColumn('last_use_at', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> lastUseAt =
+      GeneratedColumn<int?>('last_use_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Stickers.$converter1);
   @override
   List<GeneratedColumn> get $columns => [
         stickerId,
@@ -10320,11 +10005,9 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
         lastUseAt
       ];
   @override
-  Stickers get asDslTable => this;
+  String get aliasedName => _alias ?? 'stickers';
   @override
-  String get $tableName => _alias ?? 'stickers';
-  @override
-  final String actualTableName = 'stickers';
+  String get actualTableName => 'stickers';
   @override
   VerificationContext validateIntegrity(Insertable<Sticker> instance,
       {bool isInserting = false}) {
@@ -10405,37 +10088,37 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final Jobs jobs = Jobs(this);
   late final Index indexJobsAction = Index('index_jobs_action',
-      'CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action");');
+      'CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action")');
   late final Conversations conversations = Conversations(this);
   late final Index indexConversationsPinTimeLastMessageCreatedAt = Index(
       'index_conversations_pin_time_last_message_created_at',
-      'CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);');
+      'CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at)');
   late final Messages messages = Messages(this);
   late final Index indexMessagesConversationIdCategory = Index(
       'index_messages_conversation_id_category',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category ON messages(conversation_id, category);');
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category ON messages (conversation_id, category)');
   late final Index indexMessagesConversationIdQuoteMessageId = Index(
       'index_messages_conversation_id_quote_message_id',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id);');
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id)');
   late final Index indexMessagesConversationIdStatusUserIdCreatedAt = Index(
       'index_messages_conversation_id_status_user_id_created_at',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id_created_at ON messages (conversation_id, status,user_id, created_at);');
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id_created_at ON messages (conversation_id, status, user_id, created_at)');
   late final Index indexMessagesConversationIdCreatedAt = Index(
       'index_messages_conversation_id_created_at',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at);');
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at)');
   late final MessageMentions messageMentions = MessageMentions(this);
   late final Index indexMessageMentionsConversationId = Index(
       'index_message_mentions_conversation_id',
-      'CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id ON message_mentions (conversation_id);');
+      'CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id ON message_mentions (conversation_id)');
   late final Users users = Users(this);
   late final Index indexUsersRelationshipFullName = Index(
       'index_users_relationship_full_name',
-      'CREATE INDEX IF NOT EXISTS index_users_relationship_full_name ON users (relationship, full_name);');
+      'CREATE INDEX IF NOT EXISTS index_users_relationship_full_name ON users (relationship, full_name)');
   late final Trigger conversationLastMessageUpdate = Trigger(
-      'CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at  WHERE conversation_id = new.conversation_id; END;',
+      'CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at WHERE conversation_id = new.conversation_id;END',
       'conversation_last_message_update');
   late final Trigger conversationLastMessageDelete = Trigger(
-      'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;',
+      'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (SELECT message_id FROM messages WHERE conversation_id = old.conversation_id ORDER BY created_at DESC LIMIT 1) WHERE conversation_id = old.conversation_id;END',
       'conversation_last_message_delete');
   late final Addresses addresses = Addresses(this);
   late final Apps apps = Apps(this);
@@ -10494,22 +10177,22 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final UserDao userDao = UserDao(this as MixinDatabase);
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(
-        'SELECT created_at FROM flood_messages ORDER BY created_at DESC limit 1',
+        'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
         variables: [],
         readsFrom: {
-          floodMessages
+          floodMessages,
         }).map((QueryRow row) =>
         FloodMessages.$converter0.mapToDart(row.read<int>('created_at'))!);
   }
 
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, ci.created_at, count(c.conversation_id) as count, sum(c.unseen_message_count) as unseen_message_count\n        FROM circles ci LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations c ON c.conversation_id = cc.conversation_id\n        GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, ci.created_at, count(c.conversation_id) AS count, sum(c.unseen_message_count) AS unseen_message_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [],
         readsFrom: {
           circles,
           conversations,
-          circleConversations
+          circleConversations,
         }).map((QueryRow row) {
       return ConversationCircleItem(
         circleId: row.read<String>('circle_id'),
@@ -10524,14 +10207,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ConversationCircleManagerItem> circleByConversationId(
       String? conversationId) {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, count(c.conversation_id) as count FROM circles ci LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id\n        LEFT JOIN conversations c  ON c.conversation_id = cc.conversation_id\n        WHERE ci.circle_id IN (\n        SELECT cir.circle_id FROM circles cir LEFT JOIN circle_conversations ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId)\n        GROUP BY ci.circle_id\n        ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [
           Variable<String?>(conversationId)
         ],
         readsFrom: {
           circles,
           conversations,
-          circleConversations
+          circleConversations,
         }).map((QueryRow row) {
       return ConversationCircleManagerItem(
         circleId: row.read<String>('circle_id'),
@@ -10544,14 +10227,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
       String? conversationId) {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, count(c.conversation_id) as count FROM circles ci LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id\n        LEFT JOIN conversations c  ON c.conversation_id = cc.conversation_id\n        WHERE ci.circle_id NOT IN (\n        SELECT cir.circle_id FROM circles cir LEFT JOIN circle_conversations ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId)\n        GROUP BY ci.circle_id\n        ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id NOT IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [
           Variable<String?>(conversationId)
         ],
         readsFrom: {
           circles,
           conversations,
-          circleConversations
+          circleConversations,
         }).map((QueryRow row) {
       return ConversationCircleManagerItem(
         circleId: row.read<String>('circle_id'),
@@ -10563,14 +10246,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<String> circlesNameByConversationId(String? conversationId) {
     return customSelect(
-        'SELECT ci.name FROM circles ci\n        LEFT JOIN circle_conversations cc ON ci.circle_id = cc.circle_id\n        LEFT JOIN conversations c ON c.conversation_id = cc.conversation_id\n        WHERE cc.conversation_id = :conversationId',
+        'SELECT ci.name FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE cc.conversation_id = :conversationId',
         variables: [
           Variable<String?>(conversationId)
         ],
         readsFrom: {
           circles,
           circleConversations,
-          conversations
+          conversations,
         }).map((QueryRow row) => row.read<String>('name'));
   }
 
@@ -10604,7 +10287,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(
-        'SELECT u.* FROM participants p, users u\n        WHERE u.user_id != :id\n        AND p.conversation_id = :conversationId AND p.user_id = u.user_id\n        AND (u.full_name LIKE \'%\' || :username || \'%\'  ESCAPE \'\\\' OR u.identity_number like \'%\' || :identityNumber || \'%\'  ESCAPE \'\\\')\n        ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC',
+        'SELECT u.* FROM participants AS p,users AS u WHERE u.user_id != :id AND p.conversation_id = :conversationId AND p.user_id = u.user_id AND(u.full_name LIKE \'%\' || :username || \'%\' ESCAPE \'\\\' OR u.identity_number LIKE \'%\' || :identityNumber || \'%\' ESCAPE \'\\\')ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(conversationId),
@@ -10613,22 +10296,30 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           participants,
-          users
+          users,
         }).map(users.mapFromRow);
   }
 
   Selectable<User> groupParticipants(String conversationId, String id) {
     return customSelect(
-        'SELECT u.* FROM participants p, users u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id AND u.user_id != :id',
-        variables: [Variable<String>(conversationId), Variable<String>(id)],
-        readsFrom: {participants, users}).map(users.mapFromRow);
+        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id AND u.user_id != :id',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(id)
+        ],
+        readsFrom: {
+          participants,
+          users,
+        }).map(users.mapFromRow);
   }
 
   Selectable<User> friends() {
     return customSelect(
         'SELECT * FROM users WHERE relationship = \'FRIEND\' ORDER BY full_name, user_id ASC',
         variables: [],
-        readsFrom: {users}).map(users.mapFromRow);
+        readsFrom: {
+          users,
+        }).map(users.mapFromRow);
   }
 
   Selectable<User> usersByIn(List<String> userIds) {
@@ -10637,8 +10328,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     $arrayStartIndex += userIds.length;
     return customSelect(
         'SELECT * FROM users WHERE user_id IN ($expandeduserIds)',
-        variables: [for (var $ in userIds) Variable<String>($)],
-        readsFrom: {users}).map(users.mapFromRow);
+        variables: [
+          for (var $ in userIds) Variable<String>($)
+        ],
+        readsFrom: {
+          users,
+        }).map(users.mapFromRow);
   }
 
   Selectable<String> userIdsByIn(List<String> userIds) {
@@ -10647,28 +10342,36 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     $arrayStartIndex += userIds.length;
     return customSelect(
         'SELECT user_id FROM users WHERE user_id IN ($expandeduserIds)',
-        variables: [for (var $ in userIds) Variable<String>($)],
-        readsFrom: {users}).map((QueryRow row) => row.read<String>('user_id'));
+        variables: [
+          for (var $ in userIds) Variable<String>($)
+        ],
+        readsFrom: {
+          users,
+        }).map((QueryRow row) => row.read<String>('user_id'));
   }
 
   Selectable<User> fuzzySearchUser(
       String id, String username, String identityNumber) {
     return customSelect(
-        'SELECT *\nFROM   users\nWHERE  user_id != :id\n       AND relationship = \'FRIEND\'\n       AND ( full_name LIKE \'%\' || :username || \'%\' ESCAPE \'\\\'\n             OR identity_number LIKE \'%\' || :identityNumber || \'%\' ESCAPE \'\\\')\nORDER  BY full_name = :username COLLATE nocase\n           OR identity_number = :identityNumber COLLATE nocase DESC',
+        'SELECT * FROM users WHERE user_id != :id AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || :username || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || :identityNumber || \'%\' ESCAPE \'\\\')ORDER BY full_name = :username COLLATE nocase OR identity_number = :identityNumber COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
           Variable<String>(identityNumber)
         ],
         readsFrom: {
-          users
+          users,
         }).map(users.mapFromRow);
   }
 
   Selectable<String?> biographyByIdentityNumber(String user_id) {
     return customSelect('SELECT biography FROM users WHERE user_id = :user_id',
-            variables: [Variable<String>(user_id)], readsFrom: {users})
-        .map((QueryRow row) => row.read<String?>('biography'));
+        variables: [
+          Variable<String>(user_id)
+        ],
+        readsFrom: {
+          users,
+        }).map((QueryRow row) => row.read<String?>('biography'));
   }
 
   Selectable<MentionUser> userByIdentityNumbers(List<String> numbers) {
@@ -10677,8 +10380,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     $arrayStartIndex += numbers.length;
     return customSelect(
         'SELECT user_id, identity_number, full_name FROM users WHERE identity_number IN ($expandednumbers)',
-        variables: [for (var $ in numbers) Variable<String>($)],
-        readsFrom: {users}).map((QueryRow row) {
+        variables: [
+          for (var $ in numbers) Variable<String>($)
+        ],
+        readsFrom: {
+          users,
+        }).map((QueryRow row) {
       return MentionUser(
         userId: row.read<String>('user_id'),
         identityNumber: row.read<String>('identity_number'),
@@ -10691,47 +10398,63 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
         variables: [],
-        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
+        readsFrom: {
+          stickerAlbums,
+        }).map(stickerAlbums.mapFromRow);
   }
 
   Selectable<StickerAlbum> personalAlbums() {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'PERSONAL\' ORDER BY created_at ASC LIMIT 1',
         variables: [],
-        readsFrom: {stickerAlbums}).map(stickerAlbums.mapFromRow);
+        readsFrom: {
+          stickerAlbums,
+        }).map(stickerAlbums.mapFromRow);
   }
 
   Selectable<Sticker> recentUsedStickers() {
     return customSelect(
         'SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20',
         variables: [],
-        readsFrom: {stickers}).map(stickers.mapFromRow);
+        readsFrom: {
+          stickers,
+        }).map(stickers.mapFromRow);
   }
 
   Selectable<Sticker> personalStickers() {
     return customSelect(
-        'SELECT s.*\nFROM   sticker_albums sa\n       INNER JOIN sticker_relationships sr\n               ON sr.album_id = sa.album_id\n       INNER JOIN stickers s\n               ON sr.sticker_id = s.sticker_id\nWHERE  sa.category = \'PERSONAL\'\nORDER  BY s.created_at DESC',
+        'SELECT s.* FROM sticker_albums AS sa INNER JOIN sticker_relationships AS sr ON sr.album_id = sa.album_id INNER JOIN stickers AS s ON sr.sticker_id = s.sticker_id WHERE sa.category = \'PERSONAL\' ORDER BY s.created_at DESC',
         variables: [],
         readsFrom: {
           stickerAlbums,
           stickerRelationships,
-          stickers
+          stickers,
         }).map(stickers.mapFromRow);
   }
 
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
-        'SELECT u.*\nFROM participants p,\n     users u\nWHERE p.conversation_id = :conversationId\n  AND p.user_id = u.user_id\nORDER BY p.created_at\nLIMIT 4',
-        variables: [Variable<String>(conversationId)],
-        readsFrom: {participants, users}).map(users.mapFromRow);
+        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id ORDER BY p.created_at LIMIT 4',
+        variables: [
+          Variable<String>(conversationId)
+        ],
+        readsFrom: {
+          participants,
+          users,
+        }).map(users.mapFromRow);
   }
 
   Selectable<ParticipantSessionKey> getParticipantSessionKeyWithoutSelf(
       String conversationId, String userId) {
     return customSelect(
         'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id != :userId',
-        variables: [Variable<String>(conversationId), Variable<String>(userId)],
-        readsFrom: {participantSession}).map((QueryRow row) {
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId)
+        ],
+        readsFrom: {
+          participantSession,
+        }).map((QueryRow row) {
       return ParticipantSessionKey(
         conversationId: row.read<String>('conversation_id'),
         userId: row.read<String>('user_id'),
@@ -10744,22 +10467,27 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ParticipantSessionData> getNotSendSessionParticipants(
       String conversationId, String sessionId) {
     return customSelect(
-        'SELECT p.* FROM participant_session p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL',
+        'SELECT p.* FROM participant_session AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(sessionId)
         ],
         readsFrom: {
           participantSession,
-          users
+          users,
         }).map(participantSession.mapFromRow);
   }
 
   Selectable<ParticipantUser> getGroupParticipants(String conversationId) {
     return customSelect(
-        'SELECT p.conversation_id as conversationId, p.role as role, p.created_at as createdAt,\nu.user_id as userId, u.identity_number as identityNumber, u.relationship as relationship, u.biography as biography, u.full_name as fullName,\nu.avatar_url as avatarUrl, u.phone as phone, u.is_verified as isVerified, u.created_at as userCreatedAt, u.mute_until as muteUntil,\nu.has_pin as hasPin, u.app_id as appId, u.is_scam as isScam\nFROM participants p, users u\nWHERE p.conversation_id = :conversationId\nAND p.user_id = u.user_id\nORDER BY p.created_at DESC',
-        variables: [Variable<String>(conversationId)],
-        readsFrom: {participants, users}).map((QueryRow row) {
+        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam FROM participants AS p,users AS u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id ORDER BY p.created_at DESC',
+        variables: [
+          Variable<String>(conversationId)
+        ],
+        readsFrom: {
+          participants,
+          users,
+        }).map((QueryRow row) {
       return ParticipantUser(
         conversationId: row.read<String>('conversationId'),
         role: Participants.$converter0.mapToDart(row.read<String?>('role')),
@@ -10787,21 +10515,21 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<String> userIdByIdentityNumber(
       String conversationId, String identityNumber) {
     return customSelect(
-        'SELECT u.user_id FROM users u INNER JOIN participants p ON p.user_id = u.user_id\n        WHERE p.conversation_id = :conversationId AND u.identity_number = :identityNumber',
+        'SELECT u.user_id FROM users AS u INNER JOIN participants AS p ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND u.identity_number = :identityNumber',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(identityNumber)
         ],
         readsFrom: {
           users,
-          participants
+          participants,
         }).map((QueryRow row) => row.read<String>('user_id'));
   }
 
   Selectable<MessageItem> messagesByConversationId(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.conversation_id = :conversationId ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
         variables: [
           Variable<String>(conversationId),
           Variable<int>(offset),
@@ -10815,7 +10543,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -10848,7 +10576,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -10867,7 +10595,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -10885,7 +10613,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     final expandedmessageIds = $expandVar($arrayStartIndex, messageIds.length);
     $arrayStartIndex += messageIds.length;
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.message_id in ($expandedmessageIds)\n        ORDER BY m.created_at DESC',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.message_id IN ($expandedmessageIds) ORDER BY m.created_at DESC',
         variables: [
           for (var $ in messageIds) Variable<String>($)
         ],
@@ -10897,7 +10625,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -10930,7 +10658,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -10949,7 +10677,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -10964,20 +10692,23 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<MessageStatus> findMessageStatusById(String messageId) {
     return customSelect(
-            'SELECT status FROM messages WHERE message_id = :messageId',
-            variables: [Variable<String>(messageId)],
-            readsFrom: {messages})
-        .map((QueryRow row) =>
-            Messages.$converter1.mapToDart(row.read<String>('status'))!);
+        'SELECT status FROM messages WHERE message_id = :messageId',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) =>
+        Messages.$converter1.mapToDart(row.read<String>('status'))!);
   }
 
   Future<int> updateQuoteContentByQuoteId(
-      String? content, String conversationId, String? messageId) {
+      String? content, String? conversationId, String? messageId) {
     return customUpdate(
       'UPDATE messages SET quote_content = :content WHERE conversation_id = :conversationId AND quote_message_id = :messageId',
       variables: [
         Variable<String?>(content),
-        Variable<String>(conversationId),
+        Variable<String?>(conversationId),
         Variable<String?>(messageId)
       ],
       updates: {messages},
@@ -10987,9 +10718,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SendingMessage> sendingMessage(String message_id) {
     return customSelect(
-        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type,\n      m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key,\n      m.media_digest, m.media_status, m.status, m.created_at, m.action, m.participant_id, m.snapshot_id, m.hyperlink,\n      m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content,\n      rm.status as resend_status, rm.user_id as resend_user_id, rm.session_id as resend_session_id\n      FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id\n      WHERE m.message_id = :message_id AND (m.status = \'SENDING\' OR rm.status = 1) AND m.content IS NOT NULL LIMIT 1',
-        variables: [Variable<String>(message_id)],
-        readsFrom: {messages, resendSessionMessages}).map((QueryRow row) {
+        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = :message_id AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
+        variables: [
+          Variable<String>(message_id)
+        ],
+        readsFrom: {
+          messages,
+          resendSessionMessages,
+        }).map((QueryRow row) {
       return SendingMessage(
         messageId: row.read<String>('message_id'),
         conversationId: row.read<String>('conversation_id'),
@@ -11031,7 +10767,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<QuoteMessageItem> findMessageItemById(
       String conversationId, String messageId) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n      u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n      m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n      m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n      m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration,\n      m.quote_message_id as quoteId, m.quote_content as quoteContent,\n      st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n      st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n      su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId\n      FROM messages m\n      INNER JOIN users u ON m.user_id = u.user_id\n      LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n      LEFT JOIN users su ON m.shared_user_id = su.user_id\n      LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n      WHERE m.conversation_id = :conversationId AND m.message_id = :messageId AND m.status != \'FAILED\'',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.conversation_id = :conversationId AND m.message_id = :messageId AND m.status != \'FAILED\'',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(messageId)
@@ -11040,7 +10776,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           stickers,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return QuoteMessageItem(
         messageId: row.read<String>('messageId'),
@@ -11075,7 +10811,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         assetType: row.read<String?>('assetType'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11085,7 +10821,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<QuoteMessageItem> findMessageItemByMessageId(String messageId) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,\n      u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n      m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n      m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n      m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration,\n      m.quote_message_id as quoteId, m.quote_content as quoteContent,\n      st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n      st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n      su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId\n      FROM messages m\n      INNER JOIN users u ON m.user_id = u.user_id\n      LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n      LEFT JOIN users su ON m.shared_user_id = su.user_id\n      LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n      WHERE m.message_id = :messageId AND m.status != \'FAILED\'',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.message_id = :messageId AND m.status != \'FAILED\'',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11093,7 +10829,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           stickers,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return QuoteMessageItem(
         messageId: row.read<String>('messageId'),
@@ -11128,7 +10864,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         assetType: row.read<String?>('assetType'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11138,13 +10874,17 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<Message> findMessageByMessageId(String messageId) {
     return customSelect('SELECT * FROM messages WHERE message_id = :messageId',
-        variables: [Variable<String>(messageId)],
-        readsFrom: {messages}).map(messages.mapFromRow);
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages,
+        }).map(messages.mapFromRow);
   }
 
   Selectable<int> fuzzySearchMessageCount(String query) {
     return customSelect(
-        'SELECT count(*)\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    INNER JOIN users u ON c.owner_id = u.user_id\n    WHERE m.message_id = fts.message_id',
+        'SELECT count(*) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id',
         variables: [
           Variable<String>(query)
         ],
@@ -11152,14 +10892,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           messagesFts,
           conversations,
-          users
-        }).map((QueryRow row) => row.read<int>('count(*)'));
+          users,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
       String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName,\n    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId\n    FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    INNER JOIN users u ON c.owner_id = u.user_id\n    WHERE m.message_id = fts.message_id\n    ORDER BY m.created_at DESC\n    LIMIT :limit OFFSET :offset',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
         variables: [
           Variable<String>(query),
           Variable<int>(limit),
@@ -11169,7 +10909,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts
+          messagesFts,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
         messageId: row.read<String>('messageId'),
@@ -11189,10 +10929,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Future<int> recallMessage(String messageId) {
+  Future<int> recallMessage(String? messageId) {
     return customUpdate(
-      'UPDATE messages SET category = \'MESSAGE_RECALL\', content = NULL, media_url = NULL, media_mime_type = NULL, media_size = NULL,\n    media_duration = NULL, media_width = NULL, media_height = NULL, media_hash = NULL, thumb_image = NULL, media_key = NULL,\n    media_digest = NUll, media_status = NULL, "action" = NULL, participant_id = NULL, snapshot_id = NULL, hyperlink = NULL, name = NULL,\n    album_id = NULL, sticker_id = NULL, shared_user_id = NULL, media_waveform = NULL, quote_message_id = NULL, quote_content = NULL WHERE message_id = :messageId',
-      variables: [Variable<String>(messageId)],
+      'UPDATE messages SET category = \'MESSAGE_RECALL\', content = NULL, media_url = NULL, media_mime_type = NULL, media_size = NULL, media_duration = NULL, media_width = NULL, media_height = NULL, media_hash = NULL, thumb_image = NULL, media_key = NULL, media_digest = NULL, media_status = NULL, "action" = NULL, participant_id = NULL, snapshot_id = NULL, hyperlink = NULL, name = NULL, album_id = NULL, sticker_id = NULL, shared_user_id = NULL, media_waveform = NULL, quote_message_id = NULL, quote_content = NULL WHERE message_id = :messageId',
+      variables: [Variable<String?>(messageId)],
       updates: {messages},
       updateKind: UpdateKind.update,
     );
@@ -11201,7 +10941,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> mediaMessages(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\') ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
         variables: [
           Variable<String>(conversationId),
           Variable<int>(offset),
@@ -11215,7 +10955,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11248,7 +10988,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11267,7 +11007,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11282,27 +11022,31 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> mediaMessagesCount(String conversationId) {
     return customSelect(
-        'SELECT Count(*)\n        FROM messages m\n        WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')',
-        variables: [Variable<String>(conversationId)],
-        readsFrom: {messages}).map((QueryRow row) => row.read<int>('Count(*)'));
+        'SELECT Count(*) AS _c0 FROM messages AS m WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')',
+        variables: [
+          Variable<String>(conversationId)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<int> mediaMessageRowIdByConversationId(
       String conversationId, String messageId) {
     return customSelect(
-        'SELECT count(*) FROM messages WHERE conversation_id = :conversationId\n        AND created_at > (SELECT created_at FROM messages WHERE message_id = :messageId)\n        AND category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')\n        ORDER BY created_at DESC, rowid DESC',
+        'SELECT count(*) AS _c0 FROM messages WHERE conversation_id = :conversationId AND created_at > (SELECT created_at FROM messages WHERE message_id = :messageId) AND category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\') ORDER BY created_at DESC, "rowid" DESC',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(messageId)
         ],
         readsFrom: {
-          messages
-        }).map((QueryRow row) => row.read<int>('count(*)'));
+          messages,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id                   AS messageId,\n       m.conversation_id              AS conversationId,\n       sender.user_id                 AS senderId,\n       sender.full_name               AS senderFullName,\n       m.category                     AS type,\n       m.content                      AS content,\n       m.quote_content                AS quoteContent,\n       m.status                       AS status,\n       c.name                         AS groupName,\n       c.mute_until                   AS muteUntil,\n       conversationOwner.mute_until   AS ownerMuteUntil,\n       conversationOwner.user_id      AS ownerUserId,\n       conversationOwner.full_name    AS ownerFullName,\n       m.created_at                   AS createdAt,\n       c.category                     AS category,\n       m.action                       AS actionName,\n       conversationOwner.relationship AS relationship,\n       pu.full_name                   AS participantFullName,\n       pu.user_id                     AS participantUserId\nFROM   messages m\n       INNER JOIN users sender\n               ON m.user_id = sender.user_id\n       LEFT JOIN conversations c\n              ON m.conversation_id = c.conversation_id\n       LEFT JOIN users conversationOwner\n              ON c.owner_id = conversationOwner.user_id\n       LEFT JOIN message_mentions mm\n              ON m.message_id = mm.message_id\n       LEFT JOIN users pu\n              ON pu.user_id = m.participant_id\nWHERE  m.message_id = :messageId\nORDER  BY m.created_at DESC',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id = :messageId ORDER BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11310,7 +11054,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return NotificationMessage(
         messageId: row.read<String>('messageId'),
@@ -11326,7 +11070,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
         ownerMuteUntil:
             Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        ownerUserId: row.read<String>('ownerUserId'),
+        ownerUserId: row.read<String?>('ownerUserId'),
         ownerFullName: row.read<String?>('ownerFullName'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         category:
@@ -11336,7 +11080,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
         participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
       );
     });
   }
@@ -11344,7 +11088,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<int> fuzzySearchMessageCountByConversationId(
       String conversationId, String query) {
     return customSelect(
-        'SELECT count(*)\n    FROM messages m\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)',
+        'SELECT count(*) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query)
@@ -11353,14 +11097,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           conversations,
           users,
-          messagesFts
-        }).map((QueryRow row) => row.read<int>('count(*)'));
+          messagesFts,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
       String conversationId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,\n    m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName,\n    c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId\n    FROM messages m\n    INNER JOIN conversations c ON c.conversation_id = m.conversation_id\n    INNER JOIN users u ON m.user_id = u.user_id\n    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)\n    ORDER BY m.created_at DESC\n    LIMIT :limit OFFSET :offset',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -11371,7 +11115,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
-          messagesFts
+          messagesFts,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
         messageId: row.read<String>('messageId'),
@@ -11394,7 +11138,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> mediaMessagesBefore(
       int rowid, String conversationId, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')\n        ORDER BY m.created_at DESC\n        LIMIT :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m."rowid" < :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\') ORDER BY m.created_at DESC LIMIT :limit',
         variables: [
           Variable<int>(rowid),
           Variable<String>(conversationId),
@@ -11408,7 +11152,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11441,7 +11185,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11460,7 +11204,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11476,7 +11220,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> mediaMessagesAfter(
       int rowid, String conversationId, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.rowid > :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\')\n        ORDER BY m.created_at ASC\n        LIMIT :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m."rowid" > :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_IMAGE\', \'PLAIN_IMAGE\') ORDER BY m.created_at ASC LIMIT :limit',
         variables: [
           Variable<int>(rowid),
           Variable<String>(conversationId),
@@ -11490,7 +11234,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11523,7 +11267,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11542,7 +11286,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11557,15 +11301,19 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> messageRowId(String messageId) {
     return customSelect(
-        'SELECT rowid FROM messages where message_id = :messageId',
-        variables: [Variable<String>(messageId)],
-        readsFrom: {messages}).map((QueryRow row) => row.read<int>('rowid'));
+        'SELECT "rowid" FROM messages WHERE message_id = :messageId',
+        variables: [
+          Variable<String>(messageId)
+        ],
+        readsFrom: {
+          messages,
+        }).map((QueryRow row) => row.read<int>('rowid'));
   }
 
   Selectable<MessageItem> postMessages(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_POST\', \'PLAIN_POST\')\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_POST\', \'PLAIN_POST\') ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
         variables: [
           Variable<String>(conversationId),
           Variable<int>(offset),
@@ -11579,7 +11327,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11612,7 +11360,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11631,7 +11379,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11647,7 +11395,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> postMessagesBefore(
       int rowid, String conversationId, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_POST\', \'PLAIN_POST\')\n        ORDER BY m.created_at DESC\n        LIMIT :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m."rowid" < :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_POST\', \'PLAIN_POST\') ORDER BY m.created_at DESC LIMIT :limit',
         variables: [
           Variable<int>(rowid),
           Variable<String>(conversationId),
@@ -11661,7 +11409,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11694,7 +11442,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11713,7 +11461,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11729,7 +11477,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> fileMessages(
       String conversationId, int offset, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_DATA\', \'PLAIN_DATA\')\n        ORDER BY m.created_at DESC\n        LIMIT :offset, :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_DATA\', \'PLAIN_DATA\') ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
         variables: [
           Variable<String>(conversationId),
           Variable<int>(offset),
@@ -11743,7 +11491,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11776,7 +11524,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11795,7 +11543,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11811,7 +11559,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> fileMessagesBefore(
       int rowid, String conversationId, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_DATA\', \'PLAIN_DATA\')\n        ORDER BY m.created_at DESC\n        LIMIT :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m."rowid" < :rowid AND m.conversation_id = :conversationId AND m.category IN (\'SIGNAL_DATA\', \'PLAIN_DATA\') ORDER BY m.created_at DESC LIMIT :limit',
         variables: [
           Variable<int>(rowid),
           Variable<String>(conversationId),
@@ -11825,7 +11573,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11858,7 +11606,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11877,7 +11625,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11893,7 +11641,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> beforeMessagesByConversationId(
       int rowid, String conversationId, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId\n        ORDER BY m.created_at DESC\n        LIMIT :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m."rowid" < :rowid AND m.conversation_id = :conversationId ORDER BY m.created_at DESC LIMIT :limit',
         variables: [
           Variable<int>(rowid),
           Variable<String>(conversationId),
@@ -11907,7 +11655,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -11940,7 +11688,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -11959,7 +11707,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -11975,7 +11723,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<MessageItem> afterMessagesByConversationId(
       int rowid, String conversationId, int limit) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.rowid > :rowid AND m.conversation_id = :conversationId\n        ORDER BY m.created_at ASC\n        LIMIT :limit',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m."rowid" > :rowid AND m.conversation_id = :conversationId ORDER BY m.created_at ASC LIMIT :limit',
         variables: [
           Variable<int>(rowid),
           Variable<String>(conversationId),
@@ -11989,7 +11737,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -12022,7 +11770,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -12041,7 +11789,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -12056,7 +11804,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<MessageItem> messageItemByMessageId(String messageId) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,\n        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,\n        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,\n        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,\n        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,\n        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,\n        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,\n        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,\n        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,\n        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,\n        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,\n        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl\n        FROM messages m\n        INNER JOIN users u ON m.user_id = u.user_id\n        LEFT JOIN users u1 ON m.participant_id = u1.user_id\n        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id\n        LEFT JOIN assets a ON s.asset_id = a.asset_id\n        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id\n        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink\n        LEFT JOIN users su ON m.shared_user_id = su.user_id\n        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id\n        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id\n        WHERE m.message_id = :messageId\n        ORDER BY m.created_at ASC\n        LIMIT 1',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory, u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type, m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform, m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight, m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id AS quoteId, m.quote_content AS quoteContent, u1.full_name AS participantFullName, m."action" AS actionName, u1.user_id AS participantUserId, s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId, a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId, st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription, h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber, su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read AS mentionRead, c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl FROM messages AS m INNER JOIN users AS u ON m.user_id = u.user_id LEFT JOIN users AS u1 ON m.participant_id = u1.user_id LEFT JOIN snapshots AS s ON m.snapshot_id = s.snapshot_id LEFT JOIN assets AS a ON s.asset_id = a.asset_id LEFT JOIN stickers AS st ON st.sticker_id = m.sticker_id LEFT JOIN hyperlinks AS h ON m.hyperlink = h.hyperlink LEFT JOIN users AS su ON m.shared_user_id = su.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id WHERE m.message_id = :messageId ORDER BY m.created_at ASC LIMIT 1',
         variables: [
           Variable<String>(messageId)
         ],
@@ -12068,7 +11816,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           stickers,
           hyperlinks,
-          messageMentions
+          messageMentions,
         }).map((QueryRow row) {
       return MessageItem(
         messageId: row.read<String>('messageId'),
@@ -12101,7 +11849,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         snapshotId: row.read<String?>('snapshotId'),
         snapshotType: row.read<String?>('snapshotType'),
         snapshotAmount: row.read<String?>('snapshotAmount'),
@@ -12120,7 +11868,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteImage: row.read<String?>('siteImage'),
         sharedUserId: row.read<String?>('sharedUserId'),
         sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String>('sharedUserIdentityNumber'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
         sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
         sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
         sharedUserAppId: row.read<String?>('sharedUserAppId'),
@@ -12151,30 +11899,93 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     );
   }
 
-  Selectable<int> chatConversationCount() {
+  Selectable<int> baseConversationItemCount(
+      Expression<bool?> Function(Conversations conversation, Users owner)
+          where) {
+    final generatedwhere = $write(
+        where(alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner')),
+        hasMultipleTables: true);
     return customSelect(
-        'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category IN (\'CONTACT\', \'GROUP\') AND c.status = 2\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',
-        variables: [],
+        'SELECT Count(1) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql}',
+        variables: [
+          ...generatedwhere.introducedVariables
+        ],
         readsFrom: {
           conversations,
           users,
-          messages
-        }).map((QueryRow row) => row.read<int>('Count(1)'));
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
-  Selectable<ConversationItem> chatConversations(int limit, int offset) {
+  Selectable<ConversationItem> baseConversationItems(
+      Expression<bool?> Function(
+              Conversations conversation,
+              Users owner,
+              Messages lastMessage,
+              Users lastMessageSender,
+              Snapshots snapshot,
+              Users participant)
+          where,
+      OrderBy Function(
+              Conversations conversation,
+              Users owner,
+              Messages lastMessage,
+              Users lastMessageSender,
+              Snapshots snapshot,
+              Users participant)
+          order,
+      Limit Function(
+              Conversations conversation,
+              Users owner,
+              Messages lastMessage,
+              Users lastMessageSender,
+              Snapshots snapshot,
+              Users participant)
+          limit) {
+    final generatedwhere = $write(
+        where(
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'lastMessage'),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'participant')),
+        hasMultipleTables: true);
+    final generatedorder = $write(
+        order(
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'lastMessage'),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'participant')),
+        hasMultipleTables: true);
+    final generatedlimit = $write(
+        limit(
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'lastMessage'),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'participant')),
+        hasMultipleTables: true);
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\') AND c.status = 2\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT count(*) AS _c0 FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
-          Variable<int>(limit),
-          Variable<int>(offset)
+          ...generatedwhere.introducedVariables,
+          ...generatedorder.introducedVariables,
+          ...generatedlimit.introducedVariables
         ],
         readsFrom: {
           conversations,
           users,
           messages,
           snapshots,
-          messageMentions
+          messageMentions,
+          ...generatedwhere.watchedTables,
+          ...generatedorder.watchedTables,
+          ...generatedlimit.watchedTables,
         }).map((QueryRow row) {
       return ConversationItem(
         conversationId: row.read<String>('conversationId'),
@@ -12212,7 +12023,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         senderFullName: row.read<String?>('senderFullName'),
         snapshotType: row.read<String?>('SnapshotType'),
         participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         mentionCount: row.read<int>('mentionCount'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
@@ -12220,30 +12031,104 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<int> contactConversationCount() {
+  Selectable<int> baseConversationItemCountWithCircleConversation(
+      Expression<bool?> Function(CircleConversations circleConversation,
+              Conversations conversation, Users owner)
+          where) {
+    final generatedwhere = $write(
+        where(
+            alias(this.circleConversations, 'circleConversation'),
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner')),
+        hasMultipleTables: true);
     return customSelect(
-        'SELECT Count(1)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'FRIEND\'\n       AND ou.app_id IS NULL\nORDER  BY c.pin_time DESC, c.last_message_created_at DESC',
-        variables: [],
+        'SELECT Count(1) AS _c0 FROM circle_conversations AS circleConversation INNER JOIN conversations AS conversation ON conversation.conversation_id = circleConversation.conversation_id INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql}',
+        variables: [
+          ...generatedwhere.introducedVariables
+        ],
         readsFrom: {
+          circleConversations,
           conversations,
           users,
-          messages
-        }).map((QueryRow row) => row.read<int>('Count(1)'));
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
-  Selectable<ConversationItem> contactConversations(int limit, int offset) {
+  Selectable<ConversationItem> baseConversationItemsWithCircleConversation(
+      Expression<bool?> Function(
+              CircleConversations circleConversation,
+              Conversations conversation,
+              Users owner,
+              Messages lastMessage,
+              Users lastMessageSender,
+              Snapshots snapshot,
+              Users participant)
+          where,
+      OrderBy Function(
+              CircleConversations circleConversation,
+              Conversations conversation,
+              Users owner,
+              Messages lastMessage,
+              Users lastMessageSender,
+              Snapshots snapshot,
+              Users participant)
+          order,
+      Limit Function(
+              CircleConversations circleConversation,
+              Conversations conversation,
+              Users owner,
+              Messages lastMessage,
+              Users lastMessageSender,
+              Snapshots snapshot,
+              Users participant)
+          limit) {
+    final generatedwhere = $write(
+        where(
+            alias(this.circleConversations, 'circleConversation'),
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'lastMessage'),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'participant')),
+        hasMultipleTables: true);
+    final generatedorder = $write(
+        order(
+            alias(this.circleConversations, 'circleConversation'),
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'lastMessage'),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'participant')),
+        hasMultipleTables: true);
+    final generatedlimit = $write(
+        limit(
+            alias(this.circleConversations, 'circleConversation'),
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.messages, 'lastMessage'),
+            alias(this.users, 'lastMessageSender'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'participant')),
+        hasMultipleTables: true);
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'FRIEND\' AND ou.app_id IS NULL\n            ORDER BY c.pin_time DESC, c.last_message_created_at DESC\n            LIMIT :limit OFFSET :offset',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT count(*) AS _c0 FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM circle_conversations AS circleConversation INNER JOIN conversations AS conversation ON conversation.conversation_id = circleConversation.conversation_id INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
-          Variable<int>(limit),
-          Variable<int>(offset)
+          ...generatedwhere.introducedVariables,
+          ...generatedorder.introducedVariables,
+          ...generatedlimit.introducedVariables
         ],
         readsFrom: {
           conversations,
           users,
           messages,
           snapshots,
-          messageMentions
+          messageMentions,
+          circleConversations,
+          ...generatedwhere.watchedTables,
+          ...generatedorder.watchedTables,
+          ...generatedlimit.watchedTables,
         }).map((QueryRow row) {
       return ConversationItem(
         conversationId: row.read<String>('conversationId'),
@@ -12281,327 +12166,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         senderFullName: row.read<String?>('senderFullName'),
         snapshotType: row.read<String?>('SnapshotType'),
         participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
-  }
-
-  Selectable<int> strangerConversationCount() {
-    return customSelect(
-        'SELECT Count(*)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.relationship = \'STRANGER\'\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
-        variables: [],
-        readsFrom: {
-          conversations,
-          users,
-          messages
-        }).map((QueryRow row) => row.read<int>('Count(*)'));
-  }
-
-  Selectable<ConversationItem> strangerConversations(int limit, int offset) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.relationship = \'STRANGER\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
-  }
-
-  Selectable<int> groupConversationCount() {
-    return customSelect(
-        'SELECT Count(*)\nFROM   conversations c\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'GROUP\'\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
-        variables: [],
-        readsFrom: {
-          conversations,
-          messages
-        }).map((QueryRow row) => row.read<int>('Count(*)'));
-  }
-
-  Selectable<ConversationItem> groupConversations(int limit, int offset) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'GROUP\'\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
-  }
-
-  Selectable<int> botConversationCount() {
-    return customSelect(
-        'SELECT Count(*)\nFROM   conversations c\n       INNER JOIN users ou\n               ON ou.user_id = c.owner_id\n       LEFT JOIN messages m\n              ON c.last_message_id = m.message_id\nWHERE  c.category = \'CONTACT\'\n       AND ou.app_id IS NOT NULL\nORDER  BY c.pin_time DESC,\n          CASE\n            WHEN m.created_at IS NULL THEN c.created_at\n            ELSE m.created_at\n          END DESC',
-        variables: [],
-        readsFrom: {
-          conversations,
-          users,
-          messages
-        }).map((QueryRow row) => row.read<int>('Count(*)'));
-  }
-
-  Selectable<ConversationItem> botConversations(int limit, int offset) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category = \'CONTACT\' AND ou.app_id IS NOT NULL\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
-  }
-
-  Selectable<ConversationItem> conversationItem(String id) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.conversation_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
-        variables: [
-          Variable<String>(id)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
-  }
-
-  Selectable<ConversationItem> conversationByOwnerId(String? id) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE ou.relationship = \'FRIEND\' AND c.owner_id = :id\n                        ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC',
-        variables: [
-          Variable<String?>(id)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
+        participantUserId: row.read<String?>('participantUserId'),
         mentionCount: row.read<int>('mentionCount'),
         relationship:
             Users.$converter0.mapToDart(row.read<String?>('relationship')),
@@ -12611,75 +12176,26 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int?> allUnseenMessageCount(DateTime? now) {
     return customSelect(
-        'SELECT SUM(unseen_message_count) FROM conversations WHERE mute_until <= :now',
+        'SELECT SUM(unseen_message_count) AS _c0 FROM conversations WHERE mute_until <= :now',
         variables: [
           Variable<int?>(Conversations.$converter5.mapToSql(now))
         ],
         readsFrom: {
-          conversations
-        }).map((QueryRow row) => row.read<int?>('SUM(unseen_message_count)'));
-  }
-
-  Selectable<ConversationItem> conversationItems() {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM conversations c\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE c.category IN (\'CONTACT\', \'GROUP\')\n                    AND c.status = 2\n                    ORDER BY c.pin_time DESC, c.last_message_created_at DESC',
-        variables: [],
-        readsFrom: {
           conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
+        }).map((QueryRow row) => row.read<int?>('_c0'));
   }
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName,\n        ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl,\n        ou.is_verified AS isVerified, ou.app_id AS appId\n        FROM conversations c\n        INNER JOIN users ou ON ou.user_id = c.owner_id\n        LEFT JOIN messages m ON c.last_message_id = m.message_id\n        WHERE (c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\')\n        OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n            AND (ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\'\n                OR ou.identity_number like \'%\' || :query || \'%\' ESCAPE \'\\\'))\n        ORDER BY\n            (c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)\n                OR (c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\'\n                    AND (ou.full_name = :query COLLATE NOCASE\n                        OR ou.identity_number = :query COLLATE NOCASE)) DESC,\n            c.pin_time DESC,\n            m.created_at DESC',
-        variables: [Variable<String>(query)],
-        readsFrom: {conversations, users, messages}).map((QueryRow row) {
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl, ou.is_verified AS isVerified, ou.app_id AS appId FROM conversations AS c INNER JOIN users AS ou ON ou.user_id = c.owner_id LEFT JOIN messages AS m ON c.last_message_id = m.message_id WHERE(c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\')OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\' OR ou.identity_number LIKE \'%\' || :query || \'%\' ESCAPE \'\\\'))ORDER BY(c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name = :query COLLATE NOCASE OR ou.identity_number = :query COLLATE NOCASE))DESC, c.pin_time DESC, m.created_at DESC',
+        variables: [
+          Variable<String>(query)
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          messages,
+        }).map((QueryRow row) {
       return SearchConversationItem(
         conversationId: row.read<String>('conversationId'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
@@ -12696,115 +12212,25 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<ConversationItem> conversationsByCircleId(
-      String circle_id, int limit, int offset) {
-    return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,\n            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,\n            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,\n            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,\n            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,\n            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,\n            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,\n            mu.full_name AS senderFullName, s.type AS SnapshotType,\n            pu.full_name AS participantFullName, pu.user_id AS participantUserId,\n            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,\n            ou.relationship AS relationship\n            FROM circle_conversations cc\n            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            LEFT JOIN messages m ON c.last_message_id = m.message_id\n            LEFT JOIN users mu ON mu.user_id = m.user_id\n            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id\n            LEFT JOIN users pu ON pu.user_id = m.participant_id\n            WHERE cc.circle_id = :circle_id\n            ORDER BY c.pin_time DESC,\n              CASE\n                WHEN m.created_at is NULL THEN c.created_at\n                ELSE m.created_at\n              END\n            DESC\n            LIMIT :limit OFFSET :offset',
-        variables: [
-          Variable<String>(circle_id),
-          Variable<int>(limit),
-          Variable<int>(offset)
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions,
-          circleConversations
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
-  }
-
-  Selectable<int> conversationsCountByCircleId(String circle_id) {
-    return customSelect(
-        'SELECT COUNT(*)\n            FROM circle_conversations cc\n            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id\n            INNER JOIN users ou ON ou.user_id = c.owner_id\n            WHERE cc.circle_id = :circle_id',
-        variables: [
-          Variable<String>(circle_id)
-        ],
-        readsFrom: {
-          circleConversations,
-          conversations,
-          users
-        }).map((QueryRow row) => row.read<int>('COUNT(*)'));
-  }
-
   Selectable<int> conversationParticipantsCount(String conversationId) {
     return customSelect(
-        'SELECT count(1) FROM participants WHERE conversation_id = :conversationId',
+        'SELECT count(1) AS _c0 FROM participants WHERE conversation_id = :conversationId',
         variables: [
           Variable<String>(conversationId)
         ],
         readsFrom: {
-          participants
-        }).map((QueryRow row) => row.read<int>('count(1)'));
-  }
-
-  Selectable<String?> announcement(String conversationId) {
-    return customSelect(
-        'SELECT announcement FROM conversations WHERE conversation_id = :conversationId',
-        variables: [
-          Variable<String>(conversationId)
-        ],
-        readsFrom: {
-          conversations
-        }).map((QueryRow row) => row.read<String?>('announcement'));
-  }
-
-  Selectable<Participant> participantById(
-      String conversationId, String userId) {
-    return customSelect(
-        'SELECT * FROM participants WHERE conversation_id = :conversationId AND user_id = :userId',
-        variables: [Variable<String>(conversationId), Variable<String>(userId)],
-        readsFrom: {participants}).map(participants.mapFromRow);
+          participants,
+        }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<ConversationStorageUsage> conversationStorageUsage() {
     return customSelect(
-        'SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,u.full_name, u.avatar_url, u.is_verified\n        FROM conversations c INNER JOIN users u ON u.user_id = c.owner_id WHERE c.category IS NOT NULL',
+        'SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number, u.full_name, u.avatar_url, u.is_verified FROM conversations AS c INNER JOIN users AS u ON u.user_id = c.owner_id WHERE c.category IS NOT NULL',
         variables: [],
-        readsFrom: {conversations, users}).map((QueryRow row) {
+        readsFrom: {
+          conversations,
+          users,
+        }).map((QueryRow row) {
       return ConversationStorageUsage(
         conversationId: row.read<String>('conversation_id'),
         ownerId: row.read<String?>('owner_id'),
@@ -13169,7 +12595,7 @@ class MessageItem {
   final String? quoteContent;
   final String? participantFullName;
   final MessageAction? actionName;
-  final String participantUserId;
+  final String? participantUserId;
   final String? snapshotId;
   final String? snapshotType;
   final String? snapshotAmount;
@@ -13188,7 +12614,7 @@ class MessageItem {
   final String? siteImage;
   final String? sharedUserId;
   final String? sharedUserFullName;
-  final String sharedUserIdentityNumber;
+  final String? sharedUserIdentityNumber;
   final String? sharedUserAvatarUrl;
   final bool? sharedUserIsVerified;
   final String? sharedUserAppId;
@@ -13224,7 +12650,7 @@ class MessageItem {
     this.quoteContent,
     this.participantFullName,
     this.actionName,
-    required this.participantUserId,
+    this.participantUserId,
     this.snapshotId,
     this.snapshotType,
     this.snapshotAmount,
@@ -13243,7 +12669,7 @@ class MessageItem {
     this.siteImage,
     this.sharedUserId,
     this.sharedUserFullName,
-    required this.sharedUserIdentityNumber,
+    this.sharedUserIdentityNumber,
     this.sharedUserAvatarUrl,
     this.sharedUserIsVerified,
     this.sharedUserAppId,
@@ -13636,7 +13062,7 @@ class QuoteMessageItem {
   final String? assetType;
   final String? sharedUserId;
   final String? sharedUserFullName;
-  final String sharedUserIdentityNumber;
+  final String? sharedUserIdentityNumber;
   final String? sharedUserAvatarUrl;
   final bool? sharedUserIsVerified;
   final String? sharedUserAppId;
@@ -13672,7 +13098,7 @@ class QuoteMessageItem {
     this.assetType,
     this.sharedUserId,
     this.sharedUserFullName,
-    required this.sharedUserIdentityNumber,
+    this.sharedUserIdentityNumber,
     this.sharedUserAvatarUrl,
     this.sharedUserIsVerified,
     this.sharedUserAppId,
@@ -13904,14 +13330,14 @@ class NotificationMessage {
   final String? groupName;
   final DateTime? muteUntil;
   final DateTime? ownerMuteUntil;
-  final String ownerUserId;
+  final String? ownerUserId;
   final String? ownerFullName;
   final DateTime createdAt;
   final ConversationCategory? category;
   final MessageAction? actionName;
   final UserRelationship? relationship;
   final String? participantFullName;
-  final String participantUserId;
+  final String? participantUserId;
   NotificationMessage({
     required this.messageId,
     required this.conversationId,
@@ -13924,14 +13350,14 @@ class NotificationMessage {
     this.groupName,
     this.muteUntil,
     this.ownerMuteUntil,
-    required this.ownerUserId,
+    this.ownerUserId,
     this.ownerFullName,
     required this.createdAt,
     this.category,
     this.actionName,
     this.relationship,
     this.participantFullName,
-    required this.participantUserId,
+    this.participantUserId,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -14054,7 +13480,7 @@ class ConversationItem {
   final String? senderFullName;
   final String? snapshotType;
   final String? participantFullName;
-  final String participantUserId;
+  final String? participantUserId;
   final int mentionCount;
   final UserRelationship? relationship;
   ConversationItem({
@@ -14086,7 +13512,7 @@ class ConversationItem {
     this.senderFullName,
     this.snapshotType,
     this.participantFullName,
-    required this.participantUserId,
+    this.participantUserId,
     required this.mentionCount,
     this.relationship,
   });

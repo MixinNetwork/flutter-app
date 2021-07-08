@@ -110,18 +110,20 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   Identitie copyWith(
           {int? id,
           String? address,
-          int? registrationId,
+          Value<int?> registrationId = const Value.absent(),
           Uint8List? publicKey,
-          Uint8List? privateKey,
-          int? nextPrekeyId,
+          Value<Uint8List?> privateKey = const Value.absent(),
+          Value<int?> nextPrekeyId = const Value.absent(),
           int? timestamp}) =>
       Identitie(
         id: id ?? this.id,
         address: address ?? this.address,
-        registrationId: registrationId ?? this.registrationId,
+        registrationId:
+            registrationId.present ? registrationId.value : this.registrationId,
         publicKey: publicKey ?? this.publicKey,
-        privateKey: privateKey ?? this.privateKey,
-        nextPrekeyId: nextPrekeyId ?? this.nextPrekeyId,
+        privateKey: privateKey.present ? privateKey.value : this.privateKey,
+        nextPrekeyId:
+            nextPrekeyId.present ? nextPrekeyId.value : this.nextPrekeyId,
         timestamp: timestamp ?? this.timestamp,
       );
   @override
@@ -276,58 +278,45 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   final String? _alias;
   Identities(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedIntColumn id = _constructId();
-  GeneratedIntColumn _constructId() {
-    return GeneratedIntColumn('id', $tableName, false,
-        declaredAsPrimaryKey: true,
-        hasAutoIncrement: true,
-        $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+      'id', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _addressMeta = const VerificationMeta('address');
-  late final GeneratedTextColumn address = _constructAddress();
-  GeneratedTextColumn _constructAddress() {
-    return GeneratedTextColumn('address', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> address = GeneratedColumn<String?>(
+      'address', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _registrationIdMeta =
       const VerificationMeta('registrationId');
-  late final GeneratedIntColumn registrationId = _constructRegistrationId();
-  GeneratedIntColumn _constructRegistrationId() {
-    return GeneratedIntColumn('registration_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> registrationId = GeneratedColumn<int?>(
+      'registration_id', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
-  late final GeneratedBlobColumn publicKey = _constructPublicKey();
-  GeneratedBlobColumn _constructPublicKey() {
-    return GeneratedBlobColumn('public_key', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<Uint8List?> publicKey =
+      GeneratedColumn<Uint8List?>('public_key', aliasedName, false,
+          typeName: 'BLOB',
+          requiredDuringInsert: true,
+          $customConstraints: 'NOT NULL');
   final VerificationMeta _privateKeyMeta = const VerificationMeta('privateKey');
-  late final GeneratedBlobColumn privateKey = _constructPrivateKey();
-  GeneratedBlobColumn _constructPrivateKey() {
-    return GeneratedBlobColumn('private_key', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<Uint8List?> privateKey =
+      GeneratedColumn<Uint8List?>('private_key', aliasedName, true,
+          typeName: 'BLOB',
+          requiredDuringInsert: false,
+          $customConstraints: '');
   final VerificationMeta _nextPrekeyIdMeta =
       const VerificationMeta('nextPrekeyId');
-  late final GeneratedIntColumn nextPrekeyId = _constructNextPrekeyId();
-  GeneratedIntColumn _constructNextPrekeyId() {
-    return GeneratedIntColumn('next_prekey_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<int?> nextPrekeyId = GeneratedColumn<int?>(
+      'next_prekey_id', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
-  late final GeneratedIntColumn timestamp = _constructTimestamp();
-  GeneratedIntColumn _constructTimestamp() {
-    return GeneratedIntColumn('timestamp', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> timestamp = GeneratedColumn<int?>(
+      'timestamp', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -339,11 +328,9 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
         timestamp
       ];
   @override
-  Identities get asDslTable => this;
+  String get aliasedName => _alias ?? 'identities';
   @override
-  String get $tableName => _alias ?? 'identities';
-  @override
-  final String actualTableName = 'identities';
+  String get actualTableName => 'identities';
   @override
   VerificationContext validateIntegrity(Insertable<Identitie> instance,
       {bool isInserting = false}) {
@@ -555,36 +542,29 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   final String? _alias;
   Prekeys(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedIntColumn id = _constructId();
-  GeneratedIntColumn _constructId() {
-    return GeneratedIntColumn('id', $tableName, false,
-        declaredAsPrimaryKey: true,
-        hasAutoIncrement: true,
-        $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+      'id', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
-  late final GeneratedIntColumn prekeyId = _constructPrekeyId();
-  GeneratedIntColumn _constructPrekeyId() {
-    return GeneratedIntColumn('prekey_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> prekeyId = GeneratedColumn<int?>(
+      'prekey_id', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  late final GeneratedBlobColumn record = _constructRecord();
-  GeneratedBlobColumn _constructRecord() {
-    return GeneratedBlobColumn('record', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
+      'record', aliasedName, false,
+      typeName: 'BLOB',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [id, prekeyId, record];
   @override
-  Prekeys get asDslTable => this;
+  String get aliasedName => _alias ?? 'prekeys';
   @override
-  String get $tableName => _alias ?? 'prekeys';
-  @override
-  final String actualTableName = 'prekeys';
+  String get actualTableName => 'prekeys';
   @override
   VerificationContext validateIntegrity(Insertable<Prekey> instance,
       {bool isInserting = false}) {
@@ -802,43 +782,35 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   final String? _alias;
   SignedPrekeys(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedIntColumn id = _constructId();
-  GeneratedIntColumn _constructId() {
-    return GeneratedIntColumn('id', $tableName, false,
-        declaredAsPrimaryKey: true,
-        hasAutoIncrement: true,
-        $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+      'id', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
-  late final GeneratedIntColumn prekeyId = _constructPrekeyId();
-  GeneratedIntColumn _constructPrekeyId() {
-    return GeneratedIntColumn('prekey_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> prekeyId = GeneratedColumn<int?>(
+      'prekey_id', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  late final GeneratedBlobColumn record = _constructRecord();
-  GeneratedBlobColumn _constructRecord() {
-    return GeneratedBlobColumn('record', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
+      'record', aliasedName, false,
+      typeName: 'BLOB',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
-  late final GeneratedIntColumn timestamp = _constructTimestamp();
-  GeneratedIntColumn _constructTimestamp() {
-    return GeneratedIntColumn('timestamp', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> timestamp = GeneratedColumn<int?>(
+      'timestamp', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [id, prekeyId, record, timestamp];
   @override
-  SignedPrekeys get asDslTable => this;
+  String get aliasedName => _alias ?? 'signed_prekeys';
   @override
-  String get $tableName => _alias ?? 'signed_prekeys';
-  @override
-  final String actualTableName = 'signed_prekeys';
+  String get actualTableName => 'signed_prekeys';
   @override
   VerificationContext validateIntegrity(Insertable<SignedPrekey> instance,
       {bool isInserting = false}) {
@@ -1091,51 +1063,42 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   final String? _alias;
   Sessions(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedIntColumn id = _constructId();
-  GeneratedIntColumn _constructId() {
-    return GeneratedIntColumn('id', $tableName, false,
-        declaredAsPrimaryKey: true,
-        hasAutoIncrement: true,
-        $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+      'id', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _addressMeta = const VerificationMeta('address');
-  late final GeneratedTextColumn address = _constructAddress();
-  GeneratedTextColumn _constructAddress() {
-    return GeneratedTextColumn('address', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> address = GeneratedColumn<String?>(
+      'address', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _deviceMeta = const VerificationMeta('device');
-  late final GeneratedIntColumn device = _constructDevice();
-  GeneratedIntColumn _constructDevice() {
-    return GeneratedIntColumn('device', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> device = GeneratedColumn<int?>(
+      'device', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  late final GeneratedBlobColumn record = _constructRecord();
-  GeneratedBlobColumn _constructRecord() {
-    return GeneratedBlobColumn('record', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
+      'record', aliasedName, false,
+      typeName: 'BLOB',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
-  late final GeneratedIntColumn timestamp = _constructTimestamp();
-  GeneratedIntColumn _constructTimestamp() {
-    return GeneratedIntColumn('timestamp', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<int?> timestamp = GeneratedColumn<int?>(
+      'timestamp', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns =>
       [id, address, device, record, timestamp];
   @override
-  Sessions get asDslTable => this;
+  String get aliasedName => _alias ?? 'sessions';
   @override
-  String get $tableName => _alias ?? 'sessions';
-  @override
-  final String actualTableName = 'sessions';
+  String get actualTableName => 'sessions';
   @override
   VerificationContext validateIntegrity(Insertable<Session> instance,
       {bool isInserting = false}) {
@@ -1340,34 +1303,29 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   final String? _alias;
   SenderKeys(this._db, [this._alias]);
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
-  late final GeneratedTextColumn groupId = _constructGroupId();
-  GeneratedTextColumn _constructGroupId() {
-    return GeneratedTextColumn('group_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> groupId = GeneratedColumn<String?>(
+      'group_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
-  late final GeneratedTextColumn senderId = _constructSenderId();
-  GeneratedTextColumn _constructSenderId() {
-    return GeneratedTextColumn('sender_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> senderId = GeneratedColumn<String?>(
+      'sender_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
-  late final GeneratedBlobColumn record = _constructRecord();
-  GeneratedBlobColumn _constructRecord() {
-    return GeneratedBlobColumn('record', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
+      'record', aliasedName, false,
+      typeName: 'BLOB',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns => [groupId, senderId, record];
   @override
-  SenderKeys get asDslTable => this;
+  String get aliasedName => _alias ?? 'sender_keys';
   @override
-  String get $tableName => _alias ?? 'sender_keys';
-  @override
-  final String actualTableName = 'sender_keys';
+  String get actualTableName => 'sender_keys';
   @override
   VerificationContext validateIntegrity(Insertable<SenderKey> instance,
       {bool isInserting = false}) {
@@ -1496,13 +1454,13 @@ class RatchetSenderKey extends DataClass
           {String? groupId,
           String? senderId,
           String? status,
-          String? messageId,
+          Value<String?> messageId = const Value.absent(),
           String? createdAt}) =>
       RatchetSenderKey(
         groupId: groupId ?? this.groupId,
         senderId: senderId ?? this.senderId,
         status: status ?? this.status,
-        messageId: messageId ?? this.messageId,
+        messageId: messageId.present ? messageId.value : this.messageId,
         createdAt: createdAt ?? this.createdAt,
       );
   @override
@@ -1629,49 +1587,40 @@ class RatchetSenderKeys extends Table
   final String? _alias;
   RatchetSenderKeys(this._db, [this._alias]);
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
-  late final GeneratedTextColumn groupId = _constructGroupId();
-  GeneratedTextColumn _constructGroupId() {
-    return GeneratedTextColumn('group_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> groupId = GeneratedColumn<String?>(
+      'group_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
-  late final GeneratedTextColumn senderId = _constructSenderId();
-  GeneratedTextColumn _constructSenderId() {
-    return GeneratedTextColumn('sender_id', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> senderId = GeneratedColumn<String?>(
+      'sender_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  late final GeneratedTextColumn status = _constructStatus();
-  GeneratedTextColumn _constructStatus() {
-    return GeneratedTextColumn('status', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> status = GeneratedColumn<String?>(
+      'status', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedTextColumn messageId = _constructMessageId();
-  GeneratedTextColumn _constructMessageId() {
-    return GeneratedTextColumn('message_id', $tableName, true,
-        $customConstraints: '');
-  }
-
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedTextColumn createdAt = _constructCreatedAt();
-  GeneratedTextColumn _constructCreatedAt() {
-    return GeneratedTextColumn('created_at', $tableName, false,
-        $customConstraints: 'NOT NULL');
-  }
-
+  late final GeneratedColumn<String?> createdAt = GeneratedColumn<String?>(
+      'created_at', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   @override
   List<GeneratedColumn> get $columns =>
       [groupId, senderId, status, messageId, createdAt];
   @override
-  RatchetSenderKeys get asDslTable => this;
+  String get aliasedName => _alias ?? 'ratchet_sender_keys';
   @override
-  String get $tableName => _alias ?? 'ratchet_sender_keys';
-  @override
-  final String actualTableName = 'ratchet_sender_keys';
+  String get actualTableName => 'ratchet_sender_keys';
   @override
   VerificationContext validateIntegrity(Insertable<RatchetSenderKey> instance,
       {bool isInserting = false}) {
@@ -1733,18 +1682,18 @@ abstract class _$SignalDatabase extends GeneratedDatabase {
   _$SignalDatabase.connect(DatabaseConnection c) : super.connect(c);
   late final Identities identities = Identities(this);
   late final Index indexIdentitiesAddress = Index('index_identities_address',
-      'CREATE UNIQUE INDEX IF NOT EXISTS index_identities_address ON identities (address);');
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_identities_address ON identities (address)');
   late final Prekeys prekeys = Prekeys(this);
   late final Index indexPrekeysPrekeyId = Index('index_prekeys_prekey_id',
-      'CREATE UNIQUE INDEX IF NOT EXISTS index_prekeys_prekey_id ON prekeys (prekey_id);');
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_prekeys_prekey_id ON prekeys (prekey_id)');
   late final SignedPrekeys signedPrekeys = SignedPrekeys(this);
   late final Index indexSignedPrekeysPrekeyId = Index(
       'index_signed_prekeys_prekey_id',
-      'CREATE UNIQUE INDEX IF NOT EXISTS index_signed_prekeys_prekey_id ON signed_prekeys (prekey_id);');
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_signed_prekeys_prekey_id ON signed_prekeys (prekey_id)');
   late final Sessions sessions = Sessions(this);
   late final Index indexSessionsAddressDevice = Index(
       'index_sessions_address_device',
-      'CREATE UNIQUE INDEX IF NOT EXISTS index_sessions_address_device ON sessions (address, device);');
+      'CREATE UNIQUE INDEX IF NOT EXISTS index_sessions_address_device ON sessions (address, device)');
   late final SenderKeys senderKeys = SenderKeys(this);
   late final RatchetSenderKeys ratchetSenderKeys = RatchetSenderKeys(this);
   late final IdentityDao identityDao = IdentityDao(this as SignalDatabase);
