@@ -791,9 +791,11 @@ packages:
   moor_generator:
     dependency: "direct dev"
     description:
-      name: moor_generator
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: moor_generator
+      ref: develop
+      resolved-ref: "43f85e5c3421a94060091f2cf8dc3ce5e6a3fdcd"
+      url: "https://github.com/simolus3/moor.git"
+    source: git
     version: "4.4.0"
   msix:
     dependency: "direct dev"

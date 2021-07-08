@@ -110,11 +110,19 @@ dependencies:
   extended_text: ^7.0.0
 
 dependency_overrides:
+# Waiting for the new version
+# https://github.com/simolus3/moor/issues/1323
   sqlparser:
     git:
       url: https://github.com/simolus3/moor.git
       ref: develop
       path: sqlparser
+# https://github.com/simolus3/moor/issues/1324
+  moor_generator:
+    git:
+      url: https://github.com/simolus3/moor.git
+      ref: develop
+      path: moor_generator
 
 dev_dependencies:
   build_runner:
