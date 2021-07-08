@@ -10207,7 +10207,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ConversationCircleManagerItem> circleByConversationId(
       String? conversationId) {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [
           Variable<String?>(conversationId)
         ],
@@ -10227,7 +10227,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
       String? conversationId) {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id NOT IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = :conversationId) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id NOT IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [
           Variable<String?>(conversationId)
         ],
@@ -10246,7 +10246,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<String> circlesNameByConversationId(String? conversationId) {
     return customSelect(
-        'SELECT ci.name FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE cc.conversation_id = :conversationId',
+        'SELECT ci.name FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE cc.conversation_id = ?1',
         variables: [
           Variable<String?>(conversationId)
         ],
@@ -10259,7 +10259,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Future<int> deleteByCircleId(String circleId) {
     return customUpdate(
-      'DELETE FROM circle_conversations WHERE circle_id = :circleId',
+      'DELETE FROM circle_conversations WHERE circle_id = ?1',
       variables: [Variable<String>(circleId)],
       updates: {circleConversations},
       updateKind: UpdateKind.delete,
@@ -10268,7 +10268,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Future<int> deleteCircleById(String circleId) {
     return customUpdate(
-      'DELETE FROM circles WHERE circle_id = :circleId',
+      'DELETE FROM circles WHERE circle_id = ?1',
       variables: [Variable<String>(circleId)],
       updates: {circles},
       updateKind: UpdateKind.delete,
@@ -10277,7 +10277,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Future<int> deleteByIds(String conversationId, String circleId) {
     return customUpdate(
-      'DELETE FROM circle_conversations WHERE conversation_id = :conversationId AND circle_id = :circleId',
+      'DELETE FROM circle_conversations WHERE conversation_id = ?1 AND circle_id = ?2',
       variables: [Variable<String>(conversationId), Variable<String>(circleId)],
       updates: {circleConversations},
       updateKind: UpdateKind.delete,
@@ -10287,7 +10287,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchGroupUser(String id, String conversationId,
       String username, String identityNumber) {
     return customSelect(
-        'SELECT u.* FROM participants AS p,users AS u WHERE u.user_id != :id AND p.conversation_id = :conversationId AND p.user_id = u.user_id AND(u.full_name LIKE \'%\' || :username || \'%\' ESCAPE \'\\\' OR u.identity_number LIKE \'%\' || :identityNumber || \'%\' ESCAPE \'\\\')ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC',
+        'SELECT u.* FROM participants AS p,users AS u WHERE u.user_id != ?1 AND p.conversation_id = ?2 AND p.user_id = u.user_id AND(u.full_name LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\' OR u.identity_number LIKE \'%\' || ?4 || \'%\' ESCAPE \'\\\')ORDER BY u.full_name = ?3 COLLATE NOCASE OR u.identity_number = ?4 COLLATE NOCASE DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(conversationId),
@@ -10302,7 +10302,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> groupParticipants(String conversationId, String id) {
     return customSelect(
-        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id AND u.user_id != :id',
+        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id AND u.user_id != ?2',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(id)
@@ -10353,7 +10353,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchUser(
       String id, String username, String identityNumber) {
     return customSelect(
-        'SELECT * FROM users WHERE user_id != :id AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || :username || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || :identityNumber || \'%\' ESCAPE \'\\\')ORDER BY full_name = :username COLLATE nocase OR identity_number = :identityNumber COLLATE nocase DESC',
+        'SELECT * FROM users WHERE user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
@@ -10365,7 +10365,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   }
 
   Selectable<String?> biographyByIdentityNumber(String user_id) {
-    return customSelect('SELECT biography FROM users WHERE user_id = :user_id',
+    return customSelect('SELECT biography FROM users WHERE user_id = ?1',
         variables: [
           Variable<String>(user_id)
         ],
@@ -10434,7 +10434,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
-        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id ORDER BY p.created_at LIMIT 4',
+        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at LIMIT 4',
         variables: [
           Variable<String>(conversationId)
         ],
@@ -10447,7 +10447,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ParticipantSessionKey> getParticipantSessionKeyWithoutSelf(
       String conversationId, String userId) {
     return customSelect(
-        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id != :userId',
+        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id != ?2',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId)
@@ -10467,7 +10467,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ParticipantSessionData> getNotSendSessionParticipants(
       String conversationId, String sessionId) {
     return customSelect(
-        'SELECT p.* FROM participant_session AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL',
+        'SELECT p.* FROM participant_session AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND p.session_id != ?2 AND u.app_id IS NULL AND p.sent_to_server IS NULL',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(sessionId)
@@ -10480,7 +10480,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ParticipantUser> getGroupParticipants(String conversationId) {
     return customSelect(
-        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam FROM participants AS p,users AS u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id ORDER BY p.created_at DESC',
+        'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
         variables: [
           Variable<String>(conversationId)
         ],
@@ -10515,7 +10515,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<String> userIdByIdentityNumber(
       String conversationId, String identityNumber) {
     return customSelect(
-        'SELECT u.user_id FROM users AS u INNER JOIN participants AS p ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND u.identity_number = :identityNumber',
+        'SELECT u.user_id FROM users AS u INNER JOIN participants AS p ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND u.identity_number = ?2',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(identityNumber)
@@ -10778,7 +10778,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<MessageStatus> findMessageStatusById(String messageId) {
     return customSelect(
-        'SELECT status FROM messages WHERE message_id = :messageId LIMIT 1',
+        'SELECT status FROM messages WHERE message_id = ?1 LIMIT 1',
         variables: [
           Variable<String>(messageId)
         ],
@@ -10790,7 +10790,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SendingMessage> sendingMessage(String message_id) {
     return customSelect(
-        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = :message_id AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
+        'SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type, m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key, m.media_digest, m.media_status, m.status, m.created_at, m."action", m.participant_id, m.snapshot_id, m.hyperlink, m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content, rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id FROM messages AS m LEFT JOIN resend_session_messages AS rm ON m.message_id = rm.message_id WHERE m.message_id = ?1 AND(m.status = \'SENDING\' OR rm.status = 1)AND m.content IS NOT NULL LIMIT 1',
         variables: [
           Variable<String>(message_id)
         ],
@@ -10838,7 +10838,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> fuzzySearchMessageCount(String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id',
         variables: [
           Variable<String>(query)
         ],
@@ -10853,7 +10853,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
       String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
         variables: [
           Variable<String>(query),
           Variable<int>(limit),
@@ -10885,7 +10885,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<NotificationMessage> notificationMessage(String messageId) {
     return customSelect(
-        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id = :messageId ORDER BY m.created_at DESC',
+        'SELECT m.message_id AS messageId, m.conversation_id AS conversationId, sender.user_id AS senderId, sender.full_name AS senderFullName, m.category AS type, m.content AS content, m.quote_content AS quoteContent, m.status AS status, c.name AS groupName, c.mute_until AS muteUntil, conversationOwner.mute_until AS ownerMuteUntil, conversationOwner.user_id AS ownerUserId, conversationOwner.full_name AS ownerFullName, m.created_at AS createdAt, c.category AS category, m."action" AS actionName, conversationOwner.relationship AS relationship, pu.full_name AS participantFullName, pu.user_id AS participantUserId FROM messages AS m INNER JOIN users AS sender ON m.user_id = sender.user_id LEFT JOIN conversations AS c ON m.conversation_id = c.conversation_id LEFT JOIN users AS conversationOwner ON c.owner_id = conversationOwner.user_id LEFT JOIN message_mentions AS mm ON m.message_id = mm.message_id LEFT JOIN users AS pu ON pu.user_id = m.participant_id WHERE m.message_id = ?1 ORDER BY m.created_at DESC',
         variables: [
           Variable<String>(messageId)
         ],
@@ -10927,7 +10927,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<int> fuzzySearchMessageCountByConversationId(
       String conversationId, String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query)
@@ -10943,7 +10943,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
       String conversationId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) ORDER BY m.created_at DESC LIMIT :limit OFFSET :offset',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -10976,7 +10976,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> messageRowId(String messageId) {
     return customSelect(
-        'SELECT "rowid" FROM messages WHERE message_id = :messageId LIMIT 1',
+        'SELECT "rowid" FROM messages WHERE message_id = ?1 LIMIT 1',
         variables: [
           Variable<String>(messageId)
         ],
@@ -11262,7 +11262,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int?> allUnseenMessageCount(DateTime? now) {
     return customSelect(
-        'SELECT SUM(unseen_message_count) AS _c0 FROM conversations WHERE mute_until <= :now',
+        'SELECT SUM(unseen_message_count) AS _c0 FROM conversations WHERE mute_until <= ?1',
         variables: [
           Variable<int?>(Conversations.$converter5.mapToSql(now))
         ],
@@ -11273,7 +11273,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl, ou.is_verified AS isVerified, ou.app_id AS appId FROM conversations AS c INNER JOIN users AS ou ON ou.user_id = c.owner_id LEFT JOIN messages AS m ON c.last_message_id = m.message_id WHERE(c.category = \'GROUP\' AND c.name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\')OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name LIKE \'%\' || :query || \'%\' ESCAPE \'\\\' OR ou.identity_number LIKE \'%\' || :query || \'%\' ESCAPE \'\\\'))ORDER BY(c.category = \'GROUP\' AND c.name = :query COLLATE NOCASE)OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name = :query COLLATE NOCASE OR ou.identity_number = :query COLLATE NOCASE))DESC, c.pin_time DESC, m.created_at DESC',
+        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl, ou.is_verified AS isVerified, ou.app_id AS appId FROM conversations AS c INNER JOIN users AS ou ON ou.user_id = c.owner_id LEFT JOIN messages AS m ON c.last_message_id = m.message_id WHERE(c.category = \'GROUP\' AND c.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR ou.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\'))ORDER BY(c.category = \'GROUP\' AND c.name = ?1 COLLATE NOCASE)OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name = ?1 COLLATE NOCASE OR ou.identity_number = ?1 COLLATE NOCASE))DESC, c.pin_time DESC, m.created_at DESC',
         variables: [
           Variable<String>(query)
         ],
@@ -11300,7 +11300,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> conversationParticipantsCount(String conversationId) {
     return customSelect(
-        'SELECT count(1) AS _c0 FROM participants WHERE conversation_id = :conversationId',
+        'SELECT count(1) AS _c0 FROM participants WHERE conversation_id = ?1',
         variables: [
           Variable<String>(conversationId)
         ],
