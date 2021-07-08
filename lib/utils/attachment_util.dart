@@ -34,8 +34,8 @@ class AttachmentUtil {
 
   final Dio _dio = Dio(
     BaseOptions(
-      connectTimeout: 15 * 1000,
-      receiveTimeout: 15 * 1000,
+      connectTimeout: 150 * 1000,
+      receiveTimeout: 150 * 1000,
     ),
   );
   final _messageIdCancelTokenMap = <String, CancelToken?>{};
