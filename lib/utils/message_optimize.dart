@@ -10,7 +10,7 @@ import 'markdown.dart';
 
 Future<String?> messagePreviewOptimize(
   MessageStatus? messageStatus,
-  MessageCategory? messageCategory,
+  String? messageCategory,
   String? content, [
   bool isCurrentUser = false,
   bool isGroup = false,
@@ -84,7 +84,7 @@ Future<String?> messagePreviewOptimize(
 
 String? messagePreviewIcon(
   MessageStatus? messageStatus,
-  MessageCategory? messageCategory,
+  String? messageCategory,
 ) {
   String? icon;
 

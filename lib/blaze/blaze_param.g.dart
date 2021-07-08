@@ -11,8 +11,7 @@ BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) {
     conversationId: json['conversation_id'] as String?,
     recipientId: json['recipient_id'] as String?,
     messageId: json['message_id'] as String?,
-    category: const MessageCategoryJsonConverter()
-        .fromJson(json['category'] as String?),
+    category: json['category'] as String?,
     data: json['data'] as String?,
     status: json['status'] as String?,
     recipients: (json['recipients'] as List<dynamic>?)
@@ -43,8 +42,7 @@ Map<String, dynamic> _$BlazeMessageParamToJson(BlazeMessageParam instance) =>
       'conversation_id': instance.conversationId,
       'recipient_id': instance.recipientId,
       'message_id': instance.messageId,
-      'category':
-          const MessageCategoryJsonConverter().toJson(instance.category),
+      'category': instance.category,
       'data': instance.data,
       'status': instance.status,
       'recipients': instance.recipients?.map((e) => e.toJson()).toList(),

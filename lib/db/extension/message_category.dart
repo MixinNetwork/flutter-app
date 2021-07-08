@@ -1,171 +1,44 @@
 import '../../enum/message_category.dart';
 
-extension MessageCategoryExtension on MessageCategory? {
-  bool get isPlain => {
-        MessageCategory.plainText,
-        MessageCategory.plainImage,
-        MessageCategory.plainVideo,
-        MessageCategory.plainData,
-        MessageCategory.plainSticker,
-        MessageCategory.plainContact,
-        MessageCategory.plainAudio,
-        MessageCategory.plainLive,
-        MessageCategory.plainPost,
-        MessageCategory.plainJson,
-        MessageCategory.plainLocation,
-        MessageCategory.plainTranscript,
-      }.any((element) => element == this);
+extension MessageCategoryExtension on String? {
+  bool get isPlain => this?.startsWith('PLAIN_') ?? false;
 
-  bool get isSystem => {
-        MessageCategory.systemAccountSnapshot,
-        MessageCategory.systemCircle,
-        MessageCategory.systemConversation,
-        MessageCategory.systemSession,
-        MessageCategory.systemUser,
-      }.any((element) => element == this);
+  bool get isSystem => this?.startsWith('SYSTEM_') ?? false;
 
-  bool get isEncrypted => {
-        MessageCategory.encryptedText,
-        MessageCategory.encryptedImage,
-        MessageCategory.encryptedVideo,
-        MessageCategory.encryptedSticker,
-        MessageCategory.encryptedData,
-        MessageCategory.encryptedContact,
-        MessageCategory.encryptedAudio,
-        MessageCategory.encryptedLive,
-        MessageCategory.encryptedPost,
-        MessageCategory.encryptedLocation,
-        MessageCategory.encryptedTranscript,
-      }.any((element) => element == this);
+  bool get isEncrypted => this?.startsWith('ENCRYPTED_') ?? false;
 
-  bool get isSignal => {
-        MessageCategory.signalKey,
-        MessageCategory.signalText,
-        MessageCategory.signalImage,
-        MessageCategory.signalVideo,
-        MessageCategory.signalSticker,
-        MessageCategory.signalData,
-        MessageCategory.signalContact,
-        MessageCategory.signalAudio,
-        MessageCategory.signalLive,
-        MessageCategory.signalPost,
-        MessageCategory.signalLocation,
-        MessageCategory.signalTranscript,
-      }.any((element) => element == this);
+  bool get isSignal => this?.startsWith('SIGNAL_') ?? false;
 
-  bool get isCall => {
-        MessageCategory.webrtcAudioOffer,
-        MessageCategory.webrtcAudioAnswer,
-        MessageCategory.webrtcIceCandidate,
-        MessageCategory.webrtcAudioCancel,
-        MessageCategory.webrtcAudioDecline,
-        MessageCategory.webrtcAudioEnd,
-        MessageCategory.webrtcAudioBusy,
-        MessageCategory.webrtcAudioFailed,
-        MessageCategory.krakenInvite,
-        MessageCategory.krakenPublish,
-        MessageCategory.krakenSubscribe,
-        MessageCategory.krakenAnswer,
-        MessageCategory.krakenTrickle,
-        MessageCategory.krakenEnd,
-        MessageCategory.krakenCancel,
-        MessageCategory.krakenDecline,
-        MessageCategory.krakenList,
-        MessageCategory.krakenRestart,
-      }.any((element) => element == this);
+  bool get isCall => RegExp('^(WEBRTC|KRAKEN)_').hasMatch(this ?? '');
 
-  bool get isKraken => {
-        MessageCategory.krakenInvite,
-        MessageCategory.krakenPublish,
-        MessageCategory.krakenSubscribe,
-        MessageCategory.krakenAnswer,
-        MessageCategory.krakenTrickle,
-        MessageCategory.krakenEnd,
-        MessageCategory.krakenCancel,
-        MessageCategory.krakenDecline,
-        MessageCategory.krakenList,
-        MessageCategory.krakenRestart,
-      }.any((element) => element == this);
+  bool get isKraken => this?.startsWith('KRAKEN_') ?? false;
 
   bool get isRecall => this == MessageCategory.messageRecall;
 
-  bool get isFtsMessage => {
-        MessageCategory.signalText,
-        MessageCategory.plainText,
-        MessageCategory.encryptedText,
-        MessageCategory.signalData,
-        MessageCategory.plainData,
-        MessageCategory.encryptedData,
-        MessageCategory.signalPost,
-        MessageCategory.plainPost,
-        MessageCategory.encryptedPost,
-      }.any((element) => element == this);
+  bool get isFtsMessage =>
+      RegExp(r'_(TEXT|DATA|POST|TRANSCRIPT)$').hasMatch(this ?? '');
 
-  bool get isText => {
-        MessageCategory.signalText,
-        MessageCategory.plainText,
-        MessageCategory.encryptedText,
-      }.any((element) => element == this);
+  bool get isText => this?.endsWith('_TEXT') ?? false;
 
-  bool get isLive => {
-        MessageCategory.signalLive,
-        MessageCategory.plainLive,
-        MessageCategory.encryptedLive
-      }.any((element) => element == this);
+  bool get isLive => this?.endsWith('_LIVE') ?? false;
 
-  bool get isImage => {
-        MessageCategory.signalImage,
-        MessageCategory.plainImage,
-        MessageCategory.encryptedImage,
-      }.any((element) => element == this);
+  bool get isImage => this?.endsWith('_IMAGE') ?? false;
 
-  bool get isVideo => {
-        MessageCategory.signalVideo,
-        MessageCategory.plainVideo,
-        MessageCategory.encryptedVideo,
-      }.any((element) => element == this);
+  bool get isVideo => this?.endsWith('_VIDEO') ?? false;
 
-  bool get isSticker => {
-        MessageCategory.signalSticker,
-        MessageCategory.plainSticker,
-        MessageCategory.encryptedSticker,
-      }.any((element) => element == this);
+  bool get isSticker => this?.endsWith('_STICKER') ?? false;
 
-  bool get isPost => {
-        MessageCategory.signalPost,
-        MessageCategory.plainPost,
-        MessageCategory.encryptedPost,
-      }.any((element) => element == this);
+  bool get isPost => this?.endsWith('_POST') ?? false;
 
-  bool get isAudio => {
-        MessageCategory.signalAudio,
-        MessageCategory.plainAudio,
-        MessageCategory.encryptedAudio,
-      }.any((element) => element == this);
+  bool get isAudio => this?.endsWith('_AUDIO') ?? false;
 
-  bool get isData => {
-        MessageCategory.signalData,
-        MessageCategory.plainData,
-        MessageCategory.encryptedData,
-      }.any((element) => element == this);
+  bool get isData => this?.endsWith('_DATA') ?? false;
 
-  bool get isLocation => {
-        MessageCategory.signalLocation,
-        MessageCategory.plainLocation,
-        MessageCategory.encryptedLocation,
-      }.any((element) => element == this);
+  bool get isLocation => this?.endsWith('_LOCATION') ?? false;
 
-  bool get isContact => {
-        MessageCategory.signalContact,
-        MessageCategory.plainContact,
-        MessageCategory.encryptedContact,
-      }.any((element) => element == this);
+  bool get isContact => this?.endsWith('_CONTACT') ?? false;
 
-  bool get isTranscript => {
-        MessageCategory.signalTranscript,
-        MessageCategory.plainTranscript,
-        MessageCategory.encryptedTranscript,
-      }.any((element) => element == this);
+  bool get isTranscript => this?.endsWith('_TRANSCRIPT') ?? false;
 
   bool get isMedia => isData || isImage || isVideo;
 

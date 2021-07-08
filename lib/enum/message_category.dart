@@ -1,73 +1,65 @@
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
-enum MessageCategory {
-  signalKey,
-  signalText,
-  signalImage,
-  signalVideo,
-  signalSticker,
-  signalData,
-  signalContact,
-  signalAudio,
-  signalLive,
-  signalPost,
-  signalLocation,
-  signalTranscript,
-  plainText,
-  plainImage,
-  plainVideo,
-  plainData,
-  plainSticker,
-  plainContact,
-  plainAudio,
-  plainLive,
-  plainPost,
-  plainJson,
-  plainLocation,
-  plainTranscript,
-  messageRecall,
-  stranger,
-  secret,
-  systemConversation,
-  systemUser,
-  systemCircle,
-  systemSession,
-  systemAccountSnapshot,
-  appButtonGroup,
-  appCard,
-  webrtcAudioOffer,
-  webrtcAudioAnswer,
-  webrtcIceCandidate,
-  webrtcAudioCancel,
-  webrtcAudioDecline,
-  webrtcAudioEnd,
-  webrtcAudioBusy,
-  webrtcAudioFailed,
-  krakenInvite,
-  krakenPublish,
-  krakenSubscribe,
-  krakenAnswer,
-  krakenTrickle,
-  krakenEnd,
-  krakenCancel,
-  krakenDecline,
-  krakenList,
-  krakenRestart,
-  encryptedText,
-  encryptedImage,
-  encryptedVideo,
-  encryptedSticker,
-  encryptedData,
-  encryptedContact,
-  encryptedAudio,
-  encryptedLive,
-  encryptedPost,
-  encryptedLocation,
-  encryptedTranscript,
-}
-
-class MessageCategoryJsonConverter extends EnumJsonConverter<MessageCategory> {
-  const MessageCategoryJsonConverter();
-  @override
-  List<MessageCategory> enumValues() => MessageCategory.values;
+class MessageCategory {
+  static const signalKey = 'SIGNAL_KEY';
+  static const signalText = 'SIGNAL_TEXT';
+  static const signalImage = 'SIGNAL_IMAGE';
+  static const signalVideo = 'SIGNAL_VIDEO';
+  static const signalSticker = 'SIGNAL_STICKER';
+  static const signalData = 'SIGNAL_DATA';
+  static const signalContact = 'SIGNAL_CONTACT';
+  static const signalAudio = 'SIGNAL_AUDIO';
+  static const signalLive = 'SIGNAL_LIVE';
+  static const signalPost = 'SIGNAL_POST';
+  static const signalLocation = 'SIGNAL_LOCATION';
+  static const signalTranscript = 'SIGNAL_TRANSCRIPT';
+  static const plainText = 'PLAIN_TEXT';
+  static const plainImage = 'PLAIN_IMAGE';
+  static const plainVideo = 'PLAIN_VIDEO';
+  static const plainData = 'PLAIN_DATA';
+  static const plainSticker = 'PLAIN_STICKER';
+  static const plainContact = 'PLAIN_CONTACT';
+  static const plainAudio = 'PLAIN_AUDIO';
+  static const plainLive = 'PLAIN_LIVE';
+  static const plainPost = 'PLAIN_POST';
+  static const plainJson = 'PLAIN_JSON';
+  static const plainLocation = 'PLAIN_LOCATION';
+  static const plainTranscript = 'PLAIN_TRANSCRIPT';
+  static const messageRecall = 'MESSAGE_RECALL';
+  static const stranger = 'STRANGER';
+  static const secret = 'SECRET';
+  static const systemConversation = 'SYSTEM_CONVERSATION';
+  static const systemUser = 'SYSTEM_USER';
+  static const systemCircle = 'SYSTEM_CIRCLE';
+  static const systemSession = 'SYSTEM_SESSION';
+  static const systemAccountSnapshot = 'SYSTEM_ACCOUNT_SNAPSHOT';
+  static const appButtonGroup = 'APP_BUTTON_GROUP';
+  static const appCard = 'APP_CARD';
+  static const webrtcAudioOffer = 'WEBRTC_AUDIO_OFFER';
+  static const webrtcAudioAnswer = 'WEBRTC_AUDIO_ANSWER';
+  static const webrtcIceCandidate = 'WEBRTC_ICE_CANDIDATE';
+  static const webrtcAudioCancel = 'WEBRTC_AUDIO_CANCEL';
+  static const webrtcAudioDecline = 'WEBRTC_AUDIO_DECLINE';
+  static const webrtcAudioEnd = 'WEBRTC_AUDIO_END';
+  static const webrtcAudioBusy = 'WEBRTC_AUDIO_BUSY';
+  static const webrtcAudioFailed = 'WEBRTC_AUDIO_FAILED';
+  static const krakenInvite = 'KRAKEN_INVITE';
+  static const krakenPublish = 'KRAKEN_PUBLISH';
+  static const krakenSubscribe = 'KRAKEN_SUBSCRIBE';
+  static const krakenAnswer = 'KRAKEN_ANSWER';
+  static const krakenTrickle = 'KRAKEN_TRICKLE';
+  static const krakenEnd = 'KRAKEN_END';
+  static const krakenCancel = 'KRAKEN_CANCEL';
+  static const krakenDecline = 'KRAKEN_DECLINE';
+  static const krakenList = 'KRAKEN_LIST';
+  static const krakenRestart = 'KRAKEN_RESTART';
+  static const encryptedText = 'ENCRYPTED_TEXT';
+  static const encryptedImage = 'ENCRYPTED_IMAGE';
+  static const encryptedVideo = 'ENCRYPTED_VIDEO';
+  static const encryptedSticker = 'ENCRYPTED_STICKER';
+  static const encryptedData = 'ENCRYPTED_DATA';
+  static const encryptedContact = 'ENCRYPTED_CONTACT';
+  static const encryptedAudio = 'ENCRYPTED_AUDIO';
+  static const encryptedLive = 'ENCRYPTED_LIVE';
+  static const encryptedPost = 'ENCRYPTED_POST';
+  static const encryptedLocation = 'ENCRYPTED_LOCATION';
+  static const encryptedTranscript = 'ENCRYPTED_TRANSCRIPT';
 }

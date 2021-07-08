@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import '../../enum/message_category.dart';
 import '../converter/media_status_type_converter.dart';
-import '../converter/message_category_type_converter.dart';
 import '../converter/message_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
 import '../mixin_database.dart';
@@ -10,8 +8,7 @@ import '../mixin_database.dart';
 extension Message on MessageItem {
   bool get isLottie => assetType?.toLowerCase() == 'json';
 
-  bool get isSignal =>
-      const MessageCategoryJsonConverter().toJson(type)!.startsWith('SIGNAL_');
+  bool get isSignal => type.startsWith('SIGNAL_');
 }
 
 extension QueteMessage on QuoteMessageItem {
@@ -22,7 +19,7 @@ extension QueteMessage on QuoteMessageItem {
         'user_full_name': userFullName,
         'user_identity_number': userIdentityNumber,
         'app_id': appId,
-        'type': const MessageCategoryTypeConverter().mapToSql(type),
+        'type': type,
         'content': content,
         'createdAt': const MillisDateConverter().mapToSql(createdAt),
         'status': const MessageStatusTypeConverter().mapToSql(status),
@@ -60,7 +57,7 @@ QuoteMessageItem mapToQuoteMessage(Map<String, dynamic> map) =>
       status: const MessageStatusTypeConverter().mapToDart(map['status'])!,
       messageId: map['message_id'],
       sharedUserIdentityNumber: map['shared_user_identity_number'],
-      type: const MessageCategoryTypeConverter().mapToDart(map['type'])!,
+      type: map['type']!,
       createdAt: const MillisDateConverter().mapToDart(map['createdAt'])!,
       conversationId: map['conversation_id'],
       userIdentityNumber: map['user_identity_number'],
