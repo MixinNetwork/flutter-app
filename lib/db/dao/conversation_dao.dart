@@ -203,7 +203,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           Users? lastMessageSender,
           Snapshots? snapshot,
           Users? participant) =>
-      conversation.category.equalsValue(ConversationCategory.contact) & owner.appId.isNotNull();
+      conversation.category.equalsValue(ConversationCategory.contact) &
+      owner.appId.isNotNull();
 
   Selectable<int> botConversationCount() =>
       _baseConversationItemCount((conversation, owner) =>
