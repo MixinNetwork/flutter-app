@@ -92,4 +92,14 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
   Selectable<String> userIdByIdentityNumber(
           String conversationId, String identityNumber) =>
       db.userIdByIdentityNumber(conversationId, identityNumber);
+
+  Selectable<int> conversationParticipantsCount(String conversationId) =>
+      db.conversationParticipantsCount(conversationId);
+
+  Selectable<Participant> participantById(
+          String conversationId, String userId) =>
+      (db.select(db.participants)
+        ..where((tbl) =>
+            tbl.conversationId.equals(conversationId) &
+            tbl.userId.equals(userId)));
 }

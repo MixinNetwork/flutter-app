@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 // These imports are only needed to open the database
@@ -129,7 +130,7 @@ class MixinDatabase extends _$MixinDatabase {
 }
 
 LazyDatabase _openConnection(File dbFile) =>
-    LazyDatabase(() => VmDatabase(dbFile));
+    LazyDatabase(() => VmDatabase(dbFile, logStatements: !kReleaseMode));
 
 Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
   final dbFolder = await getMixinDocumentsDirectory();

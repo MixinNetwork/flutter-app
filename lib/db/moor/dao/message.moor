@@ -1,63 +1,77 @@
 import '../mixin.moor';
 
-messagesByConversationId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.conversation_id = :conversationId
-        ORDER BY m.created_at DESC
-        LIMIT :offset, :limit;
+baseMessageItems AS MessageItem:
+SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId,
+    conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory,
+    sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId,
+    message.category AS type,
+    message.content AS content, message.created_at AS createdAt, message.status AS status,
+    message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform,
+    message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize,
+    message.media_width AS mediaWidth, message.media_height AS mediaHeight,
+    message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl,
+    message.media_duration AS mediaDuration, message.quote_message_id as quoteId,
+    message.quote_content as quoteContent, participant.full_name AS participantFullName, message.action AS actionName,
+    participant.user_id AS participantUserId,
+    snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount,
+    asset.symbol AS assetSymbol, snapshot.asset_id AS assetId,
+    asset.icon_url AS assetIcon, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth,
+    sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId,
+    sticker.name AS assetName, sticker.asset_type AS assetType, hyperlink.site_name AS siteName,
+    hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription,
+    hyperlink.site_image AS siteImage, message.shared_user_id AS sharedUserId, sharedUser.full_name AS sharedUserFullName,
+    sharedUser.identity_number AS sharedUserIdentityNumber,
+    sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified,
+    sharedUser.app_id AS sharedUserAppId, messageMention.has_read as mentionRead,
+    conversation.name AS groupName, sender.relationship AS relationship, sender.avatar_url AS avatarUrl
+FROM messages message
+         INNER JOIN users sender ON message.user_id = sender.user_id
+         LEFT JOIN users participant ON message.participant_id = participant.user_id
+         LEFT JOIN snapshots snapshot ON message.snapshot_id = snapshot.snapshot_id
+         LEFT JOIN assets asset ON snapshot.asset_id = asset.asset_id
+         LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
+         LEFT JOIN hyperlinks hyperlink ON message.hyperlink = hyperlink.hyperlink
+         LEFT JOIN users sharedUser ON message.shared_user_id = sharedUser.user_id
+         LEFT JOIN conversations conversation ON message.conversation_id = conversation.conversation_id
+         LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
+WHERE $where
+ORDER BY $order
+LIMIT $limit;
 
-messagesByMessageIds AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.message_id in :messageIds
-        ORDER BY m.created_at DESC;
+baseQuoteMessageItem AS QuoteMessageItem:
+SELECT message.message_id AS messageId, message.conversation_id AS conversationId,
+    sender.user_id AS userId,
+    sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber,
+    sender.app_id AS appId,
+    message.category AS type,
+    message.content AS content, message.created_at AS createdAt, message.status AS status,
+    message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform,
+    message.name AS mediaName, message.media_mime_type AS mediaMimeType,
+    message.media_size AS mediaSize,
+    message.media_width AS mediaWidth, message.media_height AS mediaHeight,
+    message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl,
+    message.media_duration AS mediaDuration,
+    message.quote_message_id as quoteId, message.quote_content as quoteContent,
+    sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth,
+    sticker.asset_height AS assetHeight,
+    sticker.sticker_id AS stickerId,
+    sticker.name AS assetName, sticker.asset_type AS assetType,
+    message.shared_user_id AS sharedUserId,
+    shareUser.full_name AS sharedUserFullName,
+    shareUser.identity_number AS sharedUserIdentityNumber,
+    shareUser.avatar_url AS sharedUserAvatarUrl, shareUser.is_verified AS sharedUserIsVerified,
+    shareUser.app_id AS sharedUserAppId
+FROM messages message
+         INNER JOIN users sender ON message.user_id = sender.user_id
+         LEFT JOIN stickers sticker ON sticker.sticker_id = message.sticker_id
+         LEFT JOIN users shareUser ON message.shared_user_id = shareUser.user_id
+         LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
+WHERE $where
+ORDER BY $order
+LIMIT $limit;
 
 findMessageStatusById:
-SELECT status FROM messages WHERE message_id = :messageId;
-
-updateQuoteContentByQuoteId:
-UPDATE messages SET quote_content = :content WHERE conversation_id = :conversationId AND quote_message_id = :messageId;
+SELECT status FROM messages WHERE message_id = :messageId LIMIT 1;
 
 sendingMessage AS SendingMessage:
 SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.media_url, m.media_mime_type,
@@ -68,45 +82,8 @@ SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.medi
       FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id
       WHERE m.message_id = :message_id AND (m.status = 'SENDING' OR rm.status = 1) AND m.content IS NOT NULL LIMIT 1;
 
-findMessageItemById AS QuoteMessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,
-      u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-      m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-      m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-      m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration,
-      m.quote_message_id as quoteId, m.quote_content as quoteContent,
-      st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-      st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-      su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId
-      FROM messages m
-      INNER JOIN users u ON m.user_id = u.user_id
-      LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-      LEFT JOIN users su ON m.shared_user_id = su.user_id
-      LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-      WHERE m.conversation_id = :conversationId AND m.message_id = :messageId AND m.status != 'FAILED';
-
-findMessageItemByMessageId AS QuoteMessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId,
-      u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-      m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-      m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-      m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration,
-      m.quote_message_id as quoteId, m.quote_content as quoteContent,
-      st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-      st.name AS assetName, st.asset_type AS assetType, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-      su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId
-      FROM messages m
-      INNER JOIN users u ON m.user_id = u.user_id
-      LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-      LEFT JOIN users su ON m.shared_user_id = su.user_id
-      LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-      WHERE m.message_id = :messageId AND m.status != 'FAILED';
-
-findMessageByMessageId:
-SELECT * FROM messages WHERE message_id = :messageId;
-
 fuzzySearchMessageCount:
-SELECT count(*)
+SELECT COUNT(1)
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON c.owner_id = u.user_id
@@ -122,50 +99,6 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     WHERE m.message_id = fts.message_id
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
-
-recallMessage:
-UPDATE messages SET category = 'MESSAGE_RECALL', content = NULL, media_url = NULL, media_mime_type = NULL, media_size = NULL,
-    media_duration = NULL, media_width = NULL, media_height = NULL, media_hash = NULL, thumb_image = NULL, media_key = NULL,
-    media_digest = NUll, media_status = NULL, "action" = NULL, participant_id = NULL, snapshot_id = NULL, hyperlink = NULL, name = NULL,
-    album_id = NULL, sticker_id = NULL, shared_user_id = NULL, media_waveform = NULL, quote_message_id = NULL, quote_content = NULL WHERE message_id = :messageId;
-
-mediaMessages AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.conversation_id = :conversationId AND m.category IN ('SIGNAL_IMAGE', 'PLAIN_IMAGE')
-        ORDER BY m.created_at DESC
-        LIMIT :offset, :limit;
-
-mediaMessagesCount:
-SELECT Count(*)
-        FROM messages m
-        WHERE m.conversation_id = :conversationId AND m.category IN ('SIGNAL_IMAGE', 'PLAIN_IMAGE');
-
-mediaMessageRowIdByConversationId:
-SELECT count(*) FROM messages WHERE conversation_id = :conversationId
-        AND created_at > (SELECT created_at FROM messages WHERE message_id = :messageId)
-        AND category IN ('SIGNAL_IMAGE', 'PLAIN_IMAGE')
-        ORDER BY created_at DESC, rowid DESC;
 
 notificationMessage AS NotificationMessage:
 SELECT m.message_id                   AS messageId,
@@ -202,7 +135,7 @@ WHERE  m.message_id = :messageId
 ORDER  BY m.created_at DESC;
 
 fuzzySearchMessageCountByConversationId:
-SELECT count(*)
+SELECT COUNT(1)
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
@@ -219,256 +152,5 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
 
-mediaMessagesBefore AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId AND m.category IN ('SIGNAL_IMAGE', 'PLAIN_IMAGE')
-        ORDER BY m.created_at DESC
-        LIMIT :limit;
-
-mediaMessagesAfter AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.rowid > :rowid AND m.conversation_id = :conversationId AND m.category IN ('SIGNAL_IMAGE', 'PLAIN_IMAGE')
-        ORDER BY m.created_at ASC
-        LIMIT :limit;
-
-
 messageRowId:
-SELECT rowid FROM messages where message_id = :messageId;
-
-postMessages AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.conversation_id = :conversationId AND m.category IN ('SIGNAL_POST', 'PLAIN_POST')
-        ORDER BY m.created_at DESC
-        LIMIT :offset, :limit;
-
-postMessagesBefore AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId AND m.category IN ('SIGNAL_POST', 'PLAIN_POST')
-        ORDER BY m.created_at DESC
-        LIMIT :limit;
-
-
-fileMessages AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.conversation_id = :conversationId AND m.category IN ('SIGNAL_DATA', 'PLAIN_DATA')
-        ORDER BY m.created_at DESC
-        LIMIT :offset, :limit;
-
-fileMessagesBefore AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId AND m.category IN ('SIGNAL_DATA', 'PLAIN_DATA')
-        ORDER BY m.created_at DESC
-        LIMIT :limit;
-
-beforeMessagesByConversationId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.rowid < :rowid AND m.conversation_id = :conversationId
-        ORDER BY m.created_at DESC
-        LIMIT :limit;
-
-afterMessagesByConversationId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.rowid > :rowid AND m.conversation_id = :conversationId
-        ORDER BY m.created_at ASC
-        LIMIT :limit;
-
-messageItemByMessageId AS MessageItem:
-SELECT m.message_id AS messageId, m.conversation_id AS conversationId, u.user_id AS userId, c.owner_id AS conversationOwnerId, c.category AS conversionCategory,
-        u.full_name AS userFullName, u.identity_number AS userIdentityNumber, u.app_id AS appId, m.category AS type,
-        m.content AS content, m.created_at AS createdAt, m.status AS status, m.media_status AS mediaStatus, m.media_waveform AS mediaWaveform,
-        m.name AS mediaName, m.media_mime_type AS mediaMimeType, m.media_size AS mediaSize, m.media_width AS mediaWidth, m.media_height AS mediaHeight,
-        m.thumb_image AS thumbImage, m.thumb_url AS thumbUrl, m.media_url AS mediaUrl, m.media_duration AS mediaDuration, m.quote_message_id as quoteId,
-        m.quote_content as quoteContent, u1.full_name AS participantFullName, m.action AS actionName, u1.user_id AS participantUserId,
-        s.snapshot_id AS snapshotId, s.type AS snapshotType, s.amount AS snapshotAmount, a.symbol AS assetSymbol, s.asset_id AS assetId,
-        a.icon_url AS assetIcon, st.asset_url AS assetUrl, st.asset_width AS assetWidth, st.asset_height AS assetHeight, st.sticker_id AS stickerId,
-        st.name AS assetName, st.asset_type AS assetType, h.site_name AS siteName, h.site_title AS siteTitle, h.site_description AS siteDescription,
-        h.site_image AS siteImage, m.shared_user_id AS sharedUserId, su.full_name AS sharedUserFullName, su.identity_number AS sharedUserIdentityNumber,
-        su.avatar_url AS sharedUserAvatarUrl, su.is_verified AS sharedUserIsVerified, su.app_id AS sharedUserAppId, mm.has_read as mentionRead,
-        c.name AS groupName, u.relationship AS relationship, u.avatar_url AS avatarUrl
-        FROM messages m
-        INNER JOIN users u ON m.user_id = u.user_id
-        LEFT JOIN users u1 ON m.participant_id = u1.user_id
-        LEFT JOIN snapshots s ON m.snapshot_id = s.snapshot_id
-        LEFT JOIN assets a ON s.asset_id = a.asset_id
-        LEFT JOIN stickers st ON st.sticker_id = m.sticker_id
-        LEFT JOIN hyperlinks h ON m.hyperlink = h.hyperlink
-        LEFT JOIN users su ON m.shared_user_id = su.user_id
-        LEFT JOIN conversations c ON m.conversation_id = c.conversation_id
-        LEFT JOIN message_mentions mm ON m.message_id = mm.message_id
-        WHERE m.message_id = :messageId
-        ORDER BY m.created_at ASC
-        LIMIT 1;
-
-deleteMessageMentionByMessageId:        
-DELETE FROM message_mentions WHERE message_id = :messageId;
-
-deleteFtsByMessageId:
-DELETE FROM messages_fts WHERE message_id = :messageId;
+SELECT rowid FROM messages where message_id = :messageId LIMIT 1;

@@ -71,7 +71,7 @@ class ContactMessage extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    message.sharedUserIdentityNumber,
+                    message.sharedUserIdentityNumber!,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).secondaryText,
                       fontSize: 12,

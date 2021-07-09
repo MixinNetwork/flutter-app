@@ -1,336 +1,116 @@
 import '../mixin.moor';
 
-chatConversationCount:
+baseConversationItemCount:
 SELECT Count(1)
-FROM   conversations c
-       INNER JOIN users ou
-               ON ou.user_id = c.owner_id
-       LEFT JOIN messages m
-              ON c.last_message_id = m.message_id
-WHERE  c.category IN ('CONTACT', 'GROUP') AND c.status = 2
-ORDER  BY c.pin_time DESC, c.last_message_created_at DESC;
+FROM conversations conversation
+         INNER JOIN users owner
+ON owner.user_id = conversation.owner_id
+WHERE $where;
 
-chatConversations AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category IN ('CONTACT', 'GROUP') AND c.status = 2
-            ORDER BY c.pin_time DESC, c.last_message_created_at DESC
-            LIMIT :limit OFFSET :offset;
+baseConversationItems AS ConversationItem:
+SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
+    conversation.category AS category, conversation.draft AS draft,
+    conversation.name AS groupName, conversation.status AS status,
+    conversation.last_read_message_id AS lastReadMessageId,
+    conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId,
+    conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil,
+    owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified,
+    owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil,
+    owner.app_id AS appId,
+    lastMessage.content AS content, lastMessage.category AS contentType,
+    conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt,
+    lastMessage.media_url AS mediaUrl,
+    lastMessage.user_id AS senderId, lastMessage.action AS actionName,
+    lastMessage.status AS messageStatus,
+    lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
+    participant.full_name AS participantFullName, participant.user_id AS participantUserId,
+    (SELECT COUNT(1)
+     FROM message_mentions messageMention
+     WHERE messageMention.conversation_id = conversation.conversation_id AND
+         messageMention.has_read = 0) as mentionCount,
+    owner.relationship AS relationship
+FROM conversations conversation
+         INNER JOIN users owner ON owner.user_id = conversation.owner_id
+         LEFT JOIN messages lastMessage ON conversation.last_message_id = lastMessage.message_id
+         LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
+         LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
+         LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
+WHERE $where
+ORDER BY $order
+LIMIT $limit;
 
-contactConversationCount:
+baseConversationItemCountWithCircleConversation:
 SELECT Count(1)
-FROM   conversations c
-       INNER JOIN users ou
-               ON ou.user_id = c.owner_id
-       LEFT JOIN messages m
-              ON c.last_message_id = m.message_id
-WHERE  c.category = 'CONTACT'
-       AND ou.relationship = 'FRIEND'
-       AND ou.app_id IS NULL
-ORDER  BY c.pin_time DESC, c.last_message_created_at DESC;
+FROM circle_conversations circleConversation
+              INNER JOIN conversations conversation
+     ON conversation.conversation_id = circleConversation.conversation_id
+              INNER JOIN users owner ON owner.user_id = conversation.owner_id
+WHERE $where;
 
-contactConversations AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.relationship = 'FRIEND' AND ou.app_id IS NULL
-            ORDER BY c.pin_time DESC, c.last_message_created_at DESC
-            LIMIT :limit OFFSET :offset;
-
-strangerConversationCount:
-SELECT Count(*)
-FROM   conversations c
-       INNER JOIN users ou
-               ON ou.user_id = c.owner_id
-       LEFT JOIN messages m
-              ON c.last_message_id = m.message_id
-WHERE  c.category = 'CONTACT'
-       AND ou.relationship = 'STRANGER'
-ORDER  BY c.pin_time DESC,
-          CASE
-            WHEN m.created_at IS NULL THEN c.created_at
-            ELSE m.created_at
-          END DESC;
-
-strangerConversations AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.relationship = 'STRANGER'
-            ORDER BY c.pin_time DESC,
-              CASE
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at
-              END
-            DESC
-            LIMIT :limit OFFSET :offset;
-
-groupConversationCount:
-SELECT Count(*)
-FROM   conversations c
-       LEFT JOIN messages m
-              ON c.last_message_id = m.message_id
-WHERE  c.category = 'GROUP'
-ORDER  BY c.pin_time DESC,
-          CASE
-            WHEN m.created_at IS NULL THEN c.created_at
-            ELSE m.created_at
-          END DESC;
-
-groupConversations AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'GROUP'
-            ORDER BY c.pin_time DESC,
-              CASE
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at
-              END
-            DESC
-            LIMIT :limit OFFSET :offset;
-
-botConversationCount:
-SELECT Count(*)
-FROM   conversations c
-       INNER JOIN users ou
-               ON ou.user_id = c.owner_id
-       LEFT JOIN messages m
-              ON c.last_message_id = m.message_id
-WHERE  c.category = 'CONTACT'
-       AND ou.app_id IS NOT NULL
-ORDER  BY c.pin_time DESC,
-          CASE
-            WHEN m.created_at IS NULL THEN c.created_at
-            ELSE m.created_at
-          END DESC;
-
-botConversations AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category = 'CONTACT' AND ou.app_id IS NOT NULL
-            ORDER BY c.pin_time DESC,
-              CASE
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at
-              END
-            DESC
-            LIMIT :limit OFFSET :offset;
-
-conversationItem AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.conversation_id = :id
-                        ORDER BY c.pin_time DESC,
-              CASE
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at
-              END
-            DESC;
-
-conversationByOwnerId AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE ou.relationship = 'FRIEND' AND c.owner_id = :id
-                        ORDER BY c.pin_time DESC,
-              CASE
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at
-              END
-            DESC;
+baseConversationItemsWithCircleConversation AS ConversationItem:
+SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
+    conversation.category AS category, conversation.draft AS draft,
+    conversation.name AS groupName, conversation.status AS status,
+    conversation.last_read_message_id AS lastReadMessageId,
+    conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId,
+    conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil,
+    owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified,
+    owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil,
+    owner.app_id AS appId,
+    lastMessage.content AS content, lastMessage.category AS contentType,
+    conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt,
+    lastMessage.media_url AS mediaUrl,
+    lastMessage.user_id AS senderId, lastMessage.action AS actionName,
+    lastMessage.status AS messageStatus,
+    lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType,
+    participant.full_name AS participantFullName, participant.user_id AS participantUserId,
+    (SELECT COUNT(1)
+     FROM message_mentions messageMention
+     WHERE messageMention.conversation_id = conversation.conversation_id AND
+         messageMention.has_read = 0) as mentionCount,
+    owner.relationship AS relationship
+FROM circle_conversations circleConversation
+         INNER JOIN conversations conversation
+ON conversation.conversation_id = circleConversation.conversation_id
+         INNER JOIN users owner ON owner.user_id = conversation.owner_id
+         LEFT JOIN messages lastMessage ON conversation.last_message_id = lastMessage.message_id
+         LEFT JOIN users lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id
+         LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
+         LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
+WHERE $where
+ORDER BY $order
+LIMIT $limit;
 
 
 allUnseenMessageCount:
 SELECT SUM(unseen_message_count) FROM conversations WHERE mute_until <= :now;
 
-conversationItems AS ConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM conversations c
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE c.category IN ('CONTACT', 'GROUP')
-                    AND c.status = 2
-                    ORDER BY c.pin_time DESC, c.last_message_created_at DESC;
-
 fuzzySearchConversation AS SearchConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName,
-        ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl,
-        ou.is_verified AS isVerified, ou.app_id AS appId
-        FROM conversations c
-        INNER JOIN users ou ON ou.user_id = c.owner_id
-        LEFT JOIN messages m ON c.last_message_id = m.message_id
-        WHERE (c.category = 'GROUP' AND c.name LIKE '%' || :query || '%' ESCAPE '\')
-        OR (c.category = 'CONTACT' AND ou.relationship != 'FRIEND'
-            AND (ou.full_name LIKE '%' || :query || '%' ESCAPE '\'
-                OR ou.identity_number like '%' || :query || '%' ESCAPE '\'))
-        ORDER BY
-            (c.category = 'GROUP' AND c.name = :query COLLATE NOCASE)
-                OR (c.category = 'CONTACT' AND ou.relationship != 'FRIEND'
-                    AND (ou.full_name = :query COLLATE NOCASE
-                        OR ou.identity_number = :query COLLATE NOCASE)) DESC,
-            c.pin_time DESC,
-            m.created_at DESC;
-
-conversationsByCircleId AS ConversationItem:
- SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.draft AS draft,
-            c.name AS groupName, c.status AS status, c.last_read_message_id AS lastReadMessageId,
-            c.unseen_message_count AS unseenMessageCount, c.owner_id AS ownerId, c.pin_time AS pinTime, c.mute_until AS muteUntil,
-            ou.avatar_url AS avatarUrl, ou.full_name AS name, ou.is_verified AS ownerVerified,
-            ou.identity_number AS ownerIdentityNumber, ou.mute_until AS ownerMuteUntil, ou.app_id AS appId,
-            m.content AS content, m.category AS contentType, c.created_at AS createdAt, m.created_at AS lastMessageCreatedAt, m.media_url AS mediaUrl,
-            m.user_id AS senderId, m.action AS actionName, m.status AS messageStatus,
-            mu.full_name AS senderFullName, s.type AS SnapshotType,
-            pu.full_name AS participantFullName, pu.user_id AS participantUserId,
-            (SELECT count(*) FROM message_mentions me WHERE me.conversation_id = c.conversation_id AND me.has_read = 0) as mentionCount,
-            ou.relationship AS relationship
-            FROM circle_conversations cc
-            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            LEFT JOIN messages m ON c.last_message_id = m.message_id
-            LEFT JOIN users mu ON mu.user_id = m.user_id
-            LEFT JOIN snapshots s ON s.snapshot_id = m.snapshot_id
-            LEFT JOIN users pu ON pu.user_id = m.participant_id
-            WHERE cc.circle_id = :circle_id
-            ORDER BY c.pin_time DESC,
-              CASE
-                WHEN m.created_at is NULL THEN c.created_at
-                ELSE m.created_at
-              END
-            DESC
-            LIMIT :limit OFFSET :offset;
-
-conversationsCountByCircleId:
-SELECT COUNT(*)
-            FROM circle_conversations cc
-            INNER JOIN conversations c ON c.conversation_id = cc.conversation_id
-            INNER JOIN users ou ON ou.user_id = c.owner_id
-            WHERE cc.circle_id = :circle_id;
+SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
+    c.name AS groupName,
+    ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName,
+    ou.avatar_url AS avatarUrl,
+    ou.is_verified AS isVerified, ou.app_id AS appId
+FROM conversations c
+         INNER JOIN users ou ON ou.user_id = c.owner_id
+         LEFT JOIN messages m ON c.last_message_id = m.message_id
+WHERE (c.category = 'GROUP' AND c.name LIKE '%' || :query || '%' ESCAPE '\') OR
+    (c.category = 'CONTACT' AND ou.relationship != 'FRIEND'
+        AND (ou.full_name LIKE '%' || :query || '%' ESCAPE '\'
+            OR ou.identity_number like '%' || :query || '%' ESCAPE '\'))
+ORDER BY (c.category = 'GROUP' AND c.name = :query COLLATE NOCASE)
+    OR (c.category = 'CONTACT' AND ou.relationship != 'FRIEND'
+        AND (ou.full_name = :query COLLATE NOCASE
+            OR ou.identity_number = :query COLLATE NOCASE)) DESC,
+    c.pin_time DESC,
+    m.created_at DESC;
 
 conversationParticipantsCount:
 SELECT count(1) FROM participants WHERE conversation_id = :conversationId;
 
-announcement:
-SELECT announcement FROM conversations WHERE conversation_id = :conversationId;
-
-participantById:
-SELECT * FROM participants WHERE conversation_id = :conversationId AND user_id = :userId;
-
-
 conversationStorageUsage AS ConversationStorageUsage:
-SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,u.full_name, u.avatar_url, u.is_verified
-        FROM conversations c INNER JOIN users u ON u.user_id = c.owner_id WHERE c.category IS NOT NULL;
+SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,
+    u.full_name, u.avatar_url, u.is_verified
+FROM conversations c
+         INNER JOIN users u ON u.user_id = c.owner_id
+WHERE c.category IS NOT NULL;

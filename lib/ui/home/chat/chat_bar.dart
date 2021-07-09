@@ -143,7 +143,7 @@ class ConversationIDOrCount extends HookWidget {
           return context
               .read<AccountServer>()
               .database
-              .conversationDao
+              .participantDao
               .conversationParticipantsCount(conversationState!.conversationId)
               .watchSingle();
         }

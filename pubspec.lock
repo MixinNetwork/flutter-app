@@ -14,14 +14,14 @@ packages:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.0"
-  analyzer_plugin_fork:
+    version: "1.7.2"
+  analyzer_plugin:
     dependency: transitive
     description:
-      name: analyzer_plugin_fork
+      name: analyzer_plugin
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.1"
+    version: "0.6.0"
   ansicolor:
     dependency: "direct main"
     description:
@@ -787,21 +787,16 @@ packages:
       name: moor
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.3.2"
-  moor_db_viewer:
-    dependency: "direct main"
-    description:
-      name: moor_db_viewer
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.0.0"
+    version: "4.4.0"
   moor_generator:
     dependency: "direct dev"
     description:
-      name: moor_generator
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.3.1"
+      path: moor_generator
+      ref: develop
+      resolved-ref: "43f85e5c3421a94060091f2cf8dc3ce5e6a3fdcd"
+      url: "https://github.com/simolus3/moor.git"
+    source: git
+    version: "4.4.0"
   msix:
     dependency: "direct dev"
     description:
@@ -1148,12 +1143,14 @@ packages:
     source: hosted
     version: "1.1.2"
   sqlparser:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: sqlparser
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.16.0"
+      path: sqlparser
+      ref: develop
+      resolved-ref: c12de0b8a9035cb61c3192ad7ae020df5fe62e5e
+      url: "https://github.com/simolus3/moor.git"
+    source: git
+    version: "0.17.1"
   stack_trace:
     dependency: transitive
     description:
