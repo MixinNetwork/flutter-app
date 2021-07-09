@@ -10,7 +10,9 @@ extension ListExtension<T> on List<T> {
     } else {
       buffer.add(iterator.current);
       while (iterator.moveNext()) {
-        buffer..add(separator)..add(iterator.current);
+        buffer
+          ..add(separator)
+          ..add(iterator.current);
       }
     }
 
