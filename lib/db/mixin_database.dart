@@ -4,9 +4,6 @@ import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
-// These imports are only needed to open the database
-import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
@@ -23,6 +20,7 @@ import 'converter/message_status_type_converter.dart';
 import 'converter/millis_date_converter.dart';
 import 'converter/participant_role_converter.dart';
 import 'converter/user_relationship_converter.dart';
+import 'custom_vm_database_wrapper.dart';
 import 'dao/address_dao.dart';
 import 'dao/app_dao.dart';
 import 'dao/asset_dao.dart';
@@ -129,8 +127,8 @@ class MixinDatabase extends _$MixinDatabase {
       );
 }
 
-LazyDatabase _openConnection(File dbFile) =>
-    LazyDatabase(() => VmDatabase(dbFile, logStatements: !kReleaseMode));
+LazyDatabase _openConnection(File dbFile) => LazyDatabase(
+    () => CustomVmDatabaseWrapper(dbFile, logStatements: !kReleaseMode));
 
 Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
   final dbFolder = await getMixinDocumentsDirectory();

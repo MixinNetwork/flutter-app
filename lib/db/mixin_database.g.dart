@@ -10302,7 +10302,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> groupParticipants(String conversationId, String id) {
     return customSelect(
-        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id AND u.user_id != ?2',
+        'SELECT u.* FROM participants AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND p.user_id != ?2',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(id)
@@ -10434,7 +10434,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
-        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at LIMIT 4',
+        'SELECT user.* FROM participants AS participant LEFT JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
         variables: [
           Variable<String>(conversationId)
         ],
