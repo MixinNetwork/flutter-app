@@ -89,7 +89,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   final eventBus = DataBaseEventBus();
 
@@ -102,7 +102,7 @@ class MixinDatabase extends _$MixinDatabase {
           }
         },
         onUpgrade: (Migrator m, int from, int to) async {
-          if (from == 1) {
+          if (from <= 2) {
             await m.drop(Index(
                 'index_conversations_category_status_pin_time_created_at', ''));
             await m.drop(Index('index_participants_conversation_id', ''));
@@ -114,14 +114,27 @@ class MixinDatabase extends _$MixinDatabase {
                 ''));
             await m.drop(
                 Index('index_messages_conversation_id_status_user_id', ''));
-
-            await m.createIndex(indexConversationsPinTimeLastMessageCreatedAt);
-            await m.createIndex(indexMessagesConversationIdCategory);
-            await m.createIndex(indexMessagesConversationIdQuoteMessageId);
+            await m.drop(Index(
+                'index_conversations_pin_time_last_message_created_at', ''));
+            await m.drop(Index('index_messages_conversation_id_category', ''));
+            await m.drop(
+                Index('index_messages_conversation_id_quote_message_id', ''));
+            await m.drop(Index(
+                'index_messages_conversation_id_status_user_id_created_at',
+                ''));
             await m
-                .createIndex(indexMessagesConversationIdStatusUserIdCreatedAt);
-            await m.createIndex(indexMessageMentionsConversationId);
-            await m.createIndex(indexUsersRelationshipFullName);
+                .drop(Index('index_messages_conversation_id_created_at', ''));
+            await m.drop(Index('index_message_mentions_conversation_id', ''));
+            await m.drop(Index('index_users_relationship_full_name', ''));
+            await m.drop(Index('index_messages_conversation_id', ''));
+
+            await m.createIndex(indexConversationsCategoryStatus);
+            await m.createIndex(indexConversationsMuteUntil);
+            await m.createIndex(indexFloodMessagesCreatedAt);
+            await m.createIndex(indexMessageMentionsConversationIdHasRead);
+            await m.createIndex(indexMessagesConversationIdCreatedAt);
+            await m.createIndex(indexParticipantsConversationIdCreatedAt);
+            await m.createIndex(indexStickerAlbumsCategoryCreatedAt);
           }
         },
       );
