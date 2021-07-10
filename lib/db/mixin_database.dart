@@ -4,6 +4,7 @@ import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:moor/ffi.dart';
 import 'package:moor/isolate.dart';
 import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
@@ -140,8 +141,13 @@ class MixinDatabase extends _$MixinDatabase {
       );
 }
 
-LazyDatabase _openConnection(File dbFile) => LazyDatabase(
-    () => CustomVmDatabaseWrapper(dbFile, logStatements: !kReleaseMode));
+LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
+      final vmDatabase = VmDatabase(dbFile);
+      if (kReleaseMode) {
+        return vmDatabase;
+      }
+      return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
+    });
 
 Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
   final dbFolder = await getMixinDocumentsDirectory();

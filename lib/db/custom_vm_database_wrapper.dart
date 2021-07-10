@@ -1,34 +1,29 @@
-import 'dart:io';
-
 import 'package:moor/ffi.dart';
 import 'package:moor/moor.dart';
 
 import '../utils/logger.dart';
 
 class CustomVmDatabaseWrapper extends QueryExecutor {
-  CustomVmDatabaseWrapper(File file,
-      {this.logStatements = false, DatabaseSetup? setup}) {
-    vmDatabase = VmDatabase(file, logStatements: false, setup: setup);
-  }
+  CustomVmDatabaseWrapper(this.queryExecutor, {this.logStatements = false});
 
   final bool logStatements;
 
-  late final VmDatabase vmDatabase;
+  late final VmDatabase queryExecutor;
 
   @override
-  TransactionExecutor beginTransaction() => vmDatabase.beginTransaction();
+  TransactionExecutor beginTransaction() => queryExecutor.beginTransaction();
 
   @override
   Future<bool> ensureOpen(QueryExecutorUser user) =>
-      vmDatabase.ensureOpen(user);
+      queryExecutor.ensureOpen(user);
 
   @override
   Future<void> runBatched(BatchedStatements statements) =>
-      vmDatabase.runBatched(statements);
+      queryExecutor.runBatched(statements);
 
   @override
   Future<void> runCustom(String statement, [List<Object?>? args]) => logWrapper(
-        () => vmDatabase.runCustom(statement, args),
+        () => queryExecutor.runCustom(statement, args),
         statement,
         args,
         logStatements,
@@ -36,17 +31,17 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
 
   @override
   Future<int> runDelete(String statement, List<Object?> args) =>
-      vmDatabase.runDelete(statement, args);
+      queryExecutor.runDelete(statement, args);
 
   @override
   Future<int> runInsert(String statement, List<Object?> args) =>
-      vmDatabase.runInsert(statement, args);
+      queryExecutor.runInsert(statement, args);
 
   @override
   Future<List<Map<String, Object?>>> runSelect(
           String statement, List<Object?> args) =>
       logWrapper(
-        () => vmDatabase.runSelect(statement, args),
+        () => queryExecutor.runSelect(statement, args),
         statement,
         args,
         logStatements,
@@ -54,10 +49,10 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
 
   @override
   Future<int> runUpdate(String statement, List<Object?> args) =>
-      vmDatabase.runUpdate(statement, args);
+      queryExecutor.runUpdate(statement, args);
 
   @override
-  Future<void> close() => vmDatabase.close();
+  Future<void> close() => queryExecutor.close();
 
   Future<T> logWrapper<T>(Future<T> Function() run, String statement,
       List<Object?>? args, bool logStatements) async {
@@ -70,7 +65,7 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
     stopwatch?.stop();
 
     if (stopwatch != null && stopwatch.elapsed.inMilliseconds > 5) {
-      final list = await vmDatabase.runSelect(
+      final list = await queryExecutor.runSelect(
           'EXPLAIN QUERY PLAN $statement', args ?? []);
 
       final details = list.map((e) => e['detail']).whereType<String>();
