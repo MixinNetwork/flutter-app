@@ -625,9 +625,13 @@ class SendMessageHelper {
         isPlain: isPlain,
       );
     } else if (message.category.isLive) {
-      final liveMessage = LiveMessage(message.mediaWidth!, message.mediaHeight!,
+      final liveMessage = LiveMessage(
+          message.mediaWidth!,
+          message.mediaHeight!,
           // TODO shareable?
-          message.thumbUrl ?? '', message.mediaUrl!, true);
+          message.thumbUrl ?? '',
+          message.mediaUrl!,
+          true);
       final encoded = await jsonBase64EncodeWithIsolate(liveMessage);
       await _sendLiveMessage(
           conversationId,

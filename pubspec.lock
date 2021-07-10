@@ -112,7 +112,7 @@ packages:
       name: build
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.2"
+    version: "2.0.3"
   build_config:
     dependency: transitive
     description:
@@ -133,21 +133,21 @@ packages:
       name: build_resolvers
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   build_runner:
     dependency: "direct dev"
     description:
       name: build_runner
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.5"
+    version: "2.0.6"
   build_runner_core:
     dependency: transitive
     description:
       name: build_runner_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "7.0.0"
+    version: "7.0.1"
   built_collection:
     dependency: transitive
     description:
@@ -161,7 +161,7 @@ packages:
       name: built_value
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "8.1.0"
+    version: "8.1.1"
   cached_network_image:
     dependency: "direct main"
     description:
@@ -196,7 +196,7 @@ packages:
       name: cli_util
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.1"
+    version: "0.3.3"
   clock:
     dependency: transitive
     description:
@@ -224,7 +224,7 @@ packages:
       name: connectivity_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.4"
+    version: "1.0.5"
   connectivity_plus_linux:
     dependency: transitive
     description:
@@ -273,7 +273,7 @@ packages:
       name: cross_file
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.1+1"
+    version: "0.3.1+3"
   crypto:
     dependency: transitive
     description:
@@ -333,42 +333,42 @@ packages:
       name: device_info_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.1"
+    version: "2.1.0"
   device_info_plus_linux:
     dependency: transitive
     description:
       name: device_info_plus_linux
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   device_info_plus_macos:
     dependency: transitive
     description:
       name: device_info_plus_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   device_info_plus_platform_interface:
     dependency: transitive
     description:
       name: device_info_plus_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   device_info_plus_web:
     dependency: transitive
     description:
       name: device_info_plus_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   device_info_plus_windows:
     dependency: transitive
     description:
       name: device_info_plus_windows
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.1.0"
   dio:
     dependency: "direct main"
     description:
@@ -389,7 +389,7 @@ packages:
       name: ed25519_edwards
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.1"
   enum_to_string:
     dependency: transitive
     description:
@@ -682,7 +682,7 @@ packages:
       name: io
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.0.3"
   isolate:
     dependency: "direct main"
     description:
@@ -738,7 +738,7 @@ packages:
       name: lottie
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1"
+    version: "1.1.0"
   map:
     dependency: "direct main"
     description:
@@ -789,16 +789,16 @@ packages:
       name: moor
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "4.4.0"
+    version: "4.4.1"
   moor_generator:
     dependency: "direct dev"
     description:
       path: moor_generator
       ref: develop
-      resolved-ref: "43f85e5c3421a94060091f2cf8dc3ce5e6a3fdcd"
+      resolved-ref: d3f757235fb4fcb5f548d0152e32e761c071931a
       url: "https://github.com/simolus3/moor.git"
     source: git
-    version: "4.4.0"
+    version: "4.4.1"
   msix:
     dependency: "direct dev"
     description:
@@ -977,14 +977,14 @@ packages:
       name: plugin_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   pointycastle:
     dependency: transitive
     description:
       name: pointycastle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.2"
+    version: "3.1.3"
   pool:
     dependency: transitive
     description:
@@ -1075,7 +1075,7 @@ packages:
       name: shelf
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.4"
+    version: "1.2.0"
   shelf_web_socket:
     dependency: transitive
     description:
@@ -1149,7 +1149,7 @@ packages:
     description:
       path: sqlparser
       ref: develop
-      resolved-ref: c12de0b8a9035cb61c3192ad7ae020df5fe62e5e
+      resolved-ref: d3f757235fb4fcb5f548d0152e32e761c071931a
       url: "https://github.com/simolus3/moor.git"
     source: git
     version: "0.17.1"
@@ -1243,7 +1243,7 @@ packages:
       name: url_launcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "6.0.7"
+    version: "6.0.9"
   url_launcher_linux:
     dependency: transitive
     description:
@@ -1264,7 +1264,7 @@ packages:
       name: url_launcher_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.3"
+    version: "2.0.4"
   url_launcher_web:
     dependency: transitive
     description:
@@ -1327,7 +1327,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.4"
+    version: "2.2.5"
   window_size:
     dependency: "direct main"
     description:
