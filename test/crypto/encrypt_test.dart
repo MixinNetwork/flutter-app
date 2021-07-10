@@ -34,11 +34,10 @@ void main() {
     final privateKey = ed.generateKey().privateKey;
     final otherPublicKey = ed.generateKey().publicKey;
     final otherSessionId = const Uuid().v4();
-    final pub =
-        publicKeyToCurve25519(Uint8List.fromList(otherPublicKey!.bytes));
+    final pub = publicKeyToCurve25519(Uint8List.fromList(otherPublicKey.bytes));
 
     final encodedContent = protocol.encryptMessage(
-        privateKey!, source, pub.toList(), otherSessionId);
+        privateKey, source, pub.toList(), otherSessionId);
 
     final decrypted = protocol.decryptMessage(privateKey,
         Uuid.parse(otherSessionId), Uint8List.fromList(encodedContent));

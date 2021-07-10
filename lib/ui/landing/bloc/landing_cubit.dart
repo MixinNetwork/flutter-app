@@ -148,7 +148,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           userId: msg['user_id'],
           sessionId: sessionId,
           purpose: 'SESSION',
-          sessionSecret: base64Encode(edKeyPair.publicKey!.bytes),
+          sessionSecret: base64Encode(edKeyPair.publicKey.bytes),
           appVersion: appVersion,
           registrationId: registrationId,
           platform: 'Desktop',
@@ -156,7 +156,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
         ),
       );
 
-      final privateKey = base64Encode(edKeyPair.privateKey!.bytes);
+      final privateKey = base64Encode(edKeyPair.privateKey.bytes);
 
       return Tuple2(
         rsp.data,
