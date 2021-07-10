@@ -7,13 +7,10 @@ import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
-import '../blaze/vo/attachment_message.dart';
-import '../blaze/vo/contact_message.dart';
-import '../blaze/vo/live_message.dart';
 import '../blaze/vo/recall_message.dart';
-import '../blaze/vo/sticker_message.dart';
 import '../constants/constants.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
@@ -629,7 +626,8 @@ class SendMessageHelper {
       );
     } else if (message.category.isLive) {
       final liveMessage = LiveMessage(message.mediaWidth!, message.mediaHeight!,
-          message.thumbUrl ?? '', message.mediaUrl!);
+          // TODO shareable?
+          message.thumbUrl ?? '', message.mediaUrl!, true);
       final encoded = await jsonBase64EncodeWithIsolate(liveMessage);
       await _sendLiveMessage(
           conversationId,

@@ -16,8 +16,8 @@ import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import 'location_payload.dart';
 
-class LocationMessage extends HookWidget {
-  const LocationMessage({
+class LocationMessageWidget extends HookWidget {
+  const LocationMessageWidget({
     Key? key,
     required this.message,
     required this.showNip,

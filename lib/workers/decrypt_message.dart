@@ -11,16 +11,10 @@ import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze_message.dart';
-import '../blaze/vo/app_card.dart';
-import '../blaze/vo/attachment_message.dart';
 import '../blaze/vo/blaze_message_data.dart';
-import '../blaze/vo/contact_message.dart';
-import '../blaze/vo/live_message.dart';
-import '../blaze/vo/location_message.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/snapshot_message.dart';
-import '../blaze/vo/sticker_message.dart';
 import '../blaze/vo/system_circle_message.dart';
 import '../blaze/vo/system_conversation_message.dart';
 import '../blaze/vo/system_user_message.dart';
@@ -832,7 +826,7 @@ class DecryptMessage extends Injector {
 
   Future<void> _processSystemSnapshotMessage(
       BlazeMessageData data, SnapshotMessage snapshotMessage) async {
-    final snapshot = Snapshot(
+    final snapshot = db.Snapshot(
         snapshotId: snapshotMessage.snapshotId,
         type: snapshotMessage.type,
         assetId: snapshotMessage.assetId,

@@ -724,7 +724,7 @@ packages:
       name: libsignal_protocol_dart
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.5.1-nullsafety.0"
+    version: "0.5.3"
   logging:
     dependency: transitive
     description:
@@ -766,7 +766,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.7.0"
   mime:
     dependency: "direct main"
     description:
@@ -777,10 +777,12 @@ packages:
   mixin_bot_sdk_dart:
     dependency: "direct main"
     description:
-      name: mixin_bot_sdk_dart
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.0.6"
+      path: "."
+      ref: c059feed83972e9f05774119b6d9071a11d9db8f
+      resolved-ref: c059feed83972e9f05774119b6d9071a11d9db8f
+      url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
+    source: git
+    version: "0.0.8"
   moor:
     dependency: "direct main"
     description:

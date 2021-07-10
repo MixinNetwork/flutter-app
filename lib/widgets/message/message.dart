@@ -26,10 +26,10 @@ import 'item/action/action_message.dart';
 import 'item/action_card/action_card_data.dart';
 import 'item/action_card/action_message.dart';
 import 'item/audio_message.dart';
-import 'item/contact_message.dart';
+import 'item/contact_message_widget.dart';
 import 'item/file_message.dart';
 import 'item/image/image_message.dart';
-import 'item/location/location_message.dart';
+import 'item/location/location_message_widget.dart';
 import 'item/post_message.dart';
 import 'item/recall_message.dart';
 import 'item/secret_message.dart';
@@ -182,7 +182,7 @@ class MessageItemWidget extends HookWidget {
                 ],
                 builder: (BuildContext context) {
                   if (message.type.isLocation) {
-                    return LocationMessage(
+                    return LocationMessageWidget(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
@@ -206,7 +206,7 @@ class MessageItemWidget extends HookWidget {
                   }
 
                   if (message.type.isContact) {
-                    return ContactMessage(
+                    return ContactMessageWidget(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
