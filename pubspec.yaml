@@ -12,7 +12,7 @@ publish_to: none
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.1.4+1
+version: 0.1.6+1
 
 environment:
   sdk: '>=2.12.0-0 <3.0.0'
@@ -38,8 +38,11 @@ dependencies:
   ulid: ^2.0.0
   web_socket_channel: ^2.1.0
   moor: ^4.4.1
-  mixin_bot_sdk_dart: ^0.0.6
-  libsignal_protocol_dart: ^0.5.1-nullsafety.0
+  mixin_bot_sdk_dart:
+    git:
+      url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
+      ref: c059feed83972e9f05774119b6d9071a11d9db8f
+  libsignal_protocol_dart: ^0.5.3
   path_provider: ^2.0.2
   path: ^1.8.0
   hive: ^2.0.4

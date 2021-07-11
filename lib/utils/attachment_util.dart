@@ -8,7 +8,6 @@ import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 
-import '../blaze/vo/attachment_message.dart';
 import '../crypto/attachment/crypto_attachment.dart';
 import '../db/dao/message_dao.dart';
 import '../db/extension/message_category.dart';

@@ -10,8 +10,8 @@ import '../../user/user_dialog.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
-class ContactMessage extends StatelessWidget {
-  const ContactMessage({
+class ContactMessageWidget extends StatelessWidget {
+  const ContactMessageWidget({
     Key? key,
     required this.message,
     required this.showNip,
