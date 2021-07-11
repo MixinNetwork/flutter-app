@@ -5,8 +5,6 @@ enum MessageStatus {
   failed,
   @JsonValue('UNKNOWN')
   unknown,
-  @JsonValue('PENDING')
-  pending,
   @JsonValue('SENDING')
   sending,
   @JsonValue('SENT')
