@@ -151,7 +151,8 @@ class Blaze {
       await database.offsetDao.insert(Offset(
           key: statusOffset, timestamp: data.updatedAt.toIso8601String()));
     } else if (blazeMessage.action == createMessage) {
-      if (data.userId == userId && data.category == null) {
+      if (data.userId == userId &&
+          (data.category == null || data.conversationId.isEmpty)) {
         await makeMessageStatus(data.messageId, data.status);
       } else {
         await database.floodMessageDao.insert(FloodMessage(
