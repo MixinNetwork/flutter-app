@@ -766,7 +766,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.7.0"
+    version: "1.4.0"
   mime:
     dependency: "direct main"
     description:
@@ -793,11 +793,9 @@ packages:
   moor_generator:
     dependency: "direct dev"
     description:
-      path: moor_generator
-      ref: develop
-      resolved-ref: d3f757235fb4fcb5f548d0152e32e761c071931a
-      url: "https://github.com/simolus3/moor.git"
-    source: git
+      name: moor_generator
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "4.4.1"
   msix:
     dependency: "direct dev"
@@ -1145,13 +1143,11 @@ packages:
     source: hosted
     version: "1.1.2"
   sqlparser:
-    dependency: "direct overridden"
+    dependency: transitive
     description:
-      path: sqlparser
-      ref: develop
-      resolved-ref: d3f757235fb4fcb5f548d0152e32e761c071931a
-      url: "https://github.com/simolus3/moor.git"
-    source: git
+      name: sqlparser
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.17.1"
   stack_trace:
     dependency: transitive
