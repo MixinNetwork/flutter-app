@@ -7,520 +7,6 @@ part of 'mixin_database.dart';
 // **************************************************************************
 
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
-class Job extends DataClass implements Insertable<Job> {
-  final String jobId;
-  final String action;
-  final DateTime createdAt;
-  final int? orderId;
-  final int priority;
-  final String? userId;
-  final String? blazeMessage;
-  final String? conversationId;
-  final String? resendMessageId;
-  final int runCount;
-  Job(
-      {required this.jobId,
-      required this.action,
-      required this.createdAt,
-      this.orderId,
-      required this.priority,
-      this.userId,
-      this.blazeMessage,
-      this.conversationId,
-      this.resendMessageId,
-      required this.runCount});
-  factory Job.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return Job(
-      jobId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}job_id'])!,
-      action: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}action'])!,
-      createdAt: Jobs.$converter0.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      orderId: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}order_id']),
-      priority: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}priority'])!,
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
-      blazeMessage: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}blaze_message']),
-      conversationId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
-      resendMessageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}resend_message_id']),
-      runCount: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}run_count'])!,
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['job_id'] = Variable<String>(jobId);
-    map['action'] = Variable<String>(action);
-    {
-      final converter = Jobs.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
-    }
-    if (!nullToAbsent || orderId != null) {
-      map['order_id'] = Variable<int?>(orderId);
-    }
-    map['priority'] = Variable<int>(priority);
-    if (!nullToAbsent || userId != null) {
-      map['user_id'] = Variable<String?>(userId);
-    }
-    if (!nullToAbsent || blazeMessage != null) {
-      map['blaze_message'] = Variable<String?>(blazeMessage);
-    }
-    if (!nullToAbsent || conversationId != null) {
-      map['conversation_id'] = Variable<String?>(conversationId);
-    }
-    if (!nullToAbsent || resendMessageId != null) {
-      map['resend_message_id'] = Variable<String?>(resendMessageId);
-    }
-    map['run_count'] = Variable<int>(runCount);
-    return map;
-  }
-
-  JobsCompanion toCompanion(bool nullToAbsent) {
-    return JobsCompanion(
-      jobId: Value(jobId),
-      action: Value(action),
-      createdAt: Value(createdAt),
-      orderId: orderId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(orderId),
-      priority: Value(priority),
-      userId:
-          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
-      blazeMessage: blazeMessage == null && nullToAbsent
-          ? const Value.absent()
-          : Value(blazeMessage),
-      conversationId: conversationId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(conversationId),
-      resendMessageId: resendMessageId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(resendMessageId),
-      runCount: Value(runCount),
-    );
-  }
-
-  factory Job.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return Job(
-      jobId: serializer.fromJson<String>(json['job_id']),
-      action: serializer.fromJson<String>(json['action']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      orderId: serializer.fromJson<int?>(json['order_id']),
-      priority: serializer.fromJson<int>(json['priority']),
-      userId: serializer.fromJson<String?>(json['user_id']),
-      blazeMessage: serializer.fromJson<String?>(json['blaze_message']),
-      conversationId: serializer.fromJson<String?>(json['conversation_id']),
-      resendMessageId: serializer.fromJson<String?>(json['resend_message_id']),
-      runCount: serializer.fromJson<int>(json['run_count']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'job_id': serializer.toJson<String>(jobId),
-      'action': serializer.toJson<String>(action),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'order_id': serializer.toJson<int?>(orderId),
-      'priority': serializer.toJson<int>(priority),
-      'user_id': serializer.toJson<String?>(userId),
-      'blaze_message': serializer.toJson<String?>(blazeMessage),
-      'conversation_id': serializer.toJson<String?>(conversationId),
-      'resend_message_id': serializer.toJson<String?>(resendMessageId),
-      'run_count': serializer.toJson<int>(runCount),
-    };
-  }
-
-  Job copyWith(
-          {String? jobId,
-          String? action,
-          DateTime? createdAt,
-          Value<int?> orderId = const Value.absent(),
-          int? priority,
-          Value<String?> userId = const Value.absent(),
-          Value<String?> blazeMessage = const Value.absent(),
-          Value<String?> conversationId = const Value.absent(),
-          Value<String?> resendMessageId = const Value.absent(),
-          int? runCount}) =>
-      Job(
-        jobId: jobId ?? this.jobId,
-        action: action ?? this.action,
-        createdAt: createdAt ?? this.createdAt,
-        orderId: orderId.present ? orderId.value : this.orderId,
-        priority: priority ?? this.priority,
-        userId: userId.present ? userId.value : this.userId,
-        blazeMessage:
-            blazeMessage.present ? blazeMessage.value : this.blazeMessage,
-        conversationId:
-            conversationId.present ? conversationId.value : this.conversationId,
-        resendMessageId: resendMessageId.present
-            ? resendMessageId.value
-            : this.resendMessageId,
-        runCount: runCount ?? this.runCount,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('Job(')
-          ..write('jobId: $jobId, ')
-          ..write('action: $action, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('orderId: $orderId, ')
-          ..write('priority: $priority, ')
-          ..write('userId: $userId, ')
-          ..write('blazeMessage: $blazeMessage, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('resendMessageId: $resendMessageId, ')
-          ..write('runCount: $runCount')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf($mrjc(
-      jobId.hashCode,
-      $mrjc(
-          action.hashCode,
-          $mrjc(
-              createdAt.hashCode,
-              $mrjc(
-                  orderId.hashCode,
-                  $mrjc(
-                      priority.hashCode,
-                      $mrjc(
-                          userId.hashCode,
-                          $mrjc(
-                              blazeMessage.hashCode,
-                              $mrjc(
-                                  conversationId.hashCode,
-                                  $mrjc(resendMessageId.hashCode,
-                                      runCount.hashCode))))))))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Job &&
-          other.jobId == this.jobId &&
-          other.action == this.action &&
-          other.createdAt == this.createdAt &&
-          other.orderId == this.orderId &&
-          other.priority == this.priority &&
-          other.userId == this.userId &&
-          other.blazeMessage == this.blazeMessage &&
-          other.conversationId == this.conversationId &&
-          other.resendMessageId == this.resendMessageId &&
-          other.runCount == this.runCount);
-}
-
-class JobsCompanion extends UpdateCompanion<Job> {
-  final Value<String> jobId;
-  final Value<String> action;
-  final Value<DateTime> createdAt;
-  final Value<int?> orderId;
-  final Value<int> priority;
-  final Value<String?> userId;
-  final Value<String?> blazeMessage;
-  final Value<String?> conversationId;
-  final Value<String?> resendMessageId;
-  final Value<int> runCount;
-  const JobsCompanion({
-    this.jobId = const Value.absent(),
-    this.action = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.orderId = const Value.absent(),
-    this.priority = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.blazeMessage = const Value.absent(),
-    this.conversationId = const Value.absent(),
-    this.resendMessageId = const Value.absent(),
-    this.runCount = const Value.absent(),
-  });
-  JobsCompanion.insert({
-    required String jobId,
-    required String action,
-    required DateTime createdAt,
-    this.orderId = const Value.absent(),
-    required int priority,
-    this.userId = const Value.absent(),
-    this.blazeMessage = const Value.absent(),
-    this.conversationId = const Value.absent(),
-    this.resendMessageId = const Value.absent(),
-    required int runCount,
-  })  : jobId = Value(jobId),
-        action = Value(action),
-        createdAt = Value(createdAt),
-        priority = Value(priority),
-        runCount = Value(runCount);
-  static Insertable<Job> custom({
-    Expression<String>? jobId,
-    Expression<String>? action,
-    Expression<DateTime>? createdAt,
-    Expression<int?>? orderId,
-    Expression<int>? priority,
-    Expression<String?>? userId,
-    Expression<String?>? blazeMessage,
-    Expression<String?>? conversationId,
-    Expression<String?>? resendMessageId,
-    Expression<int>? runCount,
-  }) {
-    return RawValuesInsertable({
-      if (jobId != null) 'job_id': jobId,
-      if (action != null) 'action': action,
-      if (createdAt != null) 'created_at': createdAt,
-      if (orderId != null) 'order_id': orderId,
-      if (priority != null) 'priority': priority,
-      if (userId != null) 'user_id': userId,
-      if (blazeMessage != null) 'blaze_message': blazeMessage,
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (resendMessageId != null) 'resend_message_id': resendMessageId,
-      if (runCount != null) 'run_count': runCount,
-    });
-  }
-
-  JobsCompanion copyWith(
-      {Value<String>? jobId,
-      Value<String>? action,
-      Value<DateTime>? createdAt,
-      Value<int?>? orderId,
-      Value<int>? priority,
-      Value<String?>? userId,
-      Value<String?>? blazeMessage,
-      Value<String?>? conversationId,
-      Value<String?>? resendMessageId,
-      Value<int>? runCount}) {
-    return JobsCompanion(
-      jobId: jobId ?? this.jobId,
-      action: action ?? this.action,
-      createdAt: createdAt ?? this.createdAt,
-      orderId: orderId ?? this.orderId,
-      priority: priority ?? this.priority,
-      userId: userId ?? this.userId,
-      blazeMessage: blazeMessage ?? this.blazeMessage,
-      conversationId: conversationId ?? this.conversationId,
-      resendMessageId: resendMessageId ?? this.resendMessageId,
-      runCount: runCount ?? this.runCount,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (jobId.present) {
-      map['job_id'] = Variable<String>(jobId.value);
-    }
-    if (action.present) {
-      map['action'] = Variable<String>(action.value);
-    }
-    if (createdAt.present) {
-      final converter = Jobs.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
-    }
-    if (orderId.present) {
-      map['order_id'] = Variable<int?>(orderId.value);
-    }
-    if (priority.present) {
-      map['priority'] = Variable<int>(priority.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String?>(userId.value);
-    }
-    if (blazeMessage.present) {
-      map['blaze_message'] = Variable<String?>(blazeMessage.value);
-    }
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String?>(conversationId.value);
-    }
-    if (resendMessageId.present) {
-      map['resend_message_id'] = Variable<String?>(resendMessageId.value);
-    }
-    if (runCount.present) {
-      map['run_count'] = Variable<int>(runCount.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('JobsCompanion(')
-          ..write('jobId: $jobId, ')
-          ..write('action: $action, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('orderId: $orderId, ')
-          ..write('priority: $priority, ')
-          ..write('userId: $userId, ')
-          ..write('blazeMessage: $blazeMessage, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('resendMessageId: $resendMessageId, ')
-          ..write('runCount: $runCount')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Jobs extends Table with TableInfo<Jobs, Job> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  Jobs(this._db, [this._alias]);
-  final VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
-  late final GeneratedColumn<String?> jobId = GeneratedColumn<String?>(
-      'job_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _actionMeta = const VerificationMeta('action');
-  late final GeneratedColumn<String?> action = GeneratedColumn<String?>(
-      'action', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
-      GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(Jobs.$converter0);
-  final VerificationMeta _orderIdMeta = const VerificationMeta('orderId');
-  late final GeneratedColumn<int?> orderId = GeneratedColumn<int?>(
-      'order_id', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _priorityMeta = const VerificationMeta('priority');
-  late final GeneratedColumn<int?> priority = GeneratedColumn<int?>(
-      'priority', aliasedName, false,
-      typeName: 'INTEGER',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
-      'user_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _blazeMessageMeta =
-      const VerificationMeta('blazeMessage');
-  late final GeneratedColumn<String?> blazeMessage = GeneratedColumn<String?>(
-      'blaze_message', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
-      'conversation_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _resendMessageIdMeta =
-      const VerificationMeta('resendMessageId');
-  late final GeneratedColumn<String?> resendMessageId =
-      GeneratedColumn<String?>('resend_message_id', aliasedName, true,
-          typeName: 'TEXT',
-          requiredDuringInsert: false,
-          $customConstraints: '');
-  final VerificationMeta _runCountMeta = const VerificationMeta('runCount');
-  late final GeneratedColumn<int?> runCount = GeneratedColumn<int?>(
-      'run_count', aliasedName, false,
-      typeName: 'INTEGER',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  @override
-  List<GeneratedColumn> get $columns => [
-        jobId,
-        action,
-        createdAt,
-        orderId,
-        priority,
-        userId,
-        blazeMessage,
-        conversationId,
-        resendMessageId,
-        runCount
-      ];
-  @override
-  String get aliasedName => _alias ?? 'jobs';
-  @override
-  String get actualTableName => 'jobs';
-  @override
-  VerificationContext validateIntegrity(Insertable<Job> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('job_id')) {
-      context.handle(
-          _jobIdMeta, jobId.isAcceptableOrUnknown(data['job_id']!, _jobIdMeta));
-    } else if (isInserting) {
-      context.missing(_jobIdMeta);
-    }
-    if (data.containsKey('action')) {
-      context.handle(_actionMeta,
-          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
-    } else if (isInserting) {
-      context.missing(_actionMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    if (data.containsKey('order_id')) {
-      context.handle(_orderIdMeta,
-          orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta));
-    }
-    if (data.containsKey('priority')) {
-      context.handle(_priorityMeta,
-          priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta));
-    } else if (isInserting) {
-      context.missing(_priorityMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    }
-    if (data.containsKey('blaze_message')) {
-      context.handle(
-          _blazeMessageMeta,
-          blazeMessage.isAcceptableOrUnknown(
-              data['blaze_message']!, _blazeMessageMeta));
-    }
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    }
-    if (data.containsKey('resend_message_id')) {
-      context.handle(
-          _resendMessageIdMeta,
-          resendMessageId.isAcceptableOrUnknown(
-              data['resend_message_id']!, _resendMessageIdMeta));
-    }
-    if (data.containsKey('run_count')) {
-      context.handle(_runCountMeta,
-          runCount.isAcceptableOrUnknown(data['run_count']!, _runCountMeta));
-    } else if (isInserting) {
-      context.missing(_runCountMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {jobId};
-  @override
-  Job map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Job.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  Jobs createAlias(String alias) {
-    return Jobs(_db, alias);
-  }
-
-  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(job_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class Conversation extends DataClass implements Insertable<Conversation> {
   final String conversationId;
   final String? ownerId;
@@ -1335,6 +821,969 @@ class Conversations extends Table with TableInfo<Conversations, Conversation> {
   static TypeConverter<DateTime, int> $converter5 = const MillisDateConverter();
   @override
   List<String> get customConstraints => const ['PRIMARY KEY(conversation_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class FloodMessage extends DataClass implements Insertable<FloodMessage> {
+  final String messageId;
+  final String data;
+  final DateTime createdAt;
+  FloodMessage(
+      {required this.messageId, required this.data, required this.createdAt});
+  factory FloodMessage.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return FloodMessage(
+      messageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+      data: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}data'])!,
+      createdAt: FloodMessages.$converter0.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['data'] = Variable<String>(data);
+    {
+      final converter = FloodMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
+    }
+    return map;
+  }
+
+  FloodMessagesCompanion toCompanion(bool nullToAbsent) {
+    return FloodMessagesCompanion(
+      messageId: Value(messageId),
+      data: Value(data),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory FloodMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return FloodMessage(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      data: serializer.fromJson<String>(json['data']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'data': serializer.toJson<String>(data),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  FloodMessage copyWith(
+          {String? messageId, String? data, DateTime? createdAt}) =>
+      FloodMessage(
+        messageId: messageId ?? this.messageId,
+        data: data ?? this.data,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('FloodMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('data: $data, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf(
+      $mrjc(messageId.hashCode, $mrjc(data.hashCode, createdAt.hashCode)));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is FloodMessage &&
+          other.messageId == this.messageId &&
+          other.data == this.data &&
+          other.createdAt == this.createdAt);
+}
+
+class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
+  final Value<String> messageId;
+  final Value<String> data;
+  final Value<DateTime> createdAt;
+  const FloodMessagesCompanion({
+    this.messageId = const Value.absent(),
+    this.data = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  FloodMessagesCompanion.insert({
+    required String messageId,
+    required String data,
+    required DateTime createdAt,
+  })  : messageId = Value(messageId),
+        data = Value(data),
+        createdAt = Value(createdAt);
+  static Insertable<FloodMessage> custom({
+    Expression<String>? messageId,
+    Expression<String>? data,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (data != null) 'data': data,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  FloodMessagesCompanion copyWith(
+      {Value<String>? messageId,
+      Value<String>? data,
+      Value<DateTime>? createdAt}) {
+    return FloodMessagesCompanion(
+      messageId: messageId ?? this.messageId,
+      data: data ?? this.data,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (createdAt.present) {
+      final converter = FloodMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FloodMessagesCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('data: $data, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  FloodMessages(this._db, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _dataMeta = const VerificationMeta('data');
+  late final GeneratedColumn<String?> data = GeneratedColumn<String?>(
+      'data', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(FloodMessages.$converter0);
+  @override
+  List<GeneratedColumn> get $columns => [messageId, data, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'flood_messages';
+  @override
+  String get actualTableName => 'flood_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<FloodMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return FloodMessage.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  FloodMessages createAlias(String alias) {
+    return FloodMessages(_db, alias);
+  }
+
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class Job extends DataClass implements Insertable<Job> {
+  final String jobId;
+  final String action;
+  final DateTime createdAt;
+  final int? orderId;
+  final int priority;
+  final String? userId;
+  final String? blazeMessage;
+  final String? conversationId;
+  final String? resendMessageId;
+  final int runCount;
+  Job(
+      {required this.jobId,
+      required this.action,
+      required this.createdAt,
+      this.orderId,
+      required this.priority,
+      this.userId,
+      this.blazeMessage,
+      this.conversationId,
+      this.resendMessageId,
+      required this.runCount});
+  factory Job.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return Job(
+      jobId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}job_id'])!,
+      action: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}action'])!,
+      createdAt: Jobs.$converter0.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
+      orderId: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}order_id']),
+      priority: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}priority'])!,
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      blazeMessage: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}blaze_message']),
+      conversationId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id']),
+      resendMessageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}resend_message_id']),
+      runCount: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}run_count'])!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['job_id'] = Variable<String>(jobId);
+    map['action'] = Variable<String>(action);
+    {
+      final converter = Jobs.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
+    }
+    if (!nullToAbsent || orderId != null) {
+      map['order_id'] = Variable<int?>(orderId);
+    }
+    map['priority'] = Variable<int>(priority);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String?>(userId);
+    }
+    if (!nullToAbsent || blazeMessage != null) {
+      map['blaze_message'] = Variable<String?>(blazeMessage);
+    }
+    if (!nullToAbsent || conversationId != null) {
+      map['conversation_id'] = Variable<String?>(conversationId);
+    }
+    if (!nullToAbsent || resendMessageId != null) {
+      map['resend_message_id'] = Variable<String?>(resendMessageId);
+    }
+    map['run_count'] = Variable<int>(runCount);
+    return map;
+  }
+
+  JobsCompanion toCompanion(bool nullToAbsent) {
+    return JobsCompanion(
+      jobId: Value(jobId),
+      action: Value(action),
+      createdAt: Value(createdAt),
+      orderId: orderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderId),
+      priority: Value(priority),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      blazeMessage: blazeMessage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(blazeMessage),
+      conversationId: conversationId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conversationId),
+      resendMessageId: resendMessageId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resendMessageId),
+      runCount: Value(runCount),
+    );
+  }
+
+  factory Job.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return Job(
+      jobId: serializer.fromJson<String>(json['job_id']),
+      action: serializer.fromJson<String>(json['action']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      orderId: serializer.fromJson<int?>(json['order_id']),
+      priority: serializer.fromJson<int>(json['priority']),
+      userId: serializer.fromJson<String?>(json['user_id']),
+      blazeMessage: serializer.fromJson<String?>(json['blaze_message']),
+      conversationId: serializer.fromJson<String?>(json['conversation_id']),
+      resendMessageId: serializer.fromJson<String?>(json['resend_message_id']),
+      runCount: serializer.fromJson<int>(json['run_count']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'job_id': serializer.toJson<String>(jobId),
+      'action': serializer.toJson<String>(action),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'order_id': serializer.toJson<int?>(orderId),
+      'priority': serializer.toJson<int>(priority),
+      'user_id': serializer.toJson<String?>(userId),
+      'blaze_message': serializer.toJson<String?>(blazeMessage),
+      'conversation_id': serializer.toJson<String?>(conversationId),
+      'resend_message_id': serializer.toJson<String?>(resendMessageId),
+      'run_count': serializer.toJson<int>(runCount),
+    };
+  }
+
+  Job copyWith(
+          {String? jobId,
+          String? action,
+          DateTime? createdAt,
+          Value<int?> orderId = const Value.absent(),
+          int? priority,
+          Value<String?> userId = const Value.absent(),
+          Value<String?> blazeMessage = const Value.absent(),
+          Value<String?> conversationId = const Value.absent(),
+          Value<String?> resendMessageId = const Value.absent(),
+          int? runCount}) =>
+      Job(
+        jobId: jobId ?? this.jobId,
+        action: action ?? this.action,
+        createdAt: createdAt ?? this.createdAt,
+        orderId: orderId.present ? orderId.value : this.orderId,
+        priority: priority ?? this.priority,
+        userId: userId.present ? userId.value : this.userId,
+        blazeMessage:
+            blazeMessage.present ? blazeMessage.value : this.blazeMessage,
+        conversationId:
+            conversationId.present ? conversationId.value : this.conversationId,
+        resendMessageId: resendMessageId.present
+            ? resendMessageId.value
+            : this.resendMessageId,
+        runCount: runCount ?? this.runCount,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Job(')
+          ..write('jobId: $jobId, ')
+          ..write('action: $action, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderId: $orderId, ')
+          ..write('priority: $priority, ')
+          ..write('userId: $userId, ')
+          ..write('blazeMessage: $blazeMessage, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('resendMessageId: $resendMessageId, ')
+          ..write('runCount: $runCount')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      jobId.hashCode,
+      $mrjc(
+          action.hashCode,
+          $mrjc(
+              createdAt.hashCode,
+              $mrjc(
+                  orderId.hashCode,
+                  $mrjc(
+                      priority.hashCode,
+                      $mrjc(
+                          userId.hashCode,
+                          $mrjc(
+                              blazeMessage.hashCode,
+                              $mrjc(
+                                  conversationId.hashCode,
+                                  $mrjc(resendMessageId.hashCode,
+                                      runCount.hashCode))))))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Job &&
+          other.jobId == this.jobId &&
+          other.action == this.action &&
+          other.createdAt == this.createdAt &&
+          other.orderId == this.orderId &&
+          other.priority == this.priority &&
+          other.userId == this.userId &&
+          other.blazeMessage == this.blazeMessage &&
+          other.conversationId == this.conversationId &&
+          other.resendMessageId == this.resendMessageId &&
+          other.runCount == this.runCount);
+}
+
+class JobsCompanion extends UpdateCompanion<Job> {
+  final Value<String> jobId;
+  final Value<String> action;
+  final Value<DateTime> createdAt;
+  final Value<int?> orderId;
+  final Value<int> priority;
+  final Value<String?> userId;
+  final Value<String?> blazeMessage;
+  final Value<String?> conversationId;
+  final Value<String?> resendMessageId;
+  final Value<int> runCount;
+  const JobsCompanion({
+    this.jobId = const Value.absent(),
+    this.action = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.blazeMessage = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.resendMessageId = const Value.absent(),
+    this.runCount = const Value.absent(),
+  });
+  JobsCompanion.insert({
+    required String jobId,
+    required String action,
+    required DateTime createdAt,
+    this.orderId = const Value.absent(),
+    required int priority,
+    this.userId = const Value.absent(),
+    this.blazeMessage = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.resendMessageId = const Value.absent(),
+    required int runCount,
+  })  : jobId = Value(jobId),
+        action = Value(action),
+        createdAt = Value(createdAt),
+        priority = Value(priority),
+        runCount = Value(runCount);
+  static Insertable<Job> custom({
+    Expression<String>? jobId,
+    Expression<String>? action,
+    Expression<DateTime>? createdAt,
+    Expression<int?>? orderId,
+    Expression<int>? priority,
+    Expression<String?>? userId,
+    Expression<String?>? blazeMessage,
+    Expression<String?>? conversationId,
+    Expression<String?>? resendMessageId,
+    Expression<int>? runCount,
+  }) {
+    return RawValuesInsertable({
+      if (jobId != null) 'job_id': jobId,
+      if (action != null) 'action': action,
+      if (createdAt != null) 'created_at': createdAt,
+      if (orderId != null) 'order_id': orderId,
+      if (priority != null) 'priority': priority,
+      if (userId != null) 'user_id': userId,
+      if (blazeMessage != null) 'blaze_message': blazeMessage,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (resendMessageId != null) 'resend_message_id': resendMessageId,
+      if (runCount != null) 'run_count': runCount,
+    });
+  }
+
+  JobsCompanion copyWith(
+      {Value<String>? jobId,
+      Value<String>? action,
+      Value<DateTime>? createdAt,
+      Value<int?>? orderId,
+      Value<int>? priority,
+      Value<String?>? userId,
+      Value<String?>? blazeMessage,
+      Value<String?>? conversationId,
+      Value<String?>? resendMessageId,
+      Value<int>? runCount}) {
+    return JobsCompanion(
+      jobId: jobId ?? this.jobId,
+      action: action ?? this.action,
+      createdAt: createdAt ?? this.createdAt,
+      orderId: orderId ?? this.orderId,
+      priority: priority ?? this.priority,
+      userId: userId ?? this.userId,
+      blazeMessage: blazeMessage ?? this.blazeMessage,
+      conversationId: conversationId ?? this.conversationId,
+      resendMessageId: resendMessageId ?? this.resendMessageId,
+      runCount: runCount ?? this.runCount,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (jobId.present) {
+      map['job_id'] = Variable<String>(jobId.value);
+    }
+    if (action.present) {
+      map['action'] = Variable<String>(action.value);
+    }
+    if (createdAt.present) {
+      final converter = Jobs.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<int?>(orderId.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String?>(userId.value);
+    }
+    if (blazeMessage.present) {
+      map['blaze_message'] = Variable<String?>(blazeMessage.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String?>(conversationId.value);
+    }
+    if (resendMessageId.present) {
+      map['resend_message_id'] = Variable<String?>(resendMessageId.value);
+    }
+    if (runCount.present) {
+      map['run_count'] = Variable<int>(runCount.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('JobsCompanion(')
+          ..write('jobId: $jobId, ')
+          ..write('action: $action, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('orderId: $orderId, ')
+          ..write('priority: $priority, ')
+          ..write('userId: $userId, ')
+          ..write('blazeMessage: $blazeMessage, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('resendMessageId: $resendMessageId, ')
+          ..write('runCount: $runCount')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Jobs extends Table with TableInfo<Jobs, Job> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  Jobs(this._db, [this._alias]);
+  final VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
+  late final GeneratedColumn<String?> jobId = GeneratedColumn<String?>(
+      'job_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _actionMeta = const VerificationMeta('action');
+  late final GeneratedColumn<String?> action = GeneratedColumn<String?>(
+      'action', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Jobs.$converter0);
+  final VerificationMeta _orderIdMeta = const VerificationMeta('orderId');
+  late final GeneratedColumn<int?> orderId = GeneratedColumn<int?>(
+      'order_id', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _priorityMeta = const VerificationMeta('priority');
+  late final GeneratedColumn<int?> priority = GeneratedColumn<int?>(
+      'priority', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _blazeMessageMeta =
+      const VerificationMeta('blazeMessage');
+  late final GeneratedColumn<String?> blazeMessage = GeneratedColumn<String?>(
+      'blaze_message', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _resendMessageIdMeta =
+      const VerificationMeta('resendMessageId');
+  late final GeneratedColumn<String?> resendMessageId =
+      GeneratedColumn<String?>('resend_message_id', aliasedName, true,
+          typeName: 'TEXT',
+          requiredDuringInsert: false,
+          $customConstraints: '');
+  final VerificationMeta _runCountMeta = const VerificationMeta('runCount');
+  late final GeneratedColumn<int?> runCount = GeneratedColumn<int?>(
+      'run_count', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns => [
+        jobId,
+        action,
+        createdAt,
+        orderId,
+        priority,
+        userId,
+        blazeMessage,
+        conversationId,
+        resendMessageId,
+        runCount
+      ];
+  @override
+  String get aliasedName => _alias ?? 'jobs';
+  @override
+  String get actualTableName => 'jobs';
+  @override
+  VerificationContext validateIntegrity(Insertable<Job> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('job_id')) {
+      context.handle(
+          _jobIdMeta, jobId.isAcceptableOrUnknown(data['job_id']!, _jobIdMeta));
+    } else if (isInserting) {
+      context.missing(_jobIdMeta);
+    }
+    if (data.containsKey('action')) {
+      context.handle(_actionMeta,
+          action.isAcceptableOrUnknown(data['action']!, _actionMeta));
+    } else if (isInserting) {
+      context.missing(_actionMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    if (data.containsKey('order_id')) {
+      context.handle(_orderIdMeta,
+          orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta));
+    }
+    if (data.containsKey('priority')) {
+      context.handle(_priorityMeta,
+          priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta));
+    } else if (isInserting) {
+      context.missing(_priorityMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    if (data.containsKey('blaze_message')) {
+      context.handle(
+          _blazeMessageMeta,
+          blazeMessage.isAcceptableOrUnknown(
+              data['blaze_message']!, _blazeMessageMeta));
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    }
+    if (data.containsKey('resend_message_id')) {
+      context.handle(
+          _resendMessageIdMeta,
+          resendMessageId.isAcceptableOrUnknown(
+              data['resend_message_id']!, _resendMessageIdMeta));
+    }
+    if (data.containsKey('run_count')) {
+      context.handle(_runCountMeta,
+          runCount.isAcceptableOrUnknown(data['run_count']!, _runCountMeta));
+    } else if (isInserting) {
+      context.missing(_runCountMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {jobId};
+  @override
+  Job map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return Job.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  Jobs createAlias(String alias) {
+    return Jobs(_db, alias);
+  }
+
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(job_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class MessageMention extends DataClass implements Insertable<MessageMention> {
+  final String messageId;
+  final String conversationId;
+  final bool? hasRead;
+  MessageMention(
+      {required this.messageId, required this.conversationId, this.hasRead});
+  factory MessageMention.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return MessageMention(
+      messageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+      conversationId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
+      hasRead: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}has_read']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['conversation_id'] = Variable<String>(conversationId);
+    if (!nullToAbsent || hasRead != null) {
+      map['has_read'] = Variable<bool?>(hasRead);
+    }
+    return map;
+  }
+
+  MessageMentionsCompanion toCompanion(bool nullToAbsent) {
+    return MessageMentionsCompanion(
+      messageId: Value(messageId),
+      conversationId: Value(conversationId),
+      hasRead: hasRead == null && nullToAbsent
+          ? const Value.absent()
+          : Value(hasRead),
+    );
+  }
+
+  factory MessageMention.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return MessageMention(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      hasRead: serializer.fromJson<bool?>(json['has_read']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'has_read': serializer.toJson<bool?>(hasRead),
+    };
+  }
+
+  MessageMention copyWith(
+          {String? messageId,
+          String? conversationId,
+          Value<bool?> hasRead = const Value.absent()}) =>
+      MessageMention(
+        messageId: messageId ?? this.messageId,
+        conversationId: conversationId ?? this.conversationId,
+        hasRead: hasRead.present ? hasRead.value : this.hasRead,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('MessageMention(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('hasRead: $hasRead')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode, $mrjc(conversationId.hashCode, hasRead.hashCode)));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MessageMention &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.hasRead == this.hasRead);
+}
+
+class MessageMentionsCompanion extends UpdateCompanion<MessageMention> {
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<bool?> hasRead;
+  const MessageMentionsCompanion({
+    this.messageId = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.hasRead = const Value.absent(),
+  });
+  MessageMentionsCompanion.insert({
+    required String messageId,
+    required String conversationId,
+    this.hasRead = const Value.absent(),
+  })  : messageId = Value(messageId),
+        conversationId = Value(conversationId);
+  static Insertable<MessageMention> custom({
+    Expression<String>? messageId,
+    Expression<String>? conversationId,
+    Expression<bool?>? hasRead,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (hasRead != null) 'has_read': hasRead,
+    });
+  }
+
+  MessageMentionsCompanion copyWith(
+      {Value<String>? messageId,
+      Value<String>? conversationId,
+      Value<bool?>? hasRead}) {
+    return MessageMentionsCompanion(
+      messageId: messageId ?? this.messageId,
+      conversationId: conversationId ?? this.conversationId,
+      hasRead: hasRead ?? this.hasRead,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (hasRead.present) {
+      map['has_read'] = Variable<bool?>(hasRead.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('MessageMentionsCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('hasRead: $hasRead')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MessageMentions extends Table
+    with TableInfo<MessageMentions, MessageMention> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  MessageMentions(this._db, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _hasReadMeta = const VerificationMeta('hasRead');
+  late final GeneratedColumn<bool?> hasRead = GeneratedColumn<bool?>(
+      'has_read', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [messageId, conversationId, hasRead];
+  @override
+  String get aliasedName => _alias ?? 'message_mentions';
+  @override
+  String get actualTableName => 'message_mentions';
+  @override
+  VerificationContext validateIntegrity(Insertable<MessageMention> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('has_read')) {
+      context.handle(_hasReadMeta,
+          hasRead.isAcceptableOrUnknown(data['has_read']!, _hasReadMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  MessageMention map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return MessageMention.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  MessageMentions createAlias(String alias) {
+    return MessageMentions(_db, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -2640,171 +3089,193 @@ class Messages extends Table with TableInfo<Messages, Message> {
   bool get dontWriteConstraints => true;
 }
 
-class MessageMention extends DataClass implements Insertable<MessageMention> {
-  final String messageId;
+class Participant extends DataClass implements Insertable<Participant> {
   final String conversationId;
-  final bool? hasRead;
-  MessageMention(
-      {required this.messageId, required this.conversationId, this.hasRead});
-  factory MessageMention.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  final String userId;
+  final ParticipantRole? role;
+  final DateTime createdAt;
+  Participant(
+      {required this.conversationId,
+      required this.userId,
+      this.role,
+      required this.createdAt});
+  factory Participant.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
-    return MessageMention(
-      messageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+    return Participant(
       conversationId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      hasRead: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}has_read']),
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
+      role: Participants.$converter0.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}role'])),
+      createdAt: Participants.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
     );
   }
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['message_id'] = Variable<String>(messageId);
     map['conversation_id'] = Variable<String>(conversationId);
-    if (!nullToAbsent || hasRead != null) {
-      map['has_read'] = Variable<bool?>(hasRead);
+    map['user_id'] = Variable<String>(userId);
+    if (!nullToAbsent || role != null) {
+      final converter = Participants.$converter0;
+      map['role'] = Variable<String?>(converter.mapToSql(role));
+    }
+    {
+      final converter = Participants.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
     }
     return map;
   }
 
-  MessageMentionsCompanion toCompanion(bool nullToAbsent) {
-    return MessageMentionsCompanion(
-      messageId: Value(messageId),
+  ParticipantsCompanion toCompanion(bool nullToAbsent) {
+    return ParticipantsCompanion(
       conversationId: Value(conversationId),
-      hasRead: hasRead == null && nullToAbsent
-          ? const Value.absent()
-          : Value(hasRead),
+      userId: Value(userId),
+      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
+      createdAt: Value(createdAt),
     );
   }
 
-  factory MessageMention.fromJson(Map<String, dynamic> json,
+  factory Participant.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
-    return MessageMention(
-      messageId: serializer.fromJson<String>(json['message_id']),
+    return Participant(
       conversationId: serializer.fromJson<String>(json['conversation_id']),
-      hasRead: serializer.fromJson<bool?>(json['has_read']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      role: serializer.fromJson<ParticipantRole?>(json['role']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
     );
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'message_id': serializer.toJson<String>(messageId),
       'conversation_id': serializer.toJson<String>(conversationId),
-      'has_read': serializer.toJson<bool?>(hasRead),
+      'user_id': serializer.toJson<String>(userId),
+      'role': serializer.toJson<ParticipantRole?>(role),
+      'created_at': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  MessageMention copyWith(
-          {String? messageId,
-          String? conversationId,
-          Value<bool?> hasRead = const Value.absent()}) =>
-      MessageMention(
-        messageId: messageId ?? this.messageId,
+  Participant copyWith(
+          {String? conversationId,
+          String? userId,
+          Value<ParticipantRole?> role = const Value.absent(),
+          DateTime? createdAt}) =>
+      Participant(
         conversationId: conversationId ?? this.conversationId,
-        hasRead: hasRead.present ? hasRead.value : this.hasRead,
+        userId: userId ?? this.userId,
+        role: role.present ? role.value : this.role,
+        createdAt: createdAt ?? this.createdAt,
       );
   @override
   String toString() {
-    return (StringBuffer('MessageMention(')
-          ..write('messageId: $messageId, ')
+    return (StringBuffer('Participant(')
           ..write('conversationId: $conversationId, ')
-          ..write('hasRead: $hasRead')
+          ..write('userId: $userId, ')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode, $mrjc(conversationId.hashCode, hasRead.hashCode)));
+  int get hashCode => $mrjf($mrjc(conversationId.hashCode,
+      $mrjc(userId.hashCode, $mrjc(role.hashCode, createdAt.hashCode))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is MessageMention &&
-          other.messageId == this.messageId &&
+      (other is Participant &&
           other.conversationId == this.conversationId &&
-          other.hasRead == this.hasRead);
+          other.userId == this.userId &&
+          other.role == this.role &&
+          other.createdAt == this.createdAt);
 }
 
-class MessageMentionsCompanion extends UpdateCompanion<MessageMention> {
-  final Value<String> messageId;
+class ParticipantsCompanion extends UpdateCompanion<Participant> {
   final Value<String> conversationId;
-  final Value<bool?> hasRead;
-  const MessageMentionsCompanion({
-    this.messageId = const Value.absent(),
+  final Value<String> userId;
+  final Value<ParticipantRole?> role;
+  final Value<DateTime> createdAt;
+  const ParticipantsCompanion({
     this.conversationId = const Value.absent(),
-    this.hasRead = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.createdAt = const Value.absent(),
   });
-  MessageMentionsCompanion.insert({
-    required String messageId,
+  ParticipantsCompanion.insert({
     required String conversationId,
-    this.hasRead = const Value.absent(),
-  })  : messageId = Value(messageId),
-        conversationId = Value(conversationId);
-  static Insertable<MessageMention> custom({
-    Expression<String>? messageId,
+    required String userId,
+    this.role = const Value.absent(),
+    required DateTime createdAt,
+  })  : conversationId = Value(conversationId),
+        userId = Value(userId),
+        createdAt = Value(createdAt);
+  static Insertable<Participant> custom({
     Expression<String>? conversationId,
-    Expression<bool?>? hasRead,
+    Expression<String>? userId,
+    Expression<ParticipantRole?>? role,
+    Expression<DateTime>? createdAt,
   }) {
     return RawValuesInsertable({
-      if (messageId != null) 'message_id': messageId,
       if (conversationId != null) 'conversation_id': conversationId,
-      if (hasRead != null) 'has_read': hasRead,
+      if (userId != null) 'user_id': userId,
+      if (role != null) 'role': role,
+      if (createdAt != null) 'created_at': createdAt,
     });
   }
 
-  MessageMentionsCompanion copyWith(
-      {Value<String>? messageId,
-      Value<String>? conversationId,
-      Value<bool?>? hasRead}) {
-    return MessageMentionsCompanion(
-      messageId: messageId ?? this.messageId,
+  ParticipantsCompanion copyWith(
+      {Value<String>? conversationId,
+      Value<String>? userId,
+      Value<ParticipantRole?>? role,
+      Value<DateTime>? createdAt}) {
+    return ParticipantsCompanion(
       conversationId: conversationId ?? this.conversationId,
-      hasRead: hasRead ?? this.hasRead,
+      userId: userId ?? this.userId,
+      role: role ?? this.role,
+      createdAt: createdAt ?? this.createdAt,
     );
   }
 
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    if (messageId.present) {
-      map['message_id'] = Variable<String>(messageId.value);
-    }
     if (conversationId.present) {
       map['conversation_id'] = Variable<String>(conversationId.value);
     }
-    if (hasRead.present) {
-      map['has_read'] = Variable<bool?>(hasRead.value);
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (role.present) {
+      final converter = Participants.$converter0;
+      map['role'] = Variable<String?>(converter.mapToSql(role.value));
+    }
+    if (createdAt.present) {
+      final converter = Participants.$converter1;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('MessageMentionsCompanion(')
-          ..write('messageId: $messageId, ')
+    return (StringBuffer('ParticipantsCompanion(')
           ..write('conversationId: $conversationId, ')
-          ..write('hasRead: $hasRead')
+          ..write('userId: $userId, ')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 }
 
-class MessageMentions extends Table
-    with TableInfo<MessageMentions, MessageMention> {
+class Participants extends Table with TableInfo<Participants, Participant> {
   final GeneratedDatabase _db;
   final String? _alias;
-  MessageMentions(this._db, [this._alias]);
-  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
-      'message_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
+  Participants(this._db, [this._alias]);
   final VerificationMeta _conversationIdMeta =
       const VerificationMeta('conversationId');
   late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
@@ -2812,27 +3283,38 @@ class MessageMentions extends Table
       typeName: 'TEXT',
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  final VerificationMeta _hasReadMeta = const VerificationMeta('hasRead');
-  late final GeneratedColumn<bool?> hasRead = GeneratedColumn<bool?>(
-      'has_read', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _roleMeta = const VerificationMeta('role');
+  late final GeneratedColumnWithTypeConverter<ParticipantRole, String?> role =
+      GeneratedColumn<String?>('role', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<ParticipantRole>(Participants.$converter0);
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(Participants.$converter1);
   @override
-  List<GeneratedColumn> get $columns => [messageId, conversationId, hasRead];
+  List<GeneratedColumn> get $columns =>
+      [conversationId, userId, role, createdAt];
   @override
-  String get aliasedName => _alias ?? 'message_mentions';
+  String get aliasedName => _alias ?? 'participants';
   @override
-  String get actualTableName => 'message_mentions';
+  String get actualTableName => 'participants';
   @override
-  VerificationContext validateIntegrity(Insertable<MessageMention> instance,
+  VerificationContext validateIntegrity(Insertable<Participant> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
     if (data.containsKey('conversation_id')) {
       context.handle(
           _conversationIdMeta,
@@ -2841,653 +3323,467 @@ class MessageMentions extends Table
     } else if (isInserting) {
       context.missing(_conversationIdMeta);
     }
-    if (data.containsKey('has_read')) {
-      context.handle(_hasReadMeta,
-          hasRead.isAcceptableOrUnknown(data['has_read']!, _hasReadMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {messageId};
-  @override
-  MessageMention map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return MessageMention.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  MessageMentions createAlias(String alias) {
-    return MessageMentions(_db, alias);
-  }
-
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
-class User extends DataClass implements Insertable<User> {
-  final String userId;
-  final String identityNumber;
-  final UserRelationship? relationship;
-  final String? fullName;
-  final String? avatarUrl;
-  final String? phone;
-  final bool? isVerified;
-  final DateTime? createdAt;
-  final DateTime? muteUntil;
-  final int? hasPin;
-  final String? appId;
-  final String? biography;
-  final int? isScam;
-  User(
-      {required this.userId,
-      required this.identityNumber,
-      this.relationship,
-      this.fullName,
-      this.avatarUrl,
-      this.phone,
-      this.isVerified,
-      this.createdAt,
-      this.muteUntil,
-      this.hasPin,
-      this.appId,
-      this.biography,
-      this.isScam});
-  factory User.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return User(
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      identityNumber: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}identity_number'])!,
-      relationship: Users.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}relationship'])),
-      fullName: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
-      avatarUrl: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}avatar_url']),
-      phone: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}phone']),
-      isVerified: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
-      createdAt: Users.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
-      muteUntil: Users.$converter2.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
-      hasPin: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
-      appId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
-      biography: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}biography']),
-      isScam: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}is_scam']),
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['user_id'] = Variable<String>(userId);
-    map['identity_number'] = Variable<String>(identityNumber);
-    if (!nullToAbsent || relationship != null) {
-      final converter = Users.$converter0;
-      map['relationship'] = Variable<String?>(converter.mapToSql(relationship));
-    }
-    if (!nullToAbsent || fullName != null) {
-      map['full_name'] = Variable<String?>(fullName);
-    }
-    if (!nullToAbsent || avatarUrl != null) {
-      map['avatar_url'] = Variable<String?>(avatarUrl);
-    }
-    if (!nullToAbsent || phone != null) {
-      map['phone'] = Variable<String?>(phone);
-    }
-    if (!nullToAbsent || isVerified != null) {
-      map['is_verified'] = Variable<bool?>(isVerified);
-    }
-    if (!nullToAbsent || createdAt != null) {
-      final converter = Users.$converter1;
-      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt));
-    }
-    if (!nullToAbsent || muteUntil != null) {
-      final converter = Users.$converter2;
-      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil));
-    }
-    if (!nullToAbsent || hasPin != null) {
-      map['has_pin'] = Variable<int?>(hasPin);
-    }
-    if (!nullToAbsent || appId != null) {
-      map['app_id'] = Variable<String?>(appId);
-    }
-    if (!nullToAbsent || biography != null) {
-      map['biography'] = Variable<String?>(biography);
-    }
-    if (!nullToAbsent || isScam != null) {
-      map['is_scam'] = Variable<int?>(isScam);
-    }
-    return map;
-  }
-
-  UsersCompanion toCompanion(bool nullToAbsent) {
-    return UsersCompanion(
-      userId: Value(userId),
-      identityNumber: Value(identityNumber),
-      relationship: relationship == null && nullToAbsent
-          ? const Value.absent()
-          : Value(relationship),
-      fullName: fullName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(fullName),
-      avatarUrl: avatarUrl == null && nullToAbsent
-          ? const Value.absent()
-          : Value(avatarUrl),
-      phone:
-          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
-      isVerified: isVerified == null && nullToAbsent
-          ? const Value.absent()
-          : Value(isVerified),
-      createdAt: createdAt == null && nullToAbsent
-          ? const Value.absent()
-          : Value(createdAt),
-      muteUntil: muteUntil == null && nullToAbsent
-          ? const Value.absent()
-          : Value(muteUntil),
-      hasPin:
-          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
-      appId:
-          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
-      biography: biography == null && nullToAbsent
-          ? const Value.absent()
-          : Value(biography),
-      isScam:
-          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
-    );
-  }
-
-  factory User.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return User(
-      userId: serializer.fromJson<String>(json['user_id']),
-      identityNumber: serializer.fromJson<String>(json['identity_number']),
-      relationship:
-          serializer.fromJson<UserRelationship?>(json['relationship']),
-      fullName: serializer.fromJson<String?>(json['full_name']),
-      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
-      phone: serializer.fromJson<String?>(json['phone']),
-      isVerified: serializer.fromJson<bool?>(json['is_verified']),
-      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
-      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
-      hasPin: serializer.fromJson<int?>(json['has_pin']),
-      appId: serializer.fromJson<String?>(json['app_id']),
-      biography: serializer.fromJson<String?>(json['biography']),
-      isScam: serializer.fromJson<int?>(json['is_scam']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'user_id': serializer.toJson<String>(userId),
-      'identity_number': serializer.toJson<String>(identityNumber),
-      'relationship': serializer.toJson<UserRelationship?>(relationship),
-      'full_name': serializer.toJson<String?>(fullName),
-      'avatar_url': serializer.toJson<String?>(avatarUrl),
-      'phone': serializer.toJson<String?>(phone),
-      'is_verified': serializer.toJson<bool?>(isVerified),
-      'created_at': serializer.toJson<DateTime?>(createdAt),
-      'mute_until': serializer.toJson<DateTime?>(muteUntil),
-      'has_pin': serializer.toJson<int?>(hasPin),
-      'app_id': serializer.toJson<String?>(appId),
-      'biography': serializer.toJson<String?>(biography),
-      'is_scam': serializer.toJson<int?>(isScam),
-    };
-  }
-
-  User copyWith(
-          {String? userId,
-          String? identityNumber,
-          Value<UserRelationship?> relationship = const Value.absent(),
-          Value<String?> fullName = const Value.absent(),
-          Value<String?> avatarUrl = const Value.absent(),
-          Value<String?> phone = const Value.absent(),
-          Value<bool?> isVerified = const Value.absent(),
-          Value<DateTime?> createdAt = const Value.absent(),
-          Value<DateTime?> muteUntil = const Value.absent(),
-          Value<int?> hasPin = const Value.absent(),
-          Value<String?> appId = const Value.absent(),
-          Value<String?> biography = const Value.absent(),
-          Value<int?> isScam = const Value.absent()}) =>
-      User(
-        userId: userId ?? this.userId,
-        identityNumber: identityNumber ?? this.identityNumber,
-        relationship:
-            relationship.present ? relationship.value : this.relationship,
-        fullName: fullName.present ? fullName.value : this.fullName,
-        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
-        phone: phone.present ? phone.value : this.phone,
-        isVerified: isVerified.present ? isVerified.value : this.isVerified,
-        createdAt: createdAt.present ? createdAt.value : this.createdAt,
-        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
-        hasPin: hasPin.present ? hasPin.value : this.hasPin,
-        appId: appId.present ? appId.value : this.appId,
-        biography: biography.present ? biography.value : this.biography,
-        isScam: isScam.present ? isScam.value : this.isScam,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('User(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf($mrjc(
-      userId.hashCode,
-      $mrjc(
-          identityNumber.hashCode,
-          $mrjc(
-              relationship.hashCode,
-              $mrjc(
-                  fullName.hashCode,
-                  $mrjc(
-                      avatarUrl.hashCode,
-                      $mrjc(
-                          phone.hashCode,
-                          $mrjc(
-                              isVerified.hashCode,
-                              $mrjc(
-                                  createdAt.hashCode,
-                                  $mrjc(
-                                      muteUntil.hashCode,
-                                      $mrjc(
-                                          hasPin.hashCode,
-                                          $mrjc(
-                                              appId.hashCode,
-                                              $mrjc(biography.hashCode,
-                                                  isScam.hashCode)))))))))))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is User &&
-          other.userId == this.userId &&
-          other.identityNumber == this.identityNumber &&
-          other.relationship == this.relationship &&
-          other.fullName == this.fullName &&
-          other.avatarUrl == this.avatarUrl &&
-          other.phone == this.phone &&
-          other.isVerified == this.isVerified &&
-          other.createdAt == this.createdAt &&
-          other.muteUntil == this.muteUntil &&
-          other.hasPin == this.hasPin &&
-          other.appId == this.appId &&
-          other.biography == this.biography &&
-          other.isScam == this.isScam);
-}
-
-class UsersCompanion extends UpdateCompanion<User> {
-  final Value<String> userId;
-  final Value<String> identityNumber;
-  final Value<UserRelationship?> relationship;
-  final Value<String?> fullName;
-  final Value<String?> avatarUrl;
-  final Value<String?> phone;
-  final Value<bool?> isVerified;
-  final Value<DateTime?> createdAt;
-  final Value<DateTime?> muteUntil;
-  final Value<int?> hasPin;
-  final Value<String?> appId;
-  final Value<String?> biography;
-  final Value<int?> isScam;
-  const UsersCompanion({
-    this.userId = const Value.absent(),
-    this.identityNumber = const Value.absent(),
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-  });
-  UsersCompanion.insert({
-    required String userId,
-    required String identityNumber,
-    this.relationship = const Value.absent(),
-    this.fullName = const Value.absent(),
-    this.avatarUrl = const Value.absent(),
-    this.phone = const Value.absent(),
-    this.isVerified = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.muteUntil = const Value.absent(),
-    this.hasPin = const Value.absent(),
-    this.appId = const Value.absent(),
-    this.biography = const Value.absent(),
-    this.isScam = const Value.absent(),
-  })  : userId = Value(userId),
-        identityNumber = Value(identityNumber);
-  static Insertable<User> custom({
-    Expression<String>? userId,
-    Expression<String>? identityNumber,
-    Expression<UserRelationship?>? relationship,
-    Expression<String?>? fullName,
-    Expression<String?>? avatarUrl,
-    Expression<String?>? phone,
-    Expression<bool?>? isVerified,
-    Expression<DateTime?>? createdAt,
-    Expression<DateTime?>? muteUntil,
-    Expression<int?>? hasPin,
-    Expression<String?>? appId,
-    Expression<String?>? biography,
-    Expression<int?>? isScam,
-  }) {
-    return RawValuesInsertable({
-      if (userId != null) 'user_id': userId,
-      if (identityNumber != null) 'identity_number': identityNumber,
-      if (relationship != null) 'relationship': relationship,
-      if (fullName != null) 'full_name': fullName,
-      if (avatarUrl != null) 'avatar_url': avatarUrl,
-      if (phone != null) 'phone': phone,
-      if (isVerified != null) 'is_verified': isVerified,
-      if (createdAt != null) 'created_at': createdAt,
-      if (muteUntil != null) 'mute_until': muteUntil,
-      if (hasPin != null) 'has_pin': hasPin,
-      if (appId != null) 'app_id': appId,
-      if (biography != null) 'biography': biography,
-      if (isScam != null) 'is_scam': isScam,
-    });
-  }
-
-  UsersCompanion copyWith(
-      {Value<String>? userId,
-      Value<String>? identityNumber,
-      Value<UserRelationship?>? relationship,
-      Value<String?>? fullName,
-      Value<String?>? avatarUrl,
-      Value<String?>? phone,
-      Value<bool?>? isVerified,
-      Value<DateTime?>? createdAt,
-      Value<DateTime?>? muteUntil,
-      Value<int?>? hasPin,
-      Value<String?>? appId,
-      Value<String?>? biography,
-      Value<int?>? isScam}) {
-    return UsersCompanion(
-      userId: userId ?? this.userId,
-      identityNumber: identityNumber ?? this.identityNumber,
-      relationship: relationship ?? this.relationship,
-      fullName: fullName ?? this.fullName,
-      avatarUrl: avatarUrl ?? this.avatarUrl,
-      phone: phone ?? this.phone,
-      isVerified: isVerified ?? this.isVerified,
-      createdAt: createdAt ?? this.createdAt,
-      muteUntil: muteUntil ?? this.muteUntil,
-      hasPin: hasPin ?? this.hasPin,
-      appId: appId ?? this.appId,
-      biography: biography ?? this.biography,
-      isScam: isScam ?? this.isScam,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (identityNumber.present) {
-      map['identity_number'] = Variable<String>(identityNumber.value);
-    }
-    if (relationship.present) {
-      final converter = Users.$converter0;
-      map['relationship'] =
-          Variable<String?>(converter.mapToSql(relationship.value));
-    }
-    if (fullName.present) {
-      map['full_name'] = Variable<String?>(fullName.value);
-    }
-    if (avatarUrl.present) {
-      map['avatar_url'] = Variable<String?>(avatarUrl.value);
-    }
-    if (phone.present) {
-      map['phone'] = Variable<String?>(phone.value);
-    }
-    if (isVerified.present) {
-      map['is_verified'] = Variable<bool?>(isVerified.value);
-    }
-    if (createdAt.present) {
-      final converter = Users.$converter1;
-      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt.value));
-    }
-    if (muteUntil.present) {
-      final converter = Users.$converter2;
-      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil.value));
-    }
-    if (hasPin.present) {
-      map['has_pin'] = Variable<int?>(hasPin.value);
-    }
-    if (appId.present) {
-      map['app_id'] = Variable<String?>(appId.value);
-    }
-    if (biography.present) {
-      map['biography'] = Variable<String?>(biography.value);
-    }
-    if (isScam.present) {
-      map['is_scam'] = Variable<int?>(isScam.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('UsersCompanion(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('biography: $biography, ')
-          ..write('isScam: $isScam')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Users extends Table with TableInfo<Users, User> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  Users(this._db, [this._alias]);
-  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
-      'user_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _identityNumberMeta =
-      const VerificationMeta('identityNumber');
-  late final GeneratedColumn<String?> identityNumber = GeneratedColumn<String?>(
-      'identity_number', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _relationshipMeta =
-      const VerificationMeta('relationship');
-  late final GeneratedColumnWithTypeConverter<UserRelationship, String?>
-      relationship = GeneratedColumn<String?>('relationship', aliasedName, true,
-              typeName: 'TEXT',
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<UserRelationship>(Users.$converter0);
-  final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
-  late final GeneratedColumn<String?> fullName = GeneratedColumn<String?>(
-      'full_name', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _avatarUrlMeta = const VerificationMeta('avatarUrl');
-  late final GeneratedColumn<String?> avatarUrl = GeneratedColumn<String?>(
-      'avatar_url', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _phoneMeta = const VerificationMeta('phone');
-  late final GeneratedColumn<String?> phone = GeneratedColumn<String?>(
-      'phone', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
-  late final GeneratedColumn<bool?> isVerified = GeneratedColumn<bool?>(
-      'is_verified', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
-      GeneratedColumn<int?>('created_at', aliasedName, true,
-              typeName: 'INTEGER',
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime>(Users.$converter1);
-  final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
-      GeneratedColumn<int?>('mute_until', aliasedName, true,
-              typeName: 'INTEGER',
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<DateTime>(Users.$converter2);
-  final VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
-  late final GeneratedColumn<int?> hasPin = GeneratedColumn<int?>(
-      'has_pin', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _appIdMeta = const VerificationMeta('appId');
-  late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
-      'app_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _biographyMeta = const VerificationMeta('biography');
-  late final GeneratedColumn<String?> biography = GeneratedColumn<String?>(
-      'biography', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _isScamMeta = const VerificationMeta('isScam');
-  late final GeneratedColumn<int?> isScam = GeneratedColumn<int?>(
-      'is_scam', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
-  @override
-  List<GeneratedColumn> get $columns => [
-        userId,
-        identityNumber,
-        relationship,
-        fullName,
-        avatarUrl,
-        phone,
-        isVerified,
-        createdAt,
-        muteUntil,
-        hasPin,
-        appId,
-        biography,
-        isScam
-      ];
-  @override
-  String get aliasedName => _alias ?? 'users';
-  @override
-  String get actualTableName => 'users';
-  @override
-  VerificationContext validateIntegrity(Insertable<User> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
     if (data.containsKey('user_id')) {
       context.handle(_userIdMeta,
           userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
     } else if (isInserting) {
       context.missing(_userIdMeta);
     }
-    if (data.containsKey('identity_number')) {
-      context.handle(
-          _identityNumberMeta,
-          identityNumber.isAcceptableOrUnknown(
-              data['identity_number']!, _identityNumberMeta));
+    context.handle(_roleMeta, const VerificationResult.success());
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {conversationId, userId};
+  @override
+  Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return Participant.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  Participants createAlias(String alias) {
+    return Participants(_db, alias);
+  }
+
+  static TypeConverter<ParticipantRole, String> $converter0 =
+      const ParticipantRoleConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const [
+        'PRIMARY KEY(conversation_id,user_id)',
+        'FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE'
+      ];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
+class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
+  final String albumId;
+  final String name;
+  final String iconUrl;
+  final DateTime createdAt;
+  final DateTime updateAt;
+  final String userId;
+  final String category;
+  final String description;
+  StickerAlbum(
+      {required this.albumId,
+      required this.name,
+      required this.iconUrl,
+      required this.createdAt,
+      required this.updateAt,
+      required this.userId,
+      required this.category,
+      required this.description});
+  factory StickerAlbum.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return StickerAlbum(
+      albumId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}album_id'])!,
+      name: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
+      iconUrl: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}icon_url'])!,
+      createdAt: StickerAlbums.$converter0.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
+      updateAt: StickerAlbums.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}update_at']))!,
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
+      category: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}category'])!,
+      description: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['album_id'] = Variable<String>(albumId);
+    map['name'] = Variable<String>(name);
+    map['icon_url'] = Variable<String>(iconUrl);
+    {
+      final converter = StickerAlbums.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
+    }
+    {
+      final converter = StickerAlbums.$converter1;
+      map['update_at'] = Variable<int>(converter.mapToSql(updateAt)!);
+    }
+    map['user_id'] = Variable<String>(userId);
+    map['category'] = Variable<String>(category);
+    map['description'] = Variable<String>(description);
+    return map;
+  }
+
+  StickerAlbumsCompanion toCompanion(bool nullToAbsent) {
+    return StickerAlbumsCompanion(
+      albumId: Value(albumId),
+      name: Value(name),
+      iconUrl: Value(iconUrl),
+      createdAt: Value(createdAt),
+      updateAt: Value(updateAt),
+      userId: Value(userId),
+      category: Value(category),
+      description: Value(description),
+    );
+  }
+
+  factory StickerAlbum.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return StickerAlbum(
+      albumId: serializer.fromJson<String>(json['album_id']),
+      name: serializer.fromJson<String>(json['name']),
+      iconUrl: serializer.fromJson<String>(json['icon_url']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      updateAt: serializer.fromJson<DateTime>(json['update_at']),
+      userId: serializer.fromJson<String>(json['user_id']),
+      category: serializer.fromJson<String>(json['category']),
+      description: serializer.fromJson<String>(json['description']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'album_id': serializer.toJson<String>(albumId),
+      'name': serializer.toJson<String>(name),
+      'icon_url': serializer.toJson<String>(iconUrl),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'update_at': serializer.toJson<DateTime>(updateAt),
+      'user_id': serializer.toJson<String>(userId),
+      'category': serializer.toJson<String>(category),
+      'description': serializer.toJson<String>(description),
+    };
+  }
+
+  StickerAlbum copyWith(
+          {String? albumId,
+          String? name,
+          String? iconUrl,
+          DateTime? createdAt,
+          DateTime? updateAt,
+          String? userId,
+          String? category,
+          String? description}) =>
+      StickerAlbum(
+        albumId: albumId ?? this.albumId,
+        name: name ?? this.name,
+        iconUrl: iconUrl ?? this.iconUrl,
+        createdAt: createdAt ?? this.createdAt,
+        updateAt: updateAt ?? this.updateAt,
+        userId: userId ?? this.userId,
+        category: category ?? this.category,
+        description: description ?? this.description,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('StickerAlbum(')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updateAt: $updateAt, ')
+          ..write('userId: $userId, ')
+          ..write('category: $category, ')
+          ..write('description: $description')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      albumId.hashCode,
+      $mrjc(
+          name.hashCode,
+          $mrjc(
+              iconUrl.hashCode,
+              $mrjc(
+                  createdAt.hashCode,
+                  $mrjc(
+                      updateAt.hashCode,
+                      $mrjc(userId.hashCode,
+                          $mrjc(category.hashCode, description.hashCode))))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StickerAlbum &&
+          other.albumId == this.albumId &&
+          other.name == this.name &&
+          other.iconUrl == this.iconUrl &&
+          other.createdAt == this.createdAt &&
+          other.updateAt == this.updateAt &&
+          other.userId == this.userId &&
+          other.category == this.category &&
+          other.description == this.description);
+}
+
+class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
+  final Value<String> albumId;
+  final Value<String> name;
+  final Value<String> iconUrl;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updateAt;
+  final Value<String> userId;
+  final Value<String> category;
+  final Value<String> description;
+  const StickerAlbumsCompanion({
+    this.albumId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.iconUrl = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updateAt = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.category = const Value.absent(),
+    this.description = const Value.absent(),
+  });
+  StickerAlbumsCompanion.insert({
+    required String albumId,
+    required String name,
+    required String iconUrl,
+    required DateTime createdAt,
+    required DateTime updateAt,
+    required String userId,
+    required String category,
+    required String description,
+  })  : albumId = Value(albumId),
+        name = Value(name),
+        iconUrl = Value(iconUrl),
+        createdAt = Value(createdAt),
+        updateAt = Value(updateAt),
+        userId = Value(userId),
+        category = Value(category),
+        description = Value(description);
+  static Insertable<StickerAlbum> custom({
+    Expression<String>? albumId,
+    Expression<String>? name,
+    Expression<String>? iconUrl,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updateAt,
+    Expression<String>? userId,
+    Expression<String>? category,
+    Expression<String>? description,
+  }) {
+    return RawValuesInsertable({
+      if (albumId != null) 'album_id': albumId,
+      if (name != null) 'name': name,
+      if (iconUrl != null) 'icon_url': iconUrl,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updateAt != null) 'update_at': updateAt,
+      if (userId != null) 'user_id': userId,
+      if (category != null) 'category': category,
+      if (description != null) 'description': description,
+    });
+  }
+
+  StickerAlbumsCompanion copyWith(
+      {Value<String>? albumId,
+      Value<String>? name,
+      Value<String>? iconUrl,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updateAt,
+      Value<String>? userId,
+      Value<String>? category,
+      Value<String>? description}) {
+    return StickerAlbumsCompanion(
+      albumId: albumId ?? this.albumId,
+      name: name ?? this.name,
+      iconUrl: iconUrl ?? this.iconUrl,
+      createdAt: createdAt ?? this.createdAt,
+      updateAt: updateAt ?? this.updateAt,
+      userId: userId ?? this.userId,
+      category: category ?? this.category,
+      description: description ?? this.description,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (albumId.present) {
+      map['album_id'] = Variable<String>(albumId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (iconUrl.present) {
+      map['icon_url'] = Variable<String>(iconUrl.value);
+    }
+    if (createdAt.present) {
+      final converter = StickerAlbums.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
+    }
+    if (updateAt.present) {
+      final converter = StickerAlbums.$converter1;
+      map['update_at'] = Variable<int>(converter.mapToSql(updateAt.value)!);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StickerAlbumsCompanion(')
+          ..write('albumId: $albumId, ')
+          ..write('name: $name, ')
+          ..write('iconUrl: $iconUrl, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updateAt: $updateAt, ')
+          ..write('userId: $userId, ')
+          ..write('category: $category, ')
+          ..write('description: $description')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  StickerAlbums(this._db, [this._alias]);
+  final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
+  late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
+      'album_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _nameMeta = const VerificationMeta('name');
+  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
+      'name', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
+  late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
+      'icon_url', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$converter0);
+  final VerificationMeta _updateAtMeta = const VerificationMeta('updateAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> updateAt =
+      GeneratedColumn<int?>('update_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(StickerAlbums.$converter1);
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _categoryMeta = const VerificationMeta('category');
+  late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
+      'category', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
+      'description', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns => [
+        albumId,
+        name,
+        iconUrl,
+        createdAt,
+        updateAt,
+        userId,
+        category,
+        description
+      ];
+  @override
+  String get aliasedName => _alias ?? 'sticker_albums';
+  @override
+  String get actualTableName => 'sticker_albums';
+  @override
+  VerificationContext validateIntegrity(Insertable<StickerAlbum> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('album_id')) {
+      context.handle(_albumIdMeta,
+          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
     } else if (isInserting) {
-      context.missing(_identityNumberMeta);
+      context.missing(_albumIdMeta);
     }
-    context.handle(_relationshipMeta, const VerificationResult.success());
-    if (data.containsKey('full_name')) {
-      context.handle(_fullNameMeta,
-          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
-    }
-    if (data.containsKey('avatar_url')) {
-      context.handle(_avatarUrlMeta,
-          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
-    }
-    if (data.containsKey('phone')) {
+    if (data.containsKey('name')) {
       context.handle(
-          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
     }
-    if (data.containsKey('is_verified')) {
-      context.handle(
-          _isVerifiedMeta,
-          isVerified.isAcceptableOrUnknown(
-              data['is_verified']!, _isVerifiedMeta));
+    if (data.containsKey('icon_url')) {
+      context.handle(_iconUrlMeta,
+          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
+    } else if (isInserting) {
+      context.missing(_iconUrlMeta);
     }
     context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_muteUntilMeta, const VerificationResult.success());
-    if (data.containsKey('has_pin')) {
-      context.handle(_hasPinMeta,
-          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
+    context.handle(_updateAtMeta, const VerificationResult.success());
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
     }
-    if (data.containsKey('app_id')) {
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('description')) {
       context.handle(
-          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
-    }
-    if (data.containsKey('biography')) {
-      context.handle(_biographyMeta,
-          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
-    }
-    if (data.containsKey('is_scam')) {
-      context.handle(_isScamMeta,
-          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    } else if (isInserting) {
+      context.missing(_descriptionMeta);
     }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {userId};
+  Set<GeneratedColumn> get $primaryKey => {albumId};
   @override
-  User map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return User.fromData(data, _db,
+  StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return StickerAlbum.fromData(data, _db,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
-  Users createAlias(String alias) {
-    return Users(_db, alias);
+  StickerAlbums createAlias(String alias) {
+    return StickerAlbums(_db, alias);
   }
 
-  static TypeConverter<UserRelationship, String> $converter0 =
-      const UserRelationshipConverter();
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
   @override
-  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
+  List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -5910,228 +6206,6 @@ class Circles extends Table with TableInfo<Circles, Circle> {
   bool get dontWriteConstraints => true;
 }
 
-class FloodMessage extends DataClass implements Insertable<FloodMessage> {
-  final String messageId;
-  final String data;
-  final DateTime createdAt;
-  FloodMessage(
-      {required this.messageId, required this.data, required this.createdAt});
-  factory FloodMessage.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return FloodMessage(
-      messageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      data: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}data'])!,
-      createdAt: FloodMessages.$converter0.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['message_id'] = Variable<String>(messageId);
-    map['data'] = Variable<String>(data);
-    {
-      final converter = FloodMessages.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
-    }
-    return map;
-  }
-
-  FloodMessagesCompanion toCompanion(bool nullToAbsent) {
-    return FloodMessagesCompanion(
-      messageId: Value(messageId),
-      data: Value(data),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory FloodMessage.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return FloodMessage(
-      messageId: serializer.fromJson<String>(json['message_id']),
-      data: serializer.fromJson<String>(json['data']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'message_id': serializer.toJson<String>(messageId),
-      'data': serializer.toJson<String>(data),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  FloodMessage copyWith(
-          {String? messageId, String? data, DateTime? createdAt}) =>
-      FloodMessage(
-        messageId: messageId ?? this.messageId,
-        data: data ?? this.data,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('FloodMessage(')
-          ..write('messageId: $messageId, ')
-          ..write('data: $data, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf(
-      $mrjc(messageId.hashCode, $mrjc(data.hashCode, createdAt.hashCode)));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is FloodMessage &&
-          other.messageId == this.messageId &&
-          other.data == this.data &&
-          other.createdAt == this.createdAt);
-}
-
-class FloodMessagesCompanion extends UpdateCompanion<FloodMessage> {
-  final Value<String> messageId;
-  final Value<String> data;
-  final Value<DateTime> createdAt;
-  const FloodMessagesCompanion({
-    this.messageId = const Value.absent(),
-    this.data = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  FloodMessagesCompanion.insert({
-    required String messageId,
-    required String data,
-    required DateTime createdAt,
-  })  : messageId = Value(messageId),
-        data = Value(data),
-        createdAt = Value(createdAt);
-  static Insertable<FloodMessage> custom({
-    Expression<String>? messageId,
-    Expression<String>? data,
-    Expression<DateTime>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (messageId != null) 'message_id': messageId,
-      if (data != null) 'data': data,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  FloodMessagesCompanion copyWith(
-      {Value<String>? messageId,
-      Value<String>? data,
-      Value<DateTime>? createdAt}) {
-    return FloodMessagesCompanion(
-      messageId: messageId ?? this.messageId,
-      data: data ?? this.data,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (messageId.present) {
-      map['message_id'] = Variable<String>(messageId.value);
-    }
-    if (data.present) {
-      map['data'] = Variable<String>(data.value);
-    }
-    if (createdAt.present) {
-      final converter = FloodMessages.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('FloodMessagesCompanion(')
-          ..write('messageId: $messageId, ')
-          ..write('data: $data, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class FloodMessages extends Table with TableInfo<FloodMessages, FloodMessage> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  FloodMessages(this._db, [this._alias]);
-  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
-      'message_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _dataMeta = const VerificationMeta('data');
-  late final GeneratedColumn<String?> data = GeneratedColumn<String?>(
-      'data', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
-      GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(FloodMessages.$converter0);
-  @override
-  List<GeneratedColumn> get $columns => [messageId, data, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'flood_messages';
-  @override
-  String get actualTableName => 'flood_messages';
-  @override
-  VerificationContext validateIntegrity(Insertable<FloodMessage> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
-    if (data.containsKey('data')) {
-      context.handle(
-          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
-    } else if (isInserting) {
-      context.missing(_dataMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {messageId};
-  @override
-  FloodMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return FloodMessage.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  FloodMessages createAlias(String alias) {
-    return FloodMessages(_db, alias);
-  }
-
-  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(message_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class Hyperlink extends DataClass implements Insertable<Hyperlink> {
   final String hyperlink;
   final String siteName;
@@ -7508,276 +7582,6 @@ class ParticipantSession extends Table
   bool get dontWriteConstraints => true;
 }
 
-class Participant extends DataClass implements Insertable<Participant> {
-  final String conversationId;
-  final String userId;
-  final ParticipantRole? role;
-  final DateTime createdAt;
-  Participant(
-      {required this.conversationId,
-      required this.userId,
-      this.role,
-      required this.createdAt});
-  factory Participant.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return Participant(
-      conversationId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      role: Participants.$converter0.mapToDart(const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}role'])),
-      createdAt: Participants.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['conversation_id'] = Variable<String>(conversationId);
-    map['user_id'] = Variable<String>(userId);
-    if (!nullToAbsent || role != null) {
-      final converter = Participants.$converter0;
-      map['role'] = Variable<String?>(converter.mapToSql(role));
-    }
-    {
-      final converter = Participants.$converter1;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
-    }
-    return map;
-  }
-
-  ParticipantsCompanion toCompanion(bool nullToAbsent) {
-    return ParticipantsCompanion(
-      conversationId: Value(conversationId),
-      userId: Value(userId),
-      role: role == null && nullToAbsent ? const Value.absent() : Value(role),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory Participant.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return Participant(
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      role: serializer.fromJson<ParticipantRole?>(json['role']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'conversation_id': serializer.toJson<String>(conversationId),
-      'user_id': serializer.toJson<String>(userId),
-      'role': serializer.toJson<ParticipantRole?>(role),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  Participant copyWith(
-          {String? conversationId,
-          String? userId,
-          Value<ParticipantRole?> role = const Value.absent(),
-          DateTime? createdAt}) =>
-      Participant(
-        conversationId: conversationId ?? this.conversationId,
-        userId: userId ?? this.userId,
-        role: role.present ? role.value : this.role,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('Participant(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf($mrjc(conversationId.hashCode,
-      $mrjc(userId.hashCode, $mrjc(role.hashCode, createdAt.hashCode))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Participant &&
-          other.conversationId == this.conversationId &&
-          other.userId == this.userId &&
-          other.role == this.role &&
-          other.createdAt == this.createdAt);
-}
-
-class ParticipantsCompanion extends UpdateCompanion<Participant> {
-  final Value<String> conversationId;
-  final Value<String> userId;
-  final Value<ParticipantRole?> role;
-  final Value<DateTime> createdAt;
-  const ParticipantsCompanion({
-    this.conversationId = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.role = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  ParticipantsCompanion.insert({
-    required String conversationId,
-    required String userId,
-    this.role = const Value.absent(),
-    required DateTime createdAt,
-  })  : conversationId = Value(conversationId),
-        userId = Value(userId),
-        createdAt = Value(createdAt);
-  static Insertable<Participant> custom({
-    Expression<String>? conversationId,
-    Expression<String>? userId,
-    Expression<ParticipantRole?>? role,
-    Expression<DateTime>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (userId != null) 'user_id': userId,
-      if (role != null) 'role': role,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  ParticipantsCompanion copyWith(
-      {Value<String>? conversationId,
-      Value<String>? userId,
-      Value<ParticipantRole?>? role,
-      Value<DateTime>? createdAt}) {
-    return ParticipantsCompanion(
-      conversationId: conversationId ?? this.conversationId,
-      userId: userId ?? this.userId,
-      role: role ?? this.role,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (role.present) {
-      final converter = Participants.$converter0;
-      map['role'] = Variable<String?>(converter.mapToSql(role.value));
-    }
-    if (createdAt.present) {
-      final converter = Participants.$converter1;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('ParticipantsCompanion(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('role: $role, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class Participants extends Table with TableInfo<Participants, Participant> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  Participants(this._db, [this._alias]);
-  final VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
-      'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
-      'user_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _roleMeta = const VerificationMeta('role');
-  late final GeneratedColumnWithTypeConverter<ParticipantRole, String?> role =
-      GeneratedColumn<String?>('role', aliasedName, true,
-              typeName: 'TEXT',
-              requiredDuringInsert: false,
-              $customConstraints: '')
-          .withConverter<ParticipantRole>(Participants.$converter0);
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
-      GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(Participants.$converter1);
-  @override
-  List<GeneratedColumn> get $columns =>
-      [conversationId, userId, role, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'participants';
-  @override
-  String get actualTableName => 'participants';
-  @override
-  VerificationContext validateIntegrity(Insertable<Participant> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    context.handle(_roleMeta, const VerificationResult.success());
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {conversationId, userId};
-  @override
-  Participant map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Participant.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  Participants createAlias(String alias) {
-    return Participants(_db, alias);
-  }
-
-  static TypeConverter<ParticipantRole, String> $converter0 =
-      const ParticipantRoleConverter();
-  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const [
-        'PRIMARY KEY(conversation_id,user_id)',
-        'FOREIGN KEY(conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE'
-      ];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class ResendSessionMessage extends DataClass
     implements Insertable<ResendSessionMessage> {
   final String messageId;
@@ -8993,435 +8797,6 @@ class Snapshots extends Table with TableInfo<Snapshots, Snapshot> {
   bool get dontWriteConstraints => true;
 }
 
-class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
-  final String albumId;
-  final String name;
-  final String iconUrl;
-  final DateTime createdAt;
-  final DateTime updateAt;
-  final String userId;
-  final String category;
-  final String description;
-  StickerAlbum(
-      {required this.albumId,
-      required this.name,
-      required this.iconUrl,
-      required this.createdAt,
-      required this.updateAt,
-      required this.userId,
-      required this.category,
-      required this.description});
-  factory StickerAlbum.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return StickerAlbum(
-      albumId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}album_id'])!,
-      name: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}name'])!,
-      iconUrl: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}icon_url'])!,
-      createdAt: StickerAlbums.$converter0.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-      updateAt: StickerAlbums.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}update_at']))!,
-      userId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
-      category: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}category'])!,
-      description: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}description'])!,
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['album_id'] = Variable<String>(albumId);
-    map['name'] = Variable<String>(name);
-    map['icon_url'] = Variable<String>(iconUrl);
-    {
-      final converter = StickerAlbums.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
-    }
-    {
-      final converter = StickerAlbums.$converter1;
-      map['update_at'] = Variable<int>(converter.mapToSql(updateAt)!);
-    }
-    map['user_id'] = Variable<String>(userId);
-    map['category'] = Variable<String>(category);
-    map['description'] = Variable<String>(description);
-    return map;
-  }
-
-  StickerAlbumsCompanion toCompanion(bool nullToAbsent) {
-    return StickerAlbumsCompanion(
-      albumId: Value(albumId),
-      name: Value(name),
-      iconUrl: Value(iconUrl),
-      createdAt: Value(createdAt),
-      updateAt: Value(updateAt),
-      userId: Value(userId),
-      category: Value(category),
-      description: Value(description),
-    );
-  }
-
-  factory StickerAlbum.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return StickerAlbum(
-      albumId: serializer.fromJson<String>(json['album_id']),
-      name: serializer.fromJson<String>(json['name']),
-      iconUrl: serializer.fromJson<String>(json['icon_url']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-      updateAt: serializer.fromJson<DateTime>(json['update_at']),
-      userId: serializer.fromJson<String>(json['user_id']),
-      category: serializer.fromJson<String>(json['category']),
-      description: serializer.fromJson<String>(json['description']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'album_id': serializer.toJson<String>(albumId),
-      'name': serializer.toJson<String>(name),
-      'icon_url': serializer.toJson<String>(iconUrl),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-      'update_at': serializer.toJson<DateTime>(updateAt),
-      'user_id': serializer.toJson<String>(userId),
-      'category': serializer.toJson<String>(category),
-      'description': serializer.toJson<String>(description),
-    };
-  }
-
-  StickerAlbum copyWith(
-          {String? albumId,
-          String? name,
-          String? iconUrl,
-          DateTime? createdAt,
-          DateTime? updateAt,
-          String? userId,
-          String? category,
-          String? description}) =>
-      StickerAlbum(
-        albumId: albumId ?? this.albumId,
-        name: name ?? this.name,
-        iconUrl: iconUrl ?? this.iconUrl,
-        createdAt: createdAt ?? this.createdAt,
-        updateAt: updateAt ?? this.updateAt,
-        userId: userId ?? this.userId,
-        category: category ?? this.category,
-        description: description ?? this.description,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('StickerAlbum(')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updateAt: $updateAt, ')
-          ..write('userId: $userId, ')
-          ..write('category: $category, ')
-          ..write('description: $description')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf($mrjc(
-      albumId.hashCode,
-      $mrjc(
-          name.hashCode,
-          $mrjc(
-              iconUrl.hashCode,
-              $mrjc(
-                  createdAt.hashCode,
-                  $mrjc(
-                      updateAt.hashCode,
-                      $mrjc(userId.hashCode,
-                          $mrjc(category.hashCode, description.hashCode))))))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is StickerAlbum &&
-          other.albumId == this.albumId &&
-          other.name == this.name &&
-          other.iconUrl == this.iconUrl &&
-          other.createdAt == this.createdAt &&
-          other.updateAt == this.updateAt &&
-          other.userId == this.userId &&
-          other.category == this.category &&
-          other.description == this.description);
-}
-
-class StickerAlbumsCompanion extends UpdateCompanion<StickerAlbum> {
-  final Value<String> albumId;
-  final Value<String> name;
-  final Value<String> iconUrl;
-  final Value<DateTime> createdAt;
-  final Value<DateTime> updateAt;
-  final Value<String> userId;
-  final Value<String> category;
-  final Value<String> description;
-  const StickerAlbumsCompanion({
-    this.albumId = const Value.absent(),
-    this.name = const Value.absent(),
-    this.iconUrl = const Value.absent(),
-    this.createdAt = const Value.absent(),
-    this.updateAt = const Value.absent(),
-    this.userId = const Value.absent(),
-    this.category = const Value.absent(),
-    this.description = const Value.absent(),
-  });
-  StickerAlbumsCompanion.insert({
-    required String albumId,
-    required String name,
-    required String iconUrl,
-    required DateTime createdAt,
-    required DateTime updateAt,
-    required String userId,
-    required String category,
-    required String description,
-  })  : albumId = Value(albumId),
-        name = Value(name),
-        iconUrl = Value(iconUrl),
-        createdAt = Value(createdAt),
-        updateAt = Value(updateAt),
-        userId = Value(userId),
-        category = Value(category),
-        description = Value(description);
-  static Insertable<StickerAlbum> custom({
-    Expression<String>? albumId,
-    Expression<String>? name,
-    Expression<String>? iconUrl,
-    Expression<DateTime>? createdAt,
-    Expression<DateTime>? updateAt,
-    Expression<String>? userId,
-    Expression<String>? category,
-    Expression<String>? description,
-  }) {
-    return RawValuesInsertable({
-      if (albumId != null) 'album_id': albumId,
-      if (name != null) 'name': name,
-      if (iconUrl != null) 'icon_url': iconUrl,
-      if (createdAt != null) 'created_at': createdAt,
-      if (updateAt != null) 'update_at': updateAt,
-      if (userId != null) 'user_id': userId,
-      if (category != null) 'category': category,
-      if (description != null) 'description': description,
-    });
-  }
-
-  StickerAlbumsCompanion copyWith(
-      {Value<String>? albumId,
-      Value<String>? name,
-      Value<String>? iconUrl,
-      Value<DateTime>? createdAt,
-      Value<DateTime>? updateAt,
-      Value<String>? userId,
-      Value<String>? category,
-      Value<String>? description}) {
-    return StickerAlbumsCompanion(
-      albumId: albumId ?? this.albumId,
-      name: name ?? this.name,
-      iconUrl: iconUrl ?? this.iconUrl,
-      createdAt: createdAt ?? this.createdAt,
-      updateAt: updateAt ?? this.updateAt,
-      userId: userId ?? this.userId,
-      category: category ?? this.category,
-      description: description ?? this.description,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (albumId.present) {
-      map['album_id'] = Variable<String>(albumId.value);
-    }
-    if (name.present) {
-      map['name'] = Variable<String>(name.value);
-    }
-    if (iconUrl.present) {
-      map['icon_url'] = Variable<String>(iconUrl.value);
-    }
-    if (createdAt.present) {
-      final converter = StickerAlbums.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
-    }
-    if (updateAt.present) {
-      final converter = StickerAlbums.$converter1;
-      map['update_at'] = Variable<int>(converter.mapToSql(updateAt.value)!);
-    }
-    if (userId.present) {
-      map['user_id'] = Variable<String>(userId.value);
-    }
-    if (category.present) {
-      map['category'] = Variable<String>(category.value);
-    }
-    if (description.present) {
-      map['description'] = Variable<String>(description.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('StickerAlbumsCompanion(')
-          ..write('albumId: $albumId, ')
-          ..write('name: $name, ')
-          ..write('iconUrl: $iconUrl, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('updateAt: $updateAt, ')
-          ..write('userId: $userId, ')
-          ..write('category: $category, ')
-          ..write('description: $description')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  StickerAlbums(this._db, [this._alias]);
-  final VerificationMeta _albumIdMeta = const VerificationMeta('albumId');
-  late final GeneratedColumn<String?> albumId = GeneratedColumn<String?>(
-      'album_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _nameMeta = const VerificationMeta('name');
-  late final GeneratedColumn<String?> name = GeneratedColumn<String?>(
-      'name', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _iconUrlMeta = const VerificationMeta('iconUrl');
-  late final GeneratedColumn<String?> iconUrl = GeneratedColumn<String?>(
-      'icon_url', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
-      GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(StickerAlbums.$converter0);
-  final VerificationMeta _updateAtMeta = const VerificationMeta('updateAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> updateAt =
-      GeneratedColumn<int?>('update_at', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(StickerAlbums.$converter1);
-  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
-  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
-      'user_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _categoryMeta = const VerificationMeta('category');
-  late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
-      'category', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _descriptionMeta =
-      const VerificationMeta('description');
-  late final GeneratedColumn<String?> description = GeneratedColumn<String?>(
-      'description', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  @override
-  List<GeneratedColumn> get $columns => [
-        albumId,
-        name,
-        iconUrl,
-        createdAt,
-        updateAt,
-        userId,
-        category,
-        description
-      ];
-  @override
-  String get aliasedName => _alias ?? 'sticker_albums';
-  @override
-  String get actualTableName => 'sticker_albums';
-  @override
-  VerificationContext validateIntegrity(Insertable<StickerAlbum> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('album_id')) {
-      context.handle(_albumIdMeta,
-          albumId.isAcceptableOrUnknown(data['album_id']!, _albumIdMeta));
-    } else if (isInserting) {
-      context.missing(_albumIdMeta);
-    }
-    if (data.containsKey('name')) {
-      context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
-    } else if (isInserting) {
-      context.missing(_nameMeta);
-    }
-    if (data.containsKey('icon_url')) {
-      context.handle(_iconUrlMeta,
-          iconUrl.isAcceptableOrUnknown(data['icon_url']!, _iconUrlMeta));
-    } else if (isInserting) {
-      context.missing(_iconUrlMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    context.handle(_updateAtMeta, const VerificationResult.success());
-    if (data.containsKey('user_id')) {
-      context.handle(_userIdMeta,
-          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
-    } else if (isInserting) {
-      context.missing(_userIdMeta);
-    }
-    if (data.containsKey('category')) {
-      context.handle(_categoryMeta,
-          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
-    } else if (isInserting) {
-      context.missing(_categoryMeta);
-    }
-    if (data.containsKey('description')) {
-      context.handle(
-          _descriptionMeta,
-          description.isAcceptableOrUnknown(
-              data['description']!, _descriptionMeta));
-    } else if (isInserting) {
-      context.missing(_descriptionMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {albumId};
-  @override
-  StickerAlbum map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return StickerAlbum.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  StickerAlbums createAlias(String alias) {
-    return StickerAlbums(_db, alias);
-  }
-
-  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
-  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const ['PRIMARY KEY(album_id)'];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 class StickerRelationship extends DataClass
     implements Insertable<StickerRelationship> {
   final String albumId;
@@ -10083,37 +9458,664 @@ class Stickers extends Table with TableInfo<Stickers, Sticker> {
   bool get dontWriteConstraints => true;
 }
 
+class User extends DataClass implements Insertable<User> {
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? createdAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final String? biography;
+  final int? isScam;
+  User(
+      {required this.userId,
+      required this.identityNumber,
+      this.relationship,
+      this.fullName,
+      this.avatarUrl,
+      this.phone,
+      this.isVerified,
+      this.createdAt,
+      this.muteUntil,
+      this.hasPin,
+      this.appId,
+      this.biography,
+      this.isScam});
+  factory User.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return User(
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id'])!,
+      identityNumber: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}identity_number'])!,
+      relationship: Users.$converter0.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}relationship'])),
+      fullName: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}full_name']),
+      avatarUrl: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}avatar_url']),
+      phone: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}phone']),
+      isVerified: const BoolType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_verified']),
+      createdAt: Users.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at'])),
+      muteUntil: Users.$converter2.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}mute_until'])),
+      hasPin: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}has_pin']),
+      appId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}app_id']),
+      biography: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}biography']),
+      isScam: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}is_scam']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['identity_number'] = Variable<String>(identityNumber);
+    if (!nullToAbsent || relationship != null) {
+      final converter = Users.$converter0;
+      map['relationship'] = Variable<String?>(converter.mapToSql(relationship));
+    }
+    if (!nullToAbsent || fullName != null) {
+      map['full_name'] = Variable<String?>(fullName);
+    }
+    if (!nullToAbsent || avatarUrl != null) {
+      map['avatar_url'] = Variable<String?>(avatarUrl);
+    }
+    if (!nullToAbsent || phone != null) {
+      map['phone'] = Variable<String?>(phone);
+    }
+    if (!nullToAbsent || isVerified != null) {
+      map['is_verified'] = Variable<bool?>(isVerified);
+    }
+    if (!nullToAbsent || createdAt != null) {
+      final converter = Users.$converter1;
+      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt));
+    }
+    if (!nullToAbsent || muteUntil != null) {
+      final converter = Users.$converter2;
+      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil));
+    }
+    if (!nullToAbsent || hasPin != null) {
+      map['has_pin'] = Variable<int?>(hasPin);
+    }
+    if (!nullToAbsent || appId != null) {
+      map['app_id'] = Variable<String?>(appId);
+    }
+    if (!nullToAbsent || biography != null) {
+      map['biography'] = Variable<String?>(biography);
+    }
+    if (!nullToAbsent || isScam != null) {
+      map['is_scam'] = Variable<int?>(isScam);
+    }
+    return map;
+  }
+
+  UsersCompanion toCompanion(bool nullToAbsent) {
+    return UsersCompanion(
+      userId: Value(userId),
+      identityNumber: Value(identityNumber),
+      relationship: relationship == null && nullToAbsent
+          ? const Value.absent()
+          : Value(relationship),
+      fullName: fullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullName),
+      avatarUrl: avatarUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(avatarUrl),
+      phone:
+          phone == null && nullToAbsent ? const Value.absent() : Value(phone),
+      isVerified: isVerified == null && nullToAbsent
+          ? const Value.absent()
+          : Value(isVerified),
+      createdAt: createdAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(createdAt),
+      muteUntil: muteUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(muteUntil),
+      hasPin:
+          hasPin == null && nullToAbsent ? const Value.absent() : Value(hasPin),
+      appId:
+          appId == null && nullToAbsent ? const Value.absent() : Value(appId),
+      biography: biography == null && nullToAbsent
+          ? const Value.absent()
+          : Value(biography),
+      isScam:
+          isScam == null && nullToAbsent ? const Value.absent() : Value(isScam),
+    );
+  }
+
+  factory User.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return User(
+      userId: serializer.fromJson<String>(json['user_id']),
+      identityNumber: serializer.fromJson<String>(json['identity_number']),
+      relationship:
+          serializer.fromJson<UserRelationship?>(json['relationship']),
+      fullName: serializer.fromJson<String?>(json['full_name']),
+      avatarUrl: serializer.fromJson<String?>(json['avatar_url']),
+      phone: serializer.fromJson<String?>(json['phone']),
+      isVerified: serializer.fromJson<bool?>(json['is_verified']),
+      createdAt: serializer.fromJson<DateTime?>(json['created_at']),
+      muteUntil: serializer.fromJson<DateTime?>(json['mute_until']),
+      hasPin: serializer.fromJson<int?>(json['has_pin']),
+      appId: serializer.fromJson<String?>(json['app_id']),
+      biography: serializer.fromJson<String?>(json['biography']),
+      isScam: serializer.fromJson<int?>(json['is_scam']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'user_id': serializer.toJson<String>(userId),
+      'identity_number': serializer.toJson<String>(identityNumber),
+      'relationship': serializer.toJson<UserRelationship?>(relationship),
+      'full_name': serializer.toJson<String?>(fullName),
+      'avatar_url': serializer.toJson<String?>(avatarUrl),
+      'phone': serializer.toJson<String?>(phone),
+      'is_verified': serializer.toJson<bool?>(isVerified),
+      'created_at': serializer.toJson<DateTime?>(createdAt),
+      'mute_until': serializer.toJson<DateTime?>(muteUntil),
+      'has_pin': serializer.toJson<int?>(hasPin),
+      'app_id': serializer.toJson<String?>(appId),
+      'biography': serializer.toJson<String?>(biography),
+      'is_scam': serializer.toJson<int?>(isScam),
+    };
+  }
+
+  User copyWith(
+          {String? userId,
+          String? identityNumber,
+          Value<UserRelationship?> relationship = const Value.absent(),
+          Value<String?> fullName = const Value.absent(),
+          Value<String?> avatarUrl = const Value.absent(),
+          Value<String?> phone = const Value.absent(),
+          Value<bool?> isVerified = const Value.absent(),
+          Value<DateTime?> createdAt = const Value.absent(),
+          Value<DateTime?> muteUntil = const Value.absent(),
+          Value<int?> hasPin = const Value.absent(),
+          Value<String?> appId = const Value.absent(),
+          Value<String?> biography = const Value.absent(),
+          Value<int?> isScam = const Value.absent()}) =>
+      User(
+        userId: userId ?? this.userId,
+        identityNumber: identityNumber ?? this.identityNumber,
+        relationship:
+            relationship.present ? relationship.value : this.relationship,
+        fullName: fullName.present ? fullName.value : this.fullName,
+        avatarUrl: avatarUrl.present ? avatarUrl.value : this.avatarUrl,
+        phone: phone.present ? phone.value : this.phone,
+        isVerified: isVerified.present ? isVerified.value : this.isVerified,
+        createdAt: createdAt.present ? createdAt.value : this.createdAt,
+        muteUntil: muteUntil.present ? muteUntil.value : this.muteUntil,
+        hasPin: hasPin.present ? hasPin.value : this.hasPin,
+        appId: appId.present ? appId.value : this.appId,
+        biography: biography.present ? biography.value : this.biography,
+        isScam: isScam.present ? isScam.value : this.isScam,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('User(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      userId.hashCode,
+      $mrjc(
+          identityNumber.hashCode,
+          $mrjc(
+              relationship.hashCode,
+              $mrjc(
+                  fullName.hashCode,
+                  $mrjc(
+                      avatarUrl.hashCode,
+                      $mrjc(
+                          phone.hashCode,
+                          $mrjc(
+                              isVerified.hashCode,
+                              $mrjc(
+                                  createdAt.hashCode,
+                                  $mrjc(
+                                      muteUntil.hashCode,
+                                      $mrjc(
+                                          hasPin.hashCode,
+                                          $mrjc(
+                                              appId.hashCode,
+                                              $mrjc(biography.hashCode,
+                                                  isScam.hashCode)))))))))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is User &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.relationship == this.relationship &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.phone == this.phone &&
+          other.isVerified == this.isVerified &&
+          other.createdAt == this.createdAt &&
+          other.muteUntil == this.muteUntil &&
+          other.hasPin == this.hasPin &&
+          other.appId == this.appId &&
+          other.biography == this.biography &&
+          other.isScam == this.isScam);
+}
+
+class UsersCompanion extends UpdateCompanion<User> {
+  final Value<String> userId;
+  final Value<String> identityNumber;
+  final Value<UserRelationship?> relationship;
+  final Value<String?> fullName;
+  final Value<String?> avatarUrl;
+  final Value<String?> phone;
+  final Value<bool?> isVerified;
+  final Value<DateTime?> createdAt;
+  final Value<DateTime?> muteUntil;
+  final Value<int?> hasPin;
+  final Value<String?> appId;
+  final Value<String?> biography;
+  final Value<int?> isScam;
+  const UsersCompanion({
+    this.userId = const Value.absent(),
+    this.identityNumber = const Value.absent(),
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+  });
+  UsersCompanion.insert({
+    required String userId,
+    required String identityNumber,
+    this.relationship = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.avatarUrl = const Value.absent(),
+    this.phone = const Value.absent(),
+    this.isVerified = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.muteUntil = const Value.absent(),
+    this.hasPin = const Value.absent(),
+    this.appId = const Value.absent(),
+    this.biography = const Value.absent(),
+    this.isScam = const Value.absent(),
+  })  : userId = Value(userId),
+        identityNumber = Value(identityNumber);
+  static Insertable<User> custom({
+    Expression<String>? userId,
+    Expression<String>? identityNumber,
+    Expression<UserRelationship?>? relationship,
+    Expression<String?>? fullName,
+    Expression<String?>? avatarUrl,
+    Expression<String?>? phone,
+    Expression<bool?>? isVerified,
+    Expression<DateTime?>? createdAt,
+    Expression<DateTime?>? muteUntil,
+    Expression<int?>? hasPin,
+    Expression<String?>? appId,
+    Expression<String?>? biography,
+    Expression<int?>? isScam,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (identityNumber != null) 'identity_number': identityNumber,
+      if (relationship != null) 'relationship': relationship,
+      if (fullName != null) 'full_name': fullName,
+      if (avatarUrl != null) 'avatar_url': avatarUrl,
+      if (phone != null) 'phone': phone,
+      if (isVerified != null) 'is_verified': isVerified,
+      if (createdAt != null) 'created_at': createdAt,
+      if (muteUntil != null) 'mute_until': muteUntil,
+      if (hasPin != null) 'has_pin': hasPin,
+      if (appId != null) 'app_id': appId,
+      if (biography != null) 'biography': biography,
+      if (isScam != null) 'is_scam': isScam,
+    });
+  }
+
+  UsersCompanion copyWith(
+      {Value<String>? userId,
+      Value<String>? identityNumber,
+      Value<UserRelationship?>? relationship,
+      Value<String?>? fullName,
+      Value<String?>? avatarUrl,
+      Value<String?>? phone,
+      Value<bool?>? isVerified,
+      Value<DateTime?>? createdAt,
+      Value<DateTime?>? muteUntil,
+      Value<int?>? hasPin,
+      Value<String?>? appId,
+      Value<String?>? biography,
+      Value<int?>? isScam}) {
+    return UsersCompanion(
+      userId: userId ?? this.userId,
+      identityNumber: identityNumber ?? this.identityNumber,
+      relationship: relationship ?? this.relationship,
+      fullName: fullName ?? this.fullName,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+      phone: phone ?? this.phone,
+      isVerified: isVerified ?? this.isVerified,
+      createdAt: createdAt ?? this.createdAt,
+      muteUntil: muteUntil ?? this.muteUntil,
+      hasPin: hasPin ?? this.hasPin,
+      appId: appId ?? this.appId,
+      biography: biography ?? this.biography,
+      isScam: isScam ?? this.isScam,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (identityNumber.present) {
+      map['identity_number'] = Variable<String>(identityNumber.value);
+    }
+    if (relationship.present) {
+      final converter = Users.$converter0;
+      map['relationship'] =
+          Variable<String?>(converter.mapToSql(relationship.value));
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String?>(fullName.value);
+    }
+    if (avatarUrl.present) {
+      map['avatar_url'] = Variable<String?>(avatarUrl.value);
+    }
+    if (phone.present) {
+      map['phone'] = Variable<String?>(phone.value);
+    }
+    if (isVerified.present) {
+      map['is_verified'] = Variable<bool?>(isVerified.value);
+    }
+    if (createdAt.present) {
+      final converter = Users.$converter1;
+      map['created_at'] = Variable<int?>(converter.mapToSql(createdAt.value));
+    }
+    if (muteUntil.present) {
+      final converter = Users.$converter2;
+      map['mute_until'] = Variable<int?>(converter.mapToSql(muteUntil.value));
+    }
+    if (hasPin.present) {
+      map['has_pin'] = Variable<int?>(hasPin.value);
+    }
+    if (appId.present) {
+      map['app_id'] = Variable<String?>(appId.value);
+    }
+    if (biography.present) {
+      map['biography'] = Variable<String?>(biography.value);
+    }
+    if (isScam.present) {
+      map['is_scam'] = Variable<int?>(isScam.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UsersCompanion(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('biography: $biography, ')
+          ..write('isScam: $isScam')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Users extends Table with TableInfo<Users, User> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  Users(this._db, [this._alias]);
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _identityNumberMeta =
+      const VerificationMeta('identityNumber');
+  late final GeneratedColumn<String?> identityNumber = GeneratedColumn<String?>(
+      'identity_number', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _relationshipMeta =
+      const VerificationMeta('relationship');
+  late final GeneratedColumnWithTypeConverter<UserRelationship, String?>
+      relationship = GeneratedColumn<String?>('relationship', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<UserRelationship>(Users.$converter0);
+  final VerificationMeta _fullNameMeta = const VerificationMeta('fullName');
+  late final GeneratedColumn<String?> fullName = GeneratedColumn<String?>(
+      'full_name', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _avatarUrlMeta = const VerificationMeta('avatarUrl');
+  late final GeneratedColumn<String?> avatarUrl = GeneratedColumn<String?>(
+      'avatar_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _phoneMeta = const VerificationMeta('phone');
+  late final GeneratedColumn<String?> phone = GeneratedColumn<String?>(
+      'phone', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _isVerifiedMeta = const VerificationMeta('isVerified');
+  late final GeneratedColumn<bool?> isVerified = GeneratedColumn<bool?>(
+      'is_verified', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Users.$converter1);
+  final VerificationMeta _muteUntilMeta = const VerificationMeta('muteUntil');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> muteUntil =
+      GeneratedColumn<int?>('mute_until', aliasedName, true,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<DateTime>(Users.$converter2);
+  final VerificationMeta _hasPinMeta = const VerificationMeta('hasPin');
+  late final GeneratedColumn<int?> hasPin = GeneratedColumn<int?>(
+      'has_pin', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _appIdMeta = const VerificationMeta('appId');
+  late final GeneratedColumn<String?> appId = GeneratedColumn<String?>(
+      'app_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _biographyMeta = const VerificationMeta('biography');
+  late final GeneratedColumn<String?> biography = GeneratedColumn<String?>(
+      'biography', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _isScamMeta = const VerificationMeta('isScam');
+  late final GeneratedColumn<int?> isScam = GeneratedColumn<int?>(
+      'is_scam', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [
+        userId,
+        identityNumber,
+        relationship,
+        fullName,
+        avatarUrl,
+        phone,
+        isVerified,
+        createdAt,
+        muteUntil,
+        hasPin,
+        appId,
+        biography,
+        isScam
+      ];
+  @override
+  String get aliasedName => _alias ?? 'users';
+  @override
+  String get actualTableName => 'users';
+  @override
+  VerificationContext validateIntegrity(Insertable<User> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('identity_number')) {
+      context.handle(
+          _identityNumberMeta,
+          identityNumber.isAcceptableOrUnknown(
+              data['identity_number']!, _identityNumberMeta));
+    } else if (isInserting) {
+      context.missing(_identityNumberMeta);
+    }
+    context.handle(_relationshipMeta, const VerificationResult.success());
+    if (data.containsKey('full_name')) {
+      context.handle(_fullNameMeta,
+          fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta));
+    }
+    if (data.containsKey('avatar_url')) {
+      context.handle(_avatarUrlMeta,
+          avatarUrl.isAcceptableOrUnknown(data['avatar_url']!, _avatarUrlMeta));
+    }
+    if (data.containsKey('phone')) {
+      context.handle(
+          _phoneMeta, phone.isAcceptableOrUnknown(data['phone']!, _phoneMeta));
+    }
+    if (data.containsKey('is_verified')) {
+      context.handle(
+          _isVerifiedMeta,
+          isVerified.isAcceptableOrUnknown(
+              data['is_verified']!, _isVerifiedMeta));
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    context.handle(_muteUntilMeta, const VerificationResult.success());
+    if (data.containsKey('has_pin')) {
+      context.handle(_hasPinMeta,
+          hasPin.isAcceptableOrUnknown(data['has_pin']!, _hasPinMeta));
+    }
+    if (data.containsKey('app_id')) {
+      context.handle(
+          _appIdMeta, appId.isAcceptableOrUnknown(data['app_id']!, _appIdMeta));
+    }
+    if (data.containsKey('biography')) {
+      context.handle(_biographyMeta,
+          biography.isAcceptableOrUnknown(data['biography']!, _biographyMeta));
+    }
+    if (data.containsKey('is_scam')) {
+      context.handle(_isScamMeta,
+          isScam.isAcceptableOrUnknown(data['is_scam']!, _isScamMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId};
+  @override
+  User map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return User.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  Users createAlias(String alias) {
+    return Users(_db, alias);
+  }
+
+  static TypeConverter<UserRelationship, String> $converter0 =
+      const UserRelationshipConverter();
+  static TypeConverter<DateTime, int> $converter1 = const MillisDateConverter();
+  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(user_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
+  late final Conversations conversations = Conversations(this);
+  late final Index indexConversationsCategoryStatus = Index(
+      'index_conversations_category_status',
+      'CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations (category, status)');
+  late final Index indexConversationsMuteUntil = Index(
+      'index_conversations_mute_until',
+      'CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations (mute_until)');
+  late final FloodMessages floodMessages = FloodMessages(this);
+  late final Index indexFloodMessagesCreatedAt = Index(
+      'index_flood_messages_created_at',
+      'CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages (created_at)');
   late final Jobs jobs = Jobs(this);
   late final Index indexJobsAction = Index('index_jobs_action',
       'CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action")');
-  late final Conversations conversations = Conversations(this);
-  late final Index indexConversationsPinTimeLastMessageCreatedAt = Index(
-      'index_conversations_pin_time_last_message_created_at',
-      'CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at)');
+  late final MessageMentions messageMentions = MessageMentions(this);
+  late final Index indexMessageMentionsConversationIdHasRead = Index(
+      'index_message_mentions_conversation_id_has_read',
+      'CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id_has_read ON message_mentions (conversation_id, has_read)');
   late final Messages messages = Messages(this);
-  late final Index indexMessagesConversationIdCategory = Index(
-      'index_messages_conversation_id_category',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category ON messages (conversation_id, category)');
-  late final Index indexMessagesConversationIdQuoteMessageId = Index(
-      'index_messages_conversation_id_quote_message_id',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id)');
-  late final Index indexMessagesConversationIdStatusUserIdCreatedAt = Index(
-      'index_messages_conversation_id_status_user_id_created_at',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id_created_at ON messages (conversation_id, status, user_id, created_at)');
   late final Index indexMessagesConversationIdCreatedAt = Index(
       'index_messages_conversation_id_created_at',
-      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at)');
-  late final MessageMentions messageMentions = MessageMentions(this);
-  late final Index indexMessageMentionsConversationId = Index(
-      'index_message_mentions_conversation_id',
-      'CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id ON message_mentions (conversation_id)');
-  late final Users users = Users(this);
-  late final Index indexUsersRelationshipFullName = Index(
-      'index_users_relationship_full_name',
-      'CREATE INDEX IF NOT EXISTS index_users_relationship_full_name ON users (relationship, full_name)');
+      'CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at DESC)');
+  late final Participants participants = Participants(this);
+  late final Index indexParticipantsConversationIdCreatedAt = Index(
+      'index_participants_conversation_id_created_at',
+      'CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON participants (conversation_id, created_at)');
+  late final StickerAlbums stickerAlbums = StickerAlbums(this);
+  late final Index indexStickerAlbumsCategoryCreatedAt = Index(
+      'index_sticker_albums_category_created_at',
+      'CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums (category, created_at DESC)');
   late final Trigger conversationLastMessageUpdate = Trigger(
       'CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at WHERE conversation_id = new.conversation_id;END',
       'conversation_last_message_update');
@@ -10126,22 +10128,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final CircleConversations circleConversations =
       CircleConversations(this);
   late final Circles circles = Circles(this);
-  late final FloodMessages floodMessages = FloodMessages(this);
   late final Hyperlinks hyperlinks = Hyperlinks(this);
   late final MessagesFts messagesFts = MessagesFts(this);
   late final MessagesHistory messagesHistory = MessagesHistory(this);
   late final Offsets offsets = Offsets(this);
   late final ParticipantSession participantSession = ParticipantSession(this);
-  late final Participants participants = Participants(this);
   late final ResendSessionMessages resendSessionMessages =
       ResendSessionMessages(this);
   late final SentSessionSenderKeys sentSessionSenderKeys =
       SentSessionSenderKeys(this);
   late final Snapshots snapshots = Snapshots(this);
-  late final StickerAlbums stickerAlbums = StickerAlbums(this);
   late final StickerRelationships stickerRelationships =
       StickerRelationships(this);
   late final Stickers stickers = Stickers(this);
+  late final Users users = Users(this);
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -10302,7 +10302,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> groupParticipants(String conversationId, String id) {
     return customSelect(
-        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id AND u.user_id != ?2',
+        'SELECT u.* FROM participants AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND p.user_id != ?2',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(id)
@@ -10434,7 +10434,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> participantsAvatar(String conversationId) {
     return customSelect(
-        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at LIMIT 4',
+        'SELECT user.* FROM participants AS participant LEFT JOIN users AS user ON participant.user_id = user.user_id WHERE participant.conversation_id = ?1 ORDER BY participant.created_at ASC LIMIT 4',
         variables: [
           Variable<String>(conversationId)
         ],
@@ -11336,19 +11336,21 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
+        conversations,
+        indexConversationsCategoryStatus,
+        indexConversationsMuteUntil,
+        floodMessages,
+        indexFloodMessagesCreatedAt,
         jobs,
         indexJobsAction,
-        conversations,
-        indexConversationsPinTimeLastMessageCreatedAt,
-        messages,
-        indexMessagesConversationIdCategory,
-        indexMessagesConversationIdQuoteMessageId,
-        indexMessagesConversationIdStatusUserIdCreatedAt,
-        indexMessagesConversationIdCreatedAt,
         messageMentions,
-        indexMessageMentionsConversationId,
-        users,
-        indexUsersRelationshipFullName,
+        indexMessageMentionsConversationIdHasRead,
+        messages,
+        indexMessagesConversationIdCreatedAt,
+        participants,
+        indexParticipantsConversationIdCreatedAt,
+        stickerAlbums,
+        indexStickerAlbumsCategoryCreatedAt,
         conversationLastMessageUpdate,
         conversationLastMessageDelete,
         addresses,
@@ -11356,19 +11358,17 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         assets,
         circleConversations,
         circles,
-        floodMessages,
         hyperlinks,
         messagesFts,
         messagesHistory,
         offsets,
         participantSession,
-        participants,
         resendSessionMessages,
         sentSessionSenderKeys,
         snapshots,
-        stickerAlbums,
         stickerRelationships,
-        stickers
+        stickers,
+        users
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -11378,6 +11378,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('conversations',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('participants', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
@@ -11392,13 +11399,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('conversations', kind: UpdateKind.update),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('conversations',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('participants', kind: UpdateKind.delete),
             ],
           ),
         ],

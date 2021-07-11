@@ -88,21 +88,24 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         where,
     Limit Function(Conversations conversation, Users user, Messages message,
             Users lastMessageSender, Snapshots snapshot, Users participant)
-        limit,
-  ) =>
-      db.baseConversationItems(
-          (Conversations conversation,
-                  Users owner,
-                  Messages message,
-                  Users lastMessageSender,
-                  Snapshots snapshot,
-                  Users participant) =>
+        limit, {
+    bool useBaseWhere = true,
+  }) =>
+      db.baseConversationItems((Conversations conversation,
+          Users owner,
+          Messages message,
+          Users lastMessageSender,
+          Snapshots snapshot,
+          Users participant) {
+        final expression = where(conversation, owner, message,
+            lastMessageSender, snapshot, participant);
+        if (useBaseWhere) {
+          return expression &
               _baseConversationItemWhere(conversation, owner, message,
-                  lastMessageSender, snapshot, participant) &
-              where(conversation, owner, message, lastMessageSender, snapshot,
-                  participant),
-          _baseConversationItemOrder,
-          limit);
+                  lastMessageSender, snapshot, participant);
+        }
+        return expression;
+      }, _baseConversationItemOrder, limit);
 
   Expression<bool?> _chatWhere(
           Conversations conversation,
@@ -224,6 +227,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, _, __, ___, ____, ______) =>
             conversation.conversationId.equals(conversationId),
         (_, __, ___, ____, ______, _______) => Limit(1, null),
+        useBaseWhere: false,
       );
 
   Selectable<ConversationItem> conversationItems() => _baseConversationItems(

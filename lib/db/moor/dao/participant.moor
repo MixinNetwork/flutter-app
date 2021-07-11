@@ -1,12 +1,11 @@
 import '../mixin.moor';
 
 participantsAvatar:
-SELECT u.*
-FROM participants p,
-     users u
-WHERE p.conversation_id = :conversationId
-  AND p.user_id = u.user_id
-ORDER BY p.created_at
+SELECT user.*
+FROM participants AS participant
+         left join users user on participant.user_id = user.user_id
+WHERE participant.conversation_id = :conversationId
+ORDER BY participant.created_at ASC
 LIMIT 4;
 
 getParticipantSessionKeyWithoutSelf AS ParticipantSessionKey:

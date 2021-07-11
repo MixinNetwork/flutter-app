@@ -58,18 +58,14 @@ CREATE TABLE stickers ( sticker_id TEXT NOT NULL, album_id TEXT, name TEXT NOT N
 
 CREATE TABLE users ( user_id TEXT NOT NULL, identity_number TEXT NOT NULL, relationship TEXT MAPPED BY `const UserRelationshipConverter()`, full_name TEXT, avatar_url TEXT, phone TEXT, is_verified BOOLEAN, created_at INTEGER MAPPED BY `const MillisDateConverter()`, mute_until INTEGER MAPPED BY `const MillisDateConverter()`, has_pin INTEGER, app_id TEXT, biography TEXT, is_scam INTEGER, PRIMARY KEY(user_id) );
 
-CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs ("action");
-
-CREATE INDEX IF NOT EXISTS index_conversations_pin_time_last_message_created_at ON conversations (pin_time, last_message_created_at);
-
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_category ON messages(conversation_id, category);
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_quote_message_id ON messages (conversation_id, quote_message_id);
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_status_user_id_created_at ON messages (conversation_id, status,user_id, created_at);
-CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages (conversation_id, created_at);
-
-CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id ON message_mentions (conversation_id);
-
-CREATE INDEX IF NOT EXISTS index_users_relationship_full_name ON users (relationship, full_name);
+CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations(category, status);
+CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_until);
+CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(created_at);
+CREATE INDEX IF NOT EXISTS index_jobs_action ON jobs("action");
+CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id_has_read ON message_mentions(conversation_id, has_read);
+CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages(conversation_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON participants(conversation_id, created_at);
+CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums(category, created_at DESC);
 
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at  WHERE conversation_id = new.conversation_id; END;
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;
