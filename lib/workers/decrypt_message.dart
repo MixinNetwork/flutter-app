@@ -119,7 +119,7 @@ class DecryptMessage extends Injector {
           category: data.category!,
           content: data.data,
           createdAt: data.createdAt,
-          status: MessageStatus.unknown,
+          status: data.status,
         );
         await database.messageDao.insert(message, accountId);
       } else if (category.isSignal) {

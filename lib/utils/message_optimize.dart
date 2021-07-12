@@ -19,7 +19,7 @@ Future<String?> messagePreviewOptimize(
   String? _content;
 
   final trimContent = content?.trim();
-  if (messageStatus == MessageStatus.unknown) {
+  if (messageCategory.isIllegalMessageCategory) {
     _content = Localization.current.chatNotSupport;
   } else if (messageStatus == MessageStatus.failed) {
     _content = Localization.current.waitingForThisMessage;

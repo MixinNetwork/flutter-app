@@ -181,7 +181,7 @@ class MessageItemWidget extends HookWidget {
                   ),
                 ],
                 builder: (BuildContext context) {
-                  if (message.status == MessageStatus.unknown) {
+                  if (message.type.isIllegalMessageCategory) {
                     return UnknownMessage(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
