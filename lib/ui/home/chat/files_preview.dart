@@ -231,6 +231,7 @@ class _FilesPreviewDialog extends HookWidget {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.only(
                             left: 32, top: 18, bottom: 18, right: 32),
+                        primary: BrightnessData.themeOf(context).accent,
                       ),
                       child: Text(Localization.of(context).send.toUpperCase()),
                     ),
