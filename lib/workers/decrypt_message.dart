@@ -111,7 +111,18 @@ class DecryptMessage extends Injector {
 
       await syncConversion(data.conversationId);
       final category = data.category;
-      if (category.isSignal) {
+      if (category.isIllegalMessageCategory) {
+        final message = Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.senderId,
+          category: data.category!,
+          content: data.data,
+          createdAt: data.createdAt,
+          status: MessageStatus.unknown,
+        );
+        await database.messageDao.insert(message, accountId);
+      } else if (category.isSignal) {
         d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
           _remoteStatus = MessageStatus.read;
