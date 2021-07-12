@@ -433,11 +433,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
         (db.update(db.messages)
-              ..where((tbl) =>
-                  tbl.mediaStatus.equalsValue(MediaStatus.done) &
-                  tbl.status.equalsValue(MessageStatus.sending) &
-                  tbl.messageId.equals(messageId)))
-            .write(MessagesCompanion(content: Value(content))),
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(MessagesCompanion(
+          mediaStatus: const Value(MediaStatus.done),
+          status: const Value(MessageStatus.sending),
+          content: Value(content),
+        )),
       );
 
   Future<int> updateMessageContent(String messageId, String content) =>
