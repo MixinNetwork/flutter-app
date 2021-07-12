@@ -1,10 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
 enum MessageStatus {
-  @JsonValue('FAILED')
-  failed,
-  @JsonValue('UNKNOWN')
-  unknown,
   @JsonValue('SENDING')
   sending,
   @JsonValue('SENT')
@@ -13,4 +9,8 @@ enum MessageStatus {
   delivered,
   @JsonValue('READ')
   read,
+  @JsonValue('UNKNOWN')
+  unknown,
+  @JsonValue('FAILED')
+  failed,
 }
