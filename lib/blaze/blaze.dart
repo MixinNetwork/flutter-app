@@ -176,7 +176,13 @@ class Blaze {
   Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
         await database.messageDao.findMessageStatusById(messageId);
-    if (currentStatus != null && currentStatus.index < status.index) {
+    if (currentStatus == MessageStatus.sending) {
+      await database.messageDao.updateMessageStatusById(messageId, status);
+    } else if (currentStatus == MessageStatus.sent &&
+        (status == MessageStatus.delivered || status == MessageStatus.read)) {
+      await database.messageDao.updateMessageStatusById(messageId, status);
+    } else if (currentStatus == MessageStatus.delivered &&
+        status == MessageStatus.read) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     }
   }

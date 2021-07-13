@@ -60,6 +60,20 @@ class QuoteMessage extends HookWidget {
       } else {
         quote = mapToQuoteMessage(decodeMap);
       }
+      if (quote.type?.isIllegalMessageCategory) {
+        return _QuoteMessageBase(
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
+          userId: null,
+          description: Localization.of(context).chatNotSupport,
+          icon: SvgPicture.asset(
+            Resources.assetsImagesRecallSvg,
+            color: iconColor,
+          ),
+          inputMode: inputMode,
+          onTap: () {},
+        );
+      }
       final String type = quote.type;
       if (type.isText) {
         return _QuoteMessageBase(
