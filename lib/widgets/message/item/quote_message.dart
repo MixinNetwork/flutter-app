@@ -60,7 +60,7 @@ class QuoteMessage extends HookWidget {
       } else {
         quote = mapToQuoteMessage(decodeMap);
       }
-      if (quote.type?.isIllegalMessageCategory) {
+      if ((quote?.type as String?).isIllegalMessageCategory) {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
