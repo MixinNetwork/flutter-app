@@ -1,7 +1,8 @@
 import 'dart:ui';
 
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
 import '../constants/brightness_theme_data.dart';
-import 'string_extension.dart';
 
 Color getNameColorById(String userId) {
   final hashCode = userId.trim().uuidHashcode();
