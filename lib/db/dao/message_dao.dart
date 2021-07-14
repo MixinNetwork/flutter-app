@@ -223,7 +223,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         [messageId],
         (db.update(db.messages)
               ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(MessagesCompanion(mediaUrl: Value(path.relativePath))),
+            .write(MessagesCompanion(mediaUrl: Value(path.pathBasename))),
       );
 
   Future<int> updateMediaSize(int length, String messageId) =>

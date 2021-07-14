@@ -891,7 +891,7 @@ class AccountServer {
         message.conversationId,
         message.messageId,
         message.type,
-        File(message.mediaUrl!.absolutePath),
+        File(convertMessageAbsolutePath(message)),
         message.mediaName,
         message.mediaMimeType!,
         message.mediaSize!,
@@ -1311,4 +1311,15 @@ class AccountServer {
 
   Future<void> deleteMessage(String messageId) =>
       database.messageDao.deleteMessage(messageId);
+
+  String convertAbsolutePath(
+          String category, String conversationId, String? fileName) =>
+      _attachmentUtil.convertAbsolutePath(category, conversationId, fileName);
+
+  String convertMessageAbsolutePath(db.MessageItem? messageItem) {
+    if (messageItem == null) return '';
+    assert(messageItem.type.isAttachment);
+    return _attachmentUtil.convertAbsolutePath(
+        messageItem.type, messageItem.conversationId, messageItem.mediaUrl);
+  }
 }

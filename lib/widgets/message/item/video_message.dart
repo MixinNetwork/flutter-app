@@ -13,7 +13,6 @@ import '../../../constants/resources.dart';
 import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
-import '../../../utils/file.dart';
 import '../../../utils/uri_utils.dart';
 import '../../image.dart';
 import '../../interacter_decorated_box.dart';
@@ -60,14 +59,20 @@ class VideoMessageWidget extends StatelessWidget {
                   }
                 } else if (message.mediaStatus == MediaStatus.done &&
                     message.mediaUrl != null) {
-                  openUri(context,
-                      Uri.file(message.mediaUrl!.absolutePath).toString());
+                  openUri(
+                      context,
+                      Uri.file(context
+                              .read<AccountServer>()
+                              .convertMessageAbsolutePath(message))
+                          .toString());
                 } else if (message.mediaStatus == MediaStatus.pending) {
                   context
                       .read<AccountServer>()
                       .cancelProgressAttachmentJob(message.messageId);
                 } else if (message.type.isLive && message.mediaUrl != null) {
-                  launch(message.mediaUrl!.absolutePath);
+                  launch(context
+                      .read<AccountServer>()
+                      .convertMessageAbsolutePath(message));
                 }
               },
               child: ClipRRect(

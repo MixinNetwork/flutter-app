@@ -102,18 +102,11 @@ Future<File?> saveBytesToTempFile(
 }
 
 extension FileRelativePath on File {
-  String get relativePath => path.relativePath;
+  String get pathBasename => path.pathBasename;
 }
 
 extension StringPathRelativePath on String {
-  String get relativePath {
-    var relativePath = replaceFirst(mixinDocumentsDirectory.path, '');
-    final rootOfPath = p.rootPrefix(relativePath);
-    if (rootOfPath.isNotEmpty) {
-      relativePath = relativePath.replaceFirst(rootOfPath, '');
-    }
-    return relativePath;
-  }
+  String get pathBasename => p.basename(this);
 
   String get absolutePath {
     if (startsWith(mixinDocumentsDirectory.path)) return this;
