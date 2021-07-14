@@ -20,7 +20,7 @@ BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
     json['representative_id'] as String?,
     json['quote_message_id'] as String?,
     json['session_id'] as String,
-  );
+  )..isSilent = json['is_silent'] as bool?;
 }
 
 Map<String, dynamic> _$BlazeMessageDataToJson(BlazeMessageData instance) =>
@@ -37,6 +37,7 @@ Map<String, dynamic> _$BlazeMessageDataToJson(BlazeMessageData instance) =>
       'representative_id': instance.representativeId,
       'quote_message_id': instance.quoteMessageId,
       'session_id': instance.sessionId,
+      'is_silent': instance.isSilent,
     };
 
 K _$enumDecode<K, V>(
