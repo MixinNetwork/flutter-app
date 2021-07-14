@@ -16,6 +16,7 @@ import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../utils/color_utils.dart';
+import '../../../utils/file.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/markdown.dart';
 import '../../avatar_view/avatar_view.dart';
@@ -92,7 +93,7 @@ class QuoteMessage extends HookWidget {
           userId: quote.userId,
           name: quote.userFullName,
           image: Image.file(
-            File(quote.mediaUrl ?? ''),
+            File((quote.mediaUrl as String?)?.absolutePath ?? ''),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
                 ImageByBlurHashOrBase64(imageData: quote.thumbImage),

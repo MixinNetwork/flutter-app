@@ -250,9 +250,9 @@ class AttachmentUtil {
   String getFilesPath(String conversationId) =>
       p.join(mediaPath, 'Files', conversationId);
 
-  static Future<AttachmentUtil> init(
-      Client client, MessageDao messageDao, String identityNumber) async {
-    final documentDirectory = await getMixinDocumentsDirectory();
+  static AttachmentUtil init(
+      Client client, MessageDao messageDao, String identityNumber) {
+    final documentDirectory = mixinDocumentsDirectory;
     final mediaDirectory =
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
     return AttachmentUtil(client, messageDao, mediaDirectory.path);

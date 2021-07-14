@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../../../account/account_server.dart';
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../enum/media_status.dart';
+import '../../../../utils/file.dart';
 import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../status.dart';
@@ -72,7 +73,7 @@ class ImageMessageWidget extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.file(
-                      File(message.mediaUrl ?? ''),
+                      File(message.mediaUrl?.absolutePath ?? ''),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
                           imageData: message.thumbImage!),

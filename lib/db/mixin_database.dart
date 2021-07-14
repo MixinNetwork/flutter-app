@@ -150,7 +150,7 @@ LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
     });
 
 Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
-  final dbFolder = await getMixinDocumentsDirectory();
+  final dbFolder = mixinDocumentsDirectory;
   final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
   final moorIsolate = await _createMoorIsolate(dbFile);
   final databaseConnection = await moorIsolate.connect();

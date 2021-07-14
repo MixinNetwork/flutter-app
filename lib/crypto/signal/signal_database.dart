@@ -55,8 +55,8 @@ class SignalDatabase extends _$SignalDatabase {
       });
 }
 
-LazyDatabase _openConnection() => LazyDatabase(() async {
-      final dbFolder = await getMixinDocumentsDirectory();
+LazyDatabase _openConnection() => LazyDatabase(() {
+      final dbFolder = mixinDocumentsDirectory;
       final file = File(p.join(dbFolder.path, 'signal.db'));
       return VmDatabase(file);
     });

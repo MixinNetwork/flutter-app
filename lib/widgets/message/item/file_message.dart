@@ -14,6 +14,7 @@ import '../../../constants/brightness_theme_data.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../generated/l10n.dart';
+import '../../../utils/file.dart';
 import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
@@ -60,7 +61,7 @@ class FileMessage extends StatelessWidget {
                 suggestedName: message.mediaName ?? basename(message.mediaUrl!),
               );
               if (path?.isEmpty ?? true) return;
-              await File(message.mediaUrl!).copy(path!);
+              await File(message.mediaUrl!.absolutePath).copy(path!);
             } else if (message.mediaStatus == MediaStatus.pending) {
               context
                   .read<AccountServer>()

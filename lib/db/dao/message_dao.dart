@@ -5,6 +5,7 @@ import 'package:moor/moor.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
+import '../../utils/file.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../../utils/string_extension.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
@@ -222,7 +223,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         [messageId],
         (db.update(db.messages)
               ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(MessagesCompanion(mediaUrl: Value(path))),
+            .write(MessagesCompanion(mediaUrl: Value(path.relativePath))),
       );
 
   Future<int> updateMediaSize(int length, String messageId) =>

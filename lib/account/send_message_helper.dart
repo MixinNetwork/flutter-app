@@ -24,6 +24,7 @@ import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
 import '../utils/datetime_format_utils.dart';
+import '../utils/file.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/reg_exp_utils.dart';
 
@@ -127,7 +128,7 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.relativePath,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
       mediaWidth: imageWidth,
@@ -190,7 +191,7 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.relativePath,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
       // mediaWidth: , // todo
@@ -280,7 +281,7 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.relativePath,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
       name: name ?? file.name,
@@ -368,7 +369,7 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.relativePath,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
       // mediaDuration: , // todo

@@ -128,7 +128,7 @@ class AccountServer {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
-        await AttachmentUtil.init(client, database.messageDao, identityNumber);
+        AttachmentUtil.init(client, database.messageDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
       database.messageDao,
       database.messageMentionDao,
@@ -891,7 +891,7 @@ class AccountServer {
         message.conversationId,
         message.messageId,
         message.type,
-        File(message.mediaUrl!),
+        File(message.mediaUrl!.absolutePath),
         message.mediaName,
         message.mediaMimeType!,
         message.mediaSize!,

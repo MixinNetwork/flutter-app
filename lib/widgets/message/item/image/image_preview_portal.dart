@@ -20,6 +20,7 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../generated/l10n.dart';
 import '../../../../ui/home/bloc/conversation_cubit.dart';
+import '../../../../utils/file.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
@@ -141,7 +142,7 @@ class ImagePreviewPage extends HookWidget {
       actions: {
         CopyIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) =>
-              _copyUrl(context, current.value?.mediaUrl),
+              _copyUrl(context, current.value?.mediaUrl?.absolutePath),
         ),
       },
       autofocus: true,
@@ -301,7 +302,7 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesCopySvg,
             color: BrightnessData.themeOf(context).icon,
             size: 20,
-            onTap: () => _copyUrl(context, message.mediaUrl),
+            onTap: () => _copyUrl(context, message.mediaUrl?.absolutePath),
           ),
           const SizedBox(width: 14),
           ActionButton(
@@ -317,7 +318,7 @@ class _Bar extends StatelessWidget {
               if (path?.isEmpty ?? true) return;
               await runFutureWithToast(
                 context,
-                File(message.mediaUrl!).copy(path!),
+                File(message.mediaUrl!.absolutePath).copy(path!),
               );
             },
           ),
@@ -362,7 +363,8 @@ class _Item extends HookWidget {
                   : SystemMouseCursors.zoomOut,
               child: PhotoView(
                 tightMode: true,
-                imageProvider: FileImage(File(message.mediaUrl ?? '')),
+                imageProvider:
+                    FileImage(File(message.mediaUrl?.absolutePath ?? '')),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 initialScale: PhotoViewComputedScale.contained,

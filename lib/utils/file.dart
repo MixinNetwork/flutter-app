@@ -68,6 +68,8 @@ Future<int> getTotalSizeOfFile(String path) async {
   return 0;
 }
 
+late Directory mixinDocumentsDirectory;
+
 Future<Directory> getMixinDocumentsDirectory() {
   if (Platform.isLinux) {
     // https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html
@@ -96,5 +98,25 @@ Future<File?> saveBytesToTempFile(
   } catch (error, stack) {
     e('failed to save bytes to temp file. $error $stack');
     return null;
+  }
+}
+
+extension FileRelativePath on File {
+  String get relativePath => path.relativePath;
+}
+
+extension StringPathRelativePath on String {
+  String get relativePath {
+    var relativePath = replaceFirst(mixinDocumentsDirectory.path, '');
+    final rootOfPath = p.rootPrefix(relativePath);
+    if (rootOfPath.isNotEmpty) {
+      relativePath = relativePath.replaceFirst(rootOfPath, '');
+    }
+    return relativePath;
+  }
+
+  String get absolutePath {
+    if (startsWith(mixinDocumentsDirectory.path)) return this;
+    return p.join(mixinDocumentsDirectory.path, this);
   }
 }
