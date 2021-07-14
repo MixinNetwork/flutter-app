@@ -107,9 +107,4 @@ extension FileRelativePath on File {
 
 extension StringPathRelativePath on String {
   String get pathBasename => p.basename(this);
-
-  String get absolutePath {
-    if (startsWith(mixinDocumentsDirectory.path)) return this;
-    return p.join(mixinDocumentsDirectory.path, this);
-  }
 }
