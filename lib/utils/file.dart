@@ -70,14 +70,15 @@ Future<int> getTotalSizeOfFile(String path) async {
 
 late Directory mixinDocumentsDirectory;
 
-Future<Directory> getMixinDocumentsDirectory() {
+Future<void> initMixinDocumentsDirectory() async {
   if (Platform.isLinux) {
     // https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html
     final home = Platform.environment['HOME'];
     assert(home != null, 'failed to get HOME environment.');
-    return Future.value(Directory(p.join(home!, '.mixin')));
+    mixinDocumentsDirectory = Directory(p.join(home!, '.mixin'));
+    return;
   }
-  return getApplicationDocumentsDirectory();
+  mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
 }
 
 Future<File?> saveBytesToTempFile(

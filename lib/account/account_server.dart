@@ -1313,18 +1313,11 @@ class AccountServer {
       database.messageDao.deleteMessage(messageId);
 
   String convertAbsolutePath(
-      String category, String conversationId, String? fileName) {
-    if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
-      return fileName!;
-    }
-
-    return _attachmentUtil.convertAbsolutePath(
-        category, conversationId, fileName);
-  }
+          String category, String conversationId, String? fileName) =>
+      _attachmentUtil.convertAbsolutePath(category, conversationId, fileName);
 
   String convertMessageAbsolutePath(db.MessageItem? messageItem) {
     if (messageItem == null) return '';
-    assert(messageItem.type.isAttachment);
     return convertAbsolutePath(
         messageItem.type, messageItem.conversationId, messageItem.mediaUrl);
   }
