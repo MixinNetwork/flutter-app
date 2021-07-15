@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
 // ignore: implementation_imports
 import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
 import 'package:moor/moor.dart';
@@ -425,7 +426,7 @@ class DecryptMessage extends Injector {
         .findMessageItemById(data.conversationId, data.quoteMessageId!);
 
     if (quoteMessage != null) {
-      return generator(quoteMessage.toJson());
+      return generator(quoteMessage);
     } else {
       return generator(null);
     }
@@ -444,33 +445,37 @@ class DecryptMessage extends Injector {
       } else {
         plain = await _decodeWithIsolate(plainText);
       }
-      final message = await _generateMessage(
-          data,
-          (String? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: plain,
-              status: data.status,
-              createdAt: data.createdAt,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent));
-      if (message.content?.isNotEmpty ?? false) {
-        await database.messageMentionDao.parseMentionData(
-          message.content!,
-          message.messageId,
-          message.conversationId,
-          data.senderId,
+      QuoteMessageItem? _quoteContent;
+      final message =
+          await _generateMessage(data, (QuoteMessageItem? quoteContent) {
+        _quoteContent = quoteContent;
+        return Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.senderId,
+          category: data.category!,
+          content: plain,
+          status: data.status,
+          createdAt: data.createdAt,
+          quoteMessageId: data.quoteMessageId,
+          quoteContent: quoteContent?.toJson(),
         );
-      }
+      });
+      await database.messageMentionDao.parseMentionData(
+        message.content,
+        message.messageId,
+        message.conversationId,
+        data.senderId,
+        _quoteContent,
+      );
+
       await database.messageDao.insert(message, accountId);
     } else if (data.category.isImage) {
       final attachment =
           AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plainText));
       final message = await _generateMessage(
           data,
-          (String? quoteContent) => Message(
+          (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -488,7 +493,7 @@ class DecryptMessage extends Injector {
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent));
+              quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId);
       if (_photoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
@@ -505,7 +510,7 @@ class DecryptMessage extends Injector {
           AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = await _generateMessage(
           data,
-          (String? quoteContent) => Message(
+          (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -524,7 +529,7 @@ class DecryptMessage extends Injector {
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent));
+              quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId);
       if (_videoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
@@ -541,7 +546,7 @@ class DecryptMessage extends Injector {
           AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = await _generateMessage(
           data,
-          (String? quoteContent) => Message(
+          (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -556,7 +561,7 @@ class DecryptMessage extends Injector {
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent));
+              quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId);
       if (_fileAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
@@ -573,7 +578,7 @@ class DecryptMessage extends Injector {
           AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final message = await _generateMessage(
           data,
-          (String? quoteContent) => Message(
+          (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -589,7 +594,7 @@ class DecryptMessage extends Injector {
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.pending,
               quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent));
+              quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId);
       unawaited(_attachmentUtil.downloadAttachment(
         messageId: message.messageId,
@@ -626,7 +631,7 @@ class DecryptMessage extends Injector {
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
           data,
-          (String? quoteContent) => Message(
+          (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -637,7 +642,7 @@ class DecryptMessage extends Injector {
               status: data.status,
               createdAt: data.createdAt,
               quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent));
+              quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId);
     } else if (data.category.isLive) {
       final plain = await _decodeWithIsolate(plainText);
@@ -954,6 +959,7 @@ class DecryptMessage extends Injector {
         messageId,
         data.conversationId,
         data.senderId,
+        null,
       );
       await database.messageDao
           .updateMessageContentAndStatus(messageId, plaintext, data.status);
@@ -1106,4 +1112,4 @@ Future<String> _jsonEncodeWithIsolate(Object object) =>
 Future<String> _decodeWithIsolate(String encoded) =>
     runLoadBalancer(_decode, encoded);
 
-typedef MessageGenerator = Message Function(String? quoteContent);
+typedef MessageGenerator = Message Function(QuoteMessageItem? quoteMessageItem);
