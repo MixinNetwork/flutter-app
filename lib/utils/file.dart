@@ -68,6 +68,8 @@ Future<int> getTotalSizeOfFile(String path) async {
   return 0;
 }
 
+late Directory mixinDocumentsDirectory;
+
 Future<Directory> getMixinDocumentsDirectory() {
   if (Platform.isLinux) {
     // https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html
@@ -97,4 +99,12 @@ Future<File?> saveBytesToTempFile(
     e('failed to save bytes to temp file. $error $stack');
     return null;
   }
+}
+
+extension FileRelativePath on File {
+  String get pathBasename => path.pathBasename;
+}
+
+extension StringPathRelativePath on String {
+  String get pathBasename => p.basename(this);
 }

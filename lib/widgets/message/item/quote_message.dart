@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
+import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/extension/message_category.dart';
@@ -92,7 +93,8 @@ class QuoteMessage extends HookWidget {
           userId: quote.userId,
           name: quote.userFullName,
           image: Image.file(
-            File(quote.mediaUrl ?? ''),
+            File(context.read<AccountServer>().convertAbsolutePath(
+                quote.type, quote.conversationId, quote.mediaUrl)),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
                 ImageByBlurHashOrBase64(imageData: quote.thumbImage),

@@ -128,7 +128,7 @@ class AccountServer {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
-        await AttachmentUtil.init(client, database.messageDao, identityNumber);
+        AttachmentUtil.init(client, database.messageDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
       database.messageDao,
       database.messageMentionDao,
@@ -891,7 +891,7 @@ class AccountServer {
         message.conversationId,
         message.messageId,
         message.type,
-        File(message.mediaUrl!),
+        File(convertMessageAbsolutePath(message)),
         message.mediaName,
         message.mediaMimeType!,
         message.mediaSize!,
@@ -1311,4 +1311,21 @@ class AccountServer {
 
   Future<void> deleteMessage(String messageId) =>
       database.messageDao.deleteMessage(messageId);
+
+  String convertAbsolutePath(
+      String category, String conversationId, String? fileName) {
+    if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
+      return fileName!;
+    }
+
+    return _attachmentUtil.convertAbsolutePath(
+        category, conversationId, fileName);
+  }
+
+  String convertMessageAbsolutePath(db.MessageItem? messageItem) {
+    if (messageItem == null) return '';
+    assert(messageItem.type.isAttachment);
+    return convertAbsolutePath(
+        messageItem.type, messageItem.conversationId, messageItem.mediaUrl);
+  }
 }

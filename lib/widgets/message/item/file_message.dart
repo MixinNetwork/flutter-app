@@ -60,7 +60,10 @@ class FileMessage extends StatelessWidget {
                 suggestedName: message.mediaName ?? basename(message.mediaUrl!),
               );
               if (path?.isEmpty ?? true) return;
-              await File(message.mediaUrl!).copy(path!);
+              await File(context
+                      .read<AccountServer>()
+                      .convertMessageAbsolutePath(message))
+                  .copy(path!);
             } else if (message.mediaStatus == MediaStatus.pending) {
               context
                   .read<AccountServer>()

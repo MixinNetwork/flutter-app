@@ -140,8 +140,11 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) =>
-              _copyUrl(context, current.value?.mediaUrl),
+          onInvoke: (Intent intent) => _copyUrl(
+              context,
+              context
+                  .read<AccountServer>()
+                  .convertMessageAbsolutePath(current.value)),
         ),
       },
       autofocus: true,
@@ -301,7 +304,11 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesCopySvg,
             color: BrightnessData.themeOf(context).icon,
             size: 20,
-            onTap: () => _copyUrl(context, message.mediaUrl),
+            onTap: () => _copyUrl(
+                context,
+                context
+                    .read<AccountServer>()
+                    .convertMessageAbsolutePath(message)),
           ),
           const SizedBox(width: 14),
           ActionButton(
@@ -317,7 +324,10 @@ class _Bar extends StatelessWidget {
               if (path?.isEmpty ?? true) return;
               await runFutureWithToast(
                 context,
-                File(message.mediaUrl!).copy(path!),
+                File(context
+                        .read<AccountServer>()
+                        .convertMessageAbsolutePath(message))
+                    .copy(path!),
               );
             },
           ),
@@ -362,7 +372,9 @@ class _Item extends HookWidget {
                   : SystemMouseCursors.zoomOut,
               child: PhotoView(
                 tightMode: true,
-                imageProvider: FileImage(File(message.mediaUrl ?? '')),
+                imageProvider: FileImage(File(context
+                    .read<AccountServer>()
+                    .convertMessageAbsolutePath(message))),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 initialScale: PhotoViewComputedScale.contained,
