@@ -61,6 +61,11 @@ class ImageMessageWidget extends StatelessWidget {
                       context.read<AccountServer>().downloadAttachment(message);
                     }
                     break;
+                  case MediaStatus.pending:
+                    context
+                        .read<AccountServer>()
+                        .cancelProgressAttachmentJob(message.messageId);
+                    break;
                   default:
                     break;
                 }
