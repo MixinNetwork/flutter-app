@@ -37,7 +37,7 @@ S useBlocState<B extends BlocBase<S>, S>({
       final b = bloc ?? useContext().read<B>();
       var stream = b.stream;
       if (when != null) stream = stream.where(when);
-      return Tuple2(stream, b.state);
+      return Tuple2(stream.distinct(), b.state);
     },
     [bloc ?? useContext().read<B>(), ...keys],
   );
@@ -60,7 +60,7 @@ T useBlocStateConverter<B extends BlocBase<S>, S, T>({
       final b = bloc ?? useContext().read<B>();
       var stream = b.stream.map(converter);
       if (when != null) stream = stream.where(when);
-      return Tuple2(stream, converter(b.state));
+      return Tuple2(stream.distinct(), converter(b.state));
     },
     [bloc ?? useContext().read<B>(), ...keys],
   );
