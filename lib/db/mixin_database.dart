@@ -45,6 +45,7 @@ import 'dao/sticker_dao.dart';
 import 'dao/sticker_relationship_dao.dart';
 import 'dao/user_dao.dart';
 import 'database_event_bus.dart';
+import 'util/util.dart';
 
 part 'mixin_database.g.dart';
 
@@ -139,6 +140,26 @@ class MixinDatabase extends _$MixinDatabase {
           }
         },
       );
+
+  Stream<bool> watchHasData<T extends HasResultSet, R>(
+    ResultSetImplementation<T, R> table, [
+    List<Join> joins = const [],
+    Expression<bool?> predicate = ignoreWhere,
+  ]) =>
+      (selectOnly(table)
+            ..addColumns([const CustomExpression<String>('1')])
+            ..join(joins)
+            ..where(predicate)
+            ..limit(1))
+          .watch()
+          .map((event) => event.isNotEmpty);
+
+  Future<bool> hasData<T extends HasResultSet, R>(
+    ResultSetImplementation<T, R> table, [
+    List<Join> joins = const [],
+    Expression<bool?> predicate = ignoreWhere,
+  ]) =>
+      watchHasData(table, joins, predicate).first;
 }
 
 LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {

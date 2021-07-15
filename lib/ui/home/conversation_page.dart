@@ -724,7 +724,18 @@ class _List extends HookWidget {
 
     Widget child;
     if (pagingState.count <= 0) {
-      child = const _Empty();
+      if (pagingState.hasData) {
+        child = Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(
+              BrightnessData.themeOf(context).accent,
+            ),
+          ),
+        );
+      } else {
+        child = const _Empty();
+      }
     } else {
       child = ScrollablePositionedList.builder(
         key: PageStorageKey(slideCategoryState),
