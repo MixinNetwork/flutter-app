@@ -16,6 +16,7 @@ class PagingState<T> extends Equatable {
     this.initialized = false,
     this.index = 0,
     this.alignment = 0,
+    this.hasData = false,
   });
 
   final Map<int, T> map;
@@ -23,6 +24,7 @@ class PagingState<T> extends Equatable {
   final bool initialized;
   final int index;
   final double alignment;
+  final bool hasData;
 
   @override
   List<Object> get props => [
@@ -31,6 +33,7 @@ class PagingState<T> extends Equatable {
         initialized,
         index,
         alignment,
+        hasData,
       ];
 
   PagingState<T> copyWith({
@@ -39,6 +42,7 @@ class PagingState<T> extends Equatable {
     bool? initialized,
     int? index,
     double? alignment,
+    bool? hasData,
   }) =>
       PagingState(
         map: map ?? this.map,
@@ -46,6 +50,7 @@ class PagingState<T> extends Equatable {
         initialized: initialized ?? this.initialized,
         index: index ?? this.index,
         alignment: alignment ?? this.alignment,
+        hasData: hasData ?? this.hasData,
       );
 
   @override
@@ -190,6 +195,10 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
         map: map,
       );
     } else if (event is PagingInitEvent) {
+      yield state.copyWith(
+        hasData: await queryHasData(),
+      );
+
       final offset = event.offset;
 
       final count = await queryCount();
@@ -250,6 +259,8 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   Future<int> queryCount();
 
   Future<List<T>> queryRange(int limit, int offset);
+
+  Future<bool> queryHasData();
 }
 
 class AnonymousPagingBloc<T> extends PagingBloc<T> {
@@ -275,4 +286,7 @@ class AnonymousPagingBloc<T> extends PagingBloc<T> {
   @override
   Future<List<T>> queryRange(int limit, int offset) =>
       _queryRange(limit, offset);
+
+  @override
+  Future<bool> queryHasData() async => false;
 }
