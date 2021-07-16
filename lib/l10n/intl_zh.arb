@@ -181,5 +181,6 @@
   "archivedFolder": "存档文件夹",
   "sendQuick": "快速发送",
   "sendWithoutCompression": "发送原始文件",
-  "sendArchived": "打包成 zip 发送"
+  "sendArchived": "打包成 zip 发送",
+  "sendWithoutSound": "静音发送"
 }

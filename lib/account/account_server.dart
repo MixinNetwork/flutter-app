@@ -342,12 +342,12 @@ class AccountServer {
       String messageId;
       String? recipientId;
       var silent = false;
-      final json = jsonDecode(job.blazeMessage!);
-      if (json is Map && json.length == 2) {
+      try {
+        final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
         messageId = json[JobDao.messageIdKey]!;
         recipientId = json[JobDao.recipientIdKey];
         silent = json[JobDao.silentKey];
-      } else {
+      } catch (_) {
         messageId = job.blazeMessage!;
       }
 
@@ -532,6 +532,7 @@ class AccountServer {
     String? conversationId,
     String? recipientId,
     String? quoteMessageId,
+    bool silent = false,
   }) async {
     if (content.isEmpty) return;
     await _sendMessageHelper.sendTextMessage(
@@ -540,6 +541,7 @@ class AccountServer {
       isPlain,
       content,
       quoteMessageId: quoteMessageId,
+      silent: silent,
     );
   }
 
