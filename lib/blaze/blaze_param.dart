@@ -70,8 +70,8 @@ class BlazeMessageParam {
   String? trackId;
   @JsonKey(name: 'recipient_ids')
   List<String>? recipientIds;
-  @JsonKey(name: 'is_silent')
-  bool? isSilent;
+  @JsonKey(name: 'silent')
+  bool? silent;
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamToJson(this);
 }

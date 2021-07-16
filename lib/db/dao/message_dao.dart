@@ -133,7 +133,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<int> insert(Message message, String userId,
-      [bool? isSilent = false]) async {
+      [bool? silent = false]) async {
     final result = await db.transaction(() async {
       final futures = <Future>[
         into(db.messages).insertOnConflictUpdate(message),
@@ -148,7 +148,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     });
     await takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
-    if (!(isSilent ?? false)) {
+    if (!(silent ?? false)) {
       db.eventBus.send(DatabaseEvent.notification, message.messageId);
     }
 

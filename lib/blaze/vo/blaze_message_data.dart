@@ -48,8 +48,8 @@ class BlazeMessageData {
   String? quoteMessageId;
   @JsonKey(name: 'session_id')
   String sessionId;
-  @JsonKey(name: 'is_silent')
-  bool? isSilent;
+  @JsonKey(name: 'silent')
+  bool? silent;
 
   Map<String, dynamic> toJson() => _$BlazeMessageDataToJson(this);
 
