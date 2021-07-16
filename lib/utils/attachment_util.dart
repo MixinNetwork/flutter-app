@@ -211,8 +211,15 @@ class AttachmentUtil {
   }
 
   String convertAbsolutePath(
-          String category, String conversationId, String? fileName) =>
-      p.join(getAttachmentDirectoryPath(category, conversationId), fileName);
+      String category, String conversationId, String? fileName) {
+    if (fileName?.trim().isEmpty ?? true) return '';
+    assert(category.isAttachment);
+    if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
+      return fileName!;
+    }
+    return p.join(
+        getAttachmentDirectoryPath(category, conversationId), fileName);
+  }
 
   File getAttachmentFile(
       String category, String conversationId, String messageId,

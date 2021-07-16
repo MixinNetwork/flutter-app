@@ -551,7 +551,8 @@ class SendMessageHelper {
       await sendImageMessage(
         conversationId: conversationId,
         senderId: senderId,
-        file: XFile(message.mediaUrl!),
+        file: XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category: category,
         quoteMessageId: null,
         attachmentResult: attachmentResult,
@@ -568,7 +569,8 @@ class SendMessageHelper {
       await sendDataMessage(
         conversationId,
         senderId,
-        XFile(message.mediaUrl!),
+        XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category,
         null,
         attachmentResult: attachmentResult,
@@ -585,7 +587,8 @@ class SendMessageHelper {
       await sendAudioMessage(
         conversationId,
         senderId,
-        XFile(message.mediaUrl!),
+        XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category,
         null,
         attachmentResult: attachmentResult,
@@ -603,7 +606,8 @@ class SendMessageHelper {
       await sendDataMessage(
         conversationId,
         senderId,
-        XFile(message.mediaUrl!),
+        XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category,
         null,
         attachmentResult: attachmentResult,
