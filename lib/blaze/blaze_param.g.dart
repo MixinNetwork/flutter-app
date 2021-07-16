@@ -34,7 +34,8 @@ BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) {
     recipientIds: (json['recipient_ids'] as List<dynamic>?)
         ?.map((e) => e as String)
         .toList(),
-  )..silent = json['silent'] as bool?;
+    silent: json['silent'] as bool?,
+  );
 }
 
 Map<String, dynamic> _$BlazeMessageParamToJson(BlazeMessageParam instance) =>

@@ -29,6 +29,7 @@ class BlazeMessageParam {
     this.candidate,
     this.trackId,
     this.recipientIds,
+    this.silent,
   });
 
   factory BlazeMessageParam.fromJson(Map<String, dynamic> json) =>

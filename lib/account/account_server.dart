@@ -25,6 +25,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/dao/job_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
@@ -340,10 +341,12 @@ class AccountServer {
       assert(job.blazeMessage != null);
       String messageId;
       String? recipientId;
+      var silent = false;
       final json = jsonDecode(job.blazeMessage!);
       if (json is Map && json.length == 2) {
-        messageId = json['message_id']!;
-        recipientId = json['recipient_id'];
+        messageId = json[JobDao.messageIdKey]!;
+        recipientId = json[JobDao.recipientIdKey];
+        silent = json[JobDao.silentKey];
       } else {
         messageId = job.blazeMessage!;
       }
@@ -370,6 +373,7 @@ class AccountServer {
           message,
           content!,
           recipientId: recipientId,
+          silent: silent,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isEncrypted) {
@@ -393,10 +397,11 @@ class AccountServer {
         final blazeMessage = _createBlazeMessage(
           message,
           await base64EncodeWithIsolate(content),
+          silent: silent,
         );
         result = await _sender.deliver(blazeMessage);
       } else if (message.category.isSignal) {
-        result = await _sendSignalMessage(message);
+        result = await _sendSignalMessage(message, silent: silent);
       } else {}
 
       if (result?.success ?? false) {
@@ -411,7 +416,10 @@ class AccountServer {
     await Future.wait(futures);
   }
 
-  Future<MessageResult?> _sendSignalMessage(db.SendingMessage message) async {
+  Future<MessageResult?> _sendSignalMessage(
+    db.SendingMessage message, {
+    bool silent = false,
+  }) async {
     MessageResult? result;
     if (message.resendStatus != null) {
       if (message.resendStatus == 1) {
@@ -419,10 +427,13 @@ class AccountServer {
             message.resendUserId!, message.resendSessionId!);
         if (check) {
           final encrypted = await signalProtocol.encryptSessionMessage(
-              message, message.resendUserId!,
-              resendMessageId: message.messageId,
-              sessionId: message.resendSessionId,
-              mentionData: await getMentionData(message.messageId));
+            message,
+            message.resendUserId!,
+            resendMessageId: message.messageId,
+            sessionId: message.resendSessionId,
+            mentionData: await getMentionData(message.messageId),
+            silent: silent,
+          );
           result = await _sender.deliver(encrypted);
           if (result.success) {
             await database.resendSessionMessageDao
@@ -437,16 +448,28 @@ class AccountServer {
       await _sender.checkConversation(message.conversationId);
     }
     await _sender.checkSessionSenderKey(message.conversationId);
-    result = await _sender.deliver(await encryptNormalMessage(message));
+    result = await _sender.deliver(await encryptNormalMessage(
+      message,
+      silent: silent,
+    ));
     if (result.success == false && result.retry == true) {
-      return _sendSignalMessage(message);
+      return _sendSignalMessage(
+        message,
+        silent: silent,
+      );
     }
     return result;
   }
 
-  Future<BlazeMessage> encryptNormalMessage(db.SendingMessage message) async =>
+  Future<BlazeMessage> encryptNormalMessage(
+    db.SendingMessage message, {
+    bool silent = false,
+  }) async =>
       signalProtocol.encryptGroupMessage(
-          message, await getMentionData(message.messageId));
+        message,
+        await getMentionData(message.messageId),
+        silent: silent,
+      );
 
   Future<List<String>?> getMentionData(String messageId) async {
     final messages = database.mixinDatabase.messages;
@@ -474,6 +497,7 @@ class AccountServer {
     db.SendingMessage message,
     String data, {
     String? recipientId,
+    bool silent = false,
   }) {
     final blazeParam = BlazeMessageParam(
       conversationId: message.conversationId,
@@ -482,6 +506,7 @@ class AccountServer {
       category: message.category,
       data: data,
       quoteMessageId: message.quoteMessageId,
+      silent: silent,
     );
 
     return BlazeMessage(

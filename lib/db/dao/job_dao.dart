@@ -12,18 +12,27 @@ part 'job_dao.g.dart';
 class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   JobDao(MixinDatabase db) : super(db);
 
+  static const messageIdKey = 'message_id';
+  static const recipientIdKey = 'recipient_id';
+  static const silentKey = 'silent';
+
   Future<int> insert(Job job) => into(db.jobs).insertOnConflictUpdate(job);
 
-  Future<int> insertSendingJob(String messageId, String conversationId,
-          [String? recipientId]) =>
+  Future<int> insertSendingJob(
+    String messageId,
+    String conversationId, {
+    String? recipientId,
+    bool silent = false,
+  }) =>
       insert(
         Job(
           jobId: const Uuid().v4(),
           action: sendingMessage,
           priority: 5,
           blazeMessage: jsonEncode({
-            'message_id': messageId,
-            'recipient_id': recipientId,
+            messageIdKey: messageId,
+            recipientIdKey: recipientId,
+            silentKey: silent,
           }),
           conversationId: conversationId,
           createdAt: DateTime.now(),
