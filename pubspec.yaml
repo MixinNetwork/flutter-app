@@ -41,7 +41,7 @@ dependencies:
   mixin_bot_sdk_dart:
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: f6e12d80d6e94ed915b5de0b77ddbe171ca63441
+      ref: f497761b9ca3451f0305e0dd283faeb72819bc32
   libsignal_protocol_dart: ^0.5.3
   path_provider: ^2.0.2
   path: ^1.8.0

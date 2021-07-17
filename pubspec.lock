@@ -766,7 +766,7 @@ packages:
       name: meta
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.4.0"
+    version: "1.7.0"
   mime:
     dependency: "direct main"
     description:
@@ -778,8 +778,8 @@ packages:
     dependency: "direct main"
     description:
       path: "."
-      ref: f6e12d80d6e94ed915b5de0b77ddbe171ca63441
-      resolved-ref: f6e12d80d6e94ed915b5de0b77ddbe171ca63441
+      ref: f497761b9ca3451f0305e0dd283faeb72819bc32
+      resolved-ref: f497761b9ca3451f0305e0dd283faeb72819bc32
       url: "https://github.com/MixinNetwork/mixin_bot_sdk_dart.git"
     source: git
     version: "0.0.8"
@@ -1197,7 +1197,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.1"
+    version: "0.4.2"
   timezone:
     dependency: transitive
     description:
