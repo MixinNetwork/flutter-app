@@ -172,9 +172,18 @@ class SendMessageHelper {
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
-  Future<void> sendVideoMessage(String conversationId, String senderId,
-      XFile file, String category, String? quoteMessageId,
-      {AttachmentResult? attachmentResult}) async {
+  Future<void> sendVideoMessage(
+    String conversationId,
+    String senderId,
+    XFile file,
+    String category,
+    String? quoteMessageId, {
+    AttachmentResult? attachmentResult,
+    int? mediaWidth,
+    int? mediaHeight,
+    String? thumbImage,
+    String? mediaDuration,
+  }) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
     final attachment = _attachmentUtil.getAttachmentFile(
@@ -194,10 +203,10 @@ class SendMessageHelper {
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
-      // mediaWidth: , // todo
-      // mediaHeight: ,// todo
-      // thumbImage: , //todo
-      // mediaDuration: , // todo
+      mediaWidth: mediaWidth,
+      mediaHeight: mediaHeight,
+      thumbImage: thumbImage,
+      mediaDuration: mediaDuration,
       name: file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.sending,
@@ -217,10 +226,10 @@ class SendMessageHelper {
       mimeType,
       attachmentSize,
       file.name,
-      null,
-      null,
-      null,
-      null,
+      mediaWidth,
+      mediaHeight,
+      thumbImage,
+      mediaDuration == null ? null : int.tryParse(mediaDuration),
       null,
       null,
       attachmentResult.createdAt,
@@ -559,14 +568,14 @@ class SendMessageHelper {
       );
     } else if (message.category.isVideo) {
       final category =
-          isPlain ? MessageCategory.plainData : MessageCategory.signalData;
+          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
       AttachmentResult? attachmentResult;
       if (message.category == category && message.content != null) {
         attachmentResult = await _checkAttachment(message.content!);
       } else {
         attachmentResult = null;
       }
-      await sendDataMessage(
+      await sendVideoMessage(
         conversationId,
         senderId,
         XFile(_attachmentUtil.convertAbsolutePath(
@@ -574,6 +583,10 @@ class SendMessageHelper {
         category,
         null,
         attachmentResult: attachmentResult,
+        mediaDuration: message.mediaDuration,
+        mediaHeight: message.mediaHeight,
+        mediaWidth: message.mediaWidth,
+        thumbImage: message.thumbImage,
       );
     } else if (message.category.isAudio) {
       final category =
