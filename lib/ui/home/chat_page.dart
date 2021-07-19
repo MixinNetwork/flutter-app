@@ -551,7 +551,7 @@ class _JumpCurrentButton extends HookWidget {
     } catch (_) {}
 
     useEffect(() {
-      WidgetsBinding.instance.addPostFrameCallback((timeStamp) =>
+      WidgetsBinding.instance?.addPostFrameCallback((timeStamp) =>
           listPositionIsLatest.value = scrollController.hasClients &&
               (scrollController.position.maxScrollExtent -
                       scrollController.position.pixels) >
