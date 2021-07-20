@@ -70,7 +70,6 @@ class StickerMessageWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
       ),
     );
-    print('fuck lottie message: $message');
     return MessageBubble(
       messageId: message.messageId,
       showNip: true,
