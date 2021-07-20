@@ -105,16 +105,17 @@ class SearchBar extends HookWidget {
                     onlyContact: true,
                   );
                   if (result.isEmpty) return;
-                  final userIds = [
-                    context.read<AccountServer>().userId,
-                    ...result.where((e) => e.userId != null).map(
-                          (e) => e.userId!,
-                        )
-                  ];
+                  final userIds = result
+                      .where((e) => e.userId != null)
+                      .map(
+                        (e) => e.userId!,
+                      )
+                      .toList();
 
                   final name = await showMixinDialog<String>(
                     context: context,
-                    child: _NewConversationConfirm(userIds),
+                    child: _NewConversationConfirm(
+                        [context.read<AccountServer>().userId, ...userIds]),
                   );
                   if (name?.isEmpty ?? true) return;
 

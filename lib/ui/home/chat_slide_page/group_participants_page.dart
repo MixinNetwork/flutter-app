@@ -335,7 +335,7 @@ class _ActionAddParticipants extends StatelessWidget {
                 context,
                 Future.wait(userIds.map((userId) => context
                     .read<AccountServer>()
-                    .addParticipant(conversationId!, userId))),
+                    .addParticipant(conversationId!, [userId]))),
               );
             },
           ),
