@@ -70,6 +70,7 @@ class StickerMessageWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
       ),
     );
+    print('fuck lottie message: $message');
     return MessageBubble(
       messageId: message.messageId,
       showNip: true,
@@ -82,7 +83,7 @@ class StickerMessageWidget extends StatelessWidget {
       ),
       child: Builder(
         builder: (context) {
-          if (message.assetType == 'JSON') {
+          if (message.assetType == 'json') {
             return Lottie.network(
               message.assetUrl!,
               height: height,
