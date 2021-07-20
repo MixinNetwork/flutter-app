@@ -957,9 +957,7 @@ class AccountServer {
       ),
     );
     await database.conversationDao.updateConversation(response.data);
-    for (final userId in userIds) {
-      await addParticipant(conversationId, userId);
-    }
+    await addParticipant(conversationId, userIds);
   }
 
   Future<void> exitGroup(String conversationId) async {
@@ -969,11 +967,14 @@ class AccountServer {
 
   Future<void> addParticipant(
     String conversationId,
-    String userId,
+    List<String> userIds,
   ) async {
     try {
       final response = await client.conversationApi.participants(
-          conversationId, 'ADD', [ParticipantRequest(userId: userId)]);
+        conversationId,
+        'ADD',
+        userIds.map((e) => ParticipantRequest(userId: e)).toList(),
+      );
 
       await database.conversationDao.updateConversation(response.data);
     } catch (e) {
