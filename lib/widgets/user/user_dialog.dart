@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
@@ -10,13 +9,12 @@ import '../../generated/l10n.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat_page.dart';
 import '../../ui/home/conversation_page.dart';
-import '../../utils/string_extension.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../brightness_observer.dart';
 import '../buttons.dart';
 import '../dialog.dart';
-import '../interacter_decorated_box.dart';
+import '../more_extended_text.dart';
 import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
@@ -151,30 +149,12 @@ class _BioText extends HookWidget {
         physics: expand.value ? null : const NeverScrollableScrollPhysics(),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 36),
-          child: ExtendedText(
-            expand.value ? biography : biography.overflow,
+          child: MoreExtendedText(
+            biography,
             style: TextStyle(
               color: BrightnessData.themeOf(context).text,
               fontSize: 14,
               height: 1.5,
-            ),
-            maxLines: expand.value ? null : 3,
-            overflow: TextOverflow.fade,
-            textAlign: TextAlign.center,
-            selectionEnabled: true,
-            overflowWidget: TextOverflowWidget(
-              child: InteractableDecoratedBox(
-                onTap: () {
-                  expand.value = true;
-                },
-                child: Text(
-                  Localization.of(context).more,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).accent,
-                    fontSize: 14,
-                  ),
-                ),
-              ),
             ),
           ),
         ),

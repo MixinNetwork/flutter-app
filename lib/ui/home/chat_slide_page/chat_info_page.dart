@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,13 +13,12 @@ import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/list_utils.dart';
-import '../../../utils/string_extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/cell.dart';
 import '../../../widgets/dialog.dart';
-import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
@@ -539,8 +537,6 @@ class ConversationBio extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final expand = useState(false);
-
     final textStream = useMemoized(() {
       final database = context.read<AccountServer>().database;
       if (isGroup) {
@@ -555,30 +551,14 @@ class ConversationBio extends HookWidget {
       isGroup,
     ]);
 
-    final text = useStream(textStream, initialData: '').data;
-    if (text?.isEmpty == true) return const SizedBox();
+    final text = useStream(textStream, initialData: '').data!;
+    if (text.isEmpty) return const SizedBox();
 
-    return ExtendedText(
-      expand.value ? text! : text!.overflow,
+    return MoreExtendedText(
+      text,
       style: TextStyle(
         color: BrightnessData.themeOf(context).text,
         fontSize: fontSize,
-      ),
-      maxLines: expand.value ? null : 3,
-      overflow: TextOverflow.fade,
-      textAlign: TextAlign.center,
-      overflowWidget: TextOverflowWidget(
-        child: InteractableDecoratedBox(
-          onTap: () {
-            expand.value = true;
-          },
-          child: Text(
-            Localization.of(context).more,
-            style: TextStyle(
-              color: BrightnessData.themeOf(context).accent,
-            ),
-          ),
-        ),
       ),
     );
   }
