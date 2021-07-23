@@ -20,7 +20,15 @@ import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
 Future<void> showUserDialog(BuildContext context, String userId) async {
-  await showMixinDialog(context: context, child: _UserDialog(userId: userId));
+  showToastLoading(context);
+  final result = await context.read<AccountServer>().refreshUsers([userId]);
+  if (result?.isEmpty ?? true) {
+    await showToastFailed(
+        context, ToastError(Localization.of(context).userNotFound));
+  } else {
+    Toast.dismiss();
+    await showMixinDialog(context: context, child: _UserDialog(userId: userId));
+  }
 }
 
 class _UserDialog extends StatelessWidget {
