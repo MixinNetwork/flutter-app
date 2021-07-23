@@ -584,9 +584,10 @@ class _AddToContactsButton extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 12),
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: BrightnessData.themeOf(context).background,
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    fixedSize: const Size.fromHeight(30),
+                    backgroundColor:
+                        BrightnessData.themeOf(context).statusBackground,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
