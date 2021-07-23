@@ -35,6 +35,7 @@ extension XFileExtension on file_selector.XFile {
         'image/png',
         'image/bmp',
         'image/webp',
+        'image/gif',
       }.contains(mimeType?.toLowerCase());
 
   bool get isVideo =>
