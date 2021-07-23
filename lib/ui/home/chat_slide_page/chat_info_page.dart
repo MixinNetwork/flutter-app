@@ -102,6 +102,7 @@ class ChatInfoPage extends HookWidget {
             ConversationName(
               conversationState: conversation,
               fontSize: 18,
+              overflow: false,
             ),
             const SizedBox(height: 4),
             ConversationIDOrCount(
