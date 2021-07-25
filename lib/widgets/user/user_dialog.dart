@@ -149,11 +149,15 @@ class _UserProfileBody extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SelectableText(
-                  user.fullName ?? '',
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
-                    fontSize: 16,
+                Flexible(
+                  child: SelectableText(
+                    user.fullName ?? '',
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).text,
+                      fontSize: 16,
+                      height: 1,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ),
                 VerifiedOrBotWidget(
