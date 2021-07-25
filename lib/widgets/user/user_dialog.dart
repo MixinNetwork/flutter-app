@@ -20,21 +20,47 @@ import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
 Future<void> showUserDialog(BuildContext context, String userId) async {
-  showToastLoading(context);
-  final result = await context.read<AccountServer>().refreshUsers([userId]);
-  if (result?.isEmpty ?? true) {
-    await showToastFailed(
-        context, ToastError(Localization.of(context).userNotFound));
-  } else {
+  final existed =
+      await context.read<AccountServer>().database.userDao.hasUser(userId);
+  if (existed) {
     Toast.dismiss();
     await showMixinDialog(context: context, child: _UserDialog(userId: userId));
+    return;
   }
+
+  showToastLoading(context);
+
+  final result =
+      await context.read<AccountServer>().refreshUsers([userId], force: true);
+
+  if (result?.isEmpty ?? true) {
+    await showToastFailed(
+        context,
+        ToastError(
+          Localization.of(context).userNotFound,
+        ));
+    return;
+  }
+
+  Toast.dismiss();
+  await showMixinDialog(
+    context: context,
+    child: _UserDialog(
+      userId: userId,
+      refreshUser: false,
+    ),
+  );
 }
 
 class _UserDialog extends StatelessWidget {
-  const _UserDialog({Key? key, required this.userId}) : super(key: key);
+  const _UserDialog({
+    Key? key,
+    required this.userId,
+    this.refreshUser = true,
+  }) : super(key: key);
 
   final String userId;
+  final bool refreshUser;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -47,7 +73,9 @@ class _UserDialog extends StatelessWidget {
               child: Stack(
                 fit: StackFit.passthrough,
                 children: [
-                  Center(child: _UserProfileLoader(userId)),
+                  Center(
+                      child:
+                          _UserProfileLoader(userId, refreshUser: refreshUser)),
                   const Align(
                       alignment: Alignment.topRight,
                       child: Padding(
@@ -63,9 +91,14 @@ class _UserDialog extends StatelessWidget {
 }
 
 class _UserProfileLoader extends HookWidget {
-  const _UserProfileLoader(this.userId, {Key? key}) : super(key: key);
+  const _UserProfileLoader(
+    this.userId, {
+    Key? key,
+    this.refreshUser = true,
+  }) : super(key: key);
 
   final String userId;
+  final bool refreshUser;
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +109,10 @@ class _UserProfileLoader extends HookWidget {
         [userId])).data;
 
     useEffect(() {
-      accountServer.refreshUsers([userId], force: true);
-    }, [userId]);
+      if (refreshUser) {
+        accountServer.refreshUsers([userId], force: true);
+      }
+    }, [userId, refreshUser]);
 
     if (user == null) return const SizedBox();
     return _UserProfileBody(
