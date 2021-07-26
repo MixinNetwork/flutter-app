@@ -81,16 +81,14 @@ extension _AvatarConversationItem on ConversationItem {
       );
 }
 
-/// return selected conversations.
-/// null to indicator selection dialog has been canceled.
-Future<List<ConversationSelector>?> showConversationSelector({
+Future<List<ConversationSelector>> showConversationSelector({
   required BuildContext context,
   required bool singleSelect,
   required String title,
   required bool onlyContact,
   List<ConversationSelector> initSelected = const [],
-}) =>
-    showMixinDialog<List<ConversationSelector>>(
+}) async =>
+    await showMixinDialog<List<ConversationSelector>>(
       context: context,
       child: _ConversationSelector(
         title: title,
@@ -98,7 +96,8 @@ Future<List<ConversationSelector>?> showConversationSelector({
         onlyContact: onlyContact,
         initSelected: initSelected,
       ),
-    );
+    ) ??
+    [];
 
 class ConversationSelector with EquatableMixin {
   const ConversationSelector({

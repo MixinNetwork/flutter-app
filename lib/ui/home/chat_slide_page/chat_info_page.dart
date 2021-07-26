@@ -142,7 +142,7 @@ class ChatInfoPage extends HookWidget {
                       onlyContact: false,
                     );
 
-                    if (result == null || result.isEmpty) return;
+                    if (result.isEmpty) return;
                     final conversationId = result[0].conversationId;
 
                     assert(!(result[0].isGroup && result[0].userId != null),

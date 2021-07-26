@@ -290,7 +290,7 @@ class _Bar extends StatelessWidget {
                 title: Localization.of(context).forward,
                 onlyContact: false,
               );
-              if (result == null || result.isEmpty) return;
+              if (result.isEmpty) return;
               await accountServer.forwardMessage(
                 message.messageId,
                 isPlain(result.first.isGroup, result.first.isBot),
