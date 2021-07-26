@@ -145,10 +145,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
         "editAnnouncement":
             MessageLookupByLibrary.simpleMessage("Edit group description"),
+        "editCircle": MessageLookupByLibrary.simpleMessage("Manage Circle"),
         "editCircleName":
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
-        "editConversations":
-            MessageLookupByLibrary.simpleMessage("Edit Conversations"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Delete and Exit"),

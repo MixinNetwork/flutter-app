@@ -182,7 +182,7 @@ class _CircleList extends HookWidget {
                             );
                           }),
                       ContextMenu(
-                        title: Localization.of(context).editConversations,
+                        title: Localization.of(context).editCircle,
                         onTap: () async {
                           final initSelected = (await context
                                   .read<AccountServer>()
@@ -205,6 +205,7 @@ class _CircleList extends HookWidget {
                             onlyContact: false,
                             initSelected: initSelected,
                           );
+                          if (result.isEmpty) return;
 
                           final add = result.where((element) => !initSelected
                               .map((e) => e.conversationId)

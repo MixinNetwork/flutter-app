@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../account/account_server.dart';
@@ -25,6 +26,7 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
 
   Future<void> _init() async {
     var contactConversationIds = <String?>{};
+    var botConversationIds = <String>{};
     if (onlyContact) {
       conversations = [];
     } else {
@@ -35,6 +37,11 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
           .where((element) => element.isContactConversation)
           .map((e) => e.ownerId)
           .toSet();
+      botConversationIds = conversations
+          .where((element) => element.isBotConversation)
+          .map((e) => e.appId)
+          .whereNotNull()
+          .toSet();
     }
 
     friends = <User>[];
@@ -43,7 +50,8 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     Iterable<User> users = await accountServer.database.userDao.friends().get();
     if (!onlyContact) {
       users = users
-          .where((element) => !contactConversationIds.contains(element.userId));
+          .where((element) => !contactConversationIds.contains(element.userId))
+          .where((element) => !botConversationIds.contains(element.appId));
     }
     users.forEach((e) {
       if (e.isBot) {
