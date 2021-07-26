@@ -320,11 +320,11 @@ class Localization {
     );
   }
 
-  /// `Edit Conversations`
-  String get editConversations {
+  /// `Manage Circle`
+  String get editCircle {
     return Intl.message(
-      'Edit Conversations',
-      name: 'editConversations',
+      'Manage Circle',
+      name: 'editCircle',
       desc: '',
       args: [],
     );
