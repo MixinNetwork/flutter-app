@@ -12,7 +12,6 @@ import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/hook.dart';
-import '../../../utils/list_utils.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/brightness_observer.dart';
@@ -292,19 +291,6 @@ class ChatInfoPage extends HookWidget {
               ),
             ),
             CellGroup(
-              child: CellItem(
-                title: Text(Localization.of(context).circles),
-                description: const _CircleNames(),
-                onTap: () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.circles,
-                      // arguments: Tuple2<String, String>(
-                      //   conversation.name!,
-                      //   conversationId,
-                      // ),
-                    ),
-              ),
-            ),
-            CellGroup(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -461,62 +447,6 @@ class ChatInfoPage extends HookWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _CircleNames extends HookWidget {
-  const _CircleNames();
-
-  @override
-  Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    );
-
-    final circleNames = useStream<List<String>>(
-          useMemoized(
-            () => context
-                .read<AccountServer>()
-                .database
-                .circleDao
-                .circlesNameByConversationId(conversationId ?? '')
-                .watch()
-                .where((event) => event.isNotEmpty),
-            [conversationId],
-          ),
-          initialData: [],
-        ).data ??
-        [];
-
-    if (circleNames.isEmpty) return const SizedBox();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: circleNames
-          .map(
-            (e) => Container(
-              decoration: ShapeDecoration(
-                shape: StadiumBorder(
-                  side: BorderSide(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                  ),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              child: Text(
-                e,
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
-                ),
-              ),
-            ),
-          )
-          .cast<Widget>()
-          .toList()
-          .joinList(const SizedBox(width: 8)),
     );
   }
 }
