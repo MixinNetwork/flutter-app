@@ -205,6 +205,7 @@ class _CircleList extends HookWidget {
                             onlyContact: false,
                             initSelected: initSelected,
                           );
+                          if (result.isEmpty) return;
 
                           final add = result.where((element) => !initSelected
                               .map((e) => e.conversationId)
