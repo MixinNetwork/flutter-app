@@ -820,13 +820,7 @@ class AccountServer {
         circleId: cc.circleId,
         createdAt: cc.createdAt,
       ));
-
-      final conversation = await database.conversationDao
-          .conversationById(cc.conversationId)
-          .getSingleOrNull();
-      if (conversation == null) {
-        await _decryptMessage.syncConversion(cc.conversationId, force: true);
-      }
+      await _decryptMessage.syncConversion(cc.conversationId);
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
         final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
         if (u == null) {
