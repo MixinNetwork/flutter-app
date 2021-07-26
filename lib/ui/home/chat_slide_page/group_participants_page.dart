@@ -319,7 +319,7 @@ class _ActionAddParticipants extends StatelessWidget {
                 title: Localization.of(context).groupAdd,
                 onlyContact: true,
               );
-              if (result.isEmpty) {
+              if (result == null || result.isEmpty) {
                 return;
               }
               final userIds = [

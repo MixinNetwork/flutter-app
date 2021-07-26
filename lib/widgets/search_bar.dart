@@ -84,7 +84,7 @@ class SearchBar extends HookWidget {
                     title: Localization.of(context).createConversation,
                     onlyContact: true,
                   );
-                  if (list.isEmpty || (list.first.userId?.isEmpty ?? true)) {
+                  if (list == null || list.isEmpty || (list.first.userId?.isEmpty ?? true)) {
                     return;
                   }
                   final userId = list.first.userId!;
@@ -104,7 +104,7 @@ class SearchBar extends HookWidget {
                     title: Localization.of(context).createGroupConversation,
                     onlyContact: true,
                   );
-                  if (result.isEmpty) return;
+                  if (result == null || result.isEmpty) return;
                   final userIds = result
                       .where((e) => e.userId != null)
                       .map(
@@ -137,7 +137,7 @@ class SearchBar extends HookWidget {
                     onlyContact: false,
                   );
 
-                  if (list.isEmpty) return;
+                  if (list == null || list.isEmpty) return;
 
                   final name = await showMixinDialog<String>(
                     context: context,

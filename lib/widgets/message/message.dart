@@ -145,7 +145,7 @@ class MessageItemWidget extends HookWidget {
                           title: Localization.of(context).forward,
                           onlyContact: false,
                         );
-                        if (result.isEmpty) return;
+                        if (result == null || result.isEmpty) return;
                         await context.read<AccountServer>().forwardMessage(
                               message.messageId,
                               isPlain(result.first.isGroup, result.first.isBot),

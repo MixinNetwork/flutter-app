@@ -164,7 +164,7 @@ class _ActionButtons extends StatelessWidget {
                 title: Localization.of(context).forward,
                 onlyContact: false,
               );
-              if (result.isEmpty) return;
+              if (result == null || result.isEmpty) return;
               await runFutureWithToast(
                   context,
                   context.read<AccountServer>().sendTextMessage(
