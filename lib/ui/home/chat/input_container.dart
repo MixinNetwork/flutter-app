@@ -36,8 +36,6 @@ import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import 'files_preview.dart';
 
-const _kActionButtonPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 6);
-
 class InputContainer extends HookWidget {
   const InputContainer({
     Key? key,
@@ -195,39 +193,41 @@ class _InputContainer extends HookWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const _QuoteMessage(),
-              Container(
+              ConstrainedBox(
                 constraints: const BoxConstraints(
                   minHeight: 56,
                 ),
-                decoration: BoxDecoration(
-                  color: BrightnessData.themeOf(context).primary,
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    _FileButton(
-                        actionColor: BrightnessData.themeOf(context).icon),
-                    const SizedBox(width: 6),
-                    const _StickerButton(),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _SendTextField(
-                        focusNode: focusNode,
-                        textEditingController: textEditingController,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: BrightnessData.themeOf(context).primary,
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      _FileButton(
+                          actionColor: BrightnessData.themeOf(context).icon),
+                      const SizedBox(width: 6),
+                      const _StickerButton(),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _SendTextField(
+                          focusNode: focusNode,
+                          textEditingController: textEditingController,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 16),
-                    ActionButton(
-                      padding: _kActionButtonPadding,
-                      name: Resources.assetsImagesIcSendSvg,
-                      color: BrightnessData.themeOf(context).icon,
-                      onTap: () => _sendMessage(context, textEditingController),
-                    ),
-                  ],
+                      const SizedBox(width: 16),
+                      ActionButton(
+                        name: Resources.assetsImagesIcSendSvg,
+                        color: BrightnessData.themeOf(context).icon,
+                        onTap: () =>
+                            _sendMessage(context, textEditingController),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -473,7 +473,6 @@ class _FileButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ActionButton(
-        padding: _kActionButtonPadding,
         name: Resources.assetsImagesIcFileSvg,
         color: actionColor,
         onTap: () async {
@@ -549,7 +548,6 @@ class _StickerButton extends HookWidget {
           ),
           child: InteractableDecoratedBox(
             child: ActionButton(
-              padding: _kActionButtonPadding,
               name: Resources.assetsImagesIcStickerSvg,
               color: BrightnessData.themeOf(context).icon,
             ),

@@ -86,8 +86,6 @@ class SearchTextField extends HookWidget {
               color: hintColor,
             ),
           ),
-          suffixIconConstraints:
-              const BoxConstraints.expand(width: 32, height: 32),
           suffixIcon: _SearchClearIcon(controller),
           contentPadding: const EdgeInsets.only(right: 8),
           hintText: hintText,
