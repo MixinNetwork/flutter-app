@@ -56,7 +56,7 @@ class ConversationPage extends HookWidget {
   const ConversationPage({Key? key}) : super(key: key);
 
   static const conversationItemHeight = 78.0;
-  static const conversationItemAvatarSize = 48.0;
+  static const conversationItemAvatarSize = 50.0;
 
   @override
   Widget build(BuildContext context) {
