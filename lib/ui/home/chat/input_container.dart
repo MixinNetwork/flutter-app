@@ -319,7 +319,6 @@ class _SendTextField extends HookWidget {
         ),
       ),
       alignment: Alignment.center,
-      // default_text_editing_focusable_action_detector
       child: FocusableActionDetector(
         autofocus: true,
         shortcuts: {
