@@ -17,6 +17,7 @@ import '../../../utils/uri_utils.dart';
 import '../../image.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
@@ -133,7 +134,7 @@ class VideoMessageWidget extends StatelessWidget {
                                 child: Text(
                                   formatVideoDuration(duration),
                                   style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize: MessageItemWidget.subtextFontSize,
                                     color: Colors.white,
                                   ),
                                 ),

@@ -8,6 +8,7 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
+import '../message.dart';
 
 class SystemMessage extends StatelessWidget {
   const SystemMessage({
@@ -50,7 +51,7 @@ class SystemMessage extends StatelessWidget {
                     groupName: message.groupName,
                   ),
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: MessageItemWidget.textFontSize,
                     color: BrightnessData.dynamicColor(
                       context,
                       const Color.fromRGBO(0, 0, 0, 1),

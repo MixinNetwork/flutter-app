@@ -11,6 +11,7 @@ import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../toast.dart';
+import '../message.dart';
 
 class StrangerMessage extends StatelessWidget {
   const StrangerMessage({
@@ -30,7 +31,7 @@ class StrangerMessage extends StatelessWidget {
               ? Localization.of(context).botInteractInfo
               : Localization.of(context).strangerFromMessage,
           style: TextStyle(
-            fontSize: 14,
+            fontSize: MessageItemWidget.textFontSize,
             color: BrightnessData.themeOf(context).text,
           ),
         ),
@@ -115,7 +116,7 @@ class _StrangerButton extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: MessageItemWidget.textFontSize,
                   color: BrightnessData.themeOf(context).accent,
                 ),
               ),

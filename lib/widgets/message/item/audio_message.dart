@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
@@ -26,7 +27,7 @@ class NotSupportedMessage extends StatelessWidget {
     final content = Text(
       Localization.of(context).chatCheckOnPhone,
       style: TextStyle(
-        fontSize: 16,
+        fontSize: MessageItemWidget.textFontSize,
         color: BrightnessData.themeOf(context).text,
       ),
     );

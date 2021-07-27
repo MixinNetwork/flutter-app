@@ -7,6 +7,7 @@ import '../../avatar_view/avatar_view.dart';
 import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../user/user_dialog.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
@@ -60,7 +61,7 @@ class ContactMessageWidget extends StatelessWidget {
                           message.sharedUserFullName!,
                           style: TextStyle(
                             color: BrightnessData.themeOf(context).text,
-                            fontSize: 14,
+                            fontSize: MessageItemWidget.textFontSize,
                           ),
                         ),
                       ),
@@ -74,7 +75,7 @@ class ContactMessageWidget extends StatelessWidget {
                     message.sharedUserIdentityNumber!,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).secondaryText,
-                      fontSize: 12,
+                      fontSize: MessageItemWidget.subtextFontSize,
                     ),
                   ),
                 ],

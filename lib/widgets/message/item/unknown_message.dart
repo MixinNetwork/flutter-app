@@ -7,6 +7,7 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
@@ -29,7 +30,7 @@ class UnknownMessage extends StatelessWidget {
       text: TextSpan(
         text: Localization.of(context).chatNotSupport,
         style: TextStyle(
-          fontSize: 16,
+          fontSize: MessageItemWidget.textFontSize,
           color: BrightnessData.themeOf(context).text,
         ),
         children: [
@@ -37,7 +38,7 @@ class UnknownMessage extends StatelessWidget {
             mouseCursor: SystemMouseCursors.click,
             text: Localization.of(context).chatLearn,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: MessageItemWidget.textFontSize,
               color: BrightnessData.themeOf(context).accent,
             ),
             recognizer: TapGestureRecognizer()
