@@ -21,9 +21,11 @@ import 'utils/logger.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  unawaited(LoadBalancer.create(64, IsolateRunner.spawn).then((value) {
-    loadBalancer = value;
-  }));
+  if (kReleaseMode) {
+    unawaited(LoadBalancer.create(32, IsolateRunner.spawn).then((value) {
+      loadBalancer = value;
+    }));
+  }
 
   await initMixinDocumentsDirectory();
 

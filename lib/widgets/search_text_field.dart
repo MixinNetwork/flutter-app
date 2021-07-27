@@ -58,7 +58,7 @@ class SearchTextField extends HookWidget {
     }, [controller, onChanged]);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.only(top: 16, bottom: 8),
       child: TextField(
         focusNode: focusNode,
         autofocus: autofocus,
@@ -86,6 +86,8 @@ class SearchTextField extends HookWidget {
               color: hintColor,
             ),
           ),
+          suffixIconConstraints:
+              const BoxConstraints.expand(width: 32, height: 32),
           suffixIcon: _SearchClearIcon(controller),
           contentPadding: const EdgeInsets.only(right: 8),
           hintText: hintText,
