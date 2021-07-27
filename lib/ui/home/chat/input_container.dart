@@ -36,7 +36,7 @@ import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import 'files_preview.dart';
 
-const _kActionButtonPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+const _kActionButtonPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 6);
 
 class InputContainer extends HookWidget {
   const InputContainer({
@@ -197,7 +197,7 @@ class _InputContainer extends HookWidget {
               const _QuoteMessage(),
               Container(
                 constraints: const BoxConstraints(
-                  minHeight: 48,
+                  minHeight: 56,
                 ),
                 decoration: BoxDecoration(
                   color: BrightnessData.themeOf(context).primary,
@@ -309,7 +309,7 @@ class _SendTextField extends HookWidget {
         true;
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 32),
+      constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(4)),
         color: BrightnessData.dynamicColor(
