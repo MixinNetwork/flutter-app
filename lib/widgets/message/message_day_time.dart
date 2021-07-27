@@ -5,6 +5,7 @@ import '../../bloc/minute_timer_cubit.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/hook.dart';
 import '../brightness_observer.dart';
+import 'message.dart';
 
 class MessageDayTime extends HookWidget {
   const MessageDayTime({
@@ -37,6 +38,9 @@ class MessageDayTime extends HookWidget {
             child: Text(
               dateTimeString,
               textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: MessageItemWidget.subtextFontSize,
+              ),
             ),
           ),
         ),
