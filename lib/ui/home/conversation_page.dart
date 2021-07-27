@@ -55,7 +55,7 @@ void _clear(BuildContext context) {
 class ConversationPage extends HookWidget {
   const ConversationPage({Key? key}) : super(key: key);
 
-  static const conversationItemHeight = 72.0;
+  static const conversationItemHeight = 78.0;
   static const conversationItemAvatarSize = 48.0;
 
   @override
@@ -544,7 +544,7 @@ class _SearchItem extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: BrightnessData.themeOf(context).text,
-                              fontSize: 14,
+                              fontSize: 16,
                             ),
                             highlightTextSpans: [
                               if (nameHighlight)
@@ -966,7 +966,7 @@ class _Item extends StatelessWidget {
                                         style: TextStyle(
                                           color: BrightnessData.themeOf(context)
                                               .text,
-                                          fontSize: 14,
+                                          fontSize: 16,
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
