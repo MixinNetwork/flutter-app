@@ -85,7 +85,7 @@ class ChatBar extends HookWidget {
                     conversationState: conversation,
                   ),
                 ),
-                const SizedBox(height: 2),
+                const SizedBox(height: 4),
                 IgnorePointer(
                   child: ConversationIDOrCount(
                     conversationState: conversation,
@@ -127,7 +127,7 @@ class ChatBar extends HookWidget {
 class ConversationIDOrCount extends HookWidget {
   const ConversationIDOrCount({
     Key? key,
-    this.fontSize = 14,
+    this.fontSize = 12,
     required this.conversationState,
   }) : super(key: key);
 
