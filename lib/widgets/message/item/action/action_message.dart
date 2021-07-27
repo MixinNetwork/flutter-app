@@ -62,7 +62,7 @@ class ActionMessage extends StatelessWidget {
                           // ignore: avoid_dynamic_calls
                           e.label,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: 14,
                             // ignore: avoid_dynamic_calls
                             color: colorHex(e.color) ?? Colors.black,
                           ),

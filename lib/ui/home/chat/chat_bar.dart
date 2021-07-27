@@ -49,7 +49,7 @@ class ChatBar extends HookWidget {
         );
 
     return Padding(
-      padding: const EdgeInsets.only(right: 16, top: 12, bottom: 12),
+      padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         children: [
@@ -101,7 +101,6 @@ class ChatBar extends HookWidget {
           ),
           MoveWindowBarrier(
             child: ActionButton(
-              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
               name: Resources.assetsImagesIcSearchSvg,
               color: actionColor,
               onTap: () {
@@ -127,7 +126,7 @@ class ChatBar extends HookWidget {
 class ConversationIDOrCount extends HookWidget {
   const ConversationIDOrCount({
     Key? key,
-    this.fontSize = 12,
+    this.fontSize = 14,
     required this.conversationState,
   }) : super(key: key);
 
@@ -188,7 +187,7 @@ class ConversationIDOrCount extends HookWidget {
 class ConversationName extends StatelessWidget {
   const ConversationName({
     Key? key,
-    this.fontSize = 14,
+    this.fontSize = 16,
     required this.conversationState,
     this.overflow = true,
   }) : super(key: key);
@@ -228,7 +227,7 @@ class ConversationName extends StatelessWidget {
 class ConversationAvatar extends StatelessWidget {
   const ConversationAvatar({
     Key? key,
-    this.size = 32,
+    this.size = 36,
     required this.conversationState,
   }) : super(key: key);
 

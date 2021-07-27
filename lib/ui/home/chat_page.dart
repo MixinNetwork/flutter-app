@@ -334,7 +334,7 @@ class ChatContainer extends HookWidget {
       child: Column(
         children: [
           Container(
-            height: 56,
+            height: 64,
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(

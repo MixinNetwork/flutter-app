@@ -28,7 +28,7 @@ class MessageName extends StatelessWidget {
             child: Text(
               userName,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 14,
                 color: getNameColorById(userId),
               ),
             ),

@@ -58,7 +58,7 @@ class SearchTextField extends HookWidget {
     }, [controller, onChanged]);
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: TextField(
         focusNode: focusNode,
         autofocus: autofocus,

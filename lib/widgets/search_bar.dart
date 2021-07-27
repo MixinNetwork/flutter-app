@@ -48,7 +48,7 @@ class SearchBar extends HookWidget {
 
     return MoveWindow(
       child: SizedBox(
-        height: 56,
+        height: 64,
         child: Row(
           children: [
             AnimatedSize(
