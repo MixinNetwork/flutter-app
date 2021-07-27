@@ -26,6 +26,7 @@ import 'ui/landing/landing.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'widgets/brightness_observer.dart';
+import 'widgets/default_text_editing_focusable_action_detector.dart';
 import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
@@ -37,58 +38,60 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     precacheImage(
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => MultiAuthCubit(),
-        ),
-        BlocProvider(create: (context) => SettingCubit()),
-      ],
-      child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
-        converter: (state) => state.current,
-        builder: (context, authState) {
-          const app = _App();
-          if (authState == null) return app;
-          return FutureProvider<AccountServer?>(
-            key: ValueKey(Tuple4(
-              authState.account.userId,
-              authState.account.sessionId,
-              authState.account.identityNumber,
-              authState.privateKey,
-            )),
-            create: (BuildContext context) async {
-              final accountServer =
-                  AccountServer(context.read<MultiAuthCubit>());
-              try {
-                await accountServer.initServer(
-                  authState.account.userId,
-                  authState.account.sessionId,
-                  authState.account.identityNumber,
-                  authState.privateKey,
-                );
-              } catch (e, s) {
-                w('accountServer.initServer error: $e, $s');
-                rethrow;
-              }
-              return accountServer;
-            },
-            initialData: null,
-            builder: (BuildContext context, _) => Consumer<AccountServer?>(
-              builder: (context, accountServer, child) {
-                if (accountServer != null) {
-                  return _Providers(
-                    app: Portal(
-                      child: child!,
-                    ),
-                    accountServer: accountServer,
+    return DefaultTextEditingFocusableActionDetector(
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => MultiAuthCubit(),
+          ),
+          BlocProvider(create: (context) => SettingCubit()),
+        ],
+        child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
+          converter: (state) => state.current,
+          builder: (context, authState) {
+            const app = _App();
+            if (authState == null) return app;
+            return FutureProvider<AccountServer?>(
+              key: ValueKey(Tuple4(
+                authState.account.userId,
+                authState.account.sessionId,
+                authState.account.identityNumber,
+                authState.privateKey,
+              )),
+              create: (BuildContext context) async {
+                final accountServer =
+                    AccountServer(context.read<MultiAuthCubit>());
+                try {
+                  await accountServer.initServer(
+                    authState.account.userId,
+                    authState.account.sessionId,
+                    authState.account.identityNumber,
+                    authState.privateKey,
                   );
+                } catch (e, s) {
+                  w('accountServer.initServer error: $e, $s');
+                  rethrow;
                 }
-                return child!;
+                return accountServer;
               },
-              child: app,
-            ),
-          );
-        },
+              initialData: null,
+              builder: (BuildContext context, _) => Consumer<AccountServer?>(
+                builder: (context, accountServer, child) {
+                  if (accountServer != null) {
+                    return _Providers(
+                      app: Portal(
+                        child: child!,
+                      ),
+                      accountServer: accountServer,
+                    );
+                  }
+                  return child!;
+                },
+                child: app,
+              ),
+            );
+          },
+        ),
       ),
     );
   }
