@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter_app/db/converter/millis_date_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
 import 'package:moor/moor.dart';
 
 import '../../utils/string_extension.dart';
 import '../converter/conversation_status_type_converter.dart';
+import '../converter/millis_date_converter.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
