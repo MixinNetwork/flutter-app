@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -16,6 +17,16 @@ T useMemoizedFuture<T>(
       ),
       initialData: initialData,
     ).data as T;
+
+AsyncSnapshot<T> useMemoizedStream<T>(
+  Stream<T> Function() valueBuilder, {
+  T? initialData,
+  List<Object?> keys = const <Object>[],
+}) =>
+    useStream<T>(
+      useMemoized<Stream<T>>(valueBuilder, keys),
+      initialData: initialData,
+    );
 
 T useBloc<T extends BlocBase>(
   T Function() valueBuilder, {

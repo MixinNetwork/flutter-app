@@ -35,7 +35,7 @@ class HoverOverlay extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cancelableRef = useRef<CancelableOperation>();
+    final cancelableRef = useRef<CancelableOperation?>(null);
 
     final childHovering = useState(false);
     final portalHovering = useState(false);
