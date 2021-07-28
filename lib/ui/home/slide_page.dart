@@ -10,6 +10,7 @@ import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
+import '../../utils/hook.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
@@ -309,7 +310,7 @@ class _CategoryList extends StatelessWidget {
       );
 }
 
-class _Item extends StatelessWidget {
+class _Item extends HookWidget {
   const _Item({
     Key? key,
     required this.type,
@@ -322,30 +323,61 @@ class _Item extends StatelessWidget {
   final String asset;
 
   @override
-  Widget build(BuildContext context) => MoveWindowBarrier(
-        child: BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
-          converter: (state) => state.type == type,
-          builder: (BuildContext context, bool selected) => SelectItem(
-            icon: SvgPicture.asset(
-              asset,
-              width: 24,
-              height: 24,
-              color: BrightnessData.themeOf(context).text,
-            ),
-            title: title,
-            onTap: () {
-              BlocProvider.of<SlideCategoryCubit>(context).select(
-                type,
-                title,
-              );
-              if (ModalRoute.of(context)?.canPop == true) {
-                Navigator.pop(context);
-              }
-            },
-            selected: selected,
-          ),
+  Widget build(BuildContext context) {
+    final selected =
+        useBlocStateConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+      converter: (state) => state.type == type,
+      keys: [type],
+    );
+    final unseenMessageCount = useMemoizedStream<int?>(
+          () {
+            final dao = context.read<AccountServer>().database.conversationDao;
+            switch (type) {
+              case SlideCategoryType.chats:
+                return dao.chatConversationUnseenMessageCount().watchSingle();
+              case SlideCategoryType.contacts:
+                return dao
+                    .contactConversationUnseenMessageCount()
+                    .watchSingle();
+              case SlideCategoryType.groups:
+                return dao.groupConversationUnseenMessageCount().watchSingle();
+              case SlideCategoryType.bots:
+                return dao.botConversationUnseenMessageCount().watchSingle();
+              case SlideCategoryType.strangers:
+                return dao
+                    .strangerConversationUnseenMessageCount()
+                    .watchSingle();
+              default:
+                return const Stream.empty();
+            }
+          },
+          keys: [type],
+        ).data ??
+        0;
+
+    return MoveWindowBarrier(
+      child: SelectItem(
+        icon: SvgPicture.asset(
+          asset,
+          width: 24,
+          height: 24,
+          color: BrightnessData.themeOf(context).text,
         ),
-      );
+        title: title,
+        onTap: () {
+          BlocProvider.of<SlideCategoryCubit>(context).select(
+            type,
+            title,
+          );
+          if (ModalRoute.of(context)?.canPop == true) {
+            Navigator.pop(context);
+          }
+        },
+        selected: selected,
+        count: unseenMessageCount,
+      ),
+    );
+  }
 }
 
 class _Title extends StatelessWidget {

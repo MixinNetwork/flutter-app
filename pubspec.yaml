@@ -79,7 +79,7 @@ dependencies:
   map: ^1.0.0
   flutter_local_notifications: ^6.0.0
   flutter_app_icon_badge: ^2.0.0
-  flutter_hooks: ^0.17.0
+  flutter_hooks: ^0.18.0
   package_info_plus: ^1.0.3
   device_info_plus: ^2.0.1
   sliver_tools: ^0.2.5

@@ -140,9 +140,12 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       await FlutterAppIconBadge.updateBadge(count!);
     }
 
-    final count = await database.conversationDao.allUnseenMessageCount();
+    final count = await database.conversationDao
+        .allUnseenIgnoreMuteMessageCount()
+        .getSingle();
     await updateBadge(count);
-    addSubscription(database.conversationDao.allUnseenMessageCountEvent
+    addSubscription(database
+        .conversationDao.allUnseenIgnoreMuteMessageCountEvent
         .listen(updateBadge));
   }
 }
