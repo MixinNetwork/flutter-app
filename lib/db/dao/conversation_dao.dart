@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_app/db/converter/millis_date_converter.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
 import 'package:moor/moor.dart';
@@ -34,8 +35,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       .map((event) => event!);
 
   Selectable<int?> allUnseenIgnoreMuteMessageCount() => _baseUnseenMessageCount(
-        (conversation, _, __) => conversation.muteUntil
-            .isSmallerOrEqual(const CustomExpression('now')),
+        (conversation, _, __) => conversation.muteUntil.isSmallerOrEqualValue(
+            const MillisDateConverter().mapToSql(DateTime.now())),
         useBaseWhere: false,
       );
 
