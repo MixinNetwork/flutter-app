@@ -7,6 +7,7 @@ import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
@@ -40,7 +41,7 @@ class RecallMessage extends StatelessWidget {
               ? Localization.of(context).chatRecallMe
               : Localization.of(context).chatRecallDelete,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: MessageItemWidget.primaryFontSize,
             color: BrightnessData.themeOf(context).text,
           ),
         ),

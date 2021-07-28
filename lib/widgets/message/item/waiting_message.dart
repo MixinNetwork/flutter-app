@@ -8,6 +8,7 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../generated/l10n.dart';
 import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
@@ -34,7 +35,7 @@ class WaitingMessage extends StatelessWidget {
               : message.userFullName!,
         ),
         style: TextStyle(
-          fontSize: 16,
+          fontSize: MessageItemWidget.primaryFontSize,
           color: BrightnessData.themeOf(context).text,
         ),
         children: [
@@ -42,7 +43,7 @@ class WaitingMessage extends StatelessWidget {
             mouseCursor: SystemMouseCursors.click,
             text: Localization.of(context).chatLearn,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: MessageItemWidget.primaryFontSize,
               color: BrightnessData.themeOf(context).accent,
             ),
             recognizer: TapGestureRecognizer()

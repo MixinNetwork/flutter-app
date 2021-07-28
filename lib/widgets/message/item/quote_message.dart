@@ -23,6 +23,7 @@ import '../../avatar_view/avatar_view.dart';
 import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../../image.dart';
+import '../message.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
 
@@ -367,7 +368,8 @@ class _QuoteMessageBase extends StatelessWidget {
                                 child: Text(
                                   name!,
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize:
+                                        MessageItemWidget.secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
@@ -386,7 +388,8 @@ class _QuoteMessageBase extends StatelessWidget {
                                   child: Text(
                                     _description,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize:
+                                          MessageItemWidget.tertiaryFontSize,
                                       color: BrightnessData.themeOf(context)
                                           .secondaryText,
                                       height: 1,

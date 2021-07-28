@@ -9,6 +9,7 @@ import '../../../../utils/color_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../brightness_observer.dart';
 import '../../../interacter_decorated_box.dart';
+import '../../message.dart';
 import '../../message_bubble.dart';
 import 'action_data.dart';
 
@@ -62,7 +63,7 @@ class ActionMessage extends StatelessWidget {
                           // ignore: avoid_dynamic_calls
                           e.label,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: MessageItemWidget.secondaryFontSize,
                             // ignore: avoid_dynamic_calls
                             color: colorHex(e.color) ?? Colors.black,
                           ),

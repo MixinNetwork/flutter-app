@@ -47,140 +47,143 @@ class SearchBar extends HookWidget {
     }
 
     return MoveWindow(
-      child: Row(
-        children: [
-          AnimatedSize(
-            duration: const Duration(milliseconds: 150),
-            child: AnimatedSwitcher(
+      child: SizedBox(
+        height: 64,
+        child: Row(
+          children: [
+            AnimatedSize(
               duration: const Duration(milliseconds: 150),
-              child: leading != null
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 12, right: 8),
-                      child: leading,
-                    )
-                  : const SizedBox(width: 20),
-            ),
-          ),
-          Expanded(
-            child: MoveWindowBarrier(
-              child: SearchTextField(
-                focusNode: context.read<FocusNode>(),
-                controller: context.read<TextEditingController>(),
-                onChanged: (keyword) =>
-                    context.read<KeywordCubit>().emit(keyword),
-                hintText: Localization.of(context).search,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          ContextMenuPortalEntry(
-            buildMenus: () => [
-              ContextMenu(
-                title: Localization.of(context).createConversation,
-                onTap: () async {
-                  final list = await showConversationSelector(
-                    context: context,
-                    singleSelect: true,
-                    title: Localization.of(context).createConversation,
-                    onlyContact: true,
-                  );
-                  if (list.isEmpty || (list.first.userId?.isEmpty ?? true)) {
-                    return;
-                  }
-                  final userId = list.first.userId!;
-
-                  await ConversationCubit.selectUser(
-                    context,
-                    userId,
-                  );
-                },
-              ),
-              ContextMenu(
-                title: Localization.of(context).createGroupConversation,
-                onTap: () async {
-                  final result = await showConversationSelector(
-                    context: context,
-                    singleSelect: false,
-                    title: Localization.of(context).createGroupConversation,
-                    onlyContact: true,
-                  );
-                  if (result.isEmpty) return;
-                  final userIds = result
-                      .where((e) => e.userId != null)
-                      .map(
-                        (e) => e.userId!,
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 150),
+                child: leading != null
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 12, right: 8),
+                        child: leading,
                       )
-                      .toList();
-
-                  final name = await showMixinDialog<String>(
-                    context: context,
-                    child: _NewConversationConfirm(
-                        [context.read<AccountServer>().userId, ...userIds]),
-                  );
-                  if (name?.isEmpty ?? true) return;
-
-                  await runFutureWithToast(
-                    context,
-                    context
-                        .read<AccountServer>()
-                        .createGroupConversation(name!, userIds),
-                  );
-                },
+                    : const SizedBox(width: 20),
               ),
-              ContextMenu(
-                title: Localization.of(context).createCircle,
-                onTap: () async {
-                  final list = await showConversationSelector(
-                    context: context,
-                    singleSelect: false,
-                    title: Localization.of(context).createCircle,
-                    onlyContact: false,
-                  );
-
-                  if (list.isEmpty) return;
-
-                  final name = await showMixinDialog<String>(
-                    context: context,
-                    child: EditDialog(
-                      title: Text(Localization.of(context).circles),
-                      hintText: Localization.of(context).editCircleName,
-                    ),
-                  );
-
-                  if (name?.isEmpty ?? true) return;
-
-                  await runFutureWithToast(
-                    context,
-                    context.read<AccountServer>().createCircle(
-                          name!,
-                          list
-                              .map(
-                                (e) => CircleConversationRequest(
-                                  action: CircleConversationAction.add,
-                                  conversationId: e.conversationId,
-                                  userId: e.userId,
-                                ),
-                              )
-                              .toList(),
-                        ),
-                  );
-                },
-              ),
-            ],
-            child: Builder(
-              builder: (context) => MoveWindowBarrier(
-                child: ActionButton(
-                  name: Resources.assetsImagesIcAddSvg,
-                  onTapUp: (event) =>
-                      context.read<OffsetCubit>().emit(event.globalPosition),
-                  padding: const EdgeInsets.all(8),
-                  color: BrightnessData.themeOf(context).icon,
+            ),
+            Expanded(
+              child: MoveWindowBarrier(
+                child: SearchTextField(
+                  focusNode: context.read<FocusNode>(),
+                  controller: context.read<TextEditingController>(),
+                  onChanged: (keyword) =>
+                      context.read<KeywordCubit>().emit(keyword),
+                  hintText: Localization.of(context).search,
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-        ],
+            const SizedBox(width: 8),
+            ContextMenuPortalEntry(
+              buildMenus: () => [
+                ContextMenu(
+                  title: Localization.of(context).createConversation,
+                  onTap: () async {
+                    final list = await showConversationSelector(
+                      context: context,
+                      singleSelect: true,
+                      title: Localization.of(context).createConversation,
+                      onlyContact: true,
+                    );
+                    if (list.isEmpty || (list.first.userId?.isEmpty ?? true)) {
+                      return;
+                    }
+                    final userId = list.first.userId!;
+
+                    await ConversationCubit.selectUser(
+                      context,
+                      userId,
+                    );
+                  },
+                ),
+                ContextMenu(
+                  title: Localization.of(context).createGroupConversation,
+                  onTap: () async {
+                    final result = await showConversationSelector(
+                      context: context,
+                      singleSelect: false,
+                      title: Localization.of(context).createGroupConversation,
+                      onlyContact: true,
+                    );
+                    if (result.isEmpty) return;
+                    final userIds = result
+                        .where((e) => e.userId != null)
+                        .map(
+                          (e) => e.userId!,
+                        )
+                        .toList();
+
+                    final name = await showMixinDialog<String>(
+                      context: context,
+                      child: _NewConversationConfirm(
+                          [context.read<AccountServer>().userId, ...userIds]),
+                    );
+                    if (name?.isEmpty ?? true) return;
+
+                    await runFutureWithToast(
+                      context,
+                      context
+                          .read<AccountServer>()
+                          .createGroupConversation(name!, userIds),
+                    );
+                  },
+                ),
+                ContextMenu(
+                  title: Localization.of(context).createCircle,
+                  onTap: () async {
+                    final list = await showConversationSelector(
+                      context: context,
+                      singleSelect: false,
+                      title: Localization.of(context).createCircle,
+                      onlyContact: false,
+                    );
+
+                    if (list.isEmpty) return;
+
+                    final name = await showMixinDialog<String>(
+                      context: context,
+                      child: EditDialog(
+                        title: Text(Localization.of(context).circles),
+                        hintText: Localization.of(context).editCircleName,
+                      ),
+                    );
+
+                    if (name?.isEmpty ?? true) return;
+
+                    await runFutureWithToast(
+                      context,
+                      context.read<AccountServer>().createCircle(
+                            name!,
+                            list
+                                .map(
+                                  (e) => CircleConversationRequest(
+                                    action: CircleConversationAction.add,
+                                    conversationId: e.conversationId,
+                                    userId: e.userId,
+                                  ),
+                                )
+                                .toList(),
+                          ),
+                    );
+                  },
+                ),
+              ],
+              child: Builder(
+                builder: (context) => MoveWindowBarrier(
+                  child: ActionButton(
+                    name: Resources.assetsImagesIcAddSvg,
+                    onTapUp: (event) =>
+                        context.read<OffsetCubit>().emit(event.globalPosition),
+                    padding: const EdgeInsets.all(8),
+                    color: BrightnessData.themeOf(context).icon,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+        ),
       ),
     );
   }

@@ -9,6 +9,7 @@ import '../../../../utils/reg_exp_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../brightness_observer.dart';
 import '../../../high_light_text.dart';
+import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import '../../message_layout.dart';
@@ -95,7 +96,7 @@ class TextMessage extends HookWidget {
             ...mentionHighlightTextSpans,
           ],
           style: TextStyle(
-            fontSize: 16,
+            fontSize: MessageItemWidget.primaryFontSize,
             color: BrightnessData.themeOf(context).text,
           ),
         ),

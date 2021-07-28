@@ -20,6 +20,7 @@ import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
 import 'ui/home/bloc/participants_cubit.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
+import 'ui/home/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
@@ -242,7 +243,8 @@ class _Home extends HookWidget {
 
     if (signed) {
       BlocProvider.of<ConversationListBloc>(context)
-        ..limit = MediaQuery.of(context).size.height ~/ 40
+        ..limit = MediaQuery.of(context).size.height ~/
+            (ConversationPage.conversationItemHeight / 2)
         ..init();
       return const HomePage();
     }

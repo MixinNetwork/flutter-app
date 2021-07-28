@@ -28,6 +28,7 @@ import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
+import '../../message.dart';
 
 class ImagePreviewPage extends HookWidget {
   const ImagePreviewPage({
@@ -250,14 +251,14 @@ class _Bar extends StatelessWidget {
               Text(
                 message.userFullName!,
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: MessageItemWidget.primaryFontSize,
                   color: BrightnessData.themeOf(context).text,
                 ),
               ),
               Text(
                 message.userIdentityNumber,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: MessageItemWidget.secondaryFontSize,
                   color: BrightnessData.themeOf(context).secondaryText,
                 ),
               ),

@@ -1,9 +1,10 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
 import '../../../generated/l10n.dart';
 import '../../../utils/uri_utils.dart';
-
 import '../../brightness_observer.dart';
+import '../message.dart';
 
 class SecretMessage extends StatelessWidget {
   const SecretMessage({Key? key}) : super(key: key);
@@ -27,7 +28,7 @@ class SecretMessage extends StatelessWidget {
                   child: Text(
                     Localization.of(context).aboutEncryptedInfo,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: MessageItemWidget.secondaryFontSize,
                       color: BrightnessData.dynamicColor(
                         context,
                         const Color.fromRGBO(0, 0, 0, 1),
