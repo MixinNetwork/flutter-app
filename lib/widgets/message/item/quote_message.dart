@@ -368,7 +368,8 @@ class _QuoteMessageBase extends StatelessWidget {
                                 child: Text(
                                   name!,
                                   style: TextStyle(
-                                    fontSize: MessageItemWidget.secondaryFontSize,
+                                    fontSize:
+                                        MessageItemWidget.secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
