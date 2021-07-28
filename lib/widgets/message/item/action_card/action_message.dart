@@ -67,7 +67,7 @@ class ActionCardMessage extends HookWidget {
                     appCardData.title,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).text,
-                      fontSize: MessageItemWidget.textFontSize,
+                      fontSize: MessageItemWidget.secondaryFontSize,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -76,7 +76,7 @@ class ActionCardMessage extends HookWidget {
                     appCardData.description,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).secondaryText,
-                      fontSize: MessageItemWidget.subtextFontSize,
+                      fontSize: MessageItemWidget.tertiaryFontSize,
                     ),
                   ),
                 ],

@@ -112,7 +112,7 @@ class FileMessage extends StatelessWidget {
                           return Text(
                             extension,
                             style: TextStyle(
-                              fontSize: MessageItemWidget.subtextFontSize,
+                              fontSize: 12,
                               // force light style
                               color: lightBrightnessThemeData.secondaryText,
                             ),
@@ -131,14 +131,14 @@ class FileMessage extends StatelessWidget {
                   Text(
                     message.mediaName ?? '',
                     style: TextStyle(
-                      fontSize: MessageItemWidget.textFontSize,
+                      fontSize: MessageItemWidget.secondaryFontSize,
                       color: BrightnessData.themeOf(context).text,
                     ),
                   ),
                   Text(
                     filesize(message.mediaSize),
                     style: TextStyle(
-                      fontSize: MessageItemWidget.subtextFontSize,
+                      fontSize: MessageItemWidget.tertiaryFontSize,
                       color: BrightnessData.themeOf(context).secondaryText,
                     ),
                   ),

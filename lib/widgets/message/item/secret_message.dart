@@ -28,7 +28,7 @@ class SecretMessage extends StatelessWidget {
                   child: Text(
                     Localization.of(context).aboutEncryptedInfo,
                     style: TextStyle(
-                      fontSize: MessageItemWidget.textFontSize,
+                      fontSize: MessageItemWidget.secondaryFontSize,
                       color: BrightnessData.dynamicColor(
                         context,
                         const Color.fromRGBO(0, 0, 0, 1),

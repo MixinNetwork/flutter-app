@@ -96,7 +96,7 @@ class TextMessage extends HookWidget {
             ...mentionHighlightTextSpans,
           ],
           style: TextStyle(
-            fontSize: MessageItemWidget.textFontSize,
+            fontSize: MessageItemWidget.primaryFontSize,
             color: BrightnessData.themeOf(context).text,
           ),
         ),

@@ -134,7 +134,7 @@ class VideoMessageWidget extends StatelessWidget {
                                 child: Text(
                                   formatVideoDuration(duration),
                                   style: const TextStyle(
-                                    fontSize: MessageItemWidget.subtextFontSize,
+                                    fontSize: MessageItemWidget.tertiaryFontSize,
                                     color: Colors.white,
                                   ),
                                 ),

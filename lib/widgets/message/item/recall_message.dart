@@ -41,7 +41,7 @@ class RecallMessage extends StatelessWidget {
               ? Localization.of(context).chatRecallMe
               : Localization.of(context).chatRecallDelete,
           style: TextStyle(
-            fontSize: MessageItemWidget.textFontSize,
+            fontSize: MessageItemWidget.primaryFontSize,
             color: BrightnessData.themeOf(context).text,
           ),
         ),

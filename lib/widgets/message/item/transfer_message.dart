@@ -74,7 +74,7 @@ class TransferMessage extends StatelessWidget {
                             amount!,
                             style: TextStyle(
                               color: BrightnessData.themeOf(context).text,
-                              fontSize: MessageItemWidget.textFontSize,
+                              fontSize: MessageItemWidget.secondaryFontSize,
                             ),
                           );
                         }),
@@ -85,7 +85,7 @@ class TransferMessage extends StatelessWidget {
                     message.assetSymbol!,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).secondaryText,
-                      fontSize: MessageItemWidget.subtextFontSize,
+                      fontSize: MessageItemWidget.tertiaryFontSize,
                     ),
                   ),
                 ],

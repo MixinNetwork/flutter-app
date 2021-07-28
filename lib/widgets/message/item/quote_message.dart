@@ -368,7 +368,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                 child: Text(
                                   name!,
                                   style: TextStyle(
-                                    fontSize: MessageItemWidget.textFontSize,
+                                    fontSize: MessageItemWidget.secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
@@ -388,7 +388,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                     _description,
                                     style: TextStyle(
                                       fontSize:
-                                          MessageItemWidget.subtextFontSize,
+                                          MessageItemWidget.tertiaryFontSize,
                                       color: BrightnessData.themeOf(context)
                                           .secondaryText,
                                       height: 1,

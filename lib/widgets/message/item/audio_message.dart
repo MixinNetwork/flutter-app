@@ -27,7 +27,7 @@ class NotSupportedMessage extends StatelessWidget {
     final content = Text(
       Localization.of(context).chatCheckOnPhone,
       style: TextStyle(
-        fontSize: MessageItemWidget.textFontSize,
+        fontSize: MessageItemWidget.primaryFontSize,
         color: BrightnessData.themeOf(context).text,
       ),
     );

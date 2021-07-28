@@ -39,7 +39,7 @@ class MessageDayTime extends HookWidget {
               dateTimeString,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                fontSize: MessageItemWidget.subtextFontSize,
+                fontSize: MessageItemWidget.secondaryFontSize,
               ),
             ),
           ),

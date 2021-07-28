@@ -51,7 +51,7 @@ class SystemMessage extends StatelessWidget {
                     groupName: message.groupName,
                   ),
                   style: TextStyle(
-                    fontSize: MessageItemWidget.textFontSize,
+                    fontSize: MessageItemWidget.secondaryFontSize,
                     color: BrightnessData.dynamicColor(
                       context,
                       const Color.fromRGBO(0, 0, 0, 1),

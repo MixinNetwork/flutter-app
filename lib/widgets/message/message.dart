@@ -58,8 +58,10 @@ class MessageItemWidget extends HookWidget {
   final MessageItem? next;
   final String? lastReadMessageId;
 
-  static const textFontSize = 16.0;
-  static const subtextFontSize = 14.0;
+  static const primaryFontSize = 16.0;
+  static const secondaryFontSize = 14.0;
+  static const tertiaryFontSize = 12.0;
+
   static const statusFontSize = 10.0;
 
   @override
@@ -383,7 +385,7 @@ class _UnreadMessageBar extends StatelessWidget {
           Localization.of(context).unread,
           style: TextStyle(
             color: BrightnessData.themeOf(context).secondaryText,
-            fontSize: MessageItemWidget.subtextFontSize,
+            fontSize: MessageItemWidget.secondaryFontSize,
           ),
         ),
       );

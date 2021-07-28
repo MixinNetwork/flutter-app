@@ -30,7 +30,7 @@ class UnknownMessage extends StatelessWidget {
       text: TextSpan(
         text: Localization.of(context).chatNotSupport,
         style: TextStyle(
-          fontSize: MessageItemWidget.textFontSize,
+          fontSize: MessageItemWidget.primaryFontSize,
           color: BrightnessData.themeOf(context).text,
         ),
         children: [
@@ -38,7 +38,7 @@ class UnknownMessage extends StatelessWidget {
             mouseCursor: SystemMouseCursors.click,
             text: Localization.of(context).chatLearn,
             style: TextStyle(
-              fontSize: MessageItemWidget.textFontSize,
+              fontSize: MessageItemWidget.primaryFontSize,
               color: BrightnessData.themeOf(context).accent,
             ),
             recognizer: TapGestureRecognizer()

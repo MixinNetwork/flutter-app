@@ -61,7 +61,7 @@ class ContactMessageWidget extends StatelessWidget {
                           message.sharedUserFullName!,
                           style: TextStyle(
                             color: BrightnessData.themeOf(context).text,
-                            fontSize: MessageItemWidget.textFontSize,
+                            fontSize: MessageItemWidget.primaryFontSize,
                           ),
                         ),
                       ),
@@ -75,7 +75,7 @@ class ContactMessageWidget extends StatelessWidget {
                     message.sharedUserIdentityNumber!,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).secondaryText,
-                      fontSize: MessageItemWidget.subtextFontSize,
+                      fontSize: MessageItemWidget.secondaryFontSize,
                     ),
                   ),
                 ],

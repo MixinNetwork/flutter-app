@@ -31,7 +31,7 @@ class StrangerMessage extends StatelessWidget {
               ? Localization.of(context).botInteractInfo
               : Localization.of(context).strangerFromMessage,
           style: TextStyle(
-            fontSize: MessageItemWidget.textFontSize,
+            fontSize: MessageItemWidget.primaryFontSize,
             color: BrightnessData.themeOf(context).text,
           ),
         ),
@@ -116,7 +116,7 @@ class _StrangerButton extends StatelessWidget {
               child: Text(
                 text,
                 style: TextStyle(
-                  fontSize: MessageItemWidget.textFontSize,
+                  fontSize: MessageItemWidget.primaryFontSize,
                   color: BrightnessData.themeOf(context).accent,
                 ),
               ),

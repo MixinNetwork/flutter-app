@@ -251,14 +251,14 @@ class _Bar extends StatelessWidget {
               Text(
                 message.userFullName!,
                 style: TextStyle(
-                  fontSize: MessageItemWidget.textFontSize,
+                  fontSize: MessageItemWidget.primaryFontSize,
                   color: BrightnessData.themeOf(context).text,
                 ),
               ),
               Text(
                 message.userIdentityNumber,
                 style: TextStyle(
-                  fontSize: MessageItemWidget.textFontSize,
+                  fontSize: MessageItemWidget.secondaryFontSize,
                   color: BrightnessData.themeOf(context).secondaryText,
                 ),
               ),
