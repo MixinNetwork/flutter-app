@@ -6,6 +6,7 @@ import 'package:moor/moor.dart';
 
 import '../../utils/string_extension.dart';
 import '../converter/conversation_status_type_converter.dart';
+import '../converter/millis_date_converter.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
@@ -34,8 +35,8 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       .map((event) => event!);
 
   Selectable<int?> allUnseenIgnoreMuteMessageCount() => _baseUnseenMessageCount(
-        (conversation, _, __) => conversation.muteUntil
-            .isSmallerOrEqual(const CustomExpression('now')),
+        (conversation, _, __) => conversation.muteUntil.isSmallerOrEqualValue(
+            const MillisDateConverter().mapToSql(DateTime.now())),
         useBaseWhere: false,
       );
 
@@ -168,9 +169,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     Users? participant,
   ]) =>
       conversation.category.isIn(['CONTACT', 'GROUP']);
-
-  Selectable<int?> chatConversationUnseenMessageCount() =>
-      _baseUnseenMessageCount(_chatWhere);
 
   Selectable<int> chatConversationCount() =>
       _baseConversationItemCount(_chatWhere);

@@ -333,8 +333,6 @@ class _Item extends HookWidget {
           () {
             final dao = context.read<AccountServer>().database.conversationDao;
             switch (type) {
-              case SlideCategoryType.chats:
-                return dao.chatConversationUnseenMessageCount().watchSingle();
               case SlideCategoryType.contacts:
                 return dao
                     .contactConversationUnseenMessageCount()
