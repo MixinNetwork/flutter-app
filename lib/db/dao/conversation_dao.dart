@@ -170,9 +170,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   ]) =>
       conversation.category.isIn(['CONTACT', 'GROUP']);
 
-  Selectable<int?> chatConversationUnseenMessageCount() =>
-      _baseUnseenMessageCount(_chatWhere);
-
   Selectable<int> chatConversationCount() =>
       _baseConversationItemCount(_chatWhere);
 
