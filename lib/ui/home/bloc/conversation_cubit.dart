@@ -269,10 +269,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     return conversations.firstWhere(
             (element) => element?.conversationId == conversationId,
             orElse: () => null) ??
-        await context
-            .accountServer
-            .database
-            .conversationDao
+        await context.accountServer.database.conversationDao
             .conversationItem(conversationId)
             .getSingleOrNull();
   }

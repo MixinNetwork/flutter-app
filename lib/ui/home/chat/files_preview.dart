@@ -154,8 +154,7 @@ class _FilesPreviewDialog extends HookWidget {
                         ),
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewFilesSvg,
-                          tooltip:
-                              context.l10n.sendWithoutCompression,
+                          tooltip: context.l10n.sendWithoutCompression,
                           onTap: () => currentTab.value = _TabType.files,
                           selected: currentTab.value == _TabType.files,
                         ),

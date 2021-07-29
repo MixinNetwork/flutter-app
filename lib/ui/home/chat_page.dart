@@ -620,10 +620,7 @@ class _JumpMentionButton extends HookWidget {
     )!;
     final messageMentions = useStream(
           useMemoized(
-              () => context
-                  .accountServer
-                  .database
-                  .messageMentionDao
+              () => context.accountServer.database.messageMentionDao
                   .unreadMentionMessageByConversationId(conversationId)
                   .watch(),
               [conversationId]),
@@ -636,8 +633,7 @@ class _JumpMentionButton extends HookWidget {
       onTap: () {
         final mention = messageMentions.first;
         context.read<MessageBloc>().scrollTo(mention.messageId);
-        context
-            .accountServer
+        context.accountServer
             .markMentionRead(mention.messageId, mention.conversationId);
       },
       child: SizedBox(

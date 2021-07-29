@@ -137,10 +137,7 @@ class ConversationIDOrCount extends HookWidget {
     final countStream = useMemoized(
       () {
         if (isGroup) {
-          return context
-              .accountServer
-              .database
-              .participantDao
+          return context.accountServer.database.participantDao
               .conversationParticipantsCount(conversationState!.conversationId)
               .watchSingle();
         }

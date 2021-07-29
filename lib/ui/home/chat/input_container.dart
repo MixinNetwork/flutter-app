@@ -153,14 +153,10 @@ class _InputContainer extends HookWidget {
     useEffect(
         () => () {
               if (conversationId == null) return;
-              context
-                  .accountServer
-                  .database
-                  .conversationDao
-                  .updateDraft(
-                    conversationId,
-                    textEditingController.text,
-                  );
+              context.accountServer.database.conversationDao.updateDraft(
+                conversationId,
+                textEditingController.text,
+              );
             },
         [conversationId]);
 
@@ -261,12 +257,12 @@ void _sendMessage(
   if (conversationItem == null) return;
 
   context.accountServer.sendTextMessage(
-        text,
-        conversationItem.isPlainConversation,
-        conversationId: conversationItem.conversationId,
-        recipientId: conversationItem.userId,
-        quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
-      );
+    text,
+    conversationItem.isPlainConversation,
+    conversationId: conversationItem.conversationId,
+    recipientId: conversationItem.userId,
+    quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
+  );
 
   textEditingController.text = '';
   context.read<QuoteMessageCubit>().emit(null);
@@ -490,10 +486,7 @@ class _StickerButton extends HookWidget {
     final key = useMemoized(() => GlobalKey());
 
     final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(context
-          .accountServer
-          .database
-          .stickerAlbumDao
+      () => StickerAlbumsCubit(context.accountServer.database.stickerAlbumDao
           .systemAlbums()
           .watch()),
     );
