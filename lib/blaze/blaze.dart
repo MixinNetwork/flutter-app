@@ -12,7 +12,7 @@ import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
-import '../utils/datetime_format_utils.dart';
+import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import 'blaze_message.dart';
