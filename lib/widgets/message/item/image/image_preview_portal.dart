@@ -73,10 +73,7 @@ class ImagePreviewPage extends HookWidget {
       } else if (next.value?.messageId == _messageId.value) {
         current.value = next.value;
       } else {
-        context
-            .accountServer
-            .database
-            .messageDao
+        context.accountServer.database.messageDao
             .messageItemByMessageId(_messageId.value)
             .getSingleOrNull()
             .then((value) => current.value = value);
@@ -101,10 +98,7 @@ class ImagePreviewPage extends HookWidget {
 
     useEffect(
       () => context
-          .accountServer
-          .database
-          .messageDao
-          .insertOrReplaceMessageStream
+          .accountServer.database.messageDao.insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;
@@ -137,11 +131,8 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => _copyUrl(
-              context,
-              context
-                  .accountServer
-                  .convertMessageAbsolutePath(current.value)),
+          onInvoke: (Intent intent) => _copyUrl(context,
+              context.accountServer.convertMessageAbsolutePath(current.value)),
         ),
       },
       autofocus: true,
@@ -301,11 +292,8 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesCopySvg,
             color: context.theme.icon,
             size: 20,
-            onTap: () => _copyUrl(
-                context,
-                context
-                    .accountServer
-                    .convertMessageAbsolutePath(message)),
+            onTap: () => _copyUrl(context,
+                context.accountServer.convertMessageAbsolutePath(message)),
           ),
           const SizedBox(width: 14),
           ActionButton(
@@ -321,9 +309,7 @@ class _Bar extends StatelessWidget {
               if (path?.isEmpty ?? true) return;
               await runFutureWithToast(
                 context,
-                File(context
-                        .accountServer
-                        .convertMessageAbsolutePath(message))
+                File(context.accountServer.convertMessageAbsolutePath(message))
                     .copy(path!),
               );
             },
@@ -369,9 +355,8 @@ class _Item extends HookWidget {
                   : SystemMouseCursors.zoomOut,
               child: PhotoView(
                 tightMode: true,
-                imageProvider: FileImage(File(context
-                    .accountServer
-                    .convertMessageAbsolutePath(message))),
+                imageProvider: FileImage(File(
+                    context.accountServer.convertMessageAbsolutePath(message))),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 initialScale: PhotoViewComputedScale.contained,

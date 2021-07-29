@@ -728,7 +728,7 @@ class SendMessageHelper {
     final createdAt = attachmentMessage.createdAt;
     if (createdAt != null) {
       final date = DateTime.tryParse(createdAt);
-      if (within24Hours(date)) {
+      if (date?.isToady == true) {
         return AttachmentResult(
           attachmentMessage.attachmentId,
           attachmentMessage.key,

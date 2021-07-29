@@ -42,10 +42,7 @@ class StrangerMessage extends StatelessWidget {
                   : context.l10n.block,
               onTap: () async {
                 if (isBotConversation) {
-                  final app = await context
-                      .accountServer
-                      .database
-                      .appDao
+                  final app = await context.accountServer.database.appDao
                       .findUserById(message.appId!);
                   if (app == null) return;
                   await openUri(context, app.homeUri);
@@ -64,12 +61,10 @@ class StrangerMessage extends StatelessWidget {
                   : context.l10n.addContact,
               onTap: () {
                 if (isBotConversation) {
-                  context.accountServer
-                      .sendTextMessage('Hi', true,
-                          conversationId: message.conversationId);
+                  context.accountServer.sendTextMessage('Hi', true,
+                      conversationId: message.conversationId);
                 } else {
-                  context
-                      .accountServer
+                  context.accountServer
                       .addUser(message.userId, message.userFullName);
                 }
               },

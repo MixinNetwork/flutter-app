@@ -200,9 +200,9 @@ class Blaze {
         await database.offsetDao.findStatusOffset().getSingleOrNull();
     var status = 0;
     if (offset != null) {
-      status = getEpochNanoFromString(offset);
+      status = offset.epochNano;
     } else {
-      status = getEpochNano(DateTime.now());
+      status = DateTime.now().epochNano;
     }
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
@@ -219,7 +219,7 @@ class Blaze {
         await database.offsetDao.insert(Offset(
             key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
       });
-      final lastUpdateAt = getEpochNano(blazeMessages.last.updatedAt);
+      final lastUpdateAt = blazeMessages.last.updatedAt.epochNano;
       if (lastUpdateAt == status) {
         break;
       }

@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
-
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
 import '../bloc/conversation_cubit.dart';

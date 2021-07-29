@@ -121,8 +121,7 @@ class SearchBar extends HookWidget {
 
                     await runFutureWithToast(
                       context,
-                      context
-                          .accountServer
+                      context.accountServer
                           .createGroupConversation(name!, userIds),
                     );
                   },
@@ -152,17 +151,17 @@ class SearchBar extends HookWidget {
                     await runFutureWithToast(
                       context,
                       context.accountServer.createCircle(
-                            name!,
-                            list
-                                .map(
-                                  (e) => CircleConversationRequest(
-                                    action: CircleConversationAction.add,
-                                    conversationId: e.conversationId,
-                                    userId: e.userId,
-                                  ),
-                                )
-                                .toList(),
-                          ),
+                        name!,
+                        list
+                            .map(
+                              (e) => CircleConversationRequest(
+                                action: CircleConversationAction.add,
+                                conversationId: e.conversationId,
+                                userId: e.userId,
+                              ),
+                            )
+                            .toList(),
+                      ),
                     );
                   },
                 ),
@@ -198,10 +197,7 @@ class _NewConversationConfirm extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final users = useMemoizedFuture(
-      () => context
-          .accountServer
-          .database
-          .userDao
+      () => context.accountServer.database.userDao
           .usersByIn(userIds.sublist(0, min(4, userIds.length)))
           .get(),
       <User>[],

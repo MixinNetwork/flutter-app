@@ -1,7 +1,6 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
@@ -18,8 +17,7 @@ class SecretMessage extends StatelessWidget {
           child: MouseRegion(
             cursor: SystemMouseCursors.click,
             child: GestureDetector(
-              onTap: () => openUri(
-                  context, context.l10n.aboutEncryptedInfoUrl),
+              onTap: () => openUri(context, context.l10n.aboutEncryptedInfoUrl),
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: context.theme.encrypt,

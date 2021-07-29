@@ -151,11 +151,11 @@ class MessageItemWidget extends HookWidget {
                         );
                         if (result.isEmpty) return;
                         await context.accountServer.forwardMessage(
-                              message.messageId,
-                              isPlain(result.first.isGroup, result.first.isBot),
-                              conversationId: result.first.conversationId,
-                              recipientId: result.first.userId,
-                            );
+                          message.messageId,
+                          isPlain(result.first.isGroup, result.first.isBot),
+                          conversationId: result.first.conversationId,
+                          recipientId: result.first.userId,
+                        );
                       },
                     ),
                   if (message.type.isText)
@@ -171,17 +171,15 @@ class MessageItemWidget extends HookWidget {
                     ContextMenu(
                       title: context.l10n.deleteForEveryone,
                       isDestructiveAction: true,
-                      onTap: () => context
-                          .accountServer
-                          .sendRecallMessage([message.messageId],
-                              conversationId: message.conversationId),
+                      onTap: () => context.accountServer.sendRecallMessage(
+                          [message.messageId],
+                          conversationId: message.conversationId),
                     ),
                   ContextMenu(
                     title: context.l10n.deleteForMe,
                     isDestructiveAction: true,
-                    onTap: () => context
-                        .accountServer
-                        .deleteMessage(message.messageId),
+                    onTap: () =>
+                        context.accountServer.deleteMessage(message.messageId),
                   ),
                 ],
                 builder: (BuildContext context) {
@@ -313,8 +311,7 @@ class MessageItemWidget extends HookWidget {
       return VisibilityDetector(
         onVisibilityChanged: (VisibilityInfo info) {
           if (info.visibleFraction < 1) return;
-          context
-              .accountServer
+          context.accountServer
               .markMentionRead(message.messageId, message.conversationId);
         },
         key: ValueKey(message.messageId),

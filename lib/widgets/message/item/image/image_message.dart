@@ -60,8 +60,7 @@ class ImageMessageWidget extends StatelessWidget {
                     }
                     break;
                   case MediaStatus.pending:
-                    context
-                        .accountServer
+                    context.accountServer
                         .cancelProgressAttachmentJob(message.messageId);
                     break;
                   default:
@@ -75,8 +74,7 @@ class ImageMessageWidget extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.file(
-                      File(context
-                          .accountServer
+                      File(context.accountServer
                           .convertMessageAbsolutePath(message)),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(

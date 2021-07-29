@@ -62,10 +62,7 @@ class ChatInfoPage extends HookWidget {
     }, [conversationId]);
 
     final announcement = useStream<String?>(
-            useMemoized(() => context
-                .accountServer
-                .database
-                .conversationDao
+            useMemoized(() => context.accountServer.database.conversationDao
                 .announcement(conversationId)
                 .watchSingle()),
             initialData: null)
@@ -208,9 +205,9 @@ class ChatInfoPage extends HookWidget {
                           await runFutureWithToast(
                             context,
                             context.accountServer.editGroupAnnouncement(
-                                  conversationId,
-                                  result,
-                                ),
+                              conversationId,
+                              result,
+                            ),
                           );
                         },
                       );
@@ -222,9 +219,8 @@ class ChatInfoPage extends HookWidget {
               child: Column(
                 children: [
                   CellItem(
-                    title: Text(muting
-                        ? context.l10n.unMute
-                        : context.l10n.muted),
+                    title:
+                        Text(muting ? context.l10n.unMute : context.l10n.muted),
                     description: muting
                         ? Text(
                             DateFormat('yyyy/MM/dd, hh:mm a').format(
@@ -243,9 +239,9 @@ class ChatInfoPage extends HookWidget {
                         await runFutureWithToast(
                           context,
                           context.accountServer.unMuteConversation(
-                                conversationId: isGroup ? conversationId : null,
-                                userId: isGroup ? null : conversation.userId,
-                              ),
+                            conversationId: isGroup ? conversationId : null,
+                            userId: isGroup ? null : conversation.userId,
+                          ),
                         );
                         return;
                       }
@@ -257,10 +253,10 @@ class ChatInfoPage extends HookWidget {
                       await runFutureWithToast(
                           context,
                           context.accountServer.muteConversation(
-                                result,
-                                conversationId: isGroup ? conversationId : null,
-                                userId: isGroup ? null : conversation.userId,
-                              ));
+                            result,
+                            conversationId: isGroup ? conversationId : null,
+                            userId: isGroup ? null : conversation.userId,
+                          ));
                     },
                   ),
                   if (!isGroupConversation)
@@ -399,18 +395,12 @@ class ChatInfoPage extends HookWidget {
                           );
                           if (!result) return;
 
-                          await context
-                              .accountServer
-                              .database
-                              .messageDao
+                          await context.accountServer.database.messageDao
                               .deleteMessageByConversationId(conversationId);
-                          await context
-                              .accountServer
-                              .database
-                              .conversationDao
+                          await context.accountServer.database.conversationDao
                               .deleteConversation(
-                                conversationId,
-                              );
+                            conversationId,
+                          );
                           if (context
                                   .read<ConversationCubit>()
                                   .state
@@ -530,9 +520,9 @@ class _AddToContactsButton extends StatelessWidget {
                     runFutureWithToast(
                         context,
                         context.accountServer.addUser(
-                              conversation.userId!,
-                              username,
-                            ));
+                          conversation.userId!,
+                          username,
+                        ));
                   },
                   child: Text(
                     conversation.isBot!

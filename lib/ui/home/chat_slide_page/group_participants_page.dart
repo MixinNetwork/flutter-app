@@ -47,8 +47,8 @@ class GroupParticipantsPage extends HookWidget {
     // Find current user info to check if we have group manage permission.
     // Could be null if has been removed from group.
     final currentUser = useMemoized(
-      () => participants.firstWhereOrNull(
-          (e) => e.userId == context.accountServer.userId),
+      () => participants
+          .firstWhereOrNull((e) => e.userId == context.accountServer.userId),
       [participants],
     );
 
@@ -211,8 +211,8 @@ class _ParticipantMenuEntry extends StatelessWidget {
       buildMenus: () {
         final menus = [
           ContextMenu(
-            title: context.l10n
-                .groupPopMenuMessage(participant.fullName ?? '?'),
+            title:
+                context.l10n.groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
               ConversationCubit.selectUser(
                 context,
@@ -332,8 +332,7 @@ class _ActionAddParticipants extends StatelessWidget {
               assert(conversationId != null);
               await runFutureWithToast(
                 context,
-                Future.wait(userIds.map((userId) => context
-                    .accountServer
+                Future.wait(userIds.map((userId) => context.accountServer
                     .addParticipant(conversationId!, [userId]))),
               );
             },

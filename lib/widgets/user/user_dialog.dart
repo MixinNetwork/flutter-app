@@ -17,8 +17,7 @@ import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
 Future<void> showUserDialog(BuildContext context, String userId) async {
-  final existed =
-      await context.database.userDao.hasUser(userId);
+  final existed = await context.database.userDao.hasUser(userId);
   if (existed) {
     Toast.dismiss();
     await showMixinDialog(context: context, child: _UserDialog(userId: userId));
@@ -239,9 +238,9 @@ class _AddToContactsButton extends StatelessWidget {
           runFutureWithToast(
             context,
             context.accountServer.addUser(
-                  user.userId,
-                  user.fullName,
-                ),
+              user.userId,
+              user.fullName,
+            ),
           );
         },
         child: Text(
@@ -286,12 +285,12 @@ class _UserProfileButtonBar extends StatelessWidget {
               await runFutureWithToast(
                 context,
                 context.accountServer.sendContactMessage(
-                      user.userId,
-                      user.fullName!,
-                      isPlain(result.first.isGroup, result.first.isBot),
-                      conversationId: conversationId,
-                      recipientId: result[0].userId,
-                    ),
+                  user.userId,
+                  user.fullName!,
+                  isPlain(result.first.isGroup, result.first.isBot),
+                  conversationId: conversationId,
+                  recipientId: result[0].userId,
+                ),
               );
             },
             color: context.theme.icon,

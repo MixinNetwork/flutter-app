@@ -47,9 +47,9 @@ class EditProfilePage extends HookWidget {
                 runFutureWithToast(
                   context,
                   context.accountServer.updateAccount(
-                        fullName: nameTextEditingController.text.trim(),
-                        biography: bioTextEditingController.text.trim(),
-                      ),
+                    fullName: nameTextEditingController.text.trim(),
+                    biography: bioTextEditingController.text.trim(),
+                  ),
                 );
               },
               backgroundTransparent: true,

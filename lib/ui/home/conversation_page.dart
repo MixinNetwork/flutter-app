@@ -25,7 +25,6 @@ import '../../utils/hook.dart';
 import '../../utils/message_optimize.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
-
 import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/interacter_decorated_box.dart';
@@ -421,18 +420,12 @@ class _SearchMessageList extends HookWidget {
       () => AnonymousPagingBloc<SearchMessageDetailItem>(
         initState: const PagingState<SearchMessageDetailItem>(),
         limit: context.read<ConversationListBloc>().limit,
-        queryCount: () => context
-            .accountServer
-            .database
-            .messageDao
+        queryCount: () => context.accountServer.database.messageDao
             .fuzzySearchMessageCount(keyword)
             .getSingle(),
         queryRange: (int limit, int offset) async {
           if (keyword.isEmpty) return [];
-          return context
-              .accountServer
-              .database
-              .messageDao
+          return context.accountServer.database.messageDao
               .fuzzySearchMessage(query: keyword, limit: limit, offset: offset)
               .get();
         },
@@ -440,11 +433,7 @@ class _SearchMessageList extends HookWidget {
       keys: [keyword],
     );
     useEffect(
-      () => context
-          .accountServer
-          .database
-          .messageDao
-          .searchMessageUpdateEvent
+      () => context.accountServer.database.messageDao.searchMessageUpdateEvent
           .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
           .cancel,
       [keyword],
@@ -558,7 +547,7 @@ class _SearchItem extends StatelessWidget {
                         ),
                         if (date != null)
                           BlocConverter<MinuteTimerCubit, DateTime, String>(
-                            converter: (_) => formatDateTime(date!),
+                            converter: (_) => date!.format,
                             builder: (context, text) => Text(
                               text,
                               style: TextStyle(
@@ -643,9 +632,7 @@ class _SearchHeader extends StatelessWidget {
               GestureDetector(
                 onTap: onTap,
                 child: Text(
-                  more
-                      ? context.l10n.more
-                      : context.l10n.less,
+                  more ? context.l10n.more : context.l10n.less,
                   style: TextStyle(
                     fontSize: 14,
                     color: context.theme.accent,
@@ -713,11 +700,7 @@ class _List extends HookWidget {
     );
 
     final connectedState = useStream(
-          context
-              .accountServer
-              .blaze
-              .connectedStateStreamController
-              .stream
+          context.accountServer.blaze.connectedStateStreamController.stream
               .distinct(),
           initialData: true,
         ).data ??
@@ -756,9 +739,7 @@ class _List extends HookWidget {
                   title: Localization.current.unPin,
                   onTap: () => runFutureWithToast(
                     context,
-                    context
-                        .accountServer
-                        .unpin(conversation.conversationId),
+                    context.accountServer.unpin(conversation.conversationId),
                   ),
                 ),
               if (conversation.pinTime == null)
@@ -766,9 +747,7 @@ class _List extends HookWidget {
                   title: Localization.current.pin,
                   onTap: () => runFutureWithToast(
                     context,
-                    context
-                        .accountServer
-                        .pin(conversation.conversationId),
+                    context.accountServer.pin(conversation.conversationId),
                   ),
                 ),
               if (conversation.isMute)
@@ -780,13 +759,12 @@ class _List extends HookWidget {
                     await runFutureWithToast(
                       context,
                       context.accountServer.unMuteConversation(
-                            conversationId: isGroupConversation
-                                ? conversation.conversationId
-                                : null,
-                            userId: isGroupConversation
-                                ? null
-                                : conversation.ownerId,
-                          ),
+                        conversationId: isGroupConversation
+                            ? conversation.conversationId
+                            : null,
+                        userId:
+                            isGroupConversation ? null : conversation.ownerId,
+                      ),
                     );
                     return;
                   },
@@ -805,14 +783,13 @@ class _List extends HookWidget {
                     await runFutureWithToast(
                       context,
                       context.accountServer.muteConversation(
-                            result,
-                            conversationId: isGroupConversation
-                                ? conversation.conversationId
-                                : null,
-                            userId: isGroupConversation
-                                ? null
-                                : conversation.ownerId,
-                          ),
+                        result,
+                        conversationId: isGroupConversation
+                            ? conversation.conversationId
+                            : null,
+                        userId:
+                            isGroupConversation ? null : conversation.ownerId,
+                      ),
                     );
                     return;
                   },
@@ -821,13 +798,10 @@ class _List extends HookWidget {
                 title: Localization.current.deleteChat,
                 isDestructiveAction: true,
                 onTap: () async {
-                  await context
-                      .accountServer
-                      .database
-                      .conversationDao
+                  await context.accountServer.database.conversationDao
                       .deleteConversation(
-                        conversation.conversationId,
-                      );
+                    conversation.conversationId,
+                  );
                   if (context.read<ConversationCubit>().state?.conversationId ==
                       conversation.conversationId) {
                     context.read<ConversationCubit>().unselected();
@@ -973,9 +947,10 @@ class _Item extends StatelessWidget {
                                 ),
                               ),
                               BlocConverter<MinuteTimerCubit, DateTime, String>(
-                                converter: (_) => formatDateTime(
-                                    conversation.lastMessageCreatedAt ??
-                                        conversation.createdAt),
+                                converter: (_) =>
+                                    (conversation.lastMessageCreatedAt ??
+                                            conversation.createdAt)
+                                        .format,
                                 builder: (context, text) => Text(
                                   text,
                                   style: TextStyle(
@@ -1144,8 +1119,8 @@ class _MessageContent extends HookWidget {
         if (conversation.contentType == MessageCategory.systemConversation) {
           return generateSystemText(
             actionName: conversation.actionName,
-            participantIsCurrentUser: conversation.participantUserId ==
-                context.accountServer.userId,
+            participantIsCurrentUser:
+                conversation.participantUserId == context.accountServer.userId,
             relationship: conversation.relationship,
             participantFullName: conversation.participantFullName,
             senderFullName: conversation.senderFullName,

@@ -131,12 +131,8 @@ class _CircleList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useStream<List<ConversationCircleItem>>(
-      useMemoized(() => context
-          .accountServer
-          .database
-          .circleDao
-          .allCircles()
-          .watch()),
+      useMemoized(
+          () => context.accountServer.database.circleDao.allCircles().watch()),
       initialData: [],
     );
     if (circles.data?.isEmpty ?? true) return const SizedBox();
@@ -169,16 +165,14 @@ class _CircleList extends HookWidget {
                               child: EditDialog(
                                 editText: circle.name,
                                 title: Text(context.l10n.circles),
-                                hintText:
-                                    context.l10n.editCircleName,
+                                hintText: context.l10n.editCircleName,
                               ),
                             );
                             if (name?.isEmpty ?? true) return;
 
                             await runFutureWithToast(
                               context,
-                              context
-                                  .accountServer
+                              context.accountServer
                                   .updateCircle(circle.circleId, name!),
                             );
                           }),
@@ -186,9 +180,7 @@ class _CircleList extends HookWidget {
                         title: context.l10n.editCircle,
                         onTap: () async {
                           final initSelected = (await context
-                                  .accountServer
-                                  .database
-                                  .circleConversationDao
+                                  .accountServer.database.circleConversationDao
                                   .allCircleConversations(circle.circleId)
                                   .get())
                               .map((e) => ConversationSelector(
@@ -229,12 +221,10 @@ class _CircleList extends HookWidget {
                           ];
                           await runFutureWithToast(
                             context,
-                            context
-                                .accountServer
-                                .editCircleConversation(
-                                  circle.circleId,
-                                  requests,
-                                ),
+                            context.accountServer.editCircleConversation(
+                              circle.circleId,
+                              requests,
+                            ),
                           );
                         },
                       ),
@@ -242,16 +232,13 @@ class _CircleList extends HookWidget {
                         title: context.l10n.deleteCircle,
                         isDestructiveAction: true,
                         onTap: () async {
-                          final result = await showConfirmMixinDialog(
-                              context,
-                              context.l10n
-                                  .pageDeleteCircle(circle.name));
+                          final result = await showConfirmMixinDialog(context,
+                              context.l10n.pageDeleteCircle(circle.name));
                           if (!result) return;
                           await runFutureWithToast(
                             context,
                             () async {
-                              await context
-                                  .accountServer
+                              await context.accountServer
                                   .deleteCircle(circle.circleId);
                               context
                                   .read<SlideCategoryCubit>()

@@ -2,7 +2,6 @@ import 'package:extended_text/extended_text.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-
 import '../utils/extension/extension.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';

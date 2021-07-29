@@ -131,8 +131,7 @@ class _HomePage extends HookWidget {
                     decoration: BoxDecoration(
                       color: context.theme.chatBackground,
                     ),
-                    child: Empty(
-                        text: context.l10n.pageRightEmptyMessage),
+                    child: Empty(text: context.l10n.pageRightEmptyMessage),
                   ),
                 ),
               ),

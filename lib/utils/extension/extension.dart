@@ -27,13 +27,21 @@ export '../../db/extension/message.dart'
 export '../../db/extension/message_category.dart' show MessageCategoryExtension;
 export '../../db/extension/user.dart' show UserExtension;
 export '../action_utils.dart' show OpenUriExtension;
+export '../datetime_format_utils.dart'
+    show DateTimeExtension, StringEpochNanoExtension;
 
 part 'src/file.dart';
+
 part 'src/iterable.dart';
+
 part 'src/markdown.dart';
+
 part 'src/provider.dart';
+
 part 'src/stream.dart';
+
 part 'src/string.dart';
+
 part 'src/ui.dart';
 
 void importExtension() {}

@@ -47,8 +47,7 @@ class WaitingMessage extends StatelessWidget {
               color: context.theme.accent,
             ),
             recognizer: TapGestureRecognizer()
-              ..onTap = () =>
-                  openUri(context, context.l10n.chatNotSupportUrl),
+              ..onTap = () => openUri(context, context.l10n.chatNotSupportUrl),
           ),
         ],
       ),

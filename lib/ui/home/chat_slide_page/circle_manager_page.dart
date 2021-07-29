@@ -33,10 +33,7 @@ class CircleManagerPage extends HookWidget {
 
     final circles = useStream<List<ConversationCircleManagerItem>>(
           useMemoized(
-            () => context
-                .accountServer
-                .database
-                .circleDao
+            () => context.accountServer.database.circleDao
                 .circleByConversationId(conversationId)
                 .watch(),
             [conversationId],
@@ -46,10 +43,7 @@ class CircleManagerPage extends HookWidget {
         [];
     final otherCircles = useStream<List<ConversationCircleManagerItem>>(
           useMemoized(
-            () => context
-                .accountServer
-                .database
-                .circleDao
+            () => context.accountServer.database.circleDao
                 .otherCircleByConversationId(conversationId)
                 .watch(),
             [conversationId],

@@ -43,10 +43,7 @@ class ConversationAvatarWidget extends HookWidget {
           useMemoized(
             () {
               if (_category == ConversationCategory.group) {
-                return context
-                    .accountServer
-                    .database
-                    .participantDao
+                return context.accountServer.database.participantDao
                     .participantsAvatar(_conversationId!)
                     .watch()
                     .map((event) => _category == ConversationCategory.contact
