@@ -57,4 +57,3 @@ bool isSameDay(DateTime? a, DateTime? b) {
   final _b = b.toLocal();
   return _a.year == _b.year && _a.month == _b.month && _a.day == _b.day;
 }
-
