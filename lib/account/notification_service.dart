@@ -25,11 +25,7 @@ class NotificationService {
     required BuildContext context,
   }) {
     streamSubscriptions
-      ..add(context
-          .accountServer
-          .database
-          .messageDao
-          .notificationMessageStream
+      ..add(context.accountServer.database.messageDao.notificationMessageStream
           .where((event) {
             if (DesktopLifecycle.instance.isActive.value) {
               final conversationState = context.read<ConversationCubit>().state;
@@ -39,8 +35,7 @@ class NotificationService {
             }
             return true;
           })
-          .where(
-              (event) => event.senderId != context.accountServer.userId)
+          .where((event) => event.senderId != context.accountServer.userId)
           .asyncWhere((event) async {
             final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
@@ -82,8 +77,8 @@ class NotificationService {
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
                   actionName: event.actionName,
-                  participantIsCurrentUser: event.participantUserId ==
-                      context.accountServer.userId,
+                  participantIsCurrentUser:
+                      event.participantUserId == context.accountServer.userId,
                   relationship: event.relationship,
                   participantFullName: event.participantFullName,
                   senderFullName: event.senderFullName,
