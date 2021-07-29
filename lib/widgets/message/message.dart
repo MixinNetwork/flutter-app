@@ -8,18 +8,16 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-import '../../account/account_server.dart';
 import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
-import '../../generated/l10n.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../utils/datetime_format_utils.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../brightness_observer.dart';
 import '../menu.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
@@ -137,22 +135,22 @@ class MessageItemWidget extends HookWidget {
                       message.type == MessageCategory.appCard ||
                       message.type == MessageCategory.appButtonGroup)
                     ContextMenu(
-                      title: Localization.of(context).reply,
+                      title: context.l10n.reply,
                       onTap: () =>
                           context.read<QuoteMessageCubit>().emit(message),
                     ),
                   if (message.canForward)
                     ContextMenu(
-                      title: Localization.of(context).forward,
+                      title: context.l10n.forward,
                       onTap: () async {
                         final result = await showConversationSelector(
                           context: context,
                           singleSelect: true,
-                          title: Localization.of(context).forward,
+                          title: context.l10n.forward,
                           onlyContact: false,
                         );
                         if (result.isEmpty) return;
-                        await context.read<AccountServer>().forwardMessage(
+                        await context.accountServer.forwardMessage(
                               message.messageId,
                               isPlain(result.first.isGroup, result.first.isBot),
                               conversationId: result.first.conversationId,
@@ -162,7 +160,7 @@ class MessageItemWidget extends HookWidget {
                     ),
                   if (message.type.isText)
                     ContextMenu(
-                      title: Localization.of(context).copy,
+                      title: context.l10n.copy,
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.content)),
                     ),
@@ -171,18 +169,18 @@ class MessageItemWidget extends HookWidget {
                       DateTime.now().isBefore(
                           message.createdAt.add(const Duration(minutes: 30))))
                     ContextMenu(
-                      title: Localization.of(context).deleteForEveryone,
+                      title: context.l10n.deleteForEveryone,
                       isDestructiveAction: true,
                       onTap: () => context
-                          .read<AccountServer>()
+                          .accountServer
                           .sendRecallMessage([message.messageId],
                               conversationId: message.conversationId),
                     ),
                   ContextMenu(
-                    title: Localization.of(context).deleteForMe,
+                    title: context.l10n.deleteForMe,
                     isDestructiveAction: true,
                     onTap: () => context
-                        .read<AccountServer>()
+                        .accountServer
                         .deleteMessage(message.messageId),
                   ),
                 ],
@@ -316,7 +314,7 @@ class MessageItemWidget extends HookWidget {
         onVisibilityChanged: (VisibilityInfo info) {
           if (info.visibleFraction < 1) return;
           context
-              .read<AccountServer>()
+              .accountServer
               .markMentionRead(message.messageId, message.conversationId);
         },
         key: ValueKey(message.messageId),
@@ -377,14 +375,14 @@ class _UnreadMessageBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
-        color: BrightnessData.themeOf(context).background,
+        color: context.theme.background,
         padding: const EdgeInsets.symmetric(vertical: 4),
         margin: const EdgeInsets.symmetric(vertical: 6),
         alignment: Alignment.center,
         child: Text(
-          Localization.of(context).unread,
+          context.l10n.unread,
           style: TextStyle(
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: context.theme.secondaryText,
             fontSize: MessageItemWidget.secondaryFontSize,
           ),
         ),

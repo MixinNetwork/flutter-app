@@ -5,9 +5,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../constants/resources.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
+
 import '../../widgets/cell.dart';
 
 class BackupPage extends HookWidget {
@@ -15,9 +16,9 @@ class BackupPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: BrightnessData.themeOf(context).background,
+        backgroundColor: context.theme.background,
         appBar: MixinAppBar(
-          title: Text(Localization.of(context).chatBackup),
+          title: Text(context.l10n.chatBackup),
         ),
         body: Container(
           alignment: Alignment.topCenter,
@@ -28,19 +29,17 @@ class BackupPage extends HookWidget {
                 Resources.assetsImagesChatBackupSvg,
                 width: 88,
                 height: 58,
-                color: BrightnessData.themeOf(context)
-                    .secondaryText
-                    .withOpacity(0.4),
+                color: context.theme.secondaryText.withOpacity(0.4),
               ),
               const SizedBox(height: 20),
               SizedBox(
                 width: 500,
                 child: Text(
-                  Localization.of(context).chatBackupDescription,
+                  context.l10n.chatBackupDescription,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
-                    color: BrightnessData.themeOf(context).secondaryText,
+                    color: context.theme.secondaryText,
                   ),
                 ),
               ),
@@ -52,7 +51,7 @@ class BackupPage extends HookWidget {
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),
                 child: CellItem(
-                  title: Text(Localization.of(context).backup),
+                  title: Text(context.l10n.backup),
                 ),
               ),
               CellGroup(
@@ -64,31 +63,31 @@ class BackupPage extends HookWidget {
                 child: Column(
                   children: [
                     CellItem(
-                      title: Text(Localization.of(context).autoBackup),
+                      title: Text(context.l10n.autoBackup),
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
+                            activeColor: context.theme.accent,
                             value: true,
                             onChanged: (bool value) {},
                           )),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).includeFiles),
+                      title: Text(context.l10n.includeFiles),
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
+                            activeColor: context.theme.accent,
                             value: true,
                             onChanged: (bool value) {},
                           )),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).includeVideos),
+                      title: Text(context.l10n.includeVideos),
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
+                            activeColor: context.theme.accent,
                             value: true,
                             onChanged: (bool value) {},
                           )),

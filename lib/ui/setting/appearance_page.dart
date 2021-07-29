@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../bloc/setting_cubit.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/brightness_observer.dart';
+
 import '../../widgets/cell.dart';
 import '../../widgets/radio.dart';
 
@@ -14,9 +15,9 @@ class AppearancePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: BrightnessData.themeOf(context).background,
+        backgroundColor: context.theme.background,
         appBar: MixinAppBar(
-          title: Text(Localization.of(context).appearance),
+          title: Text(context.l10n.appearance),
         ),
         body: const Align(
           alignment: Alignment.topCenter,
@@ -38,9 +39,9 @@ class _Body extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10, bottom: 14),
                 child: Text(
-                  Localization.of(context).settingTheme,
+                  context.l10n.settingTheme,
                   style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
+                    color: context.theme.secondaryText,
                     fontSize: 14,
                   ),
                 ),
@@ -56,7 +57,7 @@ class _Body extends StatelessWidget {
                   children: [
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(Localization.of(context).settingThemeAuto),
+                        title: Text(context.l10n.settingThemeAuto),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
                             context.read<SettingCubit>().brightness = value,
@@ -66,7 +67,7 @@ class _Body extends StatelessWidget {
                     ),
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(Localization.of(context).settingThemeLight),
+                        title: Text(context.l10n.settingThemeLight),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
                             context.read<SettingCubit>().brightness = value,
@@ -76,7 +77,7 @@ class _Body extends StatelessWidget {
                     ),
                     CellItem(
                       title: RadioItem<Brightness?>(
-                        title: Text(Localization.of(context).settingThemeNight),
+                        title: Text(context.l10n.settingThemeNight),
                         groupValue: context.watch<SettingCubit>().brightness,
                         onChanged: (value) =>
                             context.read<SettingCubit>().brightness = value,

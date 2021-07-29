@@ -20,9 +20,9 @@ import '../db/database.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
+import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
-import '../utils/string_extension.dart';
 
 class Sender {
   Sender(

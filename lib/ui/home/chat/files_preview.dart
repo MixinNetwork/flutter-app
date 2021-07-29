@@ -17,16 +17,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
-import '../../../generated/l10n.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/platform.dart';
-import '../../../utils/string_extension.dart';
 import '../../../widgets/action_button.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/buttons.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
@@ -135,7 +133,7 @@ class _FilesPreviewDialog extends HookWidget {
       child: Container(
           width: 480,
           height: 600,
-          color: BrightnessData.themeOf(context).popUp,
+          color: context.theme.popUp,
           child: Stack(
             children: [
               Column(
@@ -149,7 +147,7 @@ class _FilesPreviewDialog extends HookWidget {
                       children: [
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewImagesSvg,
-                          tooltip: Localization.of(context).sendQuick,
+                          tooltip: context.l10n.sendQuick,
                           onTap: () => currentTab.value = _TabType.image,
                           selected: currentTab.value == _TabType.image,
                           show: hasImage,
@@ -157,13 +155,13 @@ class _FilesPreviewDialog extends HookWidget {
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewFilesSvg,
                           tooltip:
-                              Localization.of(context).sendWithoutCompression,
+                              context.l10n.sendWithoutCompression,
                           onTap: () => currentTab.value = _TabType.files,
                           selected: currentTab.value == _TabType.files,
                         ),
                         _Tab(
                           assetName: Resources.assetsImagesFilePreviewZipSvg,
-                          tooltip: Localization.of(context).sendArchived,
+                          tooltip: context.l10n.sendArchived,
                           onTap: () => currentTab.value = _TabType.zip,
                           selected: currentTab.value == _TabType.zip,
                           show: showZipTab,
@@ -231,9 +229,9 @@ class _FilesPreviewDialog extends HookWidget {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.only(
                             left: 32, top: 18, bottom: 18, right: 32),
-                        primary: BrightnessData.themeOf(context).accent,
+                        primary: context.theme.accent,
                       ),
-                      child: Text(Localization.of(context).send.toUpperCase()),
+                      child: Text(context.l10n.send.toUpperCase()),
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -270,21 +268,21 @@ Future<void> _sendFile(BuildContext context, _File file) async {
   if (conversationItem == null) return;
   final xFile = file.file;
   if (xFile.isImage) {
-    return Provider.of<AccountServer>(context, listen: false).sendImageMessage(
+    return context.accountServer.sendImageMessage(
       conversationItem.isPlainConversation,
       file: xFile,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
     );
   } else if (xFile.isVideo) {
-    return Provider.of<AccountServer>(context, listen: false).sendVideoMessage(
+    return context.accountServer.sendVideoMessage(
       xFile,
       conversationItem.isPlainConversation,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
     );
   }
-  await Provider.of<AccountServer>(context, listen: false).sendDataMessage(
+  await context.accountServer.sendDataMessage(
     xFile,
     conversationItem.isPlainConversation,
     conversationId: conversationItem.conversationId,
@@ -381,8 +379,8 @@ class _Tab extends StatelessWidget {
                       child: SvgPicture.asset(
                         assetName,
                         color: selected
-                            ? BrightnessData.themeOf(context).accent
-                            : BrightnessData.themeOf(context).icon,
+                            ? context.theme.accent
+                            : context.theme.icon,
                         width: 24,
                         height: 24,
                       )),
@@ -412,7 +410,7 @@ class _PageZip extends StatelessWidget {
                     Text(
                       _kDefaultArchiveName,
                       style: TextStyle(
-                        color: BrightnessData.themeOf(context).text,
+                        color: context.theme.text,
                         fontSize: 16,
                         height: 1.5,
                       ),
@@ -421,9 +419,9 @@ class _PageZip extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      Localization.of(context).archivedFolder,
+                      context.l10n.archivedFolder,
                       style: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
+                        color: context.theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -571,7 +569,7 @@ class _FileIcon extends StatelessWidget {
         height: 50,
         width: 50,
         decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).statusBackground,
+          color: context.theme.statusBackground,
           shape: BoxShape.circle,
         ),
         child: Center(
@@ -630,7 +628,7 @@ class _TileNormalFile extends HookWidget {
                 Text(
                   path.basename(file.path).overflow,
                   style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
+                    color: context.theme.text,
                     fontSize: 16,
                     height: 1.5,
                   ),
@@ -641,7 +639,7 @@ class _TileNormalFile extends HookWidget {
                 Text(
                   filesize(file.length, 0),
                   style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
+                    color: context.theme.secondaryText,
                     fontSize: 14,
                   ),
                 ),
@@ -650,7 +648,7 @@ class _TileNormalFile extends HookWidget {
           ),
           if (showDelete.value)
             ActionButton(
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: context.theme.secondaryText,
               name: Resources.assetsImagesDeleteSvg,
               padding: const EdgeInsets.all(10.0),
               size: 24,
@@ -741,24 +739,24 @@ class _ChatDragIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(color: BrightnessData.themeOf(context).popUp),
+        decoration: BoxDecoration(color: context.theme.popUp),
         child: Container(
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-              color: BrightnessData.themeOf(context).listSelected,
+              color: context.theme.listSelected,
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               border: DashPathBorder.all(
                 borderSide: BorderSide(
-                  color: BrightnessData.themeOf(context).accent,
+                  color: context.theme.accent,
                 ),
                 dashArray: CircularIntervalList([4, 4]),
               )),
           child: Center(
             child: Text(
-              Localization.of(context).chatDragMoreFile,
+              context.l10n.chatDragMoreFile,
               style: TextStyle(
                 fontSize: 14,
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
               ),
             ),
           ),

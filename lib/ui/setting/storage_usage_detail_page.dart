@@ -5,11 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../account/account_server.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
@@ -33,32 +31,32 @@ class StorageUsageDetailPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final watchEvent = useStream(
-      useMemoized(() => File(context.read<AccountServer>().getMediaFilePath())
+      useMemoized(() => File(context.accountServer.getMediaFilePath())
           .watch(recursive: true)),
       initialData: null,
     ).data;
 
     final photosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
-          context.read<AccountServer>().getImagesPath(conversationId))),
+          context.accountServer.getImagesPath(conversationId))),
       '0 B',
       keys: [watchEvent],
     );
     final videosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
-          context.read<AccountServer>().getVideosPath(conversationId))),
+          context.accountServer.getVideosPath(conversationId))),
       '0 B',
       keys: [watchEvent],
     );
     final audiosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
-          context.read<AccountServer>().getAudiosPath(conversationId))),
+          context.accountServer.getAudiosPath(conversationId))),
       '0 B',
       keys: [watchEvent],
     );
     final filesSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
-          context.read<AccountServer>().getFilesPath(conversationId))),
+          context.accountServer.getFilesPath(conversationId))),
       '0 B',
       keys: [watchEvent],
     );
@@ -67,7 +65,7 @@ class StorageUsageDetailPage extends HookWidget {
         const Tuple4(false, false, false, false));
 
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).background,
+      backgroundColor: context.theme.background,
       appBar: MixinAppBar(
         title: Text(name),
         actions: [
@@ -81,7 +79,7 @@ class StorageUsageDetailPage extends HookWidget {
               onTap: () => runFutureWithToast(
                 context,
                 () async {
-                  final accountServer = context.read<AccountServer>();
+                  final accountServer = context.accountServer;
                   if (selected.value.item1) {
                     await _clear(accountServer.getImagesPath(conversationId));
                   }
@@ -98,7 +96,7 @@ class StorageUsageDetailPage extends HookWidget {
               ),
               child: Center(
                 child: Text(
-                  Localization.of(context).clear,
+                  context.l10n.clear,
                 ),
               ),
             ),
@@ -123,14 +121,14 @@ class StorageUsageDetailPage extends HookWidget {
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.item1,
-                      title: Text(Localization.of(context).photos),
+                      title: Text(context.l10n.photos),
                       onChanged: (bool value) =>
                           selected.value = selected.value.withItem1(!value),
                     ),
                     description: Text(
                       photosSize,
                       style: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
+                        color: context.theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -139,14 +137,14 @@ class StorageUsageDetailPage extends HookWidget {
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.item2,
-                      title: Text(Localization.of(context).videos),
+                      title: Text(context.l10n.videos),
                       onChanged: (bool value) =>
                           selected.value = selected.value.withItem2(!value),
                     ),
                     description: Text(
                       videosSize,
                       style: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
+                        color: context.theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -155,14 +153,14 @@ class StorageUsageDetailPage extends HookWidget {
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.item3,
-                      title: Text(Localization.of(context).audio),
+                      title: Text(context.l10n.audio),
                       onChanged: (bool value) =>
                           selected.value = selected.value.withItem3(!value),
                     ),
                     description: Text(
                       audiosSize,
                       style: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
+                        color: context.theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),
@@ -171,14 +169,14 @@ class StorageUsageDetailPage extends HookWidget {
                     title: RadioItem(
                       groupValue: true,
                       value: selected.value.item4,
-                      title: Text(Localization.of(context).files),
+                      title: Text(context.l10n.files),
                       onChanged: (bool value) =>
                           selected.value = selected.value.withItem4(!value),
                     ),
                     description: Text(
                       filesSize,
                       style: TextStyle(
-                        color: BrightnessData.themeOf(context).secondaryText,
+                        color: context.theme.secondaryText,
                         fontSize: 14,
                       ),
                     ),

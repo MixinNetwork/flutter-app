@@ -4,10 +4,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../ui/home/chat_page.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/reg_exp_utils.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../brightness_observer.dart';
 import '../../../high_light_text.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -30,7 +30,7 @@ class TextMessage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final keywordTextStyle = TextStyle(
-      backgroundColor: BrightnessData.themeOf(context).highlight,
+      backgroundColor: context.theme.highlight,
     );
 
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
@@ -40,7 +40,7 @@ class TextMessage extends HookWidget {
             (e) => HighlightTextSpan(
               e[0]!,
               style: TextStyle(
-                color: BrightnessData.themeOf(context).accent,
+                color: context.theme.accent,
               ),
               onTap: () => openUri(context, e[0]!),
             ),
@@ -97,7 +97,7 @@ class TextMessage extends HookWidget {
           ],
           style: TextStyle(
             fontSize: MessageItemWidget.primaryFontSize,
-            color: BrightnessData.themeOf(context).text,
+            color: context.theme.text,
           ),
         ),
       ),

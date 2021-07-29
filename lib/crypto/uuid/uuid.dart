@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
-import '../../utils/string_extension.dart';
+
+import '../../utils/extension/extension.dart';
 
 String generateConversationId(String senderId, String recipientId) {
   final mix = minOf(senderId, recipientId) + maxOf(senderId, recipientId);

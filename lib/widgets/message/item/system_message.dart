@@ -1,12 +1,11 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
+import '../../../utils/extension/extension.dart';
 import '../../brightness_observer.dart';
 import '../message.dart';
 
@@ -44,7 +43,7 @@ class SystemMessage extends StatelessWidget {
                   generateSystemText(
                     actionName: message.actionName,
                     participantIsCurrentUser: message.participantUserId ==
-                        context.read<AccountServer>().userId,
+                        context.accountServer.userId,
                     relationship: message.relationship,
                     participantFullName: message.participantFullName,
                     senderFullName: message.userFullName,

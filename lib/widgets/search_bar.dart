@@ -5,18 +5,16 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
 
-import '../account/account_server.dart';
 import '../bloc/keyword_cubit.dart';
 import '../bloc/simple_cubit.dart';
 import '../constants/resources.dart';
 import '../db/mixin_database.dart';
-import '../generated/l10n.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/home.dart';
+import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'action_button.dart';
 import 'avatar_view/avatar_view.dart';
-import 'brightness_observer.dart';
 import 'dialog.dart';
 import 'menu.dart';
 import 'search_text_field.dart';
@@ -41,7 +39,7 @@ class SearchBar extends HookWidget {
         child: Icon(
           Icons.menu,
           size: 20,
-          color: BrightnessData.themeOf(context).icon,
+          color: context.theme.icon,
         ),
       );
     }
@@ -70,7 +68,7 @@ class SearchBar extends HookWidget {
                   controller: context.read<TextEditingController>(),
                   onChanged: (keyword) =>
                       context.read<KeywordCubit>().emit(keyword),
-                  hintText: Localization.of(context).search,
+                  hintText: context.l10n.search,
                 ),
               ),
             ),
@@ -78,12 +76,12 @@ class SearchBar extends HookWidget {
             ContextMenuPortalEntry(
               buildMenus: () => [
                 ContextMenu(
-                  title: Localization.of(context).createConversation,
+                  title: context.l10n.createConversation,
                   onTap: () async {
                     final list = await showConversationSelector(
                       context: context,
                       singleSelect: true,
-                      title: Localization.of(context).createConversation,
+                      title: context.l10n.createConversation,
                       onlyContact: true,
                     );
                     if (list.isEmpty || (list.first.userId?.isEmpty ?? true)) {
@@ -98,12 +96,12 @@ class SearchBar extends HookWidget {
                   },
                 ),
                 ContextMenu(
-                  title: Localization.of(context).createGroupConversation,
+                  title: context.l10n.createGroupConversation,
                   onTap: () async {
                     final result = await showConversationSelector(
                       context: context,
                       singleSelect: false,
-                      title: Localization.of(context).createGroupConversation,
+                      title: context.l10n.createGroupConversation,
                       onlyContact: true,
                     );
                     if (result.isEmpty) return;
@@ -117,25 +115,25 @@ class SearchBar extends HookWidget {
                     final name = await showMixinDialog<String>(
                       context: context,
                       child: _NewConversationConfirm(
-                          [context.read<AccountServer>().userId, ...userIds]),
+                          [context.accountServer.userId, ...userIds]),
                     );
                     if (name?.isEmpty ?? true) return;
 
                     await runFutureWithToast(
                       context,
                       context
-                          .read<AccountServer>()
+                          .accountServer
                           .createGroupConversation(name!, userIds),
                     );
                   },
                 ),
                 ContextMenu(
-                  title: Localization.of(context).createCircle,
+                  title: context.l10n.createCircle,
                   onTap: () async {
                     final list = await showConversationSelector(
                       context: context,
                       singleSelect: false,
-                      title: Localization.of(context).createCircle,
+                      title: context.l10n.createCircle,
                       onlyContact: false,
                     );
 
@@ -144,8 +142,8 @@ class SearchBar extends HookWidget {
                     final name = await showMixinDialog<String>(
                       context: context,
                       child: EditDialog(
-                        title: Text(Localization.of(context).circles),
-                        hintText: Localization.of(context).editCircleName,
+                        title: Text(context.l10n.circles),
+                        hintText: context.l10n.editCircleName,
                       ),
                     );
 
@@ -153,7 +151,7 @@ class SearchBar extends HookWidget {
 
                     await runFutureWithToast(
                       context,
-                      context.read<AccountServer>().createCircle(
+                      context.accountServer.createCircle(
                             name!,
                             list
                                 .map(
@@ -176,7 +174,7 @@ class SearchBar extends HookWidget {
                     onTapUp: (event) =>
                         context.read<OffsetCubit>().emit(event.globalPosition),
                     padding: const EdgeInsets.all(8),
-                    color: BrightnessData.themeOf(context).icon,
+                    color: context.theme.icon,
                   ),
                 ),
               ),
@@ -201,7 +199,7 @@ class _NewConversationConfirm extends HookWidget {
   Widget build(BuildContext context) {
     final users = useMemoizedFuture(
       () => context
-          .read<AccountServer>()
+          .accountServer
           .database
           .userDao
           .usersByIn(userIds.sublist(0, min(4, userIds.length)))
@@ -212,7 +210,7 @@ class _NewConversationConfirm extends HookWidget {
     final textEditingController = useTextEditingController();
     final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(
-      title: Text(Localization.of(context).groups),
+      title: Text(context.l10n.groups),
       titleMarginBottom: 24,
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -226,10 +224,10 @@ class _NewConversationConfirm extends HookWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            Localization.of(context).participantsCount(userIds.length),
+            context.l10n.participantsCount(userIds.length),
             style: TextStyle(
               fontSize: 14,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: context.theme.secondaryText,
             ),
           ),
           const SizedBox(height: 48),
@@ -243,11 +241,11 @@ class _NewConversationConfirm extends HookWidget {
         MixinButton(
             backgroundTransparent: true,
             onTap: () => Navigator.pop(context),
-            child: Text(Localization.of(context).cancel)),
+            child: Text(context.l10n.cancel)),
         MixinButton(
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
-          child: Text(Localization.of(context).create),
+          child: Text(context.l10n.create),
         ),
       ],
     );

@@ -6,16 +6,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
-import '../../../generated/l10n.dart';
-import '../../../utils/list_utils.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
-import '../../../widgets/brightness_observer.dart';
+
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
@@ -40,7 +39,7 @@ class GroupParticipantsPage extends HookWidget {
     });
 
     final participants = useStream(useMemoized(() {
-          final dao = context.read<AccountServer>().database.participantDao;
+          final dao = context.database.participantDao;
           return dao.watchParticipants(conversationId);
         }, [conversationId])).data ??
         const <ParticipantUser>[];
@@ -49,16 +48,16 @@ class GroupParticipantsPage extends HookWidget {
     // Could be null if has been removed from group.
     final currentUser = useMemoized(
       () => participants.firstWhereOrNull(
-          (e) => e.userId == context.read<AccountServer>().userId),
+          (e) => e.userId == context.accountServer.userId),
       [participants],
     );
 
     final controller = useTextEditingController();
 
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).primary,
+      backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).groupParticipants),
+        title: Text(context.l10n.groupParticipants),
         actions: [
           if (currentUser?.role != null)
             _ActionAddParticipants(participants: participants)
@@ -69,7 +68,7 @@ class GroupParticipantsPage extends HookWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SearchTextField(
-              hintText: Localization.of(context).groupSearchParticipants,
+              hintText: context.l10n.groupSearchParticipants,
               autofocus: true,
               controller: controller,
             ),
@@ -162,14 +161,14 @@ class _ParticipantTile extends StatelessWidget {
                 child: HighlightText(
                   participant.fullName ?? '?',
                   style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
+                    color: context.theme.text,
                     fontSize: 16,
                   ),
                   highlightTextSpans: [
                     HighlightTextSpan(
                       keyword,
                       style: TextStyle(
-                        color: BrightnessData.themeOf(context).accent,
+                        color: context.theme.accent,
                       ),
                     )
                   ],
@@ -203,7 +202,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final self = participant.userId == context.read<AccountServer>().userId;
+    final self = participant.userId == context.accountServer.userId;
     if (self) {
       return child;
     }
@@ -212,7 +211,7 @@ class _ParticipantMenuEntry extends StatelessWidget {
       buildMenus: () {
         final menus = [
           ContextMenu(
-            title: Localization.of(context)
+            title: context.l10n
                 .groupPopMenuMessage(participant.fullName ?? '?'),
             onTap: () {
               ConversationCubit.selectUser(
@@ -225,10 +224,10 @@ class _ParticipantMenuEntry extends StatelessWidget {
         if (currentUser?.role == ParticipantRole.owner) {
           if (participant.role != ParticipantRole.admin) {
             menus.add(ContextMenu(
-              title: Localization.of(context).groupPopMenuMakeAdmin,
+              title: context.l10n.groupPopMenuMakeAdmin,
               onTap: () => runFutureWithToast(
                 context,
-                context.read<AccountServer>().updateParticipantRole(
+                context.accountServer.updateParticipantRole(
                     context.read<ConversationCubit>().state!.conversationId,
                     participant.userId,
                     ParticipantRole.admin),
@@ -236,10 +235,10 @@ class _ParticipantMenuEntry extends StatelessWidget {
             ));
           } else {
             menus.add(ContextMenu(
-              title: Localization.of(context).groupPopMenuDismissAdmin,
+              title: context.l10n.groupPopMenuDismissAdmin,
               onTap: () => runFutureWithToast(
                   context,
-                  context.read<AccountServer>().updateParticipantRole(
+                  context.accountServer.updateParticipantRole(
                       context.read<ConversationCubit>().state!.conversationId,
                       participant.userId,
                       null)),
@@ -251,11 +250,11 @@ class _ParticipantMenuEntry extends StatelessWidget {
             currentUser?.role == ParticipantRole.owner) {
           menus.add(ContextMenu(
             isDestructiveAction: true,
-            title: Localization.of(context)
+            title: context.l10n
                 .groupPopMenuRemoveParticipants(participant.fullName ?? '?'),
             onTap: () => runFutureWithToast(
                 context,
-                context.read<AccountServer>().removeParticipant(
+                context.accountServer.removeParticipant(
                     context.read<ConversationCubit>().state!.conversationId,
                     participant.userId)),
           ));
@@ -275,9 +274,9 @@ class _RoleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (role) {
       case ParticipantRole.owner:
-        return _RoleLabel(Localization.of(context).groupOwner);
+        return _RoleLabel(context.l10n.groupOwner);
       case ParticipantRole.admin:
-        return _RoleLabel(Localization.of(context).groupAdmin);
+        return _RoleLabel(context.l10n.groupAdmin);
       default:
         return Container(width: 0);
     }
@@ -293,7 +292,7 @@ class _RoleLabel extends StatelessWidget {
   Widget build(BuildContext context) => Text(
         label,
         style: TextStyle(
-          color: BrightnessData.themeOf(context).secondaryText,
+          color: context.theme.secondaryText,
           fontSize: 14,
         ),
       );
@@ -311,19 +310,19 @@ class _ActionAddParticipants extends StatelessWidget {
   Widget build(BuildContext context) => ContextMenuPortalEntry(
         buildMenus: () => [
           ContextMenu(
-            title: Localization.of(context).groupAdd,
+            title: context.l10n.groupAdd,
             onTap: () async {
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: false,
-                title: Localization.of(context).groupAdd,
+                title: context.l10n.groupAdd,
                 onlyContact: true,
               );
               if (result.isEmpty) {
                 return;
               }
               final userIds = [
-                context.read<AccountServer>().userId,
+                context.accountServer.userId,
                 ...result.where((e) => e.userId != null).map(
                       (e) => e.userId!,
                     )
@@ -334,13 +333,13 @@ class _ActionAddParticipants extends StatelessWidget {
               await runFutureWithToast(
                 context,
                 Future.wait(userIds.map((userId) => context
-                    .read<AccountServer>()
+                    .accountServer
                     .addParticipant(conversationId!, [userId]))),
               );
             },
           ),
           ContextMenu(
-            title: Localization.of(context).groupInvite,
+            title: context.l10n.groupInvite,
             onTap: () {
               final conversationCubit = context.read<ConversationCubit>().state;
               assert(conversationCubit != null);
@@ -352,7 +351,7 @@ class _ActionAddParticipants extends StatelessWidget {
         child: Builder(
             builder: (context) => ActionButton(
                   name: Resources.assetsImagesIcAddSvg,
-                  color: BrightnessData.themeOf(context).icon,
+                  color: context.theme.icon,
                   onTapUp: (event) =>
                       context.read<OffsetCubit>().emit(event.globalPosition),
                   padding: const EdgeInsets.all(8),

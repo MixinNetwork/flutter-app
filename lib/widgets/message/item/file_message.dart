@@ -7,14 +7,12 @@ import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart';
-import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/brightness_theme_data.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
-import '../../../generated/l10n.dart';
-import '../../brightness_observer.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
 import '../message.dart';
@@ -49,25 +47,25 @@ class FileMessage extends StatelessWidget {
             if (message.mediaStatus == MediaStatus.canceled) {
               if (message.relationship == UserRelationship.me &&
                   message.mediaUrl?.isNotEmpty == true) {
-                await context.read<AccountServer>().reUploadAttachment(message);
+                await context.accountServer.reUploadAttachment(message);
               } else {
-                await context.read<AccountServer>().downloadAttachment(message);
+                await context.accountServer.downloadAttachment(message);
               }
             } else if (message.mediaStatus == MediaStatus.done &&
                 message.mediaUrl != null) {
               if (message.mediaUrl?.isEmpty ?? true) return;
               final path = await getSavePath(
-                confirmButtonText: Localization.of(context).save,
+                confirmButtonText: context.l10n.save,
                 suggestedName: message.mediaName ?? basename(message.mediaUrl!),
               );
               if (path?.isEmpty ?? true) return;
               await File(context
-                      .read<AccountServer>()
+                      .accountServer
                       .convertMessageAbsolutePath(message))
                   .copy(path!);
             } else if (message.mediaStatus == MediaStatus.pending) {
               context
-                  .read<AccountServer>()
+                  .accountServer
                   .cancelProgressAttachmentJob(message.messageId);
             }
           },
@@ -94,7 +92,7 @@ class FileMessage extends StatelessWidget {
 
                   return DecoratedBox(
                     decoration: BoxDecoration(
-                      color: BrightnessData.themeOf(context).statusBackground,
+                      color: context.theme.statusBackground,
                     ),
                     child: SizedBox.fromSize(
                       size: const Size.square(38),
@@ -132,14 +130,14 @@ class FileMessage extends StatelessWidget {
                     message.mediaName ?? '',
                     style: TextStyle(
                       fontSize: MessageItemWidget.secondaryFontSize,
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                     ),
                   ),
                   Text(
                     filesize(message.mediaSize),
                     style: TextStyle(
                       fontSize: MessageItemWidget.tertiaryFontSize,
-                      color: BrightnessData.themeOf(context).secondaryText,
+                      color: context.theme.secondaryText,
                     ),
                   ),
                 ],

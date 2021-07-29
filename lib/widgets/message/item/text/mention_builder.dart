@@ -5,9 +5,9 @@ import 'package:provider/provider.dart';
 
 import '../../../../db/dao/user_dao.dart';
 import '../../../../db/mixin_database.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/reg_exp_utils.dart';
-import '../../../brightness_observer.dart';
 import '../../../high_light_text.dart';
 import '../../../user/user_dialog.dart';
 
@@ -156,7 +156,7 @@ class MentionBuilder extends HookWidget {
           (entry) => HighlightTextSpan(
             '@${entry.value.fullName}',
             style: TextStyle(
-              color: BrightnessData.themeOf(context).accent,
+              color: context.theme.accent,
             ),
             onTap: () => showUserDialog(context, entry.value.userId),
           ),

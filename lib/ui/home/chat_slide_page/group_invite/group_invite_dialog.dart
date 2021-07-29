@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../account/account_server.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
-import '../../../../generated/l10n.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/avatar_view/avatar_view.dart';
 import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/buttons.dart';
@@ -38,15 +36,14 @@ class _GroupInviteByLinkDialog extends HookWidget {
   Widget build(BuildContext context) {
     final conversation = useStream(
       useMemoized(() {
-        final accountServer = context.read<AccountServer>()
-          ..refreshGroup(conversationId);
-        return accountServer.database.conversationDao
+        context.accountServer.refreshGroup(conversationId);
+        return context.database.conversationDao
             .conversationById(conversationId)
             .watchSingleOrNull();
       }, [conversationId]),
     ).data;
     return Material(
-        color: BrightnessData.themeOf(context).popUp,
+        color: context.theme.popUp,
         child: SizedBox(
             width: 480,
             height: 600,
@@ -60,10 +57,10 @@ class _GroupInviteByLinkDialog extends HookWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 30),
                       child: Text(
-                        Localization.of(context).groupInvite,
+                        context.l10n.groupInvite,
                         style: TextStyle(
                           fontSize: 18,
-                          color: BrightnessData.themeOf(context).text,
+                          color: context.theme.text,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -102,7 +99,7 @@ class _GroupInviteBody extends StatelessWidget {
             conversation.name ?? '',
             style: TextStyle(
               fontSize: 18,
-              color: BrightnessData.themeOf(context).text,
+              color: context.theme.text,
               fontWeight: FontWeight.w600,
               height: 1.5,
             ),
@@ -114,7 +111,7 @@ class _GroupInviteBody extends StatelessWidget {
               conversation.codeUrl ?? '',
               style: TextStyle(
                 fontSize: 14,
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
                 fontWeight: FontWeight.w400,
                 height: 1.5,
               ),
@@ -126,10 +123,10 @@ class _GroupInviteBody extends StatelessWidget {
           SizedBox(
             width: 338,
             child: Text(
-              Localization.of(context).groupInviteInfo,
+              context.l10n.groupInviteInfo,
               style: TextStyle(
                 fontSize: 12,
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: context.theme.secondaryText,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -154,29 +151,29 @@ class _ActionButtons extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _IconButton(
-            label: Localization.of(context).groupInviteShare,
+            label: context.l10n.groupInviteShare,
             iconAssetName: Resources.assetsImagesInviteShareSvg,
             onTap: () async {
               assert(conversation.codeUrl != null);
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: true,
-                title: Localization.of(context).forward,
+                title: context.l10n.forward,
                 onlyContact: false,
               );
               if (result.isEmpty) return;
               await runFutureWithToast(
                   context,
-                  context.read<AccountServer>().sendTextMessage(
-                        conversation.codeUrl!,
-                        isPlain(result.first.isGroup, result.first.isBot),
-                        conversationId: result.first.conversationId,
-                        recipientId: result.first.userId,
-                      ));
+                  context.accountServer.sendTextMessage(
+                    conversation.codeUrl!,
+                    isPlain(result.first.isGroup, result.first.isBot),
+                    conversationId: result.first.conversationId,
+                    recipientId: result.first.userId,
+                  ));
             },
           ),
           _IconButton(
-            label: Localization.of(context).groupInviteCopy,
+            label: context.l10n.groupInviteCopy,
             iconAssetName: Resources.assetsImagesInviteCopySvg,
             onTap: () async {
               await Clipboard.setData(
@@ -185,14 +182,11 @@ class _ActionButtons extends StatelessWidget {
             },
           ),
           _IconButton(
-            label: Localization.of(context).groupInviteReset,
+            label: context.l10n.groupInviteReset,
             iconAssetName: Resources.assetsImagesInviteRefreshSvg,
             onTap: () {
-              runFutureWithToast(
-                  context,
-                  context
-                      .read<AccountServer>()
-                      .rotate(conversation.conversationId));
+              runFutureWithToast(context,
+                  context.accountServer.rotate(conversation.conversationId));
             },
           ),
         ],
@@ -229,13 +223,13 @@ class _IconButton extends StatelessWidget {
                 iconAssetName,
                 width: 24,
                 height: 24,
-                color: BrightnessData.themeOf(context).icon,
+                color: context.theme.icon,
               ),
               const SizedBox(height: 15),
               Text(
                 label,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
+                  color: context.theme.text,
                   fontSize: 14,
                 ),
               )

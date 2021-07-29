@@ -5,8 +5,8 @@ import 'package:flutter_svg/svg.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
-import '../../../generated/l10n.dart';
-import '../../brightness_observer.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -31,18 +31,18 @@ class RecallMessage extends StatelessWidget {
       children: [
         SvgPicture.asset(
           Resources.assetsImagesRecallSvg,
-          color: BrightnessData.themeOf(context).secondaryText,
+          color: context.theme.secondaryText,
           width: 16,
           height: 16,
         ),
         const SizedBox(width: 4),
         Text(
           isCurrentUser
-              ? Localization.of(context).chatRecallMe
-              : Localization.of(context).chatRecallDelete,
+              ? context.l10n.chatRecallMe
+              : context.l10n.chatRecallDelete,
           style: TextStyle(
             fontSize: MessageItemWidget.primaryFontSize,
-            color: BrightnessData.themeOf(context).text,
+            color: context.theme.text,
           ),
         ),
       ],

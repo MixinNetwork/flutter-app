@@ -3,13 +3,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../account/account_server.dart';
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../enum/media_status.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../status.dart';
@@ -56,14 +54,14 @@ class ImageMessageWidget extends StatelessWidget {
                   case MediaStatus.canceled:
                     if (message.relationship == UserRelationship.me &&
                         message.mediaUrl?.isNotEmpty == true) {
-                      context.read<AccountServer>().reUploadAttachment(message);
+                      context.accountServer.reUploadAttachment(message);
                     } else {
-                      context.read<AccountServer>().downloadAttachment(message);
+                      context.accountServer.downloadAttachment(message);
                     }
                     break;
                   case MediaStatus.pending:
                     context
-                        .read<AccountServer>()
+                        .accountServer
                         .cancelProgressAttachmentJob(message.messageId);
                     break;
                   default:
@@ -78,7 +76,7 @@ class ImageMessageWidget extends StatelessWidget {
                   children: [
                     Image.file(
                       File(context
-                          .read<AccountServer>()
+                          .accountServer
                           .convertMessageAbsolutePath(message)),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(

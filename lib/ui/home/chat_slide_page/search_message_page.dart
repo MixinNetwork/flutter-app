@@ -4,15 +4,14 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
-import '../../../account/account_server.dart';
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
-import '../../../generated/l10n.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/search_text_field.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
@@ -43,7 +42,7 @@ class SearchMessagePage extends HookWidget {
         queryCount: () async {
           if (keyword.trim().isEmpty) return 0;
           return context
-              .read<AccountServer>()
+              .accountServer
               .database
               .messageDao
               .fuzzySearchMessageCountByConversationId(keyword, conversationId)
@@ -52,7 +51,7 @@ class SearchMessagePage extends HookWidget {
         queryRange: (int limit, int offset) async {
           if (keyword.trim().isEmpty) return [];
           return context
-              .read<AccountServer>()
+              .accountServer
               .database
               .messageDao
               .fuzzySearchMessageByConversationId(
@@ -67,7 +66,7 @@ class SearchMessagePage extends HookWidget {
     );
     useEffect(
       () => context
-          .read<AccountServer>()
+          .accountServer
           .database
           .messageDao
           .searchMessageUpdateEvent
@@ -104,14 +103,14 @@ class SearchMessagePage extends HookWidget {
     }
 
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).primary,
+      backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).searchMessageHistory),
+        title: Text(context.l10n.searchMessageHistory),
         actions: [
           if (!Navigator.of(context).canPop())
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
-              color: BrightnessData.themeOf(context).icon,
+              color: context.theme.icon,
               onTap: () {
                 context.read<SearchConversationKeywordCubit>().emit('');
                 context.read<ChatSideCubit>().onPopPage();
@@ -130,7 +129,7 @@ class SearchMessagePage extends HookWidget {
                   context.read<SearchConversationKeywordCubit>().emit(keyword),
               fontSize: 16,
               controller: useTextEditingController(),
-              hintText: Localization.of(context).search,
+              hintText: context.l10n.search,
             ),
           ),
           Expanded(

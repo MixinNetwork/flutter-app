@@ -6,7 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../constants/resources.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
@@ -21,9 +21,9 @@ class AboutPage extends HookWidget {
     final info = useMemoizedFuture(PackageInfo.fromPlatform, null);
     final version = info == null ? '' : '${info.version}(${info.buildNumber})';
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).background,
+      backgroundColor: context.theme.background,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).about),
+        title: Text(context.l10n.about),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -38,9 +38,9 @@ class AboutPage extends HookWidget {
               ),
               const SizedBox(height: 24),
               Text(
-                Localization.of(context).mixinMessenger,
+                context.l10n.mixinMessenger,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
+                  color: context.theme.text,
                   fontSize: 18,
                 ),
               ),
@@ -49,7 +49,7 @@ class AboutPage extends HookWidget {
               Text(
                 version,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
+                  color: context.theme.secondaryText,
                   fontSize: 16,
                 ),
               ),
@@ -64,27 +64,27 @@ class AboutPage extends HookWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CellItem(
-                      title: Text(Localization.of(context).followTwitter),
+                      title: Text(context.l10n.followTwitter),
                       onTap: () => openUri(
                           context, 'https://twitter.com/MixinMessenger'),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).followFacebook),
+                      title: Text(context.l10n.followFacebook),
                       onTap: () =>
                           openUri(context, 'https://fb.com/MixinMessenger'),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).helpCenter),
+                      title: Text(context.l10n.helpCenter),
                       onTap: () => openUri(
                           context, 'https://mixinmessenger.zendesk.com'),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).termsService),
+                      title: Text(context.l10n.termsService),
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/terms'),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).privacyPolicy),
+                      title: Text(context.l10n.privacyPolicy),
                       onTap: () =>
                           openUri(context, 'https://mixin.one/pages/privacy'),
                     ),

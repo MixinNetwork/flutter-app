@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../constants/resources.dart';
+import '../utils/extension/extension.dart';
 import 'brightness_observer.dart';
 import 'interacter_decorated_box.dart';
 
@@ -42,7 +43,7 @@ class SearchTextField extends HookWidget {
       const Color.fromRGBO(245, 247, 250, 1),
       darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
     );
-    final hintColor = BrightnessData.themeOf(context).secondaryText;
+    final hintColor = context.theme.secondaryText;
 
     useEffect(() {
       void notifyChanged() {
@@ -63,7 +64,7 @@ class SearchTextField extends HookWidget {
         autofocus: autofocus,
         controller: controller,
         style: TextStyle(
-          color: BrightnessData.themeOf(context).text,
+          color: context.theme.text,
           fontSize: fontSize,
         ),
         scrollPadding: EdgeInsets.zero,
@@ -121,7 +122,7 @@ class _SearchClearIcon extends HookWidget {
             padding: const EdgeInsets.only(right: 16),
             child: Icon(
               Icons.close,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: context.theme.secondaryText,
             ),
           ),
         ),

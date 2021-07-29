@@ -13,12 +13,12 @@ import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
 import '../ui/home/local_notification_center.dart';
+import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
-import 'account_server.dart';
 
 class NotificationService {
   NotificationService({
@@ -26,7 +26,7 @@ class NotificationService {
   }) {
     streamSubscriptions
       ..add(context
-          .read<AccountServer>()
+          .accountServer
           .database
           .messageDao
           .notificationMessageStream
@@ -40,7 +40,7 @@ class NotificationService {
             return true;
           })
           .where(
-              (event) => event.senderId != context.read<AccountServer>().userId)
+              (event) => event.senderId != context.accountServer.userId)
           .asyncWhere((event) async {
             final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
@@ -83,7 +83,7 @@ class NotificationService {
                 body = generateSystemText(
                   actionName: event.actionName,
                   participantIsCurrentUser: event.participantUserId ==
-                      context.read<AccountServer>().userId,
+                      context.accountServer.userId,
                   relationship: event.relationship,
                   participantFullName: event.participantFullName,
                   senderFullName: event.senderFullName,

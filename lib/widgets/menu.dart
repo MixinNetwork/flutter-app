@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
 import '../bloc/simple_cubit.dart';
+import '../utils/extension/extension.dart';
 import 'brightness_observer.dart';
+
 import 'interacter_decorated_box.dart';
 
 class ContextMenuPortalEntry extends StatelessWidget {
@@ -133,7 +135,7 @@ class ContextMenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightnessData = BrightnessData.of(context);
+    final brightnessData = context.brightnessValue;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(11),
@@ -204,7 +206,7 @@ class ContextMenu extends StatelessWidget {
           color: backgroundColor,
         ),
         tapDowningColor: Color.alphaBlend(
-          BrightnessData.themeOf(context).listSelected,
+          context.theme.listSelected,
           backgroundColor,
         ),
         onTap: () {
@@ -218,7 +220,7 @@ class ContextMenu extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               color: isDestructiveAction
-                  ? BrightnessData.themeOf(context).red
+                  ? context.theme.red
                   : BrightnessData.dynamicColor(
                       context,
                       const Color.fromRGBO(0, 0, 0, 1),

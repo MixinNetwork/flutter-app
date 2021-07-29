@@ -6,8 +6,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/action_utils.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../brightness_observer.dart';
 import '../../../cache_image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../message.dart';
@@ -66,7 +66,7 @@ class ActionCardMessage extends HookWidget {
                   Text(
                     appCardData.title,
                     style: TextStyle(
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                       fontSize: MessageItemWidget.secondaryFontSize,
                     ),
                     maxLines: 1,
@@ -75,7 +75,7 @@ class ActionCardMessage extends HookWidget {
                   Text(
                     appCardData.description,
                     style: TextStyle(
-                      color: BrightnessData.themeOf(context).secondaryText,
+                      color: context.theme.secondaryText,
                       fontSize: MessageItemWidget.tertiaryFontSize,
                     ),
                   ),

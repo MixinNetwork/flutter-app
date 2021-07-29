@@ -24,6 +24,7 @@ import 'ui/home/conversation_page.dart';
 import 'ui/home/home.dart';
 import 'ui/home/route/responsive_navigator_cubit.dart';
 import 'ui/landing/landing.dart';
+import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'widgets/brightness_observer.dart';
@@ -201,7 +202,7 @@ class _App extends StatelessWidget {
             ),
             builder: (context, child) {
               try {
-                Provider.of<AccountServer>(context).language =
+                context.accountServer.language =
                     Localizations.localeOf(context).languageCode;
               } catch (_) {}
               return BrightnessObserver(

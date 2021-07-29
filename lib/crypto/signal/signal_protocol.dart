@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:moor/moor.dart';
@@ -10,8 +11,8 @@ import '../../blaze/blaze_message.dart';
 import '../../blaze/blaze_param.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
-import '../../utils/string_extension.dart';
 import 'encrypt_result.dart';
 import 'identity_key_util.dart';
 import 'signal_database.dart';

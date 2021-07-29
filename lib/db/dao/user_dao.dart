@@ -1,6 +1,6 @@
 import 'package:moor/moor.dart';
 
-import '../../utils/string_extension.dart';
+import '../../utils/extension/extension.dart';
 import '../mixin_database.dart';
 
 part 'user_dao.g.dart';

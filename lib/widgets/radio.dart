@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../constants/resources.dart';
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
 
 class RadioItem<T> extends StatelessWidget {
   const RadioItem({
@@ -29,8 +29,8 @@ class RadioItem<T> extends StatelessWidget {
               ClipOval(
                 child: Container(
                   color: groupValue == value
-                      ? BrightnessData.themeOf(context).accent
-                      : BrightnessData.themeOf(context).secondaryText,
+                      ? context.theme.accent
+                      : context.theme.secondaryText,
                   height: 16,
                   width: 16,
                   alignment: const Alignment(0.0, -0.2),
@@ -44,7 +44,7 @@ class RadioItem<T> extends StatelessWidget {
               const SizedBox(width: 30),
               DefaultTextStyle(
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
+                  color: context.theme.text,
                   fontSize: 16,
                 ),
                 child: title,

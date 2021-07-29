@@ -6,10 +6,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
@@ -36,7 +35,7 @@ class SettingPage extends HookWidget {
         child: Icon(
           Icons.menu,
           size: 20,
-          color: BrightnessData.themeOf(context).icon,
+          color: context.theme.icon,
         ),
       );
     }
@@ -66,7 +65,7 @@ class SettingPage extends HookWidget {
                       child: _Item(
                         assetName: Resources.assetsImagesIcProfileSvg,
                         pageName: ResponsiveNavigatorCubit.editProfilePage,
-                        title: Localization.of(context).editProfile,
+                        title: context.l10n.editProfile,
                       ),
                     ),
                     CellGroup(
@@ -75,28 +74,28 @@ class SettingPage extends HookWidget {
                           _Item(
                             assetName: Resources.assetsImagesIcNotificationSvg,
                             pageName: ResponsiveNavigatorCubit.notificationPage,
-                            title: Localization.of(context).notification,
+                            title: context.l10n.notification,
                           ),
                           _Item(
                             assetName: Resources.assetsImagesIcBackupSvg,
                             pageName: ResponsiveNavigatorCubit.chatBackupPage,
-                            title: Localization.of(context).chatBackup,
+                            title: context.l10n.chatBackup,
                           ),
                           _Item(
                             assetName: Resources.assetsImagesIcStorageUsageSvg,
                             pageName: ResponsiveNavigatorCubit
                                 .dataAndStorageUsagePage,
-                            title: Localization.of(context).dataAndStorageUsage,
+                            title: context.l10n.dataAndStorageUsage,
                           ),
                           _Item(
                             assetName: Resources.assetsImagesIcAppearanceSvg,
                             pageName: ResponsiveNavigatorCubit.appearancePage,
-                            title: Localization.of(context).appearance,
+                            title: context.l10n.appearance,
                           ),
                           _Item(
                             assetName: Resources.assetsImagesIcAboutSvg,
                             pageName: ResponsiveNavigatorCubit.aboutPage,
-                            title: Localization.of(context).about,
+                            title: context.l10n.about,
                           ),
                         ],
                       ),
@@ -106,13 +105,13 @@ class SettingPage extends HookWidget {
                 CellGroup(
                   child: _Item(
                     assetName: Resources.assetsImagesIcSignOutSvg,
-                    title: Localization.of(context).signOut,
+                    title: context.l10n.signOut,
                     onTap: () async {
                       await runFutureWithToast(
                         context,
                         () async {
                           try {
-                            final accountServer = context.read<AccountServer>();
+                            final accountServer = context.accountServer;
                             await accountServer.signOutAndClear();
                           } catch (e) {
                             if (e is! MixinApiError) rethrow;
@@ -121,7 +120,7 @@ class SettingPage extends HookWidget {
                       );
                       context.read<MultiAuthCubit>().signOut();
                     },
-                    color: BrightnessData.themeOf(context).red,
+                    color: context.theme.red,
                     enableTrailingArrow: false,
                   ),
                 ),
@@ -163,7 +162,7 @@ class _Item extends StatelessWidget {
             assetName,
             width: 24,
             height: 24,
-            color: color ?? BrightnessData.themeOf(context).text,
+            color: color ?? context.theme.text,
           ),
           title: Text(title),
           color: color,
@@ -212,7 +211,7 @@ class _UserProfile extends StatelessWidget {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 18,
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
               ),
             ),
           ),

@@ -6,7 +6,9 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../widgets/brightness_observer.dart';
+
 import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
 
@@ -34,14 +36,14 @@ class LandingPage extends StatelessWidget {
               builder: (context, status) {
                 if (status == LandingStatus.init) {
                   return _Loading(
-                    title: Localization.of(context).initializing,
-                    message: Localization.of(context).chatInputHint,
+                    title: context.l10n.initializing,
+                    message: context.l10n.chatInputHint,
                   );
                 }
 
                 if (status == LandingStatus.provisioning) {
                   return _Loading(
-                    title: Localization.of(context).provisioning,
+                    title: context.l10n.provisioning,
                     message: Localization.current.chatInputHint,
                   );
                 }
@@ -106,15 +108,15 @@ class _QrCode extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              Localization.of(context).pageLandingLoginTitle,
+              context.l10n.pageLandingLoginTitle,
               style: TextStyle(
                 fontSize: 22,
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
               ),
             ),
             const SizedBox(height: 10),
             Text(
-              Localization.of(context).pageLandingLoginMessage,
+              context.l10n.pageLandingLoginMessage,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -142,7 +144,7 @@ class _Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = BrightnessData.themeOf(context).text;
+    final primaryColor = context.theme.text;
     return SizedBox(
       width: 375,
       child: Column(
@@ -208,7 +210,7 @@ class _Retry extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
-                    Localization.of(context).pageLandingClickToReload,
+                    context.l10n.pageLandingClickToReload,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       color: Color.fromRGBO(255, 255, 255, 0.9),

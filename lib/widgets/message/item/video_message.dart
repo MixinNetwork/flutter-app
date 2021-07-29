@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
 import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 import '../../image.dart';
 import '../../interacter_decorated_box.dart';
@@ -54,25 +53,25 @@ class VideoMessageWidget extends StatelessWidget {
                 if (message.mediaStatus == MediaStatus.canceled) {
                   if (message.relationship == UserRelationship.me &&
                       message.mediaUrl?.isNotEmpty == true) {
-                    context.read<AccountServer>().reUploadAttachment(message);
+                    context.accountServer.reUploadAttachment(message);
                   } else {
-                    context.read<AccountServer>().downloadAttachment(message);
+                    context.accountServer.downloadAttachment(message);
                   }
                 } else if (message.mediaStatus == MediaStatus.done &&
                     message.mediaUrl != null) {
                   openUri(
                       context,
                       Uri.file(context
-                              .read<AccountServer>()
+                              .accountServer
                               .convertMessageAbsolutePath(message))
                           .toString());
                 } else if (message.mediaStatus == MediaStatus.pending) {
                   context
-                      .read<AccountServer>()
+                      .accountServer
                       .cancelProgressAttachmentJob(message.messageId);
                 } else if (message.type.isLive && message.mediaUrl != null) {
                   launch(context
-                      .read<AccountServer>()
+                      .accountServer
                       .convertMessageAbsolutePath(message));
                 }
               },

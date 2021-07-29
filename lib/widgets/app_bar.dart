@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
 import 'buttons.dart';
 import 'window/move_window.dart';
 
@@ -23,7 +23,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
     final actionTextStyle = TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w500,
-      color: BrightnessData.themeOf(context).accent,
+      color: context.theme.accent,
     );
     return MoveWindow(
       child: AppBar(
@@ -34,7 +34,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: BrightnessData.themeOf(context).text,
+                  color: context.theme.text,
                 ),
                 child: title!,
               ),
@@ -48,8 +48,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
         ],
         elevation: 0,
         centerTitle: true,
-        backgroundColor:
-            backgroundColor ?? BrightnessData.themeOf(context).primary,
+        backgroundColor: backgroundColor ?? context.theme.primary,
         leading: MoveWindowBarrier(
           child: Builder(
             builder: (context) => ModalRoute.of(context)?.canPop ?? false

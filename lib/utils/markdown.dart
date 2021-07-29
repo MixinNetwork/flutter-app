@@ -1,45 +1,19 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
-import 'package:markdown/markdown.dart';
 
-import '../widgets/brightness_observer.dart';
-
-extension MarkdownExtension on String {
-  String postLengthOptimize([int target = 1024]) {
-    if (length > target) {
-      return substring(0, target);
-    } else {
-      return this;
-    }
-  }
-
-  String postOptimize([int lines = 20]) =>
-      split('\n').take(lines).join('\n').postLengthOptimize();
-
-  String get postOptimizeMarkdown {
-    final lines = const LineSplitter().convert(postOptimize());
-    final astNodes = Document().parseLines(lines);
-    return astNodes
-        .map((e) => e.textContent)
-        .join()
-        .replaceAll(RegExp(r'\s+'), ' ');
-  }
-}
+import 'extension/extension.dart';
 
 MarkdownStyleSheet markdownStyleSheet(BuildContext context) {
-  final baseStyle =
-      TextStyle(fontSize: 14, color: BrightnessData.themeOf(context).text);
+  final baseStyle = TextStyle(fontSize: 14, color: context.theme.text);
 
   return MarkdownStyleSheet(
     a: baseStyle.copyWith(
-      color: BrightnessData.themeOf(context).accent,
+      color: context.theme.accent,
     ),
     p: baseStyle,
     code: baseStyle.copyWith(
-      backgroundColor: BrightnessData.themeOf(context).background,
+      backgroundColor: context.theme.background,
       fontFamily: 'monospace',
       fontSize: baseStyle.fontSize! * 0.85,
     ),
@@ -69,7 +43,7 @@ MarkdownStyleSheet markdownStyleSheet(BuildContext context) {
     blockquote: baseStyle,
     img: baseStyle,
     checkbox: baseStyle.copyWith(
-      color: BrightnessData.themeOf(context).primary,
+      color: context.theme.primary,
     ),
     listBullet: baseStyle,
     tableHead: baseStyle.copyWith(
@@ -78,25 +52,25 @@ MarkdownStyleSheet markdownStyleSheet(BuildContext context) {
     tableBody: baseStyle,
     tableHeadAlign: TextAlign.center,
     tableCellsDecoration: BoxDecoration(
-      color: BrightnessData.themeOf(context).background,
+      color: context.theme.background,
     ),
     blockquoteDecoration: BoxDecoration(
-      color: BrightnessData.themeOf(context).background,
+      color: context.theme.background,
       border: Border(
         left: BorderSide(
-          color: BrightnessData.themeOf(context).sidebarSelected,
+          color: context.theme.sidebarSelected,
           width: 4,
         ),
       ),
     ),
     // codeblockPadding: const EdgeInsets.all(8),
     codeblockDecoration: BoxDecoration(
-      color: BrightnessData.themeOf(context).background,
+      color: context.theme.background,
     ),
     horizontalRuleDecoration: BoxDecoration(
       border: Border(
         top: BorderSide(
-          color: BrightnessData.themeOf(context).sidebarSelected,
+          color: context.theme.sidebarSelected,
           width: 1,
         ),
       ),

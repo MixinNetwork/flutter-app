@@ -5,25 +5,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../../account/account_server.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
-import '../../../../generated/l10n.dart';
 import '../../../../ui/home/bloc/conversation_cubit.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
-import '../../../brightness_observer.dart';
 import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../toast.dart';
@@ -78,7 +74,7 @@ class ImagePreviewPage extends HookWidget {
         current.value = next.value;
       } else {
         context
-            .read<AccountServer>()
+            .accountServer
             .database
             .messageDao
             .messageItemByMessageId(_messageId.value)
@@ -88,7 +84,7 @@ class ImagePreviewPage extends HookWidget {
     }, [_messageId.value]);
 
     useEffect(() {
-      final messageDao = context.read<AccountServer>().database.messageDao;
+      final messageDao = context.database.messageDao;
       () async {
         final rowId =
             await messageDao.messageRowId(_messageId.value).getSingleOrNull();
@@ -105,7 +101,7 @@ class ImagePreviewPage extends HookWidget {
 
     useEffect(
       () => context
-          .read<AccountServer>()
+          .accountServer
           .database
           .messageDao
           .insertOrReplaceMessageStream
@@ -144,7 +140,7 @@ class ImagePreviewPage extends HookWidget {
           onInvoke: (Intent intent) => _copyUrl(
               context,
               context
-                  .read<AccountServer>()
+                  .accountServer
                   .convertMessageAbsolutePath(current.value)),
         ),
       },
@@ -156,7 +152,7 @@ class ImagePreviewPage extends HookWidget {
             Container(
               height: 70,
               decoration: BoxDecoration(
-                color: BrightnessData.themeOf(context).primary,
+                color: context.theme.primary,
               ),
               child: Builder(
                 builder: (context) {
@@ -252,14 +248,14 @@ class _Bar extends StatelessWidget {
                 message.userFullName!,
                 style: TextStyle(
                   fontSize: MessageItemWidget.primaryFontSize,
-                  color: BrightnessData.themeOf(context).text,
+                  color: context.theme.text,
                 ),
               ),
               Text(
                 message.userIdentityNumber,
                 style: TextStyle(
                   fontSize: MessageItemWidget.secondaryFontSize,
-                  color: BrightnessData.themeOf(context).secondaryText,
+                  color: context.theme.secondaryText,
                 ),
               ),
             ],
@@ -267,7 +263,7 @@ class _Bar extends StatelessWidget {
           const Spacer(),
           ActionButton(
             name: Resources.assetsImagesZoomInSvg,
-            color: BrightnessData.themeOf(context).icon,
+            color: context.theme.icon,
             size: 20,
             onTap: () => controller.scaleState = PhotoViewScaleState.covering,
           ),
@@ -275,20 +271,20 @@ class _Bar extends StatelessWidget {
           ActionButton(
             name: Resources.assetsImagesZoomOutSvg,
             size: 20,
-            color: BrightnessData.themeOf(context).icon,
+            color: context.theme.icon,
             onTap: () => controller.scaleState = PhotoViewScaleState.initial,
           ),
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesShareSvg,
             size: 20,
-            color: BrightnessData.themeOf(context).icon,
+            color: context.theme.icon,
             onTap: () async {
-              final accountServer = context.read<AccountServer>();
+              final accountServer = context.accountServer;
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: true,
-                title: Localization.of(context).forward,
+                title: context.l10n.forward,
                 onlyContact: false,
               );
               if (result.isEmpty) return;
@@ -303,30 +299,30 @@ class _Bar extends StatelessWidget {
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesCopySvg,
-            color: BrightnessData.themeOf(context).icon,
+            color: context.theme.icon,
             size: 20,
             onTap: () => _copyUrl(
                 context,
                 context
-                    .read<AccountServer>()
+                    .accountServer
                     .convertMessageAbsolutePath(message)),
           ),
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesAttachmentDownloadSvg,
-            color: BrightnessData.themeOf(context).icon,
+            color: context.theme.icon,
             size: 20,
             onTap: () async {
               if (message.mediaUrl?.isEmpty ?? true) return;
               final path = await getSavePath(
-                confirmButtonText: Localization.of(context).save,
+                confirmButtonText: context.l10n.save,
                 suggestedName: message.mediaName ?? basename(message.mediaUrl!),
               );
               if (path?.isEmpty ?? true) return;
               await runFutureWithToast(
                 context,
                 File(context
-                        .read<AccountServer>()
+                        .accountServer
                         .convertMessageAbsolutePath(message))
                     .copy(path!),
               );
@@ -335,7 +331,7 @@ class _Bar extends StatelessWidget {
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesIcCloseBigSvg,
-            color: BrightnessData.themeOf(context).icon,
+            color: context.theme.icon,
             size: 20,
             onTap: () => Navigator.pop(context),
           ),
@@ -374,7 +370,7 @@ class _Item extends HookWidget {
               child: PhotoView(
                 tightMode: true,
                 imageProvider: FileImage(File(context
-                    .read<AccountServer>()
+                    .accountServer
                     .convertMessageAbsolutePath(message))),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,

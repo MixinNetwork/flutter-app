@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 
-import '../../utils/string_extension.dart';
+import '../../utils/extension/extension.dart';
 import 'one_time_pre_key.dart';
 import 'signed_pre_key.dart';
 

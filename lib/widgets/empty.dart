@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'brightness_observer.dart';
+
+import '../utils/extension/extension.dart';
 
 class Empty extends StatelessWidget {
   const Empty({Key? key, required this.text}) : super(key: key);
@@ -11,7 +12,7 @@ class Empty extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: context.theme.secondaryText,
           ),
         ),
       );

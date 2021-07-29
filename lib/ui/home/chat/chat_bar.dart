@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
-import '../../../generated/l10n.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
-import '../../../utils/string_extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/buttons.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
@@ -25,7 +22,7 @@ class ChatBar extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actionColor = BrightnessData.themeOf(context).icon;
+    final actionColor = context.theme.icon;
     final chatSideCubit = context.read<ChatSideCubit>();
 
     final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
@@ -141,7 +138,7 @@ class ConversationIDOrCount extends HookWidget {
       () {
         if (isGroup) {
           return context
-              .read<AccountServer>()
+              .accountServer
               .database
               .participantDao
               .conversationParticipantsCount(conversationState!.conversationId)
@@ -157,7 +154,7 @@ class ConversationIDOrCount extends HookWidget {
     );
 
     final textStyle = TextStyle(
-      color: BrightnessData.themeOf(context).secondaryText,
+      color: context.theme.secondaryText,
       fontSize: fontSize,
       height: 1,
     );
@@ -175,7 +172,7 @@ class ConversationIDOrCount extends HookWidget {
         final count = snapshot.data;
         return SelectableText(
           count != null
-              ? Localization.of(context).conversationParticipantsCount(count)
+              ? context.l10n.conversationParticipantsCount(count)
               : '',
           style: textStyle,
         );
@@ -207,7 +204,7 @@ class ConversationName extends StatelessWidget {
                       : conversationState.name) ??
                   '',
               style: TextStyle(
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
                 fontSize: fontSize,
                 height: 1,
                 overflow: overflow ? TextOverflow.ellipsis : null,

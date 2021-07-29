@@ -6,8 +6,8 @@ import 'package:flutter/widgets.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/action_utils.dart';
 import '../../../../utils/color_utils.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../brightness_observer.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -54,7 +54,7 @@ class ActionMessage extends StatelessWidget {
                     padding: const EdgeInsets.all(1),
                     child: CustomPaint(
                       painter: BubblePainter(
-                        color: BrightnessData.themeOf(context).primary,
+                        color: context.theme.primary,
                         clipper: bubbleClipper,
                       ),
                       child: Padding(

@@ -5,12 +5,12 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/brightness_observer.dart';
+
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
 import '../home/bloc/multi_auth_cubit.dart';
@@ -23,7 +23,7 @@ class EditProfilePage extends HookWidget {
     final nameTextEditingController = useTextEditingController();
     final bioTextEditingController = useTextEditingController();
     useEffect(() {
-      context.read<AccountServer>().refreshSelf();
+      context.accountServer.refreshSelf();
     });
     return BlocConverter<MultiAuthCubit, MultiAuthState,
         Tuple2<String?, String?>>(
@@ -38,22 +38,22 @@ class EditProfilePage extends HookWidget {
         bioTextEditingController.text = state.item2!;
       },
       child: Scaffold(
-        backgroundColor: BrightnessData.themeOf(context).background,
+        backgroundColor: context.theme.background,
         appBar: MixinAppBar(
-          title: Text(Localization.of(context).editProfile),
+          title: Text(context.l10n.editProfile),
           actions: [
             MixinButton(
               onTap: () {
                 runFutureWithToast(
                   context,
-                  context.read<AccountServer>().updateAccount(
+                  context.accountServer.updateAccount(
                         fullName: nameTextEditingController.text.trim(),
                         biography: bioTextEditingController.text.trim(),
                       ),
                 );
               },
               backgroundTransparent: true,
-              child: Center(child: Text(Localization.of(context).save)),
+              child: Center(child: Text(context.l10n.save)),
             ),
           ],
         ),
@@ -89,12 +89,12 @@ class EditProfilePage extends HookWidget {
               ),
               const SizedBox(height: 32),
               _Item(
-                title: Localization.of(context).name,
+                title: context.l10n.name,
                 controller: nameTextEditingController,
               ),
               const SizedBox(height: 32),
               _Item(
-                title: Localization.of(context).introduction,
+                title: context.l10n.introduction,
                 controller: bioTextEditingController,
               ),
               const SizedBox(height: 32),
@@ -102,7 +102,7 @@ class EditProfilePage extends HookWidget {
                 converter: (state) => state.current?.account.phone,
                 when: (a, b) => b != null,
                 builder: (context, phone) => _Item(
-                  title: Localization.of(context).phoneNumber,
+                  title: context.l10n.phoneNumber,
                   controller: TextEditingController(text: phone),
                   readOnly: true,
                 ),
@@ -117,11 +117,11 @@ class EditProfilePage extends HookWidget {
                 when: (a, b) => b != null,
                 builder: (context, createdAt) => Text(
                   createdAt != null
-                      ? Localization.of(context).pageEditProfileJoin(createdAt)
+                      ? context.l10n.pageEditProfileJoin(createdAt)
                       : '',
                   style: TextStyle(
                     fontSize: 14,
-                    color: BrightnessData.themeOf(context).secondaryText,
+                    color: context.theme.secondaryText,
                   ),
                 ),
               ),
@@ -181,7 +181,7 @@ class _Item extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: context.theme.secondaryText,
             ),
           ),
           const SizedBox(height: 16),
@@ -190,9 +190,8 @@ class _Item extends StatelessWidget {
             controller: controller,
             style: TextStyle(
               fontSize: 16,
-              color: readOnly
-                  ? BrightnessData.themeOf(context).secondaryText
-                  : BrightnessData.themeOf(context).text,
+              color:
+                  readOnly ? context.theme.secondaryText : context.theme.text,
             ),
             minLines: 1,
             maxLines: 10,

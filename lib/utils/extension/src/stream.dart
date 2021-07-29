@@ -1,4 +1,4 @@
-import 'dart:async';
+part of '../extension.dart';
 
 extension StreamExtension<T> on Stream<T> {
   Stream<E> asyncMapDrop<E>(FutureOr<E> Function(T event) convert) {
