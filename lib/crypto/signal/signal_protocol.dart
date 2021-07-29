@@ -14,7 +14,7 @@ import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
 import 'encrypt_result.dart';
-import 'identity_key_util.dart';
+import 'identity_key_util.dart' as identity_key_util;
 import 'signal_database.dart';
 import 'storage/mixin_identity_key_store.dart';
 import 'storage/mixin_prekey_store.dart';
@@ -35,7 +35,8 @@ class SignalProtocol {
   late MixinSenderKeyStore senderKeyStore;
 
   static Future<void> initSignal(List<int> private) async {
-    await IdentityKeyUtil.generateIdentityKeyPair(SignalDatabase.get, private);
+    await identity_key_util.generateIdentityKeyPair(
+        SignalDatabase.get, private);
   }
 
   Future<void> init() async {

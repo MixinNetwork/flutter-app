@@ -24,7 +24,7 @@ Future<MixinResponse<void>> refreshSignalKeys(Client client) async {
 
 Future<SignalKeyRequest> generateKeys() async {
   final identityKeyPair =
-      await IdentityKeyUtil.getIdentityKeyPair(SignalDatabase.get);
+      await getIdentityKeyPair(SignalDatabase.get);
   if (identityKeyPair == null) {
     throw InvalidKeyException('Local identity key pair is null!');
   }
