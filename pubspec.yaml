@@ -12,7 +12,7 @@ publish_to: none
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 0.1.6+1
+version: 0.1.9+1
 
 environment:
   sdk: '>=2.12.0-0 <3.0.0'
@@ -41,7 +41,7 @@ dependencies:
   mixin_bot_sdk_dart:
     git:
       url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: f497761b9ca3451f0305e0dd283faeb72819bc32
+      ref: 7cee8150a22cf7800cbf98a395084480314fa869
   libsignal_protocol_dart: ^0.5.3
   path_provider: ^2.0.2
   path: ^1.8.0
@@ -51,7 +51,7 @@ dependencies:
   very_good_analysis: ^2.1.1
   #  desktop_window: ^0.4.0
   bloc: ^7.0.0
-  flutter_bloc: ^7.0.1
+  flutter_bloc: ^7.1.0
   equatable: ^2.0.3
   intl: ^0.17.0
   flutter_svg: ^0.22.0
@@ -77,7 +77,7 @@ dependencies:
   flutter_markdown: ^0.6.2
   markdown: ^4.0.0
   map: ^1.0.0
-  flutter_local_notifications: ^6.0.0
+  flutter_local_notifications: ^8.0.0
   flutter_app_icon_badge: ^2.0.0
   flutter_hooks: ^0.18.0
   package_info_plus: ^1.0.3
