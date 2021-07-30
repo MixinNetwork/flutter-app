@@ -19,7 +19,7 @@ class MessageDayTime extends HookWidget {
   Widget build(BuildContext context) {
     final dateTimeString =
         useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-      converter: (dateTime) => this.dateTime.formatOfDay,
+      converter: (_) => dateTime.formatOfDay,
       keys: [dateTime],
     );
     return Center(
