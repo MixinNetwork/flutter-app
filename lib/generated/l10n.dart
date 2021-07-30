@@ -1929,6 +1929,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Send Without Sound`
+  String get sendWithoutSound {
+    return Intl.message(
+      'Send Without Sound',
+      name: 'sendWithoutSound',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

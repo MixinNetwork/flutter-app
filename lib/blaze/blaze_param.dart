@@ -29,6 +29,7 @@ class BlazeMessageParam {
     this.candidate,
     this.trackId,
     this.recipientIds,
+    this.silent,
   });
 
   factory BlazeMessageParam.fromJson(Map<String, dynamic> json) =>
@@ -70,6 +71,8 @@ class BlazeMessageParam {
   String? trackId;
   @JsonKey(name: 'recipient_ids')
   List<String>? recipientIds;
+  @JsonKey(name: 'silent')
+  bool? silent;
 
   Map<String, dynamic> toJson() => _$BlazeMessageParamToJson(this);
 }

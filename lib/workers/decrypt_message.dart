@@ -120,7 +120,7 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt,
           status: data.status,
         );
-        await database.messageDao.insert(message, accountId);
+        await database.messageDao.insert(message, accountId, data.silent);
       } else if (category.isSignal) {
         d('DecryptMessage isSignal');
         if (data.category == MessageCategory.signalKey) {
@@ -364,7 +364,7 @@ class DecryptMessage extends Injector {
       status: data.status,
       createdAt: data.createdAt,
     );
-    await database.messageDao.insert(message, accountId);
+    await database.messageDao.insert(message, accountId, data.silent);
   }
 
   Future<void> _processAppCard(BlazeMessageData data) async {
@@ -385,7 +385,7 @@ class DecryptMessage extends Injector {
         refreshUsers(<String>[appCard.appId]);
       }
     });
-    await database.messageDao.insert(message, accountId);
+    await database.messageDao.insert(message, accountId, data.silent);
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
@@ -467,7 +467,7 @@ class DecryptMessage extends Injector {
         _quoteContent,
       );
 
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isImage) {
       final attachment =
           AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plainText));
@@ -492,7 +492,7 @@ class DecryptMessage extends Injector {
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
       if (_photoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
@@ -528,7 +528,7 @@ class DecryptMessage extends Injector {
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
       if (_videoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
@@ -560,7 +560,7 @@ class DecryptMessage extends Injector {
               mediaStatus: MediaStatus.canceled,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
       if (_fileAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
           messageId: message.messageId,
@@ -593,7 +593,7 @@ class DecryptMessage extends Injector {
               mediaStatus: MediaStatus.pending,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
       unawaited(_attachmentUtil.downloadAttachment(
         messageId: message.messageId,
         conversationId: message.conversationId,
@@ -621,7 +621,7 @@ class DecryptMessage extends Injector {
           albumId: stickerMessage.albumId,
           status: data.status,
           createdAt: data.createdAt);
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isContact) {
       final plain = await _decodeWithIsolate(plainText);
       final contactMessage =
@@ -641,7 +641,7 @@ class DecryptMessage extends Injector {
               createdAt: data.createdAt,
               quoteMessageId: data.quoteMessageId,
               quoteContent: quoteContent?.toJson()));
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isLive) {
       final plain = await _decodeWithIsolate(plainText);
       final liveMessage =
@@ -657,7 +657,7 @@ class DecryptMessage extends Injector {
           thumbUrl: liveMessage.thumbUrl,
           status: data.status,
           createdAt: data.createdAt);
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isLocation) {
       String plain;
       if (data.category == MessageCategory.signalLocation) {
@@ -687,7 +687,7 @@ class DecryptMessage extends Injector {
           content: plain,
           status: data.status,
           createdAt: data.createdAt);
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isPost) {
       String plain;
       if (data.category == MessageCategory.signalPost) {
@@ -704,7 +704,7 @@ class DecryptMessage extends Injector {
         status: data.status,
         createdAt: data.createdAt,
       );
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isTranscript) {
       String plain;
       if (data.category == MessageCategory.signalTranscript) {
@@ -721,7 +721,7 @@ class DecryptMessage extends Injector {
         status: data.status,
         createdAt: data.createdAt,
       );
-      await database.messageDao.insert(message, accountId);
+      await database.messageDao.insert(message, accountId, data.silent);
     }
   }
 
@@ -798,7 +798,7 @@ class DecryptMessage extends Injector {
         return;
       }
     }
-    await database.messageDao.insert(message, accountId);
+    await database.messageDao.insert(message, accountId, data.silent);
   }
 
   Future<void> _processSystemUserMessage(
@@ -880,7 +880,7 @@ class DecryptMessage extends Injector {
         snapshotId: snapshot.snapshotId,
         status: status,
         createdAt: data.createdAt);
-    await database.messageDao.insert(message, accountId);
+    await database.messageDao.insert(message, accountId, data.silent);
   }
 
   Future<void> _updateRemoteMessageStatus(
@@ -945,7 +945,7 @@ class DecryptMessage extends Injector {
         status: MessageStatus.failed,
         createdAt: data.createdAt,
       );
-      await database.messageDao.insert(message, data.senderId);
+      await database.messageDao.insert(message, data.senderId, data.silent);
     }
   }
 
