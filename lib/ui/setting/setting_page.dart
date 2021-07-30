@@ -12,7 +12,6 @@ import '../../utils/extension/extension.dart';
 import '../../widgets/action_button.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/toast.dart';
 import '../../widgets/window/move_window.dart';
@@ -222,8 +221,7 @@ class _UserProfile extends StatelessWidget {
               'Mixin ID: $identityNumber',
               style: TextStyle(
                 fontSize: 14,
-                color: BrightnessData.dynamicColor(
-                  context,
+                color: context.dynamicColor(
                   const Color.fromRGBO(188, 190, 195, 1),
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
                 ),

@@ -7,7 +7,6 @@ import 'package:provider/provider.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import '../home/route/responsive_navigator_cubit.dart';
@@ -32,8 +31,7 @@ class StoragePage extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),
@@ -87,8 +85,7 @@ class StoragePage extends HookWidget {
                 ),
               ),
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),

@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
-import '../../brightness_observer.dart';
 
 import '../message.dart';
 
@@ -29,8 +28,7 @@ class SecretMessage extends StatelessWidget {
                     context.l10n.aboutEncryptedInfo,
                     style: TextStyle(
                       fontSize: MessageItemWidget.secondaryFontSize,
-                      color: BrightnessData.dynamicColor(
-                        context,
+                      color: context.dynamicColor(
                         const Color.fromRGBO(0, 0, 0, 1),
                       ),
                     ),

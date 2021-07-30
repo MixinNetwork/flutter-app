@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
-import 'brightness_observer.dart';
 import 'interacter_decorated_box.dart';
 
 class SearchTextField extends HookWidget {
@@ -38,8 +37,7 @@ class SearchTextField extends HookWidget {
       ),
       gapPadding: 0,
     );
-    final backgroundColor = BrightnessData.dynamicColor(
-      context,
+    final backgroundColor = context.dynamicColor(
       const Color.fromRGBO(245, 247, 250, 1),
       darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
     );

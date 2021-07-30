@@ -8,7 +8,6 @@ import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-import '../../widgets/brightness_observer.dart';
 
 import '../../widgets/dialog.dart';
 import '../../widgets/toast.dart';
@@ -77,8 +76,7 @@ class EditProfilePage extends HookWidget {
                   'Mixin ID: $identityNumber',
                   style: TextStyle(
                     fontSize: 14,
-                    color: BrightnessData.dynamicColor(
-                      context,
+                    color: context.dynamicColor(
                       const Color.fromRGBO(188, 190, 195, 1),
                       darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
                     ),
@@ -157,13 +155,11 @@ class _Item extends StatelessWidget {
     );
 
     final backgroundColor = readOnly
-        ? BrightnessData.dynamicColor(
-            context,
+        ? context.dynamicColor(
             const Color.fromRGBO(236, 238, 242, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.04),
           )
-        : BrightnessData.dynamicColor(
-            context,
+        : context.dynamicColor(
             const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
           );

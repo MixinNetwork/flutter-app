@@ -12,7 +12,6 @@ import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
@@ -180,8 +179,7 @@ class _CircleManagerItem extends StatelessWidget {
             const SizedBox(width: 4),
             ClipOval(
               child: Container(
-                color: BrightnessData.dynamicColor(
-                  context,
+                color: context.dynamicColor(
                   const Color.fromRGBO(246, 247, 250, 1),
                   darkColor: const Color.fromRGBO(245, 247, 250, 1),
                 ),

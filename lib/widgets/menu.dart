@@ -7,7 +7,6 @@ import 'package:flutter_portal/flutter_portal.dart';
 
 import '../bloc/simple_cubit.dart';
 import '../utils/extension/extension.dart';
-import 'brightness_observer.dart';
 
 import 'interacter_decorated_box.dart';
 
@@ -158,8 +157,7 @@ class ContextMenuPage extends StatelessWidget {
             blurRadius: lerpDouble(6, 12, brightnessData)!,
           ),
         ],
-        color: BrightnessData.dynamicColor(
-          context,
+        color: context.dynamicColor(
           const Color.fromRGBO(255, 255, 255, 1),
           darkColor: const Color.fromRGBO(62, 65, 72, 1),
         ),
@@ -194,8 +192,7 @@ class ContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = BrightnessData.dynamicColor(
-      context,
+    final backgroundColor = context.dynamicColor(
       const Color.fromRGBO(255, 255, 255, 1),
       darkColor: const Color.fromRGBO(62, 65, 72, 1),
     );
@@ -221,8 +218,7 @@ class ContextMenu extends StatelessWidget {
               fontSize: 16,
               color: isDestructiveAction
                   ? context.theme.red
-                  : BrightnessData.dynamicColor(
-                      context,
+                  : context.dynamicColor(
                       const Color.fromRGBO(0, 0, 0, 1),
                       darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
                     ),

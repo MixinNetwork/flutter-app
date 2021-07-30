@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../bloc/setting_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
 
 import '../../widgets/cell.dart';
 import '../../widgets/radio.dart';
@@ -47,8 +46,7 @@ class _Body extends StatelessWidget {
                 ),
               ),
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),

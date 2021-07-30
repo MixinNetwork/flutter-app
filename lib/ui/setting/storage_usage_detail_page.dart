@@ -11,7 +11,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/file.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/disable.dart';
@@ -110,8 +109,7 @@ class StorageUsageDetailPage extends HookWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CellGroup(
-              cellBackgroundColor: BrightnessData.dynamicColor(
-                context,
+              cellBackgroundColor: context.dynamicColor(
                 Colors.white,
                 darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
               ),

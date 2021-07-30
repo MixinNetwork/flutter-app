@@ -13,7 +13,6 @@ import '../../enum/message_status.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../brightness_observer.dart';
 import 'message.dart';
 
 bool _isRepresentative(
@@ -90,8 +89,7 @@ class _ChatIcon extends StatelessWidget {
         width: 8,
         height: 8,
         color: color ??
-            BrightnessData.dynamicColor(
-              context,
+            context.dynamicColor(
               const Color.fromRGBO(131, 145, 158, 1),
               darkColor: const Color.fromRGBO(128, 131, 134, 1),
             ),
@@ -118,8 +116,7 @@ class _MessageDatetime extends HookWidget {
       style: TextStyle(
         fontSize: MessageItemWidget.statusFontSize,
         color: color ??
-            BrightnessData.dynamicColor(
-              context,
+            context.dynamicColor(
               const Color.fromRGBO(131, 145, 158, 1),
               darkColor: const Color.fromRGBO(128, 131, 134, 1),
             ),

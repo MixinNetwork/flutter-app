@@ -13,7 +13,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
@@ -102,8 +101,7 @@ class _Item extends HookWidget {
       alignment: Alignment.center,
       child: CellGroup(
         padding: EdgeInsets.zero,
-        cellBackgroundColor: BrightnessData.dynamicColor(
-          context,
+        cellBackgroundColor: context.dynamicColor(
           Colors.white,
           darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
         ),

@@ -11,7 +11,6 @@ import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../brightness_observer.dart';
 import '../cache_image.dart';
 import '../interacter_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
@@ -37,8 +36,7 @@ class StickerPage extends StatelessWidget {
           height: 407,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(11),
-            color: BrightnessData.dynamicColor(
-              context,
+            color: context.dynamicColor(
               const Color.fromRGBO(255, 255, 255, 1),
               darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
@@ -186,8 +184,7 @@ class _StickerAlbumBar extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: double.infinity,
         height: 50,
-        color: BrightnessData.dynamicColor(
-          context,
+        color: context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.05),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
         ),
@@ -195,8 +192,7 @@ class _StickerAlbumBar extends StatelessWidget {
           controller: tabController,
           isScrollable: true,
           indicator: BoxDecoration(
-            color: BrightnessData.dynamicColor(
-              context,
+            color: context.dynamicColor(
               const Color.fromRGBO(229, 231, 235, 1),
               darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
             ),

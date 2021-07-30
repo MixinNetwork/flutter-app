@@ -24,7 +24,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/message_optimize.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/interacter_decorated_box.dart';
@@ -648,8 +647,7 @@ class _Empty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dynamicColor = BrightnessData.dynamicColor(
-      context,
+    final dynamicColor = context.dynamicColor(
       const Color.fromRGBO(229, 233, 240, 1),
     );
     return Center(

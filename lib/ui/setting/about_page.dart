@@ -10,7 +10,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 
 class AboutPage extends HookWidget {
@@ -55,8 +54,7 @@ class AboutPage extends HookWidget {
               ),
               const SizedBox(height: 50),
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),

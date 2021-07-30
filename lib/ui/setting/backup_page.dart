@@ -7,7 +7,6 @@ import 'package:flutter_svg/svg.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
 
 import '../../widgets/cell.dart';
 
@@ -45,8 +44,7 @@ class BackupPage extends HookWidget {
               ),
               const SizedBox(height: 30),
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),
@@ -55,8 +53,7 @@ class BackupPage extends HookWidget {
                 ),
               ),
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),

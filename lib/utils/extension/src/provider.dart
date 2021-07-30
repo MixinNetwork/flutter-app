@@ -14,4 +14,10 @@ extension ProviderExtension on BuildContext {
   BrightnessThemeData get theme => BrightnessData.themeOf(this);
 
   double get brightnessValue => BrightnessData.of(this);
+
+  Color dynamicColor(
+    Color color, {
+    Color? darkColor,
+  }) =>
+      BrightnessData.dynamicColor(this, color, darkColor: darkColor);
 }

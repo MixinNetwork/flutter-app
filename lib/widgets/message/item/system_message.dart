@@ -6,7 +6,6 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/extension/extension.dart';
-import '../../brightness_observer.dart';
 import '../message.dart';
 
 class SystemMessage extends StatelessWidget {
@@ -28,8 +27,7 @@ class SystemMessage extends StatelessWidget {
             cursor: SystemMouseCursors.click,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: BrightnessData.dynamicColor(
-                  context,
+                color: context.dynamicColor(
                   const Color.fromRGBO(202, 234, 201, 1),
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -51,8 +49,7 @@ class SystemMessage extends StatelessWidget {
                   ),
                   style: TextStyle(
                     fontSize: MessageItemWidget.secondaryFontSize,
-                    color: BrightnessData.dynamicColor(
-                      context,
+                    color: context.dynamicColor(
                       const Color.fromRGBO(0, 0, 0, 1),
                     ),
                   ),

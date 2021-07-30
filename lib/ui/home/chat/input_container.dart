@@ -20,7 +20,6 @@ import '../../../utils/hook.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../widgets/action_button.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/mention_panel.dart';
@@ -299,8 +298,7 @@ class _SendTextField extends HookWidget {
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(4)),
-        color: BrightnessData.dynamicColor(
-          context,
+        color: context.dynamicColor(
           const Color.fromRGBO(245, 247, 250, 1),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),

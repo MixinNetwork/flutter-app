@@ -7,7 +7,6 @@ import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/avatar_view/avatar_view.dart';
-import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/buttons.dart';
 import '../../../../widgets/dialog.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
@@ -209,8 +208,7 @@ class _IconButton extends StatelessWidget {
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
         onTap: onTap,
         decoration: const BoxDecoration(shape: BoxShape.rectangle),
-        hoveringColor: BrightnessData.dynamicColor(
-          context,
+        hoveringColor: context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.03),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
         ),

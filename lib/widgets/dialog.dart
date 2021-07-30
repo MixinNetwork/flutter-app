@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/extension/extension.dart';
-import 'brightness_observer.dart';
 
 import 'disable.dart';
 import 'interacter_decorated_box.dart';
@@ -149,8 +148,7 @@ class _DialogPage extends StatelessWidget {
               blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
             ),
           ],
-          color: BrightnessData.dynamicColor(
-            context,
+          color: context.dynamicColor(
             const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(62, 65, 72, 1),
           ),
@@ -208,8 +206,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
           );
     final textColor = backgroundTransparent
         ? context.theme.accent
-        : BrightnessData.dynamicColor(
-            context,
+        : context.dynamicColor(
             const Color.fromRGBO(255, 255, 255, 1),
           );
     return Disable(

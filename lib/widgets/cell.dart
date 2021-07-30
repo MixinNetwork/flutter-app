@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../constants/resources.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
 import '../utils/extension/extension.dart';
-import 'brightness_observer.dart';
 
 import 'interacter_decorated_box.dart';
 
@@ -89,8 +88,7 @@ class CellItem extends StatelessWidget {
     if (selected &&
         !context.read<ResponsiveNavigatorCubit>().state.navigationMode) {
       selectedBackgroundColor = Color.alphaBlend(
-        BrightnessData.dynamicColor(
-          context,
+        context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.05),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
         ),

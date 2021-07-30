@@ -6,7 +6,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
 
 import '../../widgets/cell.dart';
 import '../home/bloc/multi_auth_cubit.dart';
@@ -33,8 +32,7 @@ class NotificationPage extends HookWidget {
           children: [
             CellGroup(
               padding: const EdgeInsets.only(right: 10, left: 10),
-              cellBackgroundColor: BrightnessData.dynamicColor(
-                context,
+              cellBackgroundColor: context.dynamicColor(
                 Colors.white,
                 darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
               ),

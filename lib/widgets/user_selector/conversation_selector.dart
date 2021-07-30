@@ -16,7 +16,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
-import '../brightness_observer.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import 'bloc/conversation_filter_cubit.dart';
@@ -445,8 +444,7 @@ class _AvatarSmallCloseIcon extends StatelessWidget {
                 height: 16,
                 width: 16,
                 decoration: BoxDecoration(
-                  color: BrightnessData.dynamicColor(
-                    context,
+                  color: context.dynamicColor(
                     darkBrightnessThemeData.divider,
                     darkColor: const Color.fromRGBO(142, 141, 143, 1),
                   ),
@@ -483,8 +481,7 @@ class _Section extends StatelessWidget {
         children: [
           SliverPinnedHeader(
             child: Container(
-              color: BrightnessData.dynamicColor(
-                context,
+              color: context.dynamicColor(
                 const Color.fromRGBO(255, 255, 255, 1),
                 darkColor: const Color.fromRGBO(62, 65, 72, 1),
               ),

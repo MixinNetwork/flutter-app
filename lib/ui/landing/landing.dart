@@ -7,7 +7,6 @@ import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
-import '../../widgets/brightness_observer.dart';
 
 import 'bloc/landing_cubit.dart';
 
@@ -24,8 +23,7 @@ class LandingPage extends StatelessWidget {
       ),
       child: Builder(
         builder: (BuildContext context) => Scaffold(
-          backgroundColor: BrightnessData.dynamicColor(
-            context,
+          backgroundColor: context.dynamicColor(
             const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(35, 39, 43, 1),
           ),
@@ -119,8 +117,7 @@ class _QrCode extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: BrightnessData.dynamicColor(
-                  context,
+                color: context.dynamicColor(
                   const Color.fromRGBO(187, 190, 195, 1),
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
                 ),
@@ -166,8 +163,7 @@ class _Loading extends StatelessWidget {
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: BrightnessData.dynamicColor(
-                context,
+              color: context.dynamicColor(
                 const Color.fromRGBO(188, 190, 195, 1),
                 darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
               ),
