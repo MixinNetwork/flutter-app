@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart'
+    hide generateIdentityKeyPair;
 
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
@@ -14,7 +15,7 @@ import '../../enum/message_category.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/logger.dart';
 import 'encrypt_result.dart';
-import 'identity_key_util.dart' as identity_key_util;
+import 'identity_key_util.dart';
 import 'signal_database.dart';
 import 'storage/mixin_identity_key_store.dart';
 import 'storage/mixin_prekey_store.dart';
@@ -35,8 +36,7 @@ class SignalProtocol {
   late MixinSenderKeyStore senderKeyStore;
 
   static Future<void> initSignal(List<int> private) async {
-    await identity_key_util.generateIdentityKeyPair(
-        SignalDatabase.get, private);
+    await generateIdentityKeyPair(SignalDatabase.get, private);
   }
 
   Future<void> init() async {
