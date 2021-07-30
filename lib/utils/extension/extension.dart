@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:flutter/widgets.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';

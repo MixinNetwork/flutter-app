@@ -15,7 +15,6 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
-import '../../../../utils/markdown.dart';
 import '../../../../widgets/full_screen_portal.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/post_message.dart';
@@ -187,7 +186,7 @@ class _Item extends StatelessWidget {
                         .postOptimize(10)
                         .postLengthOptimize(256),
                     extensionSet: ExtensionSet.gitHubWeb,
-                    styleSheet: markdownStyleSheet(context),
+                    styleSheet: context.markdownStyleSheet,
                     imageBuilder: (_, __, ___) => const SizedBox(),
                   ),
                   Positioned(

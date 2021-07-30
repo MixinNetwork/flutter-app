@@ -164,7 +164,7 @@ class MixinDatabase extends _$MixinDatabase {
 
 LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
       final vmDatabase = VmDatabase(dbFile);
-      if (kReleaseMode) {
+      if (!kDebugMode) {
         return vmDatabase;
       }
       return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
