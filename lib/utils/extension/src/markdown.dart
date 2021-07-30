@@ -10,7 +10,7 @@ extension MarkdownExtension on String {
   }
 
   String postOptimize([int lines = 20]) =>
-      split('\n').take(lines).join('\n').postLengthOptimize();
+      LineSplitter.split(this).take(lines).join('\r\n').postLengthOptimize();
 
   String get postOptimizeMarkdown {
     final lines = const LineSplitter().convert(postOptimize());

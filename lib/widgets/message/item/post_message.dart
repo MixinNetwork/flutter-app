@@ -10,7 +10,6 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/extension/extension.dart';
 import '../../../utils/markdown.dart';
 import '../../../utils/uri_utils.dart';
-
 import '../../full_screen_portal.dart';
 import '../../interacter_decorated_box.dart';
 import '../message_bubble.dart';
