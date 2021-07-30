@@ -418,12 +418,12 @@ class _SearchMessageList extends HookWidget {
       () => AnonymousPagingBloc<SearchMessageDetailItem>(
         initState: const PagingState<SearchMessageDetailItem>(),
         limit: context.read<ConversationListBloc>().limit,
-        queryCount: () => context.accountServer.database.messageDao
+        queryCount: () => context.database.messageDao
             .fuzzySearchMessageCount(keyword)
             .getSingle(),
         queryRange: (int limit, int offset) async {
           if (keyword.isEmpty) return [];
-          return context.accountServer.database.messageDao
+          return context.database.messageDao
               .fuzzySearchMessage(query: keyword, limit: limit, offset: offset)
               .get();
         },
@@ -431,7 +431,7 @@ class _SearchMessageList extends HookWidget {
       keys: [keyword],
     );
     useEffect(
-      () => context.accountServer.database.messageDao.searchMessageUpdateEvent
+      () => context.database.messageDao.searchMessageUpdateEvent
           .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
           .cancel,
       [keyword],
@@ -795,8 +795,7 @@ class _List extends HookWidget {
                 title: Localization.current.deleteChat,
                 isDestructiveAction: true,
                 onTap: () async {
-                  await context.accountServer.database.conversationDao
-                      .deleteConversation(
+                  await context.database.conversationDao.deleteConversation(
                     conversation.conversationId,
                   );
                   if (context.read<ConversationCubit>().state?.conversationId ==

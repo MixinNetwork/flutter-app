@@ -146,7 +146,7 @@ class _InputContainer extends HookWidget {
     useEffect(
         () => () {
               if (conversationId == null) return;
-              context.accountServer.database.conversationDao.updateDraft(
+              context.database.conversationDao.updateDraft(
                 conversationId,
                 textEditingController.text,
               );
@@ -478,9 +478,8 @@ class _StickerButton extends HookWidget {
     final key = useMemoized(() => GlobalKey());
 
     final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(context.accountServer.database.stickerAlbumDao
-          .systemAlbums()
-          .watch()),
+      () => StickerAlbumsCubit(
+          context.database.stickerAlbumDao.systemAlbums().watch()),
     );
 
     final tabLength =

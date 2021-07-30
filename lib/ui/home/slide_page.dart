@@ -131,8 +131,7 @@ class _CircleList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useStream<List<ConversationCircleItem>>(
-      useMemoized(
-          () => context.accountServer.database.circleDao.allCircles().watch()),
+      useMemoized(() => context.database.circleDao.allCircles().watch()),
       initialData: [],
     );
     if (circles.data?.isEmpty ?? true) return const SizedBox();
@@ -180,7 +179,7 @@ class _CircleList extends HookWidget {
                         title: context.l10n.editCircle,
                         onTap: () async {
                           final initSelected = (await context
-                                  .accountServer.database.circleConversationDao
+                                  .database.circleConversationDao
                                   .allCircleConversations(circle.circleId)
                                   .get())
                               .map((e) => ConversationSelector(

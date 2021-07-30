@@ -620,7 +620,7 @@ class _JumpMentionButton extends HookWidget {
     )!;
     final messageMentions = useStream(
           useMemoized(
-              () => context.accountServer.database.messageMentionDao
+              () => context.database.messageMentionDao
                   .unreadMentionMessageByConversationId(conversationId)
                   .watch(),
               [conversationId]),

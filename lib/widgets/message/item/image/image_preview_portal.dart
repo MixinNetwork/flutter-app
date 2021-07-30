@@ -73,7 +73,7 @@ class ImagePreviewPage extends HookWidget {
       } else if (next.value?.messageId == _messageId.value) {
         current.value = next.value;
       } else {
-        context.accountServer.database.messageDao
+        context.database.messageDao
             .messageItemByMessageId(_messageId.value)
             .getSingleOrNull()
             .then((value) => current.value = value);
@@ -97,8 +97,7 @@ class ImagePreviewPage extends HookWidget {
     }, [_messageId.value]);
 
     useEffect(
-      () => context
-          .accountServer.database.messageDao.insertOrReplaceMessageStream
+      () => context.database.messageDao.insertOrReplaceMessageStream
           .switchMap<MessageItem>((value) async* {
             for (final item in value) {
               yield item;

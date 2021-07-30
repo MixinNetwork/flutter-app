@@ -62,7 +62,7 @@ class ChatInfoPage extends HookWidget {
     }, [conversationId]);
 
     final announcement = useStream<String?>(
-            useMemoized(() => context.accountServer.database.conversationDao
+            useMemoized(() => context.database.conversationDao
                 .announcement(conversationId)
                 .watchSingle()),
             initialData: null)
@@ -395,9 +395,9 @@ class ChatInfoPage extends HookWidget {
                           );
                           if (!result) return;
 
-                          await context.accountServer.database.messageDao
+                          await context.database.messageDao
                               .deleteMessageByConversationId(conversationId);
-                          await context.accountServer.database.conversationDao
+                          await context.database.conversationDao
                               .deleteConversation(
                             conversationId,
                           );

@@ -197,7 +197,7 @@ class _NewConversationConfirm extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final users = useMemoizedFuture(
-      () => context.accountServer.database.userDao
+      () => context.database.userDao
           .usersByIn(userIds.sublist(0, min(4, userIds.length)))
           .get(),
       <User>[],

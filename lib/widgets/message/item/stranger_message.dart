@@ -42,7 +42,7 @@ class StrangerMessage extends StatelessWidget {
                   : context.l10n.block,
               onTap: () async {
                 if (isBotConversation) {
-                  final app = await context.accountServer.database.appDao
+                  final app = await context.database.appDao
                       .findUserById(message.appId!);
                   if (app == null) return;
                   await openUri(context, app.homeUri);

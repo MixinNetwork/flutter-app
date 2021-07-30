@@ -41,13 +41,13 @@ class SearchMessagePage extends HookWidget {
         limit: context.read<ConversationListBloc>().limit,
         queryCount: () async {
           if (keyword.trim().isEmpty) return 0;
-          return context.accountServer.database.messageDao
+          return context.database.messageDao
               .fuzzySearchMessageCountByConversationId(keyword, conversationId)
               .getSingle();
         },
         queryRange: (int limit, int offset) async {
           if (keyword.trim().isEmpty) return [];
-          return context.accountServer.database.messageDao
+          return context.database.messageDao
               .fuzzySearchMessageByConversationId(
                   conversationId: conversationId,
                   query: keyword,
@@ -59,7 +59,7 @@ class SearchMessagePage extends HookWidget {
       keys: [keyword],
     );
     useEffect(
-      () => context.accountServer.database.messageDao.searchMessageUpdateEvent
+      () => context.database.messageDao.searchMessageUpdateEvent
           .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
           .cancel,
       [keyword],

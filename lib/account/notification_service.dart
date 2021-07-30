@@ -24,7 +24,7 @@ class NotificationService {
     required BuildContext context,
   }) {
     streamSubscriptions
-      ..add(context.accountServer.database.messageDao.notificationMessageStream
+      ..add(context.database.messageDao.notificationMessageStream
           .where((event) {
             if (DesktopLifecycle.instance.isActive.value) {
               final conversationState = context.read<ConversationCubit>().state;
