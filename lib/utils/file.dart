@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
-import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'logger.dart';
@@ -19,34 +18,6 @@ Future<List<file_selector.XFile>> selectFiles() async {
             name: xFile.name,
           ))
       .toList();
-}
-
-extension FileExtension on File {
-  file_selector.XFile get xFile => file_selector.XFile(
-        path,
-        mimeType: lookupMimeType(path),
-        name: basename(path),
-      );
-}
-
-extension XFileExtension on file_selector.XFile {
-  bool get isImage => {
-        'image/jpeg',
-        'image/png',
-        'image/bmp',
-        'image/webp',
-        'image/gif',
-      }.contains(mimeType?.toLowerCase());
-
-  bool get isVideo =>
-      mimeType != null &&
-      ([
-            'video/mpeg',
-            'video/mp4',
-            'video/quicktime',
-            'video/webm',
-          ].contains(mimeType?.toLowerCase()) ||
-          {'mkv', 'avi'}.contains(extensionFromMime(mimeType!)));
 }
 
 Future<int> getTotalSizeOfFile(String path) async {
@@ -101,12 +72,4 @@ Future<File?> saveBytesToTempFile(
     e('failed to save bytes to temp file. $error $stack');
     return null;
   }
-}
-
-extension FileRelativePath on File {
-  String get pathBasename => path.pathBasename;
-}
-
-extension StringPathRelativePath on String {
-  String get pathBasename => p.basename(this);
 }

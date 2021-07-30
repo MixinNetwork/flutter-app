@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 
-import '../../account/account_server.dart';
 import '../../constants/resources.dart';
 import '../../db/extension/user.dart';
 import '../../db/mixin_database.dart';
-import '../../generated/l10n.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat_page.dart';
 import '../../ui/home/conversation_page.dart';
+import '../../utils/extension/extension.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
-import '../brightness_observer.dart';
 import '../buttons.dart';
 import '../dialog.dart';
 import '../more_extended_text.dart';
@@ -20,8 +17,7 @@ import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
 Future<void> showUserDialog(BuildContext context, String userId) async {
-  final existed =
-      await context.read<AccountServer>().database.userDao.hasUser(userId);
+  final existed = await context.database.userDao.hasUser(userId);
   if (existed) {
     Toast.dismiss();
     await showMixinDialog(context: context, child: _UserDialog(userId: userId));
@@ -31,13 +27,13 @@ Future<void> showUserDialog(BuildContext context, String userId) async {
   showToastLoading(context);
 
   final result =
-      await context.read<AccountServer>().refreshUsers([userId], force: true);
+      await context.accountServer.refreshUsers([userId], force: true);
 
   if (result?.isEmpty ?? true) {
     await showToastFailed(
         context,
         ToastError(
-          Localization.of(context).userNotFound,
+          context.l10n.userNotFound,
         ));
     return;
   }
@@ -67,7 +63,7 @@ class _UserDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Material(
-            color: BrightnessData.themeOf(context).popUp,
+            color: context.theme.popUp,
             child: SizedBox(
               width: 340,
               child: Stack(
@@ -102,7 +98,7 @@ class _UserProfileLoader extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accountServer = context.read<AccountServer>();
+    final accountServer = context.accountServer;
     final user = useStream(useMemoized(
         () =>
             accountServer.database.userDao.userById(userId).watchSingleOrNull(),
@@ -153,7 +149,7 @@ class _UserProfileBody extends StatelessWidget {
                   child: SelectableText(
                     user.fullName ?? '',
                     style: TextStyle(
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                       fontSize: 16,
                       height: 1,
                     ),
@@ -168,9 +164,9 @@ class _UserProfileBody extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             SelectableText(
-              Localization.of(context).contactMixinId(user.identityNumber),
+              context.l10n.contactMixinId(user.identityNumber),
               style: TextStyle(
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: context.theme.secondaryText,
                 fontSize: 12,
               ),
             ),
@@ -210,7 +206,7 @@ class _BioText extends StatelessWidget {
             child: MoreExtendedText(
               biography,
               style: TextStyle(
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
                 fontSize: 14,
                 height: 1.5,
               ),
@@ -231,7 +227,7 @@ class _AddToContactsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => TextButton(
         style: TextButton.styleFrom(
-          backgroundColor: BrightnessData.themeOf(context).statusBackground,
+          backgroundColor: context.theme.statusBackground,
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
@@ -241,18 +237,17 @@ class _AddToContactsButton extends StatelessWidget {
           assert(user.fullName != null, ' username should not be null.');
           runFutureWithToast(
             context,
-            context.read<AccountServer>().addUser(
-                  user.userId,
-                  user.fullName,
-                ),
+            context.accountServer.addUser(
+              user.userId,
+              user.fullName,
+            ),
           );
         },
         child: Text(
           user.isBot
-              ? Localization.of(context).conversationAddBot
-              : Localization.of(context).conversationAddContact,
-          style: TextStyle(
-              fontSize: 12, color: BrightnessData.themeOf(context).accent),
+              ? context.l10n.conversationAddBot
+              : context.l10n.conversationAddContact,
+          style: TextStyle(fontSize: 12, color: context.theme.accent),
         ),
       );
 }
@@ -264,7 +259,7 @@ class _UserProfileButtonBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isSelf = user.userId == context.read<AccountServer>().userId;
+    final isSelf = user.userId == context.accountServer.userId;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 45),
       child: Row(
@@ -277,7 +272,7 @@ class _UserProfileButtonBar extends StatelessWidget {
               final result = await showConversationSelector(
                 context: context,
                 singleSelect: true,
-                title: Localization.of(context).shareContact,
+                title: context.l10n.shareContact,
                 onlyContact: false,
               );
 
@@ -289,23 +284,23 @@ class _UserProfileButtonBar extends StatelessWidget {
 
               await runFutureWithToast(
                 context,
-                context.read<AccountServer>().sendContactMessage(
-                      user.userId,
-                      user.fullName!,
-                      isPlain(result.first.isGroup, result.first.isBot),
-                      conversationId: conversationId,
-                      recipientId: result[0].userId,
-                    ),
+                context.accountServer.sendContactMessage(
+                  user.userId,
+                  user.fullName!,
+                  isPlain(result.first.isGroup, result.first.isBot),
+                  conversationId: conversationId,
+                  recipientId: result[0].userId,
+                ),
               );
             },
-            color: BrightnessData.themeOf(context).icon,
+            color: context.theme.icon,
           ),
           if (!isSelf)
             ActionButton(
               name: Resources.assetsImagesChatSvg,
               size: 30,
               onTap: () async {
-                if (user.userId == context.read<AccountServer>().userId) {
+                if (user.userId == context.accountServer.userId) {
                   // skip self.
                   return;
                 }
@@ -315,7 +310,7 @@ class _UserProfileButtonBar extends StatelessWidget {
                 );
                 Navigator.pop(context);
               },
-              color: BrightnessData.themeOf(context).icon,
+              color: context.theme.icon,
             ),
           if (!isSelf)
             ActionButton(
@@ -329,7 +324,7 @@ class _UserProfileButtonBar extends StatelessWidget {
                 );
                 Navigator.pop(context);
               },
-              color: BrightnessData.themeOf(context).icon,
+              color: context.theme.icon,
             )
         ],
       ),

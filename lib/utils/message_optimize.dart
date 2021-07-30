@@ -5,8 +5,8 @@ import '../enum/message_status.dart';
 import '../generated/l10n.dart';
 import '../widgets/message/item/action/action_data.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
+import 'extension/extension.dart';
 import 'load_balancer_utils.dart';
-import 'markdown.dart';
 
 Future<String?> messagePreviewOptimize(
   MessageStatus? messageStatus,

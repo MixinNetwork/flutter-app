@@ -14,7 +14,7 @@ import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../enum/message_status.dart';
-import '../../../utils/list_utils.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'conversation_cubit.dart';
 

@@ -1,9 +1,4 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart' as crypto;
-import 'package:flutter/widgets.dart';
-import 'package:ulid/ulid.dart';
-import 'package:uuid/uuid.dart';
+part of '../extension.dart';
 
 extension StringExtension on String {
   String get overflow => Characters(this)

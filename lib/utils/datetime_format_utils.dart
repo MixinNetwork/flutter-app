@@ -2,31 +2,41 @@ import 'package:intl/intl.dart';
 
 import '../../generated/l10n.dart';
 
-String formatDateTime(DateTime _dateTime) {
-  final now = DateTime.now().toLocal();
-  final dateTime = _dateTime.toLocal();
-  if (isSameDay(now, dateTime)) {
-    return DateFormat.Hm().format(dateTime);
+extension DateTimeExtension on DateTime {
+  String get format {
+    final now = DateTime.now().toLocal();
+    final dateTime = toLocal();
+    if (isSameDay(now, dateTime)) {
+      return DateFormat.Hm().format(dateTime);
+    }
+    if (isSameWeek(now, dateTime)) {
+      return DateFormat.E().format(dateTime);
+    }
+    if (isSameYear(now, dateTime)) {
+      return DateFormat.MMMd().format(dateTime);
+    }
+    return DateFormat.yMMMd().format(dateTime);
   }
-  if (isSameWeek(now, dateTime)) {
-    return DateFormat.EEEE().format(dateTime);
+
+  String get formatOfDay {
+    final now = DateTime.now().toLocal();
+    final dateTime = toLocal();
+    if (isSameDay(now, dateTime)) {
+      return Localization.current.today;
+    }
+    if (isSameYear(now, dateTime)) {
+      return DateFormat.MMMEd().format(dateTime);
+    }
+    return DateFormat.yMMMEd().format(dateTime);
   }
-  if (isSameYear(now, dateTime)) {
-    return DateFormat.MMMd().format(dateTime);
-  }
-  return DateFormat.yMMMd().format(dateTime);
+
+  bool get isToady => isSameDay(DateTime.now(), this);
+
+  int get epochNano => microsecondsSinceEpoch * 1000;
 }
 
-String formatDateTimeOfDay(DateTime _dateTime) {
-  final now = DateTime.now().toLocal();
-  final dateTime = _dateTime.toLocal();
-  if (isSameDay(now, dateTime)) {
-    return Localization.current.today;
-  }
-  if (isSameYear(now, dateTime)) {
-    return DateFormat.MMMEd().format(dateTime);
-  }
-  return DateFormat.yMMMEd().format(dateTime);
+extension StringEpochNanoExtension on String {
+  int get epochNano => DateTime.tryParse(this)?.epochNano ?? 0;
 }
 
 bool isSameYear(DateTime? a, DateTime? b) {
@@ -47,23 +57,3 @@ bool isSameDay(DateTime? a, DateTime? b) {
   final _b = b.toLocal();
   return _a.year == _b.year && _a.month == _b.month && _a.day == _b.day;
 }
-
-bool within24Hours(DateTime? _dateTime) {
-  if (_dateTime == null) return false;
-  final now = DateTime.now();
-  final offset = now.millisecondsSinceEpoch - _dateTime.millisecondsSinceEpoch;
-  if (offset < 60 * 60 * 1000 * 24) {
-    return true;
-  }
-  return false;
-}
-
-int getEpochNanoFromString(String timestamp) {
-  final dateTime = DateTime.tryParse(timestamp);
-  if (dateTime == null) {
-    return 0;
-  }
-  return getEpochNano(dateTime);
-}
-
-int getEpochNano(DateTime dateTime) => dateTime.microsecondsSinceEpoch * 1000;

@@ -10,21 +10,17 @@ import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart';
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../account/account_server.dart';
 import '../../../../bloc/paging/load_more_paging.dart';
 import '../../../../constants/brightness_theme_data.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/media_status.dart';
 import '../../../../enum/message_category.dart';
-import '../../../../generated/l10n.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
-import '../../../../utils/string_extension.dart';
-import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/status.dart';
 
@@ -41,7 +37,7 @@ class FilePage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final size = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
-    final messageDao = context.read<AccountServer>().database.messageDao;
+    final messageDao = context.database.messageDao;
 
     final mediaCubit = useBloc(
       () => LoadMorePagingBloc<MessageItem>(
@@ -98,16 +94,14 @@ class FilePage extends HookWidget {
           children: [
             SvgPicture.asset(
               Resources.assetsImagesEmptyFileSvg,
-              color: BrightnessData.themeOf(context)
-                  .secondaryText
-                  .withOpacity(0.4),
+              color: context.theme.secondaryText.withOpacity(0.4),
             ),
             const SizedBox(height: 24),
             Text(
-              Localization.of(context).noFile,
+              context.l10n.noFile,
               style: TextStyle(
                 fontSize: 12,
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: context.theme.secondaryText,
               ),
             ),
           ],
@@ -138,13 +132,13 @@ class FilePage extends HookWidget {
                 children: [
                   SliverPinnedHeader(
                     child: Container(
-                      color: BrightnessData.themeOf(context).primary,
+                      color: context.theme.primary,
                       padding: const EdgeInsets.all(10),
                       child: Text(
                         DateFormat.yMMMd().format(e.key.toLocal()),
                         style: TextStyle(
                           fontSize: 14,
-                          color: BrightnessData.themeOf(context).secondaryText,
+                          color: context.theme.secondaryText,
                         ),
                       ),
                     ),
@@ -181,15 +175,15 @@ class _Item extends StatelessWidget {
           if (message.mediaStatus == MediaStatus.canceled) {
             if (message.relationship == UserRelationship.me &&
                 message.mediaUrl?.isNotEmpty == true) {
-              await context.read<AccountServer>().reUploadAttachment(message);
+              await context.accountServer.reUploadAttachment(message);
             } else {
-              await context.read<AccountServer>().downloadAttachment(message);
+              await context.accountServer.downloadAttachment(message);
             }
           } else if (message.mediaStatus == MediaStatus.done &&
               message.mediaUrl != null) {
             if (message.mediaUrl?.isEmpty ?? true) return;
             final path = await getSavePath(
-              confirmButtonText: Localization.of(context).save,
+              confirmButtonText: context.l10n.save,
               suggestedName: message.mediaName ?? basename(message.mediaUrl!),
             );
             if (path?.isEmpty ?? true) return;
@@ -222,7 +216,7 @@ class _Item extends StatelessWidget {
 
                     return DecoratedBox(
                       decoration: BoxDecoration(
-                        color: BrightnessData.themeOf(context).statusBackground,
+                        color: context.theme.statusBackground,
                       ),
                       child: Center(
                         child: Builder(builder: (context) {
@@ -257,7 +251,7 @@ class _Item extends StatelessWidget {
                     message.mediaName?.overflow ?? '',
                     style: TextStyle(
                       fontSize: 16,
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                     ),
                     maxLines: 1,
                   ),
@@ -265,7 +259,7 @@ class _Item extends StatelessWidget {
                     filesize(message.mediaSize),
                     style: TextStyle(
                       fontSize: 14,
-                      color: BrightnessData.themeOf(context).secondaryText,
+                      color: context.theme.secondaryText,
                     ),
                   ),
                 ],

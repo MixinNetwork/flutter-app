@@ -16,7 +16,6 @@ import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
-import '../db/extension/message.dart' show QueteMessage;
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
 import '../enum/media_status.dart';
@@ -24,7 +23,7 @@ import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
 import '../utils/datetime_format_utils.dart';
-import '../utils/file.dart';
+import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/reg_exp_utils.dart';
 
@@ -731,7 +730,7 @@ class SendMessageHelper {
     final createdAt = attachmentMessage.createdAt;
     if (createdAt != null) {
       final date = DateTime.tryParse(createdAt);
-      if (within24Hours(date)) {
+      if (date?.isToady == true) {
         return AttachmentResult(
           attachmentMessage.attachmentId,
           attachmentMessage.key,

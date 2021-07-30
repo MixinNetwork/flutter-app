@@ -3,8 +3,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../../db/mixin_database.dart' hide Offset, Message;
-import '../../../generated/l10n.dart';
-import '../../brightness_observer.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -25,10 +25,10 @@ class NotSupportedMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = Text(
-      Localization.of(context).chatCheckOnPhone,
+      context.l10n.chatCheckOnPhone,
       style: TextStyle(
         fontSize: MessageItemWidget.primaryFontSize,
-        color: BrightnessData.themeOf(context).text,
+        color: context.theme.text,
       ),
     );
     final dateAndStatus = MessageDatetimeAndStatus(

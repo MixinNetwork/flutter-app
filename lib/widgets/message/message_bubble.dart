@@ -2,7 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../brightness_observer.dart';
+import '../../utils/extension/extension.dart';
 import 'item/quote_message.dart';
 
 const _nipWidth = 9.0;
@@ -13,10 +13,8 @@ const _darkOtherBubble = Color.fromRGBO(52, 59, 67, 1);
 
 extension BubbleColor on BuildContext {
   Color messageBubbleColor(bool isCurrentUser) => isCurrentUser
-      ? BrightnessData.dynamicColor(this, _lightCurrentBubble,
-          darkColor: _darkCurrentBubble)
-      : BrightnessData.dynamicColor(this, _lightOtherBubble,
-          darkColor: _darkOtherBubble);
+      ? dynamicColor(_lightCurrentBubble, darkColor: _darkCurrentBubble)
+      : dynamicColor(_lightOtherBubble, darkColor: _darkOtherBubble);
 }
 
 class MessageBubble extends StatelessWidget {

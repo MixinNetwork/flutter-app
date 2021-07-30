@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
+
 import '../constants/resources.dart';
+import '../utils/extension/extension.dart';
 import 'action_button.dart';
-import 'brightness_observer.dart';
 
 class MixinBackButton extends StatelessWidget {
   const MixinBackButton({
@@ -18,7 +19,7 @@ class MixinBackButton extends StatelessWidget {
         padding: const EdgeInsets.only(right: 8.0),
         child: ActionButton(
           name: Resources.assetsImagesIcBackSvg,
-          color: color ?? BrightnessData.themeOf(context).icon,
+          color: color ?? context.theme.icon,
           size: 24,
           onTap: () {
             if (onTap != null) return onTap?.call();
@@ -34,7 +35,7 @@ class MixinCloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ActionButton(
         name: Resources.assetsImagesIcCloseSvg,
-        color: BrightnessData.themeOf(context).icon,
+        color: context.theme.icon,
         onTap: () => Navigator.pop(context),
       );
 }

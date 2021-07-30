@@ -5,13 +5,13 @@ import '../converter/message_status_type_converter.dart';
 import '../converter/millis_date_converter.dart';
 import '../mixin_database.dart';
 
-extension Message on MessageItem {
+extension MessageItemExtension on MessageItem {
   bool get isLottie => assetType?.toLowerCase() == 'json';
 
   bool get isSignal => type.startsWith('SIGNAL_');
 }
 
-extension QueteMessage on QuoteMessageItem {
+extension QuoteMessageItemExtension on QuoteMessageItem {
   String toJson() => jsonEncode(<String, dynamic>{
         'message_id': messageId,
         'conversation_id': conversationId,

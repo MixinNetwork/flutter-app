@@ -11,12 +11,12 @@ import 'package:provider/provider.dart';
 import '../db/mixin_database.dart' hide Offset;
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/mention_cubit.dart';
+import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
-import '../utils/text_utils.dart';
 import 'avatar_view/avatar_view.dart';
-import 'brightness_observer.dart';
+
 import 'high_light_text.dart';
 import 'interacter_decorated_box.dart';
 
@@ -154,7 +154,7 @@ class _MentionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).popUp,
+          color: context.theme.popUp,
         ),
         child: ListView.builder(
           controller: context.read<MentionCubit>().scrollController,
@@ -186,9 +186,8 @@ class _MentionItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
-        decoration: selected
-            ? BoxDecoration(color: BrightnessData.themeOf(context).listSelected)
-            : null,
+        decoration:
+            selected ? BoxDecoration(color: context.theme.listSelected) : null,
         onTap: () => onSelect?.call(user),
         child: Container(
           height: kMentionItemHeight,
@@ -210,14 +209,14 @@ class _MentionItem extends StatelessWidget {
                     user.fullName ?? '',
                     style: TextStyle(
                       fontSize: 14,
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                       height: 1,
                     ),
                     highlightTextSpans: [
                       HighlightTextSpan(
                         keyword ?? '',
                         style: TextStyle(
-                          color: BrightnessData.themeOf(context).accent,
+                          color: context.theme.accent,
                         ),
                       ),
                     ],
@@ -228,13 +227,13 @@ class _MentionItem extends StatelessWidget {
                     user.identityNumber,
                     style: TextStyle(
                       fontSize: 12,
-                      color: BrightnessData.themeOf(context).secondaryText,
+                      color: context.theme.secondaryText,
                     ),
                     highlightTextSpans: [
                       HighlightTextSpan(
                         keyword ?? '',
                         style: TextStyle(
-                          color: BrightnessData.themeOf(context).accent,
+                          color: context.theme.accent,
                         ),
                       )
                     ],

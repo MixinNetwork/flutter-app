@@ -4,8 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../../constants/constants.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
-import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../../interacter_decorated_box.dart';
 import '../message.dart';
@@ -73,7 +73,7 @@ class TransferMessage extends StatelessWidget {
                           return Text(
                             amount!,
                             style: TextStyle(
-                              color: BrightnessData.themeOf(context).text,
+                              color: context.theme.text,
                               fontSize: MessageItemWidget.secondaryFontSize,
                             ),
                           );
@@ -84,7 +84,7 @@ class TransferMessage extends StatelessWidget {
                   Text(
                     message.assetSymbol!,
                     style: TextStyle(
-                      color: BrightnessData.themeOf(context).secondaryText,
+                      color: context.theme.secondaryText,
                       fontSize: MessageItemWidget.tertiaryFontSize,
                     ),
                   ),

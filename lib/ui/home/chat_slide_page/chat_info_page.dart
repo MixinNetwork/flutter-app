@@ -6,15 +6,14 @@ import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
-import '../../../generated/l10n.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/cell.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/more_extended_text.dart';
@@ -43,7 +42,7 @@ class ChatInfoPage extends HookWidget {
           state?.isLoaded == true && state?.conversationId == conversationId,
     )!;
 
-    final accountServer = context.read<AccountServer>();
+    final accountServer = context.accountServer;
     final userParticipant = useStream<Participant?>(
       useMemoized(
         () => accountServer.database.participantDao
@@ -63,10 +62,7 @@ class ChatInfoPage extends HookWidget {
     }, [conversationId]);
 
     final announcement = useStream<String?>(
-            useMemoized(() => context
-                .read<AccountServer>()
-                .database
-                .conversationDao
+            useMemoized(() => context.database.conversationDao
                 .announcement(conversationId)
                 .watchSingle()),
             initialData: null)
@@ -82,13 +78,13 @@ class ChatInfoPage extends HookWidget {
           if (ModalRoute.of(context)?.canPop != true)
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
-              color: BrightnessData.themeOf(context).icon,
+              color: context.theme.icon,
               onTap: () => context.read<ChatSideCubit>().onPopPage(),
             ),
         ],
-        backgroundColor: BrightnessData.themeOf(context).popUp,
+        backgroundColor: context.theme.popUp,
       ),
-      backgroundColor: BrightnessData.themeOf(context).popUp,
+      backgroundColor: context.theme.popUp,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -124,7 +120,7 @@ class ChatInfoPage extends HookWidget {
               CellGroup(
                 child: CellItem(
                   title: Text(
-                    Localization.of(context).groupParticipants,
+                    context.l10n.groupParticipants,
                   ),
                   onTap: () => context
                       .read<ChatSideCubit>()
@@ -134,12 +130,12 @@ class ChatInfoPage extends HookWidget {
             if (!isGroupConversation)
               CellGroup(
                 child: CellItem(
-                  title: Text(Localization.of(context).shareContact),
+                  title: Text(context.l10n.shareContact),
                   onTap: () async {
                     final result = await showConversationSelector(
                       context: context,
                       singleSelect: true,
-                      title: Localization.of(context).shareContact,
+                      title: context.l10n.shareContact,
                       onlyContact: false,
                     );
 
@@ -166,14 +162,14 @@ class ChatInfoPage extends HookWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   CellItem(
-                    title: Text(Localization.of(context).sharedMedia),
+                    title: Text(context.l10n.sharedMedia),
                     onTap: () => context
                         .read<ChatSideCubit>()
                         .pushPage(ChatSideCubit.sharedMedia),
                   ),
                   CellItem(
                     title: Text(
-                      Localization.of(context).searchMessageHistory,
+                      context.l10n.searchMessageHistory,
                       maxLines: 1,
                     ),
                     onTap: () => context
@@ -192,8 +188,8 @@ class ChatInfoPage extends HookWidget {
                   children: [
                     Builder(builder: (context) {
                       final announcementTitle = announcement?.isEmpty ?? true
-                          ? Localization.of(context).addAnnouncement
-                          : Localization.of(context).editAnnouncement;
+                          ? context.l10n.addAnnouncement
+                          : context.l10n.editAnnouncement;
                       return CellItem(
                         title: Text(announcementTitle),
                         onTap: () async {
@@ -208,10 +204,10 @@ class ChatInfoPage extends HookWidget {
 
                           await runFutureWithToast(
                             context,
-                            context.read<AccountServer>().editGroupAnnouncement(
-                                  conversationId,
-                                  result,
-                                ),
+                            context.accountServer.editGroupAnnouncement(
+                              conversationId,
+                              result,
+                            ),
                           );
                         },
                       );
@@ -223,17 +219,15 @@ class ChatInfoPage extends HookWidget {
               child: Column(
                 children: [
                   CellItem(
-                    title: Text(muting
-                        ? Localization.of(context).unMute
-                        : Localization.of(context).muted),
+                    title:
+                        Text(muting ? context.l10n.unMute : context.l10n.muted),
                     description: muting
                         ? Text(
                             DateFormat('yyyy/MM/dd, hh:mm a').format(
                                 conversation.conversation!.validMuteUntil!
                                     .toLocal()),
                             style: TextStyle(
-                              color:
-                                  BrightnessData.themeOf(context).secondaryText,
+                              color: context.theme.secondaryText,
                               fontSize: 14,
                             ),
                           )
@@ -244,10 +238,10 @@ class ChatInfoPage extends HookWidget {
                       if (muting) {
                         await runFutureWithToast(
                           context,
-                          context.read<AccountServer>().unMuteConversation(
-                                conversationId: isGroup ? conversationId : null,
-                                userId: isGroup ? null : conversation.userId,
-                              ),
+                          context.accountServer.unMuteConversation(
+                            conversationId: isGroup ? conversationId : null,
+                            userId: isGroup ? null : conversation.userId,
+                          ),
                         );
                         return;
                       }
@@ -258,25 +252,25 @@ class ChatInfoPage extends HookWidget {
 
                       await runFutureWithToast(
                           context,
-                          context.read<AccountServer>().muteConversation(
-                                result,
-                                conversationId: isGroup ? conversationId : null,
-                                userId: isGroup ? null : conversation.userId,
-                              ));
+                          context.accountServer.muteConversation(
+                            result,
+                            conversationId: isGroup ? conversationId : null,
+                            userId: isGroup ? null : conversation.userId,
+                          ));
                     },
                   ),
                   if (!isGroupConversation)
                     CellItem(
-                      title: Text(Localization.of(context).editName),
+                      title: Text(context.l10n.editName),
                       trailing: null,
                       onTap: () async {
                         final name = await showMixinDialog<String>(
                           context: context,
                           child: EditDialog(
                             editText: conversation.name ?? '',
-                            title: Text(Localization.of(context).editName),
-                            hintText: Localization.of(context).conversationName,
-                            positiveAction: Localization.of(context).change,
+                            title: Text(context.l10n.editName),
+                            hintText: context.l10n.conversationName,
+                            positiveAction: context.l10n.change,
                           ),
                         );
                         if (name?.isEmpty ?? true) return;
@@ -297,13 +291,13 @@ class ChatInfoPage extends HookWidget {
                 children: [
                   if (conversation.relationship == UserRelationship.blocking)
                     CellItem(
-                      title: Text(Localization.of(context).unblock),
-                      color: BrightnessData.themeOf(context).red,
+                      title: Text(context.l10n.unblock),
+                      color: context.theme.red,
                       trailing: null,
                       onTap: () async {
                         final result = await showConfirmMixinDialog(
                           context,
-                          Localization.of(context).unblock,
+                          context.l10n.unblock,
                         );
                         if (!result) return;
 
@@ -316,11 +310,11 @@ class ChatInfoPage extends HookWidget {
                   if (!isGroupConversation && !conversation.isStranger!)
                     Builder(builder: (context) {
                       final title = conversation.isBot!
-                          ? Localization.of(context).removeBot
-                          : Localization.of(context).removeContact;
+                          ? context.l10n.removeBot
+                          : context.l10n.removeContact;
                       return CellItem(
                         title: Text(title),
-                        color: BrightnessData.themeOf(context).red,
+                        color: context.theme.red,
                         trailing: null,
                         onTap: () async {
                           final result = await showConfirmMixinDialog(
@@ -338,13 +332,13 @@ class ChatInfoPage extends HookWidget {
                     }),
                   if (conversation.isStranger!)
                     CellItem(
-                      title: Text(Localization.of(context).block),
-                      color: BrightnessData.themeOf(context).red,
+                      title: Text(context.l10n.block),
+                      color: context.theme.red,
                       trailing: null,
                       onTap: () async {
                         final result = await showConfirmMixinDialog(
                           context,
-                          Localization.of(context).block,
+                          context.l10n.block,
                         );
                         if (!result) return;
 
@@ -355,13 +349,13 @@ class ChatInfoPage extends HookWidget {
                       },
                     ),
                   CellItem(
-                    title: Text(Localization.of(context).clearChat),
-                    color: BrightnessData.themeOf(context).red,
+                    title: Text(context.l10n.clearChat),
+                    color: context.theme.red,
                     trailing: null,
                     onTap: () async {
                       final result = await showConfirmMixinDialog(
                         context,
-                        Localization.of(context).clearChat,
+                        context.l10n.clearChat,
                       );
                       if (!result) return;
 
@@ -373,13 +367,13 @@ class ChatInfoPage extends HookWidget {
                   if (conversation.isGroup!)
                     if (userParticipant != null)
                       CellItem(
-                        title: Text(Localization.of(context).exitGroup),
-                        color: BrightnessData.themeOf(context).red,
+                        title: Text(context.l10n.exitGroup),
+                        color: context.theme.red,
                         trailing: null,
                         onTap: () async {
                           final result = await showConfirmMixinDialog(
                             context,
-                            Localization.of(context).exitGroup,
+                            context.l10n.exitGroup,
                           );
                           if (!result) return;
 
@@ -391,28 +385,22 @@ class ChatInfoPage extends HookWidget {
                       )
                     else
                       CellItem(
-                        title: Text(Localization.of(context).deleteGroup),
-                        color: BrightnessData.themeOf(context).red,
+                        title: Text(context.l10n.deleteGroup),
+                        color: context.theme.red,
                         trailing: null,
                         onTap: () async {
                           final result = await showConfirmMixinDialog(
                             context,
-                            Localization.of(context).deleteGroup,
+                            context.l10n.deleteGroup,
                           );
                           if (!result) return;
 
-                          await context
-                              .read<AccountServer>()
-                              .database
-                              .messageDao
+                          await context.database.messageDao
                               .deleteMessageByConversationId(conversationId);
-                          await context
-                              .read<AccountServer>()
-                              .database
-                              .conversationDao
+                          await context.database.conversationDao
                               .deleteConversation(
-                                conversationId,
-                              );
+                            conversationId,
+                          );
                           if (context
                                   .read<ConversationCubit>()
                                   .state
@@ -428,13 +416,13 @@ class ChatInfoPage extends HookWidget {
             if (!isGroupConversation)
               CellGroup(
                 child: CellItem(
-                  title: Text(Localization.of(context).report),
-                  color: BrightnessData.themeOf(context).red,
+                  title: Text(context.l10n.report),
+                  color: context.theme.red,
                   trailing: null,
                   onTap: () async {
                     final result = await showConfirmMixinDialog(
                       context,
-                      Localization.of(context).reportWarning,
+                      context.l10n.reportWarning,
                     );
                     if (!result) return;
 
@@ -469,7 +457,7 @@ class ConversationBio extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final textStream = useMemoized(() {
-      final database = context.read<AccountServer>().database;
+      final database = context.database;
       if (isGroup) {
         return database.conversationDao
             .announcement(conversationId)
@@ -488,7 +476,7 @@ class ConversationBio extends HookWidget {
     return MoreExtendedText(
       text,
       style: TextStyle(
-        color: BrightnessData.themeOf(context).text,
+        color: context.theme.text,
         fontSize: fontSize,
       ),
     );
@@ -515,8 +503,7 @@ class _AddToContactsButton extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 12),
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor:
-                        BrightnessData.themeOf(context).statusBackground,
+                    backgroundColor: context.theme.statusBackground,
                     padding:
                         const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
                     shape: RoundedRectangleBorder(
@@ -532,18 +519,16 @@ class _AddToContactsButton extends StatelessWidget {
                         'ContactsAdd conversation should not be a group.');
                     runFutureWithToast(
                         context,
-                        context.read<AccountServer>().addUser(
-                              conversation.userId!,
-                              username,
-                            ));
+                        context.accountServer.addUser(
+                          conversation.userId!,
+                          username,
+                        ));
                   },
                   child: Text(
                     conversation.isBot!
-                        ? Localization.of(context).conversationAddBot
-                        : Localization.of(context).conversationAddContact,
-                    style: TextStyle(
-                        fontSize: 12,
-                        color: BrightnessData.themeOf(context).accent),
+                        ? context.l10n.conversationAddBot
+                        : context.l10n.conversationAddContact,
+                    style: TextStyle(fontSize: 12, color: context.theme.accent),
                   ),
                 ),
               )

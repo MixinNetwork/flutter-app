@@ -10,15 +10,11 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../bloc/subscribe_mixin.dart';
 import '../../constants/resources.dart';
-import '../../generated/l10n.dart';
-import '../../utils/file.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../../utils/list_utils.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../widgets/dash_path_border.dart';
 import '../../widgets/interacter_decorated_box.dart';
@@ -153,8 +149,8 @@ class ChatPage extends HookWidget {
         BlocProvider.value(value: searchConversationKeywordCubit),
         BlocProvider(
           create: (context) => MessageBloc(
-            accountServer: context.read<AccountServer>(),
-            database: context.read<AccountServer>().database,
+            accountServer: context.accountServer,
+            database: context.database,
             conversationCubit: context.read<ConversationCubit>(),
             mentionCache: context.read<MentionCache>(),
             limit: windowHeight ~/ 20,
@@ -163,7 +159,7 @@ class ChatPage extends HookWidget {
       ],
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).primary,
+          color: context.theme.primary,
         ),
         child: LayoutBuilder(
           builder: (context, boxConstraints) {
@@ -180,7 +176,7 @@ class ChatPage extends HookWidget {
                 if (!navigationMode)
                   Container(
                     width: 1,
-                    color: BrightnessData.themeOf(context).divider,
+                    color: context.theme.divider,
                   ),
                 _SideRouter(
                   chatSideCubit: chatSideCubit,
@@ -319,7 +315,7 @@ class ChatContainer extends HookWidget {
     final blinkCubit = useBloc(
       () => BlinkCubit(
         tickerProvider,
-        BrightnessData.themeOf(context).accent.withOpacity(0.5),
+        context.theme.accent.withOpacity(0.5),
       ),
     );
 
@@ -338,7 +334,7 @@ class ChatContainer extends HookWidget {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: BrightnessData.themeOf(context).divider,
+                  color: context.theme.divider,
                 ),
               ),
             ),
@@ -347,14 +343,14 @@ class ChatContainer extends HookWidget {
           Expanded(
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: BrightnessData.themeOf(context).chatBackground,
+                color: context.theme.chatBackground,
                 image: DecorationImage(
                   image: const ExactAssetImage(
                     Resources.assetsImagesChatBackgroundPng,
                   ),
                   fit: BoxFit.cover,
                   colorFilter: ColorFilter.mode(
-                    BrightnessData.of(context) == 1.0
+                    context.brightnessValue == 1.0
                         ? Colors.white.withOpacity(0.02)
                         : Colors.black.withOpacity(0.03),
                     BlendMode.srcIn,
@@ -374,8 +370,7 @@ class ChatContainer extends HookWidget {
                               decoration: BoxDecoration(
                                 border: Border(
                                   bottom: BorderSide(
-                                    color:
-                                        BrightnessData.themeOf(context).divider,
+                                    color: context.theme.divider,
                                   ),
                                 ),
                               ),
@@ -604,7 +599,7 @@ class _JumpCurrentButton extends HookWidget {
             alignment: Alignment.center,
             child: SvgPicture.asset(
               Resources.assetsImagesJumpCurrentArrowSvg,
-              color: BrightnessData.themeOf(context).text,
+              color: context.theme.text,
             ),
           ),
         ),
@@ -625,10 +620,7 @@ class _JumpMentionButton extends HookWidget {
     )!;
     final messageMentions = useStream(
           useMemoized(
-              () => context
-                  .read<AccountServer>()
-                  .database
-                  .messageMentionDao
+              () => context.database.messageMentionDao
                   .unreadMentionMessageByConversationId(conversationId)
                   .watch(),
               [conversationId]),
@@ -641,8 +633,7 @@ class _JumpMentionButton extends HookWidget {
       onTap: () {
         final mention = messageMentions.first;
         context.read<MessageBloc>().scrollTo(mention.messageId);
-        context
-            .read<AccountServer>()
+        context.accountServer
             .markMentionRead(mention.messageId, mention.conversationId);
       },
       child: SizedBox(
@@ -672,7 +663,7 @@ class _JumpMentionButton extends HookWidget {
                     style: TextStyle(
                       fontSize: 17,
                       height: 1,
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                     ),
                   ),
                 ),
@@ -683,7 +674,7 @@ class _JumpMentionButton extends HookWidget {
               alignment: Alignment.topCenter,
               child: Container(
                 decoration: BoxDecoration(
-                  color: BrightnessData.themeOf(context).accent,
+                  color: context.theme.accent,
                   shape: BoxShape.circle,
                 ),
                 width: 20,
@@ -753,24 +744,24 @@ class _ChatDragIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(color: BrightnessData.themeOf(context).popUp),
+        decoration: BoxDecoration(color: context.theme.popUp),
         child: Container(
           margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-              color: BrightnessData.themeOf(context).listSelected,
+              color: context.theme.listSelected,
               borderRadius: const BorderRadius.all(Radius.circular(8)),
               border: DashPathBorder.all(
                 borderSide: BorderSide(
-                  color: BrightnessData.themeOf(context).divider,
+                  color: context.theme.divider,
                 ),
                 dashArray: CircularIntervalList([4, 4]),
               )),
           child: Center(
             child: Text(
-              Localization.of(context).chatDragHint,
+              context.l10n.chatDragHint,
               style: TextStyle(
                 fontSize: 14,
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
               ),
             ),
           ),

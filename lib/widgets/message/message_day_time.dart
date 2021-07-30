@@ -3,8 +3,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../bloc/minute_timer_cubit.dart';
 import '../../utils/datetime_format_utils.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../brightness_observer.dart';
 import 'message.dart';
 
 class MessageDayTime extends HookWidget {
@@ -19,7 +19,7 @@ class MessageDayTime extends HookWidget {
   Widget build(BuildContext context) {
     final dateTimeString =
         useBlocStateConverter<MinuteTimerCubit, DateTime, String>(
-      converter: (dateTime) => formatDateTimeOfDay(this.dateTime),
+      converter: (dateTime) => dateTime.formatOfDay,
       keys: [dateTime],
     );
     return Center(
@@ -28,7 +28,7 @@ class MessageDayTime extends HookWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            color: BrightnessData.themeOf(context).dateTime,
+            color: context.theme.dateTime,
           ),
           padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 10),
           child: ConstrainedBox(

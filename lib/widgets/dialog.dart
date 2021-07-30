@@ -5,9 +5,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../generated/l10n.dart';
-import '../utils/list_utils.dart';
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
+
 import 'disable.dart';
 import 'interacter_decorated_box.dart';
 
@@ -96,7 +95,7 @@ class AlertDialogLayout extends StatelessWidget {
                     DefaultTextStyle(
                       style: TextStyle(
                         fontSize: 16,
-                        color: BrightnessData.themeOf(context).text,
+                        color: context.theme.text,
                       ),
                       child: title!,
                     ),
@@ -105,7 +104,7 @@ class AlertDialogLayout extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                     ),
                     child: content,
                   ),
@@ -146,11 +145,10 @@ class _DialogPage extends StatelessWidget {
             BoxShadow(
               color: const Color.fromRGBO(0, 0, 0, 0.07),
               offset: const Offset(0, 4),
-              blurRadius: lerpDouble(16, 6, BrightnessData.of(context))!,
+              blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
             ),
           ],
-          color: BrightnessData.dynamicColor(
-            context,
+          color: context.dynamicColor(
             const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(62, 65, 72, 1),
           ),
@@ -204,12 +202,11 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
         ? const BoxDecoration()
         : BoxDecoration(
             borderRadius: BorderRadius.circular(5),
-            color: BrightnessData.themeOf(context).accent,
+            color: context.theme.accent,
           );
     final textColor = backgroundTransparent
-        ? BrightnessData.themeOf(context).accent
-        : BrightnessData.dynamicColor(
-            context,
+        ? context.theme.accent
+        : context.dynamicColor(
             const Color.fromRGBO(255, 255, 255, 1),
           );
     return Disable(
@@ -248,14 +245,14 @@ class DialogTextField extends HookWidget {
         height: 48,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).background,
+          color: context.theme.background,
           borderRadius: BorderRadius.circular(5),
         ),
         alignment: Alignment.center,
         child: TextField(
           controller: textEditingController,
           style: TextStyle(
-            color: BrightnessData.themeOf(context).text,
+            color: context.theme.text,
           ),
           scrollPadding: EdgeInsets.zero,
           decoration: InputDecoration(
@@ -281,10 +278,10 @@ Future<bool> showConfirmMixinDialog(
             MixinButton(
                 backgroundTransparent: true,
                 onTap: () => Navigator.pop(context, false),
-                child: Text(Localization.of(context).cancel)),
+                child: Text(context.l10n.cancel)),
             MixinButton(
               onTap: () => Navigator.pop(context, true),
-              child: Text(Localization.of(context).confirm),
+              child: Text(context.l10n.confirm),
             ),
           ],
         ),
@@ -320,11 +317,11 @@ class EditDialog extends HookWidget {
         MixinButton(
             backgroundTransparent: true,
             onTap: () => Navigator.pop(context),
-            child: Text(Localization.of(context).cancel)),
+            child: Text(context.l10n.cancel)),
         MixinButton(
           disable: textEditingValue.text.isEmpty,
           onTap: () => Navigator.pop(context, textEditingController.text),
-          child: Text(positiveAction ?? Localization.of(context).create),
+          child: Text(positiveAction ?? context.l10n.create),
         ),
       ],
     );

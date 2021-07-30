@@ -2,10 +2,9 @@ import 'package:extended_text/extended_text.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../generated/l10n.dart';
+import '../utils/extension/extension.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
-import 'brightness_observer.dart';
 import 'high_light_text.dart';
 import 'interacter_decorated_box.dart';
 
@@ -34,7 +33,7 @@ class MoreExtendedText extends HookWidget {
               (e) => HighlightTextSpan(
                 e[0]!,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).accent,
+                  color: context.theme.accent,
                 ),
                 onTap: () => openUri(context, e[0]!),
               ),
@@ -63,9 +62,9 @@ class MoreExtendedText extends HookWidget {
               expand.value = true;
             },
             child: Text(
-              Localization.of(context).more,
+              context.l10n.more,
               style: style?.merge(TextStyle(
-                color: BrightnessData.themeOf(context).accent,
+                color: context.theme.accent,
               )),
             ),
           ),

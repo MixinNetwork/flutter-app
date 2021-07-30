@@ -4,7 +4,7 @@ import 'package:lottie/lottie.dart';
 
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/dp_utils.dart';
-import '../../brightness_observer.dart';
+import '../../../utils/extension/extension.dart';
 import '../../cache_image.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -66,7 +66,7 @@ class StickerMessageWidget extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: BrightnessData.themeOf(context).stickerPlaceholderColor,
+        color: context.theme.stickerPlaceholderColor,
         borderRadius: BorderRadius.circular(24),
       ),
     );

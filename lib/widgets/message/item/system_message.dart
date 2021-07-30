@@ -1,13 +1,11 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
-import '../../brightness_observer.dart';
+import '../../../utils/extension/extension.dart';
 import '../message.dart';
 
 class SystemMessage extends StatelessWidget {
@@ -29,8 +27,7 @@ class SystemMessage extends StatelessWidget {
             cursor: SystemMouseCursors.click,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: BrightnessData.dynamicColor(
-                  context,
+                color: context.dynamicColor(
                   const Color.fromRGBO(202, 234, 201, 1),
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -44,7 +41,7 @@ class SystemMessage extends StatelessWidget {
                   generateSystemText(
                     actionName: message.actionName,
                     participantIsCurrentUser: message.participantUserId ==
-                        context.read<AccountServer>().userId,
+                        context.accountServer.userId,
                     relationship: message.relationship,
                     participantFullName: message.participantFullName,
                     senderFullName: message.userFullName,
@@ -52,8 +49,7 @@ class SystemMessage extends StatelessWidget {
                   ),
                   style: TextStyle(
                     fontSize: MessageItemWidget.secondaryFontSize,
-                    color: BrightnessData.dynamicColor(
-                      context,
+                    color: context.dynamicColor(
                       const Color.fromRGBO(0, 0, 0, 1),
                     ),
                   ),

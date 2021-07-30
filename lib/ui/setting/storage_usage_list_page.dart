@@ -7,14 +7,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../account/account_server.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../home/route/responsive_navigator_cubit.dart';
 
@@ -23,9 +21,9 @@ class StorageUsageListPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        backgroundColor: BrightnessData.themeOf(context).background,
+        backgroundColor: context.theme.background,
         appBar: MixinAppBar(
-          title: Text(Localization.of(context).storageUsage),
+          title: Text(context.l10n.storageUsage),
         ),
         body: const _Content(),
       );
@@ -37,7 +35,7 @@ class _Content extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final watchEvent = useStream(
-      useMemoized(() => File(context.read<AccountServer>().getMediaFilePath())
+      useMemoized(() => File(context.accountServer.getMediaFilePath())
           .watch(recursive: true)),
       initialData: null,
     ).data;
@@ -46,7 +44,7 @@ class _Content extends HookWidget {
         useMemoizedFuture<List<Tuple2<ConversationStorageUsage, int>>?>(
             () async {
       try {
-        final accountServer = context.read<AccountServer>();
+        final accountServer = context.accountServer;
         final list = await accountServer.database.conversationDao
             .conversationStorageUsage()
             .get();
@@ -68,8 +66,7 @@ class _Content extends HookWidget {
     if (list == null) {
       return Center(
         child: CircularProgressIndicator(
-          valueColor:
-              AlwaysStoppedAnimation(BrightnessData.themeOf(context).accent),
+          valueColor: AlwaysStoppedAnimation(context.theme.accent),
         ),
       );
     }
@@ -104,8 +101,7 @@ class _Item extends HookWidget {
       alignment: Alignment.center,
       child: CellGroup(
         padding: EdgeInsets.zero,
-        cellBackgroundColor: BrightnessData.dynamicColor(
-          context,
+        cellBackgroundColor: context.dynamicColor(
           Colors.white,
           darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
         ),
@@ -126,7 +122,7 @@ class _Item extends HookWidget {
               Text(
                 sizeString,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
+                  color: context.theme.secondaryText,
                   fontSize: 14,
                 ),
               ),

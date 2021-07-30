@@ -11,18 +11,15 @@ import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
-import '../../../generated/l10n.dart';
 import '../../../utils/callback_text_editing_action.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
-import '../../../utils/text_utils.dart';
 import '../../../widgets/action_button.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/mention_panel.dart';
@@ -32,7 +29,6 @@ import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
-import '../bloc/multi_auth_cubit.dart';
 import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import 'files_preview.dart';
@@ -56,7 +52,7 @@ class InputContainer extends HookWidget {
 
     final hasParticipant = useStream(
             useMemoized(() {
-              final database = context.read<AccountServer>().database;
+              final database = context.database;
               return CombineLatestStream([
                 database.conversationDao
                     .conversationItem(conversationId!)
@@ -64,12 +60,7 @@ class InputContainer extends HookWidget {
                 database.participantDao
                     .findParticipantById(
                       conversationId,
-                      context
-                          .read<MultiAuthCubit>()
-                          .state
-                          .current!
-                          .account
-                          .userId,
+                      context.multiAuthState.current!.account.userId,
                     )
                     .watchSingleOrNull(),
               ], (list) {
@@ -78,7 +69,7 @@ class InputContainer extends HookWidget {
               }).debounceTime(const Duration(milliseconds: 500));
             }, [
               conversationId,
-              context.read<MultiAuthCubit>().state.current?.account.userId,
+              context.multiAuthState.current?.account.userId,
             ]),
             initialData: true)
         .data!;
@@ -87,14 +78,14 @@ class InputContainer extends HookWidget {
         ? const _InputContainer()
         : Container(
             decoration: BoxDecoration(
-              color: BrightnessData.themeOf(context).primary,
+              color: context.theme.primary,
             ),
             height: 56,
             alignment: Alignment.center,
             child: Text(
-              Localization.of(context).groupCantSendDes,
+              context.l10n.groupCantSendDes,
               style: TextStyle(
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: context.theme.secondaryText,
               ),
             ),
           );
@@ -110,8 +101,8 @@ class _InputContainer extends HookWidget {
   Widget build(BuildContext context) {
     final mentionCubit = useBloc(
       () => MentionCubit(
-        userDao: context.read<AccountServer>().database.userDao,
-        multiAuthCubit: BlocProvider.of<MultiAuthCubit>(context),
+        userDao: context.database.userDao,
+        multiAuthCubit: context.multiAuthCubit,
         participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
       ),
     );
@@ -129,7 +120,7 @@ class _InputContainer extends HookWidget {
         final textEditingController = HighlightTextEditingController(
           initialText: draft,
           highlightTextStyle: TextStyle(
-            color: BrightnessData.themeOf(context).accent,
+            color: context.theme.accent,
           ),
           participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
         )..selection = TextSelection.fromPosition(
@@ -156,14 +147,10 @@ class _InputContainer extends HookWidget {
     useEffect(
         () => () {
               if (conversationId == null) return;
-              context
-                  .read<AccountServer>()
-                  .database
-                  .conversationDao
-                  .updateDraft(
-                    conversationId,
-                    textEditingController.text,
-                  );
+              context.database.conversationDao.updateDraft(
+                conversationId,
+                textEditingController.text,
+              );
             },
         [conversationId]);
 
@@ -200,7 +187,7 @@ class _InputContainer extends HookWidget {
                 ),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: BrightnessData.themeOf(context).primary,
+                    color: context.theme.primary,
                   ),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
@@ -209,8 +196,7 @@ class _InputContainer extends HookWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      _FileButton(
-                          actionColor: BrightnessData.themeOf(context).icon),
+                      _FileButton(actionColor: context.theme.icon),
                       const SizedBox(width: 6),
                       const _StickerButton(),
                       const SizedBox(width: 16),
@@ -224,7 +210,7 @@ class _InputContainer extends HookWidget {
                       ContextMenuPortalEntry(
                         buildMenus: () => [
                           ContextMenu(
-                            title: Localization.of(context).sendWithoutSound,
+                            title: context.l10n.sendWithoutSound,
                             onTap: () => _sendMessage(
                               context,
                               textEditingController,
@@ -234,7 +220,7 @@ class _InputContainer extends HookWidget {
                         ],
                         child: ActionButton(
                           name: Resources.assetsImagesIcSendSvg,
-                          color: BrightnessData.themeOf(context).icon,
+                          color: context.theme.icon,
                           onTap: () =>
                               _sendMessage(context, textEditingController),
                         ),
@@ -259,7 +245,7 @@ void _sendPostMessage(
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
-  context.read<AccountServer>().sendPostMessage(
+  context.accountServer.sendPostMessage(
       text, conversationItem.isPlainConversation,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId);
@@ -279,14 +265,14 @@ void _sendMessage(
   final conversationItem = context.read<ConversationCubit>().state;
   if (conversationItem == null) return;
 
-  context.read<AccountServer>().sendTextMessage(
-        text,
-        conversationItem.isPlainConversation,
-        conversationId: conversationItem.conversationId,
-        recipientId: conversationItem.userId,
-        quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
-        silent: silent,
-      );
+  context.accountServer.sendTextMessage(
+    text,
+    conversationItem.isPlainConversation,
+    conversationId: conversationItem.conversationId,
+    recipientId: conversationItem.userId,
+    quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
+    silent: silent,
+  );
 
   textEditingController.text = '';
   context.read<QuoteMessageCubit>().emit(null);
@@ -329,8 +315,7 @@ class _SendTextField extends HookWidget {
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(4)),
-        color: BrightnessData.dynamicColor(
-          context,
+        color: context.dynamicColor(
           const Color.fromRGBO(245, 247, 250, 1),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.08),
         ),
@@ -399,14 +384,14 @@ class _SendTextField extends HookWidget {
             focusNode: focusNode,
             controller: textEditingController,
             style: TextStyle(
-              color: BrightnessData.themeOf(context).text,
+              color: context.theme.text,
               fontSize: 14,
             ),
             decoration: InputDecoration(
               isDense: true,
-              hintText: Localization.of(context).chatInputHint,
+              hintText: context.l10n.chatInputHint,
               hintStyle: TextStyle(
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: context.theme.secondaryText,
                 fontSize: 14,
               ),
               enabledBorder: InputBorder.none,
@@ -449,7 +434,7 @@ class _QuoteMessage extends StatelessWidget {
               if (message == null) return const SizedBox();
               return DecoratedBox(
                 decoration: BoxDecoration(
-                  color: BrightnessData.themeOf(context).popUp,
+                  color: context.theme.popUp,
                 ),
                 child: Row(
                   children: [
@@ -510,12 +495,8 @@ class _StickerButton extends HookWidget {
     final key = useMemoized(() => GlobalKey());
 
     final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(context
-          .read<AccountServer>()
-          .database
-          .stickerAlbumDao
-          .systemAlbums()
-          .watch()),
+      () => StickerAlbumsCubit(
+          context.database.stickerAlbumDao.systemAlbums().watch()),
     );
 
     final tabLength =
@@ -566,7 +547,7 @@ class _StickerButton extends HookWidget {
           child: InteractableDecoratedBox(
             child: ActionButton(
               name: Resources.assetsImagesIcStickerSvg,
-              color: BrightnessData.themeOf(context).icon,
+              color: context.theme.icon,
             ),
           ),
         ),

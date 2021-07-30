@@ -9,15 +9,13 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../account/account_server.dart';
 import '../../../../bloc/paging/load_more_paging.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
-import '../../../../generated/l10n.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/markdown.dart';
-import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/full_screen_portal.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/post_message.dart';
@@ -36,7 +34,7 @@ class PostPage extends HookWidget {
   Widget build(BuildContext context) {
     final size = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
 
-    final messageDao = context.read<AccountServer>().database.messageDao;
+    final messageDao = context.database.messageDao;
 
     final mediaCubit = useBloc(
       () => LoadMorePagingBloc<MessageItem>(
@@ -93,16 +91,14 @@ class PostPage extends HookWidget {
           children: [
             SvgPicture.asset(
               Resources.assetsImagesEmptyFileSvg,
-              color: BrightnessData.themeOf(context)
-                  .secondaryText
-                  .withOpacity(0.4),
+              color: context.theme.secondaryText.withOpacity(0.4),
             ),
             const SizedBox(height: 24),
             Text(
-              Localization.of(context).noPost,
+              context.l10n.noPost,
               style: TextStyle(
                 fontSize: 12,
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: context.theme.secondaryText,
               ),
             ),
           ],
@@ -133,13 +129,13 @@ class PostPage extends HookWidget {
                 children: [
                   SliverPinnedHeader(
                     child: Container(
-                      color: BrightnessData.themeOf(context).primary,
+                      color: context.theme.primary,
                       padding: const EdgeInsets.all(10),
                       child: Text(
                         DateFormat.yMMMd().format(e.key.toLocal()),
                         style: TextStyle(
                           fontSize: 14,
-                          color: BrightnessData.themeOf(context).secondaryText,
+                          color: context.theme.secondaryText,
                         ),
                       ),
                     ),
@@ -181,7 +177,7 @@ class _Item extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: BrightnessData.themeOf(context).sidebarSelected,
+                color: context.theme.sidebarSelected,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Stack(

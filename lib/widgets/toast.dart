@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../constants/resources.dart';
-import '../generated/l10n.dart';
+import '../utils/extension/extension.dart';
 
 class Toast {
   factory Toast() => _singleton;
@@ -105,7 +105,7 @@ void showToastSuccessful(BuildContext context) => Toast.createView(
       child: ToastWidget(
         barrierColor: Colors.transparent,
         icon: const _Successful(),
-        text: Localization.of(context).successful,
+        text: context.l10n.successful,
       ),
     );
 
@@ -129,7 +129,7 @@ Future<void> showToastFailed(BuildContext context, Object? error) {
     child: ToastWidget(
       barrierColor: Colors.transparent,
       icon: const _Failed(),
-      text: message ?? Localization.of(context).failed,
+      text: message ?? context.l10n.failed,
     ),
   );
 }
@@ -138,7 +138,7 @@ void showToastLoading(BuildContext context) => Toast.createView(
       context: context,
       child: ToastWidget(
         icon: const _Loading(),
-        text: Localization.of(context).loading,
+        text: context.l10n.loading,
       ),
       duration: null,
     );

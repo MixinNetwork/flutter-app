@@ -3,7 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../constants/resources.dart';
 import '../enum/message_status.dart';
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
 
 class MessageStatusIcon extends StatelessWidget {
   const MessageStatusIcon({
@@ -15,7 +15,7 @@ class MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var color = BrightnessData.themeOf(context).secondaryText;
+    var color = context.theme.secondaryText;
     String icon;
     switch (status) {
       case MessageStatus.sent:
@@ -26,7 +26,7 @@ class MessageStatusIcon extends StatelessWidget {
         break;
       case MessageStatus.read:
         icon = Resources.assetsImagesReadSvg;
-        color = BrightnessData.themeOf(context).accent;
+        color = context.theme.accent;
         break;
       case MessageStatus.sending:
       default:

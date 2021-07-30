@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
 import 'interacter_decorated_box.dart';
 import 'unread_text.dart';
 
@@ -28,8 +28,7 @@ class SelectItem extends StatelessWidget {
     return InteractableDecoratedBox.color(
       onTap: onTap,
       decoration: selected == true
-          ? boxDecoration.copyWith(
-              color: BrightnessData.themeOf(context).sidebarSelected)
+          ? boxDecoration.copyWith(color: context.theme.sidebarSelected)
           : boxDecoration,
       child: LayoutBuilder(builder: (context, boxConstraints) {
         final hideTitle = boxConstraints.maxWidth < 75;
@@ -46,7 +45,7 @@ class SelectItem extends StatelessWidget {
                     title,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: BrightnessData.themeOf(context).text,
+                      color: context.theme.text,
                       fontSize: 14,
                     ),
                   ),
@@ -54,12 +53,11 @@ class SelectItem extends StatelessWidget {
               if (count > 0 && !hideUnreadText)
                 UnreadText(
                   data: '$count',
-                  backgroundColor: BrightnessData.dynamicColor(
-                    context,
+                  backgroundColor: context.dynamicColor(
                     const Color.fromRGBO(51, 51, 51, 0.16),
                     darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
                   ),
-                  textColor: BrightnessData.themeOf(context).text,
+                  textColor: context.theme.text,
                 ),
             ],
           ),

@@ -3,9 +3,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
-import '../../../generated/l10n.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../bloc/conversation_cubit.dart';
 import 'share_media/file_page.dart';
 import 'share_media/media_page.dart';
@@ -25,9 +24,9 @@ class SharedMediaPage extends HookWidget {
 
     final selectedIndex = useState(0);
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).primary,
+      backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).sharedMedia),
+        title: Text(context.l10n.sharedMedia),
       ),
       body: Column(
         children: [
@@ -55,9 +54,9 @@ class SharedMediaPage extends HookWidget {
           ),
           Row(
             children: [
-              Localization.of(context).media,
-              Localization.of(context).post,
-              Localization.of(context).file,
+              context.l10n.media,
+              context.l10n.post,
+              context.l10n.file,
             ]
                 .asMap()
                 .entries
@@ -74,8 +73,8 @@ class SharedMediaPage extends HookWidget {
                           style: TextStyle(
                             fontSize: 14,
                             color: e.key == selectedIndex.value
-                                ? BrightnessData.themeOf(context).accent
-                                : BrightnessData.themeOf(context).secondaryText,
+                                ? context.theme.accent
+                                : context.theme.secondaryText,
                           ),
                         ),
                       ),

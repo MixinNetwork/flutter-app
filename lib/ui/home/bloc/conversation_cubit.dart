@@ -11,7 +11,7 @@ import '../../../crypto/uuid/uuid.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/extension/user.dart';
 import '../../../db/mixin_database.dart';
-import '../../../generated/l10n.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list_bloc.dart';
@@ -163,7 +163,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     String? initIndexMessageId,
     String? initialChatSidePage,
   }) async {
-    final accountServer = context.read<AccountServer>();
+    final accountServer = context.accountServer;
     final conversationCubit = context.read<ConversationCubit>();
     final state = conversationCubit.state;
 
@@ -218,7 +218,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     User? user,
     String? initialChatSidePage,
   }) async {
-    final accountServer = context.read<AccountServer>();
+    final accountServer = context.accountServer;
     final conversationCubit = context.read<ConversationCubit>();
 
     final conversationId = generateConversationId(userId, accountServer.userId);
@@ -240,8 +240,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         await accountServer.database.userDao.userById(userId).getSingleOrNull();
 
     if (_user == null) {
-      return showToastFailed(
-          context, ToastError(Localization.of(context).userNotFound));
+      return showToastFailed(context, ToastError(context.l10n.userNotFound));
     }
 
     conversationCubit.emit(ConversationState(
@@ -270,10 +269,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     return conversations.firstWhere(
             (element) => element?.conversationId == conversationId,
             orElse: () => null) ??
-        await context
-            .read<AccountServer>()
-            .database
-            .conversationDao
+        await context.database.conversationDao
             .conversationItem(conversationId)
             .getSingleOrNull();
   }

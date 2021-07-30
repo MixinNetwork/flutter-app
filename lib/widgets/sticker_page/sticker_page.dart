@@ -5,13 +5,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../brightness_observer.dart';
 import '../cache_image.dart';
 import '../interacter_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
@@ -37,8 +36,7 @@ class StickerPage extends StatelessWidget {
           height: 407,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(11),
-            color: BrightnessData.dynamicColor(
-              context,
+            color: context.dynamicColor(
               const Color.fromRGBO(255, 255, 255, 1),
               darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
@@ -77,7 +75,7 @@ class _StickerAlbumPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stickerDao = Provider.of<AccountServer>(context).database.stickerDao;
+    final stickerDao = context.database.stickerDao;
     if (index == 1) {
       // todo can add or delete
     }
@@ -147,8 +145,7 @@ class _StickerAlbumPageItem extends HookWidget {
 
     return InteractableDecoratedBox(
       onTap: () async {
-        final accountServer =
-            Provider.of<AccountServer>(context, listen: false);
+        final accountServer = context.accountServer;
         final conversationItem = context.read<ConversationCubit>().state;
         if (conversationItem == null) return;
 
@@ -187,8 +184,7 @@ class _StickerAlbumBar extends StatelessWidget {
   Widget build(BuildContext context) => Container(
         width: double.infinity,
         height: 50,
-        color: BrightnessData.dynamicColor(
-          context,
+        color: context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.05),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
         ),
@@ -196,8 +192,7 @@ class _StickerAlbumBar extends StatelessWidget {
           controller: tabController,
           isScrollable: true,
           indicator: BoxDecoration(
-            color: BrightnessData.dynamicColor(
-              context,
+            color: context.dynamicColor(
               const Color.fromRGBO(229, 231, 235, 1),
               darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
             ),
@@ -236,7 +231,7 @@ class _StickerAlbumBarItem extends StatelessWidget {
                       // todo
                       // 2: Resources.assetsImagesGifStickerSvg
                     }[index]!,
-                    color: BrightnessData.themeOf(context).secondaryText,
+                    color: context.theme.secondaryText,
                     width: 24,
                     height: 24,
                   );

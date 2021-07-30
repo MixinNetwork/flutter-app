@@ -5,9 +5,9 @@ import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../db/mixin_database.dart' hide Offset, Message;
-import '../../../generated/l10n.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
-import '../../brightness_observer.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -29,26 +29,25 @@ class WaitingMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final content = RichText(
       text: TextSpan(
-        text: Localization.of(context).chatWaiting(
+        text: context.l10n.chatWaiting(
           message.relationship == UserRelationship.me
-              ? Localization.of(context).chatWaitingDesktop
+              ? context.l10n.chatWaitingDesktop
               : message.userFullName!,
         ),
         style: TextStyle(
           fontSize: MessageItemWidget.primaryFontSize,
-          color: BrightnessData.themeOf(context).text,
+          color: context.theme.text,
         ),
         children: [
           TextSpan(
             mouseCursor: SystemMouseCursors.click,
-            text: Localization.of(context).chatLearn,
+            text: context.l10n.chatLearn,
             style: TextStyle(
               fontSize: MessageItemWidget.primaryFontSize,
-              color: BrightnessData.themeOf(context).accent,
+              color: context.theme.accent,
             ),
             recognizer: TapGestureRecognizer()
-              ..onTap = () =>
-                  openUri(context, Localization.of(context).chatNotSupportUrl),
+              ..onTap = () => openUri(context, context.l10n.chatNotSupportUrl),
           ),
         ],
       ),

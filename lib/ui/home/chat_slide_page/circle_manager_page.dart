@@ -4,16 +4,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
-import '../../../generated/l10n.dart';
+
 import '../../../utils/color_utils.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
-import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/toast.dart';
 import '../bloc/conversation_cubit.dart';
@@ -34,10 +32,7 @@ class CircleManagerPage extends HookWidget {
 
     final circles = useStream<List<ConversationCircleManagerItem>>(
           useMemoized(
-            () => context
-                .read<AccountServer>()
-                .database
-                .circleDao
+            () => context.database.circleDao
                 .circleByConversationId(conversationId)
                 .watch(),
             [conversationId],
@@ -47,10 +42,7 @@ class CircleManagerPage extends HookWidget {
         [];
     final otherCircles = useStream<List<ConversationCircleManagerItem>>(
           useMemoized(
-            () => context
-                .read<AccountServer>()
-                .database
-                .circleDao
+            () => context.database.circleDao
                 .otherCircleByConversationId(conversationId)
                 .watch(),
             [conversationId],
@@ -60,9 +52,9 @@ class CircleManagerPage extends HookWidget {
         [];
 
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).background,
+      backgroundColor: context.theme.background,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).circles),
+        title: Text(context.l10n.circles),
         actions: [
           ActionButton(
             name: Resources.assetsImagesIcAddSvg,
@@ -73,14 +65,14 @@ class CircleManagerPage extends HookWidget {
               final name = await showMixinDialog<String>(
                 context: context,
                 child: EditDialog(
-                  title: Text(Localization.of(context).circles),
-                  hintText: Localization.of(context).editCircleName,
+                  title: Text(context.l10n.circles),
+                  hintText: context.l10n.editCircleName,
                 ),
               );
 
               await runFutureWithToast(
                 context,
-                context.read<AccountServer>().createCircle(name!, [
+                context.accountServer.createCircle(name!, [
                   CircleConversationRequest(
                     action: CircleConversationAction.add,
                     conversationId: conversation!.conversationId,
@@ -141,7 +133,7 @@ class _CircleManagerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
         height: 80,
-        color: BrightnessData.themeOf(context).primary,
+        color: context.theme.primary,
         child: Row(
           children: [
             GestureDetector(
@@ -152,7 +144,7 @@ class _CircleManagerItem extends StatelessWidget {
                 if (selected) {
                   await runFutureWithToast(
                     context,
-                    context.read<AccountServer>().circleRemoveConversation(
+                    context.accountServer.circleRemoveConversation(
                         circleId, conversation!.conversationId),
                   );
                   return;
@@ -160,7 +152,7 @@ class _CircleManagerItem extends StatelessWidget {
 
                 await runFutureWithToast(
                   context,
-                  context.read<AccountServer>().editCircleConversation(
+                  context.accountServer.editCircleConversation(
                     circleId,
                     [
                       CircleConversationRequest(
@@ -187,8 +179,7 @@ class _CircleManagerItem extends StatelessWidget {
             const SizedBox(width: 4),
             ClipOval(
               child: Container(
-                color: BrightnessData.dynamicColor(
-                  context,
+                color: context.dynamicColor(
                   const Color.fromRGBO(246, 247, 250, 1),
                   darkColor: const Color.fromRGBO(245, 247, 250, 1),
                 ),
@@ -211,15 +202,15 @@ class _CircleManagerItem extends StatelessWidget {
                 Text(
                   name,
                   style: TextStyle(
-                    color: BrightnessData.themeOf(context).text,
+                    color: context.theme.text,
                     fontSize: 16,
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  Localization.of(context).conversationCount(count),
+                  context.l10n.conversationCount(count),
                   style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
+                    color: context.theme.secondaryText,
                     fontSize: 14,
                   ),
                 ),

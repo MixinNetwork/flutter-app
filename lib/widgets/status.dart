@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../constants/resources.dart';
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
 
 class StatusPending extends StatelessWidget {
   const StatusPending({
@@ -20,7 +20,7 @@ class StatusPending extends StatelessWidget {
                 size: const Size.square(10),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: BrightnessData.themeOf(context).accent,
+                    color: context.theme.accent,
                   ),
                 ),
               ),
@@ -28,7 +28,7 @@ class StatusPending extends StatelessWidget {
             CircularProgressIndicator(
               strokeWidth: 2,
               valueColor: AlwaysStoppedAnimation(
-                BrightnessData.themeOf(context).accent,
+                context.theme.accent,
               ),
             ),
           ],
@@ -46,7 +46,7 @@ class StatusWarning extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesWarningSvg,
-            color: BrightnessData.themeOf(context).text,
+            color: context.theme.text,
           ),
         ),
       );
@@ -62,7 +62,7 @@ class StatusDownload extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesDownloadSvg,
-            color: BrightnessData.themeOf(context).accent,
+            color: context.theme.accent,
           ),
         ),
       );
@@ -78,7 +78,7 @@ class StatusUpload extends StatelessWidget {
         child: Center(
           child: SvgPicture.asset(
             Resources.assetsImagesUploadSvg,
-            color: BrightnessData.themeOf(context).accent,
+            color: context.theme.accent,
           ),
         ),
       );
@@ -97,7 +97,7 @@ class _StatusLayout extends StatelessWidget {
         size: const Size.square(38),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: BrightnessData.themeOf(context).statusBackground,
+            color: context.theme.statusBackground,
             shape: BoxShape.circle,
           ),
           child: child,

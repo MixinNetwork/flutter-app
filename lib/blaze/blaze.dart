@@ -12,8 +12,7 @@ import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
-import '../utils/dao_extension.dart';
-import '../utils/datetime_format_utils.dart';
+import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import 'blaze_message.dart';
@@ -201,9 +200,9 @@ class Blaze {
         await database.offsetDao.findStatusOffset().getSingleOrNull();
     var status = 0;
     if (offset != null) {
-      status = getEpochNanoFromString(offset);
+      status = offset.epochNano;
     } else {
-      status = getEpochNano(DateTime.now());
+      status = DateTime.now().epochNano;
     }
     for (;;) {
       final response = await client.messageApi.messageStatusOffset(status);
@@ -220,7 +219,7 @@ class Blaze {
         await database.offsetDao.insert(Offset(
             key: statusOffset, timestamp: m.updatedAt.toIso8601String()));
       });
-      final lastUpdateAt = getEpochNano(blazeMessages.last.updatedAt);
+      final lastUpdateAt = blazeMessages.last.updatedAt.epochNano;
       if (lastUpdateAt == status) {
         break;
       }

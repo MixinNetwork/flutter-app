@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/keyword_cubit.dart';
 import '../../bloc/minute_timer_cubit.dart';
@@ -21,12 +20,10 @@ import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
 import '../../generated/l10n.dart';
 import '../../utils/datetime_format_utils.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../../utils/list_utils.dart';
 import '../../utils/message_optimize.dart';
-import '../../utils/string_extension.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/interacter_decorated_box.dart';
@@ -40,7 +37,6 @@ import '../../widgets/toast.dart';
 import '../../widgets/unread_text.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/conversation_list_bloc.dart';
-import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'route/responsive_navigator_cubit.dart';
 
@@ -115,7 +111,7 @@ class _SearchList extends HookWidget {
   Widget build(BuildContext context) {
     final keyword =
         useBlocState<KeywordCubit, String>(bloc: context.read<KeywordCubit>());
-    final accountServer = context.read<AccountServer>();
+    final accountServer = context.accountServer;
 
     final users = useStream<List<User>>(
             useMemoized(
@@ -168,7 +164,7 @@ class _SearchList extends HookWidget {
         if (users.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
-              title: Localization.of(context).contact,
+              title: context.l10n.contact,
               showMore: users.length > _defaultLimit,
               more: type.value != _ShowMoreType.contact,
               onTap: () {
@@ -214,7 +210,7 @@ class _SearchList extends HookWidget {
         if (conversations.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
-              title: Localization.of(context).groups,
+              title: context.l10n.groups,
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {
@@ -268,7 +264,7 @@ class _SearchList extends HookWidget {
         if (messages.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
-              title: Localization.of(context).messages,
+              title: context.l10n.messages,
               showMore: messages.length > _defaultLimit,
               more: type.value != _ShowMoreType.message,
               onTap: () {
@@ -396,10 +392,10 @@ class SearchEmpty extends StatelessWidget {
         width: double.infinity,
         alignment: Alignment.topCenter,
         child: Text(
-          Localization.of(context).searchEmpty,
+          context.l10n.searchEmpty,
           style: TextStyle(
             fontSize: 14,
-            color: BrightnessData.themeOf(context).secondaryText,
+            color: context.theme.secondaryText,
           ),
         ),
       );
@@ -422,18 +418,12 @@ class _SearchMessageList extends HookWidget {
       () => AnonymousPagingBloc<SearchMessageDetailItem>(
         initState: const PagingState<SearchMessageDetailItem>(),
         limit: context.read<ConversationListBloc>().limit,
-        queryCount: () => context
-            .read<AccountServer>()
-            .database
-            .messageDao
+        queryCount: () => context.database.messageDao
             .fuzzySearchMessageCount(keyword)
             .getSingle(),
         queryRange: (int limit, int offset) async {
           if (keyword.isEmpty) return [];
-          return context
-              .read<AccountServer>()
-              .database
-              .messageDao
+          return context.database.messageDao
               .fuzzySearchMessage(query: keyword, limit: limit, offset: offset)
               .get();
         },
@@ -441,11 +431,7 @@ class _SearchMessageList extends HookWidget {
       keys: [keyword],
     );
     useEffect(
-      () => context
-          .read<AccountServer>()
-          .database
-          .messageDao
-          .searchMessageUpdateEvent
+      () => context.database.messageDao.searchMessageUpdateEvent
           .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
           .cancel,
       [keyword],
@@ -479,7 +465,7 @@ class _SearchMessageList extends HookWidget {
     return Column(
       children: [
         _SearchHeader(
-          title: Localization.of(context).messages,
+          title: context.l10n.messages,
           showMore: true,
           more: false,
           onTap: onTap,
@@ -543,7 +529,7 @@ class _SearchItem extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: BrightnessData.themeOf(context).text,
+                              color: context.theme.text,
                               fontSize: 16,
                             ),
                             highlightTextSpans: [
@@ -551,8 +537,7 @@ class _SearchItem extends StatelessWidget {
                                 HighlightTextSpan(
                                   keyword,
                                   style: TextStyle(
-                                    color:
-                                        BrightnessData.themeOf(context).accent,
+                                    color: context.theme.accent,
                                   ),
                                 ),
                             ],
@@ -560,12 +545,11 @@ class _SearchItem extends StatelessWidget {
                         ),
                         if (date != null)
                           BlocConverter<MinuteTimerCubit, DateTime, String>(
-                            converter: (_) => formatDateTime(date!),
+                            converter: (_) => date!.format,
                             builder: (context, text) => Text(
                               text,
                               style: TextStyle(
-                                color: BrightnessData.themeOf(context)
-                                    .secondaryText,
+                                color: context.theme.secondaryText,
                                 fontSize: 12,
                               ),
                             ),
@@ -578,8 +562,7 @@ class _SearchItem extends StatelessWidget {
                           if (descriptionIcon != null)
                             SvgPicture.asset(
                               descriptionIcon!,
-                              color:
-                                  BrightnessData.themeOf(context).secondaryText,
+                              color: context.theme.secondaryText,
                             ),
                           Expanded(
                             child: HighlightText(
@@ -587,16 +570,14 @@ class _SearchItem extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: BrightnessData.themeOf(context)
-                                    .secondaryText,
+                                color: context.theme.secondaryText,
                                 fontSize: 14,
                               ),
                               highlightTextSpans: [
                                 HighlightTextSpan(
                                   keyword,
                                   style: TextStyle(
-                                    color:
-                                        BrightnessData.themeOf(context).accent,
+                                    color: context.theme.accent,
                                   ),
                                 ),
                               ],
@@ -642,19 +623,17 @@ class _SearchHeader extends StatelessWidget {
               title,
               style: TextStyle(
                 fontSize: 14,
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
               ),
             ),
             if (showMore)
               GestureDetector(
                 onTap: onTap,
                 child: Text(
-                  more
-                      ? Localization.of(context).more
-                      : Localization.of(context).less,
+                  more ? context.l10n.more : context.l10n.less,
                   style: TextStyle(
                     fontSize: 14,
-                    color: BrightnessData.themeOf(context).accent,
+                    color: context.theme.accent,
                   ),
                 ),
               ),
@@ -668,8 +647,7 @@ class _Empty extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dynamicColor = BrightnessData.dynamicColor(
-      context,
+    final dynamicColor = context.dynamicColor(
       const Color.fromRGBO(229, 233, 240, 1),
     );
     return Center(
@@ -719,11 +697,7 @@ class _List extends HookWidget {
     );
 
     final connectedState = useStream(
-          context
-              .read<AccountServer>()
-              .blaze
-              .connectedStateStreamController
-              .stream
+          context.accountServer.blaze.connectedStateStreamController.stream
               .distinct(),
           initialData: true,
         ).data ??
@@ -736,7 +710,7 @@ class _List extends HookWidget {
           child: CircularProgressIndicator(
             strokeWidth: 2,
             valueColor: AlwaysStoppedAnimation(
-              BrightnessData.themeOf(context).accent,
+              context.theme.accent,
             ),
           ),
         );
@@ -762,9 +736,7 @@ class _List extends HookWidget {
                   title: Localization.current.unPin,
                   onTap: () => runFutureWithToast(
                     context,
-                    context
-                        .read<AccountServer>()
-                        .unpin(conversation.conversationId),
+                    context.accountServer.unpin(conversation.conversationId),
                   ),
                 ),
               if (conversation.pinTime == null)
@@ -772,9 +744,7 @@ class _List extends HookWidget {
                   title: Localization.current.pin,
                   onTap: () => runFutureWithToast(
                     context,
-                    context
-                        .read<AccountServer>()
-                        .pin(conversation.conversationId),
+                    context.accountServer.pin(conversation.conversationId),
                   ),
                 ),
               if (conversation.isMute)
@@ -785,14 +755,13 @@ class _List extends HookWidget {
                         conversation.isGroupConversation;
                     await runFutureWithToast(
                       context,
-                      context.read<AccountServer>().unMuteConversation(
-                            conversationId: isGroupConversation
-                                ? conversation.conversationId
-                                : null,
-                            userId: isGroupConversation
-                                ? null
-                                : conversation.ownerId,
-                          ),
+                      context.accountServer.unMuteConversation(
+                        conversationId: isGroupConversation
+                            ? conversation.conversationId
+                            : null,
+                        userId:
+                            isGroupConversation ? null : conversation.ownerId,
+                      ),
                     );
                     return;
                   },
@@ -810,15 +779,14 @@ class _List extends HookWidget {
 
                     await runFutureWithToast(
                       context,
-                      context.read<AccountServer>().muteConversation(
-                            result,
-                            conversationId: isGroupConversation
-                                ? conversation.conversationId
-                                : null,
-                            userId: isGroupConversation
-                                ? null
-                                : conversation.ownerId,
-                          ),
+                      context.accountServer.muteConversation(
+                        result,
+                        conversationId: isGroupConversation
+                            ? conversation.conversationId
+                            : null,
+                        userId:
+                            isGroupConversation ? null : conversation.ownerId,
+                      ),
                     );
                     return;
                   },
@@ -827,13 +795,9 @@ class _List extends HookWidget {
                 title: Localization.current.deleteChat,
                 isDestructiveAction: true,
                 onTap: () async {
-                  await context
-                      .read<AccountServer>()
-                      .database
-                      .conversationDao
-                      .deleteConversation(
-                        conversation.conversationId,
-                      );
+                  await context.database.conversationDao.deleteConversation(
+                    conversation.conversationId,
+                  );
                   if (context.read<ConversationCubit>().state?.conversationId ==
                       conversation.conversationId) {
                     context.read<ConversationCubit>().unselected();
@@ -877,15 +841,15 @@ class MuteDialog extends HookWidget {
   Widget build(BuildContext context) {
     final result = useState<int?>(null);
     return AlertDialogLayout(
-      title: Text(Localization.of(context).muteTitle),
+      title: Text(context.l10n.muteTitle),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Tuple2(Localization.of(context).mute1hour, 1 * 60 * 60),
-            Tuple2(Localization.of(context).mute8hours, 8 * 60 * 60),
-            Tuple2(Localization.of(context).mute1week, 7 * 24 * 60 * 60),
-            Tuple2(Localization.of(context).mute1year, 365 * 24 * 60 * 60),
+            Tuple2(context.l10n.mute1hour, 1 * 60 * 60),
+            Tuple2(context.l10n.mute8hours, 8 * 60 * 60),
+            Tuple2(context.l10n.mute1week, 7 * 24 * 60 * 60),
+            Tuple2(context.l10n.mute1year, 365 * 24 * 60 * 60),
           ]
               .map(
                 (e) => RadioItem<int>(
@@ -902,10 +866,10 @@ class MuteDialog extends HookWidget {
         MixinButton(
             backgroundTransparent: true,
             onTap: () => Navigator.pop(context),
-            child: Text(Localization.of(context).cancel)),
+            child: Text(context.l10n.cancel)),
         MixinButton(
           onTap: () => Navigator.pop(context, result.value),
-          child: Text(Localization.of(context).confirm),
+          child: Text(context.l10n.confirm),
         ),
       ],
     );
@@ -926,7 +890,7 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final messageColor = BrightnessData.themeOf(context).secondaryText;
+    final messageColor = context.theme.secondaryText;
     return SizedBox(
       height: ConversationPage.conversationItemHeight,
       child: InteractableDecoratedBox(
@@ -937,7 +901,7 @@ class _Item extends StatelessWidget {
             decoration: selected
                 ? BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    color: BrightnessData.themeOf(context).listSelected,
+                    color: context.theme.listSelected,
                   )
                 : const BoxDecoration(),
             child: Padding(
@@ -964,8 +928,7 @@ class _Item extends StatelessWidget {
                                       child: Text(
                                         conversation.validName,
                                         style: TextStyle(
-                                          color: BrightnessData.themeOf(context)
-                                              .text,
+                                          color: context.theme.text,
                                           fontSize: 16,
                                         ),
                                         maxLines: 1,
@@ -980,9 +943,10 @@ class _Item extends StatelessWidget {
                                 ),
                               ),
                               BlocConverter<MinuteTimerCubit, DateTime, String>(
-                                converter: (_) => formatDateTime(
-                                    conversation.lastMessageCreatedAt ??
-                                        conversation.createdAt),
+                                converter: (_) =>
+                                    (conversation.lastMessageCreatedAt ??
+                                            conversation.createdAt)
+                                        .format,
                                 builder: (context, text) => Text(
                                   text,
                                   style: TextStyle(
@@ -1023,7 +987,7 @@ class _ItemConversationSubtitle extends StatelessWidget {
           children: [
             Expanded(
               child: _MessagePreview(
-                messageColor: BrightnessData.themeOf(context).secondaryText,
+                messageColor: context.theme.secondaryText,
                 conversation: conversation,
               ),
             ),
@@ -1034,15 +998,15 @@ class _ItemConversationSubtitle extends StatelessWidget {
                   UnreadText(
                     data: '@',
                     textColor: const Color.fromRGBO(255, 255, 255, 1),
-                    backgroundColor: BrightnessData.themeOf(context).accent,
+                    backgroundColor: context.theme.accent,
                   ),
                 if ((conversation.unseenMessageCount ?? 0) > 0)
                   UnreadText(
                     data: '${conversation.unseenMessageCount}',
                     textColor: const Color.fromRGBO(255, 255, 255, 1),
                     backgroundColor: conversation.isMute
-                        ? BrightnessData.themeOf(context).secondaryText
-                        : BrightnessData.themeOf(context).accent,
+                        ? context.theme.secondaryText
+                        : context.theme.accent,
                   ),
                 if ((conversation.unseenMessageCount ?? 0) <= 0)
                   _StatusRow(conversation: conversation),
@@ -1101,12 +1065,12 @@ class _StatusRow extends StatelessWidget {
           if (conversation.isMute)
             SvgPicture.asset(
               Resources.assetsImagesMuteSvg,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: context.theme.secondaryText,
             ),
           if (conversation.pinTime != null)
             SvgPicture.asset(
               Resources.assetsImagesPinSvg,
-              color: BrightnessData.themeOf(context).secondaryText,
+              color: context.theme.secondaryText,
             ),
         ].joinList(const SizedBox(width: 4)),
       );
@@ -1151,8 +1115,8 @@ class _MessageContent extends HookWidget {
         if (conversation.contentType == MessageCategory.systemConversation) {
           return generateSystemText(
             actionName: conversation.actionName,
-            participantIsCurrentUser: conversation.participantUserId ==
-                context.read<AccountServer>().userId,
+            participantIsCurrentUser:
+                conversation.participantUserId == context.accountServer.userId,
             relationship: conversation.relationship,
             participantFullName: conversation.participantFullName,
             senderFullName: conversation.senderFullName,
@@ -1169,7 +1133,7 @@ class _MessageContent extends HookWidget {
             conversation.content,
             await mentionCache.checkMentionCache({conversation.content}),
           ),
-          conversation.senderId == context.read<AccountServer>().userId,
+          conversation.senderId == context.accountServer.userId,
           isGroup,
           conversation.senderFullName,
         );
@@ -1201,7 +1165,7 @@ class _MessageContent extends HookWidget {
 
     if (conversation.contentType == null) return const SizedBox();
 
-    final dynamicColor = BrightnessData.themeOf(context).secondaryText;
+    final dynamicColor = context.theme.secondaryText;
 
     return Row(
       children: [
@@ -1237,7 +1201,7 @@ class _MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (context.read<MultiAuthCubit>().state.current?.account.userId ==
+    if (context.multiAuthState.current?.account.userId ==
             conversation.senderId &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&
@@ -1266,12 +1230,12 @@ class _NetworkNotConnect extends StatelessWidget {
     if (visible) {
       child = Container(
         padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 22),
-        color: BrightnessData.themeOf(context).warning.withOpacity(0.2),
+        color: context.theme.warning.withOpacity(0.2),
         child: Row(
           children: [
             ClipOval(
               child: Container(
-                color: BrightnessData.themeOf(context).warning,
+                color: context.theme.warning,
                 width: 20,
                 height: 20,
                 alignment: Alignment.center,
@@ -1289,9 +1253,9 @@ class _NetworkNotConnect extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Text(
-              Localization.of(context).networkConnectionFailed,
+              context.l10n.networkConnectionFailed,
               style: TextStyle(
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
                 fontSize: 14,
               ),
             ),

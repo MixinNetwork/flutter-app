@@ -4,9 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
 import '../../bloc/bloc_converter.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/empty.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
@@ -88,11 +87,11 @@ class _HomePage extends HookWidget {
     return ChangeNotifierProvider.value(
       value: hasDrawerValueNotifier,
       child: Scaffold(
-        backgroundColor: BrightnessData.themeOf(context).primary,
+        backgroundColor: context.theme.primary,
         drawer: hasDrawer
             ? Drawer(
                 child: Scaffold(
-                  backgroundColor: BrightnessData.themeOf(context).primary,
+                  backgroundColor: context.theme.primary,
                   body: const SizedBox(
                     width: double.infinity,
                     child: SlidePage(),
@@ -130,10 +129,9 @@ class _HomePage extends HookWidget {
                   name: 'empty',
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: BrightnessData.themeOf(context).chatBackground,
+                      color: context.theme.chatBackground,
                     ),
-                    child: Empty(
-                        text: Localization.of(context).pageRightEmptyMessage),
+                    child: Empty(text: context.l10n.pageRightEmptyMessage),
                   ),
                 ),
               ),
@@ -153,10 +151,10 @@ class _CenterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).primary,
+          color: context.theme.primary,
           border: Border(
             right: BorderSide(
-              color: BrightnessData.themeOf(context).divider,
+              color: context.theme.divider,
             ),
           ),
         ),

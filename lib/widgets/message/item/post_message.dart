@@ -7,9 +7,10 @@ import 'package:provider/provider.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
+import '../../../utils/extension/extension.dart';
 import '../../../utils/markdown.dart';
 import '../../../utils/uri_utils.dart';
-import '../../brightness_observer.dart';
+
 import '../../full_screen_portal.dart';
 import '../../interacter_decorated_box.dart';
 import '../message_bubble.dart';
@@ -113,7 +114,7 @@ class PostPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).background,
+          color: context.theme.background,
         ),
         onTap: () {
           context.read<FullScreenVisibleCubit>().emit(false);

@@ -10,15 +10,13 @@ import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../../../account/account_server.dart';
 import '../../../../bloc/paging/load_more_paging.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/media_status.dart';
 import '../../../../enum/message_category.dart';
-import '../../../../generated/l10n.dart';
+import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
-import '../../../../widgets/brightness_observer.dart';
 import '../../../../widgets/image.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/image/image_preview_portal.dart';
@@ -40,7 +38,7 @@ class MediaPage extends HookWidget {
     final navigationMode = context.read<ChatSideCubit>().state.navigationMode;
     final size = column * (navigationMode ? 4 : 3);
 
-    final messageDao = context.read<AccountServer>().database.messageDao;
+    final messageDao = context.database.messageDao;
 
     final mediaCubit = useBloc(
       () => LoadMorePagingBloc<MessageItem>(
@@ -96,16 +94,14 @@ class MediaPage extends HookWidget {
           children: [
             SvgPicture.asset(
               Resources.assetsImagesEmptyImageSvg,
-              color: BrightnessData.themeOf(context)
-                  .secondaryText
-                  .withOpacity(0.4),
+              color: context.theme.secondaryText.withOpacity(0.4),
             ),
             const SizedBox(height: 24),
             Text(
-              Localization.of(context).noMedia,
+              context.l10n.noMedia,
               style: TextStyle(
                 fontSize: 12,
-                color: BrightnessData.themeOf(context).secondaryText,
+                color: context.theme.secondaryText,
               ),
             ),
           ],
@@ -136,13 +132,13 @@ class MediaPage extends HookWidget {
                 children: [
                   SliverPinnedHeader(
                     child: Container(
-                      color: BrightnessData.themeOf(context).primary,
+                      color: context.theme.primary,
                       padding: const EdgeInsets.all(10),
                       child: Text(
                         DateFormat.yMMMd().format(e.key.toLocal()),
                         style: TextStyle(
                           fontSize: 14,
-                          color: BrightnessData.themeOf(context).secondaryText,
+                          color: context.theme.secondaryText,
                         ),
                       ),
                     ),
@@ -195,9 +191,9 @@ class _Item extends StatelessWidget {
             case MediaStatus.canceled:
               if (message.relationship == UserRelationship.me &&
                   message.mediaUrl?.isNotEmpty == true) {
-                context.read<AccountServer>().reUploadAttachment(message);
+                context.accountServer.reUploadAttachment(message);
               } else {
-                context.read<AccountServer>().downloadAttachment(message);
+                context.accountServer.downloadAttachment(message);
               }
               ImagePreviewPage.push(
                 context,

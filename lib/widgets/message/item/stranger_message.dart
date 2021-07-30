@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../db/mixin_database.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
-import '../../../generated/l10n.dart';
+
+import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
-import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../toast.dart';
 import '../message.dart';
@@ -28,11 +25,11 @@ class StrangerMessage extends StatelessWidget {
       children: [
         Text(
           isBotConversation
-              ? Localization.of(context).botInteractInfo
-              : Localization.of(context).strangerFromMessage,
+              ? context.l10n.botInteractInfo
+              : context.l10n.strangerFromMessage,
           style: TextStyle(
             fontSize: MessageItemWidget.primaryFontSize,
-            color: BrightnessData.themeOf(context).text,
+            color: context.theme.text,
           ),
         ),
         const SizedBox(height: 10),
@@ -41,21 +38,18 @@ class StrangerMessage extends StatelessWidget {
           children: [
             _StrangerButton(
               isBotConversation
-                  ? Localization.of(context).botInteractOpen
-                  : Localization.of(context).block,
+                  ? context.l10n.botInteractOpen
+                  : context.l10n.block,
               onTap: () async {
                 if (isBotConversation) {
-                  final app = await context
-                      .read<AccountServer>()
-                      .database
-                      .appDao
+                  final app = await context.database.appDao
                       .findUserById(message.appId!);
                   if (app == null) return;
                   await openUri(context, app.homeUri);
                 } else {
                   await runFutureWithToast(
                     context,
-                    context.read<AccountServer>().blockUser(message.userId),
+                    context.accountServer.blockUser(message.userId),
                   );
                 }
               },
@@ -63,16 +57,14 @@ class StrangerMessage extends StatelessWidget {
             const SizedBox(width: 16),
             _StrangerButton(
               isBotConversation
-                  ? Localization.of(context).botInteractHi
-                  : Localization.of(context).addContact,
+                  ? context.l10n.botInteractHi
+                  : context.l10n.addContact,
               onTap: () {
                 if (isBotConversation) {
-                  Provider.of<AccountServer>(context, listen: false)
-                      .sendTextMessage('Hi', true,
-                          conversationId: message.conversationId);
+                  context.accountServer.sendTextMessage('Hi', true,
+                      conversationId: message.conversationId);
                 } else {
-                  context
-                      .read<AccountServer>()
+                  context.accountServer
                       .addUser(message.userId, message.userFullName);
                 }
               },
@@ -98,7 +90,7 @@ class _StrangerButton extends StatelessWidget {
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
         onTap: onTap,
         decoration: BoxDecoration(
-          color: BrightnessData.themeOf(context).primary,
+          color: context.theme.primary,
           borderRadius: BorderRadius.circular(8),
         ),
         child: ConstrainedBox(
@@ -117,7 +109,7 @@ class _StrangerButton extends StatelessWidget {
                 text,
                 style: TextStyle(
                   fontSize: MessageItemWidget.primaryFontSize,
-                  color: BrightnessData.themeOf(context).accent,
+                  color: context.theme.accent,
                 ),
               ),
             ),

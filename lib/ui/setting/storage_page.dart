@@ -4,10 +4,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
 import '../../widgets/cell.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 import '../home/route/responsive_navigator_cubit.dart';
@@ -20,9 +19,9 @@ class StoragePage extends HookWidget {
     final authState = useBlocState<MultiAuthCubit, MultiAuthState>();
 
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).background,
+      backgroundColor: context.theme.background,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).dataAndStorageUsage),
+        title: Text(context.l10n.dataAndStorageUsage),
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -32,8 +31,7 @@ class StoragePage extends HookWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),
@@ -41,38 +39,35 @@ class StoragePage extends HookWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     CellItem(
-                      title: Text(Localization.of(context).photos),
+                      title: Text(context.l10n.photos),
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
+                            activeColor: context.theme.accent,
                             value: authState.currentPhotoAutoDownload,
-                            onChanged: (bool value) => context
-                                .read<MultiAuthCubit>()
+                            onChanged: (bool value) => context.multiAuthCubit
                                 .setCurrentSetting(photoAutoDownload: value),
                           )),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).videos),
+                      title: Text(context.l10n.videos),
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
+                            activeColor: context.theme.accent,
                             value: authState.currentVideoAutoDownload,
-                            onChanged: (bool value) => context
-                                .read<MultiAuthCubit>()
+                            onChanged: (bool value) => context.multiAuthCubit
                                 .setCurrentSetting(videoAutoDownload: value),
                           )),
                     ),
                     CellItem(
-                      title: Text(Localization.of(context).files),
+                      title: Text(context.l10n.files),
                       trailing: Transform.scale(
                           scale: 0.7,
                           child: CupertinoSwitch(
-                            activeColor: BrightnessData.themeOf(context).accent,
+                            activeColor: context.theme.accent,
                             value: authState.currentFileAutoDownload,
-                            onChanged: (bool value) => context
-                                .read<MultiAuthCubit>()
+                            onChanged: (bool value) => context.multiAuthCubit
                                 .setCurrentSetting(fileAutoDownload: value),
                           )),
                     ),
@@ -82,21 +77,20 @@ class StoragePage extends HookWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
                 child: Text(
-                  Localization.of(context).storageAutoDownloadDescription,
+                  context.l10n.storageAutoDownloadDescription,
                   style: TextStyle(
-                    color: BrightnessData.themeOf(context).secondaryText,
+                    color: context.theme.secondaryText,
                     fontSize: 14,
                   ),
                 ),
               ),
               CellGroup(
-                cellBackgroundColor: BrightnessData.dynamicColor(
-                  context,
+                cellBackgroundColor: context.dynamicColor(
                   Colors.white,
                   darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
                 ),
                 child: CellItem(
-                  title: Text(Localization.of(context).storageUsage),
+                  title: Text(context.l10n.storageUsage),
                   onTap: () => context
                       .read<ResponsiveNavigatorCubit>()
                       .pushPage(ResponsiveNavigatorCubit.storageUsage),

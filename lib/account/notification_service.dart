@@ -10,26 +10,21 @@ import '../db/extension/conversation.dart';
 import '../db/extension/message_category.dart';
 import '../enum/message_category.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
-import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
 import '../ui/home/local_notification_center.dart';
+import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
-import 'account_server.dart';
 
 class NotificationService {
   NotificationService({
     required BuildContext context,
   }) {
     streamSubscriptions
-      ..add(context
-          .read<AccountServer>()
-          .database
-          .messageDao
-          .notificationMessageStream
+      ..add(context.database.messageDao.notificationMessageStream
           .where((event) {
             if (DesktopLifecycle.instance.isActive.value) {
               final conversationState = context.read<ConversationCubit>().state;
@@ -39,8 +34,7 @@ class NotificationService {
             }
             return true;
           })
-          .where(
-              (event) => event.senderId != context.read<AccountServer>().userId)
+          .where((event) => event.senderId != context.accountServer.userId)
           .asyncWhere((event) async {
             final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
@@ -49,8 +43,7 @@ class NotificationService {
 
             if (!event.type.isText) return false;
 
-            final account =
-                context.read<MultiAuthCubit>().state.current!.account;
+            final account = context.multiAuthState.current!.account;
 
             // mention current user
             if (mentionNumberRegExp
@@ -78,12 +71,12 @@ class NotificationService {
             );
 
             var body = event.content;
-            if (context.read<MultiAuthCubit>().state.currentMessagePreview) {
+            if (context.multiAuthState.currentMessagePreview) {
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
                   actionName: event.actionName,
-                  participantIsCurrentUser: event.participantUserId ==
-                      context.read<AccountServer>().userId,
+                  participantIsCurrentUser:
+                      event.participantUserId == context.accountServer.userId,
                   relationship: event.relationship,
                   participantFullName: event.participantFullName,
                   senderFullName: event.senderFullName,

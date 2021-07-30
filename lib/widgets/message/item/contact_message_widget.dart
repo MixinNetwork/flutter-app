@@ -3,8 +3,8 @@ import 'package:flutter/widgets.dart';
 
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/conversation_page.dart';
+import '../../../utils/extension/extension.dart';
 import '../../avatar_view/avatar_view.dart';
-import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../user/user_dialog.dart';
 import '../message.dart';
@@ -60,7 +60,7 @@ class ContactMessageWidget extends StatelessWidget {
                         child: Text(
                           message.sharedUserFullName!,
                           style: TextStyle(
-                            color: BrightnessData.themeOf(context).text,
+                            color: context.theme.text,
                             fontSize: MessageItemWidget.primaryFontSize,
                           ),
                         ),
@@ -74,7 +74,7 @@ class ContactMessageWidget extends StatelessWidget {
                   Text(
                     message.sharedUserIdentityNumber!,
                     style: TextStyle(
-                      color: BrightnessData.themeOf(context).secondaryText,
+                      color: context.theme.secondaryText,
                       fontSize: MessageItemWidget.secondaryFontSize,
                     ),
                   ),

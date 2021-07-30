@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
 import 'interacter_decorated_box.dart';
 
 class ActionButton extends StatelessWidget {
@@ -51,8 +51,7 @@ class ActionButton extends StatelessWidget {
       onExit: onExit,
       onHover: onHover,
       decoration: const BoxDecoration(shape: BoxShape.circle),
-      hoveringColor: BrightnessData.dynamicColor(
-        context,
+      hoveringColor: context.dynamicColor(
         const Color.fromRGBO(0, 0, 0, 0.03),
         darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
       ),

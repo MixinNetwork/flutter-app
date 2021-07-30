@@ -2,12 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/app_bar.dart';
-import '../../widgets/brightness_observer.dart';
+
 import '../../widgets/cell.dart';
 import '../home/bloc/multi_auth_cubit.dart';
 
@@ -21,9 +20,9 @@ class NotificationPage extends HookWidget {
       converter: (state) => state.currentMessagePreview,
     );
     return Scaffold(
-      backgroundColor: BrightnessData.themeOf(context).background,
+      backgroundColor: context.theme.background,
       appBar: MixinAppBar(
-        title: Text(Localization.of(context).notification),
+        title: Text(context.l10n.notification),
       ),
       body: Container(
         alignment: Alignment.topCenter,
@@ -33,20 +32,18 @@ class NotificationPage extends HookWidget {
           children: [
             CellGroup(
               padding: const EdgeInsets.only(right: 10, left: 10),
-              cellBackgroundColor: BrightnessData.dynamicColor(
-                context,
+              cellBackgroundColor: context.dynamicColor(
                 Colors.white,
                 darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
               ),
               child: CellItem(
-                title: Text(Localization.of(context).messagePreview),
+                title: Text(context.l10n.messagePreview),
                 trailing: Transform.scale(
                   scale: 0.7,
                   child: CupertinoSwitch(
-                    activeColor: BrightnessData.themeOf(context).accent,
+                    activeColor: context.theme.accent,
                     value: currentMessagePreview,
-                    onChanged: (bool value) => context
-                        .read<MultiAuthCubit>()
+                    onChanged: (bool value) => context.multiAuthCubit
                         .setCurrentSetting(messagePreview: value),
                   ),
                 ),
@@ -55,9 +52,9 @@ class NotificationPage extends HookWidget {
             Padding(
               padding: const EdgeInsets.only(left: 20, bottom: 14, top: 10),
               child: Text(
-                Localization.of(context).messagePreviewDescription,
+                context.l10n.messagePreviewDescription,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
+                  color: context.theme.secondaryText,
                   fontSize: 14,
                 ),
               ),

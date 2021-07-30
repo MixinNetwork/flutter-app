@@ -6,7 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
 import '../bloc/simple_cubit.dart';
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
+
 import 'interacter_decorated_box.dart';
 
 class ContextMenuPortalEntry extends StatelessWidget {
@@ -133,7 +134,7 @@ class ContextMenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightnessData = BrightnessData.of(context);
+    final brightnessData = context.brightnessValue;
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(11),
@@ -156,8 +157,7 @@ class ContextMenuPage extends StatelessWidget {
             blurRadius: lerpDouble(6, 12, brightnessData)!,
           ),
         ],
-        color: BrightnessData.dynamicColor(
-          context,
+        color: context.dynamicColor(
           const Color.fromRGBO(255, 255, 255, 1),
           darkColor: const Color.fromRGBO(62, 65, 72, 1),
         ),
@@ -192,8 +192,7 @@ class ContextMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = BrightnessData.dynamicColor(
-      context,
+    final backgroundColor = context.dynamicColor(
       const Color.fromRGBO(255, 255, 255, 1),
       darkColor: const Color.fromRGBO(62, 65, 72, 1),
     );
@@ -204,7 +203,7 @@ class ContextMenu extends StatelessWidget {
           color: backgroundColor,
         ),
         tapDowningColor: Color.alphaBlend(
-          BrightnessData.themeOf(context).listSelected,
+          context.theme.listSelected,
           backgroundColor,
         ),
         onTap: () {
@@ -218,9 +217,8 @@ class ContextMenu extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               color: isDestructiveAction
-                  ? BrightnessData.themeOf(context).red
-                  : BrightnessData.dynamicColor(
-                      context,
+                  ? context.theme.red
+                  : context.dynamicColor(
                       const Color.fromRGBO(0, 0, 0, 1),
                       darkColor: const Color.fromRGBO(255, 255, 255, 0.9),
                     ),

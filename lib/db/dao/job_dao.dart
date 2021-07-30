@@ -101,4 +101,11 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   Future<void> insertAll(List<Job> jobs) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.jobs, jobs);
       });
+
+  Future<void> insertNoReplace(Job job) async {
+    final exists = await findAckJobById(job.jobId);
+    if (exists == null) {
+      await insert(job);
+    }
+  }
 }

@@ -4,15 +4,15 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-import '../../widgets/brightness_observer.dart';
+
 import '../../widgets/dialog.dart';
 import '../../widgets/menu.dart';
 import '../../widgets/select_item.dart';
@@ -28,12 +28,12 @@ class SlidePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => DecoratedBox(
         decoration: BoxDecoration(
-          color: BrightnessData.of(context) == 1.0
+          color: context.brightnessValue == 1.0
               ? Colors.black.withOpacity(0.03)
               : Colors.white.withOpacity(0.01),
           border: Border(
             right: BorderSide(
-              color: BrightnessData.themeOf(context).divider,
+              color: context.theme.divider,
             ),
           ),
         ),
@@ -49,22 +49,22 @@ class SlidePage extends StatelessWidget {
                     const SizedBox(height: 72),
                     _Item(
                       asset: Resources.assetsImagesChatSvg,
-                      title: Localization.of(context).chats,
+                      title: context.l10n.chats,
                       type: SlideCategoryType.chats,
                     ),
                     const SizedBox(height: 12),
-                    _Title(data: Localization.of(context).people),
+                    _Title(data: context.l10n.people),
                     const SizedBox(height: 12),
                     _CategoryList(
                       children: [
                         _Item(
                           asset: Resources.assetsImagesSlideContactsSvg,
-                          title: Localization.of(context).contacts,
+                          title: context.l10n.contacts,
                           type: SlideCategoryType.contacts,
                         ),
                         _Item(
                           asset: Resources.assetsImagesGroupSvg,
-                          title: Localization.of(context).groups,
+                          title: context.l10n.groups,
                           type: SlideCategoryType.groups,
                         ),
                         _Item(
@@ -74,7 +74,7 @@ class SlidePage extends StatelessWidget {
                         ),
                         _Item(
                           asset: Resources.assetsImagesStrangersSvg,
-                          title: Localization.of(context).strangers,
+                          title: context.l10n.strangers,
                           type: SlideCategoryType.strangers,
                         ),
                       ],
@@ -131,18 +131,13 @@ class _CircleList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useStream<List<ConversationCircleItem>>(
-      useMemoized(() => context
-          .read<AccountServer>()
-          .database
-          .circleDao
-          .allCircles()
-          .watch()),
+      useMemoized(() => context.database.circleDao.allCircles().watch()),
       initialData: [],
     );
     if (circles.data?.isEmpty ?? true) return const SizedBox();
     return Column(
       children: [
-        _Title(data: Localization.of(context).circles),
+        _Title(data: context.l10n.circles),
         const SizedBox(height: 12),
         Expanded(
           child: ListView.separated(
@@ -162,33 +157,29 @@ class _CircleList extends HookWidget {
                   child: ContextMenuPortalEntry(
                     buildMenus: () => [
                       ContextMenu(
-                          title: Localization.of(context).editCircleName,
+                          title: context.l10n.editCircleName,
                           onTap: () async {
                             final name = await showMixinDialog<String>(
                               context: context,
                               child: EditDialog(
                                 editText: circle.name,
-                                title: Text(Localization.of(context).circles),
-                                hintText:
-                                    Localization.of(context).editCircleName,
+                                title: Text(context.l10n.circles),
+                                hintText: context.l10n.editCircleName,
                               ),
                             );
                             if (name?.isEmpty ?? true) return;
 
                             await runFutureWithToast(
                               context,
-                              context
-                                  .read<AccountServer>()
+                              context.accountServer
                                   .updateCircle(circle.circleId, name!),
                             );
                           }),
                       ContextMenu(
-                        title: Localization.of(context).editCircle,
+                        title: context.l10n.editCircle,
                         onTap: () async {
                           final initSelected = (await context
-                                  .read<AccountServer>()
-                                  .database
-                                  .circleConversationDao
+                                  .database.circleConversationDao
                                   .allCircleConversations(circle.circleId)
                                   .get())
                               .map((e) => ConversationSelector(
@@ -229,29 +220,24 @@ class _CircleList extends HookWidget {
                           ];
                           await runFutureWithToast(
                             context,
-                            context
-                                .read<AccountServer>()
-                                .editCircleConversation(
-                                  circle.circleId,
-                                  requests,
-                                ),
+                            context.accountServer.editCircleConversation(
+                              circle.circleId,
+                              requests,
+                            ),
                           );
                         },
                       ),
                       ContextMenu(
-                        title: Localization.of(context).deleteCircle,
+                        title: context.l10n.deleteCircle,
                         isDestructiveAction: true,
                         onTap: () async {
-                          final result = await showConfirmMixinDialog(
-                              context,
-                              Localization.of(context)
-                                  .pageDeleteCircle(circle.name));
+                          final result = await showConfirmMixinDialog(context,
+                              context.l10n.pageDeleteCircle(circle.name));
                           if (!result) return;
                           await runFutureWithToast(
                             context,
                             () async {
-                              await context
-                                  .read<AccountServer>()
+                              await context.accountServer
                                   .deleteCircle(circle.circleId);
                               context
                                   .read<SlideCategoryCubit>()
@@ -331,7 +317,7 @@ class _Item extends HookWidget {
     );
     final unseenMessageCount = useMemoizedStream<int?>(
           () {
-            final dao = context.read<AccountServer>().database.conversationDao;
+            final dao = context.database.conversationDao;
             switch (type) {
               case SlideCategoryType.contacts:
                 return dao
@@ -359,7 +345,7 @@ class _Item extends HookWidget {
           asset,
           width: 24,
           height: 24,
-          color: BrightnessData.themeOf(context).text,
+          color: context.theme.text,
         ),
         title: title,
         onTap: () {
@@ -397,7 +383,7 @@ class _Title extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
+                  color: context.theme.secondaryText,
                 ),
               ),
             ),

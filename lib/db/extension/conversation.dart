@@ -2,7 +2,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../mixin_database.dart';
 
-extension Conversation on ConversationItem {
+extension ConversationItemExtension on ConversationItem {
   bool get isContactConversation =>
       category == ConversationCategory.contact &&
       relationship == UserRelationship.friend &&
@@ -27,8 +27,6 @@ extension Conversation on ConversationItem {
   DateTime? get validMuteUntil =>
       isGroupConversation ? muteUntil : ownerMuteUntil;
 }
-
-void importConversationExtension() {}
 
 String conversationValidName(String? groupName, String? fullName) =>
     groupName?.trim().isNotEmpty == true ? groupName! : fullName ?? '';

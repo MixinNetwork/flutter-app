@@ -5,15 +5,14 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/minute_timer_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/extension/message.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../brightness_observer.dart';
 import 'message.dart';
 
 bool _isRepresentative(
@@ -53,7 +52,7 @@ class MessageDatetimeAndStatus extends StatelessWidget {
           if (_isRepresentative(
               message,
               context.read<ConversationCubit>().state,
-              context.read<AccountServer>().userId))
+              context.accountServer.userId))
             Padding(
               padding: const EdgeInsets.only(right: 4.0),
               child: _ChatIcon(
@@ -90,8 +89,7 @@ class _ChatIcon extends StatelessWidget {
         width: 8,
         height: 8,
         color: color ??
-            BrightnessData.dynamicColor(
-              context,
+            context.dynamicColor(
               const Color.fromRGBO(131, 145, 158, 1),
               darkColor: const Color.fromRGBO(128, 131, 134, 1),
             ),
@@ -118,8 +116,7 @@ class _MessageDatetime extends HookWidget {
       style: TextStyle(
         fontSize: MessageItemWidget.statusFontSize,
         color: color ??
-            BrightnessData.dynamicColor(
-              context,
+            context.dynamicColor(
               const Color.fromRGBO(131, 145, 158, 1),
               darkColor: const Color.fromRGBO(128, 131, 134, 1),
             ),
@@ -138,7 +135,7 @@ class _MessageStatusWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var assetName = Resources.assetsImagesSendingSvg;
-    var color = this.color ?? BrightnessData.themeOf(context).secondaryText;
+    var color = this.color ?? context.theme.secondaryText;
     switch (status) {
       case MessageStatus.sent:
         assetName = Resources.assetsImagesSentSvg;
@@ -148,7 +145,7 @@ class _MessageStatusWidget extends StatelessWidget {
         break;
       case MessageStatus.read:
         assetName = Resources.assetsImagesReadSvg;
-        color = BrightnessData.themeOf(context).accent;
+        color = context.theme.accent;
         break;
       default:
         break;

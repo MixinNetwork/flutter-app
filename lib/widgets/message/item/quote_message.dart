@@ -6,21 +6,19 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
-import '../../../generated/l10n.dart';
+
 import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../utils/color_utils.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
-import '../../../utils/markdown.dart';
 import '../../avatar_view/avatar_view.dart';
-import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../../image.dart';
 import '../message.dart';
@@ -52,7 +50,7 @@ class QuoteMessage extends HookWidget {
     if (quoteMessageId?.isEmpty ?? true) return const SizedBox();
     var inputMode = false;
 
-    final iconColor = BrightnessData.themeOf(context).secondaryText;
+    final iconColor = context.theme.secondaryText;
 
     try {
       late dynamic quote;
@@ -67,7 +65,7 @@ class QuoteMessage extends HookWidget {
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
           userId: null,
-          description: Localization.of(context).chatNotSupport,
+          description: context.l10n.chatNotSupport,
           icon: SvgPicture.asset(
             Resources.assetsImagesRecallSvg,
             color: iconColor,
@@ -94,7 +92,7 @@ class QuoteMessage extends HookWidget {
           userId: quote.userId,
           name: quote.userFullName,
           image: Image.file(
-            File(context.read<AccountServer>().convertAbsolutePath(
+            File(context.accountServer.convertAbsolutePath(
                 quote.type, quote.conversationId, quote.mediaUrl)),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
@@ -104,7 +102,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesImageSvg,
             color: iconColor,
           ),
-          description: Localization.of(context).image,
+          description: context.l10n.image,
           inputMode: inputMode,
         );
       }
@@ -119,7 +117,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesVideoSvg,
             color: iconColor,
           ),
-          description: Localization.of(context).video,
+          description: context.l10n.video,
           inputMode: inputMode,
         );
       }
@@ -142,7 +140,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesLiveSvg,
             color: iconColor,
           ),
-          description: Localization.of(context).live,
+          description: context.l10n.live,
           inputMode: inputMode,
         );
       }
@@ -157,7 +155,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesFileSvg,
             color: iconColor,
           ),
-          description: quote.mediaName ?? Localization.of(context).file,
+          description: quote.mediaName ?? context.l10n.file,
           inputMode: inputMode,
         );
       }
@@ -185,7 +183,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesLocationSvg,
             color: iconColor,
           ),
-          description: Localization.of(context).location,
+          description: context.l10n.location,
           inputMode: inputMode,
         );
       }
@@ -199,7 +197,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesAudioSvg,
             color: iconColor,
           ),
-          description: Localization.of(context).audio,
+          description: context.l10n.audio,
           inputMode: inputMode,
         );
       }
@@ -214,7 +212,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesStickerSvg,
             color: iconColor,
           ),
-          description: Localization.of(context).sticker,
+          description: context.l10n.sticker,
           inputMode: inputMode,
         );
       }
@@ -267,7 +265,7 @@ class QuoteMessage extends HookWidget {
             Resources.assetsImagesAppButtonSvg,
             color: iconColor,
           ),
-          description: description ?? Localization.of(context).extensions,
+          description: description ?? context.l10n.extensions,
           inputMode: inputMode,
         );
       }
@@ -279,7 +277,7 @@ class QuoteMessage extends HookWidget {
       messageId: messageId,
       quoteMessageId: quoteMessageId!,
       userId: null,
-      description: Localization.of(context).chatNotFound,
+      description: context.l10n.chatNotFound,
       icon: SvgPicture.asset(
         Resources.assetsImagesRecallSvg,
         color: iconColor,
@@ -321,7 +319,7 @@ class _QuoteMessageBase extends StatelessWidget {
         '${iterator.moveNext() ? iterator.current : ''}${iterator.moveNext() ? '...' : ''}';
     final color = userId?.isNotEmpty == true
         ? getNameColorById(userId!)
-        : BrightnessData.themeOf(context).accent;
+        : context.theme.accent;
     return ClipRRect(
       borderRadius: inputMode ? BorderRadius.zero : BorderRadius.circular(8),
       child: GestureDetector(
@@ -390,8 +388,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize:
                                           MessageItemWidget.tertiaryFontSize,
-                                      color: BrightnessData.themeOf(context)
-                                          .secondaryText,
+                                      color: context.theme.secondaryText,
                                       height: 1,
                                     ),
                                     maxLines: 1,

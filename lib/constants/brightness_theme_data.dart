@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../widgets/brightness_observer.dart';
 
 const lightBrightnessThemeData = BrightnessThemeData(

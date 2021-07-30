@@ -1,12 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
-import '../../account/account_server.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../constants/brightness_theme_data.dart';
 import '../../constants/resources.dart';
@@ -14,11 +12,10 @@ import '../../crypto/uuid/uuid.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/extension/user.dart';
 import '../../db/mixin_database.dart';
-import '../../generated/l10n.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
-import '../brightness_observer.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
 import 'bloc/conversation_filter_cubit.dart';
@@ -34,7 +31,7 @@ String _getConversationId(dynamic item, BuildContext context) {
   if (item is User) {
     return generateConversationId(
       item.userId,
-      context.read<AccountServer>().userId,
+      context.accountServer.userId,
     );
   }
   throw ArgumentError('must be ConversationItem or User');
@@ -156,7 +153,7 @@ class _ConversationSelector extends HookWidget {
     }
 
     final conversationFilterCubit = useBloc(() => ConversationFilterCubit(
-            useContext().read<AccountServer>(), onlyContact, (state) {
+            useContext().accountServer, onlyContact, (state) {
           state.recentConversations.forEach((element) {
             if (!initSelected
                 .map((e) => e.conversationId)
@@ -208,7 +205,7 @@ class _ConversationSelector extends HookWidget {
                       alignment: Alignment.centerLeft,
                       child: ActionButton(
                         name: Resources.assetsImagesIcCloseSvg,
-                        color: BrightnessData.themeOf(context).icon,
+                        color: context.theme.icon,
                         onTap: () => Navigator.pop(context),
                       ),
                     ),
@@ -222,7 +219,7 @@ class _ConversationSelector extends HookWidget {
                           Text(
                             title,
                             style: TextStyle(
-                              color: BrightnessData.themeOf(context).text,
+                              color: context.theme.text,
                               fontSize: 16,
                             ),
                           ),
@@ -231,8 +228,7 @@ class _ConversationSelector extends HookWidget {
                               '${selected.length} / ${conversationFilterState.recentConversations.length + conversationFilterState.friends.length + conversationFilterState.bots.length}',
                               style: TextStyle(
                                 fontSize: 12,
-                                color: BrightnessData.themeOf(context)
-                                    .secondaryText,
+                                color: context.theme.secondaryText,
                               ),
                             ),
                         ],
@@ -257,7 +253,7 @@ class _ConversationSelector extends HookWidget {
                                     .toList(),
                               ),
                               child: Text(
-                                Localization.of(context).next,
+                                context.l10n.next,
                               ),
                             ),
                     ),
@@ -270,14 +266,14 @@ class _ConversationSelector extends HookWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               margin: const EdgeInsets.only(top: 8, right: 24, left: 24),
               decoration: BoxDecoration(
-                color: BrightnessData.themeOf(context).background,
+                color: context.theme.background,
                 borderRadius: BorderRadius.circular(16),
               ),
               alignment: Alignment.center,
               child: TextField(
                 onChanged: (string) => conversationFilterCubit.keyword = string,
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
+                  color: context.theme.text,
                   fontSize: 14,
                 ),
                 autofocus: true,
@@ -287,7 +283,7 @@ class _ConversationSelector extends HookWidget {
                     padding: const EdgeInsetsDirectional.only(end: 8.0),
                     child: SvgPicture.asset(
                       Resources.assetsImagesIcSearchSmallSvg,
-                      color: BrightnessData.themeOf(context).secondaryText,
+                      color: context.theme.secondaryText,
                     ),
                   ),
                   prefixIconConstraints: const BoxConstraints(
@@ -295,9 +291,8 @@ class _ConversationSelector extends HookWidget {
                     minWidth: 16,
                   ),
                   isDense: true,
-                  hintText: Localization.of(context).search,
-                  hintStyle: TextStyle(
-                      color: BrightnessData.themeOf(context).secondaryText),
+                  hintText: context.l10n.search,
+                  hintStyle: TextStyle(color: context.theme.secondaryText),
                   focusedBorder: InputBorder.none,
                   enabledBorder: InputBorder.none,
                 ),
@@ -330,7 +325,7 @@ class _ConversationSelector extends HookWidget {
                                 _getConversationName(selected[index]),
                                 style: TextStyle(
                                   fontSize: 14,
-                                  color: BrightnessData.themeOf(context).text,
+                                  color: context.theme.text,
                                 ),
                               ),
                             ],
@@ -349,7 +344,7 @@ class _ConversationSelector extends HookWidget {
                   slivers: [
                     if (conversationFilterState.recentConversations.isNotEmpty)
                       _Section(
-                        title: Localization.of(context).recentConversations,
+                        title: context.l10n.recentConversations,
                         count:
                             conversationFilterState.recentConversations.length,
                         builder: (BuildContext context, int index) {
@@ -372,7 +367,7 @@ class _ConversationSelector extends HookWidget {
                       ),
                     if (conversationFilterState.friends.isNotEmpty)
                       _Section(
-                        title: Localization.of(context).contact,
+                        title: context.l10n.contact,
                         count: conversationFilterState.friends.length,
                         builder: (BuildContext context, int index) {
                           final item = conversationFilterState.friends[index];
@@ -393,7 +388,7 @@ class _ConversationSelector extends HookWidget {
                       ),
                     if (conversationFilterState.bots.isNotEmpty)
                       _Section(
-                        title: Localization.of(context).bots,
+                        title: context.l10n.bots,
                         count: conversationFilterState.bots.length,
                         builder: (BuildContext context, int index) {
                           final item = conversationFilterState.bots[index];
@@ -441,7 +436,7 @@ class _AvatarSmallCloseIcon extends StatelessWidget {
             width: 22,
             height: 22,
             decoration: BoxDecoration(
-              color: BrightnessData.themeOf(context).popUp,
+              color: context.theme.popUp,
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -449,8 +444,7 @@ class _AvatarSmallCloseIcon extends StatelessWidget {
                 height: 16,
                 width: 16,
                 decoration: BoxDecoration(
-                  color: BrightnessData.dynamicColor(
-                    context,
+                  color: context.dynamicColor(
                     darkBrightnessThemeData.divider,
                     darkColor: const Color.fromRGBO(142, 141, 143, 1),
                   ),
@@ -487,8 +481,7 @@ class _Section extends StatelessWidget {
         children: [
           SliverPinnedHeader(
             child: Container(
-              color: BrightnessData.dynamicColor(
-                context,
+              color: context.dynamicColor(
                 const Color.fromRGBO(255, 255, 255, 1),
                 darkColor: const Color.fromRGBO(62, 65, 72, 1),
               ),
@@ -497,7 +490,7 @@ class _Section extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: 16,
-                  color: BrightnessData.themeOf(context).text,
+                  color: context.theme.text,
                 ),
               ),
             ),
@@ -544,8 +537,8 @@ class _BaseItem extends StatelessWidget {
                     width: 16,
                     decoration: BoxDecoration(
                       color: selected
-                          ? BrightnessData.themeOf(context).accent
-                          : BrightnessData.themeOf(context).secondaryText,
+                          ? context.theme.accent
+                          : context.theme.secondaryText,
                     ),
                     alignment: Alignment.center,
                     child: SvgPicture.asset(Resources.assetsImagesSelectedSvg),
@@ -560,13 +553,12 @@ class _BaseItem extends StatelessWidget {
                 if (keyword != null)
                   HighlightTextSpan(
                     keyword!,
-                    style: TextStyle(
-                        color: BrightnessData.themeOf(context).accent),
+                    style: TextStyle(color: context.theme.accent),
                   )
               ],
               style: TextStyle(
                 fontSize: 16,
-                color: BrightnessData.themeOf(context).text,
+                color: context.theme.text,
               ),
             ),
           ],

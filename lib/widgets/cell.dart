@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 
 import '../constants/resources.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
-import 'brightness_observer.dart';
+import '../utils/extension/extension.dart';
+
 import 'interacter_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
@@ -30,8 +31,8 @@ class CellGroup extends StatelessWidget {
           child: ClipRRect(
             borderRadius: borderRadius,
             child: _CellItemStyle(
-              backgroundColor: cellBackgroundColor ??
-                  BrightnessData.themeOf(context).listSelected,
+              backgroundColor:
+                  cellBackgroundColor ?? context.theme.listSelected,
               child: child,
             ),
           ),
@@ -81,14 +82,13 @@ class CellItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dynamicColor = color ?? BrightnessData.themeOf(context).text;
+    final dynamicColor = color ?? context.theme.text;
     final backgroundColor = _CellItemStyle.of(context).backgroundColor;
     var selectedBackgroundColor = backgroundColor;
     if (selected &&
         !context.read<ResponsiveNavigatorCubit>().state.navigationMode) {
       selectedBackgroundColor = Color.alphaBlend(
-        BrightnessData.dynamicColor(
-          context,
+        context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.05),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.06),
         ),
@@ -124,7 +124,7 @@ class CellItem extends StatelessWidget {
             if (description != null)
               DefaultTextStyle(
                 style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
+                  color: context.theme.secondaryText,
                   fontSize: 14,
                 ),
                 child: description!,
@@ -146,7 +146,7 @@ class Arrow extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SvgPicture.asset(
         Resources.assetsImagesIcArrowRightSvg,
-        color: BrightnessData.themeOf(context).secondaryText,
+        color: context.theme.secondaryText,
         width: 30,
         height: 30,
       );
