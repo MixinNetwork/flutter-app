@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/extension/extension.dart';
-import '../../../utils/markdown.dart';
 import '../../../utils/uri_utils.dart';
 import '../../full_screen_portal.dart';
 import '../../interacter_decorated_box.dart';
@@ -53,7 +52,7 @@ class PostMessage extends StatelessWidget {
                         data: message.thumbImage?.postLengthOptimize() ??
                             message.content!.postOptimize(),
                         extensionSet: ExtensionSet.gitHubWeb,
-                        styleSheet: markdownStyleSheet(context),
+                        styleSheet: context.markdownStyleSheet,
                         imageBuilder: (_, __, ___) => const SizedBox(),
                         onTapLink: (String text, String? href, String title) {
                           if (href?.isEmpty ?? true) return;
@@ -123,7 +122,7 @@ class PostPreview extends StatelessWidget {
           child: Markdown(
             data: message.thumbImage ?? message.content!,
             extensionSet: ExtensionSet.gitHubWeb,
-            styleSheet: markdownStyleSheet(context),
+            styleSheet: context.markdownStyleSheet,
             selectable: true,
             onTapLink: (String text, String? href, String title) =>
                 openUri(context, href!),
