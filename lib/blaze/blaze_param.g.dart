@@ -34,6 +34,7 @@ BlazeMessageParam _$BlazeMessageParamFromJson(Map<String, dynamic> json) {
     recipientIds: (json['recipient_ids'] as List<dynamic>?)
         ?.map((e) => e as String)
         .toList(),
+    silent: json['silent'] as bool?,
   );
 }
 
@@ -57,4 +58,5 @@ Map<String, dynamic> _$BlazeMessageParamToJson(BlazeMessageParam instance) =>
       'candidate': instance.candidate,
       'track_id': instance.trackId,
       'recipient_ids': instance.recipientIds,
+      'silent': instance.silent,
     };

@@ -51,6 +51,7 @@ class SendMessageHelper {
     bool isPlain,
     String content, {
     String? quoteMessageId,
+    bool silent = false,
   }) async {
     var category =
         isPlain ? MessageCategory.plainText : MessageCategory.signalText;
@@ -82,7 +83,8 @@ class SendMessageHelper {
     await _jobDao.insertSendingJob(
       message.messageId,
       conversationId,
-      recipientId,
+      recipientId: recipientId,
+      silent: silent,
     );
   }
 

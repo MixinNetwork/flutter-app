@@ -60,7 +60,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   ).distinct();
 
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
-      .watch<String>(DatabaseEvent.insert)
+      .watch<String>(DatabaseEvent.notification)
       .asyncMap((event) => db.notificationMessage(event).getSingleOrNull())
       .where((event) => event != null)
       .cast<NotificationMessage>();
@@ -133,7 +133,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<int> insert(Message message, String userId) async {
+  Future<int> insert(Message message, String userId,
+      [bool? silent = false]) async {
     final result = await db.transaction(() async {
       final futures = <Future>[
         into(db.messages).insertOnConflictUpdate(message),
@@ -148,7 +149,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     });
     await takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
-    db.eventBus.send(DatabaseEvent.insert, message.messageId);
+    if (!(silent ?? false)) {
+      db.eventBus.send(DatabaseEvent.notification, message.messageId);
+    }
+
     return result;
   }
 

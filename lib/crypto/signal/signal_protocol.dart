@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
+
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
 import 'package:moor/moor.dart';
@@ -184,10 +185,13 @@ class SignalProtocol {
   }
 
   Future<BlazeMessage> encryptSessionMessage(
-      SendingMessage message, String recipientId,
-      {String? resendMessageId,
-      String? sessionId,
-      List<String>? mentionData}) async {
+    SendingMessage message,
+    String recipientId, {
+    String? resendMessageId,
+    String? sessionId,
+    List<String>? mentionData,
+    bool silent = false,
+  }) async {
     final cipher = await encryptSession(
         Uint8List.fromList(utf8.encode(message.content!)),
         recipientId,
@@ -204,12 +208,16 @@ class SignalProtocol {
       quoteMessageId: message.quoteMessageId,
       sessionId: sessionId,
       mentions: mentionData,
+      silent: silent,
     );
     return createParamBlazeMessage(blazeParam);
   }
 
   Future<BlazeMessage> encryptGroupMessage(
-      SendingMessage message, List<String>? mentionData) async {
+    SendingMessage message,
+    List<String>? mentionData, {
+    bool silent = false,
+  }) async {
     final address = SignalProtocolAddress(message.userId, defaultDeviceId);
     final senderKeyName = SenderKeyName(message.conversationId, address);
     final groupCipher = GroupCipher(senderKeyStore, senderKeyName);
@@ -230,6 +238,7 @@ class SignalProtocol {
       data: data,
       quoteMessageId: message.quoteMessageId,
       mentions: mentionData,
+      silent: silent,
     );
     return createParamBlazeMessage(blazeParam);
   }

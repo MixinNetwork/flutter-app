@@ -26,6 +26,7 @@ import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/mention_panel.dart';
+import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
@@ -220,11 +221,23 @@ class _InputContainer extends HookWidget {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      ActionButton(
-                        name: Resources.assetsImagesIcSendSvg,
-                        color: BrightnessData.themeOf(context).icon,
-                        onTap: () =>
-                            _sendMessage(context, textEditingController),
+                      ContextMenuPortalEntry(
+                        buildMenus: () => [
+                          ContextMenu(
+                            title: Localization.of(context).sendWithoutSound,
+                            onTap: () => _sendMessage(
+                              context,
+                              textEditingController,
+                              silent: true,
+                            ),
+                          ),
+                        ],
+                        child: ActionButton(
+                          name: Resources.assetsImagesIcSendSvg,
+                          color: BrightnessData.themeOf(context).icon,
+                          onTap: () =>
+                              _sendMessage(context, textEditingController),
+                        ),
                       ),
                     ],
                   ),
@@ -256,7 +269,10 @@ void _sendPostMessage(
 }
 
 void _sendMessage(
-    BuildContext context, TextEditingController textEditingController) {
+  BuildContext context,
+  TextEditingController textEditingController, {
+  bool silent = false,
+}) {
   final text = textEditingController.value.text.trim();
   if (text.isEmpty) return;
 
@@ -269,6 +285,7 @@ void _sendMessage(
         conversationId: conversationItem.conversationId,
         recipientId: conversationItem.userId,
         quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
+        silent: silent,
       );
 
   textEditingController.text = '';
