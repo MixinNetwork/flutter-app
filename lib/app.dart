@@ -61,8 +61,7 @@ class App extends StatelessWidget {
                 authState.privateKey,
               )),
               create: (BuildContext context) async {
-                final accountServer =
-                    AccountServer(context.read<MultiAuthCubit>());
+                final accountServer = AccountServer(context.multiAuthCubit);
                 try {
                   await accountServer.initServer(
                     authState.account.userId,

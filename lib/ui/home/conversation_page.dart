@@ -38,7 +38,6 @@ import '../../widgets/toast.dart';
 import '../../widgets/unread_text.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/conversation_list_bloc.dart';
-import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'route/responsive_navigator_cubit.dart';
 
@@ -1205,7 +1204,7 @@ class _MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (context.read<MultiAuthCubit>().state.current?.account.userId ==
+    if (context.multiAuthState.current?.account.userId ==
             conversation.senderId &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&

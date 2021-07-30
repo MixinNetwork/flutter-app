@@ -15,6 +15,7 @@ import 'package:uuid/uuid.dart';
 import '../../account/account_server.dart';
 import '../../db/database.dart';
 import '../../generated/l10n.dart';
+import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
 
 export 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'

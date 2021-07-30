@@ -10,7 +10,6 @@ import '../db/extension/conversation.dart';
 import '../db/extension/message_category.dart';
 import '../enum/message_category.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
-import '../ui/home/bloc/multi_auth_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
 import '../ui/home/local_notification_center.dart';
 import '../utils/extension/extension.dart';
@@ -44,8 +43,7 @@ class NotificationService {
 
             if (!event.type.isText) return false;
 
-            final account =
-                context.read<MultiAuthCubit>().state.current!.account;
+            final account = context.multiAuthState.current!.account;
 
             // mention current user
             if (mentionNumberRegExp
@@ -73,7 +71,7 @@ class NotificationService {
             );
 
             var body = event.content;
-            if (context.read<MultiAuthCubit>().state.currentMessagePreview) {
+            if (context.multiAuthState.currentMessagePreview) {
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
                   actionName: event.actionName,

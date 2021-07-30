@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../bloc/bloc_converter.dart';
@@ -62,8 +61,7 @@ class EditProfilePage extends HookWidget {
             children: [
               const SizedBox(height: 40),
               Builder(builder: (context) {
-                final account =
-                    context.read<MultiAuthCubit>().state.current!.account;
+                final account = context.multiAuthState.current!.account;
                 return AvatarWidget(
                   userId: account.userId,
                   name: account.fullName!,

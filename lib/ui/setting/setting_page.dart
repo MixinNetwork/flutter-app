@@ -118,7 +118,7 @@ class SettingPage extends HookWidget {
                           }
                         }(),
                       );
-                      context.read<MultiAuthCubit>().signOut();
+                      context.multiAuthCubit.signOut();
                     },
                     color: context.theme.red,
                     enableTrailingArrow: false,
@@ -193,8 +193,7 @@ class _UserProfile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Builder(builder: (context) {
-            final account =
-                context.read<MultiAuthCubit>().state.current!.account;
+            final account = context.multiAuthState.current!.account;
             return AvatarWidget(
               userId: account.userId,
               name: account.fullName!,

@@ -29,7 +29,6 @@ import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
-import '../bloc/multi_auth_cubit.dart';
 import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import 'files_preview.dart';
@@ -61,12 +60,7 @@ class InputContainer extends HookWidget {
                 database.participantDao
                     .findParticipantById(
                       conversationId,
-                      context
-                          .read<MultiAuthCubit>()
-                          .state
-                          .current!
-                          .account
-                          .userId,
+                      context.multiAuthState.current!.account.userId,
                     )
                     .watchSingleOrNull(),
               ], (list) {
@@ -75,7 +69,7 @@ class InputContainer extends HookWidget {
               }).debounceTime(const Duration(milliseconds: 500));
             }, [
               conversationId,
-              context.read<MultiAuthCubit>().state.current?.account.userId,
+              context.multiAuthState.current?.account.userId,
             ]),
             initialData: true)
         .data!;
@@ -108,7 +102,7 @@ class _InputContainer extends HookWidget {
     final mentionCubit = useBloc(
       () => MentionCubit(
         userDao: context.database.userDao,
-        multiAuthCubit: BlocProvider.of<MultiAuthCubit>(context),
+        multiAuthCubit: context.multiAuthCubit,
         participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
       ),
     );

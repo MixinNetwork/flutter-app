@@ -1,9 +1,11 @@
 part of '../extension.dart';
 
 extension ProviderExtension on BuildContext {
-  AccountServer get accountServer => read<AccountServer>();
+  MultiAuthCubit get multiAuthCubit => read<MultiAuthCubit>();
 
-  AccountServer get watchAccountServer => watch<AccountServer>();
+  MultiAuthState get multiAuthState => multiAuthCubit.state;
+
+  AccountServer get accountServer => read<AccountServer>();
 
   Database get database => accountServer.database;
 

@@ -9,7 +9,6 @@ import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
 import '../../widgets/brightness_observer.dart';
 
-import '../home/bloc/multi_auth_cubit.dart';
 import 'bloc/landing_cubit.dart';
 
 class LandingPage extends StatelessWidget {
@@ -20,7 +19,7 @@ class LandingPage extends StatelessWidget {
     final locale = Localizations.localeOf(context);
     return BlocProvider(
       create: (context) => LandingCubit(
-        context.read<MultiAuthCubit>(),
+        context.multiAuthCubit,
         locale,
       ),
       child: Builder(
