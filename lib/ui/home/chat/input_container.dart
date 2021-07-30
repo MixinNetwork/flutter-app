@@ -210,7 +210,7 @@ class _InputContainer extends HookWidget {
                       ContextMenuPortalEntry(
                         buildMenus: () => [
                           ContextMenu(
-                            title: Localization.of(context).sendWithoutSound,
+                            title: context.l10n.sendWithoutSound,
                             onTap: () => _sendMessage(
                               context,
                               textEditingController,
@@ -271,8 +271,8 @@ void _sendMessage(
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
     quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,
-  silent: silent,
-      );
+    silent: silent,
+  );
 
   textEditingController.text = '';
   context.read<QuoteMessageCubit>().emit(null);
