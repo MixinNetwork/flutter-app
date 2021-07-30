@@ -55,6 +55,9 @@ void _clear(BuildContext context) {
 class ConversationPage extends HookWidget {
   const ConversationPage({Key? key}) : super(key: key);
 
+  static const conversationItemHeight = 78.0;
+  static const conversationItemAvatarSize = 50.0;
+
   @override
   Widget build(BuildContext context) {
     final hasKeyword =
@@ -186,7 +189,7 @@ class _SearchList extends HookWidget {
                   avatar: AvatarWidget(
                     name: user.fullName ?? '?',
                     userId: user.userId,
-                    size: 50,
+                    size: ConversationPage.conversationItemAvatarSize,
                     avatarUrl: user.avatarUrl,
                   ),
                   name: user.fullName ?? '?',
@@ -238,7 +241,7 @@ class _SearchList extends HookWidget {
                     groupIconUrl: conversation.groupIconUrl,
                     avatarUrl: conversation.avatarUrl,
                     category: conversation.category,
-                    size: 50,
+                    size: ConversationPage.conversationItemAvatarSize,
                   ),
                   name: conversationValidName(
                     conversation.groupName,
@@ -347,7 +350,7 @@ class SearchMessageItem extends StatelessWidget {
         ? AvatarWidget(
             userId: message.userId,
             avatarUrl: message.userAvatarUrl,
-            size: 50,
+            size: ConversationPage.conversationItemAvatarSize,
             name: message.userFullName ?? '',
           )
         : ConversationAvatarWidget(
@@ -359,7 +362,7 @@ class SearchMessageItem extends StatelessWidget {
             groupIconUrl: message.groupIconUrl,
             avatarUrl: message.userAvatarUrl,
             category: message.category,
-            size: 50,
+            size: ConversationPage.conversationItemAvatarSize,
           );
     return _SearchItem(
       avatar: avatar,
@@ -459,7 +462,11 @@ class _SearchMessageList extends HookWidget {
         itemCount: pageState.count,
         itemBuilder: (context, index) {
           final message = pageState.map[index];
-          if (message == null) return const SizedBox(height: 80);
+          if (message == null) {
+            return const SizedBox(
+              height: ConversationPage.conversationItemHeight,
+            );
+          }
           return SearchMessageItem(
             message: message,
             keyword: keyword,
@@ -509,7 +516,7 @@ class _SearchItem extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
         onTap: onTap,
         child: Container(
-          height: 80,
+          height: 72,
           width: double.infinity,
           padding: const EdgeInsets.symmetric(
             horizontal: 12,
@@ -518,11 +525,11 @@ class _SearchItem extends StatelessWidget {
           child: Row(
             children: [
               SizedBox(
-                height: 50,
-                width: 50,
+                height: ConversationPage.conversationItemAvatarSize,
+                width: ConversationPage.conversationItemAvatarSize,
                 child: avatar,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -724,7 +731,18 @@ class _List extends HookWidget {
 
     Widget child;
     if (pagingState.count <= 0) {
-      child = const _Empty();
+      if (pagingState.hasData) {
+        child = Center(
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(
+              BrightnessData.themeOf(context).accent,
+            ),
+          ),
+        );
+      } else {
+        child = const _Empty();
+      }
     } else {
       child = ScrollablePositionedList.builder(
         key: PageStorageKey(slideCategoryState),
@@ -909,80 +927,79 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final messageColor = BrightnessData.themeOf(context).secondaryText;
-    return InteractableDecoratedBox(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: DecoratedBox(
-          decoration: selected
-              ? BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: BrightnessData.themeOf(context).listSelected,
-                )
-              : const BoxDecoration(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: ConversationAvatarWidget(
+    return SizedBox(
+      height: ConversationPage.conversationItemHeight,
+      child: InteractableDecoratedBox(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: DecoratedBox(
+            decoration: selected
+                ? BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: BrightnessData.themeOf(context).listSelected,
+                  )
+                : const BoxDecoration(),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  ConversationAvatarWidget(
                     conversation: conversation,
-                    size: 50,
+                    size: ConversationPage.conversationItemAvatarSize,
                   ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Row(
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      conversation.validName,
-                                      style: TextStyle(
-                                        color: BrightnessData.themeOf(context)
-                                            .text,
-                                        fontSize: 16,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        conversation.validName,
+                                        style: TextStyle(
+                                          color: BrightnessData.themeOf(context)
+                                              .text,
+                                          fontSize: 16,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                  ),
-                                  VerifiedOrBotWidget(
-                                    verified: conversation.ownerVerified,
-                                    isBot: conversation.isBotConversation,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            BlocConverter<MinuteTimerCubit, DateTime, String>(
-                              converter: (_) => formatDateTime(
-                                  conversation.lastMessageCreatedAt ??
-                                      conversation.createdAt),
-                              builder: (context, text) => Text(
-                                text,
-                                style: TextStyle(
-                                  color: messageColor,
-                                  fontSize: 12,
+                                    VerifiedOrBotWidget(
+                                      verified: conversation.ownerVerified,
+                                      isBot: conversation.isBotConversation,
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 2),
-                        _ItemConversationSubtitle(conversation: conversation),
-                      ],
+                              BlocConverter<MinuteTimerCubit, DateTime, String>(
+                                converter: (_) => formatDateTime(
+                                    conversation.lastMessageCreatedAt ??
+                                        conversation.createdAt),
+                                builder: (context, text) => Text(
+                                  text,
+                                  style: TextStyle(
+                                    color: messageColor,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          _ItemConversationSubtitle(conversation: conversation),
+                        ],
+                      ),
                     ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ),

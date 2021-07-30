@@ -25,7 +25,7 @@ class ImageByBase64 extends HookWidget {
   }
 }
 
-const _kDefaultBlurHashSize = 32;
+const _kDefaultBlurHashSize = 20;
 
 class ImageByBlurHash extends HookWidget {
   const ImageByBlurHash({

@@ -61,6 +61,11 @@ class ImageMessageWidget extends StatelessWidget {
                       context.read<AccountServer>().downloadAttachment(message);
                     }
                     break;
+                  case MediaStatus.pending:
+                    context
+                        .read<AccountServer>()
+                        .cancelProgressAttachmentJob(message.messageId);
+                    break;
                   default:
                     break;
                 }
@@ -72,7 +77,9 @@ class ImageMessageWidget extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Image.file(
-                      File(message.mediaUrl ?? ''),
+                      File(context
+                          .read<AccountServer>()
+                          .convertMessageAbsolutePath(message)),
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
                           imageData: message.thumbImage!),

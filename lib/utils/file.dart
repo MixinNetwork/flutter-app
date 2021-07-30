@@ -35,6 +35,7 @@ extension XFileExtension on file_selector.XFile {
         'image/png',
         'image/bmp',
         'image/webp',
+        'image/gif',
       }.contains(mimeType?.toLowerCase());
 
   bool get isVideo =>
@@ -68,14 +69,17 @@ Future<int> getTotalSizeOfFile(String path) async {
   return 0;
 }
 
-Future<Directory> getMixinDocumentsDirectory() {
+late Directory mixinDocumentsDirectory;
+
+Future<void> initMixinDocumentsDirectory() async {
   if (Platform.isLinux) {
     // https://pubs.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap08.html
     final home = Platform.environment['HOME'];
     assert(home != null, 'failed to get HOME environment.');
-    return Future.value(Directory(p.join(home!, '.mixin')));
+    mixinDocumentsDirectory = Directory(p.join(home!, '.mixin'));
+    return;
   }
-  return getApplicationDocumentsDirectory();
+  mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
 }
 
 Future<File?> saveBytesToTempFile(
@@ -97,4 +101,12 @@ Future<File?> saveBytesToTempFile(
     e('failed to save bytes to temp file. $error $stack');
     return null;
   }
+}
+
+extension FileRelativePath on File {
+  String get pathBasename => path.pathBasename;
+}
+
+extension StringPathRelativePath on String {
+  String get pathBasename => p.basename(this);
 }

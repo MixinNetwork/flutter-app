@@ -10,6 +10,7 @@ import '../../../../utils/uri_utils.dart';
 import '../../../brightness_observer.dart';
 import '../../../cache_image.dart';
 import '../../../interacter_decorated_box.dart';
+import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import 'action_card_data.dart';
@@ -66,7 +67,7 @@ class ActionCardMessage extends HookWidget {
                     appCardData.title,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).text,
-                      fontSize: 14,
+                      fontSize: MessageItemWidget.secondaryFontSize,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -75,7 +76,7 @@ class ActionCardMessage extends HookWidget {
                     appCardData.description,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).secondaryText,
-                      fontSize: 12,
+                      fontSize: MessageItemWidget.tertiaryFontSize,
                     ),
                   ),
                 ],

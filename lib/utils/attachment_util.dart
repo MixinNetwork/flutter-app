@@ -53,10 +53,10 @@ class AttachmentUtil {
       d('download ${response.data.viewUrl}');
 
       if (response.data.viewUrl != null) {
-        final file = _getAttachmentFile(
-          conversationId: conversationId,
-          messageId: messageId,
-          category: category,
+        final file = getAttachmentFile(
+          category,
+          conversationId,
+          messageId,
           mimeType: attachmentMessage?.mimeType,
         );
 
@@ -195,14 +195,38 @@ class AttachmentUtil {
     }
   }
 
+  String getAttachmentDirectoryPath(String category, String conversationId) {
+    assert(category.isAttachment);
+    String path;
+    if (category.isImage) {
+      path = getImagesPath(conversationId);
+    } else if (category.isVideo) {
+      path = getVideosPath(conversationId);
+    } else if (category.isAudio) {
+      path = getAudiosPath(conversationId);
+    } else {
+      path = getFilesPath(conversationId);
+    }
+    return path;
+  }
+
+  String convertAbsolutePath(
+      String category, String conversationId, String? fileName) {
+    if (fileName?.trim().isEmpty ?? true) return '';
+    assert(category.isAttachment);
+    if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
+      return fileName!;
+    }
+    return p.join(
+        getAttachmentDirectoryPath(category, conversationId), fileName);
+  }
+
   File getAttachmentFile(
       String category, String conversationId, String messageId,
       {String? mimeType}) {
-    assert(category.isAttachment);
-    String path;
+    final path = getAttachmentDirectoryPath(category, conversationId);
     String suffix;
     if (category.isImage) {
-      path = getImagesPath(conversationId);
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
         suffix = 'png';
       } else if (_equalsIgnoreCase(mimeType, 'image/gif')) {
@@ -213,13 +237,10 @@ class AttachmentUtil {
         suffix = 'jpg';
       }
     } else if (category.isVideo) {
-      path = getVideosPath(conversationId);
       suffix = 'mp4';
     } else if (category.isAudio) {
-      path = getAudiosPath(conversationId);
       suffix = 'ogg';
     } else {
-      path = getFilesPath(conversationId);
       assert(mimeType != null);
       suffix = extensionFromMime(mimeType!);
     }
@@ -228,15 +249,6 @@ class AttachmentUtil {
 
   bool _equalsIgnoreCase(String? string1, String? string2) =>
       string1?.toLowerCase() == string2?.toLowerCase();
-
-  File _getAttachmentFile({
-    required String messageId,
-    required String conversationId,
-    required String category,
-    String? mimeType,
-  }) =>
-      getAttachmentFile(category, conversationId, messageId,
-          mimeType: mimeType);
 
   String getImagesPath(String conversationId) =>
       p.join(mediaPath, 'Images', conversationId);
@@ -250,9 +262,9 @@ class AttachmentUtil {
   String getFilesPath(String conversationId) =>
       p.join(mediaPath, 'Files', conversationId);
 
-  static Future<AttachmentUtil> init(
-      Client client, MessageDao messageDao, String identityNumber) async {
-    final documentDirectory = await getMixinDocumentsDirectory();
+  static AttachmentUtil init(
+      Client client, MessageDao messageDao, String identityNumber) {
+    final documentDirectory = mixinDocumentsDirectory;
     final mediaDirectory =
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
     return AttachmentUtil(client, messageDao, mediaDirectory.path);

@@ -23,14 +23,29 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
           .go();
 
   Future<void> parseMentionData(
-    String content,
+    String? content,
     String messageId,
     String conversationId,
     String senderId,
+    QuoteMessageItem? quoteMessage,
   ) async {
-    final numbers = mentionNumberRegExp.allMatches(content).map((e) => e[1]!);
-    final mentionMe = senderId != MultiAuthCubit.currentAccount?.userId &&
-        numbers.contains(MultiAuthCubit.currentAccount?.identityNumber);
+    var mentionMe = false;
+    final currentUserId = MultiAuthCubit.currentAccount?.userId;
+
+    if (content?.isNotEmpty == true) {
+      final numbers =
+          mentionNumberRegExp.allMatches(content!).map((e) => e[1]!);
+      mentionMe = senderId != currentUserId &&
+          numbers.contains(MultiAuthCubit.currentAccount?.identityNumber);
+    }
+
+    if (!mentionMe &&
+        quoteMessage != null &&
+        quoteMessage.userId == currentUserId &&
+        senderId != currentUserId) {
+      mentionMe = true;
+    }
+
     if (!mentionMe) return;
 
     await insert(MessageMention(

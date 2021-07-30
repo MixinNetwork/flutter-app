@@ -8,6 +8,7 @@ import '../../../utils/uri_utils.dart';
 import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../../interacter_decorated_box.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
@@ -73,7 +74,7 @@ class TransferMessage extends StatelessWidget {
                             amount!,
                             style: TextStyle(
                               color: BrightnessData.themeOf(context).text,
-                              fontSize: 14,
+                              fontSize: MessageItemWidget.secondaryFontSize,
                             ),
                           );
                         }),
@@ -84,7 +85,7 @@ class TransferMessage extends StatelessWidget {
                     message.assetSymbol!,
                     style: TextStyle(
                       color: BrightnessData.themeOf(context).secondaryText,
-                      fontSize: 12,
+                      fontSize: MessageItemWidget.tertiaryFontSize,
                     ),
                   ),
                 ],

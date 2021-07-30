@@ -57,8 +57,7 @@ class SearchTextField extends HookWidget {
       };
     }, [controller, onChanged]);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+    return Center(
       child: TextField(
         focusNode: focusNode,
         autofocus: autofocus,
@@ -86,7 +85,9 @@ class SearchTextField extends HookWidget {
               color: hintColor,
             ),
           ),
-          suffixIcon: _SearchClearIcon(controller),
+          suffixIconConstraints:
+              const BoxConstraints.expand(width: 32, height: 36),
+          suffixIcon: Center(child: _SearchClearIcon(controller)),
           contentPadding: const EdgeInsets.only(right: 8),
           hintText: hintText,
           hintStyle: TextStyle(

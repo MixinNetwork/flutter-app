@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
+import '../../../account/account_server.dart';
 import '../../../constants/resources.dart';
 import '../../../db/extension/message.dart';
 import '../../../db/extension/message_category.dart';
@@ -22,6 +23,7 @@ import '../../avatar_view/avatar_view.dart';
 import '../../brightness_observer.dart';
 import '../../cache_image.dart';
 import '../../image.dart';
+import '../message.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
 
@@ -92,7 +94,8 @@ class QuoteMessage extends HookWidget {
           userId: quote.userId,
           name: quote.userFullName,
           image: Image.file(
-            File(quote.mediaUrl ?? ''),
+            File(context.read<AccountServer>().convertAbsolutePath(
+                quote.type, quote.conversationId, quote.mediaUrl)),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
                 ImageByBlurHashOrBase64(imageData: quote.thumbImage),
@@ -365,7 +368,8 @@ class _QuoteMessageBase extends StatelessWidget {
                                 child: Text(
                                   name!,
                                   style: TextStyle(
-                                    fontSize: 14,
+                                    fontSize:
+                                        MessageItemWidget.secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
@@ -384,7 +388,8 @@ class _QuoteMessageBase extends StatelessWidget {
                                   child: Text(
                                     _description,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize:
+                                          MessageItemWidget.tertiaryFontSize,
                                       color: BrightnessData.themeOf(context)
                                           .secondaryText,
                                       height: 1,

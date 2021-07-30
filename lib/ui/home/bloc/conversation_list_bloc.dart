@@ -51,6 +51,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               database.conversationDao.chatConversations(limit, offset).get(),
           database.conversationDao.updateEvent,
           mentionCache,
+          database.conversationDao.chatConversationHasData,
         );
         break;
       case SlideCategoryType.contacts:
@@ -62,6 +63,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               .get(),
           database.conversationDao.updateEvent,
           mentionCache,
+          database.conversationDao.contactConversationHasData,
         );
         break;
       case SlideCategoryType.groups:
@@ -72,6 +74,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               database.conversationDao.groupConversations(limit, offset).get(),
           database.conversationDao.updateEvent,
           mentionCache,
+          database.conversationDao.groupConversationHasData,
         );
         break;
       case SlideCategoryType.bots:
@@ -82,6 +85,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               database.conversationDao.botConversations(limit, offset).get(),
           database.conversationDao.updateEvent,
           mentionCache,
+          database.conversationDao.botConversationHasData,
         );
         break;
       case SlideCategoryType.strangers:
@@ -94,6 +98,7 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               .get(),
           database.conversationDao.updateEvent,
           mentionCache,
+          database.conversationDao.strangerConversationHasData,
         );
         break;
       case SlideCategoryType.circle:
@@ -107,6 +112,8 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
               .get(),
           database.conversationDao.updateEvent,
           mentionCache,
+          () =>
+              database.conversationDao.conversationHasDataByCircleId(state.id!),
         );
         break;
       default:
@@ -133,9 +140,12 @@ class ConversationListBloc extends Cubit<PagingState<ConversationItem>>
       await FlutterAppIconBadge.updateBadge(count!);
     }
 
-    final count = await database.conversationDao.allUnseenMessageCount();
+    final count = await database.conversationDao
+        .allUnseenIgnoreMuteMessageCount()
+        .getSingle();
     await updateBadge(count);
-    addSubscription(database.conversationDao.allUnseenMessageCountEvent
+    addSubscription(database
+        .conversationDao.allUnseenIgnoreMuteMessageCountEvent
         .listen(updateBadge));
   }
 }
@@ -147,8 +157,10 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
     Future<List<ConversationItem>> Function(int limit, int offset) queryRange,
     Stream<void> updateEvent,
     this.mentionCache,
+    Future<bool> Function() queryHasData,
   )   : _queryCount = queryCount,
         _queryRange = queryRange,
+        _queryHasData = queryHasData,
         super(
           initState: const PagingState<ConversationItem>(),
           itemPositionsListener: ItemPositionsListener.create(),
@@ -161,6 +173,7 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
   final Future<int> Function() _queryCount;
   final Future<List<ConversationItem>> Function(int limit, int offset)
       _queryRange;
+  final Future<bool> Function() _queryHasData;
 
   @override
   Future<int> queryCount() => _queryCount();
@@ -174,4 +187,7 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
 
     return list;
   }
+
+  @override
+  Future<bool> queryHasData() => _queryHasData();
 }

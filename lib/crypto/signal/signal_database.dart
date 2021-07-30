@@ -49,14 +49,15 @@ class SignalDatabase extends _$SignalDatabase {
       });
 
   Future<void> clear() => transaction(() async {
+        await customStatement('PRAGMA wal_checkpoint(FULL)');
         for (var table in allTables) {
           await delete(table).go();
         }
       });
 }
 
-LazyDatabase _openConnection() => LazyDatabase(() async {
-      final dbFolder = await getMixinDocumentsDirectory();
+LazyDatabase _openConnection() => LazyDatabase(() {
+      final dbFolder = mixinDocumentsDirectory;
       final file = File(p.join(dbFolder.path, 'signal.db'));
       return VmDatabase(file);
     });

@@ -1,60 +1,104 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
 import '../../account/account_server.dart';
 import '../../constants/resources.dart';
+import '../../db/extension/user.dart';
 import '../../db/mixin_database.dart';
 import '../../generated/l10n.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat_page.dart';
 import '../../ui/home/conversation_page.dart';
-import '../../utils/string_extension.dart';
 import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../brightness_observer.dart';
 import '../buttons.dart';
 import '../dialog.dart';
-import '../interacter_decorated_box.dart';
+import '../more_extended_text.dart';
 import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
 Future<void> showUserDialog(BuildContext context, String userId) async {
-  await showMixinDialog(context: context, child: _UserDialog(userId: userId));
+  final existed =
+      await context.read<AccountServer>().database.userDao.hasUser(userId);
+  if (existed) {
+    Toast.dismiss();
+    await showMixinDialog(context: context, child: _UserDialog(userId: userId));
+    return;
+  }
+
+  showToastLoading(context);
+
+  final result =
+      await context.read<AccountServer>().refreshUsers([userId], force: true);
+
+  if (result?.isEmpty ?? true) {
+    await showToastFailed(
+        context,
+        ToastError(
+          Localization.of(context).userNotFound,
+        ));
+    return;
+  }
+
+  Toast.dismiss();
+  await showMixinDialog(
+    context: context,
+    child: _UserDialog(
+      userId: userId,
+      refreshUser: false,
+    ),
+  );
 }
 
 class _UserDialog extends StatelessWidget {
-  const _UserDialog({Key? key, required this.userId}) : super(key: key);
+  const _UserDialog({
+    Key? key,
+    required this.userId,
+    this.refreshUser = true,
+  }) : super(key: key);
 
   final String userId;
+  final bool refreshUser;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: BrightnessData.themeOf(context).popUp,
-        child: SizedBox(
-          height: 390,
-          width: 340,
-          child: Stack(
-            fit: StackFit.passthrough,
-            children: [
-              _UserProfileLoader(userId),
-              const Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: EdgeInsets.only(right: 12, top: 12),
-                    child: MixinCloseButton(),
-                  )),
-            ],
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Material(
+            color: BrightnessData.themeOf(context).popUp,
+            child: SizedBox(
+              width: 340,
+              child: Stack(
+                fit: StackFit.passthrough,
+                children: [
+                  Center(
+                      child:
+                          _UserProfileLoader(userId, refreshUser: refreshUser)),
+                  const Align(
+                      alignment: Alignment.topRight,
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 12, top: 12),
+                        child: MixinCloseButton(),
+                      )),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       );
 }
 
 class _UserProfileLoader extends HookWidget {
-  const _UserProfileLoader(this.userId, {Key? key}) : super(key: key);
+  const _UserProfileLoader(
+    this.userId, {
+    Key? key,
+    this.refreshUser = true,
+  }) : super(key: key);
 
   final String userId;
+  final bool refreshUser;
 
   @override
   Widget build(BuildContext context) {
@@ -65,8 +109,10 @@ class _UserProfileLoader extends HookWidget {
         [userId])).data;
 
     useEffect(() {
-      accountServer.refreshUsers([userId], force: true);
-    }, [userId]);
+      if (refreshUser) {
+        accountServer.refreshUsers([userId], force: true);
+      }
+    }, [userId, refreshUser]);
 
     if (user == null) return const SizedBox();
     return _UserProfileBody(
@@ -86,51 +132,64 @@ class _UserProfileBody extends StatelessWidget {
   final bool isSelf;
 
   @override
-  Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          const SizedBox(height: 75),
-          AvatarWidget(
-            size: 60,
-            avatarUrl: user.avatarUrl,
-            userId: user.userId,
-            name: user.fullName ?? '',
-          ),
-          const SizedBox(height: 8),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SelectableText(
-                user.fullName ?? '',
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).text,
-                  fontSize: 16,
-                ),
-              ),
-              VerifiedOrBotWidget(
-                verified: user.isVerified,
-                isBot: user.appId != null,
-              )
-            ],
-          ),
-          const SizedBox(height: 4),
-          SelectableText(
-            Localization.of(context).contactMixinId(user.identityNumber),
-            style: TextStyle(
-              color: BrightnessData.themeOf(context).secondaryText,
-              fontSize: 12,
+  Widget build(BuildContext context) => AnimatedSize(
+        duration: const Duration(milliseconds: 150),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 72),
+            AvatarWidget(
+              size: 90,
+              avatarUrl: user.avatarUrl,
+              userId: user.userId,
+              name: user.fullName ?? '',
             ),
-          ),
-          const SizedBox(height: 12),
-          _BioText(biography: user.biography ?? ''),
-          const Spacer(),
-          _UserProfileButtonBar(user: user),
-          const SizedBox(height: 72),
-        ],
+            const SizedBox(height: 8),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: SelectableText(
+                    user.fullName ?? '',
+                    style: TextStyle(
+                      color: BrightnessData.themeOf(context).text,
+                      fontSize: 16,
+                      height: 1,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                VerifiedOrBotWidget(
+                  verified: user.isVerified,
+                  isBot: user.appId != null,
+                )
+              ],
+            ),
+            const SizedBox(height: 4),
+            SelectableText(
+              Localization.of(context).contactMixinId(user.identityNumber),
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).secondaryText,
+                fontSize: 12,
+              ),
+            ),
+            if (user.isStranger)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: _AddToContactsButton(user: user),
+              ),
+            const SizedBox(height: 20),
+            _BioText(biography: user.biography ?? ''),
+            const SizedBox(height: 24),
+            _UserProfileButtonBar(user: user),
+            const SizedBox(height: 56),
+          ],
+        ),
       );
 }
 
-class _BioText extends HookWidget {
+class _BioText extends StatelessWidget {
   const _BioText({
     Key? key,
     required this.biography,
@@ -139,48 +198,63 @@ class _BioText extends HookWidget {
   final String biography;
 
   @override
-  Widget build(BuildContext context) {
-    final expand = useState(false);
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxHeight: 74,
-        minHeight: 0,
-        minWidth: 160,
-      ),
-      child: SingleChildScrollView(
-        physics: expand.value ? null : const NeverScrollableScrollPhysics(),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 36),
-          child: ExtendedText(
-            expand.value ? biography : biography.overflow,
-            style: TextStyle(
-              color: BrightnessData.themeOf(context).text,
-              fontSize: 14,
-              height: 1.5,
-            ),
-            maxLines: expand.value ? null : 3,
-            overflow: TextOverflow.fade,
-            textAlign: TextAlign.center,
-            selectionEnabled: true,
-            overflowWidget: TextOverflowWidget(
-              child: InteractableDecoratedBox(
-                onTap: () {
-                  expand.value = true;
-                },
-                child: Text(
-                  Localization.of(context).more,
-                  style: TextStyle(
-                    color: BrightnessData.themeOf(context).accent,
-                    fontSize: 14,
-                  ),
-                ),
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: const BoxConstraints(
+          maxHeight: 74,
+          minHeight: 0,
+          minWidth: 160,
+        ),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 36),
+            child: MoreExtendedText(
+              biography,
+              style: TextStyle(
+                color: BrightnessData.themeOf(context).text,
+                fontSize: 14,
+                height: 1.5,
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+}
+
+class _AddToContactsButton extends StatelessWidget {
+  const _AddToContactsButton({
+    Key? key,
+    required this.user,
+  }) : super(key: key);
+
+  final User user;
+
+  @override
+  Widget build(BuildContext context) => TextButton(
+        style: TextButton.styleFrom(
+          backgroundColor: BrightnessData.themeOf(context).statusBackground,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        onPressed: () {
+          assert(user.fullName != null, ' username should not be null.');
+          runFutureWithToast(
+            context,
+            context.read<AccountServer>().addUser(
+                  user.userId,
+                  user.fullName,
+                ),
+          );
+        },
+        child: Text(
+          user.isBot
+              ? Localization.of(context).conversationAddBot
+              : Localization.of(context).conversationAddContact,
+          style: TextStyle(
+              fontSize: 12, color: BrightnessData.themeOf(context).accent),
+        ),
+      );
 }
 
 class _UserProfileButtonBar extends StatelessWidget {

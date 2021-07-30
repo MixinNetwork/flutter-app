@@ -129,7 +129,7 @@ class AccountServer {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     _attachmentUtil =
-        await AttachmentUtil.init(client, database.messageDao, identityNumber);
+        AttachmentUtil.init(client, database.messageDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
       database.messageDao,
       database.messageMentionDao,
@@ -826,7 +826,7 @@ class AccountServer {
 
     refreshUserIdSet.clear();
     final res = await client.circleApi.getCircles();
-    res.data.forEach((circle) async {
+    await Future.forEach<CircleResponse>(res.data, (circle) async {
       await database.circleDao.insertUpdate(db.Circle(
           circleId: circle.circleId,
           name: circle.name,
@@ -847,6 +847,7 @@ class AccountServer {
         circleId: cc.circleId,
         createdAt: cc.createdAt,
       ));
+      await _decryptMessage.syncConversion(cc.conversationId);
       if (cc.userId != null && !refreshUserIdSet.contains(cc.userId)) {
         final u = await database.userDao.userById(cc.userId!).getSingleOrNull();
         if (u == null) {
@@ -918,7 +919,7 @@ class AccountServer {
         message.conversationId,
         message.messageId,
         message.type,
-        File(message.mediaUrl!),
+        File(convertMessageAbsolutePath(message)),
         message.mediaName,
         message.mediaMimeType!,
         message.mediaSize!,
@@ -984,9 +985,7 @@ class AccountServer {
       ),
     );
     await database.conversationDao.updateConversation(response.data);
-    for (final userId in userIds) {
-      await addParticipant(conversationId, userId);
-    }
+    await addParticipant(conversationId, userIds);
   }
 
   Future<void> exitGroup(String conversationId) async {
@@ -996,11 +995,14 @@ class AccountServer {
 
   Future<void> addParticipant(
     String conversationId,
-    String userId,
+    List<String> userIds,
   ) async {
     try {
       final response = await client.conversationApi.participants(
-          conversationId, 'ADD', [ParticipantRequest(userId: userId)]);
+        conversationId,
+        'ADD',
+        userIds.map((e) => ParticipantRequest(userId: e)).toList(),
+      );
 
       await database.conversationDao.updateConversation(response.data);
     } catch (e) {
@@ -1338,4 +1340,14 @@ class AccountServer {
 
   Future<void> deleteMessage(String messageId) =>
       database.messageDao.deleteMessage(messageId);
+
+  String convertAbsolutePath(
+          String category, String conversationId, String? fileName) =>
+      _attachmentUtil.convertAbsolutePath(category, conversationId, fileName);
+
+  String convertMessageAbsolutePath(db.MessageItem? messageItem) {
+    if (messageItem == null) return '';
+    return convertAbsolutePath(
+        messageItem.type, messageItem.conversationId, messageItem.mediaUrl);
+  }
 }

@@ -75,7 +75,7 @@ class ClampingRenderViewport extends RenderViewport {
     RenderSliver? center,
     double? cacheExtent,
     CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
-    Clip clipBehavior = Clip.hardEdge,
+    Clip clipBehavior = Clip.antiAlias,
   })  : assert(anchor >= 0.0 && anchor <= 1.0),
         assert(cacheExtentStyle != CacheExtentStyle.viewport ||
             cacheExtent != null),

@@ -1,4 +1,3 @@
-import 'package:extended_text/extended_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,14 +12,12 @@ import '../../../db/extension/conversation.dart';
 import '../../../db/mixin_database.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/hook.dart';
-import '../../../utils/list_utils.dart';
-import '../../../utils/string_extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/brightness_observer.dart';
 import '../../../widgets/cell.dart';
 import '../../../widgets/dialog.dart';
-import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
@@ -104,6 +101,7 @@ class ChatInfoPage extends HookWidget {
             ConversationName(
               conversationState: conversation,
               fontSize: 18,
+              overflow: false,
             ),
             const SizedBox(height: 4),
             ConversationIDOrCount(
@@ -294,19 +292,6 @@ class ChatInfoPage extends HookWidget {
               ),
             ),
             CellGroup(
-              child: CellItem(
-                title: Text(Localization.of(context).circles),
-                description: const _CircleNames(),
-                onTap: () => context.read<ChatSideCubit>().pushPage(
-                      ChatSideCubit.circles,
-                      // arguments: Tuple2<String, String>(
-                      //   conversation.name!,
-                      //   conversationId,
-                      // ),
-                    ),
-              ),
-            ),
-            CellGroup(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -467,62 +452,6 @@ class ChatInfoPage extends HookWidget {
   }
 }
 
-class _CircleNames extends HookWidget {
-  const _CircleNames();
-
-  @override
-  Widget build(BuildContext context) {
-    final conversationId =
-        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
-      converter: (state) => state?.conversationId,
-      when: (conversationId) => conversationId != null,
-    );
-
-    final circleNames = useStream<List<String>>(
-          useMemoized(
-            () => context
-                .read<AccountServer>()
-                .database
-                .circleDao
-                .circlesNameByConversationId(conversationId ?? '')
-                .watch()
-                .where((event) => event.isNotEmpty),
-            [conversationId],
-          ),
-          initialData: [],
-        ).data ??
-        [];
-
-    if (circleNames.isEmpty) return const SizedBox();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: circleNames
-          .map(
-            (e) => Container(
-              decoration: ShapeDecoration(
-                shape: StadiumBorder(
-                  side: BorderSide(
-                    color: BrightnessData.themeOf(context).secondaryText,
-                  ),
-                ),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              child: Text(
-                e,
-                style: TextStyle(
-                  color: BrightnessData.themeOf(context).secondaryText,
-                ),
-              ),
-            ),
-          )
-          .cast<Widget>()
-          .toList()
-          .joinList(const SizedBox(width: 8)),
-    );
-  }
-}
-
 class ConversationBio extends HookWidget {
   const ConversationBio({
     Key? key,
@@ -539,8 +468,6 @@ class ConversationBio extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final expand = useState(false);
-
     final textStream = useMemoized(() {
       final database = context.read<AccountServer>().database;
       if (isGroup) {
@@ -555,30 +482,14 @@ class ConversationBio extends HookWidget {
       isGroup,
     ]);
 
-    final text = useStream(textStream, initialData: '').data;
-    if (text?.isEmpty == true) return const SizedBox();
+    final text = useStream(textStream, initialData: '').data!;
+    if (text.isEmpty) return const SizedBox();
 
-    return ExtendedText(
-      expand.value ? text! : text!.overflow,
+    return MoreExtendedText(
+      text,
       style: TextStyle(
         color: BrightnessData.themeOf(context).text,
         fontSize: fontSize,
-      ),
-      maxLines: expand.value ? null : 3,
-      overflow: TextOverflow.fade,
-      textAlign: TextAlign.center,
-      overflowWidget: TextOverflowWidget(
-        child: InteractableDecoratedBox(
-          onTap: () {
-            expand.value = true;
-          },
-          child: Text(
-            Localization.of(context).more,
-            style: TextStyle(
-              color: BrightnessData.themeOf(context).accent,
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -604,9 +515,10 @@ class _AddToContactsButton extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 12),
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    backgroundColor: BrightnessData.themeOf(context).background,
-                    padding: const EdgeInsets.symmetric(horizontal: 15),
-                    fixedSize: const Size.fromHeight(30),
+                    backgroundColor:
+                        BrightnessData.themeOf(context).statusBackground,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),

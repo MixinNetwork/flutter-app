@@ -60,7 +60,6 @@ class SelectItem extends StatelessWidget {
                     darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
                   ),
                   textColor: BrightnessData.themeOf(context).text,
-                  fontWeight: FontWeight.w700,
                 ),
             ],
           ),

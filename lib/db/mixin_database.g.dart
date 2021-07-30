@@ -10986,20 +10986,24 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   }
 
   Selectable<int> baseConversationItemCount(
-      Expression<bool?> Function(Conversations conversation, Users owner)
+      Expression<bool?> Function(Conversations conversation, Users owner,
+              CircleConversations circleConversation)
           where) {
     final generatedwhere = $write(
-        where(alias(this.conversations, 'conversation'),
-            alias(this.users, 'owner')),
+        where(
+            alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner'),
+            alias(this.circleConversations, 'circleConversation')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT Count(1) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql}',
+        'SELECT Count(1) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql}',
         variables: [
           ...generatedwhere.introducedVariables
         ],
         readsFrom: {
           conversations,
           users,
+          circleConversations,
           ...generatedwhere.watchedTables,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
@@ -11008,6 +11012,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       Expression<bool?> Function(
               Conversations conversation,
               Users owner,
+              CircleConversations circleConversation,
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
@@ -11016,6 +11021,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       OrderBy Function(
               Conversations conversation,
               Users owner,
+              CircleConversations circleConversation,
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
@@ -11024,6 +11030,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       Limit Function(
               Conversations conversation,
               Users owner,
+              CircleConversations circleConversation,
               Messages lastMessage,
               Users lastMessageSender,
               Snapshots snapshot,
@@ -11033,6 +11040,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         where(
             alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'),
+            alias(this.circleConversations, 'circleConversation'),
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
@@ -11042,6 +11050,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         order(
             alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'),
+            alias(this.circleConversations, 'circleConversation'),
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
@@ -11051,13 +11060,14 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         limit(
             alias(this.conversations, 'conversation'),
             alias(this.users, 'owner'),
+            alias(this.circleConversations, 'circleConversation'),
             alias(this.messages, 'lastMessage'),
             alias(this.users, 'lastMessageSender'),
             alias(this.snapshots, 'snapshot'),
             alias(this.users, 'participant')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT COUNT(1) AS _c0 FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT COUNT(1) AS _c0 FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -11069,6 +11079,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           snapshots,
           messageMentions,
+          circleConversations,
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
           ...generatedlimit.watchedTables,
@@ -11117,157 +11128,26 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<int> baseConversationItemCountWithCircleConversation(
-      Expression<bool?> Function(CircleConversations circleConversation,
-              Conversations conversation, Users owner)
+  Selectable<int?> baseUnseenMessageCount(
+      Expression<bool?> Function(Conversations conversation, Users owner,
+              CircleConversations circleConversation)
           where) {
     final generatedwhere = $write(
         where(
-            alias(this.circleConversations, 'circleConversation'),
             alias(this.conversations, 'conversation'),
-            alias(this.users, 'owner')),
+            alias(this.users, 'owner'),
+            alias(this.circleConversations, 'circleConversation')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT Count(1) AS _c0 FROM circle_conversations AS circleConversation INNER JOIN conversations AS conversation ON conversation.conversation_id = circleConversation.conversation_id INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql}',
+        'SELECT SUM(unseen_message_count) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql} LIMIT 1',
         variables: [
           ...generatedwhere.introducedVariables
         ],
         readsFrom: {
-          circleConversations,
           conversations,
           users,
-          ...generatedwhere.watchedTables,
-        }).map((QueryRow row) => row.read<int>('_c0'));
-  }
-
-  Selectable<ConversationItem> baseConversationItemsWithCircleConversation(
-      Expression<bool?> Function(
-              CircleConversations circleConversation,
-              Conversations conversation,
-              Users owner,
-              Messages lastMessage,
-              Users lastMessageSender,
-              Snapshots snapshot,
-              Users participant)
-          where,
-      OrderBy Function(
-              CircleConversations circleConversation,
-              Conversations conversation,
-              Users owner,
-              Messages lastMessage,
-              Users lastMessageSender,
-              Snapshots snapshot,
-              Users participant)
-          order,
-      Limit Function(
-              CircleConversations circleConversation,
-              Conversations conversation,
-              Users owner,
-              Messages lastMessage,
-              Users lastMessageSender,
-              Snapshots snapshot,
-              Users participant)
-          limit) {
-    final generatedwhere = $write(
-        where(
-            alias(this.circleConversations, 'circleConversation'),
-            alias(this.conversations, 'conversation'),
-            alias(this.users, 'owner'),
-            alias(this.messages, 'lastMessage'),
-            alias(this.users, 'lastMessageSender'),
-            alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
-        hasMultipleTables: true);
-    final generatedorder = $write(
-        order(
-            alias(this.circleConversations, 'circleConversation'),
-            alias(this.conversations, 'conversation'),
-            alias(this.users, 'owner'),
-            alias(this.messages, 'lastMessage'),
-            alias(this.users, 'lastMessageSender'),
-            alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
-        hasMultipleTables: true);
-    final generatedlimit = $write(
-        limit(
-            alias(this.circleConversations, 'circleConversation'),
-            alias(this.conversations, 'conversation'),
-            alias(this.users, 'owner'),
-            alias(this.messages, 'lastMessage'),
-            alias(this.users, 'lastMessageSender'),
-            alias(this.snapshots, 'snapshot'),
-            alias(this.users, 'participant')),
-        hasMultipleTables: true);
-    return customSelect(
-        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.draft AS draft, conversation.name AS groupName, conversation.status AS status, conversation.last_read_message_id AS lastReadMessageId, conversation.unseen_message_count AS unseenMessageCount, conversation.owner_id AS ownerId, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, owner.avatar_url AS avatarUrl, owner.full_name AS name, owner.is_verified AS ownerVerified, owner.identity_number AS ownerIdentityNumber, owner.mute_until AS ownerMuteUntil, owner.app_id AS appId, lastMessage.content AS content, lastMessage.category AS contentType, conversation.created_at AS createdAt, lastMessage.created_at AS lastMessageCreatedAt, lastMessage.media_url AS mediaUrl, lastMessage.user_id AS senderId, lastMessage."action" AS actionName, lastMessage.status AS messageStatus, lastMessageSender.full_name AS senderFullName, snapshot.type AS SnapshotType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, (SELECT COUNT(1) AS _c0 FROM message_mentions AS messageMention WHERE messageMention.conversation_id = conversation.conversation_id AND messageMention.has_read = 0) AS mentionCount, owner.relationship AS relationship FROM circle_conversations AS circleConversation INNER JOIN conversations AS conversation ON conversation.conversation_id = circleConversation.conversation_id INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS lastMessage ON conversation.last_message_id = lastMessage.message_id LEFT JOIN users AS lastMessageSender ON lastMessageSender.user_id = lastMessage.user_id LEFT JOIN snapshots AS snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id LEFT JOIN users AS participant ON participant.user_id = lastMessage.participant_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
-        variables: [
-          ...generatedwhere.introducedVariables,
-          ...generatedorder.introducedVariables,
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          conversations,
-          users,
-          messages,
-          snapshots,
-          messageMentions,
           circleConversations,
           ...generatedwhere.watchedTables,
-          ...generatedorder.watchedTables,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return ConversationItem(
-        conversationId: row.read<String>('conversationId'),
-        groupIconUrl: row.read<String?>('groupIconUrl'),
-        category:
-            Conversations.$converter0.mapToDart(row.read<String?>('category')),
-        draft: row.read<String?>('draft'),
-        groupName: row.read<String?>('groupName'),
-        status: Conversations.$converter4.mapToDart(row.read<int>('status'))!,
-        lastReadMessageId: row.read<String?>('lastReadMessageId'),
-        unseenMessageCount: row.read<int?>('unseenMessageCount'),
-        ownerId: row.read<String?>('ownerId'),
-        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
-        muteUntil:
-            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        name: row.read<String?>('name'),
-        ownerVerified: row.read<bool?>('ownerVerified'),
-        ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        ownerMuteUntil:
-            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
-        appId: row.read<String?>('appId'),
-        content: row.read<String?>('content'),
-        contentType: row.read<String?>('contentType'),
-        createdAt:
-            Conversations.$converter1.mapToDart(row.read<int>('createdAt'))!,
-        lastMessageCreatedAt: Messages.$converter2
-            .mapToDart(row.read<int?>('lastMessageCreatedAt')),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        senderId: row.read<String?>('senderId'),
-        actionName:
-            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        messageStatus:
-            Messages.$converter1.mapToDart(row.read<String?>('messageStatus')),
-        senderFullName: row.read<String?>('senderFullName'),
-        snapshotType: row.read<String?>('SnapshotType'),
-        participantFullName: row.read<String?>('participantFullName'),
-        participantUserId: row.read<String?>('participantUserId'),
-        mentionCount: row.read<int>('mentionCount'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-      );
-    });
-  }
-
-  Selectable<int?> allUnseenMessageCount(DateTime? now) {
-    return customSelect(
-        'SELECT SUM(unseen_message_count) AS _c0 FROM conversations WHERE mute_until <= ?1',
-        variables: [
-          Variable<int?>(Conversations.$converter5.mapToSql(now))
-        ],
-        readsFrom: {
-          conversations,
         }).map((QueryRow row) => row.read<int?>('_c0'));
   }
 

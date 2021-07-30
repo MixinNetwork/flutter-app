@@ -2,8 +2,9 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class HighlightText extends StatelessWidget {
+class HighlightText extends HookWidget {
   const HighlightText(
     this.text, {
     Key? key,
@@ -20,17 +21,23 @@ class HighlightText extends StatelessWidget {
   final TextOverflow? overflow;
 
   @override
-  Widget build(BuildContext context) => Text.rich(
-        TextSpan(
-          children: _buildSpan(text, highlightTextSpans, style),
-        ),
-        maxLines: maxLines,
-        overflow: overflow,
-        textWidthBasis: TextWidthBasis.longestLine,
-      );
+  Widget build(BuildContext context) {
+    final spans = useMemoized(
+      () => buildHighlightTextSpan(text, highlightTextSpans, style),
+      [text, highlightTextSpans, style],
+    );
+    return Text.rich(
+      TextSpan(
+        children: spans,
+      ),
+      maxLines: maxLines,
+      overflow: overflow,
+      textWidthBasis: TextWidthBasis.longestLine,
+    );
+  }
 }
 
-List<InlineSpan> _buildSpan(
+List<InlineSpan> buildHighlightTextSpan(
     String text, List<HighlightTextSpan> highlightTextSpans,
     [TextStyle? style]) {
   final map = Map<String, HighlightTextSpan>.fromIterable(
@@ -69,7 +76,7 @@ List<InlineSpan> _buildSpan(
   return children;
 }
 
-class HighlightSelectableText extends StatelessWidget {
+class HighlightSelectableText extends HookWidget {
   const HighlightSelectableText(
     this.text, {
     Key? key,
@@ -84,14 +91,21 @@ class HighlightSelectableText extends StatelessWidget {
   final int? maxLines;
 
   @override
-  Widget build(BuildContext context) => SelectableText.rich(
-        TextSpan(
-          children: _buildSpan(text, highlightTextSpans, style),
-        ),
-        maxLines: maxLines,
-        textWidthBasis: TextWidthBasis.longestLine,
-        toolbarOptions: const ToolbarOptions(),
-      );
+  Widget build(BuildContext context) {
+    final spans = useMemoized(
+      () => buildHighlightTextSpan(text, highlightTextSpans, style),
+      [text, highlightTextSpans, style],
+    );
+
+    return SelectableText.rich(
+      TextSpan(
+        children: spans,
+      ),
+      maxLines: maxLines,
+      textWidthBasis: TextWidthBasis.longestLine,
+      toolbarOptions: const ToolbarOptions(),
+    );
+  }
 }
 
 class HighlightTextSpan extends Equatable {

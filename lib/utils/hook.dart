@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
@@ -16,6 +17,16 @@ T useMemoizedFuture<T>(
       ),
       initialData: initialData,
     ).data as T;
+
+AsyncSnapshot<T> useMemoizedStream<T>(
+  Stream<T> Function() valueBuilder, {
+  T? initialData,
+  List<Object?> keys = const <Object>[],
+}) =>
+    useStream<T>(
+      useMemoized<Stream<T>>(valueBuilder, keys),
+      initialData: initialData,
+    );
 
 T useBloc<T extends BlocBase>(
   T Function() valueBuilder, {
@@ -37,7 +48,7 @@ S useBlocState<B extends BlocBase<S>, S>({
       final b = bloc ?? useContext().read<B>();
       var stream = b.stream;
       if (when != null) stream = stream.where(when);
-      return Tuple2(stream, b.state);
+      return Tuple2(stream.distinct(), b.state);
     },
     [bloc ?? useContext().read<B>(), ...keys],
   );
@@ -60,7 +71,7 @@ T useBlocStateConverter<B extends BlocBase<S>, S, T>({
       final b = bloc ?? useContext().read<B>();
       var stream = b.stream.map(converter);
       if (when != null) stream = stream.where(when);
-      return Tuple2(stream, converter(b.state));
+      return Tuple2(stream.distinct(), converter(b.state));
     },
     [bloc ?? useContext().read<B>(), ...keys],
   );

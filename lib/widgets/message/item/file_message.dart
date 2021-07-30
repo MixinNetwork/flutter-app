@@ -17,6 +17,7 @@ import '../../../generated/l10n.dart';
 import '../../brightness_observer.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
@@ -60,7 +61,10 @@ class FileMessage extends StatelessWidget {
                 suggestedName: message.mediaName ?? basename(message.mediaUrl!),
               );
               if (path?.isEmpty ?? true) return;
-              await File(message.mediaUrl!).copy(path!);
+              await File(context
+                      .read<AccountServer>()
+                      .convertMessageAbsolutePath(message))
+                  .copy(path!);
             } else if (message.mediaStatus == MediaStatus.pending) {
               context
                   .read<AccountServer>()
@@ -127,14 +131,14 @@ class FileMessage extends StatelessWidget {
                   Text(
                     message.mediaName ?? '',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: MessageItemWidget.secondaryFontSize,
                       color: BrightnessData.themeOf(context).text,
                     ),
                   ),
                   Text(
                     filesize(message.mediaSize),
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: MessageItemWidget.tertiaryFontSize,
                       color: BrightnessData.themeOf(context).secondaryText,
                     ),
                   ),

@@ -189,10 +189,12 @@ class ConversationName extends StatelessWidget {
     Key? key,
     this.fontSize = 16,
     required this.conversationState,
+    this.overflow = true,
   }) : super(key: key);
 
   final double fontSize;
   final ConversationState conversationState;
+  final bool overflow;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -200,14 +202,18 @@ class ConversationName extends StatelessWidget {
         children: [
           Flexible(
             child: SelectableText(
-              conversationState.name?.overflow ?? '',
+              (overflow
+                      ? conversationState.name?.overflow
+                      : conversationState.name) ??
+                  '',
               style: TextStyle(
                 color: BrightnessData.themeOf(context).text,
                 fontSize: fontSize,
                 height: 1,
-                overflow: TextOverflow.ellipsis,
+                overflow: overflow ? TextOverflow.ellipsis : null,
               ),
-              maxLines: 1,
+              textAlign: TextAlign.center,
+              maxLines: overflow ? 1 : null,
             ),
           ),
           VerifiedOrBotWidget(

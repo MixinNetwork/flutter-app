@@ -21,12 +21,16 @@ import 'utils/logger.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  unawaited(LoadBalancer.create(64, IsolateRunner.spawn).then((value) {
-    loadBalancer = value;
-  }));
+  final result = await Future.wait<dynamic>([
+    LoadBalancer.create(Platform.numberOfProcessors, IsolateRunner.spawn),
+    initMixinDocumentsDirectory(),
+  ]);
+  loadBalancer = result[0];
+
+  await initMixinDocumentsDirectory();
 
   HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: await getMixinDocumentsDirectory(),
+    storageDirectory: mixinDocumentsDirectory,
   );
 
   debugHighlightDeprecatedWidgets = true;

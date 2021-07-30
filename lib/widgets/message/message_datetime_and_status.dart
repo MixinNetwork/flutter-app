@@ -14,6 +14,7 @@ import '../../enum/message_status.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/hook.dart';
 import '../brightness_observer.dart';
+import 'message.dart';
 
 bool _isRepresentative(
   MessageItem message,
@@ -115,7 +116,7 @@ class _MessageDatetime extends HookWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 10,
+        fontSize: MessageItemWidget.statusFontSize,
         color: color ??
             BrightnessData.dynamicColor(
               context,

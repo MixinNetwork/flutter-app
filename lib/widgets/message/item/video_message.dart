@@ -17,6 +17,7 @@ import '../../../utils/uri_utils.dart';
 import '../../image.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
@@ -59,13 +60,20 @@ class VideoMessageWidget extends StatelessWidget {
                   }
                 } else if (message.mediaStatus == MediaStatus.done &&
                     message.mediaUrl != null) {
-                  openUri(context, Uri.file(message.mediaUrl!).toString());
+                  openUri(
+                      context,
+                      Uri.file(context
+                              .read<AccountServer>()
+                              .convertMessageAbsolutePath(message))
+                          .toString());
                 } else if (message.mediaStatus == MediaStatus.pending) {
                   context
                       .read<AccountServer>()
                       .cancelProgressAttachmentJob(message.messageId);
                 } else if (message.type.isLive && message.mediaUrl != null) {
-                  launch(message.mediaUrl!);
+                  launch(context
+                      .read<AccountServer>()
+                      .convertMessageAbsolutePath(message));
                 }
               },
               child: ClipRRect(
@@ -126,7 +134,8 @@ class VideoMessageWidget extends StatelessWidget {
                                 child: Text(
                                   formatVideoDuration(duration),
                                   style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize:
+                                        MessageItemWidget.tertiaryFontSize,
                                     color: Colors.white,
                                   ),
                                 ),

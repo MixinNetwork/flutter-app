@@ -21,7 +21,7 @@ abstract class HiveKeyValue {
     if (_hasInit) {
       return;
     }
-    final dbFolder = await getMixinDocumentsDirectory();
+    final dbFolder = mixinDocumentsDirectory;
     final file = File(p.join(dbFolder.path, _boxName));
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb) {

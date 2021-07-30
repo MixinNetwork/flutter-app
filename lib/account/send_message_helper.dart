@@ -24,10 +24,11 @@ import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../utils/attachment_util.dart';
 import '../utils/datetime_format_utils.dart';
+import '../utils/file.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/reg_exp_utils.dart';
 
-const _kEnableImageBlurHashThumb = false;
+const _kEnableImageBlurHashThumb = true;
 
 class SendMessageHelper {
   SendMessageHelper(
@@ -129,7 +130,7 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
       mediaWidth: imageWidth,
@@ -173,9 +174,18 @@ class SendMessageHelper {
     await _jobDao.insertSendingJob(messageId, conversationId);
   }
 
-  Future<void> sendVideoMessage(String conversationId, String senderId,
-      XFile file, String category, String? quoteMessageId,
-      {AttachmentResult? attachmentResult}) async {
+  Future<void> sendVideoMessage(
+    String conversationId,
+    String senderId,
+    XFile file,
+    String category,
+    String? quoteMessageId, {
+    AttachmentResult? attachmentResult,
+    int? mediaWidth,
+    int? mediaHeight,
+    String? thumbImage,
+    String? mediaDuration,
+  }) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'video/mp4';
     final attachment = _attachmentUtil.getAttachmentFile(
@@ -192,13 +202,13 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
-      // mediaWidth: , // todo
-      // mediaHeight: ,// todo
-      // thumbImage: , //todo
-      // mediaDuration: , // todo
+      mediaWidth: mediaWidth,
+      mediaHeight: mediaHeight,
+      thumbImage: thumbImage,
+      mediaDuration: mediaDuration,
       name: file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.sending,
@@ -218,10 +228,10 @@ class SendMessageHelper {
       mimeType,
       attachmentSize,
       file.name,
-      null,
-      null,
-      null,
-      null,
+      mediaWidth,
+      mediaHeight,
+      thumbImage,
+      mediaDuration == null ? null : int.tryParse(mediaDuration),
       null,
       null,
       attachmentResult.createdAt,
@@ -282,7 +292,7 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
       name: name ?? file.name,
@@ -370,7 +380,7 @@ class SendMessageHelper {
       userId: senderId,
       content: '',
       category: category,
-      mediaUrl: attachment.path,
+      mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
       // mediaDuration: , // todo
@@ -552,27 +562,33 @@ class SendMessageHelper {
       await sendImageMessage(
         conversationId: conversationId,
         senderId: senderId,
-        file: XFile(message.mediaUrl!),
+        file: XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category: category,
         quoteMessageId: null,
         attachmentResult: attachmentResult,
       );
     } else if (message.category.isVideo) {
       final category =
-          isPlain ? MessageCategory.plainData : MessageCategory.signalData;
+          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
       AttachmentResult? attachmentResult;
       if (message.category == category && message.content != null) {
         attachmentResult = await _checkAttachment(message.content!);
       } else {
         attachmentResult = null;
       }
-      await sendDataMessage(
+      await sendVideoMessage(
         conversationId,
         senderId,
-        XFile(message.mediaUrl!),
+        XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category,
         null,
         attachmentResult: attachmentResult,
+        mediaDuration: message.mediaDuration,
+        mediaHeight: message.mediaHeight,
+        mediaWidth: message.mediaWidth,
+        thumbImage: message.thumbImage,
       );
     } else if (message.category.isAudio) {
       final category =
@@ -586,7 +602,8 @@ class SendMessageHelper {
       await sendAudioMessage(
         conversationId,
         senderId,
-        XFile(message.mediaUrl!),
+        XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category,
         null,
         attachmentResult: attachmentResult,
@@ -604,7 +621,8 @@ class SendMessageHelper {
       await sendDataMessage(
         conversationId,
         senderId,
-        XFile(message.mediaUrl!),
+        XFile(_attachmentUtil.convertAbsolutePath(
+            message.category, message.conversationId, message.mediaUrl)),
         category,
         null,
         attachmentResult: attachmentResult,
