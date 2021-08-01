@@ -8,7 +8,7 @@ FROM conversations conversation
 WHERE $where;
 
 baseConversationItems AS ConversationItem:
-SELECT DISTINCT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
+SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
     conversation.category AS category, conversation.draft AS draft,
     conversation.name AS groupName, conversation.status AS status,
     conversation.last_read_message_id AS lastReadMessageId,
@@ -37,6 +37,7 @@ FROM conversations conversation
          LEFT JOIN snapshots snapshot ON snapshot.snapshot_id = lastMessage.snapshot_id
          LEFT JOIN users participant ON participant.user_id = lastMessage.participant_id
 WHERE $where
+GROUP BY conversation.conversation_id
 ORDER BY $order
 LIMIT $limit;
 
