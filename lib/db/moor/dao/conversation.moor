@@ -1,14 +1,14 @@
 import '../mixin.moor';
 
 baseConversationItemCount:
-SELECT Count(1)
+SELECT COUNT(DISTINCT conversation.conversation_id)
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id
          LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
 WHERE $where;
 
 baseConversationItems AS ConversationItem:
-SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
+SELECT DISTINCT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl,
     conversation.category AS category, conversation.draft AS draft,
     conversation.name AS groupName, conversation.status AS status,
     conversation.last_read_message_id AS lastReadMessageId,
@@ -68,7 +68,7 @@ ORDER BY (c.category = 'GROUP' AND c.name = :query COLLATE NOCASE)
     m.created_at DESC;
 
 conversationParticipantsCount:
-SELECT count(1) FROM participants WHERE conversation_id = :conversationId;
+SELECT COUNT(1) FROM participants WHERE conversation_id = :conversationId;
 
 conversationStorageUsage AS ConversationStorageUsage:
 SELECT c.conversation_id, c.owner_id, c.category, c.icon_url, c.name, u.identity_number,
