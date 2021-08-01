@@ -22,9 +22,9 @@ Future<List<file_selector.XFile>> selectFiles() async {
 
 Future<int> getTotalSizeOfFile(String path) async {
   final file = File(path);
-  if (await file.exists()) return file.length();
+  if (file.existsSync()) return file.length();
   final directory = Directory(path);
-  if (await directory.exists()) {
+  if (directory.existsSync()) {
     List<FileSystemEntity> children;
     try {
       children = await directory.list().toList();
@@ -63,7 +63,7 @@ Future<File?> saveBytesToTempFile(
   try {
     final file = File(p.join(tempDir.path,
         '${prefix}_${DateTime.now().millisecondsSinceEpoch}$suffix'));
-    if (await file.exists()) {
+    if (file.existsSync()) {
       await file.delete();
     }
     await file.writeAsBytes(bytes);

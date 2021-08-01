@@ -716,7 +716,7 @@ class _ChatDropOverlay extends HookWidget {
         final files = <XFile>[];
         for (final uri in urls) {
           final file = File(uri.toFilePath(windows: Platform.isWindows));
-          if (!await file.exists()) {
+          if (!file.existsSync()) {
             continue;
           }
           files.add(file.xFile);

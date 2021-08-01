@@ -2,6 +2,7 @@ include: package:very_good_analysis/analysis_options.yaml
 
 analyzer:
   errors:
+    always_use_package_imports: ignore
     public_member_api_docs: ignore
     lines_longer_than_80_chars: ignore
     avoid_function_literals_in_foreach_calls: ignore

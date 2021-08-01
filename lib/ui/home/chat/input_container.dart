@@ -356,7 +356,7 @@ class _SendTextField extends HookWidget {
               if (uri != null) {
                 final file = File(uri.toFilePath(windows: Platform.isWindows));
 
-                if (!await file.exists()) return;
+                if (!file.existsSync()) return;
                 await showFilesPreviewDialog(context, [file.xFile]);
               } else {
                 final bytes = await Pasteboard.image;

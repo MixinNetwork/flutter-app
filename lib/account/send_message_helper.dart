@@ -507,7 +507,7 @@ class SendMessageHelper {
       final message = await _messageDao.findMessageByMessageId(messageId);
       if (message?.category.isAttachment == true) {
         final file = File(message!.mediaUrl!);
-        final exists = await file.exists();
+        final exists = file.existsSync();
         if (exists) {
           await file.delete();
         }

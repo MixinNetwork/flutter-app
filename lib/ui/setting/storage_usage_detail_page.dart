@@ -190,7 +190,7 @@ class StorageUsageDetailPage extends HookWidget {
 
   Future<void> _clear(String path) async {
     final directory = Directory(path);
-    if (!(await directory.exists())) return;
+    if (!directory.existsSync()) return;
     final list = await directory.list().toList();
     await Future.wait(list.map((e) => e.delete(recursive: true)));
   }
