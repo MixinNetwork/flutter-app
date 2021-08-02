@@ -980,10 +980,10 @@ class Localization {
     );
   }
 
-  /// `New circle`
+  /// `New Circle`
   String get createCircle {
     return Intl.message(
-      'New circle',
+      'New Circle',
       name: 'createCircle',
       desc: '',
       args: [],

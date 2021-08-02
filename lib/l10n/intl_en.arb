@@ -92,7 +92,7 @@
   "more": "more",
   "less": "less",
   "searchRelatedMessage": "{count} related messages",
-  "createCircle": "New circle",
+  "createCircle": "New Circle",
   "messages": "Messages",
   "conversationID": "ID: {id}",
   "conversationParticipantsCount": "{count} Participants",
