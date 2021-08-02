@@ -119,6 +119,7 @@ class _ParticipantList extends HookWidget {
 
     return ListView.builder(
       itemCount: filteredParticipants.length,
+      padding: const EdgeInsets.only(top: 8),
       itemBuilder: (context, index) => _ParticipantTile(
         participant: filteredParticipants[index],
         currentUser: currentUser,

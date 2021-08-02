@@ -1,9 +1,9 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
      xmlns="http://www.w3.org/2000/svg">
-  <rect x="15.4351" y="16.6777" width="2" height="6" rx="1"
-        transform="rotate(-45 15.4351 16.6777)" fill="white"/>
+  <rect x="15.435" y="16.6775" width="2" height="6" rx="1"
+        transform="rotate(-45 15.435 16.6775)" fill="#2F3032"/>
   <path fill-rule="evenodd" clip-rule="evenodd"
-        d="M16.8492 16.6779C19.9734 13.5537 19.9734 8.48834 16.8492 5.36414C13.725 2.23995 8.65971 2.23995 5.53552 5.36414C2.41132 8.48834 2.41132 13.5537 5.53552 16.6779C8.65971 19.802 13.725 19.802 16.8492 16.6779Z"
-        stroke="white" stroke-opacity="0.9" stroke-width="2"
-        stroke-linecap="round" stroke-linejoin="round"/>
+        d="M16.8492 16.6776C19.9734 13.5534 19.9734 8.48809 16.8492 5.3639C13.725 2.2397 8.65971 2.2397 5.53552 5.3639C2.41132 8.48809 2.41132 13.5534 5.53552 16.6776C8.65971 19.8018 13.725 19.8018 16.8492 16.6776Z"
+        stroke="#2F3032" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round"/>
 </svg>
