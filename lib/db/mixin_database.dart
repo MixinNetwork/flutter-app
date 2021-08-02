@@ -91,7 +91,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   final eventBus = DataBaseEventBus();
 
@@ -137,6 +137,12 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createIndex(indexMessagesConversationIdCreatedAt);
             await m.createIndex(indexParticipantsConversationIdCreatedAt);
             await m.createIndex(indexStickerAlbumsCategoryCreatedAt);
+          }
+          if (from <= 3) {
+            await m.drop(addresses);
+            await m.createTable(addresses);
+            await m.addColumn(assets, assets.reserve);
+            await m.addColumn(messages, messages.caption);
           }
         },
       );
