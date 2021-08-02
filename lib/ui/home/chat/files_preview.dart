@@ -689,7 +689,7 @@ class _FileInputOverlay extends HookWidget {
           final uri = await Pasteboard.uri;
           if (uri != null) {
             final file = File(uri.toFilePath(windows: Platform.isWindows));
-            if (!await file.exists()) return;
+            if (!file.existsSync()) return;
             onFileAdded([await _File.createFromFile(file)]);
           } else {
             final bytes = await Pasteboard.image;
@@ -708,7 +708,7 @@ class _FileInputOverlay extends HookWidget {
           final files = <_File>[];
           for (final uri in urls) {
             final file = File(uri.toFilePath(windows: Platform.isWindows));
-            if (!await file.exists()) {
+            if (!file.existsSync()) {
               continue;
             }
             files.add(await _File.createFromFile(file));
