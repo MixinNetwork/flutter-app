@@ -30,12 +30,17 @@ class MixinBackButton extends StatelessWidget {
 }
 
 class MixinCloseButton extends StatelessWidget {
-  const MixinCloseButton({Key? key}) : super(key: key);
+  const MixinCloseButton({
+    Key? key,
+    this.onTap,
+  }) : super(key: key);
+
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) => ActionButton(
         name: Resources.assetsImagesIcCloseSvg,
         color: context.theme.icon,
-        onTap: () => Navigator.pop(context),
+        onTap: onTap ?? () => Navigator.pop(context),
       );
 }
