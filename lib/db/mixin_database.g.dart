@@ -1819,6 +1819,7 @@ class Message extends DataClass implements Insertable<Message> {
   final String? quoteMessageId;
   final String? quoteContent;
   final String? thumbUrl;
+  final String? caption;
   Message(
       {required this.messageId,
       required this.conversationId,
@@ -1849,7 +1850,8 @@ class Message extends DataClass implements Insertable<Message> {
       this.mediaWaveform,
       this.quoteMessageId,
       this.quoteContent,
-      this.thumbUrl});
+      this.thumbUrl,
+      this.caption});
   factory Message.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -1914,6 +1916,8 @@ class Message extends DataClass implements Insertable<Message> {
           .mapFromDatabaseResponse(data['${effectivePrefix}quote_content']),
       thumbUrl: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}thumb_url']),
+      caption: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}caption']),
     );
   }
   @override
@@ -2005,6 +2009,9 @@ class Message extends DataClass implements Insertable<Message> {
     if (!nullToAbsent || thumbUrl != null) {
       map['thumb_url'] = Variable<String?>(thumbUrl);
     }
+    if (!nullToAbsent || caption != null) {
+      map['caption'] = Variable<String?>(caption);
+    }
     return map;
   }
 
@@ -2085,6 +2092,9 @@ class Message extends DataClass implements Insertable<Message> {
       thumbUrl: thumbUrl == null && nullToAbsent
           ? const Value.absent()
           : Value(thumbUrl),
+      caption: caption == null && nullToAbsent
+          ? const Value.absent()
+          : Value(caption),
     );
   }
 
@@ -2122,6 +2132,7 @@ class Message extends DataClass implements Insertable<Message> {
       quoteMessageId: serializer.fromJson<String?>(json['quote_message_id']),
       quoteContent: serializer.fromJson<String?>(json['quote_content']),
       thumbUrl: serializer.fromJson<String?>(json['thumb_url']),
+      caption: serializer.fromJson<String?>(json['caption']),
     );
   }
   @override
@@ -2158,6 +2169,7 @@ class Message extends DataClass implements Insertable<Message> {
       'quote_message_id': serializer.toJson<String?>(quoteMessageId),
       'quote_content': serializer.toJson<String?>(quoteContent),
       'thumb_url': serializer.toJson<String?>(thumbUrl),
+      'caption': serializer.toJson<String?>(caption),
     };
   }
 
@@ -2191,7 +2203,8 @@ class Message extends DataClass implements Insertable<Message> {
           Value<String?> mediaWaveform = const Value.absent(),
           Value<String?> quoteMessageId = const Value.absent(),
           Value<String?> quoteContent = const Value.absent(),
-          Value<String?> thumbUrl = const Value.absent()}) =>
+          Value<String?> thumbUrl = const Value.absent(),
+          Value<String?> caption = const Value.absent()}) =>
       Message(
         messageId: messageId ?? this.messageId,
         conversationId: conversationId ?? this.conversationId,
@@ -2230,6 +2243,7 @@ class Message extends DataClass implements Insertable<Message> {
         quoteContent:
             quoteContent.present ? quoteContent.value : this.quoteContent,
         thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
+        caption: caption.present ? caption.value : this.caption,
       );
   @override
   String toString() {
@@ -2263,7 +2277,8 @@ class Message extends DataClass implements Insertable<Message> {
           ..write('mediaWaveform: $mediaWaveform, ')
           ..write('quoteMessageId: $quoteMessageId, ')
           ..write('quoteContent: $quoteContent, ')
-          ..write('thumbUrl: $thumbUrl')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('caption: $caption')
           ..write(')'))
         .toString();
   }
@@ -2311,7 +2326,7 @@ class Message extends DataClass implements Insertable<Message> {
                                                                               .hashCode,
                                                                           $mrjc(
                                                                               action.hashCode,
-                                                                              $mrjc(participantId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(hyperlink.hashCode, $mrjc(name.hashCode, $mrjc(albumId.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mediaWaveform.hashCode, $mrjc(quoteMessageId.hashCode, $mrjc(quoteContent.hashCode, thumbUrl.hashCode))))))))))))))))))))))))))))));
+                                                                              $mrjc(participantId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(hyperlink.hashCode, $mrjc(name.hashCode, $mrjc(albumId.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mediaWaveform.hashCode, $mrjc(quoteMessageId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(thumbUrl.hashCode, caption.hashCode)))))))))))))))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2345,7 +2360,8 @@ class Message extends DataClass implements Insertable<Message> {
           other.mediaWaveform == this.mediaWaveform &&
           other.quoteMessageId == this.quoteMessageId &&
           other.quoteContent == this.quoteContent &&
-          other.thumbUrl == this.thumbUrl);
+          other.thumbUrl == this.thumbUrl &&
+          other.caption == this.caption);
 }
 
 class MessagesCompanion extends UpdateCompanion<Message> {
@@ -2379,6 +2395,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
   final Value<String?> quoteMessageId;
   final Value<String?> quoteContent;
   final Value<String?> thumbUrl;
+  final Value<String?> caption;
   const MessagesCompanion({
     this.messageId = const Value.absent(),
     this.conversationId = const Value.absent(),
@@ -2410,6 +2427,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     this.quoteMessageId = const Value.absent(),
     this.quoteContent = const Value.absent(),
     this.thumbUrl = const Value.absent(),
+    this.caption = const Value.absent(),
   });
   MessagesCompanion.insert({
     required String messageId,
@@ -2442,6 +2460,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     this.quoteMessageId = const Value.absent(),
     this.quoteContent = const Value.absent(),
     this.thumbUrl = const Value.absent(),
+    this.caption = const Value.absent(),
   })  : messageId = Value(messageId),
         conversationId = Value(conversationId),
         userId = Value(userId),
@@ -2479,6 +2498,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     Expression<String?>? quoteMessageId,
     Expression<String?>? quoteContent,
     Expression<String?>? thumbUrl,
+    Expression<String?>? caption,
   }) {
     return RawValuesInsertable({
       if (messageId != null) 'message_id': messageId,
@@ -2511,6 +2531,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       if (quoteMessageId != null) 'quote_message_id': quoteMessageId,
       if (quoteContent != null) 'quote_content': quoteContent,
       if (thumbUrl != null) 'thumb_url': thumbUrl,
+      if (caption != null) 'caption': caption,
     });
   }
 
@@ -2544,7 +2565,8 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       Value<String?>? mediaWaveform,
       Value<String?>? quoteMessageId,
       Value<String?>? quoteContent,
-      Value<String?>? thumbUrl}) {
+      Value<String?>? thumbUrl,
+      Value<String?>? caption}) {
     return MessagesCompanion(
       messageId: messageId ?? this.messageId,
       conversationId: conversationId ?? this.conversationId,
@@ -2576,6 +2598,7 @@ class MessagesCompanion extends UpdateCompanion<Message> {
       quoteMessageId: quoteMessageId ?? this.quoteMessageId,
       quoteContent: quoteContent ?? this.quoteContent,
       thumbUrl: thumbUrl ?? this.thumbUrl,
+      caption: caption ?? this.caption,
     );
   }
 
@@ -2677,6 +2700,9 @@ class MessagesCompanion extends UpdateCompanion<Message> {
     if (thumbUrl.present) {
       map['thumb_url'] = Variable<String?>(thumbUrl.value);
     }
+    if (caption.present) {
+      map['caption'] = Variable<String?>(caption.value);
+    }
     return map;
   }
 
@@ -2712,7 +2738,8 @@ class MessagesCompanion extends UpdateCompanion<Message> {
           ..write('mediaWaveform: $mediaWaveform, ')
           ..write('quoteMessageId: $quoteMessageId, ')
           ..write('quoteContent: $quoteContent, ')
-          ..write('thumbUrl: $thumbUrl')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('caption: $caption')
           ..write(')'))
         .toString();
   }
@@ -2873,6 +2900,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
   late final GeneratedColumn<String?> thumbUrl = GeneratedColumn<String?>(
       'thumb_url', aliasedName, true,
       typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _captionMeta = const VerificationMeta('caption');
+  late final GeneratedColumn<String?> caption = GeneratedColumn<String?>(
+      'caption', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         messageId,
@@ -2904,7 +2935,8 @@ class Messages extends Table with TableInfo<Messages, Message> {
         mediaWaveform,
         quoteMessageId,
         quoteContent,
-        thumbUrl
+        thumbUrl,
+        caption
       ];
   @override
   String get aliasedName => _alias ?? 'messages';
@@ -3056,6 +3088,10 @@ class Messages extends Table with TableInfo<Messages, Message> {
     if (data.containsKey('thumb_url')) {
       context.handle(_thumbUrlMeta,
           thumbUrl.isAcceptableOrUnknown(data['thumb_url']!, _thumbUrlMeta));
+    }
+    if (data.containsKey('caption')) {
+      context.handle(_captionMeta,
+          caption.isAcceptableOrUnknown(data['caption']!, _captionMeta));
     }
     return context;
   }
@@ -3792,25 +3828,23 @@ class Addresse extends DataClass implements Insertable<Addresse> {
   final String addressId;
   final String type;
   final String assetId;
-  final String? publicKey;
-  final String? label;
+  final String destination;
+  final String label;
   final DateTime updatedAt;
   final String reserve;
   final String fee;
-  final String? accountName;
-  final String? accountTag;
+  final String? tag;
   final String? dust;
   Addresse(
       {required this.addressId,
       required this.type,
       required this.assetId,
-      this.publicKey,
-      this.label,
+      required this.destination,
+      required this.label,
       required this.updatedAt,
       required this.reserve,
       required this.fee,
-      this.accountName,
-      this.accountTag,
+      this.tag,
       this.dust});
   factory Addresse.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
@@ -3822,20 +3856,18 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           .mapFromDatabaseResponse(data['${effectivePrefix}type'])!,
       assetId: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_id'])!,
-      publicKey: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}public_key']),
+      destination: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}destination'])!,
       label: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}label']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}label'])!,
       updatedAt: Addresses.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}updated_at']))!,
       reserve: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}reserve'])!,
       fee: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}fee'])!,
-      accountName: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}account_name']),
-      accountTag: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}account_tag']),
+      tag: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}tag']),
       dust: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}dust']),
     );
@@ -3846,23 +3878,16 @@ class Addresse extends DataClass implements Insertable<Addresse> {
     map['address_id'] = Variable<String>(addressId);
     map['type'] = Variable<String>(type);
     map['asset_id'] = Variable<String>(assetId);
-    if (!nullToAbsent || publicKey != null) {
-      map['public_key'] = Variable<String?>(publicKey);
-    }
-    if (!nullToAbsent || label != null) {
-      map['label'] = Variable<String?>(label);
-    }
+    map['destination'] = Variable<String>(destination);
+    map['label'] = Variable<String>(label);
     {
       final converter = Addresses.$converter0;
       map['updated_at'] = Variable<int>(converter.mapToSql(updatedAt)!);
     }
     map['reserve'] = Variable<String>(reserve);
     map['fee'] = Variable<String>(fee);
-    if (!nullToAbsent || accountName != null) {
-      map['account_name'] = Variable<String?>(accountName);
-    }
-    if (!nullToAbsent || accountTag != null) {
-      map['account_tag'] = Variable<String?>(accountTag);
+    if (!nullToAbsent || tag != null) {
+      map['tag'] = Variable<String?>(tag);
     }
     if (!nullToAbsent || dust != null) {
       map['dust'] = Variable<String?>(dust);
@@ -3875,20 +3900,12 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       addressId: Value(addressId),
       type: Value(type),
       assetId: Value(assetId),
-      publicKey: publicKey == null && nullToAbsent
-          ? const Value.absent()
-          : Value(publicKey),
-      label:
-          label == null && nullToAbsent ? const Value.absent() : Value(label),
+      destination: Value(destination),
+      label: Value(label),
       updatedAt: Value(updatedAt),
       reserve: Value(reserve),
       fee: Value(fee),
-      accountName: accountName == null && nullToAbsent
-          ? const Value.absent()
-          : Value(accountName),
-      accountTag: accountTag == null && nullToAbsent
-          ? const Value.absent()
-          : Value(accountTag),
+      tag: tag == null && nullToAbsent ? const Value.absent() : Value(tag),
       dust: dust == null && nullToAbsent ? const Value.absent() : Value(dust),
     );
   }
@@ -3900,13 +3917,12 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       addressId: serializer.fromJson<String>(json['address_id']),
       type: serializer.fromJson<String>(json['type']),
       assetId: serializer.fromJson<String>(json['asset_id']),
-      publicKey: serializer.fromJson<String?>(json['public_key']),
-      label: serializer.fromJson<String?>(json['label']),
+      destination: serializer.fromJson<String>(json['destination']),
+      label: serializer.fromJson<String>(json['label']),
       updatedAt: serializer.fromJson<DateTime>(json['updated_at']),
       reserve: serializer.fromJson<String>(json['reserve']),
       fee: serializer.fromJson<String>(json['fee']),
-      accountName: serializer.fromJson<String?>(json['account_name']),
-      accountTag: serializer.fromJson<String?>(json['account_tag']),
+      tag: serializer.fromJson<String?>(json['tag']),
       dust: serializer.fromJson<String?>(json['dust']),
     );
   }
@@ -3917,13 +3933,12 @@ class Addresse extends DataClass implements Insertable<Addresse> {
       'address_id': serializer.toJson<String>(addressId),
       'type': serializer.toJson<String>(type),
       'asset_id': serializer.toJson<String>(assetId),
-      'public_key': serializer.toJson<String?>(publicKey),
-      'label': serializer.toJson<String?>(label),
+      'destination': serializer.toJson<String>(destination),
+      'label': serializer.toJson<String>(label),
       'updated_at': serializer.toJson<DateTime>(updatedAt),
       'reserve': serializer.toJson<String>(reserve),
       'fee': serializer.toJson<String>(fee),
-      'account_name': serializer.toJson<String?>(accountName),
-      'account_tag': serializer.toJson<String?>(accountTag),
+      'tag': serializer.toJson<String?>(tag),
       'dust': serializer.toJson<String?>(dust),
     };
   }
@@ -3932,25 +3947,23 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           {String? addressId,
           String? type,
           String? assetId,
-          Value<String?> publicKey = const Value.absent(),
-          Value<String?> label = const Value.absent(),
+          String? destination,
+          String? label,
           DateTime? updatedAt,
           String? reserve,
           String? fee,
-          Value<String?> accountName = const Value.absent(),
-          Value<String?> accountTag = const Value.absent(),
+          Value<String?> tag = const Value.absent(),
           Value<String?> dust = const Value.absent()}) =>
       Addresse(
         addressId: addressId ?? this.addressId,
         type: type ?? this.type,
         assetId: assetId ?? this.assetId,
-        publicKey: publicKey.present ? publicKey.value : this.publicKey,
-        label: label.present ? label.value : this.label,
+        destination: destination ?? this.destination,
+        label: label ?? this.label,
         updatedAt: updatedAt ?? this.updatedAt,
         reserve: reserve ?? this.reserve,
         fee: fee ?? this.fee,
-        accountName: accountName.present ? accountName.value : this.accountName,
-        accountTag: accountTag.present ? accountTag.value : this.accountTag,
+        tag: tag.present ? tag.value : this.tag,
         dust: dust.present ? dust.value : this.dust,
       );
   @override
@@ -3959,13 +3972,12 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           ..write('addressId: $addressId, ')
           ..write('type: $type, ')
           ..write('assetId: $assetId, ')
-          ..write('publicKey: $publicKey, ')
+          ..write('destination: $destination, ')
           ..write('label: $label, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('reserve: $reserve, ')
           ..write('fee: $fee, ')
-          ..write('accountName: $accountName, ')
-          ..write('accountTag: $accountTag, ')
+          ..write('tag: $tag, ')
           ..write('dust: $dust')
           ..write(')'))
         .toString();
@@ -3979,19 +3991,15 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           $mrjc(
               assetId.hashCode,
               $mrjc(
-                  publicKey.hashCode,
+                  destination.hashCode,
                   $mrjc(
                       label.hashCode,
                       $mrjc(
                           updatedAt.hashCode,
                           $mrjc(
                               reserve.hashCode,
-                              $mrjc(
-                                  fee.hashCode,
-                                  $mrjc(
-                                      accountName.hashCode,
-                                      $mrjc(accountTag.hashCode,
-                                          dust.hashCode)))))))))));
+                              $mrjc(fee.hashCode,
+                                  $mrjc(tag.hashCode, dust.hashCode))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3999,13 +4007,12 @@ class Addresse extends DataClass implements Insertable<Addresse> {
           other.addressId == this.addressId &&
           other.type == this.type &&
           other.assetId == this.assetId &&
-          other.publicKey == this.publicKey &&
+          other.destination == this.destination &&
           other.label == this.label &&
           other.updatedAt == this.updatedAt &&
           other.reserve == this.reserve &&
           other.fee == this.fee &&
-          other.accountName == this.accountName &&
-          other.accountTag == this.accountTag &&
+          other.tag == this.tag &&
           other.dust == this.dust);
 }
 
@@ -4013,42 +4020,41 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
   final Value<String> addressId;
   final Value<String> type;
   final Value<String> assetId;
-  final Value<String?> publicKey;
-  final Value<String?> label;
+  final Value<String> destination;
+  final Value<String> label;
   final Value<DateTime> updatedAt;
   final Value<String> reserve;
   final Value<String> fee;
-  final Value<String?> accountName;
-  final Value<String?> accountTag;
+  final Value<String?> tag;
   final Value<String?> dust;
   const AddressesCompanion({
     this.addressId = const Value.absent(),
     this.type = const Value.absent(),
     this.assetId = const Value.absent(),
-    this.publicKey = const Value.absent(),
+    this.destination = const Value.absent(),
     this.label = const Value.absent(),
     this.updatedAt = const Value.absent(),
     this.reserve = const Value.absent(),
     this.fee = const Value.absent(),
-    this.accountName = const Value.absent(),
-    this.accountTag = const Value.absent(),
+    this.tag = const Value.absent(),
     this.dust = const Value.absent(),
   });
   AddressesCompanion.insert({
     required String addressId,
     required String type,
     required String assetId,
-    this.publicKey = const Value.absent(),
-    this.label = const Value.absent(),
+    required String destination,
+    required String label,
     required DateTime updatedAt,
     required String reserve,
     required String fee,
-    this.accountName = const Value.absent(),
-    this.accountTag = const Value.absent(),
+    this.tag = const Value.absent(),
     this.dust = const Value.absent(),
   })  : addressId = Value(addressId),
         type = Value(type),
         assetId = Value(assetId),
+        destination = Value(destination),
+        label = Value(label),
         updatedAt = Value(updatedAt),
         reserve = Value(reserve),
         fee = Value(fee);
@@ -4056,26 +4062,24 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
     Expression<String>? addressId,
     Expression<String>? type,
     Expression<String>? assetId,
-    Expression<String?>? publicKey,
-    Expression<String?>? label,
+    Expression<String>? destination,
+    Expression<String>? label,
     Expression<DateTime>? updatedAt,
     Expression<String>? reserve,
     Expression<String>? fee,
-    Expression<String?>? accountName,
-    Expression<String?>? accountTag,
+    Expression<String?>? tag,
     Expression<String?>? dust,
   }) {
     return RawValuesInsertable({
       if (addressId != null) 'address_id': addressId,
       if (type != null) 'type': type,
       if (assetId != null) 'asset_id': assetId,
-      if (publicKey != null) 'public_key': publicKey,
+      if (destination != null) 'destination': destination,
       if (label != null) 'label': label,
       if (updatedAt != null) 'updated_at': updatedAt,
       if (reserve != null) 'reserve': reserve,
       if (fee != null) 'fee': fee,
-      if (accountName != null) 'account_name': accountName,
-      if (accountTag != null) 'account_tag': accountTag,
+      if (tag != null) 'tag': tag,
       if (dust != null) 'dust': dust,
     });
   }
@@ -4084,25 +4088,23 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
       {Value<String>? addressId,
       Value<String>? type,
       Value<String>? assetId,
-      Value<String?>? publicKey,
-      Value<String?>? label,
+      Value<String>? destination,
+      Value<String>? label,
       Value<DateTime>? updatedAt,
       Value<String>? reserve,
       Value<String>? fee,
-      Value<String?>? accountName,
-      Value<String?>? accountTag,
+      Value<String?>? tag,
       Value<String?>? dust}) {
     return AddressesCompanion(
       addressId: addressId ?? this.addressId,
       type: type ?? this.type,
       assetId: assetId ?? this.assetId,
-      publicKey: publicKey ?? this.publicKey,
+      destination: destination ?? this.destination,
       label: label ?? this.label,
       updatedAt: updatedAt ?? this.updatedAt,
       reserve: reserve ?? this.reserve,
       fee: fee ?? this.fee,
-      accountName: accountName ?? this.accountName,
-      accountTag: accountTag ?? this.accountTag,
+      tag: tag ?? this.tag,
       dust: dust ?? this.dust,
     );
   }
@@ -4119,11 +4121,11 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
     if (assetId.present) {
       map['asset_id'] = Variable<String>(assetId.value);
     }
-    if (publicKey.present) {
-      map['public_key'] = Variable<String?>(publicKey.value);
+    if (destination.present) {
+      map['destination'] = Variable<String>(destination.value);
     }
     if (label.present) {
-      map['label'] = Variable<String?>(label.value);
+      map['label'] = Variable<String>(label.value);
     }
     if (updatedAt.present) {
       final converter = Addresses.$converter0;
@@ -4135,11 +4137,8 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
     if (fee.present) {
       map['fee'] = Variable<String>(fee.value);
     }
-    if (accountName.present) {
-      map['account_name'] = Variable<String?>(accountName.value);
-    }
-    if (accountTag.present) {
-      map['account_tag'] = Variable<String?>(accountTag.value);
+    if (tag.present) {
+      map['tag'] = Variable<String?>(tag.value);
     }
     if (dust.present) {
       map['dust'] = Variable<String?>(dust.value);
@@ -4153,13 +4152,12 @@ class AddressesCompanion extends UpdateCompanion<Addresse> {
           ..write('addressId: $addressId, ')
           ..write('type: $type, ')
           ..write('assetId: $assetId, ')
-          ..write('publicKey: $publicKey, ')
+          ..write('destination: $destination, ')
           ..write('label: $label, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('reserve: $reserve, ')
           ..write('fee: $fee, ')
-          ..write('accountName: $accountName, ')
-          ..write('accountTag: $accountTag, ')
+          ..write('tag: $tag, ')
           ..write('dust: $dust')
           ..write(')'))
         .toString();
@@ -4188,14 +4186,19 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
       typeName: 'TEXT',
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
-  late final GeneratedColumn<String?> publicKey = GeneratedColumn<String?>(
-      'public_key', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _destinationMeta =
+      const VerificationMeta('destination');
+  late final GeneratedColumn<String?> destination = GeneratedColumn<String?>(
+      'destination', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _labelMeta = const VerificationMeta('label');
   late final GeneratedColumn<String?> label = GeneratedColumn<String?>(
-      'label', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      'label', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
   final VerificationMeta _updatedAtMeta = const VerificationMeta('updatedAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> updatedAt =
       GeneratedColumn<int?>('updated_at', aliasedName, false,
@@ -4215,14 +4218,9 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
       typeName: 'TEXT',
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
-  final VerificationMeta _accountNameMeta =
-      const VerificationMeta('accountName');
-  late final GeneratedColumn<String?> accountName = GeneratedColumn<String?>(
-      'account_name', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
-  final VerificationMeta _accountTagMeta = const VerificationMeta('accountTag');
-  late final GeneratedColumn<String?> accountTag = GeneratedColumn<String?>(
-      'account_tag', aliasedName, true,
+  final VerificationMeta _tagMeta = const VerificationMeta('tag');
+  late final GeneratedColumn<String?> tag = GeneratedColumn<String?>(
+      'tag', aliasedName, true,
       typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _dustMeta = const VerificationMeta('dust');
   late final GeneratedColumn<String?> dust = GeneratedColumn<String?>(
@@ -4233,13 +4231,12 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
         addressId,
         type,
         assetId,
-        publicKey,
+        destination,
         label,
         updatedAt,
         reserve,
         fee,
-        accountName,
-        accountTag,
+        tag,
         dust
       ];
   @override
@@ -4269,13 +4266,19 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
     } else if (isInserting) {
       context.missing(_assetIdMeta);
     }
-    if (data.containsKey('public_key')) {
-      context.handle(_publicKeyMeta,
-          publicKey.isAcceptableOrUnknown(data['public_key']!, _publicKeyMeta));
+    if (data.containsKey('destination')) {
+      context.handle(
+          _destinationMeta,
+          destination.isAcceptableOrUnknown(
+              data['destination']!, _destinationMeta));
+    } else if (isInserting) {
+      context.missing(_destinationMeta);
     }
     if (data.containsKey('label')) {
       context.handle(
           _labelMeta, label.isAcceptableOrUnknown(data['label']!, _labelMeta));
+    } else if (isInserting) {
+      context.missing(_labelMeta);
     }
     context.handle(_updatedAtMeta, const VerificationResult.success());
     if (data.containsKey('reserve')) {
@@ -4290,17 +4293,9 @@ class Addresses extends Table with TableInfo<Addresses, Addresse> {
     } else if (isInserting) {
       context.missing(_feeMeta);
     }
-    if (data.containsKey('account_name')) {
+    if (data.containsKey('tag')) {
       context.handle(
-          _accountNameMeta,
-          accountName.isAcceptableOrUnknown(
-              data['account_name']!, _accountNameMeta));
-    }
-    if (data.containsKey('account_tag')) {
-      context.handle(
-          _accountTagMeta,
-          accountTag.isAcceptableOrUnknown(
-              data['account_tag']!, _accountTagMeta));
+          _tagMeta, tag.isAcceptableOrUnknown(data['tag']!, _tagMeta));
     }
     if (data.containsKey('dust')) {
       context.handle(
@@ -4983,6 +4978,7 @@ class Asset extends DataClass implements Insertable<Asset> {
   final String changeBtc;
   final int confirmations;
   final String? assetKey;
+  final String? reserve;
   Asset(
       {required this.assetId,
       required this.symbol,
@@ -4997,7 +4993,8 @@ class Asset extends DataClass implements Insertable<Asset> {
       required this.changeUsd,
       required this.changeBtc,
       required this.confirmations,
-      this.assetKey});
+      this.assetKey,
+      this.reserve});
   factory Asset.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
@@ -5030,6 +5027,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           .mapFromDatabaseResponse(data['${effectivePrefix}confirmations'])!,
       assetKey: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}asset_key']),
+      reserve: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}reserve']),
     );
   }
   @override
@@ -5053,6 +5052,9 @@ class Asset extends DataClass implements Insertable<Asset> {
     if (!nullToAbsent || assetKey != null) {
       map['asset_key'] = Variable<String?>(assetKey);
     }
+    if (!nullToAbsent || reserve != null) {
+      map['reserve'] = Variable<String?>(reserve);
+    }
     return map;
   }
 
@@ -5074,6 +5076,9 @@ class Asset extends DataClass implements Insertable<Asset> {
       assetKey: assetKey == null && nullToAbsent
           ? const Value.absent()
           : Value(assetKey),
+      reserve: reserve == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reserve),
     );
   }
 
@@ -5095,6 +5100,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       changeBtc: serializer.fromJson<String>(json['change_btc']),
       confirmations: serializer.fromJson<int>(json['confirmations']),
       assetKey: serializer.fromJson<String?>(json['asset_key']),
+      reserve: serializer.fromJson<String?>(json['reserve']),
     );
   }
   @override
@@ -5115,6 +5121,7 @@ class Asset extends DataClass implements Insertable<Asset> {
       'change_btc': serializer.toJson<String>(changeBtc),
       'confirmations': serializer.toJson<int>(confirmations),
       'asset_key': serializer.toJson<String?>(assetKey),
+      'reserve': serializer.toJson<String?>(reserve),
     };
   }
 
@@ -5132,7 +5139,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           String? changeUsd,
           String? changeBtc,
           int? confirmations,
-          Value<String?> assetKey = const Value.absent()}) =>
+          Value<String?> assetKey = const Value.absent(),
+          Value<String?> reserve = const Value.absent()}) =>
       Asset(
         assetId: assetId ?? this.assetId,
         symbol: symbol ?? this.symbol,
@@ -5148,6 +5156,7 @@ class Asset extends DataClass implements Insertable<Asset> {
         changeBtc: changeBtc ?? this.changeBtc,
         confirmations: confirmations ?? this.confirmations,
         assetKey: assetKey.present ? assetKey.value : this.assetKey,
+        reserve: reserve.present ? reserve.value : this.reserve,
       );
   @override
   String toString() {
@@ -5165,7 +5174,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           ..write('changeUsd: $changeUsd, ')
           ..write('changeBtc: $changeBtc, ')
           ..write('confirmations: $confirmations, ')
-          ..write('assetKey: $assetKey')
+          ..write('assetKey: $assetKey, ')
+          ..write('reserve: $reserve')
           ..write(')'))
         .toString();
   }
@@ -5197,8 +5207,10 @@ class Asset extends DataClass implements Insertable<Asset> {
                                                   changeBtc.hashCode,
                                                   $mrjc(
                                                       confirmations.hashCode,
-                                                      assetKey
-                                                          .hashCode))))))))))))));
+                                                      $mrjc(
+                                                          assetKey.hashCode,
+                                                          reserve
+                                                              .hashCode)))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5216,7 +5228,8 @@ class Asset extends DataClass implements Insertable<Asset> {
           other.changeUsd == this.changeUsd &&
           other.changeBtc == this.changeBtc &&
           other.confirmations == this.confirmations &&
-          other.assetKey == this.assetKey);
+          other.assetKey == this.assetKey &&
+          other.reserve == this.reserve);
 }
 
 class AssetsCompanion extends UpdateCompanion<Asset> {
@@ -5234,6 +5247,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
   final Value<String> changeBtc;
   final Value<int> confirmations;
   final Value<String?> assetKey;
+  final Value<String?> reserve;
   const AssetsCompanion({
     this.assetId = const Value.absent(),
     this.symbol = const Value.absent(),
@@ -5249,6 +5263,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     this.changeBtc = const Value.absent(),
     this.confirmations = const Value.absent(),
     this.assetKey = const Value.absent(),
+    this.reserve = const Value.absent(),
   });
   AssetsCompanion.insert({
     required String assetId,
@@ -5265,6 +5280,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     required String changeBtc,
     required int confirmations,
     this.assetKey = const Value.absent(),
+    this.reserve = const Value.absent(),
   })  : assetId = Value(assetId),
         symbol = Value(symbol),
         name = Value(name),
@@ -5292,6 +5308,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     Expression<String>? changeBtc,
     Expression<int>? confirmations,
     Expression<String?>? assetKey,
+    Expression<String?>? reserve,
   }) {
     return RawValuesInsertable({
       if (assetId != null) 'asset_id': assetId,
@@ -5308,6 +5325,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       if (changeBtc != null) 'change_btc': changeBtc,
       if (confirmations != null) 'confirmations': confirmations,
       if (assetKey != null) 'asset_key': assetKey,
+      if (reserve != null) 'reserve': reserve,
     });
   }
 
@@ -5325,7 +5343,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       Value<String>? changeUsd,
       Value<String>? changeBtc,
       Value<int>? confirmations,
-      Value<String?>? assetKey}) {
+      Value<String?>? assetKey,
+      Value<String?>? reserve}) {
     return AssetsCompanion(
       assetId: assetId ?? this.assetId,
       symbol: symbol ?? this.symbol,
@@ -5341,6 +5360,7 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
       changeBtc: changeBtc ?? this.changeBtc,
       confirmations: confirmations ?? this.confirmations,
       assetKey: assetKey ?? this.assetKey,
+      reserve: reserve ?? this.reserve,
     );
   }
 
@@ -5389,6 +5409,9 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
     if (assetKey.present) {
       map['asset_key'] = Variable<String?>(assetKey.value);
     }
+    if (reserve.present) {
+      map['reserve'] = Variable<String?>(reserve.value);
+    }
     return map;
   }
 
@@ -5408,7 +5431,8 @@ class AssetsCompanion extends UpdateCompanion<Asset> {
           ..write('changeUsd: $changeUsd, ')
           ..write('changeBtc: $changeBtc, ')
           ..write('confirmations: $confirmations, ')
-          ..write('assetKey: $assetKey')
+          ..write('assetKey: $assetKey, ')
+          ..write('reserve: $reserve')
           ..write(')'))
         .toString();
   }
@@ -5500,6 +5524,10 @@ class Assets extends Table with TableInfo<Assets, Asset> {
   late final GeneratedColumn<String?> assetKey = GeneratedColumn<String?>(
       'asset_key', aliasedName, true,
       typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _reserveMeta = const VerificationMeta('reserve');
+  late final GeneratedColumn<String?> reserve = GeneratedColumn<String?>(
+      'reserve', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   @override
   List<GeneratedColumn> get $columns => [
         assetId,
@@ -5515,7 +5543,8 @@ class Assets extends Table with TableInfo<Assets, Asset> {
         changeUsd,
         changeBtc,
         confirmations,
-        assetKey
+        assetKey,
+        reserve
       ];
   @override
   String get aliasedName => _alias ?? 'assets';
@@ -5609,6 +5638,10 @@ class Assets extends Table with TableInfo<Assets, Asset> {
     if (data.containsKey('asset_key')) {
       context.handle(_assetKeyMeta,
           assetKey.isAcceptableOrUnknown(data['asset_key']!, _assetKeyMeta));
+    }
+    if (data.containsKey('reserve')) {
+      context.handle(_reserveMeta,
+          reserve.isAcceptableOrUnknown(data['reserve']!, _reserveMeta));
     }
     return context;
   }
