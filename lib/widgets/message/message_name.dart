@@ -12,28 +12,28 @@ class MessageName extends StatelessWidget {
     required this.userId,
   }) : super(key: key);
 
-  final String userName;
-  final String userId;
+  final String? userName;
+  final String? userId;
 
   @override
-  Widget build(BuildContext context) => Align(
-        alignment: Alignment.centerLeft,
-        child: InteractableDecoratedBox(
-          onTap: () => showUserDialog(context, userId),
-          cursor: SystemMouseCursors.click,
-          child: Padding(
-            padding: const EdgeInsets.only(
-              left: 10,
-              bottom: 2,
-            ),
-            child: Text(
-              userName,
-              style: TextStyle(
-                fontSize: MessageItemWidget.secondaryFontSize,
-                color: getNameColorById(userId),
-              ),
-            ),
+  Widget build(BuildContext context) {
+    if (userName == null || userId == null) return const SizedBox();
+    return InteractableDecoratedBox(
+      onTap: () => showUserDialog(context, userId!),
+      cursor: SystemMouseCursors.click,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: 10,
+          bottom: 2,
+        ),
+        child: Text(
+          userName!,
+          style: TextStyle(
+            fontSize: MessageItemWidget.secondaryFontSize,
+            color: getNameColorById(userId!),
           ),
         ),
-      );
+      ),
+    );
+  }
 }

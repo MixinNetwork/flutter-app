@@ -81,25 +81,25 @@ class MessageBubble extends StatelessWidget {
       );
     }
 
-    final clipper = BubbleClipper(
-      currentUser: isCurrentUser,
-      showNip: showNip,
-    );
+    // final clipper = BubbleClipper(
+    //   currentUser: isCurrentUser,
+    //   showNip: showNip,
+    // );
 
-    _child = ClipPath(
-      clipper: clipper,
-      child: _child,
-    );
+    // _child = ClipPath(
+    //   clipper: clipper,
+    //   child: _child,
+    // );
 
-    if (showBubble) {
-      _child = CustomPaint(
-        painter: BubblePainter(
-          color: showBubble ? bubbleColor : Colors.transparent,
-          clipper: clipper,
-        ),
-        child: _child,
-      );
-    }
+    // if (showBubble) {
+    //   _child = CustomPaint(
+    //     painter: BubblePainter(
+    //       color: showBubble ? bubbleColor : Colors.transparent,
+    //       clipper: clipper,
+    //     ),
+    //     child: _child,
+    //   );
+    // }
 
     return Align(
       alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -154,10 +154,10 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
   final bool showNip;
   final bool nipPadding;
 
+  double get nipWidth => nipPadding ? _nipWidth : 0.0;
+
   @override
   Path getClip(Size size) {
-    final nipWidth = nipPadding ? _nipWidth : 0.0;
-
     final bubblePath = _bubblePath(Size(size.width - nipWidth, size.height))
         .shift(Offset(currentUser ? 0 : nipWidth, 0));
 
@@ -219,8 +219,19 @@ class BubbleClipper extends CustomClipper<Path> with EquatableMixin {
   @override
   bool shouldReclip(covariant BubbleClipper oldClipper) => this != oldClipper;
 
+  BubbleClipper copyWith({
+    bool? currentUser,
+    bool? showNip,
+    bool? nipPadding,
+  }) =>
+      BubbleClipper(
+        currentUser: currentUser ?? this.currentUser,
+        showNip: showNip ?? this.showNip,
+        nipPadding: nipPadding ?? this.nipPadding,
+      );
+
   @override
-  List<Object?> get props => [currentUser, showNip];
+  List<Object?> get props => [currentUser, showNip, nipPadding];
 }
 
 class BubblePainter extends CustomPainter with EquatableMixin {

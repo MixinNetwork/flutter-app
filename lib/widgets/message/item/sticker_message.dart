@@ -6,8 +6,8 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/dp_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../cache_image.dart';
-import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import '../message_layout.dart';
 
 class StickerMessageWidget extends StatelessWidget {
   const StickerMessageWidget({
@@ -70,17 +70,19 @@ class StickerMessageWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
       ),
     );
-    return MessageBubble(
-      messageId: message.messageId,
+    return MessageBubbleWrapper(
+      message: message,
       showNip: true,
       isCurrentUser: isCurrentUser,
       showBubble: false,
-      padding: EdgeInsets.zero,
-      outerTimeAndStatusWidget: MessageDatetimeAndStatus(
+      clip: true,
+      bubblePadding: EdgeInsets.zero,
+      dateAndStatusPosition: DateAndStatusPosition.outside,
+      dateAndStatus: MessageDatetimeAndStatus(
         isCurrentUser: isCurrentUser,
         message: message,
       ),
-      child: Builder(
+      content: Builder(
         builder: (context) {
           if (message.assetType == 'json') {
             return Lottie.network(

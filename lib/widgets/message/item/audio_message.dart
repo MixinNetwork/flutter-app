@@ -40,7 +40,6 @@ class NotSupportedMessage extends StatelessWidget {
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       child: MessageLayout(
-        spacing: 6,
         content: content,
         dateAndStatus: dateAndStatus,
       ),

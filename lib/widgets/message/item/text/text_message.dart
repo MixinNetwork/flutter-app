@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../ui/home/chat_page.dart';
@@ -10,7 +11,6 @@ import '../../../../utils/reg_exp_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../high_light_text.dart';
 import '../../message.dart';
-import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import '../../message_layout.dart';
 import 'mention_builder.dart';
@@ -107,17 +107,13 @@ class TextMessage extends HookWidget {
       message: message,
     );
 
-    return MessageBubble(
-      messageId: message.messageId,
-      quoteMessageId: message.quoteId,
-      quoteMessageContent: message.quoteContent,
-      showNip: showNip,
+    return MessageBubbleWrapper(
       isCurrentUser: isCurrentUser,
-      child: MessageLayout(
-        spacing: 6,
-        content: content,
-        dateAndStatus: dateAndStatus,
-      ),
+      dateAndStatusPosition: DateAndStatusPosition.textOverflow,
+      content: content,
+      dateAndStatus: dateAndStatus,
+      showNip: context.read<MessageContextData>().showNip,
+      message: message,
     );
   }
 }

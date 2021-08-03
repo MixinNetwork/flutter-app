@@ -11,8 +11,8 @@ import '../../../../utils/extension/extension.dart';
 import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../status.dart';
-import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import '../../message_layout.dart';
 import 'image_preview_portal.dart';
 
 class ImageMessageWidget extends StatelessWidget {
@@ -31,99 +31,93 @@ class ImageMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) => ImageMessageLayout(
         imageWidthInPixel: message.mediaWidth!,
         imageHeightInPixel: message.mediaHeight!,
-        builder: (context, width, height) => MessageBubble(
-          messageId: message.messageId,
-          quoteMessageId: message.quoteId,
-          quoteMessageContent: message.quoteContent,
+        builder: (context, width, height) => MessageBubbleWrapper(
+          message: message,
           isCurrentUser: isCurrentUser,
-          padding: EdgeInsets.zero,
+          bubblePadding: EdgeInsets.zero,
           showNip: showNip,
+          showBubble: true,
+          clip: true,
           includeNip: true,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: InteractableDecoratedBox(
-              onTap: () {
-                switch (message.mediaStatus) {
-                  case MediaStatus.done:
-                    ImagePreviewPage.push(
-                      context,
-                      conversationId: message.conversationId,
-                      messageId: message.messageId,
-                    );
-                    break;
-                  case MediaStatus.canceled:
-                    if (message.relationship == UserRelationship.me &&
-                        message.mediaUrl?.isNotEmpty == true) {
-                      context.accountServer.reUploadAttachment(message);
-                    } else {
-                      context.accountServer.downloadAttachment(message);
-                    }
-                    break;
-                  case MediaStatus.pending:
-                    context.accountServer
-                        .cancelProgressAttachmentJob(message.messageId);
-                    break;
-                  default:
-                    break;
-                }
-              },
-              child: SizedBox(
-                height: height,
-                width: width,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.file(
-                      File(context.accountServer
-                          .convertMessageAbsolutePath(message)),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
-                          imageData: message.thumbImage!),
+          dateAndStatus: DecoratedBox(
+            decoration: const ShapeDecoration(
+              color: Color.fromRGBO(0, 0, 0, 0.3),
+              shape: StadiumBorder(),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 3,
+                horizontal: 5,
+              ),
+              child: MessageDatetimeAndStatus(
+                isCurrentUser: isCurrentUser,
+                color: Colors.white,
+                message: message,
+              ),
+            ),
+          ),
+          dateAndStatusPosition: DateAndStatusPosition.inside,
+          content: InteractableDecoratedBox(
+            onTap: () {
+              switch (message.mediaStatus) {
+                case MediaStatus.done:
+                  ImagePreviewPage.push(
+                    context,
+                    conversationId: message.conversationId,
+                    messageId: message.messageId,
+                  );
+                  break;
+                case MediaStatus.canceled:
+                  if (message.relationship == UserRelationship.me &&
+                      message.mediaUrl?.isNotEmpty == true) {
+                    context.accountServer.reUploadAttachment(message);
+                  } else {
+                    context.accountServer.downloadAttachment(message);
+                  }
+                  break;
+                case MediaStatus.pending:
+                  context.accountServer
+                      .cancelProgressAttachmentJob(message.messageId);
+                  break;
+                default:
+                  break;
+              }
+            },
+            child: SizedBox(
+              height: height,
+              width: width,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.file(
+                    File(context.accountServer
+                        .convertMessageAbsolutePath(message)),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
+                        imageData: message.thumbImage!),
+                  ),
+                  Center(
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        switch (message.mediaStatus) {
+                          case MediaStatus.canceled:
+                            if (message.relationship == UserRelationship.me &&
+                                message.mediaUrl?.isNotEmpty == true) {
+                              return const StatusUpload();
+                            } else {
+                              return const StatusDownload();
+                            }
+                          case MediaStatus.pending:
+                            return const StatusPending();
+                          case MediaStatus.expired:
+                            return const StatusWarning();
+                          default:
+                            return const SizedBox();
+                        }
+                      },
                     ),
-                    Center(
-                      child: Builder(
-                        builder: (BuildContext context) {
-                          switch (message.mediaStatus) {
-                            case MediaStatus.canceled:
-                              if (message.relationship == UserRelationship.me &&
-                                  message.mediaUrl?.isNotEmpty == true) {
-                                return const StatusUpload();
-                              } else {
-                                return const StatusDownload();
-                              }
-                            case MediaStatus.pending:
-                              return const StatusPending();
-                            case MediaStatus.expired:
-                              return const StatusWarning();
-                            default:
-                              return const SizedBox();
-                          }
-                        },
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 4,
-                      right: isCurrentUser ? 12 : 4,
-                      child: DecoratedBox(
-                        decoration: const ShapeDecoration(
-                          color: Color.fromRGBO(0, 0, 0, 0.3),
-                          shape: StadiumBorder(),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 3,
-                            horizontal: 5,
-                          ),
-                          child: MessageDatetimeAndStatus(
-                            isCurrentUser: isCurrentUser,
-                            color: Colors.white,
-                            message: message,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

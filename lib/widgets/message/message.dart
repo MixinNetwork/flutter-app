@@ -40,7 +40,6 @@ import 'item/unknown_message.dart';
 import 'item/video_message.dart';
 import 'item/waiting_message.dart';
 import 'message_day_time.dart';
-import 'message_name.dart';
 
 class MessageItemWidget extends HookWidget {
   const MessageItemWidget({
@@ -92,10 +91,13 @@ class MessageItemWidget extends HookWidget {
       },
     );
 
-    final child = Column(
+    Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        SizedBox(
+          height: sameUserPrev ? 0 : 6,
+        ),
         if (datetime != null) MessageDayTime(dateTime: datetime),
         ColoredBox(
           color: blinkColor,
@@ -308,7 +310,7 @@ class MessageItemWidget extends HookWidget {
     );
 
     if (message.mentionRead == false) {
-      return VisibilityDetector(
+      child = VisibilityDetector(
         onVisibilityChanged: (VisibilityInfo info) {
           if (info.visibleFraction < 1) return;
           context.accountServer
@@ -319,11 +321,30 @@ class MessageItemWidget extends HookWidget {
       );
     }
 
-    return Padding(
-      padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
+    return Provider(
+      create: (BuildContext context) => MessageContextData(
+        userName: userName,
+        userId: userId,
+        isCurrentUser: isCurrentUser,
+        showNip: showNip,
+      ),
       child: child,
     );
   }
+}
+
+class MessageContextData {
+  const MessageContextData({
+    required this.userName,
+    required this.userId,
+    required this.isCurrentUser,
+    required this.showNip,
+  });
+
+  final String? userName;
+  final String? userId;
+  final bool isCurrentUser;
+  final bool showNip;
 }
 
 class _MessageBubbleMargin extends StatelessWidget {
@@ -343,27 +364,9 @@ class _MessageBubbleMargin extends StatelessWidget {
   final List<ContextMenu> Function() buildMenus;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: EdgeInsets.only(
-          left: isCurrentUser ? 65 : 16,
-          right: !isCurrentUser ? 65 : 16,
-          top: 2,
-          bottom: 2,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (userName != null && userId != null)
-              MessageName(
-                userName: userName!,
-                userId: userId!,
-              ),
-            ContextMenuPortalEntry(
-              buildMenus: buildMenus,
-              child: Builder(builder: builder),
-            ),
-          ],
-        ),
+  Widget build(BuildContext context) => ContextMenuPortalEntry(
+        buildMenus: buildMenus,
+        child: Builder(builder: builder),
       );
 }
 
