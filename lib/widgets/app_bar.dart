@@ -32,7 +32,7 @@ class MixinAppBar extends StatelessWidget implements PreferredSizeWidget {
             ? null
             : DefaultTextStyle(
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.w600,
                   color: context.theme.text,
                 ),

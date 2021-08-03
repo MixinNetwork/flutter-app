@@ -75,6 +75,7 @@ class SearchMessagePage extends HookWidget {
       child = ScrollablePositionedList.builder(
         itemPositionsListener: searchMessageBloc.itemPositionsListener,
         itemCount: pageState.count,
+        padding: const EdgeInsets.only(top: 8),
         itemBuilder: (context, index) {
           final message = pageState.map[index];
           if (message == null) return const SizedBox(height: 80);

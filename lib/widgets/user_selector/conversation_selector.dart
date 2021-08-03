@@ -304,14 +304,16 @@ class _ConversationSelector extends HookWidget {
               child: singleSelect || selected.isEmpty
                   ? const SizedBox(height: 8)
                   : SizedBox(
-                      height: 110,
+                      height: 120,
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 30),
-                        itemBuilder: (context, index) => Center(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        itemBuilder: (context, index) => SizedBox(
+                          width: 66,
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              const SizedBox(height: 20),
                               Stack(
                                 children: [
                                   _getAvatarWidget(selected[index]),
@@ -327,12 +329,15 @@ class _ConversationSelector extends HookWidget {
                                   fontSize: 14,
                                   color: context.theme.text,
                                 ),
+                                textAlign: TextAlign.center,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
                               ),
                             ],
                           ),
                         ),
                         separatorBuilder: (BuildContext context, int index) =>
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 4),
                         itemCount: selected.length,
                       ),
                     ),
