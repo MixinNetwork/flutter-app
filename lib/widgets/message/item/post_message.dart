@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
@@ -9,6 +10,8 @@ import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
+import '../../app_bar.dart';
+import '../../buttons.dart';
 import '../../full_screen_portal.dart';
 import '../../interacter_decorated_box.dart';
 import '../message_bubble.dart';
@@ -110,22 +113,41 @@ class PostPreview extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => InteractableDecoratedBox(
-        decoration: BoxDecoration(
-          color: context.theme.background,
-        ),
-        onTap: () {
-          context.read<FullScreenVisibleCubit>().emit(false);
+  Widget build(BuildContext context) => CallbackShortcuts(
+        bindings: {
+          const SingleActivator(LogicalKeyboardKey.escape): () {
+            context.read<FullScreenVisibleCubit>().emit(false);
+          }
         },
-        child: Padding(
-          padding: const EdgeInsets.only(top: 32),
-          child: Markdown(
-            data: message.thumbImage ?? message.content!,
-            extensionSet: ExtensionSet.gitHubWeb,
-            styleSheet: context.markdownStyleSheet,
-            selectable: true,
-            onTapLink: (String text, String? href, String title) =>
-                openUri(context, href!),
+        child: Focus(
+          autofocus: true,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.theme.background,
+            ),
+            child: Column(
+              children: [
+                MixinAppBar(
+                  actions: [
+                    MixinCloseButton(
+                      onTap: () {
+                        context.read<FullScreenVisibleCubit>().emit(false);
+                      },
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Markdown(
+                    data: message.thumbImage ?? message.content!,
+                    extensionSet: ExtensionSet.gitHubWeb,
+                    styleSheet: context.markdownStyleSheet,
+                    selectable: true,
+                    onTapLink: (String text, String? href, String title) =>
+                        openUri(context, href!),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
