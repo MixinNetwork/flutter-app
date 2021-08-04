@@ -97,7 +97,7 @@ class MessageBubble extends StatelessWidget {
       );
     }
 
-    if (showBubble) {
+    if (showBubble || quoteMessageId != null) {
       _child = CustomPaint(
         painter: BubblePainter(
           color: showBubble ? bubbleColor : Colors.transparent,
