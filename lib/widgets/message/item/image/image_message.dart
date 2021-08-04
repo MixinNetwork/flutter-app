@@ -38,7 +38,6 @@ class ImageMessageWidget extends StatelessWidget {
           isCurrentUser: isCurrentUser,
           padding: EdgeInsets.zero,
           showNip: showNip,
-          showBubble: false,
           includeNip: true,
           clip: true,
           child: InteractableDecoratedBox(
