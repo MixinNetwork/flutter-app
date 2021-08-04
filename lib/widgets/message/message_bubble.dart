@@ -26,6 +26,7 @@ class MessageBubble extends StatelessWidget {
     this.showNip = true,
     this.showBubble = true,
     this.includeNip = false,
+    this.clip = false,
     this.padding = const EdgeInsets.all(8),
     this.outerTimeAndStatusWidget,
     this.quoteMessageId,
@@ -38,6 +39,7 @@ class MessageBubble extends StatelessWidget {
   final bool showNip;
   final bool showBubble;
   final bool includeNip;
+  final bool clip;
   final EdgeInsetsGeometry padding;
   final Widget? outerTimeAndStatusWidget;
   final String? quoteMessageContent;
@@ -86,10 +88,14 @@ class MessageBubble extends StatelessWidget {
       showNip: showNip,
     );
 
-    _child = ClipPath(
-      clipper: clipper,
-      child: _child,
-    );
+    if (clip) {
+      _child = RepaintBoundary(
+        child: ClipPath(
+          clipper: clipper,
+          child: _child,
+        ),
+      );
+    }
 
     if (showBubble) {
       _child = CustomPaint(
