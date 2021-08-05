@@ -63,7 +63,7 @@ class FileMessage extends StatelessWidget {
                       context.accountServer.convertMessageAbsolutePath(message))
                   .copy(path!);
             } else if (message.mediaStatus == MediaStatus.pending) {
-              context.accountServer
+              await context.accountServer
                   .cancelProgressAttachmentJob(message.messageId);
             }
           },

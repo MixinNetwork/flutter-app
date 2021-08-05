@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as cr;
 import 'package:pointycastle/api.dart';
@@ -11,10 +9,13 @@ import 'package:pointycastle/block/aes_fast.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
+import 'package:tuple/tuple.dart';
+
+import '../../utils/load_balancer_utils.dart';
+import '../../utils/logger.dart';
 
 class AttachmentOutputCipher {
-  AttachmentOutputCipher(
-      this._inputStream, File outFile, List<int> keys, List<int> iv) {
+  AttachmentOutputCipher(this._inputStream, List<int> keys, List<int> iv) {
     final aesKey = keys.sublist(0, 32);
     final macKey = keys.sublist(32, 64);
     final mac = cr.Hmac(cr.sha256, macKey);
@@ -36,52 +37,55 @@ class AttachmentOutputCipher {
 
     _macSink.add(iv);
     _digestSink.add(iv);
-    _fileSink = outFile.openWrite(mode: FileMode.append);
-    _fileSink.add(iv);
+    _streamController = StreamController<List<int>>(onCancel: () {
+      _macSink.close();
+      _digestSink.close();
+    })
+      ..add(iv);
   }
 
-  final ChunkedStreamReader<int> _inputStream;
-  late IOSink _fileSink;
-  late PaddedBlockCipher _aesCipher;
-  late AccumulatorSink<cr.Digest> _macOutput;
-  late ByteConversionSink _macSink;
-  late AccumulatorSink<cr.Digest> _digestOutput;
-  late ByteConversionSink _digestSink;
+  Stream<List<int>> get stream => _streamController.stream;
 
   Future<List<int>> process() async {
-    List<int> digest;
-    while (true) {
-      final plaintext = await _inputStream.readBytes(8192);
-      if (plaintext.length < 8192) {
-        final lastCipher = _aesCipher.process(plaintext);
-        _macSink
-          ..add(lastCipher)
-          ..close();
-        final mac = _macOutput.events.single.bytes;
-        _digestSink
-          ..add(lastCipher)
-          ..add(mac)
-          ..close();
-        digest = _digestOutput.events.single.bytes;
-        _fileSink
-          ..add(lastCipher)
-          ..add(mac);
-        await _fileSink.flush();
-        await _fileSink.close();
-        break;
-      }
-      await write(plaintext);
-    }
+    d('cipher stream start');
+    await _streamController.addStream(
+      _inputStream.asyncMap((List<int> event) async {
+        final uint8list =
+            await runLoadBalancer(_process, Tuple2(_aesCipher, event));
+        _macSink.add(uint8list);
+        _digestSink.add(uint8list);
+
+        return uint8list.toList();
+      }),
+      cancelOnError: true,
+    );
+
+    _macSink.close();
+
+    final mac = _macOutput.events.single.bytes;
+    _digestSink
+      ..add(mac)
+      ..close();
+    _streamController.add(mac);
+    d('cipher stream start done');
+    // await _streamController.done;
+    await _streamController.close();
+    d('cipher stream closed');
+    final digest = _digestOutput.events.single.bytes;
     return digest;
   }
 
-  Future<void> write(Uint8List plaintext) async {
-    final ciphertext = _aesCipher.process(plaintext);
-    _macSink.add(ciphertext);
-    _digestSink.add(ciphertext);
-    _fileSink.add(ciphertext);
-  }
+  late final StreamController<List<int>> _streamController;
+  final Stream<List<int>> _inputStream;
+  late final PaddedBlockCipher _aesCipher;
+  late final AccumulatorSink<cr.Digest> _macOutput;
+  late final ByteConversionSink _macSink;
+  late final AccumulatorSink<cr.Digest> _digestOutput;
+  late final ByteConversionSink _digestSink;
 
   static int getCiphertextLength(int plaintextLength) =>
       (16 + (((plaintextLength / 16) + 1) * 16) + 32).toInt();
 }
+
+Uint8List _process(Tuple2<PaddedBlockCipher, List<int>> argument) =>
+    argument.item1.process(Uint8List.fromList(argument.item2));

@@ -1334,7 +1334,7 @@ class AccountServer {
     multiAuthCubit.updateAccount(user.data);
   }
 
-  bool cancelProgressAttachmentJob(String messageId) =>
+  Future<bool> cancelProgressAttachmentJob(String messageId) =>
       _attachmentUtil.cancelProgressAttachmentJob(messageId);
 
   Future<void> deleteMessage(String messageId) =>

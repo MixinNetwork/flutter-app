@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:async/async.dart';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
@@ -130,44 +129,53 @@ class AttachmentUtil {
 
     try {
       final response = await _client.attachmentApi.postAttachment();
+      if (MediaStatus.pending !=
+          await _messageDao.mediaStatus(messageId).getSingleOrNull()) {
+        return null;
+      }
+
       if (response.data.uploadUrl != null) {
-        File tmpFile;
+        Stream<List<int>> uploadStream;
+        AttachmentOutputCipher? attachmentOutputCipher;
+        int length;
         List<int>? keys;
         List<int>? digest;
         if (category.isSignal) {
-          tmpFile = File(p.join(file.parent.path, '$messageId.tmp'));
           keys = generateRandomKey(64);
           final iv = generateRandomKey(16);
           final fileLen = await file.length();
-          final reader = ChunkedStreamReader(file.openRead());
-          final outputCipher =
-              AttachmentOutputCipher(reader, tmpFile, keys, iv);
-          final totalLen = AttachmentOutputCipher.getCiphertextLength(fileLen);
-          digest = await outputCipher.process();
+          attachmentOutputCipher =
+              AttachmentOutputCipher(file.openRead(), keys, iv);
+          uploadStream = attachmentOutputCipher.stream;
+          length = AttachmentOutputCipher.getCiphertextLength(fileLen);
         } else {
-          tmpFile = file;
+          length = await file.length();
+          uploadStream = file.openRead();
         }
 
-        d('tmpFile: ${tmpFile.path}');
-
         _messageIdCancelTokenMap[messageId] = CancelToken();
-        final httpResponse = await _dio.putUri(
-          Uri.parse(response.data.uploadUrl!),
-          data: tmpFile.openRead(),
-          options: Options(
-            headers: {
-              HttpHeaders.contentTypeHeader: 'application/octet-stream',
-              HttpHeaders.connectionHeader: 'close',
-              HttpHeaders.contentLengthHeader: await tmpFile.length(),
-              'x-amz-acl': 'public-read',
-            },
+        final result = await Future.wait([
+          _dio.putUri(
+            Uri.parse(response.data.uploadUrl!),
+            data: uploadStream,
+            options: Options(
+              headers: {
+                HttpHeaders.contentTypeHeader: 'application/octet-stream',
+                HttpHeaders.connectionHeader: 'close',
+                HttpHeaders.contentLengthHeader: length,
+                'x-amz-acl': 'public-read',
+              },
+            ),
+            onSendProgress: (int count, int total) => v('$count / $total'),
+            cancelToken: _messageIdCancelTokenMap[messageId],
           ),
-          onSendProgress: (int count, int total) => v('$count / $total'),
-          cancelToken: _messageIdCancelTokenMap[messageId],
-        );
-
+          if (attachmentOutputCipher != null) attachmentOutputCipher.process()
+        ]);
+        final httpResponse = result[0] as Response;
+        if (category.isSignal) {
+          digest = result[1] as List<int>;
+        }
         if (httpResponse.statusCode == 200) {
-          deleteCryptoTmpFile(category, tmpFile);
           await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
           return AttachmentResult(
               response.data.attachmentId,
@@ -175,7 +183,6 @@ class AttachmentUtil {
               category.isSignal ? await base64EncodeWithIsolate(digest!) : null,
               response.data.createdAt);
         } else {
-          deleteCryptoTmpFile(category, tmpFile);
           await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;
         }
@@ -185,6 +192,10 @@ class AttachmentUtil {
       }
     } catch (e) {
       w(e.toString());
+      if (MediaStatus.pending !=
+          await _messageDao.mediaStatus(messageId).getSingleOrNull()) {
+        return null;
+      }
       await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
       return null;
     } finally {
@@ -273,7 +284,8 @@ class AttachmentUtil {
     return AttachmentUtil(client, messageDao, mediaDirectory.path);
   }
 
-  bool cancelProgressAttachmentJob(String messageId) {
+  Future<bool> cancelProgressAttachmentJob(String messageId) async {
+    await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
     if (_messageIdCancelTokenMap[messageId] == null) return false;
     _messageIdCancelTokenMap[messageId]?.cancel();
     _messageIdCancelTokenMap[messageId] = null;
