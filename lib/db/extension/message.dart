@@ -9,6 +9,10 @@ extension MessageItemExtension on MessageItem {
   bool get isLottie => assetType?.toLowerCase() == 'json';
 
   bool get isSignal => type.startsWith('SIGNAL_');
+
+  bool get isEncrypted => type.startsWith('ENCRYPTED_');
+
+  bool get isSecret => isSignal || isEncrypted;
 }
 
 extension QuoteMessageItemExtension on QuoteMessageItem {

@@ -41,7 +41,7 @@ class MessageDatetimeAndStatus extends StatelessWidget {
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (message.isSignal)
+          if (message.isSecret)
             Padding(
               padding: const EdgeInsets.only(right: 4.0),
               child: _ChatIcon(

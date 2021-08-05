@@ -634,7 +634,7 @@ class AccountServer {
         userId,
         ContactMessage(shareUserId),
         shareUserFullName,
-        isPlain: isPlain,
+        isEncrypted: isPlain,
         quoteMessageId: quoteMessageId,
       );
 
@@ -653,7 +653,7 @@ class AccountServer {
         await _initConversation(conversationId, recipientId),
         userId,
         forwardMessageId,
-        isPlain: isPlain,
+        isEncrypted: isPlain,
       );
 
   void selectConversation(String? conversationId) {
