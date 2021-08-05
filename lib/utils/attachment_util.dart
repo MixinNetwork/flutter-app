@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:async/async.dart';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
@@ -8,6 +9,7 @@ import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 
+import '../crypto/attachment/attachment_output_cipher.dart';
 import '../crypto/attachment/crypto_attachment.dart';
 import '../db/dao/message_dao.dart';
 import '../db/extension/message_category.dart';
@@ -136,16 +138,17 @@ class AttachmentUtil {
           tmpFile = File(p.join(file.parent.path, '$messageId.tmp'));
           keys = generateRandomKey(64);
           final iv = generateRandomKey(16);
-          final encrypted = CryptoAttachment()
-              .encryptAttachment(file.readAsBytesSync(), keys, iv);
-          final encryptedBin = encrypted.item1;
-          digest = encrypted.item2;
-          tmpFile.writeAsBytesSync(encryptedBin);
+          final fileLen = await file.length();
+          final reader = ChunkedStreamReader(file.openRead());
+          final outputCipher =
+              AttachmentOutputCipher(reader, tmpFile, keys, iv);
+          final totalLen = AttachmentOutputCipher.getCiphertextLength(fileLen);
+          digest = await outputCipher.process();
         } else {
           tmpFile = file;
         }
 
-        d(tmpFile.path);
+        d('tmpFile: ${tmpFile.path}');
 
         _messageIdCancelTokenMap[messageId] = CancelToken();
         final httpResponse = await _dio.putUri(
