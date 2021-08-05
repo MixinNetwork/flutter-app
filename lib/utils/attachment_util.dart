@@ -136,7 +136,6 @@ class AttachmentUtil {
 
       if (response.data.uploadUrl != null) {
         Stream<List<int>> uploadStream;
-        AttachmentOutputCipher? attachmentOutputCipher;
         int length;
         List<int>? keys;
         List<int>? digest;
@@ -144,9 +143,8 @@ class AttachmentUtil {
           keys = generateRandomKey(64);
           final iv = generateRandomKey(16);
           final fileLen = await file.length();
-          attachmentOutputCipher =
-              AttachmentOutputCipher(file.openRead(), keys, iv);
-          uploadStream = attachmentOutputCipher.stream;
+          uploadStream =
+              file.openRead().encrypt(keys, iv, (_digest) => digest = _digest);
           length = AttachmentOutputCipher.getCiphertextLength(fileLen);
         } else {
           length = await file.length();
@@ -154,27 +152,20 @@ class AttachmentUtil {
         }
 
         _messageIdCancelTokenMap[messageId] = CancelToken();
-        final result = await Future.wait([
-          _dio.putUri(
-            Uri.parse(response.data.uploadUrl!),
-            data: uploadStream,
-            options: Options(
-              headers: {
-                HttpHeaders.contentTypeHeader: 'application/octet-stream',
-                HttpHeaders.connectionHeader: 'close',
-                HttpHeaders.contentLengthHeader: length,
-                'x-amz-acl': 'public-read',
-              },
-            ),
-            onSendProgress: (int count, int total) => v('$count / $total'),
-            cancelToken: _messageIdCancelTokenMap[messageId],
+        final httpResponse = await _dio.putUri(
+          Uri.parse(response.data.uploadUrl!),
+          data: uploadStream,
+          options: Options(
+            headers: {
+              HttpHeaders.contentTypeHeader: 'application/octet-stream',
+              HttpHeaders.connectionHeader: 'close',
+              HttpHeaders.contentLengthHeader: length,
+              'x-amz-acl': 'public-read',
+            },
           ),
-          if (attachmentOutputCipher != null) attachmentOutputCipher.process()
-        ]);
-        final httpResponse = result[0] as Response;
-        if (category.isSignal) {
-          digest = result[1] as List<int>;
-        }
+          onSendProgress: (int count, int total) => v('$count / $total'),
+          cancelToken: _messageIdCancelTokenMap[messageId],
+        );
         if (httpResponse.statusCode == 200) {
           await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
           return AttachmentResult(

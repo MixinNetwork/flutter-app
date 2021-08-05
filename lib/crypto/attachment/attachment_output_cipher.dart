@@ -87,3 +87,91 @@ class AttachmentOutputCipher {
 
 Uint8List _process(Tuple2<PaddedBlockCipher, List<int>> argument) =>
     argument.item1.process(Uint8List.fromList(argument.item2));
+
+extension EncryptStreamExtension on Stream<List<int>> {
+  Stream<List<int>> encrypt(
+    List<int> keys,
+    List<int> iv,
+    void Function(List<int>) digestCallback,
+  ) {
+    if (isBroadcast) throw ArgumentError('Stream must be not broadcast.');
+
+    final aesKey = keys.sublist(0, 32);
+    final macKey = keys.sublist(32, 64);
+    final mac = cr.Hmac(cr.sha256, macKey);
+    final macOutput = AccumulatorSink<cr.Digest>();
+    final macSink = mac.startChunkedConversion(macOutput);
+
+    final cbcCipher = CBCBlockCipher(AESFastEngine());
+    final ivParams = ParametersWithIV<KeyParameter>(
+        KeyParameter(Uint8List.fromList(aesKey)), Uint8List.fromList(iv));
+    final paddingParams =
+        // ignore: prefer_void_to_null
+        PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
+            ivParams, null);
+    final _aesCipher = PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
+      ..init(true, paddingParams);
+
+    final digestOutput = AccumulatorSink<cr.Digest>();
+    final digestSink = cr.sha256.startChunkedConversion(digestOutput);
+
+    macSink.add(iv);
+    digestSink.add(iv);
+
+    final controller = StreamController<List<int>>()..add(iv);
+
+    void close() {
+      macSink.close();
+      digestSink.close();
+    }
+
+    void addError(Object error, [StackTrace? stackTrace]) {
+      close();
+      controller.addError(error, stackTrace);
+    }
+
+    controller.onListen = () {
+      final subscription = listen(
+        null, onError: addError, // Avoid Zone error replacement.
+        onDone: () {
+          macSink.close();
+          final mac = macOutput.events.single.bytes;
+          digestSink
+            ..add(mac)
+            ..close();
+          controller
+            ..add(mac)
+            ..close();
+          digestCallback(digestOutput.events.single.bytes);
+        },
+      );
+
+      final pause = subscription.pause;
+      final resume = subscription.resume;
+
+      Future<List<int>> process(List<int> event) async {
+        final uint8list =
+            await runLoadBalancer(_process, Tuple2(_aesCipher, event));
+        macSink.add(uint8list);
+        digestSink.add(uint8list);
+
+        return uint8list.toList();
+      }
+
+      subscription.onData((List<int> event) {
+        pause();
+        process(event)
+            .then(controller.add, onError: addError)
+            .whenComplete(resume);
+      });
+      controller
+        ..onCancel = () {
+          close();
+          subscription.cancel();
+        }
+        ..onPause = pause
+        ..onResume = resume;
+    };
+    return controller.stream;
+  }
+}
