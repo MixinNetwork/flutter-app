@@ -163,17 +163,17 @@ class ChatPage extends HookWidget {
         ),
         child: LayoutBuilder(
           builder: (context, boxConstraints) {
-            final navigationMode = boxConstraints.maxWidth <
+            final routeMode = boxConstraints.maxWidth <
                 (kResponsiveNavigationMinWidth + kChatSidePageWidth);
-            chatSideCubit.updateNavigationMode(navigationMode);
+            chatSideCubit.updateRouteMode(routeMode);
 
             return Row(
               children: [
-                if (!navigationMode)
+                if (!routeMode)
                   Expanded(
                     child: chatContainerPage.child,
                   ),
-                if (!navigationMode)
+                if (!routeMode)
                   Container(
                     width: 1,
                     color: context.theme.divider,
@@ -186,7 +186,7 @@ class ChatPage extends HookWidget {
                     return route.didPop(result);
                   },
                   pages: [
-                    if (navigationMode) chatContainerPage,
+                    if (routeMode) chatContainerPage,
                     ...navigatorState.pages,
                   ],
                 ),
@@ -218,8 +218,8 @@ class _SideRouter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navigationMode = chatSideCubit.state.navigationMode;
-    if (navigationMode) {
+    final routeMode = chatSideCubit.state.routeMode;
+    if (routeMode) {
       return SizedBox(
         width: constraints.maxWidth,
         child: Navigator(

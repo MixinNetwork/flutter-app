@@ -113,6 +113,8 @@ class Resources {
 
   static const String assetsImagesIcRetrySvg = 'assets/images/ic_retry.svg';
 
+  static const String assetsImagesIcScreenSvg = 'assets/images/ic_screen.svg';
+
   static const String assetsImagesIcSearchSvg = 'assets/images/ic_search.svg';
 
   static const String assetsImagesIcSearchSmallSvg =

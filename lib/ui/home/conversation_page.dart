@@ -691,9 +691,9 @@ class _List extends HookWidget {
       converter: (state) => state?.conversationId,
     );
 
-    final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
+    final routeMode = useBlocStateConverter<ResponsiveNavigatorCubit,
         ResponsiveNavigatorState, bool>(
-      converter: (state) => state.navigationMode,
+      converter: (state) => state.routeMode,
     );
 
     final connectedState = useStream(
@@ -727,7 +727,7 @@ class _List extends HookWidget {
           final conversation = pagingState.map[index];
           if (conversation == null) return const SizedBox(height: 80);
           final selected =
-              conversation.conversationId == conversationId && !navigationMode;
+              conversation.conversationId == conversationId && !routeMode;
 
           return ContextMenuPortalEntry(
             buildMenus: () => [

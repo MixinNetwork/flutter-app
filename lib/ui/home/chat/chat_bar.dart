@@ -25,9 +25,15 @@ class ChatBar extends HookWidget {
     final actionColor = context.theme.icon;
     final chatSideCubit = context.read<ChatSideCubit>();
 
-    final navigationMode = useBlocStateConverter<ResponsiveNavigatorCubit,
+    final chatSideRouteMode =
+        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, bool>(
+      bloc: chatSideCubit,
+      converter: (state) => state.routeMode,
+    );
+
+    final routeMode = useBlocStateConverter<ResponsiveNavigatorCubit,
         ResponsiveNavigatorState, bool>(
-      converter: (state) => state.navigationMode,
+      converter: (state) => state.routeMode,
     );
 
     final conversation = useBlocState<ConversationCubit, ConversationState?>(
@@ -51,7 +57,7 @@ class ChatBar extends HookWidget {
         mainAxisSize: MainAxisSize.max,
         children: [
           Builder(
-            builder: (context) => navigationMode
+            builder: (context) => routeMode
                 ? MoveWindowBarrier(
                     child: MixinBackButton(
                       color: actionColor,
@@ -112,6 +118,19 @@ class ChatBar extends HookWidget {
                       (page) => page.name == ChatSideCubit.searchMessageHistory)
                   ..pushPage(ChatSideCubit.searchMessageHistory);
               },
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.centerLeft,
+            child: MoveWindowBarrier(
+              child: chatSideRouteMode
+                  ? const SizedBox()
+                  : ActionButton(
+                      name: Resources.assetsImagesIcScreenSvg,
+                      color: actionColor,
+                      onTap: chatSideCubit.toggleInfoPage,
+                    ),
             ),
           ),
         ],
