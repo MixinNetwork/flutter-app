@@ -67,8 +67,6 @@ class AttachmentOutputCipher {
       ..add(mac)
       ..close();
     _streamController.add(mac);
-    d('cipher stream start done');
-    // await _streamController.done;
     await _streamController.close();
     d('cipher stream closed');
     final digest = _digestOutput.events.single.bytes;
