@@ -9,12 +9,17 @@ import 'package:uuid/uuid.dart';
 import '../../utils/crypto_util.dart';
 
 class EncryptedProtocol {
-  List<int> encryptMessage(ed.PrivateKey privateKey, List<int> plainText,
-      List<int> otherPublicKey, String otherSessionId) {
+  List<int> encryptMessage(
+      ed.PrivateKey privateKey,
+      List<int> plainText,
+      List<int> otherPublicKey,
+      String otherSessionId,
+      List<int>? extensionSessionKey,
+      String? extensionSessionId) {
     final key = generateRandomKey(16);
     final encryptedMessageData = aesGcmEncrypt(key, plainText);
     final messageKey =
-        _encryptCipherMessageKey(privateKey, otherPublicKey, key);
+        encryptCipherMessageKey(privateKey, otherPublicKey, key);
     final messageKeyWithSession = [
       ...Uuid.parse(otherSessionId),
       ...messageKey
@@ -32,7 +37,7 @@ class EncryptedProtocol {
     ];
   }
 
-  List<int> _encryptCipherMessageKey(
+  List<int> encryptCipherMessageKey(
       ed.PrivateKey privateKey, List<int> otherPublicKey, List<int> aesGcmKey) {
     final private =
         privateKeyToCurve25519(Uint8List.fromList(privateKey.bytes));
@@ -40,7 +45,7 @@ class EncryptedProtocol {
     return aesEncrypt(sharedSecret, aesGcmKey);
   }
 
-  List<int> _decryptCipherMessageKey(ed.PrivateKey privateKey,
+  List<int> decryptCipherMessageKey(ed.PrivateKey privateKey,
       List<int> otherPublicKey, List<int> cipherText, List<int> iv) {
     final private =
         privateKeyToCurve25519(Uint8List.fromList(privateKey.bytes));
@@ -69,7 +74,7 @@ class EncryptedProtocol {
 
     final iv = messageKey.sublist(0, 16);
 
-    final decodedMessageKey = _decryptCipherMessageKey(privateKey,
+    final decodedMessageKey = decryptCipherMessageKey(privateKey,
         senderPublicKey, messageKey.sublist(16, messageKey.length), iv);
 
     return aesGcmDecrypt(decodedMessageKey, message.sublist(0, 12),

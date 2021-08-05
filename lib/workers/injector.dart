@@ -90,7 +90,8 @@ class Injector {
       participantSessions.add(db.ParticipantSessionData(
           conversationId: conversationId,
           userId: u.userId,
-          sessionId: u.sessionId));
+          sessionId: u.sessionId,
+          publicKey: u.publicKey));
     });
     await database.participantSessionDao
         .replaceAll(conversationId, participantSessions);

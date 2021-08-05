@@ -37,8 +37,30 @@ void main() {
     final pub = publicKeyToCurve25519(Uint8List.fromList(otherPublicKey.bytes));
 
     final encodedContent = protocol.encryptMessage(
-        privateKey, source, pub.toList(), otherSessionId);
+        privateKey, source, pub.toList(), otherSessionId, null, null);
+    final decrypted = protocol.decryptMessage(privateKey,
+        Uuid.parse(otherSessionId), Uint8List.fromList(encodedContent));
 
+    assert(listEquals(source, decrypted));
+  });
+
+  test('encryptedWithExtensionTest', () {
+    final source = utf8.encode('LA');
+    final protocol = EncryptedProtocol();
+    final privateKey = ed.generateKey().privateKey;
+    final otherPublicKey = ed.generateKey().publicKey;
+    final otherSessionId = const Uuid().v4();
+    final pub = publicKeyToCurve25519(Uint8List.fromList(otherPublicKey.bytes));
+
+    const extensionSessionKey = 'yiPAbfi53jznnt4YUPzbmRjbyoA7cn0KoYxyUVlruxY';
+    const extensionSessionId = '93b15f04-3f16-4845-b0c9-acc1314dc8cb';
+    final encodedContent = protocol.encryptMessage(
+        privateKey,
+        source,
+        pub.toList(),
+        otherSessionId,
+        base64.decode(base64.normalize(extensionSessionKey)),
+        extensionSessionId);
     final decrypted = protocol.decryptMessage(privateKey,
         Uuid.parse(otherSessionId), Uint8List.fromList(encodedContent));
 
@@ -56,5 +78,37 @@ void main() {
     final decrypted = protocol.decryptMessage(ed.PrivateKey(privateKey),
         sessionId, Uint8List.fromList(encodedContent));
     assert(listEquals(utf8.encode('LA'), decrypted));
+  });
+
+  test('base64RawTest', () {
+    const raw = 'MZqwdh6zq6KKfQU6YozSQ4jtAws5UPOJNPSwEBvWUw0';
+    base64.decode(base64.normalize(raw));
+  });
+
+  test('calculateAgreementTest', () {
+    final private =
+        base64.decode('IFxd7LKqNc+NBVhFYqGOyN67J9XXqOzmFu4wBd3YgX0=');
+    final public =
+        base64.decode('MZqwdh6zq6KKfQU6YozSQ4jtAws5UPOJNPSwEBvWUw0=');
+    final sharedSecret = calculateAgreement(public, private);
+    assert('njmQdTN33L/7ZsKuCyPmKu9Q8ywwwpfgSuvT4t8aXQw=' ==
+        base64.encode(sharedSecret));
+  });
+
+  test('cipherMessageTest', () {
+    final protocol = EncryptedProtocol();
+    final privateKey = ed.PrivateKey(
+        base64.decode('KbGU2ZunXKC43jWPTg1jzxIJRo7KrmVzGc5QSZU0OV8='));
+    final otherPublicKey =
+        base64.decode('qZZsBsnxIQgES/FUTMUnbylivOCvgNzg2WnkbS85dVA=');
+    final aesGcmKey = base64.decode('t651fSbwBClwHFXiIJ4abg==');
+    final encrypted =
+        protocol.encryptCipherMessageKey(privateKey, otherPublicKey, aesGcmKey);
+    final decrypted = protocol.decryptCipherMessageKey(
+        privateKey,
+        otherPublicKey,
+        encrypted.sublist(16, encrypted.length),
+        encrypted.sublist(0, 16));
+    assert(listEquals(aesGcmKey, decrypted));
   });
 }
