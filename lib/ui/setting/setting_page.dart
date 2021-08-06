@@ -149,7 +149,7 @@ class _Item extends StatelessWidget {
   Widget build(BuildContext context) =>
       BlocConverter<ResponsiveNavigatorCubit, ResponsiveNavigatorState, bool>(
         converter: (state) =>
-            !state.navigationMode &&
+            !state.routeMode &&
             state.pages.any((element) => pageName == element.name),
         builder: (context, selected) => CellItem(
           leading: SvgPicture.asset(

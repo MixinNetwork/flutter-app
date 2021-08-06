@@ -165,13 +165,13 @@ class _CenterPage extends StatelessWidget {
                 context.read<ResponsiveNavigatorCubit>();
 
             responsiveNavigatorCubit.popWhere((page) {
-              if (responsiveNavigatorCubit.state.navigationMode) return true;
+              if (responsiveNavigatorCubit.state.routeMode) return true;
 
               return ResponsiveNavigatorCubit.settingPageNameSet
                   .contains(page.name);
             });
 
-            if (isSetting && !responsiveNavigatorCubit.state.navigationMode) {
+            if (isSetting && !responsiveNavigatorCubit.state.routeMode) {
               context.read<ConversationCubit>().unselected();
               responsiveNavigatorCubit
                   .pushPage(ResponsiveNavigatorCubit.settingPageNameSet.first);

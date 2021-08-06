@@ -85,8 +85,7 @@ class CellItem extends StatelessWidget {
     final dynamicColor = color ?? context.theme.text;
     final backgroundColor = _CellItemStyle.of(context).backgroundColor;
     var selectedBackgroundColor = backgroundColor;
-    if (selected &&
-        !context.read<ResponsiveNavigatorCubit>().state.navigationMode) {
+    if (selected && !context.read<ResponsiveNavigatorCubit>().state.routeMode) {
       selectedBackgroundColor = Color.alphaBlend(
         context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.05),
