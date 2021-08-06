@@ -37,6 +37,7 @@ class AttachmentUtil {
       receiveTimeout: 150 * 1000,
     ),
   );
+
   // todo
   final _messageIdCancelTokenMap = <String, dynamic?>{};
 
@@ -61,6 +62,8 @@ class AttachmentUtil {
           messageId,
           mimeType: attachmentMessage?.mimeType,
         );
+
+        if (await _isNotPending(messageId)) return null;
 
         try {
           _messageIdCancelTokenMap[messageId] = CancelToken();
@@ -111,13 +114,13 @@ class AttachmentUtil {
           await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
         } catch (err) {
           e(err.toString());
-          await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
+          await _messageDao.updateMediaStatusToCanceled(messageId);
         }
         return file.absolute.path;
       }
     } catch (er) {
       e(er.toString());
-      await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
+      await _messageDao.updateMediaStatusToCanceled(messageId);
     } finally {
       _messageIdCancelTokenMap[messageId] = null;
     }
@@ -130,14 +133,13 @@ class AttachmentUtil {
 
     try {
       final response = await _client.attachmentApi.postAttachment();
-      if (MediaStatus.pending !=
-          await _messageDao.mediaStatus(messageId).getSingleOrNull()) {
-        return null;
-      }
 
       if (response.data.uploadUrl != null) {
         List<int>? keys;
         List<int>? iv;
+
+        if (await _isNotPending(messageId)) return null;
+
         if (category.isSignal) {
           keys = generateRandomKey(64);
           iv = generateRandomKey(16);
@@ -153,7 +155,8 @@ class AttachmentUtil {
 
         _messageIdCancelTokenMap[messageId] = attachmentUploadJob;
         try {
-          final digest = await attachmentUploadJob.upload((int count, int total) {
+          final digest =
+              await attachmentUploadJob.upload((int count, int total) {
             v('utils $count / $total');
           });
           await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
@@ -163,25 +166,25 @@ class AttachmentUtil {
               category.isSignal ? await base64EncodeWithIsolate(digest!) : null,
               response.data.createdAt);
         } catch (e) {
-          await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
+          await _messageDao.updateMediaStatusToCanceled(messageId);
           return null;
         }
       } else {
-        await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
+        await _messageDao.updateMediaStatusToCanceled(messageId);
         return null;
       }
     } catch (e) {
       w(e.toString());
-      if (MediaStatus.pending !=
-          await _messageDao.mediaStatus(messageId).getSingleOrNull()) {
-        return null;
-      }
-      await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
+      await _messageDao.updateMediaStatusToCanceled(messageId);
       return null;
     } finally {
       _messageIdCancelTokenMap[messageId] = null;
     }
   }
+
+  Future<bool> _isNotPending(String messageId) async =>
+      MediaStatus.pending !=
+      await _messageDao.mediaStatus(messageId).getSingleOrNull();
 
   void deleteCryptoTmpFile(String category, File file) {
     if (category.isSignal) {
