@@ -88,9 +88,28 @@ class AttachmentOutputCipher {
 Uint8List _process(Tuple2<PaddedBlockCipher, List<int>> argument) =>
     argument.item1.process(Uint8List.fromList(argument.item2));
 
-void _processBlock(Tuple3<PaddedBlockCipher, List<int>, Uint8List> argument) =>
-    argument.item1
-        .processBlock(Uint8List.fromList(argument.item2), 0, argument.item3, 0);
+Uint8List _processBlocks(Tuple2<PaddedBlockCipher, List<int>> argument) =>
+    _processBlock(argument.item1, Uint8List.fromList(argument.item2));
+
+Uint8List _processBlock(PaddedBlockCipher cipher, Uint8List input) {
+  final output = Uint8List(input.lengthInBytes);
+  for (var offset = 0; offset < input.lengthInBytes;) {
+    offset += cipher.processBlock(input, offset, output, offset);
+  }
+  return output;
+}
+
+PaddedBlockCipher getAesCipher(
+    CBCBlockCipher cbcCipher, List<int> aesKey, List<int> iv) {
+  final ivParams = ParametersWithIV<KeyParameter>(
+      KeyParameter(Uint8List.fromList(aesKey)), Uint8List.fromList(iv));
+  final paddingParams =
+      // ignore: prefer_void_to_null
+      PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
+          ivParams, null);
+  return PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
+    ..init(true, paddingParams);
+}
 
 extension EncryptStreamExtension on Stream<List<int>> {
   Stream<List<int>> encrypt(
@@ -107,14 +126,7 @@ extension EncryptStreamExtension on Stream<List<int>> {
     final macSink = mac.startChunkedConversion(macOutput);
 
     final cbcCipher = CBCBlockCipher(AESFastEngine());
-    final ivParams = ParametersWithIV<KeyParameter>(
-        KeyParameter(Uint8List.fromList(aesKey)), Uint8List.fromList(iv));
-    final paddingParams =
-        // ignore: prefer_void_to_null
-        PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
-            ivParams, null);
-    final _aesCipher = PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
-      ..init(true, paddingParams);
+    var _aesCipher = getAesCipher(cbcCipher, aesKey, iv);
 
     final digestOutput = AccumulatorSink<cr.Digest>();
     final digestSink = cr.sha256.startChunkedConversion(digestOutput);
@@ -153,21 +165,23 @@ extension EncryptStreamExtension on Stream<List<int>> {
       final pause = subscription.pause;
       final resume = subscription.resume;
 
+      var lastBlock = iv;
       Future<List<int>> process(List<int> event) async {
         Uint8List ciphertext;
+        _aesCipher = getAesCipher(cbcCipher, aesKey, lastBlock);
         if (event.length < 65536) {
           ciphertext =
               await runLoadBalancer(_process, Tuple2(_aesCipher, event));
         } else {
-          ciphertext = Uint8List(event.length);
-          await runLoadBalancer(
-              _processBlock, Tuple3(_aesCipher, event, ciphertext));
+          ciphertext =
+              await runLoadBalancer(_processBlocks, Tuple2(_aesCipher, event));
         }
-        i('event len: ${event.length}, cipher len: ${ciphertext.length}');
         macSink.add(ciphertext);
         digestSink.add(ciphertext);
 
-        return ciphertext.toList();
+        final result = ciphertext.toList();
+        lastBlock = result.sublist(result.length - 16, result.length);
+        return result;
       }
 
       subscription.onData((List<int> event) {
