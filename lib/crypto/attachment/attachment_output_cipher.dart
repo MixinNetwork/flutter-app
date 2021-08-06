@@ -365,8 +365,8 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
     if (response.statusCode == 200) {
       options.sendPort.send(digest);
       options.sendPort.send(_killMessage);
+      return;
     }
-  } catch (e) {
-    options.sendPort.send(_killMessage);
-  }
+  } catch (_) {}
+  options.sendPort.send(_killMessage);
 }
