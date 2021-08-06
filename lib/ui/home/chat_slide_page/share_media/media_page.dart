@@ -206,7 +206,7 @@ class _Item extends StatelessWidget {
           }
         },
         child: Image.file(
-          File(message.mediaUrl ?? ''),
+          File(context.accountServer.convertMessageAbsolutePath(message)),
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => ImageByBase64(message.thumbImage!),
         ),
