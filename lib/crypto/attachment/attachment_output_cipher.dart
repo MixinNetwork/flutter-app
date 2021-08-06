@@ -307,6 +307,17 @@ extension _CiphertextLengthExtension on int {
   int get ciphertextLength => (16 + (((this ~/ 16) + 1) * 16) + 32).toInt();
 }
 
+final _dio = Dio(BaseOptions(
+  connectTimeout: 150 * 1000,
+  receiveTimeout: 150 * 1000,
+));
+
+Map<String, dynamic> headers = {
+  HttpHeaders.contentTypeHeader: 'application/octet-stream',
+  HttpHeaders.connectionHeader: 'close',
+  'x-amz-acl': 'public-read',
+};
+
 Future<void> _upload(_AttachmentUploadJobOption options) async {
   List<int>? digest;
   final CancelToken? cancelToken = CancelToken();
@@ -337,24 +348,17 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
   }
 
   try {
-    final response = await Dio(BaseOptions(
-      connectTimeout: 150 * 1000,
-      receiveTimeout: 150 * 1000,
-    )).putUri(
+    final response = await _dio.putUri(
       Uri.parse(options.url),
       data: uploadStream,
       options: Options(
         headers: {
-          HttpHeaders.contentTypeHeader: 'application/octet-stream',
-          HttpHeaders.connectionHeader: 'close',
+          ...headers,
           HttpHeaders.contentLengthHeader: length,
-          'x-amz-acl': 'public-read',
         },
       ),
-      onSendProgress: (int count, int total) {
-        v('$count / $total');
-        options.sendPort.send(Tuple2(count, total));
-      },
+      onSendProgress: (int count, int total) =>
+          options.sendPort.send(Tuple2(count, total)),
       cancelToken: cancelToken,
     );
 
