@@ -39,91 +39,89 @@ class ImageMessageWidget extends StatelessWidget {
           padding: EdgeInsets.zero,
           showNip: showNip,
           includeNip: true,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: InteractableDecoratedBox(
-              onTap: () {
-                switch (message.mediaStatus) {
-                  case MediaStatus.done:
-                    ImagePreviewPage.push(
-                      context,
-                      conversationId: message.conversationId,
-                      messageId: message.messageId,
-                    );
-                    break;
-                  case MediaStatus.canceled:
-                    if (message.relationship == UserRelationship.me &&
-                        message.mediaUrl?.isNotEmpty == true) {
-                      context.accountServer.reUploadAttachment(message);
-                    } else {
-                      context.accountServer.downloadAttachment(message);
-                    }
-                    break;
-                  case MediaStatus.pending:
-                    context.accountServer
-                        .cancelProgressAttachmentJob(message.messageId);
-                    break;
-                  default:
-                    break;
-                }
-              },
-              child: SizedBox(
-                height: height,
-                width: width,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.file(
-                      File(context.accountServer
-                          .convertMessageAbsolutePath(message)),
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
-                          imageData: message.thumbImage!),
+          clip: true,
+          child: InteractableDecoratedBox(
+            onTap: () {
+              switch (message.mediaStatus) {
+                case MediaStatus.done:
+                  ImagePreviewPage.push(
+                    context,
+                    conversationId: message.conversationId,
+                    messageId: message.messageId,
+                  );
+                  break;
+                case MediaStatus.canceled:
+                  if (message.relationship == UserRelationship.me &&
+                      message.mediaUrl?.isNotEmpty == true) {
+                    context.accountServer.reUploadAttachment(message);
+                  } else {
+                    context.accountServer.downloadAttachment(message);
+                  }
+                  break;
+                case MediaStatus.pending:
+                  context.accountServer
+                      .cancelProgressAttachmentJob(message.messageId);
+                  break;
+                default:
+                  break;
+              }
+            },
+            child: SizedBox(
+              height: height,
+              width: width,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.file(
+                    File(context.accountServer
+                        .convertMessageAbsolutePath(message)),
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        ImageByBlurHashOrBase64(imageData: message.thumbImage!),
+                  ),
+                  Center(
+                    child: Builder(
+                      builder: (BuildContext context) {
+                        switch (message.mediaStatus) {
+                          case MediaStatus.canceled:
+                            if (message.relationship == UserRelationship.me &&
+                                message.mediaUrl?.isNotEmpty == true) {
+                              return const StatusUpload();
+                            } else {
+                              return const StatusDownload();
+                            }
+                          case MediaStatus.pending:
+                            return const StatusPending();
+                          case MediaStatus.expired:
+                            return const StatusWarning();
+                          default:
+                            return const SizedBox();
+                        }
+                      },
                     ),
-                    Center(
-                      child: Builder(
-                        builder: (BuildContext context) {
-                          switch (message.mediaStatus) {
-                            case MediaStatus.canceled:
-                              if (message.relationship == UserRelationship.me &&
-                                  message.mediaUrl?.isNotEmpty == true) {
-                                return const StatusUpload();
-                              } else {
-                                return const StatusDownload();
-                              }
-                            case MediaStatus.pending:
-                              return const StatusPending();
-                            case MediaStatus.expired:
-                              return const StatusWarning();
-                            default:
-                              return const SizedBox();
-                          }
-                        },
+                  ),
+                  Positioned(
+                    bottom: 4,
+                    right: isCurrentUser ? 12 : 4,
+                    child: DecoratedBox(
+                      decoration: const ShapeDecoration(
+                        color: Color.fromRGBO(0, 0, 0, 0.3),
+                        shape: StadiumBorder(),
                       ),
-                    ),
-                    Positioned(
-                      bottom: 4,
-                      right: isCurrentUser ? 12 : 4,
-                      child: DecoratedBox(
-                        decoration: const ShapeDecoration(
-                          color: Color.fromRGBO(0, 0, 0, 0.3),
-                          shape: StadiumBorder(),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 3,
+                          horizontal: 5,
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 3,
-                            horizontal: 5,
-                          ),
-                          child: MessageDatetimeAndStatus(
-                            isCurrentUser: isCurrentUser,
-                            color: Colors.white,
-                            message: message,
-                          ),
+                        child: MessageDatetimeAndStatus(
+                          isCurrentUser: isCurrentUser,
+                          color: Colors.white,
+                          message: message,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),

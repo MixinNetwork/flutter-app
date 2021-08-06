@@ -65,17 +65,15 @@ class StickerMessageWidget extends StatelessWidget {
     final placeholder = Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: context.theme.stickerPlaceholderColor,
-        borderRadius: BorderRadius.circular(24),
-      ),
+      color: context.theme.stickerPlaceholderColor,
     );
     return MessageBubble(
       messageId: message.messageId,
-      showNip: true,
+      showNip: false,
       isCurrentUser: isCurrentUser,
       showBubble: false,
       padding: EdgeInsets.zero,
+      clip: true,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
         isCurrentUser: isCurrentUser,
         message: message,
