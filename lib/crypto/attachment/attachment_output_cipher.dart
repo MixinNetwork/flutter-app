@@ -85,17 +85,25 @@ class AttachmentOutputCipher {
       (16 + (((plaintextLength ~/ 16) + 1) * 16) + 32).toInt();
 }
 
-Uint8List _process(Tuple2<PaddedBlockCipher, List<int>> argument) =>
-    argument.item1.process(Uint8List.fromList(argument.item2));
+Uint8List _process(Tuple2<PaddedBlockCipher, List<int>> argument) {
+  final stopwatch = Stopwatch()..start();
+  final uint8list = argument.item1.process(Uint8List.fromList(argument.item2));
+  stopwatch.stop();
+  d('_process: ${stopwatch.elapsedMilliseconds}');
+  return uint8list;
+}
 
 Uint8List _processBlocks(Tuple2<PaddedBlockCipher, List<int>> argument) =>
     _processBlock(argument.item1, Uint8List.fromList(argument.item2));
 
 Uint8List _processBlock(PaddedBlockCipher cipher, Uint8List input) {
+  final stopwatch = Stopwatch()..start();
   final output = Uint8List(input.lengthInBytes);
   for (var offset = 0; offset < input.lengthInBytes;) {
     offset += cipher.processBlock(input, offset, output, offset);
   }
+  stopwatch.stop();
+  d('_processBlock: ${stopwatch.elapsedMilliseconds}');
   return output;
 }
 
