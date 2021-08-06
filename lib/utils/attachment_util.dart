@@ -37,7 +37,8 @@ class AttachmentUtil {
       receiveTimeout: 150 * 1000,
     ),
   );
-  final _messageIdCancelTokenMap = <String, CancelToken?>{};
+  // todo
+  final _messageIdCancelTokenMap = <String, dynamic?>{};
 
   Future<String?> downloadAttachment({
     required String messageId,
@@ -135,45 +136,33 @@ class AttachmentUtil {
       }
 
       if (response.data.uploadUrl != null) {
-        Stream<List<int>> uploadStream;
-        int length;
         List<int>? keys;
-        List<int>? digest;
+        List<int>? iv;
         if (category.isSignal) {
           keys = generateRandomKey(64);
-          final iv = generateRandomKey(16);
-          final fileLen = await file.length();
-          uploadStream =
-              file.openRead().encrypt(keys, iv, (_digest) => digest = _digest);
-          length = AttachmentOutputCipher.getCiphertextLength(fileLen);
-        } else {
-          length = await file.length();
-          uploadStream = file.openRead();
+          iv = generateRandomKey(16);
         }
 
-        _messageIdCancelTokenMap[messageId] = CancelToken();
-        final httpResponse = await _dio.putUri(
-          Uri.parse(response.data.uploadUrl!),
-          data: uploadStream,
-          options: Options(
-            headers: {
-              HttpHeaders.contentTypeHeader: 'application/octet-stream',
-              HttpHeaders.connectionHeader: 'close',
-              HttpHeaders.contentLengthHeader: length,
-              'x-amz-acl': 'public-read',
-            },
-          ),
-          onSendProgress: (int count, int total) => v('$count / $total'),
-          cancelToken: _messageIdCancelTokenMap[messageId],
+        final attachmentUploadJob = AttachmentUploadJob(
+          path: file.absolute.path,
+          url: response.data.uploadUrl!,
+          keys: keys,
+          iv: iv,
+          isSignal: category.isSignal,
         );
-        if (httpResponse.statusCode == 200) {
+
+        _messageIdCancelTokenMap[messageId] = attachmentUploadJob;
+        try {
+          final digest = await attachmentUploadJob.upload((int count, int total) {
+            v('utils $count / $total');
+          });
           await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
           return AttachmentResult(
               response.data.attachmentId,
               category.isSignal ? await base64EncodeWithIsolate(keys!) : null,
               category.isSignal ? await base64EncodeWithIsolate(digest!) : null,
               response.data.createdAt);
-        } else {
+        } catch (e) {
           await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
           return null;
         }
