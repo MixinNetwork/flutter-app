@@ -176,8 +176,12 @@ extension EncryptStreamExtension on Stream<List<int>> {
           ciphertext =
               await runLoadBalancer(_processBlocks, Tuple2(_aesCipher, event));
         }
+        final stopwatch = Stopwatch()..start();
         macSink.add(ciphertext);
         digestSink.add(ciphertext);
+        stopwatch.stop();
+
+        d('add ${stopwatch.elapsedMilliseconds}');
 
         final result = ciphertext.toList();
         lastBlock = result.sublist(result.length - 16, result.length);
