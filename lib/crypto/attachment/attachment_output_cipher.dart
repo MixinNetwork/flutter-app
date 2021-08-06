@@ -312,7 +312,7 @@ final _dio = Dio(BaseOptions(
   receiveTimeout: 150 * 1000,
 ));
 
-Map<String, dynamic> headers = {
+Map<String, dynamic> _headers = {
   HttpHeaders.contentTypeHeader: 'application/octet-stream',
   HttpHeaders.connectionHeader: 'close',
   'x-amz-acl': 'public-read',
@@ -353,7 +353,7 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
       data: uploadStream,
       options: Options(
         headers: {
-          ...headers,
+          ..._headers,
           HttpHeaders.contentLengthHeader: length,
         },
       ),
