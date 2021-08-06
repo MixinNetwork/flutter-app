@@ -159,7 +159,8 @@ extension EncryptStreamExtension on Stream<List<int>> {
     }
 
     controller.onListen = () {
-      final subscription = listen(
+      final subscription =
+          ChunkedStreamReader(this).readStream(_blockSize).listen(
         null, onError: addError, // Avoid Zone error replacement.
         onDone: () {
           macSink.close();
@@ -335,9 +336,8 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
   Stream<List<int>> uploadStream;
   int length;
   if (options.isSignal && options.keys != null && options.iv != null) {
-    uploadStream = ChunkedStreamReader(file.openRead())
-        .readStream(_blockSize)
-        .encrypt(options.keys!, options.iv!, (_digest) {
+    uploadStream =
+        file.openRead().encrypt(options.keys!, options.iv!, (_digest) {
       digest = _digest;
     });
 
