@@ -49,7 +49,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.7.0"
+    version: "2.8.1"
   bitsdojo_window:
     dependency: "direct main"
     description:
@@ -204,6 +204,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.0.1"
+  chunked_stream:
+    dependency: "direct main"
+    description:
+      name: chunked_stream
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.1"
   cli_util:
     dependency: transitive
     description:

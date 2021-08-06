@@ -8,7 +8,7 @@ import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
 
-import '../crypto/attachment/attachment_output_cipher.dart';
+import '../crypto/attachment/attachment_upload_job.dart';
 import '../crypto/attachment/crypto_attachment.dart';
 import '../db/dao/message_dao.dart';
 import '../db/extension/message_category.dart';
@@ -55,6 +55,8 @@ class AttachmentUtil {
       final response = await _client.attachmentApi.getAttachment(content);
       d('download ${response.data.viewUrl}');
 
+      if (await _isNotPending(messageId)) return null;
+
       if (response.data.viewUrl != null) {
         final file = getAttachmentFile(
           category,
@@ -62,8 +64,6 @@ class AttachmentUtil {
           messageId,
           mimeType: attachmentMessage?.mimeType,
         );
-
-        if (await _isNotPending(messageId)) return null;
 
         try {
           _messageIdCancelTokenMap[messageId] = CancelToken();
@@ -133,46 +133,35 @@ class AttachmentUtil {
 
     try {
       final response = await _client.attachmentApi.postAttachment();
+      if (response.data.uploadUrl == null) throw Error();
+      if (await _isNotPending(messageId)) return null;
 
-      if (response.data.uploadUrl != null) {
-        List<int>? keys;
-        List<int>? iv;
+      List<int>? keys;
+      List<int>? iv;
 
-        if (await _isNotPending(messageId)) return null;
-
-        if (category.isSignal) {
-          keys = generateRandomKey(64);
-          iv = generateRandomKey(16);
-        }
-
-        final attachmentUploadJob = AttachmentUploadJob(
-          path: file.absolute.path,
-          url: response.data.uploadUrl!,
-          keys: keys,
-          iv: iv,
-          isSignal: category.isSignal,
-        );
-
-        _messageIdCancelTokenMap[messageId] = attachmentUploadJob;
-        try {
-          final digest =
-              await attachmentUploadJob.upload((int count, int total) {
-            v('utils $count / $total');
-          });
-          await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
-          return AttachmentResult(
-              response.data.attachmentId,
-              category.isSignal ? await base64EncodeWithIsolate(keys!) : null,
-              category.isSignal ? await base64EncodeWithIsolate(digest!) : null,
-              response.data.createdAt);
-        } catch (e) {
-          await _messageDao.updateMediaStatusToCanceled(messageId);
-          return null;
-        }
-      } else {
-        await _messageDao.updateMediaStatusToCanceled(messageId);
-        return null;
+      if (category.isSignal) {
+        keys = generateRandomKey(64);
+        iv = generateRandomKey(16);
       }
+
+      final attachmentUploadJob = AttachmentUploadJob(
+        path: file.absolute.path,
+        url: response.data.uploadUrl!,
+        keys: keys,
+        iv: iv,
+        isSignal: category.isSignal,
+      );
+
+      _messageIdCancelTokenMap[messageId] = attachmentUploadJob;
+      final digest = await attachmentUploadJob.upload((int count, int total) {
+        v('utils $count / $total');
+      });
+      await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
+      return AttachmentResult(
+          response.data.attachmentId,
+          category.isSignal ? await base64EncodeWithIsolate(keys!) : null,
+          category.isSignal ? await base64EncodeWithIsolate(digest!) : null,
+          response.data.createdAt);
     } catch (e) {
       w(e.toString());
       await _messageDao.updateMediaStatusToCanceled(messageId);
