@@ -18,8 +18,7 @@ class EncryptedProtocol {
       String? extensionSessionId) {
     final key = generateRandomKey(16);
     final encryptedMessageData = aesGcmEncrypt(key, plainText);
-    final messageKey =
-        encryptCipherMessageKey(privateKey, otherPublicKey, key);
+    final messageKey = encryptCipherMessageKey(privateKey, otherPublicKey, key);
     final messageKeyWithSession = [
       ...Uuid.parse(otherSessionId),
       ...messageKey
@@ -28,13 +27,25 @@ class EncryptedProtocol {
     final senderPublicKey = otherPublicKey;
     final version = [0x01];
 
-    return [
-      ...version,
-      ...toLeByteArray(1),
-      ...senderPublicKey,
-      ...messageKeyWithSession,
-      ...encryptedMessageData
-    ];
+    if (extensionSessionKey != null && extensionSessionId != null) {
+      return [
+        ...version,
+        ...toLeByteArray(2),
+        ...senderPublicKey,
+        ...Uuid.parse(extensionSessionId),
+        ...encryptCipherMessageKey(privateKey, extensionSessionKey, key),
+        ...messageKeyWithSession,
+        ...encryptedMessageData
+      ];
+    } else {
+      return [
+        ...version,
+        ...toLeByteArray(1),
+        ...senderPublicKey,
+        ...messageKeyWithSession,
+        ...encryptedMessageData
+      ];
+    }
   }
 
   List<int> encryptCipherMessageKey(
