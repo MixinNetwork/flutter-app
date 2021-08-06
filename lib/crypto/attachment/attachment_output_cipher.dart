@@ -88,6 +88,10 @@ class AttachmentOutputCipher {
 Uint8List _process(Tuple2<PaddedBlockCipher, List<int>> argument) =>
     argument.item1.process(Uint8List.fromList(argument.item2));
 
+void _processBlock(Tuple3<PaddedBlockCipher, List<int>, Uint8List> argument) =>
+    argument.item1
+        .processBlock(Uint8List.fromList(argument.item2), 0, argument.item3, 0);
+
 extension EncryptStreamExtension on Stream<List<int>> {
   Stream<List<int>> encrypt(
     List<int> keys,
@@ -150,13 +154,20 @@ extension EncryptStreamExtension on Stream<List<int>> {
       final resume = subscription.resume;
 
       Future<List<int>> process(List<int> event) async {
-        i('event len: ${event.length}');
-        final uint8list =
-            await runLoadBalancer(_process, Tuple2(_aesCipher, event));
-        macSink.add(uint8list);
-        digestSink.add(uint8list);
+        Uint8List ciphertext;
+        if (event.length < 65536) {
+          ciphertext =
+              await runLoadBalancer(_process, Tuple2(_aesCipher, event));
+        } else {
+          ciphertext = Uint8List(event.length);
+          await runLoadBalancer(
+              _processBlock, Tuple3(_aesCipher, event, ciphertext));
+        }
+        i('event len: ${event.length}, cipher len: ${ciphertext.length}');
+        macSink.add(ciphertext);
+        digestSink.add(ciphertext);
 
-        return uint8list.toList();
+        return ciphertext.toList();
       }
 
       subscription.onData((List<int> event) {
