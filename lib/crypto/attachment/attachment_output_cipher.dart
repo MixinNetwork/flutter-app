@@ -82,7 +82,7 @@ class AttachmentOutputCipher {
   late final ByteConversionSink _digestSink;
 
   static int getCiphertextLength(int plaintextLength) =>
-      (16 + (((plaintextLength / 16) + 1) * 16) + 32).toInt();
+      (16 + (((plaintextLength ~/ 16) + 1) * 16) + 32).toInt();
 }
 
 Uint8List _process(Tuple2<PaddedBlockCipher, List<int>> argument) =>
@@ -150,6 +150,7 @@ extension EncryptStreamExtension on Stream<List<int>> {
       final resume = subscription.resume;
 
       Future<List<int>> process(List<int> event) async {
+        i('event len: ${event.length}');
         final uint8list =
             await runLoadBalancer(_process, Tuple2(_aesCipher, event));
         macSink.add(uint8list);
