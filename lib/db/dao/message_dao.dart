@@ -245,21 +245,23 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .write(MessagesCompanion(mediaStatus: Value(status))),
       );
 
-  Future<int> updateMediaStatusToCanceled(String messageId) =>
-      db.transaction(() async {
-        if (MediaStatus.canceled ==
-            await mediaStatus(messageId).getSingleOrNull()) {
-          return -1;
-        }
+  Future<int> updateMediaStatusToCanceled(String messageId) async {
+    final result = await db.transaction(() async {
+      if (MediaStatus.canceled ==
+          await mediaStatus(messageId).getSingleOrNull()) {
+        return -1;
+      }
 
-        return _sendInsertOrReplaceEventWithFuture(
-          [messageId],
-          (db.update(db.messages)
-                ..where((tbl) => tbl.messageId.equals(messageId)))
-              .write(const MessagesCompanion(
-                  mediaStatus: Value(MediaStatus.canceled))),
-        );
-      });
+      return (db.update(db.messages)
+            ..where((tbl) => tbl.messageId.equals(messageId)))
+          .write(const MessagesCompanion(
+              mediaStatus: Value(MediaStatus.canceled)));
+    });
+    if (result > -1) {
+      db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
+    }
+    return result;
+  }
 
   Selectable<MediaStatus?> mediaStatus(String messageId) =>
       (db.selectOnly(db.messages)
