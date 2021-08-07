@@ -21,7 +21,7 @@ import '../db/mixin_database.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
-import '../utils/attachment_util.dart';
+import '../utils/attachment/attachment_util.dart';
 import '../utils/datetime_format_utils.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';

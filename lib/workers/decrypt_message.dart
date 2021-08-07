@@ -37,7 +37,7 @@ import '../enum/message_status.dart';
 import '../enum/system_circle_action.dart';
 import '../enum/system_user_action.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
-import '../utils/attachment_util.dart';
+import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
@@ -7,16 +8,18 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
+import 'package:tuple/tuple.dart';
 
-import '../crypto/attachment/attachment_upload_job.dart';
-import '../crypto/attachment/crypto_attachment.dart';
-import '../db/dao/message_dao.dart';
-import '../db/extension/message_category.dart';
-import '../enum/media_status.dart';
-import 'crypto_util.dart';
-import 'file.dart';
-import 'load_balancer_utils.dart';
-import 'logger.dart';
+import '../../crypto/attachment/crypto_attachment.dart';
+import '../../db/dao/message_dao.dart';
+import '../../db/extension/message_category.dart';
+import '../../enum/media_status.dart';
+import '../crypto_util.dart';
+import '../file.dart';
+import '../load_balancer_utils.dart';
+import '../logger.dart';
+
+part 'attachment_upload_job.dart';
 
 class AttachmentUtil {
   AttachmentUtil(this._client, this._messageDao, this.mediaPath) {
@@ -72,6 +75,7 @@ class AttachmentUtil {
             Uri.parse(response.data.viewUrl!),
             file.absolute.path,
             options: Options(
+              responseType: ResponseType.stream,
               headers: {
                 HttpHeaders.contentTypeHeader: 'application/octet-stream',
               },

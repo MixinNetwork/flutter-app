@@ -33,7 +33,7 @@ import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
-import '../utils/attachment_util.dart';
+import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
