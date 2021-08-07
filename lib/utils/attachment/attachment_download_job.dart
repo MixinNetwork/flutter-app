@@ -90,12 +90,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
       transformStream: (Stream<List<int>> stream, int total) {
         var _stream = stream;
         if (options.keys != null && options.digest != null) {
-          _stream = _stream;
-          // todo
-          // .decrypt(
-          //   keys: options.keys,
-          //   digest: options.digest,
-          // );
+          _stream = _stream.decrypt(options.keys!, options.digest!, total);
         }
         return _stream.doOnData((event) {
           received += event.length;

@@ -7,6 +7,7 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as cr;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/utils/logger.dart';
 import 'package:pointycastle/api.dart';
 import 'package:pointycastle/block/aes_fast.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
@@ -17,6 +18,8 @@ import 'package:tuple/tuple.dart';
 import '../../utils/crypto_util.dart';
 
 const int _blockSize = 64 * 1024;
+const int _macSize = 16;
+const int _cbcBlockSize = 16;
 
 class CryptoAttachment {
   List<int> decryptAttachment(
@@ -67,6 +70,7 @@ PaddedBlockCipher _getAesCipher(
   CBCBlockCipher cbcCipher,
   List<int> aesKey,
   List<int> iv,
+  bool forEncryption,
 ) {
   final ivParams = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(aesKey)), Uint8List.fromList(iv));
@@ -75,10 +79,149 @@ PaddedBlockCipher _getAesCipher(
       PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
           ivParams, null);
   return PaddedBlockCipherImpl(PKCS7Padding(), cbcCipher)
-    ..init(true, paddingParams);
+    ..init(forEncryption, paddingParams);
 }
 
 extension EncryptAttachmentStreamExtension on Stream<List<int>> {
+  Stream<List<int>> decrypt(
+    List<int> keys,
+    List<int> iv,
+    int total,
+  ) =>
+      bufferChunkedStream(this, bufferSize: _blockSize)
+          ._decrypt(keys, iv, total);
+
+  Stream<List<int>> _decrypt(
+    List<int> keys,
+    List<int> digest,
+    int total,
+  ) {
+    if (isBroadcast) throw ArgumentError('Stream must be not broadcast.');
+
+    final aesKey = keys.sublist(0, 32);
+    final macKey = keys.sublist(32, 64);
+    final mac = cr.Hmac(cr.sha256, macKey);
+    final macOutput = AccumulatorSink<cr.Digest>();
+    final macSink = mac.startChunkedConversion(macOutput);
+
+    final cbcCipher = CBCBlockCipher(AESFastEngine());
+
+    final digestOutput = AccumulatorSink<cr.Digest>();
+    final digestSink = cr.sha256.startChunkedConversion(digestOutput);
+
+    final controller = StreamController<List<int>>();
+
+    void close() {
+      macSink.close();
+      digestSink.close();
+    }
+
+    void addError(Object error, [StackTrace? stackTrace]) {
+      close();
+      controller.addError(error, stackTrace);
+    }
+
+    controller.onListen = () {
+      List<int>? theirMac;
+
+      final subscription = listen(
+        null,
+        onError: addError,
+        onDone: () {
+          macSink.close();
+          final mac = macOutput.events.single.bytes;
+          if (!listEquals(theirMac, mac)) {
+            i('MAC doesn\'t match!');
+            // TODO delete local file or make file disabled
+            return;
+          }
+
+          digestSink
+            ..add(mac)
+            ..close();
+          final ourDigest = digestOutput.events.single.bytes;
+          if (!listEquals(ourDigest, digest)) {
+            i('Digest doesn\'t match!');
+            // TODO delete local file or make file disabled
+            return;
+          }
+
+          controller
+            ..add(mac)
+            ..close();
+        },
+      );
+
+      final pause = subscription.pause;
+      final resume = subscription.resume;
+
+      List<int>? iv;
+      PaddedBlockCipher _aesCipher;
+      var fileRemain = total - _macSize;
+      List<int>? firstPartTheirMac;
+      Future<List<int>> process(List<int> event) async {
+        var plaintext = event;
+        if (iv == null) {
+          if (event.length < _cbcBlockSize) {
+            // TODO invalid stream should throw exception or end this download
+            return event;
+          }
+          iv = event.sublist(0, _cbcBlockSize);
+          macSink.add(iv!);
+          digestSink.add(iv!);
+          plaintext = event.sublist(_cbcBlockSize, event.length);
+        }
+
+        Uint8List ciphertext;
+        _aesCipher = _getAesCipher(cbcCipher, aesKey, iv!, false);
+
+        fileRemain -= _blockSize;
+        i('event length: ${event.length}, fileRemain: $fileRemain');
+        if (event.length == _blockSize && fileRemain >= 0) {
+          final input = Uint8List.fromList(plaintext);
+          ciphertext = Uint8List(input.lengthInBytes);
+          for (var offset = 0; offset < input.lengthInBytes;) {
+            offset +=
+                _aesCipher.processBlock(input, offset, ciphertext, offset);
+          }
+        } else if (event.length == _blockSize && fileRemain < 0) {
+          firstPartTheirMac =
+              event.sublist(event.length + fileRemain, event.length);
+          ciphertext = _aesCipher.process(Uint8List.fromList(
+              plaintext.sublist(0, plaintext.length + fileRemain)));
+        } else if (event.length < _blockSize && fileRemain >= 0) {
+          ciphertext = _aesCipher.process(Uint8List.fromList(
+              plaintext.sublist(0, plaintext.length - _macSize)));
+        } else {
+          theirMac = List.from(firstPartTheirMac!)..addAll(plaintext);
+          ciphertext = Uint8List.fromList([]);
+        }
+
+        macSink.add(ciphertext);
+        digestSink.add(ciphertext);
+
+        final result = ciphertext.toList();
+        iv = result.sublist(result.length - _cbcBlockSize, result.length);
+        return result;
+      }
+
+      subscription.onData((List<int> event) {
+        pause();
+        process(event)
+            .then(controller.add, onError: addError)
+            .whenComplete(resume);
+      });
+      controller
+        ..onCancel = () {
+          close();
+          subscription.cancel();
+        }
+        ..onPause = pause
+        ..onResume = resume;
+    };
+    return controller.stream;
+  }
+
   Stream<List<int>> encrypt(
     List<int> keys,
     List<int> iv,
@@ -101,7 +244,7 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
     final macSink = mac.startChunkedConversion(macOutput);
 
     final cbcCipher = CBCBlockCipher(AESFastEngine());
-    var _aesCipher = _getAesCipher(cbcCipher, aesKey, iv);
+    var _aesCipher = _getAesCipher(cbcCipher, aesKey, iv, true);
 
     final digestOutput = AccumulatorSink<cr.Digest>();
     final digestSink = cr.sha256.startChunkedConversion(digestOutput);
@@ -144,7 +287,7 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
       var lastBlock = iv;
       Future<List<int>> process(List<int> event) async {
         Uint8List ciphertext;
-        _aesCipher = _getAesCipher(cbcCipher, aesKey, lastBlock);
+        _aesCipher = _getAesCipher(cbcCipher, aesKey, lastBlock, true);
         final input = Uint8List.fromList(event);
         if (event.length < _blockSize) {
           ciphertext = _aesCipher.process(input);
@@ -159,7 +302,8 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
         digestSink.add(ciphertext);
 
         final result = ciphertext.toList();
-        lastBlock = result.sublist(result.length - 16, result.length);
+        lastBlock =
+            result.sublist(result.length - _cbcBlockSize, result.length);
         return result;
       }
 
