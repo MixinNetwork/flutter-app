@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:core';
 import 'dart:typed_data';
 
-import 'package:chunked_stream/chunked_stream.dart';
+import 'package:async/async.dart';
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart' as cr;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/utils/logger.dart';
 import 'package:pointycastle/api.dart';
 import 'package:pointycastle/block/aes_fast.dart';
 import 'package:pointycastle/block/modes/cbc.dart';
@@ -16,6 +15,7 @@ import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../utils/crypto_util.dart';
+import '../../utils/logger.dart';
 
 const int _blockSize = 64 * 1024;
 const int _macSize = 16;
@@ -82,14 +82,56 @@ PaddedBlockCipher _getAesCipher(
     ..init(forEncryption, paddingParams);
 }
 
+extension _StreamExtension on Stream<List<int>> {
+  Stream<List<int>> chunkSize([int chunkSize = _blockSize]) {
+    final streamController = StreamController<List<int>>();
+    final chunkedStreamReader = ChunkedStreamReader(this);
+
+    Future<void>? future;
+    late Future<void> Function() addChunk;
+    var pending = false;
+
+    void updateFuture() => future = addChunk();
+
+    addChunk = () async {
+      if (streamController.isClosed) return;
+      if (pending) return;
+
+      pending = true && !streamController.isPaused;
+
+      final chunk = await chunkedStreamReader.readChunk(chunkSize);
+      if (streamController.isClosed) return;
+      streamController.add(chunk);
+      pending = false;
+
+      future = null;
+      if (chunk.length < chunkSize) {
+        await streamController.close();
+        return;
+      }
+      if (streamController.isPaused) return;
+      updateFuture();
+    };
+
+    streamController
+      ..onResume = (() {
+        if (pending) return;
+        if (future == null) return updateFuture();
+        future?.whenComplete(updateFuture);
+      })
+      ..onListen = updateFuture;
+
+    return streamController.stream;
+  }
+}
+
 extension DecryptAttachmentStreamExtension on Stream<List<int>> {
   Stream<List<int>> decrypt(
     List<int> keys,
     List<int> iv,
     int total,
   ) =>
-      bufferChunkedStream(this, bufferSize: _blockSize)
-          ._decrypt(keys, iv, total);
+      chunkSize(_blockSize)._decrypt(keys, iv, total);
 
   Stream<List<int>> _decrypt(
     List<int> keys,
@@ -229,8 +271,7 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
     List<int> iv,
     void Function(List<int>) digestCallback,
   ) =>
-      bufferChunkedStream(this, bufferSize: _blockSize)
-          ._encrypt(keys, iv, digestCallback);
+      chunkSize(_blockSize)._encrypt(keys, iv, digestCallback);
 
   Stream<List<int>> _encrypt(
     List<int> keys,
