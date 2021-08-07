@@ -1,21 +1,14 @@
 part of 'attachment_util.dart';
 
-const _killMessage = 'kill';
-
-extension _CiphertextLengthExtension on int {
-  int get ciphertextLength => (16 + (((this ~/ 16) + 1) * 16) + 32).toInt();
-}
-
-final _dio = Dio(BaseOptions(
-  connectTimeout: 150 * 1000,
-  receiveTimeout: 150 * 1000,
-));
-
-Map<String, dynamic> _headers = {
+Map<String, dynamic> _uploadHeaders = {
   HttpHeaders.contentTypeHeader: 'application/octet-stream',
   HttpHeaders.connectionHeader: 'close',
   'x-amz-acl': 'public-read',
 };
+
+extension _CiphertextLengthExtension on int {
+  int get ciphertextLength => (16 + (((this ~/ 16) + 1) * 16) + 32).toInt();
+}
 
 class _AttachmentUploadJobOption {
   _AttachmentUploadJobOption({
@@ -23,7 +16,6 @@ class _AttachmentUploadJobOption {
     required this.url,
     required this.keys,
     required this.iv,
-    required this.isSignal,
     required this.sendPort,
   });
 
@@ -31,24 +23,21 @@ class _AttachmentUploadJobOption {
   final String url;
   final List<int>? keys;
   final List<int>? iv;
-  final bool isSignal;
   final SendPort sendPort;
 }
 
-class AttachmentUploadJob {
+class AttachmentUploadJob implements AttachmentJobBase {
   AttachmentUploadJob({
     required this.path,
     required this.url,
     this.keys,
     this.iv,
-    required this.isSignal,
   });
 
   final String path;
   final String url;
   final List<int>? keys;
   final List<int>? iv;
-  final bool isSignal;
 
   late final ReceivePort? _receivePort;
 
@@ -83,16 +72,14 @@ class AttachmentUploadJob {
           url: url,
           keys: keys,
           iv: iv,
-          isSignal: isSignal,
           sendPort: _receivePort!.sendPort,
         ));
 
     return completer.future;
   }
 
-  void cancel() {
-    _receivePort?.sendPort.send(_killMessage);
-  }
+  @override
+  void cancel() => _receivePort?.sendPort.send(_killMessage);
 }
 
 Future<void> _upload(_AttachmentUploadJobOption options) async {
@@ -108,7 +95,7 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
 
   Stream<List<int>> uploadStream;
   int length;
-  if (options.isSignal && options.keys != null && options.iv != null) {
+  if (options.keys != null && options.iv != null) {
     uploadStream =
         file.openRead().encrypt(options.keys!, options.iv!, (_digest) {
       digest = _digest;
@@ -126,7 +113,7 @@ Future<void> _upload(_AttachmentUploadJobOption options) async {
       data: uploadStream,
       options: Options(
         headers: {
-          ..._headers,
+          ..._uploadHeaders,
           HttpHeaders.contentLengthHeader: length,
         },
       ),

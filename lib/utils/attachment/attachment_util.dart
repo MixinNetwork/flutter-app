@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
@@ -8,6 +9,7 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../crypto/attachment/crypto_attachment.dart';
@@ -19,7 +21,21 @@ import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
 
+part 'attachment_download_job.dart';
+
 part 'attachment_upload_job.dart';
+
+final _dio = Dio(BaseOptions(
+  connectTimeout: 150 * 1000,
+  receiveTimeout: 150 * 1000,
+));
+
+// isolate kill message
+const _killMessage = 'kill';
+
+mixin AttachmentJobBase {
+  void cancel();
+}
 
 class AttachmentUtil {
   AttachmentUtil(this._client, this._messageDao, this.mediaPath) {
@@ -42,7 +58,7 @@ class AttachmentUtil {
   );
 
   // todo
-  final _messageIdCancelTokenMap = <String, dynamic?>{};
+  final _messageIdCancelTokenMap = <String, AttachmentJobBase>{};
 
   Future<String?> downloadAttachment({
     required String messageId,
@@ -69,44 +85,45 @@ class AttachmentUtil {
         );
 
         try {
-          _messageIdCancelTokenMap[messageId] = CancelToken();
-
-          await _dio.downloadUri(
-            Uri.parse(response.data.viewUrl!),
-            file.absolute.path,
-            options: Options(
-              responseType: ResponseType.stream,
-              headers: {
-                HttpHeaders.contentTypeHeader: 'application/octet-stream',
-              },
-            ),
-            cancelToken: _messageIdCancelTokenMap[messageId],
-          );
+          String? mediaKey;
+          String? mediaDigest;
 
           if (category.isSignal) {
-            var localKey = attachmentMessage?.key;
-            var localDigest = attachmentMessage?.digest;
-            if (localKey == null || localDigest == null) {
+            mediaKey = attachmentMessage?.key;
+            mediaDigest = attachmentMessage?.digest;
+            if (mediaKey == null || mediaDigest == null) {
               final message =
                   await _messageDao.findMessageByMessageId(messageId);
               if (message != null) {
-                localKey = message.mediaKey;
-                localDigest = message.mediaDigest;
+                mediaKey = message.mediaKey;
+                mediaDigest = message.mediaDigest;
               }
-              if (localKey == null || localDigest == null) {
+              if (mediaKey == null || mediaDigest == null) {
                 throw InvalidKeyException(
                     'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
               }
             }
-            final result = CryptoAttachment().decryptAttachment(
-              file.readAsBytesSync(),
-              await base64DecodeWithIsolate(localKey),
-              await base64DecodeWithIsolate(localDigest),
-            );
-            file.writeAsBytesSync(result);
           }
 
+          final attachmentDownloadJob = AttachmentDownloadJob(
+            path: file.absolute.path,
+            url: response.data.viewUrl!,
+            keys: mediaKey != null
+                ? await base64DecodeWithIsolate(mediaKey)
+                : null,
+            digest: mediaDigest != null
+                ? await base64DecodeWithIsolate(mediaDigest)
+                : null,
+          );
+
+          _messageIdCancelTokenMap[messageId] = attachmentDownloadJob;
+
+          await attachmentDownloadJob.download((int count, int total) {
+            v('utils $count / $total');
+          });
+
           final fileSize = await file.length();
+
           if (attachmentMessage != null) {
             final encoded =
                 await jsonBase64EncodeWithIsolate(attachmentMessage);
@@ -126,7 +143,8 @@ class AttachmentUtil {
       e(er.toString());
       await _messageDao.updateMediaStatusToCanceled(messageId);
     } finally {
-      _messageIdCancelTokenMap[messageId] = null;
+      _messageIdCancelTokenMap[messageId]?.cancel();
+      _messageIdCancelTokenMap.remove(messageId);
     }
   }
 
@@ -153,7 +171,6 @@ class AttachmentUtil {
         url: response.data.uploadUrl!,
         keys: keys,
         iv: iv,
-        isSignal: category.isSignal,
       );
 
       _messageIdCancelTokenMap[messageId] = attachmentUploadJob;
@@ -171,7 +188,8 @@ class AttachmentUtil {
       await _messageDao.updateMediaStatusToCanceled(messageId);
       return null;
     } finally {
-      _messageIdCancelTokenMap[messageId] = null;
+      _messageIdCancelTokenMap[messageId]?.cancel();
+      _messageIdCancelTokenMap.remove(messageId);
     }
   }
 
@@ -264,7 +282,7 @@ class AttachmentUtil {
     await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
     if (_messageIdCancelTokenMap[messageId] == null) return false;
     _messageIdCancelTokenMap[messageId]?.cancel();
-    _messageIdCancelTokenMap[messageId] = null;
+    _messageIdCancelTokenMap.remove(messageId);
     return true;
   }
 }
