@@ -16,8 +16,8 @@ class _AttachmentDownloadJobOption {
   final SendPort sendPort;
 }
 
-class AttachmentDownloadJob implements AttachmentJobBase {
-  AttachmentDownloadJob({
+class _AttachmentDownloadJob implements _AttachmentJobBase {
+  _AttachmentDownloadJob({
     required this.path,
     required this.url,
     this.keys,

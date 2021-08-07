@@ -33,7 +33,7 @@ final _dio = Dio(BaseOptions(
 // isolate kill message
 const _killMessage = 'kill';
 
-mixin AttachmentJobBase {
+mixin _AttachmentJobBase {
   void cancel();
 }
 
@@ -57,8 +57,7 @@ class AttachmentUtil {
     ),
   );
 
-  // todo
-  final _messageIdCancelTokenMap = <String, AttachmentJobBase>{};
+  final _messageIdCancelTokenMap = <String, _AttachmentJobBase>{};
 
   Future<String?> downloadAttachment({
     required String messageId,
@@ -105,7 +104,7 @@ class AttachmentUtil {
             }
           }
 
-          final attachmentDownloadJob = AttachmentDownloadJob(
+          final attachmentDownloadJob = _AttachmentDownloadJob(
             path: file.absolute.path,
             url: response.data.viewUrl!,
             keys: mediaKey != null
@@ -166,7 +165,7 @@ class AttachmentUtil {
         iv = generateRandomKey(16);
       }
 
-      final attachmentUploadJob = AttachmentUploadJob(
+      final attachmentUploadJob = _AttachmentUploadJob(
         path: file.absolute.path,
         url: response.data.uploadUrl!,
         keys: keys,
