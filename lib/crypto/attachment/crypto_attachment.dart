@@ -82,7 +82,7 @@ PaddedBlockCipher _getAesCipher(
     ..init(forEncryption, paddingParams);
 }
 
-extension EncryptAttachmentStreamExtension on Stream<List<int>> {
+extension DecryptAttachmentStreamExtension on Stream<List<int>> {
   Stream<List<int>> decrypt(
     List<int> keys,
     List<int> iv,
@@ -221,7 +221,9 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
     };
     return controller.stream;
   }
+}
 
+extension EncryptAttachmentStreamExtension on Stream<List<int>> {
   Stream<List<int>> encrypt(
     List<int> keys,
     List<int> iv,
