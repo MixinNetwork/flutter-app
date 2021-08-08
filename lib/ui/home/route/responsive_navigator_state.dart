@@ -3,15 +3,15 @@ part of 'responsive_navigator_cubit.dart';
 class ResponsiveNavigatorState extends Equatable {
   const ResponsiveNavigatorState({
     this.pages = const [],
-    this.navigationMode = false,
+    this.routeMode = false,
   });
 
   final List<MaterialPage> pages;
-  final bool navigationMode;
+  final bool routeMode;
 
   @override
   List<Object?> get props => [
-        navigationMode,
+        routeMode,
         ...pages.map((e) => Tuple4(
               e.key,
               e.name,
@@ -22,10 +22,10 @@ class ResponsiveNavigatorState extends Equatable {
 
   ResponsiveNavigatorState copyWith({
     final List<MaterialPage>? pages,
-    final bool? navigationMode,
+    final bool? routeMode,
   }) =>
       ResponsiveNavigatorState(
         pages: pages ?? this.pages,
-        navigationMode: navigationMode ?? this.navigationMode,
+        routeMode: routeMode ?? this.routeMode,
       );
 }

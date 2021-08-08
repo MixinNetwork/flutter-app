@@ -187,7 +187,9 @@ class _Item extends StatelessWidget {
               suggestedName: message.mediaName ?? basename(message.mediaUrl!),
             );
             if (path?.isEmpty ?? true) return;
-            await File(message.mediaUrl!).copy(path!);
+            await File(
+                    context.accountServer.convertMessageAbsolutePath(message))
+                .copy(path!);
           }
         },
         child: Padding(

@@ -409,9 +409,11 @@ class _QuoteMessageBase extends StatelessWidget {
                 SizedBox(
                   width: 48,
                   height: 48,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: image,
+                  child: RepaintBoundary(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: image,
+                    ),
                   ),
                 ),
             ],

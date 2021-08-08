@@ -48,6 +48,7 @@ class VideoMessageWidget extends StatelessWidget {
             padding: EdgeInsets.zero,
             showNip: showNip,
             includeNip: true,
+            clip: true,
             child: InteractableDecoratedBox(
               onTap: () {
                 if (message.mediaStatus == MediaStatus.canceled) {

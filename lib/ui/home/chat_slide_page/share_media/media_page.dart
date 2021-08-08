@@ -35,8 +35,8 @@ class MediaPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final column = useMemoized(() => maxHeight / 90 * 2, [maxHeight]).toInt();
-    final navigationMode = context.read<ChatSideCubit>().state.navigationMode;
-    final size = column * (navigationMode ? 4 : 3);
+    final routeMode = context.read<ChatSideCubit>().state.routeMode;
+    final size = column * (routeMode ? 4 : 3);
 
     final messageDao = context.database.messageDao;
 
@@ -154,7 +154,7 @@ class MediaPage extends HookWidget {
                         childCount: e.value.length,
                       ),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: navigationMode ? 4 : 3,
+                        crossAxisCount: routeMode ? 4 : 3,
                         mainAxisSpacing: 5,
                         crossAxisSpacing: 5,
                       ),
@@ -206,7 +206,7 @@ class _Item extends StatelessWidget {
           }
         },
         child: Image.file(
-          File(message.mediaUrl ?? ''),
+          File(context.accountServer.convertMessageAbsolutePath(message)),
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => ImageByBase64(message.thumbImage!),
         ),

@@ -14,8 +14,8 @@ abstract class AbstractResponsiveNavigatorCubit
   AbstractResponsiveNavigatorCubit(ResponsiveNavigatorState initialState)
       : super(initialState);
 
-  void updateNavigationMode(bool navigationMode) =>
-      emit(state.copyWith(navigationMode: navigationMode));
+  void updateRouteMode(bool routeMode) =>
+      emit(state.copyWith(routeMode: routeMode));
 
   void onPopPage() {
     final bool = state.pages.isNotEmpty == true;
@@ -84,11 +84,11 @@ class ResponsiveNavigator extends HookWidget {
       bloc: responsiveNavigatorCubit,
     );
     return LayoutBuilder(builder: (context, boxConstraints) {
-      final navigationMode = boxConstraints.maxWidth < switchWidth;
-      responsiveNavigatorCubit.updateNavigationMode(navigationMode);
+      final routeMode = boxConstraints.maxWidth < switchWidth;
+      responsiveNavigatorCubit.updateRouteMode(routeMode);
       return Row(
         children: [
-          if (!navigationMode) leftPage.child,
+          if (!routeMode) leftPage.child,
           Expanded(
             child: ClipRect(
               child: Navigator(
@@ -103,8 +103,8 @@ class ResponsiveNavigator extends HookWidget {
                   return route.didPop(result);
                 },
                 pages: [
-                  if (navigationMode) leftPage,
-                  if (!navigationMode && responsiveNavigatorState.pages.isEmpty)
+                  if (routeMode) leftPage,
+                  if (!routeMode && responsiveNavigatorState.pages.isEmpty)
                     rightEmptyPage,
                   ...responsiveNavigatorState.pages,
                 ],

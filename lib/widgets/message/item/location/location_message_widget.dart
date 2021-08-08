@@ -44,6 +44,7 @@ class LocationMessageWidget extends HookWidget {
       ),
       showNip: showNip,
       includeNip: true,
+      clip: true,
       child: SizedBox(
         width: 260,
         height: 180,
