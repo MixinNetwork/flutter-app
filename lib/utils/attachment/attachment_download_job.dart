@@ -93,8 +93,8 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
           HttpHeaders.contentTypeHeader: 'application/octet-stream',
         },
       ),
-      transformStream: (Stream<List<int>> stream, int total) {
-        var _stream = stream;
+      transformStream: (Stream<Uint8List> stream, int total) {
+        var _stream = stream.cast<List<int>>();
         if (options.keys != null && options.digest != null) {
           _stream = _stream.decrypt(options.keys!, options.digest!, total);
         }
@@ -108,7 +108,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
 
     if (response.statusCode != 200) throw Error();
     options.sendPort.send(_completeMessage);
-  } catch (_) {}
+  } catch (e) {}
   options.sendPort.send(_killMessage);
 }
 
