@@ -111,4 +111,19 @@ void main() {
         encrypted.sublist(0, 16));
     assert(listEquals(aesGcmKey, decrypted));
   });
+
+  test('calculateAgreement', () {
+    final senderKey = ed.generateKey();
+    final senderPrivate = privateKeyToCurve25519(Uint8List.fromList(senderKey.privateKey.bytes));
+    final senderPublic = publicKeyToCurve25519(Uint8List.fromList(senderKey.publicKey.bytes));
+
+    final receiverKey = ed.generateKey();
+    final receiverPrivate = privateKeyToCurve25519(Uint8List.fromList(receiverKey.privateKey.bytes));
+    final receiverPublic = publicKeyToCurve25519(Uint8List.fromList(receiverKey.publicKey.bytes));
+
+    final senderSecret = calculateAgreement(receiverPublic, senderPrivate);
+
+    final receiverSecret = calculateAgreement(senderPublic, receiverPrivate);
+    assert(listEquals(senderSecret, receiverSecret));
+  });
 }
