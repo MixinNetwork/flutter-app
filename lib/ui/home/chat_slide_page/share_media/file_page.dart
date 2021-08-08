@@ -227,8 +227,8 @@ class _Item extends StatelessWidget {
                         final _lookupMimeType =
                             lookupMimeType(message.mediaName!);
                         if (_lookupMimeType != null) {
-                          extension = extensionFromMime(_lookupMimeType)
-                              .toUpperCase();
+                          extension =
+                              extensionFromMime(_lookupMimeType).toUpperCase();
                         }
                       }
                       return Text(
