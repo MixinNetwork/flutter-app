@@ -108,7 +108,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
 
     if (response.statusCode != 200) throw Error();
     options.sendPort.send(_completeMessage);
-  } catch (e) {}
+  } catch (_) {}
   options.sendPort.send(_killMessage);
 }
 
