@@ -126,14 +126,13 @@ class _StatusLayout extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => SizedBox.fromSize(
-        size: const Size.square(38),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: context.theme.statusBackground,
-            shape: BoxShape.circle,
-          ),
-          child: child,
+  Widget build(BuildContext context) => Container(
+        height: 38,
+        width: 38,
+        decoration: BoxDecoration(
+          color: context.theme.statusBackground,
+          shape: BoxShape.circle,
         ),
+        child: child,
       );
 }

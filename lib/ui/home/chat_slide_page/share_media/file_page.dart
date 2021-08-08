@@ -196,53 +196,51 @@ class _Item extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Row(
             children: [
-              ClipOval(
-                child: SizedBox.fromSize(
-                  size: const Size.square(50),
-                  child: Builder(builder: (context) {
-                    switch (message.mediaStatus) {
-                      case MediaStatus.canceled:
-                        if (message.relationship == UserRelationship.me &&
-                            message.mediaUrl?.isNotEmpty == true) {
-                          return const StatusUpload();
-                        } else {
-                          return const StatusDownload();
-                        }
-                      case MediaStatus.pending:
-                        return StatusPending(messageId: message.messageId);
-                      case MediaStatus.expired:
-                        return const StatusWarning();
-                      default:
-                        break;
-                    }
+              SizedBox.fromSize(
+                size: const Size.square(50),
+                child: Builder(builder: (context) {
+                  switch (message.mediaStatus) {
+                    case MediaStatus.canceled:
+                      if (message.relationship == UserRelationship.me &&
+                          message.mediaUrl?.isNotEmpty == true) {
+                        return const StatusUpload();
+                      } else {
+                        return const StatusDownload();
+                      }
+                    case MediaStatus.pending:
+                      return StatusPending(messageId: message.messageId);
+                    case MediaStatus.expired:
+                      return const StatusWarning();
+                    default:
+                      break;
+                  }
 
-                    return DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: context.theme.statusBackground,
-                      ),
-                      child: Center(
-                        child: Builder(builder: (context) {
-                          var extension = 'FILE';
-                          if (message.mediaName != null) {
-                            final _lookupMimeType =
-                                lookupMimeType(message.mediaName!);
-                            if (_lookupMimeType != null) {
-                              extension = extensionFromMime(_lookupMimeType)
-                                  .toUpperCase();
-                            }
-                          }
-                          return Text(
-                            extension,
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: lightBrightnessThemeData.secondaryText,
-                            ),
-                          );
-                        }),
-                      ),
-                    );
-                  }),
-                ),
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: context.theme.statusBackground,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Builder(builder: (context) {
+                      var extension = 'FILE';
+                      if (message.mediaName != null) {
+                        final _lookupMimeType =
+                            lookupMimeType(message.mediaName!);
+                        if (_lookupMimeType != null) {
+                          extension = extensionFromMime(_lookupMimeType)
+                              .toUpperCase();
+                        }
+                      }
+                      return Text(
+                        extension,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: lightBrightnessThemeData.secondaryText,
+                        ),
+                      );
+                    }),
+                  );
+                }),
               ),
               const SizedBox(width: 10),
               Column(

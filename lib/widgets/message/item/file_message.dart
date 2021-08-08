@@ -11,7 +11,6 @@ import 'package:path/path.dart';
 import '../../../constants/brightness_theme_data.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
-
 import '../../../utils/extension/extension.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
@@ -70,55 +69,51 @@ class FileMessage extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              ClipOval(
-                child: Builder(builder: (context) {
-                  switch (message.mediaStatus) {
-                    case MediaStatus.canceled:
-                      if (message.relationship == UserRelationship.me &&
-                          message.mediaUrl?.isNotEmpty == true) {
-                        return const StatusUpload();
-                      } else {
-                        return const StatusDownload();
-                      }
-                    case MediaStatus.pending:
-                      return StatusPending(messageId: message.messageId);
-                    case MediaStatus.expired:
-                      return const StatusWarning();
-                    default:
-                      break;
-                  }
+              Builder(builder: (context) {
+                switch (message.mediaStatus) {
+                  case MediaStatus.canceled:
+                    if (message.relationship == UserRelationship.me &&
+                        message.mediaUrl?.isNotEmpty == true) {
+                      return const StatusUpload();
+                    } else {
+                      return const StatusDownload();
+                    }
+                  case MediaStatus.pending:
+                    return StatusPending(messageId: message.messageId);
+                  case MediaStatus.expired:
+                    return const StatusWarning();
+                  default:
+                    break;
+                }
 
-                  return DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: context.theme.statusBackground,
-                    ),
-                    child: SizedBox.fromSize(
-                      size: const Size.square(38),
-                      child: Center(
-                        child: Builder(builder: (context) {
-                          var extension = 'FILE';
-                          if (message.mediaName != null) {
-                            final _lookupMimeType =
-                                lookupMimeType(message.mediaName!);
-                            if (_lookupMimeType != null) {
-                              extension = extensionFromMime(_lookupMimeType)
-                                  .toUpperCase();
-                            }
-                          }
-                          return Text(
-                            extension,
-                            style: TextStyle(
-                              fontSize: 12,
-                              // force light style
-                              color: lightBrightnessThemeData.secondaryText,
-                            ),
-                          );
-                        }),
+                return Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: context.theme.statusBackground,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: Builder(builder: (context) {
+                    var extension = 'FILE';
+                    if (message.mediaName != null) {
+                      final _lookupMimeType =
+                          lookupMimeType(message.mediaName!);
+                      if (_lookupMimeType != null) {
+                        extension =
+                            extensionFromMime(_lookupMimeType).toUpperCase();
+                      }
+                    }
+                    return Text(
+                      extension,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: lightBrightnessThemeData.secondaryText,
                       ),
-                    ),
-                  );
-                }),
-              ),
+                    );
+                  }),
+                );
+              }),
               const SizedBox(width: 8),
               Column(
                 mainAxisSize: MainAxisSize.min,
