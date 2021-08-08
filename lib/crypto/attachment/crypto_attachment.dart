@@ -18,7 +18,7 @@ import '../../utils/crypto_util.dart';
 import '../../utils/logger.dart';
 
 const int _blockSize = 64 * 1024;
-const int _macSize = 16;
+const int _macSize = 32;
 const int _cbcBlockSize = 16;
 
 class CryptoAttachment {
@@ -187,10 +187,6 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
             // TODO delete local file or make file disabled
             return;
           }
-
-          controller
-            ..add(mac)
-            ..close();
         },
       );
 
@@ -202,7 +198,8 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
       var fileRemain = total - _macSize;
       List<int>? firstPartTheirMac;
       Future<List<int>> process(List<int> event) async {
-        var plaintext = event;
+        i('event: ${event.length}');
+        var ciphertext = event;
         if (iv == null) {
           if (event.length < _cbcBlockSize) {
             // TODO invalid stream should throw exception or end this download
@@ -211,38 +208,49 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
           iv = event.sublist(0, _cbcBlockSize);
           macSink.add(iv!);
           digestSink.add(iv!);
-          plaintext = event.sublist(_cbcBlockSize, event.length);
+          ciphertext = event.sublist(_cbcBlockSize, event.length);
         }
 
-        Uint8List ciphertext;
+        Uint8List plaintext;
         _aesCipher = _getAesCipher(cbcCipher, aesKey, iv!, false);
 
         fileRemain -= _blockSize;
         i('event length: ${event.length}, fileRemain: $fileRemain');
         if (event.length == _blockSize && fileRemain >= 0) {
-          final input = Uint8List.fromList(plaintext);
-          ciphertext = Uint8List(input.lengthInBytes);
+          final input = Uint8List.fromList(ciphertext);
+          plaintext = Uint8List(input.lengthInBytes);
           for (var offset = 0; offset < input.lengthInBytes;) {
-            offset +=
-                _aesCipher.processBlock(input, offset, ciphertext, offset);
+            offset += _aesCipher.processBlock(input, offset, plaintext, offset);
           }
+          macSink.add(ciphertext);
+          digestSink.add(ciphertext);
         } else if (event.length == _blockSize && fileRemain < 0) {
           firstPartTheirMac =
               event.sublist(event.length + fileRemain, event.length);
-          ciphertext = _aesCipher.process(Uint8List.fromList(
-              plaintext.sublist(0, plaintext.length + fileRemain)));
+          final nonMac = ciphertext.sublist(0, ciphertext.length + fileRemain);
+          plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
+          macSink.add(nonMac);
+          digestSink.add(nonMac);
         } else if (event.length < _blockSize && fileRemain >= 0) {
-          ciphertext = _aesCipher.process(Uint8List.fromList(
-              plaintext.sublist(0, plaintext.length - _macSize)));
+          final nonMac = ciphertext.sublist(0, ciphertext.length - _macSize);
+          plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
+          macSink.add(nonMac);
+          digestSink.add(nonMac);
         } else {
-          theirMac = List.from(firstPartTheirMac!)..addAll(plaintext);
-          ciphertext = Uint8List.fromList([]);
+          if (firstPartTheirMac != null) {
+            theirMac = List.from(firstPartTheirMac!)..addAll(ciphertext);
+            plaintext = Uint8List.fromList([]);
+          } else {
+            final len = ciphertext.length;
+            theirMac = ciphertext.sublist(len - _macSize, len);
+            final nonMac = ciphertext.sublist(0, len - _macSize);
+            plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
+            macSink.add(nonMac);
+            digestSink.add(nonMac);
+          }
         }
 
-        macSink.add(ciphertext);
-        digestSink.add(ciphertext);
-
-        final result = ciphertext.toList();
+        final result = plaintext.toList();
         iv = result.sublist(result.length - _cbcBlockSize, result.length);
         return result;
       }
