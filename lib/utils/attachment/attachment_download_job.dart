@@ -107,9 +107,8 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
 
     if (response.statusCode != 200) throw Error();
     options.sendPort.send(_completeMessage);
-  } catch (_) {
-    options.sendPort.send(_killMessage);
-  }
+  } catch (_) {}
+  options.sendPort.send(_killMessage);
 }
 
 extension _AttachmentDownloadExtension on Dio {
