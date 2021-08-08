@@ -84,6 +84,13 @@ class AttachmentUtil extends ChangeNotifier {
     assert(_attachmentJob[messageId] == null);
     await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
 
+    final file = getAttachmentFile(
+      category,
+      conversationId,
+      messageId,
+      mimeType: attachmentMessage?.mimeType,
+    );
+
     try {
       final response = await _client.attachmentApi.getAttachment(content);
       d('download ${response.data.viewUrl}');
@@ -91,69 +98,55 @@ class AttachmentUtil extends ChangeNotifier {
       if (await _isNotPending(messageId)) return null;
 
       if (response.data.viewUrl != null) {
-        final file = getAttachmentFile(
-          category,
-          conversationId,
-          messageId,
-          mimeType: attachmentMessage?.mimeType,
-        );
+        String? mediaKey;
+        String? mediaDigest;
 
-        try {
-          String? mediaKey;
-          String? mediaDigest;
-
-          if (category.isSignal) {
-            mediaKey = attachmentMessage?.key;
-            mediaDigest = attachmentMessage?.digest;
+        if (category.isSignal) {
+          mediaKey = attachmentMessage?.key;
+          mediaDigest = attachmentMessage?.digest;
+          if (mediaKey == null || mediaDigest == null) {
+            final message = await _messageDao.findMessageByMessageId(messageId);
+            if (message != null) {
+              mediaKey = message.mediaKey;
+              mediaDigest = message.mediaDigest;
+            }
             if (mediaKey == null || mediaDigest == null) {
-              final message =
-                  await _messageDao.findMessageByMessageId(messageId);
-              if (message != null) {
-                mediaKey = message.mediaKey;
-                mediaDigest = message.mediaDigest;
-              }
-              if (mediaKey == null || mediaDigest == null) {
-                throw InvalidKeyException(
-                    'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
-              }
+              throw InvalidKeyException(
+                  'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
             }
           }
-
-          final attachmentDownloadJob = _AttachmentDownloadJob(
-            path: file.absolute.path,
-            url: response.data.viewUrl!,
-            keys: mediaKey != null
-                ? await base64DecodeWithIsolate(mediaKey)
-                : null,
-            digest: mediaDigest != null
-                ? await base64DecodeWithIsolate(mediaDigest)
-                : null,
-          );
-
-          _attachmentJob[messageId] = attachmentDownloadJob;
-
-          await attachmentDownloadJob
-              .download((int count, int total) => notifyListeners());
-
-          final fileSize = await file.length();
-
-          if (attachmentMessage != null) {
-            final encoded =
-                await jsonBase64EncodeWithIsolate(attachmentMessage);
-            await _messageDao.updateMessageContent(messageId, encoded);
-          }
-
-          await _messageDao.updateMediaMessageUrl(file.path, messageId);
-          await _messageDao.updateMediaSize(fileSize, messageId);
-          await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
-        } catch (err) {
-          e(err.toString());
-          await _messageDao.updateMediaStatusToCanceled(messageId);
         }
+
+        final attachmentDownloadJob = _AttachmentDownloadJob(
+          path: file.absolute.path,
+          url: response.data.viewUrl!,
+          keys:
+              mediaKey != null ? await base64DecodeWithIsolate(mediaKey) : null,
+          digest: mediaDigest != null
+              ? await base64DecodeWithIsolate(mediaDigest)
+              : null,
+        );
+
+        _attachmentJob[messageId] = attachmentDownloadJob;
+
+        await attachmentDownloadJob
+            .download((int count, int total) => notifyListeners());
+
+        final fileSize = await file.length();
+
+        if (attachmentMessage != null) {
+          final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
+          await _messageDao.updateMessageContent(messageId, encoded);
+        }
+
+        await _messageDao.updateMediaMessageUrl(file.path, messageId);
+        await _messageDao.updateMediaSize(fileSize, messageId);
+        await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
         return file.absolute.path;
       }
     } catch (er) {
       e(er.toString());
+      if (file.existsSync()) await file.delete();
       await _messageDao.updateMediaStatusToCanceled(messageId);
     } finally {
       _attachmentJob[messageId]?.cancel();

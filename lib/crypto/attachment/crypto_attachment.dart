@@ -125,8 +125,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
           macSink.close();
           final mac = macOutput.events.single.bytes;
           if (!listEquals(theirMac, mac)) {
-            i('MAC doesn\'t match!');
-            // TODO delete local file or make file disabled
+            controller.addError(Exception('MAC doesn\'t match!'));
             return;
           }
 
@@ -135,8 +134,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
             ..close();
           final ourDigest = digestOutput.events.single.bytes;
           if (!listEquals(ourDigest, digest)) {
-            i('Digest doesn\'t match!');
-            // TODO delete local file or make file disabled
+            controller.addError(Exception('Digest doesn\'t match!'));
             return;
           }
 
@@ -156,7 +154,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
         var ciphertext = event;
         if (iv == null) {
           if (event.length < _cbcBlockSize) {
-            // TODO invalid stream should throw exception or end this download
+            controller.addError(Exception('Invalid stream'));
             return event;
           }
           iv = event.sublist(0, _cbcBlockSize);
