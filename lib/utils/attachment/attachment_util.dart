@@ -47,7 +47,7 @@ abstract class _AttachmentJobBase {
   }
 
   double get progress {
-    if (total == 0 && current == 0) return 0;
+    if (total == 0) return 0;
     return min(current / total, 1);
   }
 }

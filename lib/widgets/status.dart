@@ -53,11 +53,15 @@ class _StatusPending extends StatelessWidget {
                 ),
               ),
             ),
-            CircularProgressIndicator(
-              value: value,
-              strokeWidth: 4,
-              valueColor: AlwaysStoppedAnimation(
-                context.theme.accent,
+            TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: value),
+              duration: const Duration(milliseconds: 100),
+              builder: (context, value, _) => CircularProgressIndicator(
+                value: value,
+                strokeWidth: 4,
+                valueColor: AlwaysStoppedAnimation(
+                  context.theme.accent,
+                ),
               ),
             ),
           ],
