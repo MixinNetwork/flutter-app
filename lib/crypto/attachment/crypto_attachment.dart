@@ -187,6 +187,8 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
             // TODO delete local file or make file disabled
             return;
           }
+
+          controller.close();
         },
       );
 
