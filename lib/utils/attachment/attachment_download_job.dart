@@ -1,5 +1,7 @@
 part of 'attachment_util.dart';
 
+const _completeMessage = 'complete';
+
 class _AttachmentDownloadJobOption {
   _AttachmentDownloadJobOption({
     required this.path,
@@ -49,6 +51,9 @@ class _AttachmentDownloadJob implements _AttachmentJobBase {
       if (message is Tuple2<int, int>) {
         sendProgress(message.item1, message.item2);
         return;
+      }
+      if (message == _completeMessage) {
+        completer.complete();
       }
     });
 
@@ -101,7 +106,7 @@ Future<void> _download(_AttachmentDownloadJobOption options) async {
     );
 
     if (response.statusCode != 200) throw Error();
-    options.sendPort.send(_killMessage);
+    options.sendPort.send(_completeMessage);
   } catch (_) {
     options.sendPort.send(_killMessage);
   }
