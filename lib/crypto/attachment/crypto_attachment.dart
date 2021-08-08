@@ -226,6 +226,8 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
           }
           macSink.add(ciphertext);
           digestSink.add(ciphertext);
+          iv = ciphertext.sublist(
+              ciphertext.length - _cbcBlockSize, ciphertext.length);
         } else if (event.length == _blockSize && fileRemain < 0) {
           firstPartTheirMac =
               event.sublist(event.length + fileRemain, event.length);
@@ -233,11 +235,13 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
           plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
           macSink.add(nonMac);
           digestSink.add(nonMac);
+          iv = nonMac.sublist(nonMac.length - _cbcBlockSize, nonMac.length);
         } else if (event.length < _blockSize && fileRemain >= 0) {
           final nonMac = ciphertext.sublist(0, ciphertext.length - _macSize);
           plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
           macSink.add(nonMac);
           digestSink.add(nonMac);
+          iv = nonMac.sublist(nonMac.length - _cbcBlockSize, nonMac.length);
         } else {
           if (firstPartTheirMac != null) {
             theirMac = List.from(firstPartTheirMac!)..addAll(ciphertext);
@@ -249,12 +253,11 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
             plaintext = _aesCipher.process(Uint8List.fromList(nonMac));
             macSink.add(nonMac);
             digestSink.add(nonMac);
+            iv = nonMac.sublist(nonMac.length - _cbcBlockSize, nonMac.length);
           }
         }
 
-        final result = plaintext.toList();
-        iv = result.sublist(result.length - _cbcBlockSize, result.length);
-        return result;
+        return plaintext.toList();
       }
 
       subscription.onData((List<int> event) {
