@@ -12,8 +12,6 @@ import 'package:pointycastle/block/modes/cbc.dart';
 import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
 
-import '../../utils/logger.dart';
-
 const int _blockSize = 64 * 1024;
 const int _macSize = 32;
 const int _cbcBlockSize = 16;
@@ -150,7 +148,6 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
       var fileRemain = total - _macSize;
       List<int>? firstPartTheirMac;
       Future<List<int>> process(List<int> event) async {
-        i('event: ${event.length}');
         var ciphertext = event;
         if (iv == null) {
           if (event.length < _cbcBlockSize) {
@@ -167,7 +164,6 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
         _aesCipher = _getAesCipher(cbcCipher, aesKey, iv!, false);
 
         fileRemain -= _blockSize;
-        i('event length: ${event.length}, fileRemain: $fileRemain');
         if (event.length == _blockSize && fileRemain >= 0) {
           final input = Uint8List.fromList(ciphertext);
           plaintext = Uint8List(input.lengthInBytes);
