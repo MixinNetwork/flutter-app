@@ -92,7 +92,8 @@ class ImageMessageWidget extends StatelessWidget {
                                 return const StatusDownload();
                               }
                             case MediaStatus.pending:
-                              return const StatusPending();
+                              return StatusPending(
+                                  messageId: message.messageId);
                             case MediaStatus.expired:
                               return const StatusWarning();
                             default:

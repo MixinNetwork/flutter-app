@@ -18,7 +18,7 @@ class _AttachmentDownloadJobOption {
   final SendPort sendPort;
 }
 
-class _AttachmentDownloadJob implements _AttachmentJobBase {
+class _AttachmentDownloadJob extends _AttachmentJobBase {
   _AttachmentDownloadJob({
     required this.path,
     required this.url,
@@ -49,6 +49,7 @@ class _AttachmentDownloadJob implements _AttachmentJobBase {
       }
 
       if (message is Tuple2<int, int>) {
+        updateProgress(message.item1, message.item2);
         sendProgress(message.item1, message.item2);
         return;
       }

@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -33,11 +35,24 @@ final _dio = Dio(BaseOptions(
 // isolate kill message
 const _killMessage = 'kill';
 
-mixin _AttachmentJobBase {
+abstract class _AttachmentJobBase {
+  int total = 0;
+  int current = 0;
+
   void cancel();
+
+  void updateProgress(int current, int total) {
+    this.current = current;
+    this.total = total;
+  }
+
+  double get progress {
+    if (total == 0 && current == 0) return 0;
+    return min(current / total, 1);
+  }
 }
 
-class AttachmentUtil {
+class AttachmentUtil extends ChangeNotifier {
   AttachmentUtil(this._client, this._messageDao, this.mediaPath) {
     (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
         (client) {
@@ -57,7 +72,7 @@ class AttachmentUtil {
     ),
   );
 
-  final _messageIdCancelTokenMap = <String, _AttachmentJobBase>{};
+  final _attachmentJob = <String, _AttachmentJobBase>{};
 
   Future<String?> downloadAttachment({
     required String messageId,
@@ -66,7 +81,7 @@ class AttachmentUtil {
     required String category,
     AttachmentMessage? attachmentMessage,
   }) async {
-    assert(_messageIdCancelTokenMap[messageId] == null);
+    assert(_attachmentJob[messageId] == null);
     await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
 
     try {
@@ -115,11 +130,10 @@ class AttachmentUtil {
                 : null,
           );
 
-          _messageIdCancelTokenMap[messageId] = attachmentDownloadJob;
+          _attachmentJob[messageId] = attachmentDownloadJob;
 
-          await attachmentDownloadJob.download((int count, int total) {
-            v('utils $count / $total');
-          });
+          await attachmentDownloadJob
+              .download((int count, int total) => notifyListeners());
 
           final fileSize = await file.length();
 
@@ -142,14 +156,14 @@ class AttachmentUtil {
       e(er.toString());
       await _messageDao.updateMediaStatusToCanceled(messageId);
     } finally {
-      _messageIdCancelTokenMap[messageId]?.cancel();
-      _messageIdCancelTokenMap.remove(messageId);
+      _attachmentJob[messageId]?.cancel();
+      _attachmentJob.remove(messageId);
     }
   }
 
   Future<AttachmentResult?> uploadAttachment(
       File file, String messageId, String category) async {
-    assert(_messageIdCancelTokenMap[messageId] == null);
+    assert(_attachmentJob[messageId] == null);
     await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
 
     try {
@@ -172,10 +186,9 @@ class AttachmentUtil {
         iv: iv,
       );
 
-      _messageIdCancelTokenMap[messageId] = attachmentUploadJob;
-      final digest = await attachmentUploadJob.upload((int count, int total) {
-        v('utils $count / $total');
-      });
+      _attachmentJob[messageId] = attachmentUploadJob;
+      final digest = await attachmentUploadJob
+          .upload((int count, int total) => notifyListeners());
       await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
       return AttachmentResult(
           response.data.attachmentId,
@@ -187,8 +200,8 @@ class AttachmentUtil {
       await _messageDao.updateMediaStatusToCanceled(messageId);
       return null;
     } finally {
-      _messageIdCancelTokenMap[messageId]?.cancel();
-      _messageIdCancelTokenMap.remove(messageId);
+      _attachmentJob[messageId]?.cancel();
+      _attachmentJob.remove(messageId);
     }
   }
 
@@ -279,11 +292,14 @@ class AttachmentUtil {
 
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
     await _messageDao.updateMediaStatus(MediaStatus.canceled, messageId);
-    if (_messageIdCancelTokenMap[messageId] == null) return false;
-    _messageIdCancelTokenMap[messageId]?.cancel();
-    _messageIdCancelTokenMap.remove(messageId);
+    if (_attachmentJob[messageId] == null) return false;
+    _attachmentJob[messageId]?.cancel();
+    _attachmentJob.remove(messageId);
     return true;
   }
+
+  double getAttachmentProgress(String messageId) =>
+      _attachmentJob[messageId]?.progress ?? 0;
 }
 
 class AttachmentResult {

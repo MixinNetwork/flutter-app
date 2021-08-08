@@ -26,7 +26,7 @@ class _AttachmentUploadJobOption {
   final SendPort sendPort;
 }
 
-class _AttachmentUploadJob implements _AttachmentJobBase {
+class _AttachmentUploadJob extends _AttachmentJobBase {
   _AttachmentUploadJob({
     required this.path,
     required this.url,
@@ -57,6 +57,7 @@ class _AttachmentUploadJob implements _AttachmentJobBase {
       }
 
       if (message is Tuple2<int, int>) {
+        updateProgress(message.item1, message.item2);
         sendProgress(message.item1, message.item2);
         return;
       }

@@ -1,14 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/utils/attachment/attachment_util.dart';
+import 'package:flutter_app/utils/hook.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
 
-class StatusPending extends StatelessWidget {
+class StatusPending extends HookWidget {
   const StatusPending({
     Key? key,
+    required this.messageId,
   }) : super(key: key);
+
+  final String messageId;
+
+  @override
+  Widget build(BuildContext context) {
+    final value = useListenableConverter(
+      context.accountServer.attachmentUtil,
+      converter: (AttachmentUtil attachmentUtil) =>
+          attachmentUtil.getAttachmentProgress(messageId),
+      initialData: 0.0,
+      keys: [messageId],
+    ).requireData;
+
+    return _StatusPending(value: value);
+  }
+}
+
+class _StatusPending extends StatelessWidget {
+  const _StatusPending({
+    Key? key,
+    required this.value,
+  }) : super(key: key);
+
+  final double value;
 
   @override
   Widget build(BuildContext context) => _StatusLayout(
@@ -26,7 +54,8 @@ class StatusPending extends StatelessWidget {
               ),
             ),
             CircularProgressIndicator(
-              strokeWidth: 2,
+              value: value,
+              strokeWidth: 4,
               valueColor: AlwaysStoppedAnimation(
                 context.theme.accent,
               ),
