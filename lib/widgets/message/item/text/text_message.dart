@@ -9,6 +9,7 @@ import '../../../../utils/hook.dart';
 import '../../../../utils/reg_exp_utils.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../high_light_text.dart';
+import '../../../user/user_dialog.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
@@ -35,7 +36,7 @@ class TextMessage extends HookWidget {
 
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
 
-    final highlightTextSpans = useMemoized(
+    final urlHighlightTextSpans = useMemoized(
       () => uriRegExp.allMatches(message.content!).map(
             (e) => HighlightTextSpan(
               e[0]!,
@@ -48,11 +49,24 @@ class TextMessage extends HookWidget {
       [message.content],
     );
 
+    final botNumberHighlightTextSpans = useMemoized(
+      () => botNumberRegExp.allMatches(message.content!).map(
+            (e) => HighlightTextSpan(
+              e[0]!,
+              style: TextStyle(
+                color: context.theme.accent,
+              ),
+              onTap: () => showUserDialog(context, null, e[0]),
+            ),
+          ),
+      [message.content],
+    );
+
     final keywordHighlightTextSpans = useMemoized(
         () => keyword.trim().isEmpty
-            ? highlightTextSpans
-            : highlightTextSpans.fold<Set<HighlightTextSpan>>({},
-                (previousValue, element) {
+            ? [...urlHighlightTextSpans, ...botNumberHighlightTextSpans]
+            : [...urlHighlightTextSpans, ...botNumberHighlightTextSpans]
+                .fold<Set<HighlightTextSpan>>({}, (previousValue, element) {
                 element.text.splitMapJoin(
                   RegExp(keyword, caseSensitive: false),
                   onMatch: (match) {

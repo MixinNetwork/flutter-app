@@ -37,7 +37,7 @@ class ContactMessageWidget extends StatelessWidget {
         child: InteractableDecoratedBox(
           onTap: () => showUserDialog(
             context,
-            message.sharedUserId!,
+            message.sharedUserId,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,

@@ -38,10 +38,7 @@ dependencies:
   ulid: ^2.0.0
   web_socket_channel: ^2.1.0
   moor: ^4.4.1
-  mixin_bot_sdk_dart:
-    git:
-      url: https://github.com/MixinNetwork/mixin_bot_sdk_dart.git
-      ref: 7cee8150a22cf7800cbf98a395084480314fa869
+  mixin_bot_sdk_dart: ^0.1.1
   libsignal_protocol_dart: ^0.5.3
   path_provider: ^2.0.2
   path: ^1.8.0

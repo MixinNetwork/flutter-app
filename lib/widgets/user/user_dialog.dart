@@ -16,33 +16,56 @@ import '../more_extended_text.dart';
 import '../toast.dart';
 import '../user_selector/conversation_selector.dart';
 
-Future<void> showUserDialog(BuildContext context, String userId) async {
-  final existed = await context.database.userDao.hasUser(userId);
+Future<void> showUserDialog(BuildContext context, String? userId,
+    [String? identityNumber]) async {
+  var _userId = userId;
+  assert(_userId != null || identityNumber != null);
+
+  final existed =
+      await context.database.userDao.hasUser(_userId ?? identityNumber!);
   if (existed) {
     Toast.dismiss();
-    await showMixinDialog(context: context, child: _UserDialog(userId: userId));
+    _userId ??= (await context.database.userDao
+            .findMultiUserIdsByIdentityNumbers([identityNumber!]))
+        .first;
+    await showMixinDialog(
+        context: context, child: _UserDialog(userId: _userId));
     return;
   }
 
   showToastLoading(context);
 
-  final result =
-      await context.accountServer.refreshUsers([userId], force: true);
+  User? user;
+  if (_userId != null) {
+    user = (await context.accountServer.refreshUsers([_userId], force: true))
+        ?.firstOrNull;
+  }
 
-  if (result?.isEmpty ?? true) {
+  if (identityNumber != null) {
+    user =
+        (await context.accountServer.updateUserByIdentityNumber(identityNumber))
+            ?.firstOrNull;
+  }
+
+  if (user == null) {
     await showToastFailed(
-        context,
-        ToastError(
-          context.l10n.userNotFound,
-        ));
+      context,
+      ToastError(
+        context.l10n.userNotFound,
+      ),
+    );
     return;
   }
+
+  _userId ??= (await context.database.userDao
+          .findMultiUserIdsByIdentityNumbers([identityNumber!]))
+      .first;
 
   Toast.dismiss();
   await showMixinDialog(
     context: context,
     child: _UserDialog(
-      userId: userId,
+      userId: _userId,
       refreshUser: false,
     ),
   );
