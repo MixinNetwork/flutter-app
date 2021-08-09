@@ -127,6 +127,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversationName":
             MessageLookupByLibrary.simpleMessage("Conversation Name"),
         "conversationParticipantsCount": m10,
+        "conversations": MessageLookupByLibrary.simpleMessage("Conversations"),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "create": MessageLookupByLibrary.simpleMessage("Create"),
         "createCircle": MessageLookupByLibrary.simpleMessage("New Circle"),

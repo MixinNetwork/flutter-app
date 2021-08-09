@@ -210,7 +210,7 @@ class _SearchList extends HookWidget {
         if (conversations.isNotEmpty)
           SliverToBoxAdapter(
             child: _SearchHeader(
-              title: context.l10n.groups,
+              title: context.l10n.conversations,
               showMore: conversations.length > _defaultLimit,
               more: type.value != _ShowMoreType.conversation,
               onTap: () {
@@ -227,31 +227,34 @@ class _SearchList extends HookWidget {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 final conversation = conversations[index];
-                return _SearchItem(
-                  avatar: ConversationAvatarWidget(
-                    conversationId: conversation.conversationId,
-                    fullName: conversationValidName(
+                return _ConversationMenuWrapper(
+                  searchConversation: conversation,
+                  child: _SearchItem(
+                    avatar: ConversationAvatarWidget(
+                      conversationId: conversation.conversationId,
+                      fullName: conversationValidName(
+                        conversation.groupName,
+                        conversation.fullName,
+                      ),
+                      groupIconUrl: conversation.groupIconUrl,
+                      avatarUrl: conversation.avatarUrl,
+                      category: conversation.category,
+                      size: ConversationPage.conversationItemAvatarSize,
+                    ),
+                    name: conversationValidName(
                       conversation.groupName,
                       conversation.fullName,
                     ),
-                    groupIconUrl: conversation.groupIconUrl,
-                    avatarUrl: conversation.avatarUrl,
-                    category: conversation.category,
-                    size: ConversationPage.conversationItemAvatarSize,
-                  ),
-                  name: conversationValidName(
-                    conversation.groupName,
-                    conversation.fullName,
-                  ),
-                  keyword: keyword,
-                  onTap: () async {
-                    await ConversationCubit.selectConversation(
-                      context,
-                      conversation.conversationId,
-                    );
+                    keyword: keyword,
+                    onTap: () async {
+                      await ConversationCubit.selectConversation(
+                        context,
+                        conversation.conversationId,
+                      );
 
-                    _clear(context);
-                  },
+                      _clear(context);
+                    },
+                  ),
                 );
               },
               childCount: type.value == _ShowMoreType.conversation
@@ -729,82 +732,8 @@ class _List extends HookWidget {
           final selected =
               conversation.conversationId == conversationId && !routeMode;
 
-          return ContextMenuPortalEntry(
-            buildMenus: () => [
-              if (conversation.pinTime != null)
-                ContextMenu(
-                  title: Localization.current.unPin,
-                  onTap: () => runFutureWithToast(
-                    context,
-                    context.accountServer.unpin(conversation.conversationId),
-                  ),
-                ),
-              if (conversation.pinTime == null)
-                ContextMenu(
-                  title: Localization.current.pin,
-                  onTap: () => runFutureWithToast(
-                    context,
-                    context.accountServer.pin(conversation.conversationId),
-                  ),
-                ),
-              if (conversation.isMute)
-                ContextMenu(
-                  title: Localization.current.unMute,
-                  onTap: () async {
-                    final isGroupConversation =
-                        conversation.isGroupConversation;
-                    await runFutureWithToast(
-                      context,
-                      context.accountServer.unMuteConversation(
-                        conversationId: isGroupConversation
-                            ? conversation.conversationId
-                            : null,
-                        userId:
-                            isGroupConversation ? null : conversation.ownerId,
-                      ),
-                    );
-                    return;
-                  },
-                )
-              else
-                ContextMenu(
-                  title: Localization.current.muted,
-                  onTap: () async {
-                    final result = await showMixinDialog<int?>(
-                        context: context, child: const MuteDialog());
-                    if (result == null) return;
-
-                    final isGroupConversation =
-                        conversation.isGroupConversation;
-
-                    await runFutureWithToast(
-                      context,
-                      context.accountServer.muteConversation(
-                        result,
-                        conversationId: isGroupConversation
-                            ? conversation.conversationId
-                            : null,
-                        userId:
-                            isGroupConversation ? null : conversation.ownerId,
-                      ),
-                    );
-                    return;
-                  },
-                ),
-              ContextMenu(
-                title: Localization.current.deleteChat,
-                isDestructiveAction: true,
-                onTap: () async {
-                  await context.database.conversationDao.deleteConversation(
-                    conversation.conversationId,
-                  );
-                  if (context.read<ConversationCubit>().state?.conversationId ==
-                      conversation.conversationId) {
-                    context.read<ConversationCubit>().unselected();
-                  }
-                },
-              ),
-            ],
+          return _ConversationMenuWrapper(
+            conversation: conversation,
             child: _Item(
               selected: selected,
               conversation: conversation,
@@ -828,6 +757,98 @@ class _List extends HookWidget {
           child: child,
         ),
       ],
+    );
+  }
+}
+
+class _ConversationMenuWrapper extends StatelessWidget {
+  const _ConversationMenuWrapper({
+    Key? key,
+    this.conversation,
+    this.searchConversation,
+    required this.child,
+  }) : super(key: key);
+
+  final ConversationItem? conversation;
+  final SearchConversationItem? searchConversation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    assert(conversation != null || searchConversation != null);
+
+    final conversationId =
+        conversation?.conversationId ?? searchConversation!.conversationId;
+    final ownerId = conversation?.ownerId ?? searchConversation!.ownerId;
+    final pinTime = conversation?.pinTime ?? searchConversation?.pinTime;
+    final isMute = conversation?.isMute ?? searchConversation!.isMute;
+    final isGroupConversation = conversation?.isGroupConversation ??
+        searchConversation!.isGroupConversation;
+
+    return ContextMenuPortalEntry(
+      buildMenus: () => [
+        if (pinTime != null)
+          ContextMenu(
+            title: Localization.current.unPin,
+            onTap: () => runFutureWithToast(
+              context,
+              context.accountServer.unpin(conversationId),
+            ),
+          ),
+        if (pinTime == null)
+          ContextMenu(
+            title: Localization.current.pin,
+            onTap: () => runFutureWithToast(
+              context,
+              context.accountServer.pin(conversationId),
+            ),
+          ),
+        if (isMute)
+          ContextMenu(
+            title: Localization.current.unMute,
+            onTap: () async {
+              await runFutureWithToast(
+                context,
+                context.accountServer.unMuteConversation(
+                  conversationId: isGroupConversation ? conversationId : null,
+                  userId: isGroupConversation ? null : ownerId,
+                ),
+              );
+              return;
+            },
+          )
+        else
+          ContextMenu(
+            title: Localization.current.muted,
+            onTap: () async {
+              final result = await showMixinDialog<int?>(
+                  context: context, child: const MuteDialog());
+              if (result == null) return;
+              await runFutureWithToast(
+                context,
+                context.accountServer.muteConversation(
+                  result,
+                  conversationId: isGroupConversation ? conversationId : null,
+                  userId: isGroupConversation ? null : ownerId,
+                ),
+              );
+              return;
+            },
+          ),
+        ContextMenu(
+          title: Localization.current.deleteChat,
+          isDestructiveAction: true,
+          onTap: () async {
+            await context.database.conversationDao
+                .deleteConversation(conversationId);
+            if (context.read<ConversationCubit>().state?.conversationId ==
+                conversationId) {
+              context.read<ConversationCubit>().unselected();
+            }
+          },
+        ),
+      ],
+      child: child,
     );
   }
 }
