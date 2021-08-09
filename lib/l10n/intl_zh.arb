@@ -182,5 +182,6 @@
   "sendQuick": "快速发送",
   "sendWithoutCompression": "发送原始文件",
   "sendArchived": "打包成 zip 发送",
-  "sendWithoutSound": "静音发送"
+  "sendWithoutSound": "静音发送",
+  "conversations": "会话"
 }

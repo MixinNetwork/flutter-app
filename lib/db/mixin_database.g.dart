@@ -10386,7 +10386,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<User> fuzzySearchUser(
       String id, String username, String identityNumber) {
     return customSelect(
-        'SELECT * FROM users WHERE user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
+        'SELECT users.* FROM users LEFT JOIN conversations ON conversations.owner_id = user_id WHERE conversations.status IS NULL AND user_id != ?1 AND relationship = \'FRIEND\' AND(full_name LIKE \'%\' || ?2 || \'%\' ESCAPE \'\\\' OR identity_number LIKE \'%\' || ?3 || \'%\' ESCAPE \'\\\')ORDER BY full_name = ?2 COLLATE nocase OR identity_number = ?3 COLLATE nocase DESC',
         variables: [
           Variable<String>(id),
           Variable<String>(username),
@@ -10394,6 +10394,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           users,
+          conversations,
         }).map(users.mapFromRow);
   }
 
@@ -11186,7 +11187,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
     return customSelect(
-        'SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName, ou.avatar_url AS avatarUrl, ou.is_verified AS isVerified, ou.app_id AS appId FROM conversations AS c INNER JOIN users AS ou ON ou.user_id = c.owner_id LEFT JOIN messages AS m ON c.last_message_id = m.message_id WHERE(c.category = \'GROUP\' AND c.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR ou.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\'))ORDER BY(c.category = \'GROUP\' AND c.name = ?1 COLLATE NOCASE)OR(c.category = \'CONTACT\' AND ou.relationship != \'FRIEND\' AND(ou.full_name = ?1 COLLATE NOCASE OR ou.identity_number = ?1 COLLATE NOCASE))DESC, c.pin_time DESC, m.created_at DESC',
+        'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id WHERE(conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\'))ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC',
         variables: [
           Variable<String>(query)
         ],
@@ -11201,8 +11202,13 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
         groupName: row.read<String?>('groupName'),
+        pinTime: Conversations.$converter2.mapToDart(row.read<int?>('pinTime')),
+        muteUntil:
+            Conversations.$converter5.mapToDart(row.read<int?>('muteUntil')),
+        ownerId: row.read<String?>('ownerId'),
+        ownerMuteUntil:
+            Users.$converter2.mapToDart(row.read<int?>('ownerMuteUntil')),
         ownerIdentityNumber: row.read<String>('ownerIdentityNumber'),
-        userId: row.read<String?>('userId'),
         fullName: row.read<String?>('fullName'),
         avatarUrl: row.read<String?>('avatarUrl'),
         isVerified: row.read<bool?>('isVerified'),
@@ -12639,8 +12645,11 @@ class SearchConversationItem {
   final String? groupIconUrl;
   final ConversationCategory? category;
   final String? groupName;
+  final DateTime? pinTime;
+  final DateTime? muteUntil;
+  final String? ownerId;
+  final DateTime? ownerMuteUntil;
   final String ownerIdentityNumber;
-  final String? userId;
   final String? fullName;
   final String? avatarUrl;
   final bool? isVerified;
@@ -12650,8 +12659,11 @@ class SearchConversationItem {
     this.groupIconUrl,
     this.category,
     this.groupName,
+    this.pinTime,
+    this.muteUntil,
+    this.ownerId,
+    this.ownerMuteUntil,
     required this.ownerIdentityNumber,
-    this.userId,
     this.fullName,
     this.avatarUrl,
     this.isVerified,
@@ -12667,15 +12679,21 @@ class SearchConversationItem {
               $mrjc(
                   groupName.hashCode,
                   $mrjc(
-                      ownerIdentityNumber.hashCode,
+                      pinTime.hashCode,
                       $mrjc(
-                          userId.hashCode,
+                          muteUntil.hashCode,
                           $mrjc(
-                              fullName.hashCode,
+                              ownerId.hashCode,
                               $mrjc(
-                                  avatarUrl.hashCode,
-                                  $mrjc(isVerified.hashCode,
-                                      appId.hashCode))))))))));
+                                  ownerMuteUntil.hashCode,
+                                  $mrjc(
+                                      ownerIdentityNumber.hashCode,
+                                      $mrjc(
+                                          fullName.hashCode,
+                                          $mrjc(
+                                              avatarUrl.hashCode,
+                                              $mrjc(isVerified.hashCode,
+                                                  appId.hashCode)))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -12684,8 +12702,11 @@ class SearchConversationItem {
           other.groupIconUrl == this.groupIconUrl &&
           other.category == this.category &&
           other.groupName == this.groupName &&
+          other.pinTime == this.pinTime &&
+          other.muteUntil == this.muteUntil &&
+          other.ownerId == this.ownerId &&
+          other.ownerMuteUntil == this.ownerMuteUntil &&
           other.ownerIdentityNumber == this.ownerIdentityNumber &&
-          other.userId == this.userId &&
           other.fullName == this.fullName &&
           other.avatarUrl == this.avatarUrl &&
           other.isVerified == this.isVerified &&
@@ -12697,8 +12718,11 @@ class SearchConversationItem {
           ..write('groupIconUrl: $groupIconUrl, ')
           ..write('category: $category, ')
           ..write('groupName: $groupName, ')
+          ..write('pinTime: $pinTime, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('ownerMuteUntil: $ownerMuteUntil, ')
           ..write('ownerIdentityNumber: $ownerIdentityNumber, ')
-          ..write('userId: $userId, ')
           ..write('fullName: $fullName, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('isVerified: $isVerified, ')

@@ -106,6 +106,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversationCount": m8,
         "conversationName": MessageLookupByLibrary.simpleMessage("群组名称"),
         "conversationParticipantsCount": m10,
+        "conversations": MessageLookupByLibrary.simpleMessage("会话"),
         "copy": MessageLookupByLibrary.simpleMessage("复制"),
         "create": MessageLookupByLibrary.simpleMessage("创建"),
         "createCircle": MessageLookupByLibrary.simpleMessage("创建圈子"),

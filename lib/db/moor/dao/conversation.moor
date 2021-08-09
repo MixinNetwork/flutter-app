@@ -49,24 +49,32 @@ WHERE $where
 LIMIT 1;
 
 fuzzySearchConversation AS SearchConversationItem:
-SELECT c.conversation_id AS conversationId, c.icon_url AS groupIconUrl, c.category AS category,
-    c.name AS groupName,
-    ou.identity_number AS ownerIdentityNumber, c.owner_id AS userId, ou.full_name AS fullName,
-    ou.avatar_url AS avatarUrl,
-    ou.is_verified AS isVerified, ou.app_id AS appId
-FROM conversations c
-         INNER JOIN users ou ON ou.user_id = c.owner_id
-         LEFT JOIN messages m ON c.last_message_id = m.message_id
-WHERE (c.category = 'GROUP' AND c.name LIKE '%' || :query || '%' ESCAPE '\') OR
-    (c.category = 'CONTACT' AND ou.relationship != 'FRIEND'
-        AND (ou.full_name LIKE '%' || :query || '%' ESCAPE '\'
-            OR ou.identity_number like '%' || :query || '%' ESCAPE '\'))
-ORDER BY (c.category = 'GROUP' AND c.name = :query COLLATE NOCASE)
-    OR (c.category = 'CONTACT' AND ou.relationship != 'FRIEND'
-        AND (ou.full_name = :query COLLATE NOCASE
-            OR ou.identity_number = :query COLLATE NOCASE)) DESC,
-    c.pin_time DESC,
-    m.created_at DESC;
+SELECT conversation.conversation_id AS conversationId,
+    conversation.icon_url AS groupIconUrl,
+    conversation.category AS category,
+    conversation.name AS groupName,
+    conversation.pin_time AS pinTime,
+    conversation.mute_until AS muteUntil,
+    conversation.owner_id AS ownerId,
+    owner.mute_until AS ownerMuteUntil,
+    owner.identity_number AS ownerIdentityNumber,
+    owner.full_name AS fullName,
+    owner.avatar_url AS avatarUrl,
+    owner.is_verified AS isVerified, owner.app_id AS appId
+FROM conversations conversation
+         INNER JOIN users owner ON owner.user_id = conversation.owner_id
+         LEFT JOIN messages message ON conversation.last_message_id = message.message_id
+WHERE (conversation.category = 'GROUP' AND
+       conversation.name LIKE '%' || :query || '%' ESCAPE '\') OR
+    (conversation.category = 'CONTACT'
+        AND (owner.full_name LIKE '%' || :query || '%' ESCAPE '\'
+            OR owner.identity_number LIKE '%' || :query || '%' ESCAPE '\'))
+ORDER BY (conversation.category = 'GROUP' AND conversation.name = :query COLLATE NOCASE)
+    OR (conversation.category = 'CONTACT'
+        AND (owner.full_name = :query COLLATE NOCASE
+            OR owner.identity_number = :query COLLATE NOCASE)) DESC,
+    conversation.pin_time DESC,
+    message.created_at DESC;
 
 conversationParticipantsCount:
 SELECT COUNT(1) FROM participants WHERE conversation_id = :conversationId;
