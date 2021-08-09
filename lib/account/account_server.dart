@@ -1349,4 +1349,7 @@ class AccountServer {
     return convertAbsolutePath(
         messageItem.type, messageItem.conversationId, messageItem.mediaUrl);
   }
+
+  Future<List<db.User>?> updateUserByIdentityNumber(String identityNumber) =>
+      _decryptMessage.updateUserByIdentityNumber(identityNumber);
 }

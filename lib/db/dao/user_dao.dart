@@ -82,6 +82,9 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
   Selectable<MentionUser> userByIdentityNumbers(List<String> list) =>
       db.userByIdentityNumbers(list);
 
-  Future<bool> hasUser(String userId) =>
-      db.hasData(db.users, [], db.users.userId.equals(userId));
+  Future<bool> hasUser(String userIdOrIdentityNumber) => db.hasData(
+      db.users,
+      [],
+      db.users.userId.equals(userIdOrIdentityNumber) |
+          db.users.identityNumber.equals(userIdOrIdentityNumber));
 }

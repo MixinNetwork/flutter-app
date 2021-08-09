@@ -1092,6 +1092,16 @@ class DecryptMessage extends Injector {
   }
 
   void syncSession() {}
+
+  Future<List<db.User>?> updateUserByIdentityNumber(
+      String identityNumber) async {
+    try {
+      return await insertUpdateUsers(
+          [(await client.userApi.search(identityNumber)).data]);
+    } catch (e, s) {
+      w('updateUserByIdentityNumber error $e, stack: $s');
+    }
+  }
 }
 
 dynamic _jsonDecode(String encoded) => jsonDecode(_decode(encoded));
