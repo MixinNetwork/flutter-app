@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../../db/mixin_database.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
-
+import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 import '../../interacter_decorated_box.dart';
@@ -61,7 +61,7 @@ class StrangerMessage extends StatelessWidget {
                   : context.l10n.addContact,
               onTap: () {
                 if (isBotConversation) {
-                  context.accountServer.sendTextMessage('Hi', true,
+                  context.accountServer.sendTextMessage('Hi', EncryptCategory.plain,
                       conversationId: message.conversationId);
                 } else {
                   context.accountServer

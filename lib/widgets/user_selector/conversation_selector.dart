@@ -12,6 +12,7 @@ import '../../crypto/uuid/uuid.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/extension/user.dart';
 import '../../db/mixin_database.dart';
+import '../../enum/encrypt_category.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../action_button.dart';
@@ -47,6 +48,19 @@ String? _getUserId(dynamic item) {
 bool _isBot(dynamic item) {
   if (item is ConversationItem) return item.isBotConversation;
   if (item is User) return item.isBot;
+  throw ArgumentError('must be ConversationItem or User');
+}
+
+// Todo
+EncryptCategory _getEncryptedCategory(dynamic item) {
+  if (item is ConversationItem) {
+    return item.isBotConversation
+        ? EncryptCategory.plain
+        : EncryptCategory.signal;
+  }
+  if (item is User) {
+    return item.isBot ? EncryptCategory.plain : EncryptCategory.signal;
+  }
   throw ArgumentError('must be ConversationItem or User');
 }
 
@@ -102,12 +116,14 @@ class ConversationSelector with EquatableMixin {
     required this.userId,
     required this.isBot,
     required this.isGroup,
+    required this.encryptCategory,
   });
 
   final String conversationId;
   final String? userId;
   final bool isBot;
   final bool isGroup;
+  final EncryptCategory encryptCategory;
 
   @override
   List<Object?> get props => [
@@ -123,6 +139,7 @@ class ConversationSelector with EquatableMixin {
         userId: _getUserId(item),
         isBot: _isBot(item),
         isGroup: _isGroup(item),
+        encryptCategory: _getEncryptedCategory(item),
       );
 }
 

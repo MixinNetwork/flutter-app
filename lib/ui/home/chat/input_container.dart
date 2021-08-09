@@ -246,7 +246,7 @@ void _sendPostMessage(
   if (conversationItem == null) return;
 
   context.accountServer.sendPostMessage(
-      text, conversationItem.isPlainConversation,
+      text, conversationItem.encryptCategory,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId);
 
@@ -267,7 +267,7 @@ void _sendMessage(
 
   context.accountServer.sendTextMessage(
     text,
-    conversationItem.isPlainConversation,
+    conversationItem.encryptCategory,
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
     quoteMessageId: context.read<QuoteMessageCubit>().state?.messageId,

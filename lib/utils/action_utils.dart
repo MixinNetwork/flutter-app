@@ -12,7 +12,7 @@ extension OpenUriExtension on BuildContext {
       final conversationItem = read<ConversationCubit>().state;
       if (content.isNotEmpty == true && conversationItem != null) {
         accountServer.sendTextMessage(
-            content, conversationItem.isPlainConversation,
+            content, conversationItem.encryptCategory,
             conversationId: conversationItem.conversationId);
       }
 

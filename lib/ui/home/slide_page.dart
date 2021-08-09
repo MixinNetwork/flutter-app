@@ -7,12 +7,12 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart';
+import '../../enum/encrypt_category.dart';
 import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-
 import '../../widgets/dialog.dart';
 import '../../widgets/menu.dart';
 import '../../widgets/select_item.dart';
@@ -185,6 +185,8 @@ class _CircleList extends HookWidget {
                               .map((e) => ConversationSelector(
                                     conversationId: e.conversationId,
                                     userId: e.userId,
+                                    // Todo
+                                    encryptCategory: EncryptCategory.plain,
                                     isBot: false,
                                     isGroup: false,
                                   ))

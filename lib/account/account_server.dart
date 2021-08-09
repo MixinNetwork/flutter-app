@@ -30,6 +30,7 @@ import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart' as db;
+import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
@@ -537,7 +538,7 @@ class AccountServer {
 
   Future<void> sendTextMessage(
     String content,
-    bool isPlain, {
+    EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
     String? quoteMessageId,
@@ -547,7 +548,7 @@ class AccountServer {
     await _sendMessageHelper.sendTextMessage(
       await _initConversation(conversationId, recipientId),
       userId,
-      isPlain,
+      encryptCategory,
       content,
       quoteMessageId: quoteMessageId,
       silent: silent,
@@ -556,7 +557,7 @@ class AccountServer {
 
   Future<void> sendPostMessage(
     String content,
-    bool isPlain, {
+    EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
   }) async {
@@ -565,12 +566,12 @@ class AccountServer {
       await _initConversation(conversationId, recipientId),
       userId,
       content,
-      isPlain,
+      encryptCategory,
     );
   }
 
   Future<void> sendImageMessage(
-    bool isPlain, {
+    EncryptCategory encryptCategory, {
     XFile? file,
     Uint8List? bytes,
     String? conversationId,
@@ -582,12 +583,12 @@ class AccountServer {
         senderId: userId,
         file: file,
         bytes: bytes,
-        category:
-            isPlain ? MessageCategory.plainImage : MessageCategory.signalImage,
+        category: encryptCategory.toCategory( MessageCategory.plainImage,
+            MessageCategory.signalImage, MessageCategory.encryptedImage),
         quoteMessageId: quoteMessageId,
       );
 
-  Future<void> sendVideoMessage(XFile video, bool isPlain,
+  Future<void> sendVideoMessage(XFile video, EncryptCategory encryptCategory,
           {String? conversationId,
           String? recipientId,
           String? quoteMessageId}) async =>
@@ -595,10 +596,11 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           video,
-          isPlain ? MessageCategory.plainData : MessageCategory.signalData,
+          encryptCategory.toCategory( MessageCategory.plainVideo,
+              MessageCategory.signalVideo, MessageCategory.encryptedVideo),
           quoteMessageId);
 
-  Future<void> sendAudioMessage(XFile audio, bool isPlain,
+  Future<void> sendAudioMessage(XFile audio, EncryptCategory encryptCategory,
           {String? conversationId,
           String? recipientId,
           String? quoteMessageId}) async =>
@@ -606,10 +608,11 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           audio,
-          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio,
+          encryptCategory.toCategory( MessageCategory.plainAudio,
+              MessageCategory.signalAudio, MessageCategory.encryptedAudio),
           quoteMessageId);
 
-  Future<void> sendDataMessage(XFile file, bool isPlain,
+  Future<void> sendDataMessage(XFile file, EncryptCategory encryptCategory,
           {String? conversationId,
           String? recipientId,
           String? quoteMessageId}) async =>
@@ -617,12 +620,13 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           file,
-          isPlain ? MessageCategory.plainData : MessageCategory.signalData,
+          encryptCategory.toCategory( MessageCategory.plainData,
+              MessageCategory.signalData, MessageCategory.encryptedData),
           quoteMessageId);
 
   Future<void> sendStickerMessage(
     String stickerId,
-    bool isPlain, {
+    EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
   }) async =>
@@ -630,12 +634,11 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           StickerMessage(stickerId, null, null),
-          isPlain
-              ? MessageCategory.plainSticker
-              : MessageCategory.signalSticker);
+          encryptCategory.toCategory( MessageCategory.plainSticker,
+              MessageCategory.signalSticker, MessageCategory.encryptedSticker));
 
-  Future<void> sendContactMessage(
-          String shareUserId, String shareUserFullName, bool isPlain,
+  Future<void> sendContactMessage(String shareUserId, String shareUserFullName,
+          EncryptCategory encryptCategory,
           {String? conversationId,
           String? recipientId,
           String? quoteMessageId}) async =>
@@ -644,7 +647,7 @@ class AccountServer {
         userId,
         ContactMessage(shareUserId),
         shareUserFullName,
-        isEncrypted: isPlain,
+        encryptCategory: encryptCategory,
         quoteMessageId: quoteMessageId,
       );
 
@@ -655,7 +658,7 @@ class AccountServer {
 
   Future<void> forwardMessage(
     String forwardMessageId,
-    bool isPlain, {
+    EncryptCategory encryptCategory, {
     String? conversationId,
     String? recipientId,
   }) async =>
@@ -663,7 +666,7 @@ class AccountServer {
         await _initConversation(conversationId, recipientId),
         userId,
         forwardMessageId,
-        isEncrypted: isPlain,
+        encryptCategory: encryptCategory,
       );
 
   void selectConversation(String? conversationId) {

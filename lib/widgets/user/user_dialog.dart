@@ -310,7 +310,7 @@ class _UserProfileButtonBar extends StatelessWidget {
                 context.accountServer.sendContactMessage(
                   user.userId,
                   user.fullName!,
-                  isPlain(result.first.isGroup, result.first.isBot),
+                  result.first.encryptCategory,
                   conversationId: conversationId,
                   recipientId: result[0].userId,
                 ),

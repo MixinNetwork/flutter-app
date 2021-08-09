@@ -13,7 +13,6 @@ import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
@@ -152,7 +151,7 @@ class MessageItemWidget extends HookWidget {
                         if (result.isEmpty) return;
                         await context.accountServer.forwardMessage(
                           message.messageId,
-                          isPlain(result.first.isGroup, result.first.isBot),
+                          result.first.encryptCategory,
                           conversationId: result.first.conversationId,
                           recipientId: result.first.userId,
                         );

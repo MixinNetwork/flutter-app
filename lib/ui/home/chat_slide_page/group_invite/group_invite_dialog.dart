@@ -12,7 +12,6 @@ import '../../../../widgets/dialog.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/toast.dart';
 import '../../../../widgets/user_selector/conversation_selector.dart';
-import '../../bloc/conversation_cubit.dart';
 
 Future<void> showGroupInviteByLinkDialog(BuildContext context,
     {required String conversationId}) async {
@@ -165,7 +164,7 @@ class _ActionButtons extends StatelessWidget {
                   context,
                   context.accountServer.sendTextMessage(
                     conversation.codeUrl!,
-                    isPlain(result.first.isGroup, result.first.isBot),
+                    result.first.encryptCategory,
                     conversationId: result.first.conversationId,
                     recipientId: result.first.userId,
                   ));
