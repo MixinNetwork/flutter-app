@@ -33,7 +33,7 @@ import '../db/mixin_database.dart' as db;
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
-import '../utils/attachment_util.dart';
+import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import '../utils/hive_key_values.dart';
@@ -127,14 +127,14 @@ class AccountServer {
       String privateKey, MultiAuthCubit multiAuthCubit) async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
-    _attachmentUtil =
+    attachmentUtil =
         AttachmentUtil.init(client, database.messageDao, identityNumber);
     _sendMessageHelper = SendMessageHelper(
       database.messageDao,
       database.messageMentionDao,
       database.jobDao,
       database.participantDao,
-      _attachmentUtil,
+      attachmentUtil,
     );
     blaze = Blaze(
       userId,
@@ -164,7 +164,7 @@ class AccountServer {
       client,
       sessionId,
       this.privateKey,
-      _attachmentUtil,
+      attachmentUtil,
       multiAuthCubit,
     );
 
@@ -182,7 +182,7 @@ class AccountServer {
   late DecryptMessage _decryptMessage;
   late Sender _sender;
   late SendMessageHelper _sendMessageHelper;
-  late AttachmentUtil _attachmentUtil;
+  late AttachmentUtil attachmentUtil;
 
   late SignalProtocol signalProtocol;
 
@@ -905,7 +905,7 @@ class AccountServer {
       null,
       null,
     );
-    await _attachmentUtil.downloadAttachment(
+    await attachmentUtil.downloadAttachment(
         content: message.content!,
         messageId: message.messageId,
         conversationId: message.conversationId,
@@ -1284,27 +1284,24 @@ class AccountServer {
       database.conversationDao.pin(conversationId);
 
   Future<int> getConversationMediaSize(String conversationId) async =>
-      (await getTotalSizeOfFile(
-          _attachmentUtil.getImagesPath(conversationId))) +
-      (await getTotalSizeOfFile(
-          _attachmentUtil.getVideosPath(conversationId))) +
-      (await getTotalSizeOfFile(
-          _attachmentUtil.getAudiosPath(conversationId))) +
-      (await getTotalSizeOfFile(_attachmentUtil.getFilesPath(conversationId)));
+      (await getTotalSizeOfFile(attachmentUtil.getImagesPath(conversationId))) +
+      (await getTotalSizeOfFile(attachmentUtil.getVideosPath(conversationId))) +
+      (await getTotalSizeOfFile(attachmentUtil.getAudiosPath(conversationId))) +
+      (await getTotalSizeOfFile(attachmentUtil.getFilesPath(conversationId)));
 
   String getImagesPath(String conversationId) =>
-      _attachmentUtil.getImagesPath(conversationId);
+      attachmentUtil.getImagesPath(conversationId);
 
   String getVideosPath(String conversationId) =>
-      _attachmentUtil.getVideosPath(conversationId);
+      attachmentUtil.getVideosPath(conversationId);
 
   String getAudiosPath(String conversationId) =>
-      _attachmentUtil.getAudiosPath(conversationId);
+      attachmentUtil.getAudiosPath(conversationId);
 
   String getFilesPath(String conversationId) =>
-      _attachmentUtil.getFilesPath(conversationId);
+      attachmentUtil.getFilesPath(conversationId);
 
-  String getMediaFilePath() => _attachmentUtil.mediaPath;
+  String getMediaFilePath() => attachmentUtil.mediaPath;
 
   Future<void> markMentionRead(String messageId, String conversationId) =>
       Future.wait([
@@ -1334,15 +1331,15 @@ class AccountServer {
     multiAuthCubit.updateAccount(user.data);
   }
 
-  bool cancelProgressAttachmentJob(String messageId) =>
-      _attachmentUtil.cancelProgressAttachmentJob(messageId);
+  Future<bool> cancelProgressAttachmentJob(String messageId) =>
+      attachmentUtil.cancelProgressAttachmentJob(messageId);
 
   Future<void> deleteMessage(String messageId) =>
       database.messageDao.deleteMessage(messageId);
 
   String convertAbsolutePath(
           String category, String conversationId, String? fileName) =>
-      _attachmentUtil.convertAbsolutePath(category, conversationId, fileName);
+      attachmentUtil.convertAbsolutePath(category, conversationId, fileName);
 
   String convertMessageAbsolutePath(db.MessageItem? messageItem) {
     if (messageItem == null) return '';

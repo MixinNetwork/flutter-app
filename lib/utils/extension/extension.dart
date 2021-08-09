@@ -23,6 +23,8 @@ export 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     show UuidHashcodeExtension;
 export 'package:provider/provider.dart' show ReadContext, WatchContext;
 
+export '../../crypto/attachment/crypto_attachment.dart'
+    show EncryptAttachmentStreamExtension, DecryptAttachmentStreamExtension;
 export '../../db/extension/conversation.dart' show ConversationItemExtension;
 export '../../db/extension/message.dart'
     show MessageItemExtension, QuoteMessageItemExtension;

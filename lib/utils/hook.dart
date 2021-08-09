@@ -96,3 +96,32 @@ Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
   final stream = useMemoized(() => streamController.stream, [valueNotifier]);
   return stream;
 }
+
+AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(
+  L listenable, {
+  required T Function(L) converter,
+  List<Object?> keys = const <Object>[],
+  T? initialData,
+}) {
+  final streamController = useStreamController<T>(
+    keys: [listenable, ...keys],
+  );
+
+  useEffect(
+    () {
+      void onListen() => streamController.add(converter(listenable));
+
+      listenable.addListener(onListen);
+      return () {
+        listenable.removeListener(onListen);
+      };
+    },
+    [listenable, ...keys],
+  );
+
+  final stream = useMemoized(
+    () => streamController.stream.distinct(),
+    [listenable, ...keys],
+  );
+  return useStream(stream, initialData: initialData);
+}
