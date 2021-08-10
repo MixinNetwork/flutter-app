@@ -101,7 +101,7 @@ class AttachmentUtil extends ChangeNotifier {
         String? mediaKey;
         String? mediaDigest;
 
-        if (category.isSignal) {
+        if (category.isSignal || category.isEncrypted) {
           mediaKey = attachmentMessage?.key;
           mediaDigest = attachmentMessage?.digest;
           if (mediaKey == null || mediaDigest == null) {
@@ -167,7 +167,7 @@ class AttachmentUtil extends ChangeNotifier {
       List<int>? keys;
       List<int>? iv;
 
-      if (category.isSignal) {
+      if (category.isSignal || category.isEncrypted) {
         keys = generateRandomKey(64);
         iv = generateRandomKey(16);
       }
@@ -185,8 +185,8 @@ class AttachmentUtil extends ChangeNotifier {
       await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
       return AttachmentResult(
           response.data.attachmentId,
-          category.isSignal ? await base64EncodeWithIsolate(keys!) : null,
-          category.isSignal ? await base64EncodeWithIsolate(digest!) : null,
+          category.isSignal || category.isEncrypted ? await base64EncodeWithIsolate(keys!) : null,
+          category.isSignal || category.isEncrypted ? await base64EncodeWithIsolate(digest!) : null,
           response.data.createdAt);
     } catch (e) {
       w(e.toString());
@@ -203,7 +203,7 @@ class AttachmentUtil extends ChangeNotifier {
       await _messageDao.mediaStatus(messageId).getSingleOrNull();
 
   void deleteCryptoTmpFile(String category, File file) {
-    if (category.isSignal) {
+    if (category.isSignal || category.isEncrypted) {
       file.delete();
     }
   }
