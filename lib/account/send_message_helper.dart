@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/rendering.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -25,9 +26,10 @@ import '../utils/attachment/attachment_util.dart';
 import '../utils/datetime_format_utils.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 
-const _kEnableImageBlurHashThumb = true;
+const _kEnableImageBlurHashThumb = false;
 
 class SendMessageHelper {
   SendMessageHelper(
@@ -143,11 +145,26 @@ class SendMessageHelper {
       quoteContent: quoteMessage?.toJson(),
     );
     await _messageDao.insert(message, senderId);
-    final thumbImage = await runLoadBalancer(
+
+    String? thumbImage;
+    final stopwatch = Stopwatch()..start();
+
+    final image = await _getSmallImage(attachment.path);
+
+    stopwatch.stop();
+    d('_getSmallImage duration: ${stopwatch.elapsedMilliseconds}');
+    stopwatch.start();
+
+    thumbImage = await runLoadBalancer(
       _getImageThumbnailString,
-      attachment.path,
+      image,
     );
-    // ignore: parameter_assignments
+    stopwatch.stop();
+    d('thumbImage: $thumbImage');
+    d('_getImageThumbnailString duration: ${stopwatch.elapsedMilliseconds}, _kEnableImageBlurHashThumb: $_kEnableImageBlurHashThumb');
+
+    if (await _attachmentUtil.isNotPending(messageId)) return;
+
     attachmentResult ??=
         await _attachmentUtil.uploadAttachment(attachment, messageId, category);
     if (attachmentResult == null) return;
@@ -743,19 +760,20 @@ class SendMessageHelper {
   }
 }
 
-Future<String?> _getImageThumbnailString(String path) async {
-  final image = decodeImage(await XFile(path).readAsBytes())!;
+Future<Image> _getSmallImage(String path) async {
+  final fileImage = FileImage(File(path), scale: 1.0);
+  final imageProvider = ExtendedResizeImage(fileImage, maxBytes: 128 << 10);
+  final image = await imageProvider.toImage();
+
+  return Image.fromBytes(image.width, image.height, (await image.toBytes())!);
+}
+
+Future<String?> _getImageThumbnailString(Image image) async {
   String? thumbImage;
   if (_kEnableImageBlurHashThumb) {
     thumbImage = BlurHash.encode(image).hash;
   } else {
-    final scale = max(max(image.width, image.height) / 48, 1.0);
-    final thumbnail = copyResize(
-      image,
-      width: image.width ~/ scale,
-      height: image.height ~/ scale,
-    );
-    thumbImage = base64Encode(encodeJpg(thumbnail, quality: 50));
+    thumbImage = base64Encode(encodeJpg(image, quality: 50));
   }
   return thumbImage;
 }

@@ -27,8 +27,6 @@ Future<void> main() async {
   ]);
   loadBalancer = result[0];
 
-  await initMixinDocumentsDirectory();
-
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,
   );

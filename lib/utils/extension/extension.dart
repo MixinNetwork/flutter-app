@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:file_selector/file_selector.dart' as file_selector;
@@ -35,6 +37,8 @@ export '../datetime_format_utils.dart'
     show DateTimeExtension, StringEpochNanoExtension;
 
 part 'src/file.dart';
+
+part 'src/image.dart';
 
 part 'src/iterable.dart';
 
