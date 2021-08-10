@@ -320,7 +320,7 @@ class _UserProfileButtonBar extends StatelessWidget {
           ),
           if (!isSelf)
             ActionButton(
-              name: Resources.assetsImagesChatSvg,
+              name: Resources.assetsImagesChatSmallSvg,
               size: 30,
               onTap: () async {
                 if (user.userId == context.accountServer.userId) {
