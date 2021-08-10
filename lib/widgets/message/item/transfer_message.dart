@@ -62,13 +62,7 @@ class TransferMessage extends StatelessWidget {
                           try {
                             final numberFormat = NumberFormat.decimalPattern(
                                 Intl.getCurrentLocale());
-
-                            if (amount!.startsWith('-')) {
-                              amount = numberFormat
-                                  .format(int.parse(amount.substring(1)));
-                            } else {
-                              amount = numberFormat.format(int.parse(amount));
-                            }
+                            amount = numberFormat.format(int.parse(amount!));
                           } catch (_) {}
                           return Text(
                             amount!,
