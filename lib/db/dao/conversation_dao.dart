@@ -29,14 +29,23 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   late Stream<int> allUnseenIgnoreMuteMessageCountEvent = db
       .tableUpdates(TableUpdateQuery.onAllTables([
         db.conversations,
+        db.users,
       ]))
       .asyncMap((event) => allUnseenIgnoreMuteMessageCount().getSingle())
       .where((event) => event != null)
       .map((event) => event!);
 
   Selectable<int?> allUnseenIgnoreMuteMessageCount() => _baseUnseenMessageCount(
-        (conversation, _, __) => conversation.muteUntil.isSmallerOrEqualValue(
-            const MillisDateConverter().mapToSql(DateTime.now())),
+        (conversation, owner, __) {
+          final now = const MillisDateConverter().mapToSql(DateTime.now());
+          final groupExpression =
+              conversation.category.equalsValue(ConversationCategory.group) &
+                  conversation.muteUntil.isSmallerOrEqualValue(now);
+          final userExpression =
+              conversation.category.equalsValue(ConversationCategory.contact) &
+                  owner.muteUntil.isSmallerOrEqualValue(now);
+          return groupExpression | userExpression;
+        },
         useBaseWhere: false,
       );
 
