@@ -95,7 +95,7 @@ class AttachmentUtil extends ChangeNotifier {
       final response = await _client.attachmentApi.getAttachment(content);
       d('download ${response.data.viewUrl}');
 
-      if (await _isNotPending(messageId)) return null;
+      if (await isNotPending(messageId)) return null;
 
       if (response.data.viewUrl != null) {
         String? mediaKey;
@@ -162,7 +162,7 @@ class AttachmentUtil extends ChangeNotifier {
     try {
       final response = await _client.attachmentApi.postAttachment();
       if (response.data.uploadUrl == null) throw Error();
-      if (await _isNotPending(messageId)) return null;
+      if (await isNotPending(messageId)) return null;
 
       List<int>? keys;
       List<int>? iv;
@@ -198,7 +198,7 @@ class AttachmentUtil extends ChangeNotifier {
     }
   }
 
-  Future<bool> _isNotPending(String messageId) async =>
+  Future<bool> isNotPending(String messageId) async =>
       MediaStatus.pending !=
       await _messageDao.mediaStatus(messageId).getSingleOrNull();
 
