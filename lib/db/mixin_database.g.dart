@@ -10346,10 +10346,15 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
-  Selectable<User> friends() {
+  Selectable<User> friends(List<String> filterIds) {
+    var $arrayStartIndex = 1;
+    final expandedfilterIds = $expandVar($arrayStartIndex, filterIds.length);
+    $arrayStartIndex += filterIds.length;
     return customSelect(
-        'SELECT * FROM users WHERE relationship = \'FRIEND\' ORDER BY full_name, user_id ASC',
-        variables: [],
+        'SELECT * FROM users WHERE relationship = \'FRIEND\' AND user_id NOT IN ($expandedfilterIds) ORDER BY full_name, user_id ASC',
+        variables: [
+          for (var $ in filterIds) Variable<String>($)
+        ],
         readsFrom: {
           users,
         }).map(users.mapFromRow);

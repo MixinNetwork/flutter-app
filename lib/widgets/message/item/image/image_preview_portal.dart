@@ -279,7 +279,7 @@ class _Bar extends StatelessWidget {
               if (result.isEmpty) return;
               await accountServer.forwardMessage(
                 message.messageId,
-                result.first.encryptCategory,
+                result.first.encryptCategory!,
                 conversationId: result.first.conversationId,
                 recipientId: result.first.userId,
               );

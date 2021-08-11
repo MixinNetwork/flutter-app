@@ -185,8 +185,12 @@ class AttachmentUtil extends ChangeNotifier {
       await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
       return AttachmentResult(
           response.data.attachmentId,
-          category.isSignal || category.isEncrypted ? await base64EncodeWithIsolate(keys!) : null,
-          category.isSignal || category.isEncrypted ? await base64EncodeWithIsolate(digest!) : null,
+          category.isSignal || category.isEncrypted
+              ? await base64EncodeWithIsolate(keys!)
+              : null,
+          category.isSignal || category.isEncrypted
+              ? await base64EncodeWithIsolate(digest!)
+              : null,
           response.data.createdAt);
     } catch (e) {
       w(e.toString());

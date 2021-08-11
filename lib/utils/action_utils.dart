@@ -11,8 +11,7 @@ extension OpenUriExtension on BuildContext {
       final content = actionText.substring(6).trim();
       final conversationItem = read<ConversationCubit>().state;
       if (content.isNotEmpty == true && conversationItem != null) {
-        accountServer.sendTextMessage(
-            content, conversationItem.encryptCategory,
+        accountServer.sendTextMessage(content, conversationItem.encryptCategory,
             conversationId: conversationItem.conversationId);
       }
 

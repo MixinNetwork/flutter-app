@@ -25,7 +25,7 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
   late List<User> bots;
 
   Future<void> _init() async {
-    var contactConversationIds = <String?>{};
+    var contactConversationIds = <String>{};
     var botConversationIds = <String>{};
     if (onlyContact) {
       conversations = [];
@@ -34,8 +34,9 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
           .conversationItems()
           .get();
       contactConversationIds = conversations
-          .where((element) => element.isContactConversation)
-          .map((e) => e.ownerId)
+          .where((element) =>
+              element.isContactConversation && element.ownerId != null)
+          .map((e) => e.ownerId!)
           .toSet();
       botConversationIds = conversations
           .where((element) => element.isBotConversation)
@@ -47,12 +48,10 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     friends = <User>[];
     bots = <User>[];
 
-    Iterable<User> users = await accountServer.database.userDao.friends().get();
-    if (!onlyContact) {
-      users = users
-          .where((element) => !contactConversationIds.contains(element.userId))
-          .where((element) => !botConversationIds.contains(element.appId));
-    }
+    final Iterable<User> users = await accountServer.database.userDao.friends([
+      ...contactConversationIds,
+      ...botConversationIds,
+    ]).get();
     users.forEach((e) {
       if (e.isBot) {
         bots.add(e);

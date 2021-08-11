@@ -12,7 +12,10 @@ class AppDao extends DatabaseAccessor<MixinDatabase> with _$AppDaoMixin {
 
   Future deleteApp(App app) => delete(db.apps).delete(app);
 
-  Future<App?> findUserById(String appId) async =>
+  Future<App?> findAppById(String appId) async =>
       (select(db.apps)..where((tbl) => tbl.appId.equals(appId)))
           .getSingleOrNull();
+
+  SimpleSelectStatement<Apps, App> appInIds(Iterable<String> ids) =>
+      select(db.apps)..where((tbl) => tbl.appId.isIn(ids));
 }

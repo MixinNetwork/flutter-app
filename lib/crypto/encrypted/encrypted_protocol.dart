@@ -24,7 +24,8 @@ class EncryptedProtocol {
       ...messageKey
     ];
 
-    final senderPublicKey =  publicKeyToCurve25519(Uint8List.fromList(ed.public(privateKey).bytes));
+    final senderPublicKey =
+        publicKeyToCurve25519(Uint8List.fromList(ed.public(privateKey).bytes));
     final version = [0x01];
 
     if (extensionSessionKey != null && extensionSessionId != null) {

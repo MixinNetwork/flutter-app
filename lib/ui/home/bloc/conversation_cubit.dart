@@ -201,7 +201,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
 
     final ownerId = _conversation.ownerId;
     final app = (!_conversation.isGroupConversation && ownerId != null)
-        ? await accountServer.database.appDao.findUserById(ownerId)
+        ? await accountServer.database.appDao.findAppById(ownerId)
         : null;
 
     final conversationState = ConversationState(
@@ -253,7 +253,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       return showToastFailed(context, ToastError(context.l10n.userNotFound));
     }
 
-    final app = await accountServer.database.appDao.findUserById(userId);
+    final app = await accountServer.database.appDao.findAppById(userId);
 
     conversationCubit.emit(ConversationState(
       conversationId: conversationId,

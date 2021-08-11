@@ -583,7 +583,7 @@ class AccountServer {
         senderId: userId,
         file: file,
         bytes: bytes,
-        category: encryptCategory.toCategory( MessageCategory.plainImage,
+        category: encryptCategory.toCategory(MessageCategory.plainImage,
             MessageCategory.signalImage, MessageCategory.encryptedImage),
         quoteMessageId: quoteMessageId,
       );
@@ -596,7 +596,7 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           video,
-          encryptCategory.toCategory( MessageCategory.plainVideo,
+          encryptCategory.toCategory(MessageCategory.plainVideo,
               MessageCategory.signalVideo, MessageCategory.encryptedVideo),
           quoteMessageId);
 
@@ -608,7 +608,7 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           audio,
-          encryptCategory.toCategory( MessageCategory.plainAudio,
+          encryptCategory.toCategory(MessageCategory.plainAudio,
               MessageCategory.signalAudio, MessageCategory.encryptedAudio),
           quoteMessageId);
 
@@ -620,7 +620,7 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           file,
-          encryptCategory.toCategory( MessageCategory.plainData,
+          encryptCategory.toCategory(MessageCategory.plainData,
               MessageCategory.signalData, MessageCategory.encryptedData),
           quoteMessageId);
 
@@ -634,7 +634,7 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           StickerMessage(stickerId, null, null),
-          encryptCategory.toCategory( MessageCategory.plainSticker,
+          encryptCategory.toCategory(MessageCategory.plainSticker,
               MessageCategory.signalSticker, MessageCategory.encryptedSticker));
 
   Future<void> sendContactMessage(String shareUserId, String shareUserFullName,

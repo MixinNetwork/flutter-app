@@ -164,7 +164,7 @@ class _ActionButtons extends StatelessWidget {
                   context,
                   context.accountServer.sendTextMessage(
                     conversation.codeUrl!,
-                    result.first.encryptCategory,
+                    result.first.encryptCategory!,
                     conversationId: result.first.conversationId,
                     recipientId: result.first.userId,
                   ));

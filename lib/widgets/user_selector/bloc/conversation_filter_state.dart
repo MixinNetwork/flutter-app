@@ -13,6 +13,14 @@ class ConversationFilterState extends Equatable {
   final List<User> bots;
   final String? keyword;
 
+  Set<String> get appIds => {
+        ...recentConversations
+            .map((e) => e.ownerId)
+            .where((element) => element != null)
+            .cast<String>(),
+        ...[...bots, ...friends].map((e) => e.userId),
+      };
+
   @override
   List<Object?> get props => [
         friends,

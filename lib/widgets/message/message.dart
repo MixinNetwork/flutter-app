@@ -151,7 +151,7 @@ class MessageItemWidget extends HookWidget {
                         if (result.isEmpty) return;
                         await context.accountServer.forwardMessage(
                           message.messageId,
-                          result.first.encryptCategory,
+                          result.first.encryptCategory!,
                           conversationId: result.first.conversationId,
                           recipientId: result.first.userId,
                         );

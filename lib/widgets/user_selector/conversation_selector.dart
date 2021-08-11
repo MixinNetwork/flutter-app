@@ -45,28 +45,22 @@ String? _getUserId(dynamic item) {
   if (item is User) return item.userId;
 }
 
-bool _isBot(dynamic item) {
-  if (item is ConversationItem) return item.isBotConversation;
-  if (item is User) return item.isBot;
-  throw ArgumentError('must be ConversationItem or User');
-}
+EncryptCategory _getEncryptedCategory(dynamic item, Map<String, App> map) {
+  bool isEncrypted(appId) {
+    final app = map[appId];
+    return app != null && app.capabilities?.contains('ENCRYPTED') == true;
+  }
 
-// Todo
-EncryptCategory _getEncryptedCategory(dynamic item) {
   if (item is ConversationItem) {
+    if (isEncrypted(item.ownerId)) return EncryptCategory.encrypted;
     return item.isBotConversation
         ? EncryptCategory.plain
         : EncryptCategory.signal;
   }
   if (item is User) {
+    if (isEncrypted(item.userId)) return EncryptCategory.encrypted;
     return item.isBot ? EncryptCategory.plain : EncryptCategory.signal;
   }
-  throw ArgumentError('must be ConversationItem or User');
-}
-
-bool _isGroup(dynamic item) {
-  if (item is ConversationItem) return item.isGroupConversation;
-  if (item is User) return false;
   throw ArgumentError('must be ConversationItem or User');
 }
 
@@ -114,32 +108,26 @@ class ConversationSelector with EquatableMixin {
   const ConversationSelector({
     required this.conversationId,
     required this.userId,
-    required this.isBot,
-    required this.isGroup,
-    required this.encryptCategory,
+    this.encryptCategory,
   });
 
   final String conversationId;
   final String? userId;
-  final bool isBot;
-  final bool isGroup;
-  final EncryptCategory encryptCategory;
+  final EncryptCategory? encryptCategory;
 
   @override
   List<Object?> get props => [
         conversationId,
         userId,
-        isBot,
-        isGroup,
+        encryptCategory,
       ];
 
-  static ConversationSelector init(dynamic item, BuildContext context) =>
+  static ConversationSelector init(
+          dynamic item, BuildContext context, Map<String, App> map) =>
       ConversationSelector(
         conversationId: _getConversationId(item, context),
         userId: _getUserId(item),
-        isBot: _isBot(item),
-        isGroup: _isGroup(item),
-        encryptCategory: _getEncryptedCategory(item),
+        encryptCategory: _getEncryptedCategory(item, map),
       );
 }
 
@@ -193,11 +181,23 @@ class _ConversationSelector extends HookWidget {
       bloc: conversationFilterCubit,
     );
 
+    final appMap = useMemoizedFuture(
+      () async {
+        final list = await context.database.appDao
+            .appInIds(conversationFilterState.appIds)
+            .get();
+        return {for (var e in list) e.appId: e};
+      },
+      <String, App>{},
+      keys: [conversationFilterState],
+    );
+
     useEffect(
       () => selector.stream.listen((event) {
         if (event.isNotEmpty && singleSelect) {
           final item = event.first;
-          Navigator.pop(context, [ConversationSelector.init(item, context)]);
+          Navigator.pop(
+              context, [ConversationSelector.init(item, context, appMap)]);
         }
       }).cancel,
     );
@@ -265,7 +265,10 @@ class _ConversationSelector extends HookWidget {
                                 selected
                                     .map(
                                       (item) => ConversationSelector.init(
-                                          item, context),
+                                        item,
+                                        context,
+                                        appMap,
+                                      ),
                                     )
                                     .toList(),
                               ),
