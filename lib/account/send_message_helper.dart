@@ -29,7 +29,7 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
 
-const _kEnableImageBlurHashThumb = false;
+const _kEnableImageBlurHashThumb = true;
 
 class SendMessageHelper {
   SendMessageHelper(
