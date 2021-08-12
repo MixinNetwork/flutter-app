@@ -32,13 +32,14 @@ void main() {
     final source = utf8.encode('LA');
     final protocol = EncryptedProtocol();
     final privateKey = ed.generateKey().privateKey;
-    final otherPublicKey = ed.generateKey().publicKey;
+    final otherKey = ed.generateKey();
     final otherSessionId = const Uuid().v4();
-    final pub = publicKeyToCurve25519(Uint8List.fromList(otherPublicKey.bytes));
+    final pub =
+        publicKeyToCurve25519(Uint8List.fromList(otherKey.publicKey.bytes));
 
     final encodedContent = protocol.encryptMessage(
         privateKey, source, pub.toList(), otherSessionId, null, null);
-    final decrypted = protocol.decryptMessage(privateKey,
+    final decrypted = protocol.decryptMessage(otherKey.privateKey,
         Uuid.parse(otherSessionId), Uint8List.fromList(encodedContent));
 
     assert(listEquals(source, decrypted));
@@ -48,9 +49,10 @@ void main() {
     final source = utf8.encode('LA');
     final protocol = EncryptedProtocol();
     final privateKey = ed.generateKey().privateKey;
-    final otherPublicKey = ed.generateKey().publicKey;
+    final otherKey = ed.generateKey();
     final otherSessionId = const Uuid().v4();
-    final pub = publicKeyToCurve25519(Uint8List.fromList(otherPublicKey.bytes));
+    final pub =
+        publicKeyToCurve25519(Uint8List.fromList(otherKey.publicKey.bytes));
 
     const extensionSessionKey = 'yiPAbfi53jznnt4YUPzbmRjbyoA7cn0KoYxyUVlruxY';
     const extensionSessionId = '93b15f04-3f16-4845-b0c9-acc1314dc8cb';
@@ -61,7 +63,7 @@ void main() {
         otherSessionId,
         base64.decode(base64.normalize(extensionSessionKey)),
         extensionSessionId);
-    final decrypted = protocol.decryptMessage(privateKey,
+    final decrypted = protocol.decryptMessage(otherKey.privateKey,
         Uuid.parse(otherSessionId), Uint8List.fromList(encodedContent));
 
     assert(listEquals(source, decrypted));
