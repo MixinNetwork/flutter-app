@@ -8,6 +8,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../enum/media_status.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../cache_image.dart';
 import '../../../image.dart';
 import '../../../interacter_decorated_box.dart';
 import '../../../status.dart';
@@ -72,9 +73,9 @@ class ImageMessageWidget extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Image.file(
-                    File(context.accountServer
-                        .convertMessageAbsolutePath(message)),
+                  Image(
+                    image: MixinFileImage(File(context.accountServer
+                        .convertMessageAbsolutePath(message))),
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) =>
                         ImageByBlurHashOrBase64(imageData: message.thumbImage!),
