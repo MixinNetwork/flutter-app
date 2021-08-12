@@ -264,7 +264,7 @@ class DecryptMessage extends Injector {
         await _insertInvalidMessage(data);
       } else {
         final plainText = await utf8DecodeWithIsolate(decryptedContent);
-          await _processDecryptSuccess(data, plainText);
+        await _processDecryptSuccess(data, plainText);
       }
     } catch (e) {
       await _insertInvalidMessage(data);
