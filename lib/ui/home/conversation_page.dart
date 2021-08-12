@@ -113,39 +113,32 @@ class _SearchList extends HookWidget {
         useBlocState<KeywordCubit, String>(bloc: context.read<KeywordCubit>());
     final accountServer = context.accountServer;
 
-    final users = useStream<List<User>>(
-            useMemoized(
-                () => accountServer.database.userDao
-                    .fuzzySearchUser(
-                        id: accountServer.userId,
-                        username: keyword,
-                        identityNumber: keyword)
-                    .watch(),
-                [keyword]),
-            initialData: []).data ??
-        [];
+    final users = useMemoizedFuture(
+        () => accountServer.database.userDao
+            .fuzzySearchUser(
+                id: accountServer.userId,
+                username: keyword,
+                identityNumber: keyword)
+            .get(),
+        <User>[],
+        keys: [keyword]);
 
-    final messages = useStream<List<SearchMessageDetailItem>>(
-            useMemoized(() async* {
-              if (keyword.trim().isEmpty) {
-                yield [];
-              } else {
-                yield* accountServer.database.messageDao
-                    .fuzzySearchMessage(query: keyword, limit: 4)
-                    .watch();
-              }
-            }, [keyword]),
-            initialData: []).data ??
-        [];
+    final messages = useMemoizedFuture(() async {
+      if (keyword.trim().isEmpty) {
+        return [];
+      } else {
+        return accountServer.database.messageDao
+            .fuzzySearchMessage(query: keyword, limit: 4)
+            .get();
+      }
+    }, <SearchMessageDetailItem>[], keys: [keyword]);
 
-    final conversations = useStream<List<SearchConversationItem>>(
-            useMemoized(
-                () => accountServer.database.conversationDao
-                    .fuzzySearchConversation(keyword)
-                    .watch(),
-                [keyword]),
-            initialData: []).data ??
-        [];
+    final conversations = useMemoizedFuture(
+        () => accountServer.database.conversationDao
+            .fuzzySearchConversation(keyword)
+            .get(),
+        <SearchConversationItem>[],
+        keys: [keyword]);
 
     final type = useState<_ShowMoreType?>(null);
 
