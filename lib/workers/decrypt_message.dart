@@ -261,18 +261,13 @@ class DecryptMessage extends Injector {
       final decryptedContent = _encryptedProtocol.decryptMessage(_privateKey,
           Uuid.parse(_sessionId), await base64DecodeWithIsolate(data.data));
       if (decryptedContent == null) {
-        // todo
+        await _insertInvalidMessage(data);
       } else {
         final plainText = await utf8DecodeWithIsolate(decryptedContent);
-        try {
           await _processDecryptSuccess(data, plainText);
-        } catch (e) {
-          // todo insertInvalidMessage
-        }
       }
     } catch (e) {
-      // todo
-      w(e.toString());
+      await _insertInvalidMessage(data);
     }
   }
 

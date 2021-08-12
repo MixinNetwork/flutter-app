@@ -109,7 +109,7 @@ EncryptCategory getEncryptCategory(App? app) {
   } else if (app != null) {
     return EncryptCategory.plain;
   }
-  return EncryptCategory.plain;
+  return EncryptCategory.signal;
 }
 
 class ConversationCubit extends SimpleCubit<ConversationState?>

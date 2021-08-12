@@ -384,24 +384,24 @@ class AccountServer {
         final participantSessionKey = await database.participantSessionDao
             .getParticipantSessionKeyWithoutSelf(
                 message.conversationId, userId);
-        if (participantSessionKey == null ||
-            participantSessionKey.publicKey == null) {
-          // todo throw checksum
-          return;
-        }
         final otherSessionKey = await database.participantSessionDao
             .getOtherParticipantSessionKey(
                 message.conversationId, userId, sessionId);
-        if (otherSessionKey == null || otherSessionKey.publicKey == null) {
-          // todo throw checksum
+        if (otherSessionKey == null ||
+            otherSessionKey.publicKey == null ||
+            participantSessionKey == null ||
+            participantSessionKey.publicKey == null) {
+          await _sender.checkConversation(message.conversationId);
           return;
         }
         final content = _encryptedProtocol.encryptMessage(
             privateKey,
             await utf8EncodeWithIsolate(message.content!),
-            base64.decode(base64.normalize(participantSessionKey.publicKey!)),
+            await base64DecodeWithIsolate(
+                base64.normalize(participantSessionKey.publicKey!)),
             participantSessionKey.sessionId,
-            base64.decode(base64.normalize(otherSessionKey.publicKey!)),
+            await base64DecodeWithIsolate(
+                base64.normalize(otherSessionKey.publicKey!)),
             otherSessionKey.sessionId);
 
         final blazeMessage = _createBlazeMessage(
