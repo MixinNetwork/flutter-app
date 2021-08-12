@@ -43,7 +43,9 @@ class CacheImage extends StatelessWidget {
 }
 
 // min frameDuration
-// see also: https://nullsleep.tumblr.com/post/16524517190/animated-gif-minimum-frame-delay-browser
+// see also:
+// https://nullsleep.tumblr.com/post/16524517190/animated-gif-minimum-frame-delay-browser
+// https://qiita.com/razokulover/items/34962844e314bb4bfd04
 const _minFrameDuration = Duration(milliseconds: 100);
 
 class _MultiImageStreamCompleter extends ImageStreamCompleter {
