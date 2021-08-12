@@ -74,19 +74,26 @@ class _QrCode extends StatelessWidget {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    BlocConverter<LandingCubit, LandingState, String>(
-                      converter: (state) => state.authUrl!,
-                      builder: (context, url) => QrImage(
-                        data: url,
-                        version: QrVersions.auto,
-                        foregroundColor: Colors.black,
-                        backgroundColor: Colors.white,
-                        embeddedImage:
-                            const AssetImage(Resources.assetsImagesLogoPng),
-                        embeddedImageStyle: QrEmbeddedImageStyle(
-                          size: const Size(44, 44),
-                        ),
-                      ),
+                    BlocConverter<LandingCubit, LandingState, String?>(
+                      converter: (state) => state.authUrl,
+                      builder: (context, url) {
+                        if (url == null) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+                        return QrImage(
+                          data: url,
+                          version: QrVersions.auto,
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.white,
+                          embeddedImage:
+                              const AssetImage(Resources.assetsImagesLogoPng),
+                          embeddedImageStyle: QrEmbeddedImageStyle(
+                            size: const Size(44, 44),
+                          ),
+                        );
+                      },
                     ),
                     BlocConverter<LandingCubit, LandingState, bool>(
                       converter: (state) =>

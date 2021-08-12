@@ -17,9 +17,9 @@ class SystemCircleMessage {
   @JsonKey(name: 'circle_id')
   String circleId;
   @JsonKey(name: 'conversation_id')
-  String conversationId;
+  String? conversationId;
   @JsonKey(name: 'user_id')
-  String userId;
+  String? userId;
 
   Map<String, dynamic> toJson() => _$SystemCircleMessageToJson(this);
 }
