@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +17,7 @@ import '../../../../enum/media_status.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
+import '../../../../widgets/cache_image.dart';
 import '../../../../widgets/image.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/image/image_preview_portal.dart';
