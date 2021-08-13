@@ -78,9 +78,7 @@ class _QrCode extends StatelessWidget {
                       converter: (state) => state.authUrl,
                       builder: (context, url) {
                         if (url == null) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return const SizedBox();
                         }
                         return QrImage(
                           data: url,
