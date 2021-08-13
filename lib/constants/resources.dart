@@ -31,6 +31,8 @@ class Resources {
   static const String assetsImagesChatSecretSvg =
       'assets/images/chat_secret.svg';
 
+  static const String assetsImagesChatSmallSvg = 'assets/images/chat_small.svg';
+
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
 
   static const String assetsImagesCircleAddSvg = 'assets/images/circle_add.svg';
