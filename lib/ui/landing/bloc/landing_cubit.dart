@@ -69,7 +69,8 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       streamSubscription = Stream.periodic(const Duration(seconds: 1), (i) => i)
           .listen(periodicStreamController.add);
       addSubscription(streamSubscription);
-    } catch (_) {
+    } catch (error, stack) {
+      e('requestAuthUrl failed: $error $stack');
       emit(state.copyWith(
         status: LandingStatus.needReload,
       ));
@@ -99,7 +100,10 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           ));
         })
         .asyncMap(_verify)
-        .handleError((_) => null)
+        .handleError((error, stack) {
+          e('_verify: $error $stack');
+          return null;
+        })
         .doOnData((auth) {
           if (auth == null) {
             streamSubscription?.cancel();
@@ -119,7 +123,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     addSubscription(subscription);
   }
 
-  FutureOr<Tuple2<Account, String>?> _verify(secret) async {
+  FutureOr<Tuple2<Account, String>?> _verify(String secret) async {
     try {
       final result =
           signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);

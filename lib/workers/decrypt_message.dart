@@ -25,6 +25,7 @@ import '../crypto/signal/ratchet_status.dart';
 import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
+import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
@@ -820,15 +821,19 @@ class DecryptMessage extends Injector {
         unawaited(refreshCircle(circleId: systemMessage.circleId));
       }
       final conversationId = systemMessage.conversationId;
-      await refreshUsers(<String>[systemMessage.userId]);
+      if (systemMessage.userId != null) {
+        await refreshUsers(<String>[systemMessage.userId!]);
+      }
       await database.circleConversationDao.insert(db.CircleConversation(
-        conversationId: conversationId,
+        conversationId: conversationId ??
+            generateConversationId(accountId, systemMessage.userId!),
         circleId: systemMessage.circleId,
         userId: systemMessage.userId,
         createdAt: data.createdAt,
       ));
     } else if (systemMessage.action == SystemCircleAction.remove) {
-      final conversationId = systemMessage.conversationId;
+      final conversationId = systemMessage.conversationId ??
+          generateConversationId(accountId, systemMessage.userId!);
       await database.circleConversationDao
           .deleteByIds(conversationId, systemMessage.circleId);
     } else if (systemMessage.action == SystemCircleAction.delete) {

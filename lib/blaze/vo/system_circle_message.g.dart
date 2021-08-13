@@ -10,8 +10,8 @@ SystemCircleMessage _$SystemCircleMessageFromJson(Map<String, dynamic> json) {
   return SystemCircleMessage(
     _$enumDecode(_$SystemCircleActionEnumMap, json['action']),
     json['circle_id'] as String,
-    json['user_id'] as String,
-    json['conversation_id'] as String,
+    json['user_id'] as String?,
+    json['conversation_id'] as String?,
   );
 }
 
