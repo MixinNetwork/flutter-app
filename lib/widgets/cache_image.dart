@@ -46,7 +46,8 @@ class CacheImage extends StatelessWidget {
 // see also:
 // https://nullsleep.tumblr.com/post/16524517190/animated-gif-minimum-frame-delay-browser
 // https://qiita.com/razokulover/items/34962844e314bb4bfd04
-const _minFrameDuration = Duration(milliseconds: 100);
+const _defaultFrameDuration = Duration(milliseconds: 100);
+const _minFrameDuration = Duration(milliseconds: 20);
 
 class _MultiImageStreamCompleter extends ImageStreamCompleter {
   /// The constructor to create an MultiImageStreamCompleter. The [codec]
@@ -132,8 +133,8 @@ class _MultiImageStreamCompleter extends ImageStreamCompleter {
       _emitFrame(ImageInfo(image: _nextFrame!.image, scale: _scale));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
-      if (_frameDuration!.inMilliseconds < 20) {
-        _frameDuration = _minFrameDuration;
+      if (_frameDuration! < _minFrameDuration) {
+        _frameDuration = _defaultFrameDuration;
       }
       _nextFrame = null;
       if (_framesEmitted % _codec!.frameCount == 0 && _nextImageCodec != null) {
@@ -307,8 +308,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       ));
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame!.duration;
-      if (_frameDuration!.inMilliseconds < 20) {
-        _frameDuration = _minFrameDuration;
+      if (_frameDuration! < _minFrameDuration) {
+        _frameDuration = _defaultFrameDuration;
       }
       _nextFrame!.image.dispose();
       _nextFrame = null;
