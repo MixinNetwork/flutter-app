@@ -109,6 +109,9 @@ dependencies:
   async: ^2.8.1
   extended_text: ^7.0.0
   extended_image: ^4.1.0
+  flutter_cache_manager: ^3.1.2
+  cached_network_image_platform_interface: ^1.0.0
+  octo_image: ^1.0.0+1
 
 dev_dependencies:
   build_runner:

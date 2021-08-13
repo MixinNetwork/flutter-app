@@ -19,13 +19,13 @@ import 'package:tuple/tuple.dart';
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
-
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/platform.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/buttons.dart';
+import '../../../widgets/cache_image.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/dialog.dart';
 import '../bloc/conversation_cubit.dart';
@@ -514,8 +514,8 @@ class _TileBigImage extends HookWidget {
                   minWidth: 420,
                   maxWidth: 420,
                 ),
-                child: Image.file(
-                  File(file.path),
+                child: Image(
+                  image: MixinFileImage(File(file.path)),
                   fit: BoxFit.fitWidth,
                   errorBuilder: (_, __, ___) => const SizedBox(),
                 ),
