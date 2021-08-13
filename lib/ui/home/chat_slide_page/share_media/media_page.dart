@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/widgets/cache_image.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
@@ -205,8 +206,9 @@ class _Item extends StatelessWidget {
               break;
           }
         },
-        child: Image.file(
-          File(context.accountServer.convertMessageAbsolutePath(message)),
+        child: Image(
+          image: MixinFileImage(
+              File(context.accountServer.convertMessageAbsolutePath(message))),
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => ImageByBase64(message.thumbImage!),
         ),

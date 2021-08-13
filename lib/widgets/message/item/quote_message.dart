@@ -11,7 +11,6 @@ import '../../../db/extension/message.dart';
 import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
-
 import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
@@ -91,9 +90,10 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: quote.userId,
           name: quote.userFullName,
-          image: Image.file(
-            File(context.accountServer.convertAbsolutePath(
-                quote.type, quote.conversationId, quote.mediaUrl)),
+          image: Image(
+            image: MixinFileImage(File(context.accountServer
+                .convertAbsolutePath(
+                    quote.type, quote.conversationId, quote.mediaUrl))),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
                 ImageByBlurHashOrBase64(imageData: quote.thumbImage),
