@@ -17,23 +17,11 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
 
   Selectable<Sticker> recentUsedStickers() => db.recentUsedStickers();
 
-  Future<Sticker?> getStickerByUnique(String stickerId) async =>
-      customSelect('SELECT * FROM stickers WHERE sticker_id = :stickerId;',
-              readsFrom: {
-            db.stickers
-          },
-              variables: [
-            Variable.withString(stickerId),
-          ])
-          .map((QueryRow row) => Sticker(
-              stickerId: row.read<String>('sticker_id'),
-              name: row.read<String>('name'),
-              assetUrl: row.read<String>('asset_url'),
-              assetType: row.read<String>('asset_type'),
-              assetWidth: row.read<int>('asset_width'),
-              assetHeight: row.read<int>('asset_height'),
-              createdAt: row.read<DateTime>('last_use_at')))
-          .getSingleOrNull();
+  SimpleSelectStatement<Stickers, Sticker> getStickerByUnique(
+          String stickerId) =>
+      (select(db.stickers)
+        ..where((tbl) => tbl.stickerId.equals(stickerId))
+        ..limit(1));
 
   Selectable<Sticker> stickerByAlbumId(String albumId) => select(db.stickers)
     ..where((tbl) => tbl.albumId.equals(albumId))
