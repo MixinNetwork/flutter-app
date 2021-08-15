@@ -268,7 +268,8 @@ class DecryptMessage extends Injector {
         try {
           await _processDecryptSuccess(data, plainText);
         } catch (e) {
-          // todo insertInvalidMessage
+          w('insertInvalidMessage ${data.messageId}, $e');
+          await _insertInvalidMessage(data);
         }
       }
     } catch (e) {
@@ -607,7 +608,8 @@ class DecryptMessage extends Injector {
       final stickerMessage =
           StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId);
+          .getStickerByUnique(stickerMessage.stickerId)
+          .getSingleOrNull();
       if (sticker == null) {
         await refreshSticker(stickerMessage.stickerId);
       }
@@ -999,7 +1001,8 @@ class DecryptMessage extends Injector {
       final stickerMessage =
           StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
       final sticker = await database.stickerDao
-          .getStickerByUnique(stickerMessage.stickerId);
+          .getStickerByUnique(stickerMessage.stickerId)
+          .getSingleOrNull();
       if (sticker == null) {
         await refreshSticker(stickerMessage.stickerId);
       }
