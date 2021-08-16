@@ -673,8 +673,8 @@ class DecryptMessage extends Injector {
       try {
         locationMessage = LocationMessage.fromJson(
             await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
-      } catch (e) {
-        w('decode locationMessage error $e');
+      } catch (e, s) {
+        w('decode locationMessage error $e, $s');
       }
       if (locationMessage == null ||
           locationMessage.latitude == 0.0 ||
