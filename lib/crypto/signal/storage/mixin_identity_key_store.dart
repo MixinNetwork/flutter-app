@@ -84,7 +84,7 @@ class MixinIdentityKeyStore extends IdentityKeyStore {
       return true;
     }
     if (identityKey != identity.getIdentityKey()) {
-      i('Identity keys don\'t match...');
+      i("Identity keys don't match...");
       return false;
     }
     return true;

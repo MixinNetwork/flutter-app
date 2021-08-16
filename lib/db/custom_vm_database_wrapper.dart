@@ -75,7 +75,8 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
               detail.startsWith('SCAN') || detail.startsWith('USE TEMP B-TREE'))
           .isNotEmpty;
       if (needPrint) {
-        w('''execution time: ${stopwatch.elapsed.inMilliseconds} MS, args: $args, sql:
+        w('''
+execution time: ${stopwatch.elapsed.inMilliseconds} MS, args: $args, sql:
 $statement
 EXPLAIN QUERY PLAN RESULT: 
 ${details.join('\n')}

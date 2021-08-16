@@ -54,7 +54,6 @@ class ChatBar extends HookWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 16, top: 14, bottom: 14),
       child: Row(
-        mainAxisSize: MainAxisSize.max,
         children: [
           Builder(
             builder: (context) => routeMode
@@ -80,7 +79,6 @@ class ChatBar extends HookWidget {
           ),
           Expanded(
             child: Column(
-              mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 IgnorePointer(

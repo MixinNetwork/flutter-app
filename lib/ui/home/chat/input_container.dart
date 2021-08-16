@@ -125,7 +125,6 @@ class _InputContainer extends HookWidget {
           participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
         )..selection = TextSelection.fromPosition(
             TextPosition(
-              affinity: TextAffinity.downstream,
               offset: draft?.length ?? 0,
             ),
           );
@@ -157,11 +156,11 @@ class _InputContainer extends HookWidget {
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
     useEffect(() {
-      focusNode.requestFocus(null);
+      focusNode.requestFocus();
       final subscription =
           context.read<QuoteMessageCubit>().stream.listen((event) {
         if (event == null) return;
-        focusNode.requestFocus(null);
+        focusNode.requestFocus();
       });
       return subscription.cancel;
     }, [conversationId]);
@@ -399,7 +398,6 @@ class _SendTextField extends HookWidget {
               contentPadding: const EdgeInsets.only(
                 left: 8,
                 top: 8,
-                right: 0,
                 bottom: 8,
               ),
             ),

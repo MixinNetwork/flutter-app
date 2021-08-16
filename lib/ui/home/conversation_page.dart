@@ -125,7 +125,7 @@ class _SearchList extends HookWidget {
 
     final messages = useMemoizedFuture(() async {
       if (keyword.trim().isEmpty) {
-        return [];
+        return <SearchMessageDetailItem>[];
       } else {
         return accountServer.database.messageDao
             .fuzzySearchMessage(query: keyword, limit: 4)

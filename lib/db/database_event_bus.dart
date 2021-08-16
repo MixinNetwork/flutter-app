@@ -17,7 +17,8 @@ class DataBaseEventBus {
           .where((e) => event == e.item1)
           .where((e) => nullable || e.item2 != null)
           .where((e) => e.item2 is T)
-          .map((e) => e.item2);
+          .map((e) => e.item2)
+          .cast<T>();
 
   void send<T>(DatabaseEvent event, T value) =>
       _streamController.add(Tuple2(event, value));

@@ -53,7 +53,7 @@ class ConversationAvatarWidget extends HookWidget {
                             .toList()
                         : event);
               }
-              return const Stream.empty();
+              return const Stream<List<User>>.empty();
             },
             [_conversationId, _category],
           ),

@@ -26,7 +26,7 @@ class InteracterBuilder extends StatefulWidget {
     this.behavior = HitTestBehavior.opaque,
   }) : super(key: key);
 
-  final Function(BuildContext context, InteracteStatus status,
+  final Widget Function(BuildContext context, InteracteStatus status,
       InteracteStatus lastStatus, Widget? child) builder;
 
   final Widget? child;

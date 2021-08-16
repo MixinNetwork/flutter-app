@@ -204,7 +204,6 @@ class _FilesPreviewDialog extends HookWidget {
                   ),
                   const SizedBox(height: 32),
                   Align(
-                    alignment: Alignment.center,
                     child: ElevatedButton(
                       onPressed: () async {
                         if (currentTab.value != _TabType.zip) {
@@ -396,7 +395,6 @@ class _PageZip extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(width: 30),
               const _FileIcon(extension: 'ZIP'),
@@ -539,8 +537,7 @@ class _TileBigImage extends HookWidget {
                     child: ActionButton(
                       color: Colors.white,
                       name: Resources.assetsImagesDeleteSvg,
-                      padding: const EdgeInsets.all(10.0),
-                      size: 24,
+                      padding: const EdgeInsets.all(10),
                       onTap: onDelete,
                     ),
                   ),
@@ -614,7 +611,6 @@ class _TileNormalFile extends HookWidget {
       onEnter: (_) => showDelete.value = true,
       onExit: (_) => showDelete.value = false,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(width: 30),
           _FileIcon(extension: _getFileExtension(file)),
@@ -649,8 +645,7 @@ class _TileNormalFile extends HookWidget {
             ActionButton(
               color: context.theme.secondaryText,
               name: Resources.assetsImagesDeleteSvg,
-              padding: const EdgeInsets.all(10.0),
-              size: 24,
+              padding: const EdgeInsets.all(10),
               onTap: onDelete,
             ),
           if (showDelete.value) const SizedBox(width: 10),

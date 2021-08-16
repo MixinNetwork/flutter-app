@@ -255,8 +255,6 @@ class _AnimatedChatSlide extends HookWidget {
   Widget build(BuildContext context) {
     final controller = useAnimationController(
       duration: const Duration(milliseconds: 300),
-      lowerBound: 0,
-      upperBound: 1,
     );
 
     final _pages = useState(<Page<dynamic>>[]);
@@ -570,7 +568,7 @@ class _JumpCurrentButton extends HookWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
+      padding: const EdgeInsets.only(top: 8),
       child: InteractableDecoratedBox(
         onTap: () {
           final messageId = pendingJumpMessageCubit.state;

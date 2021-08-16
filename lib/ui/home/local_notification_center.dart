@@ -103,7 +103,6 @@ class _LinuxNotificationManager extends _NotificationManager {
         replacesId: id,
         expireTimeoutMs: 0,
         appName: 'Mixin',
-        appIcon: '',
         hints: [
           NotificationHint.category(NotificationCategory.im()),
           NotificationHint.resident(),

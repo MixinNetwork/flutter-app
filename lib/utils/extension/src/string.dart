@@ -25,7 +25,7 @@ extension StringExtension on String {
     return content.toString();
   }
 
-  String escapeSqliteSingleQuotationMarks() => replaceAll('\'', '\'\'');
+  String escapeSqliteSingleQuotationMarks() => replaceAll("'", "''");
 
   static final regExp = RegExp('[a-zA-Z0-9]');
 
@@ -93,12 +93,12 @@ String maxOf(String a, String b) {
   }
 }
 
-const _kEscapeSqlChars = {'\\', '%', '_', '[', ']'};
+const _kEscapeSqlChars = {r'\', '%', '_', '[', ']'};
 
 extension SqlStringExt on String {
   String escapeSql() {
     var result = this;
-    for (var c in _kEscapeSqlChars) {
+    for (final c in _kEscapeSqlChars) {
       result = result.replaceAll(c.toString(), '\\$c');
     }
     return result;

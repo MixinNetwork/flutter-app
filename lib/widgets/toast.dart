@@ -149,7 +149,7 @@ class _Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const CircularProgressIndicator(
         valueColor: AlwaysStoppedAnimation(Colors.white),
-        strokeWidth: 3.0,
+        strokeWidth: 3,
       );
 }
 

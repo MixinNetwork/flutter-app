@@ -13,7 +13,7 @@ String generateConversationId(String senderId, String recipientId) {
   final digest = bytes.map((byte) {
     final b = '0${(byte & 0xff).toRadixString(16)}';
     return b.substring(b.length - 2, b.length);
-  }).join('');
+  }).join();
 
   return '${digest.substring(0, 8)}-${digest.substring(8, 12)}-${digest.substring(12, 16)}-${digest.substring(16, 20)}-${digest.substring(20, 32)}';
 }

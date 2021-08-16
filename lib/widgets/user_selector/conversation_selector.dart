@@ -212,7 +212,6 @@ class _ConversationSelector extends HookWidget {
                   ),
                   Expanded(
                     child: Align(
-                      alignment: Alignment.center,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -280,7 +279,7 @@ class _ConversationSelector extends HookWidget {
                 scrollPadding: EdgeInsets.zero,
                 decoration: InputDecoration(
                   prefixIcon: Padding(
-                    padding: const EdgeInsetsDirectional.only(end: 8.0),
+                    padding: const EdgeInsetsDirectional.only(end: 8),
                     child: SvgPicture.asset(
                       Resources.assetsImagesIcSearchSmallSvg,
                       color: context.theme.secondaryText,

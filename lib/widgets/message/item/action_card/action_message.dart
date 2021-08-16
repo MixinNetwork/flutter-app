@@ -30,7 +30,8 @@ class ActionCardMessage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final appCardData = useMemoized(
-      () => AppCardData.fromJson(jsonDecode(message.content!)),
+      () => AppCardData.fromJson(
+          jsonDecode(message.content!) as Map<String, dynamic>),
       [message.content],
     );
     return MessageBubble(

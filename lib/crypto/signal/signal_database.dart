@@ -50,7 +50,7 @@ class SignalDatabase extends _$SignalDatabase {
 
   Future<void> clear() => transaction(() async {
         await customStatement('PRAGMA wal_checkpoint(FULL)');
-        for (var table in allTables) {
+        for (final table in allTables) {
           await delete(table).go();
         }
       });

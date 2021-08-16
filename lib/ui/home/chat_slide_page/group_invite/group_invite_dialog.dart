@@ -67,7 +67,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
                 const Align(
                     alignment: Alignment.topRight,
                     child: Padding(
-                      padding: EdgeInsets.only(right: 30.0, top: 20),
+                      padding: EdgeInsets.only(right: 30, top: 20),
                       child: MixinCloseButton(),
                     )),
               ],
@@ -83,7 +83,6 @@ class _GroupInviteBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const SizedBox(height: 120),
           ConversationAvatarWidget(
@@ -207,13 +206,13 @@ class _IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => InteractableDecoratedBox.color(
         onTap: onTap,
-        decoration: const BoxDecoration(shape: BoxShape.rectangle),
+        decoration: const BoxDecoration(),
         hoveringColor: context.dynamicColor(
           const Color.fromRGBO(0, 0, 0, 0.03),
           darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

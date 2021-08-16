@@ -22,9 +22,9 @@ class StatusPending extends HookWidget {
       context.accountServer.attachmentUtil,
       converter: (AttachmentUtil attachmentUtil) =>
           attachmentUtil.getAttachmentProgress(messageId),
-      initialData: 0.0,
+      initialData: 0,
       keys: [messageId],
-    ).requireData;
+    ).requireData.toDouble();
 
     return _StatusPending(value: value);
   }
@@ -58,7 +58,6 @@ class _StatusPending extends StatelessWidget {
               duration: const Duration(milliseconds: 100),
               builder: (context, value, _) => CircularProgressIndicator(
                 value: value,
-                strokeWidth: 4,
                 valueColor: AlwaysStoppedAnimation(
                   context.theme.accent,
                 ),

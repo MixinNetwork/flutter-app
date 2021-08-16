@@ -67,7 +67,7 @@ BlazeMessage createSignalKeyMessage(BlazeMessageParam param) => BlazeMessage(
     id: const Uuid().v4(), action: createSignalKeyMessages, params: param);
 
 BlazeMessage createCountSignalKeys() =>
-    BlazeMessage(id: const Uuid().v4(), action: countSignalKeys, params: null);
+    BlazeMessage(id: const Uuid().v4(), action: countSignalKeys);
 
 BlazeMessage createSyncSignalKeys(BlazeMessageParam param) =>
     BlazeMessage(id: const Uuid().v4(), action: syncSignalKeys, params: param);

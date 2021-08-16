@@ -67,7 +67,7 @@ class _MultiImageStreamCompleter extends ImageStreamCompleter {
       } else {
         _handleCodecReady(event);
       }
-    }, onError: (dynamic error, StackTrace stack) {
+    }, onError: (Object error, StackTrace stack) {
       reportError(
         context: ErrorDescription('resolving an image codec'),
         exception: error,
@@ -79,7 +79,7 @@ class _MultiImageStreamCompleter extends ImageStreamCompleter {
     if (chunkEvents != null) {
       chunkEvents.listen(
         reportImageChunkEvent,
-        onError: (dynamic error, StackTrace stack) {
+        onError: (Object error, StackTrace stack) {
           reportError(
             context: ErrorDescription('loading an image'),
             exception: error,
@@ -99,7 +99,7 @@ class _MultiImageStreamCompleter extends ImageStreamCompleter {
   ui.FrameInfo? _nextFrame;
 
   // When the current was first shown.
-  Duration? _shownTimestamp;
+  late Duration? _shownTimestamp;
 
   // The requested duration for the current frame;
   Duration? _frameDuration;
