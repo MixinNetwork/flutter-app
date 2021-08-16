@@ -53,7 +53,7 @@ class ActionCardMessage extends HookWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: CacheImage(
-                appCardData.iconUrl!,
+                appCardData.iconUrl,
                 height: 40,
                 width: 40,
               ),
