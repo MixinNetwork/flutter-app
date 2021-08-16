@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_linux
+  desktop_drop
   file_selector_linux
   flutter_app_icon_badge
   url_launcher_linux
