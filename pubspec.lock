@@ -585,9 +585,11 @@ packages:
   flutter_markdown:
     dependency: "direct main"
     description:
-      name: flutter_markdown
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "packages/flutter_markdown"
+      ref: fd139655d30b6f86ab6bac281949b49b02d04b37
+      resolved-ref: fd139655d30b6f86ab6bac281949b49b02d04b37
+      url: "https://github.com/YeungKC/packages.git"
+    source: git
     version: "0.6.4"
   flutter_portal:
     dependency: "direct main"

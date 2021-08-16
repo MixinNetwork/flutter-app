@@ -58,7 +58,11 @@ dependencies:
   flutter_local_notifications: ^8.0.0
   flutter_localizations:
     sdk: flutter
-  flutter_markdown: ^0.6.2
+  flutter_markdown:
+    git:
+      url: https://github.com/YeungKC/packages.git
+      ref: fd139655d30b6f86ab6bac281949b49b02d04b37
+      path: packages/flutter_markdown
   flutter_portal: ^0.4.0
   flutter_svg: ^0.22.0
   hive: ^2.0.4
