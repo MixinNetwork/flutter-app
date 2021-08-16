@@ -205,11 +205,11 @@ class Blaze {
       status = DateTime.now().epochNano;
     }
     for (;;) {
-      final response = await client.messageApi.messageStatusOffset(status);
-      // ignore: avoid_dynamic_calls
-      final List<BlazeMessageData> blazeMessages = response.data
-          .map<BlazeMessageData>(
-              (itemJson) => BlazeMessageData.fromJson(itemJson))
+      final response = await client.messageApi.messageStatusOffset(status)
+          as MixinResponse<List<dynamic>>;
+      final blazeMessages = response.data
+          .map((itemJson) =>
+              BlazeMessageData.fromJson(itemJson))
           .toList();
       if (blazeMessages.isEmpty) {
         break;

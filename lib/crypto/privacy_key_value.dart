@@ -11,12 +11,12 @@ class PrivacyKeyValue extends HiveKeyValue {
   static const _hasSyncSession = 'has_sync_session';
   static const _hasPushSignalKeys = 'has_push_signal_keys';
 
-  bool get hasSyncSession => box.get(_hasSyncSession, defaultValue: false);
+  bool get hasSyncSession => box.get(_hasSyncSession, defaultValue: false) as bool;
 
   set hasSyncSession(bool value) => box.put(_hasSyncSession, value);
 
   bool get hasPushSignalKeys =>
-      box.get(_hasPushSignalKeys, defaultValue: false);
+      box.get(_hasPushSignalKeys, defaultValue: false) as bool;
 
   set hasPushSignalKeys(bool value) => box.put(_hasPushSignalKeys, value);
 }

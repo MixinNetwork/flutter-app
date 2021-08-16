@@ -261,7 +261,7 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final Map map = await jsonDecodeWithIsolate(e.blazeMessage!);
+          final map = await jsonDecodeWithIsolate(e.blazeMessage!) as Map<String, dynamic>;
           return BlazeAckMessage(
               messageId: map['message_id'], status: map['status']);
         },
@@ -286,7 +286,7 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final Map map = await jsonDecodeWithIsolate(e.blazeMessage!);
+          final map = await jsonDecodeWithIsolate(e.blazeMessage!) as Map<String, dynamic>;
           return BlazeAckMessage(
               messageId: map['message_id'], status: map['status']);
         },
@@ -343,9 +343,9 @@ class AccountServer {
       var silent = false;
       try {
         final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
-        messageId = json[JobDao.messageIdKey]!;
-        recipientId = json[JobDao.recipientIdKey];
-        silent = json[JobDao.silentKey];
+        messageId = json[JobDao.messageIdKey] as String;
+        recipientId = json[JobDao.recipientIdKey] as String?;
+        silent = json[JobDao.silentKey] as bool;
       } catch (_) {
         messageId = job.blazeMessage!;
       }

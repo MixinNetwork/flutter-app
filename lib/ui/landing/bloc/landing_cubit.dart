@@ -139,7 +139,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
 
       await AccountKeyValue.instance.init();
       // ignore: avoid_dynamic_calls
-      final sessionId = msg['session_id'];
+      final sessionId = msg['session_id'] as String?;
       AccountKeyValue.instance.primarySessionId = sessionId;
       final info = await PackageInfo.fromPlatform();
       final appVersion = '${info.version}(${info.buildNumber})';

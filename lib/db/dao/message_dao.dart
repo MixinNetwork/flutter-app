@@ -144,7 +144,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           message.createdAt,
         ),
       ];
-      return (await Future.wait(futures))[0];
+      return (await Future.wait(futures))[0] as int;
     });
     await takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);

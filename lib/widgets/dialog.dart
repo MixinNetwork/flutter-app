@@ -269,7 +269,7 @@ class DialogTextField extends HookWidget {
 
 Future<bool> showConfirmMixinDialog(
         BuildContext context, String content) async =>
-    await showMixinDialog(
+    await showMixinDialog<bool>(
       context: context,
       child: Builder(
         builder: (context) => AlertDialogLayout(

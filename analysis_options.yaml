@@ -6,6 +6,15 @@ analyzer:
     public_member_api_docs: ignore
     lines_longer_than_80_chars: ignore
     avoid_function_literals_in_foreach_calls: ignore
+    implicit_dynamic_parameter: ignore
+    implicit_dynamic_type: ignore
+    argument_type_not_assignable: ignore
+    implicit_dynamic_map_literal: ignore
+    implicit_dynamic_method: ignore
+    implicit_dynamic_list_literal: ignore
+    implicit_dynamic_variable: ignore
+    implicit_dynamic_function: ignore
+#    invalid_assignment: ignore
     control_flow_in_finally: true
   exclude:
     - 'bin/cache/**'

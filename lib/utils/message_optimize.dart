@@ -46,8 +46,8 @@ Future<String?> messagePreviewOptimize(
   } else if (messageCategory == MessageCategory.appButtonGroup) {
     _content = '';
     if (trimContent != null) {
-      // ignore: avoid_dynamic_calls
-      _content = (await jsonDecodeWithIsolate(trimContent))
+      final list = await jsonDecodeWithIsolate(trimContent) as List<dynamic>;
+      _content = list
           .map((e) => ActionData.fromJson(e))
           // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')

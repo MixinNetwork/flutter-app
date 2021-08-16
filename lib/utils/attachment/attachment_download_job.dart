@@ -261,6 +261,7 @@ extension _AttachmentDownloadExtension on Dio {
             type: DioErrorType.receiveTimeout,
           );
         } else {
+          // ignore: throw_of_invalid_type
           throw err;
         }
       });

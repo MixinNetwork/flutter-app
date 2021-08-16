@@ -25,7 +25,7 @@ Future<void> main() async {
     LoadBalancer.create(Platform.numberOfProcessors, IsolateRunner.spawn),
     initMixinDocumentsDirectory(),
   ]);
-  loadBalancer = result[0];
+  loadBalancer = result[0] as LoadBalancer?;
 
   HydratedBloc.storage = await HydratedStorage.build(
     storageDirectory: mixinDocumentsDirectory,
