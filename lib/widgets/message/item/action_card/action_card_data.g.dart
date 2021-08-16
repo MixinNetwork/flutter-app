@@ -9,7 +9,7 @@ part of 'action_card_data.dart';
 AppCardData _$AppCardDataFromJson(Map<String, dynamic> json) {
   return AppCardData(
     json['app_id'] as String?,
-    json['icon_url'] as String,
+    json['icon_url'] as String?,
     json['title'] as String,
     json['description'] as String,
     json['action'] as String,

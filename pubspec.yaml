@@ -73,7 +73,7 @@ dependencies:
   map: ^1.0.0
   markdown: ^4.0.0
   mime: ^1.0.0
-  mixin_bot_sdk_dart: ^0.2.0
+  mixin_bot_sdk_dart: ^0.2.1
   moor: ^4.4.1
   octo_image: ^1.0.0+1
   package_info_plus: ^1.0.3
