@@ -31,6 +31,7 @@ class ActionMessage extends StatelessWidget {
       nipPadding: false,
     );
 
+    final list = jsonDecode(message.content!) as List<dynamic>;
     return MessageBubble(
       messageId: message.messageId,
       isCurrentUser: isCurrentUser,
@@ -40,8 +41,7 @@ class ActionMessage extends StatelessWidget {
         spacing: 8,
         runSpacing: 6,
         children: List<Widget>.from(
-          // ignore: avoid_dynamic_calls
-          jsonDecode(message.content!).map((e) => ActionData.fromJson(e)).map(
+          list.map((e) => ActionData.fromJson(e as Map<String, dynamic>)).map(
                 (e) => InteractableDecoratedBox.color(
                   cursor: MaterialStateMouseCursor.clickable,
                   onTap: () {

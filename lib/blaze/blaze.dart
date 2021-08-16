@@ -140,7 +140,8 @@ class Blaze {
   Future<void> handleReceiveMessage(BlazeMessage blazeMessage) async {
     BlazeMessageData? data;
     try {
-      data = BlazeMessageData.fromJson(blazeMessage.data);
+      data =
+          BlazeMessageData.fromJson(blazeMessage.data as Map<String, dynamic>);
     } catch (e) {
       d('blazeMessage not a BlazeMessageData');
       return;
@@ -209,7 +210,7 @@ class Blaze {
           as MixinResponse<List<dynamic>>;
       final blazeMessages = response.data
           .map((itemJson) =>
-              BlazeMessageData.fromJson(itemJson))
+              BlazeMessageData.fromJson(itemJson as Map<String, dynamic>))
           .toList();
       if (blazeMessages.isEmpty) {
         break;
@@ -290,7 +291,8 @@ Future<BlazeMessage> parseBlazeMessage(List<int> list) =>
 
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
-  final blazeMessage = BlazeMessage.fromJson(jsonDecode(content));
+  final blazeMessage =
+      BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
   return blazeMessage;
 }
 
@@ -301,10 +303,12 @@ class WebSocketTransaction<T> {
 
   final Completer<T?> _completer = Completer();
 
-  Future<T?> run(Function() fun, Function() onTimeout) {
+  Future<T?> run(Function() fun, T? Function() onTimeout) {
     fun.call();
-    return _completer.future
-        .timeout(const Duration(seconds: 5), onTimeout: onTimeout.call());
+    return _completer.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => onTimeout.call(),
+    );
   }
 
   void success(T? data) {

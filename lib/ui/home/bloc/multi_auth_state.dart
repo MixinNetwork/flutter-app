@@ -5,14 +5,18 @@ class MultiAuthState extends Equatable {
     Set<AuthState> auths = const {},
   }) : _auths = auths;
 
-  factory MultiAuthState.fromMap(Map<String, dynamic> map) => MultiAuthState(
-        auths:
-            // ignore: avoid_dynamic_calls
-            Set<AuthState>.from(map['auths']?.map((x) => AuthState.fromMap(x))),
-      );
+  factory MultiAuthState.fromMap(Map<String, dynamic> map) {
+    final list = map['auths'] as Iterable<dynamic>?;
+    return MultiAuthState(
+      auths: list
+              ?.map((e) => AuthState.fromMap(e as Map<String, dynamic>))
+              .toSet() ??
+          {},
+    );
+  }
 
   factory MultiAuthState.fromJson(String source) =>
-      MultiAuthState.fromMap(json.decode(source));
+      MultiAuthState.fromMap(json.decode(source) as Map<String, dynamic>);
 
   final Set<AuthState> _auths;
 
@@ -49,16 +53,16 @@ class AuthState extends Equatable {
   });
 
   factory AuthState.fromMap(Map<String, dynamic> map) => AuthState(
-        account: Account.fromJson(map['account']),
-        privateKey: map['privateKey'],
-        messagePreview: map['messagePreview'],
-        photoAutoDownload: map['photoAutoDownload'],
-        videoAutoDownload: map['videoAutoDownload'],
-        fileAutoDownload: map['fileAutoDownload'],
+        account: Account.fromJson(map['account'] as Map<String, dynamic>),
+        privateKey: map['privateKey'] as String,
+        messagePreview: map['messagePreview'] as bool?,
+        photoAutoDownload: map['photoAutoDownload'] as bool?,
+        videoAutoDownload: map['videoAutoDownload'] as bool?,
+        fileAutoDownload: map['fileAutoDownload'] as bool?,
       );
 
   factory AuthState.fromJson(String source) =>
-      AuthState.fromMap(json.decode(source));
+      AuthState.fromMap(json.decode(source) as Map<String, dynamic>);
 
   final Account account;
   final String privateKey;

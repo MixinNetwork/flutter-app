@@ -29,8 +29,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -99,7 +99,7 @@ class DecryptMessage extends Injector {
 
   Future<void> process(FloodMessage floodMessage) async {
     final data = BlazeMessageData.fromJson(
-        await jsonDecodeWithIsolate(floodMessage.data));
+        await jsonDecodeWithIsolate(floodMessage.data) as Map<String, dynamic>);
     d('DecryptMessage process data: ${data.toJson()}');
     if (await isExistMessage(data.messageId)) {
       await _updateRemoteMessageStatus(data.messageId, MessageStatus.delivered);
@@ -225,8 +225,8 @@ class DecryptMessage extends Injector {
 
   Future<void> _processPlainMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.plainJson) {
-      final plainJsonMessage =
-          PlainJsonMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
+      final plainJsonMessage = PlainJsonMessage.fromJson(
+          await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
       if (plainJsonMessage.action == acknowledgeMessageReceipts) {
         if (plainJsonMessage.ackMessages?.isNotEmpty != true) {
           return;
@@ -324,19 +324,19 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemMessage(BlazeMessageData data) async {
     if (data.category == MessageCategory.systemConversation) {
       final systemMessage = SystemConversationMessage.fromJson(
-          await _jsonDecodeWithIsolate(data.data));
+          await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
       await _processSystemConversationMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemUser) {
-      final systemMessage =
-          SystemUserMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
+      final systemMessage = SystemUserMessage.fromJson(
+          await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
       await _processSystemUserMessage(systemMessage);
     } else if (data.category == MessageCategory.systemCircle) {
-      final systemMessage =
-          SystemCircleMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
+      final systemMessage = SystemCircleMessage.fromJson(
+          await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
       await _processSystemCircleMessage(data, systemMessage);
     } else if (data.category == MessageCategory.systemAccountSnapshot) {
-      final systemSnapshot =
-          SnapshotMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
+      final systemSnapshot = SnapshotMessage.fromJson(
+          await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
       await _processSystemSnapshotMessage(data, systemSnapshot);
     }
   }
@@ -372,7 +372,8 @@ class DecryptMessage extends Injector {
   Future<void> _processAppCard(BlazeMessageData data) async {
     await refreshUsers(<String>[data.userId]);
     final content = await _decodeWithIsolate(data.data);
-    final appCard = AppCard.fromJson(await jsonDecodeWithIsolate(content));
+    final appCard = AppCard.fromJson(
+        await jsonDecodeWithIsolate(content) as Map<String, dynamic>);
     final message = Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
@@ -391,8 +392,8 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
-    final recallMessage =
-        RecallMessage.fromJson(await _jsonDecodeWithIsolate(data.data));
+    final recallMessage = RecallMessage.fromJson(
+        await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
     if (message?.category.isAttachment == true) {
@@ -471,8 +472,8 @@ class DecryptMessage extends Injector {
 
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isImage) {
-      final attachment =
-          AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plainText));
+      final attachment = AttachmentMessage.fromJson(
+          await _jsonDecodeWithIsolate(plainText) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -487,8 +488,8 @@ class DecryptMessage extends Injector {
               mediaWidth: attachment.width,
               mediaHeight: attachment.height,
               thumbImage: attachment.thumbnail,
-              mediaKey: attachment.key,
-              mediaDigest: attachment.digest,
+              mediaKey: attachment.key as String?,
+              mediaDigest: attachment.digest as String?,
               status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
@@ -506,8 +507,8 @@ class DecryptMessage extends Injector {
       }
     } else if (data.category.isVideo) {
       final plain = await _decodeWithIsolate(plainText);
-      final attachment =
-          AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final attachment = AttachmentMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -523,8 +524,8 @@ class DecryptMessage extends Injector {
               mediaWidth: attachment.width,
               mediaHeight: attachment.height,
               thumbImage: attachment.thumbnail,
-              mediaKey: attachment.key,
-              mediaDigest: attachment.digest,
+              mediaKey: attachment.key as String?,
+              mediaDigest: attachment.digest as String?,
               status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
@@ -542,8 +543,8 @@ class DecryptMessage extends Injector {
       }
     } else if (data.category.isData) {
       final plain = await _decodeWithIsolate(plainText);
-      final attachment =
-          AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final attachment = AttachmentMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -555,8 +556,8 @@ class DecryptMessage extends Injector {
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
-              mediaKey: attachment.key,
-              mediaDigest: attachment.digest,
+              mediaKey: attachment.key as String?,
+              mediaDigest: attachment.digest as String?,
               status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.canceled,
@@ -574,8 +575,8 @@ class DecryptMessage extends Injector {
       }
     } else if (data.category.isAudio) {
       final plain = await _decodeWithIsolate(plainText);
-      final attachment =
-          AttachmentMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final attachment = AttachmentMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -587,9 +588,9 @@ class DecryptMessage extends Injector {
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
-              mediaKey: attachment.key,
-              mediaDigest: attachment.digest,
-              mediaWaveform: attachment.waveform,
+              mediaKey: attachment.key as String?,
+              mediaDigest: attachment.digest as String?,
+              mediaWaveform: attachment.waveform as String?,
               status: data.status,
               createdAt: data.createdAt,
               mediaStatus: MediaStatus.pending,
@@ -605,8 +606,8 @@ class DecryptMessage extends Injector {
       ));
     } else if (data.category.isSticker) {
       final plain = await _decodeWithIsolate(plainText);
-      final stickerMessage =
-          StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final stickerMessage = StickerMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
           .getStickerByUnique(stickerMessage.stickerId)
           .getSingleOrNull();
@@ -627,8 +628,8 @@ class DecryptMessage extends Injector {
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isContact) {
       final plain = await _decodeWithIsolate(plainText);
-      final contactMessage =
-          ContactMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final contactMessage = ContactMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
           data,
@@ -647,8 +648,8 @@ class DecryptMessage extends Injector {
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isLive) {
       final plain = await _decodeWithIsolate(plainText);
-      final liveMessage =
-          LiveMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final liveMessage = LiveMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
@@ -671,8 +672,8 @@ class DecryptMessage extends Injector {
       // ignore: unused_local_variable todo check location
       LocationMessage? locationMessage;
       try {
-        locationMessage =
-            LocationMessage.fromJson(await jsonDecodeWithIsolate(plain));
+        locationMessage = LocationMessage.fromJson(
+            await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       } catch (e) {
         w('decode locationMessage error $e');
       }
@@ -891,7 +892,7 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _updateRemoteMessageStatus(
-      messageId, MessageStatus status) async {
+      String messageId, MessageStatus status) async {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
@@ -978,8 +979,8 @@ class DecryptMessage extends Injector {
         data.category == MessageCategory.signalVideo ||
         data.category == MessageCategory.signalData ||
         data.category == MessageCategory.signalAudio) {
-      final attachment =
-          AttachmentMessage.fromJson(await _jsonDecodeWithIsolate(plaintext));
+      final attachment = AttachmentMessage.fromJson(
+          await _jsonDecodeWithIsolate(plaintext) as Map<String, dynamic>);
       final messagesCompanion = MessagesCompanion(
           status: Value(data.status),
           content: Value(attachment.attachmentId),
@@ -988,9 +989,9 @@ class DecryptMessage extends Injector {
           mediaStatus: const Value(MediaStatus.canceled),
           mediaWidth: Value(attachment.width),
           mediaHeight: Value(attachment.height),
-          mediaDigest: Value(attachment.digest),
-          mediaKey: Value(attachment.key),
-          mediaWaveform: Value(attachment.waveform),
+          mediaDigest: Value(attachment.digest as String?),
+          mediaKey: Value(attachment.key as String?),
+          mediaWaveform: Value(attachment.waveform as String?),
           name: Value(attachment.name),
           thumbImage: Value(attachment.thumbnail),
           mediaDuration: Value(attachment.duration.toString()));
@@ -998,8 +999,8 @@ class DecryptMessage extends Injector {
           .updateAttachmentMessage(messageId, messagesCompanion);
     } else if (data.category == MessageCategory.signalSticker) {
       final plain = await _decodeWithIsolate(plaintext);
-      final stickerMessage =
-          StickerMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final stickerMessage = StickerMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
           .getStickerByUnique(stickerMessage.stickerId)
           .getSingleOrNull();
@@ -1010,14 +1011,14 @@ class DecryptMessage extends Injector {
           messageId, data.status, stickerMessage.stickerId);
     } else if (data.category == MessageCategory.signalContact) {
       final plain = await _decodeWithIsolate(plaintext);
-      final contactMessage =
-          ContactMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final contactMessage = ContactMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       await database.messageDao
           .updateContactMessage(messageId, data.status, contactMessage.userId);
     } else if (data.category == MessageCategory.signalLive) {
       final plain = await _decodeWithIsolate(plaintext);
-      final liveMessage =
-          LiveMessage.fromJson(await jsonDecodeWithIsolate(plain));
+      final liveMessage = LiveMessage.fromJson(
+          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       await database.messageDao.updateLiveMessage(
           messageId,
           liveMessage.width,
@@ -1087,7 +1088,7 @@ class DecryptMessage extends Injector {
     refreshKeyMap[conversationId] = current;
     final blazeMessage = createCountSignalKeys();
     final data = (await _sender.signalKeysChannel(blazeMessage))?.data;
-    final count = SignalKeyCount.fromJson(data);
+    final count = SignalKeyCount.fromJson(data as Map<String, dynamic>);
     if (count.preKeyCount >= preKeyMinNum) {
       return;
     }

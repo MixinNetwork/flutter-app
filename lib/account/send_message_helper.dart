@@ -737,7 +737,7 @@ class SendMessageHelper {
     AttachmentMessage? attachmentMessage;
     try {
       attachmentMessage = AttachmentMessage.fromJson(
-          await jsonBase64DecodeWithIsolate(content));
+          await jsonBase64DecodeWithIsolate(content) as Map<String, dynamic>);
     } catch (e) {
       attachmentMessage = null;
     }
@@ -750,8 +750,8 @@ class SendMessageHelper {
       if (date?.isToady == true) {
         return AttachmentResult(
           attachmentMessage.attachmentId,
-          attachmentMessage.key,
-          attachmentMessage.digest,
+          attachmentMessage.key as String?,
+          attachmentMessage.digest as String?,
           attachmentMessage.createdAt,
         );
       }

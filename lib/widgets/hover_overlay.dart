@@ -31,7 +31,7 @@ class HoverOverlay extends HookWidget {
   final Duration closeWaitDuration;
   final Curve inCurve;
   final Curve outCurve;
-  final ValueWidgetBuilder? portalBuilder;
+  final ValueWidgetBuilder<double>? portalBuilder;
 
   @override
   Widget build(BuildContext context) {

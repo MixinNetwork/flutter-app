@@ -167,8 +167,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     } else if (message.category.isContact) {
       ftsContent = message.name;
     } else if (message.category == MessageCategory.appCard) {
-      final appCard =
-          AppCardData.fromJson(await jsonDecodeWithIsolate(message.content!));
+      final appCard = AppCardData.fromJson(
+          await jsonDecodeWithIsolate(message.content!)
+              as Map<String, dynamic>);
       ftsContent = '${appCard.title} ${appCard.description}';
     }
     if (ftsContent != null) {

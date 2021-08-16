@@ -261,9 +261,12 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final map = await jsonDecodeWithIsolate(e.blazeMessage!) as Map<String, dynamic>;
+          final map = await jsonDecodeWithIsolate(e.blazeMessage!)
+              as Map<String, dynamic>;
           return BlazeAckMessage(
-              messageId: map['message_id'], status: map['status']);
+            messageId: map['message_id'] as String,
+            status: map['status'] as String,
+          );
         },
       ),
     );
@@ -286,9 +289,12 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final map = await jsonDecodeWithIsolate(e.blazeMessage!) as Map<String, dynamic>;
+          final map = await jsonDecodeWithIsolate(e.blazeMessage!)
+              as Map<String, dynamic>;
           return BlazeAckMessage(
-              messageId: map['message_id'], status: map['status']);
+            messageId: map['message_id'] as String,
+            status: map['status'] as String,
+          );
         },
       ),
     );

@@ -12,7 +12,8 @@ class AccountKeyValue extends HiveKeyValue {
   static const _refreshStickerLastTime = 'refreshStickerLastTime';
   static const _primarySessionId = 'primarySessionId';
 
-  bool get hasSyncCircle => box.get(_hasSyncCircle, defaultValue: false) as bool;
+  bool get hasSyncCircle =>
+      box.get(_hasSyncCircle, defaultValue: false) as bool;
   set hasSyncCircle(bool value) => box.put(_hasSyncCircle, value);
 
   int get refreshStickerLastTime =>

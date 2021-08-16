@@ -133,7 +133,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
 
       await CryptoKeyValue.instance.init();
       // ignore: avoid_dynamic_calls
-      final private = base64.decode(msg['identity_key_private']);
+      final private = base64.decode(msg['identity_key_private'] as String);
       await SignalProtocol.initSignal(private);
       final registrationId = CryptoKeyValue.instance.localRegistrationId;
 
@@ -146,8 +146,8 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       final platformVersion = await getPlatformVersion();
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
-          code: msg['provisioning_code'],
-          userId: msg['user_id'],
+          code: msg['provisioning_code'] as String,
+          userId: msg['user_id'] as String,
           sessionId: sessionId,
           purpose: 'SESSION',
           sessionSecret: base64Encode(edKeyPair.publicKey.bytes),

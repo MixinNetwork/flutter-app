@@ -103,8 +103,8 @@ class Sender {
       if (data == null) {
         return false;
       }
-      final keys = List<SignalKey>.from(
-          (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
+      final keys = List<SignalKey>.from((data as List<dynamic>)
+          .map((e) => SignalKey.fromJson(e as Map<String, dynamic>)));
       if (keys.isNotEmpty) {
         final preKeyBundle = keys[0].createPreKeyBundle();
         await signalProtocol.processSession(recipientId, preKeyBundle);
@@ -148,8 +148,8 @@ class Sender {
           createConsumeSignalKeysParam(requestSignalKeyUsers));
       final data = (await signalKeysChannel(blazeMessage))?.data;
       if (data != null) {
-        final signalKeys = List<SignalKey>.from(
-            (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
+        final signalKeys = List<SignalKey>.from((data as List<dynamic>)
+            .map((e) => SignalKey.fromJson(e as Map<String, dynamic>)));
         i('signalKeys size: ${signalKeys.length}');
         final keys = <BlazeMessageParamSession>[];
         if (signalKeys.isNotEmpty) {
@@ -341,8 +341,8 @@ class Sender {
     if (data == null) {
       return false;
     }
-    final keys = List<SignalKey>.from(
-        (data as List<dynamic>).map((e) => SignalKey.fromJson(e)));
+    final keys = List<SignalKey>.from((data as List<dynamic>)
+        .map((e) => SignalKey.fromJson(e as Map<String, dynamic>)));
     if (keys.isNotEmpty) {
       final preKeyBundle = keys[0].createPreKeyBundle();
       await signalProtocol.processSession(recipientId, preKeyBundle);

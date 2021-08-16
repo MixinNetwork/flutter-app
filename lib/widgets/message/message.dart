@@ -399,5 +399,6 @@ extension _MessageForward on MessageItem {
       type.isPost ||
       type.isLocation ||
       (type == MessageCategory.appCard &&
-          AppCardData.fromJson(jsonDecode(content!)).shareable);
+          AppCardData.fromJson(jsonDecode(content!) as Map<String, dynamic>)
+              .shareable);
 }

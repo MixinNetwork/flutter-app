@@ -48,7 +48,7 @@ Future<String?> messagePreviewOptimize(
     if (trimContent != null) {
       final list = await jsonDecodeWithIsolate(trimContent) as List<dynamic>;
       _content = list
-          .map((e) => ActionData.fromJson(e))
+          .map((e) => ActionData.fromJson(e as Map<String, dynamic>))
           // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')
           .join();
@@ -56,8 +56,9 @@ Future<String?> messagePreviewOptimize(
   } else if (messageCategory == MessageCategory.appCard) {
     _content = '';
     if (trimContent != null) {
-      _content =
-          AppCardData.fromJson(await jsonDecodeWithIsolate(trimContent)).title;
+      _content = AppCardData.fromJson(
+              await jsonDecodeWithIsolate(trimContent) as Map<String, dynamic>)
+          .title;
     }
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';

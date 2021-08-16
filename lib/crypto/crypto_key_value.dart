@@ -17,7 +17,8 @@ class CryptoKeyValue extends HiveKeyValue {
   static const _nextSignedPreKeyId = 'next_signed_pre_key_id';
   static const _activeSignedPreKeyId = 'active_signed_pre_key_id';
 
-  int get localRegistrationId => box.get(_localRegistrationId, defaultValue: 0) as int;
+  int get localRegistrationId =>
+      box.get(_localRegistrationId, defaultValue: 0) as int;
   set localRegistrationId(int registrationId) =>
       box.put(_localRegistrationId, registrationId);
 
@@ -26,7 +27,8 @@ class CryptoKeyValue extends HiveKeyValue {
   set nextPreKeyId(int preKeyId) => box.put(_nextPreKeyId, preKeyId);
 
   int get nextSignedPreKeyId =>
-      box.get(_nextSignedPreKeyId, defaultValue: generateRandomInt(maxValue)) as int;
+      box.get(_nextSignedPreKeyId, defaultValue: generateRandomInt(maxValue))
+          as int;
   set nextSignedPreKeyId(int preKeyId) =>
       box.put(_nextSignedPreKeyId, preKeyId);
 
