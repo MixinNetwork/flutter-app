@@ -77,6 +77,7 @@ class BrightnessData extends InheritedWidget {
   }
 }
 
+@immutable
 class BrightnessThemeData {
   const BrightnessThemeData({
     required this.primary,

@@ -98,7 +98,6 @@ class _Item extends HookWidget {
   Widget build(BuildContext context) {
     final sizeString = useMemoized(() => filesize(size), [item, size]);
     return Align(
-      alignment: Alignment.center,
       child: CellGroup(
         padding: EdgeInsets.zero,
         cellBackgroundColor: context.dynamicColor(

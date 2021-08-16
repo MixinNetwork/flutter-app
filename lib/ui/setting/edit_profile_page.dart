@@ -149,7 +149,7 @@ class _Item extends StatelessWidget {
         color: Colors.transparent,
       ),
       borderRadius: BorderRadius.all(
-        Radius.circular(8.0),
+        Radius.circular(8),
       ),
       gapPadding: 0,
     );

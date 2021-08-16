@@ -85,12 +85,12 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
 
 Future<void> _upload(_AttachmentUploadJobOption options) async {
   List<int>? digest;
-  final CancelToken? cancelToken = CancelToken();
+  final cancelToken = CancelToken();
 
   final receivePort = ReceivePort();
   options.sendPort.send(receivePort.sendPort);
 
-  receivePort.listen((message) => cancelToken?.cancel());
+  receivePort.listen((message) => cancelToken.cancel());
 
   final file = File(options.path);
 

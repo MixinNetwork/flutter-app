@@ -127,7 +127,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     try {
       final result =
           signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
-      final msg = json.decode(String.fromCharCodes(result));
+      final msg = json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
 
       final edKeyPair = ed.generateKey();
 
@@ -138,7 +138,6 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       final registrationId = CryptoKeyValue.instance.localRegistrationId;
 
       await AccountKeyValue.instance.init();
-      // ignore: avoid_dynamic_calls
       final sessionId = msg['session_id'] as String;
       AccountKeyValue.instance.primarySessionId = sessionId;
       final info = await PackageInfo.fromPlatform();

@@ -17,7 +17,7 @@ Path dashPath(
 }) {
   assert(dashArray != null); // ignore: unnecessary_null_comparison
 
-  final _dashOffset = dashOffset ?? const DashOffset.absolute(0.0);
+  final _dashOffset = dashOffset ?? const DashOffset.absolute(0);
   // TODO: Is there some way to determine how much of a path would be visible today?
 
   final dest = Path();

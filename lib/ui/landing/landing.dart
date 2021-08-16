@@ -82,7 +82,6 @@ class _QrCode extends StatelessWidget {
                         }
                         return QrImage(
                           data: url,
-                          version: QrVersions.auto,
                           foregroundColor: Colors.black,
                           backgroundColor: Colors.white,
                           embeddedImage:

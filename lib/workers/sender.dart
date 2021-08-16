@@ -219,7 +219,7 @@ class Sender {
 
   String generateConversationChecksum(List<db.ParticipantSessionData> devices) {
     devices.sort((a, b) => a.sessionId.compareTo(b.sessionId));
-    final d = devices.map((e) => e.sessionId).join('');
+    final d = devices.map((e) => e.sessionId).join();
     return d.md5();
   }
 

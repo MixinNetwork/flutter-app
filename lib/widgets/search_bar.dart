@@ -35,7 +35,6 @@ class SearchBar extends HookWidget {
     if (hasDrawer.value) {
       leading = ActionButton(
         onTapUp: (event) => Scaffold.of(context).openDrawer(),
-        padding: const EdgeInsets.all(8),
         child: Icon(
           Icons.menu,
           size: 20,
@@ -172,7 +171,6 @@ class SearchBar extends HookWidget {
                     name: Resources.assetsImagesIcAddSvg,
                     onTapUp: (event) =>
                         context.read<OffsetCubit>().emit(event.globalPosition),
-                    padding: const EdgeInsets.all(8),
                     color: context.theme.icon,
                   ),
                 ),

@@ -482,7 +482,6 @@ class DecryptMessage extends Injector {
               userId: data.senderId,
               category: data.category!,
               content: attachment.attachmentId,
-              mediaUrl: null,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
               mediaWidth: attachment.width,
@@ -916,7 +915,7 @@ class DecryptMessage extends Injector {
       await database.messageDao.markMessageRead(accountId, messageIds);
       final conversationIds =
           await database.messageDao.findConversationIdsByMessages(messageIds);
-      for (var cId in conversationIds) {
+      for (final cId in conversationIds) {
         await database.messageDao.takeUnseen(accountId, cId);
       }
     }

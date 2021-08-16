@@ -81,7 +81,7 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   }
 
   Future<List<Job>> findCreateMessageJobs() => customSelect(
-              'SELECT * FROM jobs WHERE `action` = \'CREATE_MESSAGE\' ORDER BY created_at ASC LIMIT 100',
+              "SELECT * FROM jobs WHERE `action` = 'CREATE_MESSAGE' ORDER BY created_at ASC LIMIT 100",
               readsFrom: {
             db.jobs
           })

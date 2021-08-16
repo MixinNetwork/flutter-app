@@ -136,7 +136,6 @@ class SendMessageHelper {
       mediaSize: await attachment.length(),
       mediaWidth: imageWidth,
       mediaHeight: imageHeight,
-      thumbImage: null,
       name: fileName,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.sending,
@@ -581,7 +580,6 @@ class SendMessageHelper {
         file: XFile(_attachmentUtil.convertAbsolutePath(
             message.category, message.conversationId, message.mediaUrl)),
         category: category,
-        quoteMessageId: null,
         attachmentResult: attachmentResult,
       );
     } else if (message.category.isVideo) {
@@ -761,7 +759,7 @@ class SendMessageHelper {
 }
 
 Future<Image> _getSmallImage(String path) async {
-  final fileImage = FileImage(File(path), scale: 1.0);
+  final fileImage = FileImage(File(path));
   final imageProvider = ExtendedResizeImage(fileImage, maxBytes: 128 << 10);
   final image = await imageProvider.toImage();
 

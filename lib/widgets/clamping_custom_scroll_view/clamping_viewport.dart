@@ -286,7 +286,7 @@ class ClampingRenderViewport extends RenderViewport {
       _minScrollExtent = 0.0;
       _maxScrollExtent = 0.0;
       _hasVisualOverflow = false;
-      offset.applyContentDimensions(0.0, 0.0);
+      offset.applyContentDimensions(0, 0);
       return;
     }
     assert(center!.parent == this);
@@ -322,8 +322,8 @@ class ClampingRenderViewport extends RenderViewport {
         final bottom = _maxScrollExtent -
             mainAxisExtent * (1.0 - anchor) -
             _correctedOffset;
-        final minScrollExtent = math.min(0.0, top);
-        final maxScrollExtent = math.max(0.0, bottom);
+        final minScrollExtent = math.min(0, top).toDouble();
+        final maxScrollExtent = math.max(0, bottom).toDouble();
 
         if (top > 0.0) {
           _correctedOffset = (mainAxisExtent * anchor) + _minScrollExtent;
@@ -434,7 +434,7 @@ class ClampingRenderViewport extends RenderViewport {
       final result = layoutChildSequence(
         child: leadingNegativeChild,
         scrollOffset: math.max(mainAxisExtent, centerOffset) - mainAxisExtent,
-        overlap: 0.0,
+        overlap: 0,
         layoutOffset: forwardDirectionRemainingPaintExtent,
         remainingPaintExtent: reverseDirectionRemainingPaintExtent,
         mainAxisExtent: mainAxisExtent,
@@ -451,9 +451,9 @@ class ClampingRenderViewport extends RenderViewport {
     // positive scroll offsets
     return layoutChildSequence(
       child: center,
-      scrollOffset: math.max(0.0, -centerOffset),
+      scrollOffset: math.max(0, -centerOffset),
       overlap:
-          leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
+          leadingNegativeChild == null ? math.min(0, -centerOffset) : 0.0,
       layoutOffset: centerOffset >= mainAxisExtent
           ? centerOffset
           : reverseDirectionRemainingPaintExtent,

@@ -13,6 +13,7 @@ analyzer:
     implicit_dynamic_list_literal: ignore
     implicit_dynamic_variable: ignore
     implicit_dynamic_function: ignore
+    avoid_setters_without_getters: ignore
   exclude:
     - 'bin/cache/**'
     # the following two are relative to the stocks example and the flutter package respectively

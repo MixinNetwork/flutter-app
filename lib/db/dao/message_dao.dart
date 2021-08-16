@@ -186,7 +186,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<int> insertFts(String messageId, String conversationId, String content,
           DateTime createdAt, String userId) =>
       db.customInsert(
-        'INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES (\'$messageId\', \'$conversationId\',\'${content.escapeSqliteSingleQuotationMarks()}\', \'${createdAt.millisecondsSinceEpoch}\', \'$userId\')',
+        "INSERT OR REPLACE INTO messages_fts (message_id, conversation_id, content, created_at, user_id) VALUES ('$messageId', '$conversationId','${content.escapeSqliteSingleQuotationMarks()}', '${createdAt.millisecondsSinceEpoch}', '$userId')",
         updates: {db.messagesFts},
       );
 
@@ -287,7 +287,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         .getSingleOrNull();
 
     return db.customUpdate(
-      'UPDATE conversations SET last_read_message_id = ?, unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN (\'SENT\', \'DELIVERED\')) WHERE conversation_id = ?',
+      "UPDATE conversations SET last_read_message_id = ?, unseen_message_count = (SELECT count(1) FROM messages m WHERE m.conversation_id = ? AND m.user_id != ? AND m.status IN ('SENT', 'DELIVERED')) WHERE conversation_id = ?",
       variables: [
         Variable(messageId),
         Variable.withString(conversationId),

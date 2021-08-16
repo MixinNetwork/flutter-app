@@ -99,7 +99,7 @@ class _MultiImageStreamCompleter extends ImageStreamCompleter {
   ui.FrameInfo? _nextFrame;
 
   // When the current was first shown.
-  Duration? _shownTimestamp;
+  late Duration? _shownTimestamp;
 
   // The requested duration for the current frame;
   Duration? _frameDuration;

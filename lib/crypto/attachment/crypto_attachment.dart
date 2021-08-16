@@ -81,7 +81,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
     List<int> iv,
     int total,
   ) =>
-      chunkSize(_blockSize)._decrypt(keys, iv, total);
+      chunkSize()._decrypt(keys, iv, total);
 
   Stream<List<int>> _decrypt(
     List<int> keys,
@@ -123,7 +123,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
           macSink.close();
           final mac = macOutput.events.single.bytes;
           if (!listEquals(theirMac, mac)) {
-            controller.addError(Exception('MAC doesn\'t match!'));
+            controller.addError(Exception("MAC doesn't match!"));
             return;
           }
 
@@ -132,7 +132,7 @@ extension DecryptAttachmentStreamExtension on Stream<List<int>> {
             ..close();
           final ourDigest = digestOutput.events.single.bytes;
           if (!listEquals(ourDigest, digest)) {
-            controller.addError(Exception('Digest doesn\'t match!'));
+            controller.addError(Exception("Digest doesn't match!"));
             return;
           }
 
@@ -230,7 +230,7 @@ extension EncryptAttachmentStreamExtension on Stream<List<int>> {
     List<int> iv,
     void Function(List<int>) digestCallback,
   ) =>
-      chunkSize(_blockSize)._encrypt(keys, iv, digestCallback);
+      chunkSize()._encrypt(keys, iv, digestCallback);
 
   Stream<List<int>> _encrypt(
     List<int> keys,

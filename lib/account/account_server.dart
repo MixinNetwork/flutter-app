@@ -712,7 +712,6 @@ class AccountServer {
       isVerified: me.isVerified,
       createdAt: me.createdAt,
       muteUntil: DateTime.tryParse(me.muteUntil),
-      appId: null,
       biography: me.biography,
       isScam: me.isScam ? 1 : 0,
     ));
@@ -835,8 +834,7 @@ class AccountServer {
       await database.circleDao.insertUpdate(db.Circle(
           circleId: circle.circleId,
           name: circle.name,
-          createdAt: circle.createdAt,
-          orderedAt: null));
+          createdAt: circle.createdAt));
       await handleCircle(circle);
     });
 

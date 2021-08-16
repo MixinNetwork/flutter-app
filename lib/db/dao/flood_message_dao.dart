@@ -18,7 +18,7 @@ class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
   SimpleSelectStatement<FloodMessages, FloodMessage> findFloodMessage() =>
       select(db.floodMessages)
         ..orderBy([
-          (u) => OrderingTerm(expression: u.createdAt, mode: OrderingMode.asc)
+          (u) => OrderingTerm(expression: u.createdAt)
         ])
         ..limit(10);
 

@@ -34,7 +34,7 @@ class SelectItem extends StatelessWidget {
         final hideTitle = boxConstraints.maxWidth < 75;
         final hideUnreadText = boxConstraints.maxWidth < 100;
         return Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Row(
             children: [
               icon,
