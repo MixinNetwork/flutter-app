@@ -43,7 +43,7 @@ class QuoteMessage extends HookWidget {
   Widget build(BuildContext context) {
     final decodeMap = useMemoized(() {
       if (content == null) return null;
-      return jsonDecode(content!) as List<dynamic>;
+      return jsonDecode(content!);
     }, [content]);
 
     if (quoteMessageId?.isEmpty ?? true) return const SizedBox();
@@ -244,7 +244,7 @@ class QuoteMessage extends HookWidget {
         String? description;
         switch (type) {
           case MessageCategory.appButtonGroup:
-            description = decodeMap
+            description = (decodeMap as List?)
                 ?.map((e) => ActionData.fromJson(e))
                 .map((e) => '[${e.label}]')
                 .join();

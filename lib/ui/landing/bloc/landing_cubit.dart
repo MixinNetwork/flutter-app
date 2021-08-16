@@ -139,16 +139,14 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
 
       await AccountKeyValue.instance.init();
       // ignore: avoid_dynamic_calls
-      final sessionId = msg['session_id'] as String?;
+      final sessionId = msg['session_id'] as String;
       AccountKeyValue.instance.primarySessionId = sessionId;
       final info = await PackageInfo.fromPlatform();
       final appVersion = '${info.version}(${info.buildNumber})';
       final platformVersion = await getPlatformVersion();
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
-          // ignore: avoid_dynamic_calls
           code: msg['provisioning_code'],
-          // ignore: avoid_dynamic_calls
           userId: msg['user_id'],
           sessionId: sessionId,
           purpose: 'SESSION',
