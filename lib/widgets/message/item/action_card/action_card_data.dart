@@ -20,7 +20,7 @@ class AppCardData {
   @JsonKey(name: 'app_id')
   final String? appId;
   @JsonKey(name: 'icon_url')
-  final String? iconUrl;
+  final String iconUrl;
   final String title;
   final String description;
   final String action;
