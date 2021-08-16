@@ -28,13 +28,11 @@ dependencies:
   cached_network_image_platform_interface: ^1.0.0
   connectivity_plus: ^1.0.3
   desktop_drop:
-    #    path: ../flutter-plugins/packages/desktop_drop
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: affa029c0ba4cd22a5dff2d32c612fa2c60567ef
       path: packages/desktop_drop
   desktop_lifecycle:
-    #    path: ../flutter-plugins/packages/desktop_lifecycle
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 18e4e369cdeda9bbf8c4baade20ad951294a26b3
@@ -80,7 +78,6 @@ dependencies:
   octo_image: ^1.0.0+1
   package_info_plus: ^1.0.3
   pasteboard:
-    #    path: ../pasteboard
     git:
       url: https://github.com/MixinNetwork/flutter_pasteboard.git
       ref: 107f500cb5946d6ca228dbb53b7d7d0bb31c6db2

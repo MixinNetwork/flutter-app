@@ -127,7 +127,8 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     try {
       final result =
           signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
-      final msg = json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
+      final msg =
+          json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
 
       final edKeyPair = ed.generateKey();
 

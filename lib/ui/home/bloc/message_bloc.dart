@@ -156,9 +156,7 @@ class MessageState extends Equatable {
 
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
-      return copyWith(
-
-      );
+      return copyWith();
     }
 
     var message =
