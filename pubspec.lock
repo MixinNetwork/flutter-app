@@ -586,8 +586,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/flutter_markdown"
-      ref: fd139655d30b6f86ab6bac281949b49b02d04b37
-      resolved-ref: fd139655d30b6f86ab6bac281949b49b02d04b37
+      ref: "14e22e84025c5dc7dbffc5245f3bdc7d72ce82e7"
+      resolved-ref: "14e22e84025c5dc7dbffc5245f3bdc7d72ce82e7"
       url: "https://github.com/YeungKC/packages.git"
     source: git
     version: "0.6.4"

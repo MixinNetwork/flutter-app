@@ -61,7 +61,7 @@ dependencies:
   flutter_markdown:
     git:
       url: https://github.com/YeungKC/packages.git
-      ref: fd139655d30b6f86ab6bac281949b49b02d04b37
+      ref: 14e22e84025c5dc7dbffc5245f3bdc7d72ce82e7
       path: packages/flutter_markdown
   flutter_portal: ^0.4.0
   flutter_svg: ^0.22.0
