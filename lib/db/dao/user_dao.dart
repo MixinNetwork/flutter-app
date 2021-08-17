@@ -46,16 +46,6 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
 
   Selectable<User> usersByIn(List<String> userIds) => db.usersByIn(userIds);
 
-  Selectable<String> userIdsByIn(List<String> userIds) {
-    var arrayStartIndex = 1;
-    final expandedUserIds = $expandVar(arrayStartIndex, userIds.length);
-    arrayStartIndex += userIds.length;
-    return customSelect(
-      'SELECT user_id FROM users WHERE user_id IN ($expandedUserIds)',
-      variables: [for (var $ in userIds) Variable<String>($)],
-    ).map((row) => row.read<String>('user_id'));
-  }
-
   Selectable<User> fuzzySearchUser({
     required String id,
     required String username,
