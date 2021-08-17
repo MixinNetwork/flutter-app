@@ -187,6 +187,7 @@ class _Item extends StatelessWidget {
                         .postLengthOptimize(256),
                     extensionSet: ExtensionSet.gitHubWeb,
                     styleSheet: context.markdownStyleSheet,
+                    softLineBreak: true,
                     imageBuilder: (_, __, ___) => const SizedBox(),
                   ),
                   Positioned(

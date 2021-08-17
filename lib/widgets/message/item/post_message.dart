@@ -56,6 +56,7 @@ class PostMessage extends StatelessWidget {
                             message.content!.postOptimize(),
                         extensionSet: ExtensionSet.gitHubWeb,
                         styleSheet: context.markdownStyleSheet,
+                        softLineBreak: true,
                         imageBuilder: (_, __, ___) => const SizedBox(),
                         onTapLink: (String text, String? href, String title) {
                           if (href?.isEmpty ?? true) return;
@@ -142,6 +143,7 @@ class PostPreview extends StatelessWidget {
                     extensionSet: ExtensionSet.gitHubWeb,
                     styleSheet: context.markdownStyleSheet,
                     selectable: true,
+                    softLineBreak: true,
                     onTapLink: (String text, String? href, String title) =>
                         openUri(context, href!),
                   ),
