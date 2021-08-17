@@ -80,24 +80,6 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     return query.watch();
   }
 
-  Future<List<Job>> findCreateMessageJobs() => customSelect(
-              "SELECT * FROM jobs WHERE `action` = 'CREATE_MESSAGE' ORDER BY created_at ASC LIMIT 100",
-              readsFrom: {
-            db.jobs
-          })
-          .map((QueryRow row) => Job(
-              jobId: row.read<String>('jobId'),
-              action: row.read<String>('action'),
-              orderId: row.read<int>('orderId'),
-              priority: row.read<int>('priority'),
-              userId: row.read<String>('userId'),
-              blazeMessage: row.read<String>('jobId'),
-              conversationId: row.read<String>('jobId'),
-              resendMessageId: row.read<String>('resendMessageId'),
-              runCount: row.read<int>('runCount'),
-              createdAt: row.read<DateTime>('createdAt')))
-          .get();
-
   Future<void> insertAll(List<Job> jobs) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.jobs, jobs);
       });

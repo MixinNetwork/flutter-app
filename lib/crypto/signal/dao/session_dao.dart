@@ -9,25 +9,22 @@ class SessionDao extends DatabaseAccessor<SignalDatabase>
     with _$SessionDaoMixin {
   SessionDao(SignalDatabase db) : super(db);
 
-  Future<Session?> getSession(String address, int deviceId) async => db
-      .customSelect('SELECT * FROM sessions WHERE address = ? AND device = ?',
-          variables: [Variable.withString(address), Variable.withInt(deviceId)])
-      .map((row) => Session(
-            id: row.read<int>('id'),
-            address: row.read<String>('address'),
-            device: row.read<int>('device'),
-            record: row.read<Uint8List>('record'),
-            timestamp: row.read<int>('timestamp'),
-          ))
-      .getSingleOrNull();
+  Future<Session?> getSession(String address, int deviceId) =>
+      (select(db.sessions)
+            ..where((tbl) =>
+                tbl.address.equals(address) & tbl.device.equals(deviceId))
+            ..limit(1))
+          .getSingleOrNull();
 
-  Future<List<int>> getSubDevice(String address) async => db
-      .customSelect('SELECT * FROM sessions WHERE address = ? AND device != 1',
-          variables: [
-            Variable.withString(address),
-          ])
-      .map((row) => row.read<int>('device'))
-      .get();
+  Future<List<int>> getSubDevice(String address) async {
+    final list = await (selectOnly(db.sessions)
+          ..addColumns([db.sessions.device])
+          ..where(db.sessions.address.equals(address) &
+              db.sessions.device.equals(1).not()))
+        .map((row) => row.read(db.sessions.device))
+        .get();
+    return list.where((element) => element != null).cast<int>().toList();
+  }
 
   Future<List<Session>> getSessions(String address) async =>
       (select(db.sessions)..where((tbl) => tbl.address.equals(address))).get();
