@@ -19,6 +19,7 @@ import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
+import '../enum/encrypt_category.dart';
 import '../enum/media_status.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
@@ -49,13 +50,13 @@ class SendMessageHelper {
   Future<void> sendTextMessage(
     String conversationId,
     String senderId,
-    bool isPlain,
+    EncryptCategory encryptCategory,
     String content, {
     String? quoteMessageId,
     bool silent = false,
   }) async {
-    var category =
-        isPlain ? MessageCategory.plainText : MessageCategory.signalText;
+    var category = encryptCategory.toCategory(MessageCategory.plainText,
+        MessageCategory.signalText, MessageCategory.encryptedText);
     final quoteMessage =
         await _messageDao.findMessageItemByMessageId(quoteMessageId);
 
@@ -65,7 +66,7 @@ class SendMessageHelper {
       recipientId = await _participantDao
           .userIdByIdentityNumber(conversationId, botNumber!)
           .getSingleOrNull();
-      category = recipientId != null ? MessageCategory.plainText : category;
+      category = recipientId != null ? MessageCategory.encryptedText : category;
     }
 
     final message = Message(
@@ -349,11 +350,11 @@ class SendMessageHelper {
     String senderId,
     ContactMessage contactMessage,
     String? shareUserFullName, {
-    bool isPlain = true,
+    EncryptCategory encryptCategory = EncryptCategory.plain,
     String? quoteMessageId,
   }) async {
-    final category =
-        isPlain ? MessageCategory.plainContact : MessageCategory.signalContact;
+    final category = encryptCategory.toCategory(MessageCategory.plainContact,
+        MessageCategory.signalContact, MessageCategory.encryptedContact);
     final encoded = await jsonBase64EncodeWithIsolate(contactMessage);
 
     final quoteMessage =
@@ -442,9 +443,9 @@ class SendMessageHelper {
       String thumbUrl,
       int mediaWidth,
       int mediaHeight,
-      bool isPlain) async {
-    final category =
-        isPlain ? MessageCategory.plainLive : MessageCategory.signalLive;
+      EncryptCategory encryptCategory) async {
+    final category = encryptCategory.toCategory(MessageCategory.plainLive,
+        MessageCategory.signalLive, MessageCategory.encryptedLive);
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -464,9 +465,9 @@ class SendMessageHelper {
   }
 
   Future<void> sendPostMessage(String conversationId, String senderId,
-      String content, bool isPlain) async {
-    final category =
-        isPlain ? MessageCategory.plainPost : MessageCategory.signalPost;
+      String content, EncryptCategory encryptCategory) async {
+    final category = encryptCategory.toCategory(MessageCategory.plainPost,
+        MessageCategory.signalPost, MessageCategory.encryptedPost);
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -482,10 +483,9 @@ class SendMessageHelper {
   }
 
   Future<void> _sendLocationMessage(String conversationId, String senderId,
-      String content, bool isPlain) async {
-    final category = isPlain
-        ? MessageCategory.plainLocation
-        : MessageCategory.signalLocation;
+      String content, EncryptCategory encryptCategory) async {
+    final category = encryptCategory.toCategory(MessageCategory.plainLocation,
+        MessageCategory.signalLocation, MessageCategory.encryptedLocation);
     final message = Message(
       messageId: const Uuid().v4(),
       conversationId: conversationId,
@@ -550,11 +550,8 @@ class SendMessageHelper {
   }
 
   Future<void> forwardMessage(
-    String conversationId,
-    String senderId,
-    String forwardMessageId, {
-    bool isPlain = true,
-  }) async {
+      String conversationId, String senderId, String forwardMessageId,
+      {EncryptCategory encryptCategory = EncryptCategory.plain}) async {
     final message = await _messageDao.findMessageByMessageId(forwardMessageId);
     if (message == null) {
       return;
@@ -562,12 +559,12 @@ class SendMessageHelper {
       await sendTextMessage(
         conversationId,
         senderId,
-        isPlain,
+        encryptCategory,
         message.content!,
       );
     } else if (message.category.isImage) {
-      final category =
-          isPlain ? MessageCategory.plainImage : MessageCategory.signalImage;
+      final category = encryptCategory.toCategory(MessageCategory.plainImage,
+          MessageCategory.signalImage, MessageCategory.encryptedImage);
       AttachmentResult? attachmentResult;
       if (message.category == category && message.content != null) {
         attachmentResult = await _checkAttachment(message.content!);
@@ -583,8 +580,8 @@ class SendMessageHelper {
         attachmentResult: attachmentResult,
       );
     } else if (message.category.isVideo) {
-      final category =
-          isPlain ? MessageCategory.plainVideo : MessageCategory.signalVideo;
+      final category = encryptCategory.toCategory(MessageCategory.plainVideo,
+          MessageCategory.signalVideo, MessageCategory.encryptedVideo);
       AttachmentResult? attachmentResult;
       if (message.category == category && message.content != null) {
         attachmentResult = await _checkAttachment(message.content!);
@@ -605,8 +602,8 @@ class SendMessageHelper {
         thumbImage: message.thumbImage,
       );
     } else if (message.category.isAudio) {
-      final category =
-          isPlain ? MessageCategory.plainAudio : MessageCategory.signalAudio;
+      final category = encryptCategory.toCategory(MessageCategory.plainAudio,
+          MessageCategory.signalAudio, MessageCategory.encryptedAudio);
       AttachmentResult? attachmentResult;
       if (message.category == category && message.content != null) {
         attachmentResult = await _checkAttachment(message.content!);
@@ -623,8 +620,8 @@ class SendMessageHelper {
         attachmentResult: attachmentResult,
       );
     } else if (message.category.isData) {
-      final category =
-          isPlain ? MessageCategory.plainData : MessageCategory.signalData;
+      final category = encryptCategory.toCategory(MessageCategory.plainData,
+          MessageCategory.signalData, MessageCategory.encryptedData);
       AttachmentResult? attachmentResult;
       if (message.category == category && message.content != null) {
         attachmentResult = await _checkAttachment(message.content!);
@@ -647,16 +644,15 @@ class SendMessageHelper {
           conversationId,
           senderId,
           StickerMessage(message.stickerId!, null, null),
-          isPlain
-              ? MessageCategory.plainSticker
-              : MessageCategory.signalSticker);
+          encryptCategory.toCategory(MessageCategory.encryptedSticker,
+              MessageCategory.signalSticker, MessageCategory.encryptedSticker));
     } else if (message.category.isContact) {
       await sendContactMessage(
         conversationId,
         senderId,
         ContactMessage(message.sharedUserId!),
         message.name,
-        isPlain: isPlain,
+        encryptCategory: encryptCategory,
       );
     } else if (message.category.isLive) {
       final liveMessage = LiveMessage(
@@ -675,13 +671,13 @@ class SendMessageHelper {
           message.thumbUrl ?? '',
           message.mediaWidth!,
           message.mediaHeight!,
-          isPlain);
+          encryptCategory);
     } else if (message.category.isPost) {
       await sendPostMessage(
-          conversationId, senderId, message.content!, isPlain);
+          conversationId, senderId, message.content!, encryptCategory);
     } else if (message.category.isLocation) {
       await _sendLocationMessage(
-          conversationId, senderId, message.content!, isPlain);
+          conversationId, senderId, message.content!, encryptCategory);
     } else if (message.category == MessageCategory.appCard) {
       await _sendAppCardMessage(conversationId, senderId, message.content!);
     }

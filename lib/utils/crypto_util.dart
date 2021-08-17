@@ -9,8 +9,10 @@ import 'package:pointycastle/padded_block_cipher/padded_block_cipher_impl.dart';
 import 'package:pointycastle/paddings/pkcs7.dart';
 import 'package:x25519/x25519.dart' as x25519;
 
+const gcmIvLength = 12;
+
 List<int> aesGcmEncrypt(List<int> key, List<int> plainText) {
-  final iv = generateRandomKey(12);
+  final iv = generateRandomKey(gcmIvLength);
   final params = ParametersWithIV<KeyParameter>(
       KeyParameter(Uint8List.fromList(key)), Uint8List.fromList(iv));
   final gcmCipher = GCMBlockCipher(AESFastEngine())..init(true, params);

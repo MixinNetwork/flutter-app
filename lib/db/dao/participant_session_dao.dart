@@ -22,6 +22,12 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
           .getParticipantSessionKeyWithoutSelf(conversationId, userId)
           .getSingle();
 
+  Future<ParticipantSessionKey?> getOtherParticipantSessionKey(
+          String conversationId, String userId, String sessionId) =>
+      db
+          .getOtherParticipantSessionKey(conversationId, userId, sessionId)
+          .getSingle();
+
   Future deleteByStatus(String conversationId) async {
     await (delete(db.participantSession)
           ..where((tbl) =>
@@ -75,6 +81,12 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
   Future<List<ParticipantSessionData>> getNotSendSessionParticipants(
           String conversationId, String sessionId) async =>
       db.getNotSendSessionParticipants(conversationId, sessionId).get();
+
+  Future<ParticipantSessionData?> getParticipantSessionKeyBySessionId(
+          String conversationId, String sessionId) async =>
+      db
+          .getParticipantSessionKeyBySessionId(conversationId, sessionId)
+          .getSingleOrNull();
 
   Future updateList(List<ParticipantSessionData> list) async {
     for (final p in list) {

@@ -300,15 +300,12 @@ class _UserProfileButtonBar extends StatelessWidget {
               if (result.isEmpty) return;
               final conversationId = result[0].conversationId;
 
-              assert(!(result[0].isGroup && result[0].userId != null),
-                  'group conversation should not contains userId!');
-
               await runFutureWithToast(
                 context,
                 context.accountServer.sendContactMessage(
                   user.userId,
                   user.fullName!,
-                  isPlain(result.first.isGroup, result.first.isBot),
+                  result.first.encryptCategory!,
                   conversationId: conversationId,
                   recipientId: result[0].userId,
                 ),

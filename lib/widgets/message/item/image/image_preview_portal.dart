@@ -15,7 +15,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
-import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
@@ -280,7 +279,7 @@ class _Bar extends StatelessWidget {
               if (result.isEmpty) return;
               await accountServer.forwardMessage(
                 message.messageId,
-                isPlain(result.first.isGroup, result.first.isBot),
+                result.first.encryptCategory!,
                 conversationId: result.first.conversationId,
                 recipientId: result.first.userId,
               );

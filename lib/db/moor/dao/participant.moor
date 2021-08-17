@@ -11,8 +11,14 @@ LIMIT 4;
 getParticipantSessionKeyWithoutSelf AS ParticipantSessionKey:
 SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id != :userId;
 
+getOtherParticipantSessionKey AS ParticipantSessionKey:
+SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id == :userId AND session_id != :sessionId;
+
 getNotSendSessionParticipants:
 SELECT p.* FROM participant_session p LEFT JOIN users u ON p.user_id = u.user_id WHERE p.conversation_id = :conversationId AND p.session_id != :sessionId AND u.app_id IS NULL AND p.sent_to_server IS NULL;
+
+getParticipantSessionKeyBySessionId:
+SELECT * FROM participant_session WHERE conversation_id = :conversationId AND session_id == :sessionId;
 
 getGroupParticipants as ParticipantUser:
 SELECT p.conversation_id as conversationId, p.role as role, p.created_at as createdAt,

@@ -11,6 +11,7 @@ import '../../../crypto/uuid/uuid.dart';
 import '../../../db/extension/conversation.dart';
 import '../../../db/extension/user.dart';
 import '../../../db/mixin_database.dart';
+import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
@@ -24,6 +25,7 @@ class ConversationState extends Equatable {
     this.lastReadMessageId,
     this.conversation,
     this.user,
+    this.app,
     required this.refreshKey,
     this.initialSidePage,
   });
@@ -34,6 +36,7 @@ class ConversationState extends Equatable {
   final String? lastReadMessageId;
   final ConversationItem? conversation;
   final User? user;
+  final App? app;
   final Object refreshKey;
 
   final String? initialSidePage;
@@ -61,7 +64,7 @@ class ConversationState extends Equatable {
   UserRelationship? get relationship =>
       conversation?.relationship ?? user?.relationship;
 
-  bool get isPlainConversation => isPlain(isGroup!, isBot!);
+  EncryptCategory get encryptCategory => getEncryptCategory(app);
 
   @override
   List<Object?> get props => [
@@ -83,6 +86,7 @@ class ConversationState extends Equatable {
     final String? lastReadMessageId,
     final ConversationItem? conversation,
     final User? user,
+    final App? app,
     final Object? refreshKey,
     final String? initialSidePage,
   }) =>
@@ -92,20 +96,20 @@ class ConversationState extends Equatable {
         initIndexMessageId: initIndexMessageId ?? this.initIndexMessageId,
         conversation: conversation ?? this.conversation,
         user: user ?? this.user,
+        app: app ?? this.app,
         lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
         refreshKey: refreshKey ?? this.refreshKey,
         initialSidePage: initialSidePage ?? this.initialSidePage,
       );
 }
 
-bool isPlain(bool isGroup, bool isBot) {
-  bool isPlain;
-  if (isGroup) {
-    isPlain = false;
-  } else {
-    isPlain = isBot;
+EncryptCategory getEncryptCategory(App? app) {
+  if (app != null && app.capabilities?.contains('ENCRYPTED') == true) {
+    return EncryptCategory.encrypted;
+  } else if (app != null) {
+    return EncryptCategory.plain;
   }
-  return isPlain;
+  return EncryptCategory.signal;
 }
 
 class ConversationCubit extends SimpleCubit<ConversationState?>
@@ -195,12 +199,18 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     lastReadMessageId =
         lastReadMessageId ?? (hasUnreadMessage ? _initIndexMessageId : null);
 
+    final ownerId = _conversation.ownerId;
+    final app = (!_conversation.isGroupConversation && ownerId != null)
+        ? await accountServer.database.appDao.findAppById(ownerId)
+        : null;
+
     final conversationState = ConversationState(
       conversationId: conversationId,
       conversation: _conversation,
       initIndexMessageId: _initIndexMessageId,
       lastReadMessageId: lastReadMessageId,
       userId: _conversation.isGroupConversation ? null : _conversation.ownerId,
+      app: app,
       initialSidePage: initialChatSidePage,
       refreshKey: Object(),
     );
@@ -243,10 +253,13 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
       return showToastFailed(context, ToastError(context.l10n.userNotFound));
     }
 
+    final app = await accountServer.database.appDao.findAppById(userId);
+
     conversationCubit.emit(ConversationState(
       conversationId: conversationId,
       userId: userId,
       user: _user,
+      app: app,
       initialSidePage: initialChatSidePage,
       refreshKey: Object(),
     ));

@@ -267,7 +267,7 @@ Future<void> _sendFile(BuildContext context, _File file) async {
   final xFile = file.file;
   if (xFile.isImage) {
     return context.accountServer.sendImageMessage(
-      conversationItem.isPlainConversation,
+      conversationItem.encryptCategory,
       file: xFile,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
@@ -275,14 +275,14 @@ Future<void> _sendFile(BuildContext context, _File file) async {
   } else if (xFile.isVideo) {
     return context.accountServer.sendVideoMessage(
       xFile,
-      conversationItem.isPlainConversation,
+      conversationItem.encryptCategory,
       conversationId: conversationItem.conversationId,
       recipientId: conversationItem.userId,
     );
   }
   await context.accountServer.sendDataMessage(
     xFile,
-    conversationItem.isPlainConversation,
+    conversationItem.encryptCategory,
     conversationId: conversationItem.conversationId,
     recipientId: conversationItem.userId,
   );

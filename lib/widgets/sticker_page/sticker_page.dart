@@ -155,7 +155,7 @@ class _StickerAlbumPageItem extends HookWidget {
                 .updateUsedAt(sticker.stickerId, DateTime.now()),
           accountServer.sendStickerMessage(
             sticker.stickerId,
-            conversationItem.isPlainConversation,
+            conversationItem.encryptCategory,
             conversationId: conversationItem.conversationId,
             recipientId: conversationItem.user?.userId,
           ),

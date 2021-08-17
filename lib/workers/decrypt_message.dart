@@ -262,7 +262,7 @@ class DecryptMessage extends Injector {
       final decryptedContent = _encryptedProtocol.decryptMessage(_privateKey,
           Uuid.parse(_sessionId), await base64DecodeWithIsolate(data.data));
       if (decryptedContent == null) {
-        // todo
+        await _insertInvalidMessage(data);
       } else {
         final plainText = await utf8DecodeWithIsolate(decryptedContent);
         try {
@@ -273,8 +273,7 @@ class DecryptMessage extends Injector {
         }
       }
     } catch (e) {
-      // todo
-      w(e.toString());
+      await _insertInvalidMessage(data);
     }
   }
 
@@ -383,7 +382,7 @@ class DecryptMessage extends Injector {
       status: data.status,
       createdAt: data.createdAt,
     );
-    await database.appDao.findUserById(appCard.appId).then((app) {
+    await database.appDao.findAppById(appCard.appId).then((app) {
       if (app == null || app.updatedAt != appCard.updatedAt) {
         refreshUsers(<String>[appCard.appId]);
       }
@@ -441,7 +440,8 @@ class DecryptMessage extends Injector {
 
     if (data.category.isText) {
       String plain;
-      if (data.category == MessageCategory.signalText) {
+      if (data.category == MessageCategory.signalText ||
+          data.category == MessageCategory.encryptedText) {
         plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);
@@ -663,7 +663,8 @@ class DecryptMessage extends Injector {
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isLocation) {
       String plain;
-      if (data.category == MessageCategory.signalLocation) {
+      if (data.category == MessageCategory.signalLocation ||
+          data.category == MessageCategory.encryptedLocation) {
         plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);
@@ -693,7 +694,8 @@ class DecryptMessage extends Injector {
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isPost) {
       String plain;
-      if (data.category == MessageCategory.signalPost) {
+      if (data.category == MessageCategory.signalPost ||
+          data.category == MessageCategory.encryptedPost) {
         plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);
@@ -710,7 +712,8 @@ class DecryptMessage extends Injector {
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isTranscript) {
       String plain;
-      if (data.category == MessageCategory.signalTranscript) {
+      if (data.category == MessageCategory.signalTranscript ||
+          data.category == MessageCategory.encryptedTranscript) {
         plain = plainText;
       } else {
         plain = await _decodeWithIsolate(plainText);

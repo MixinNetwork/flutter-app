@@ -12,7 +12,6 @@ import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
-
 import '../../widgets/dialog.dart';
 import '../../widgets/menu.dart';
 import '../../widgets/select_item.dart';
@@ -185,8 +184,6 @@ class _CircleList extends HookWidget {
                               .map((e) => ConversationSelector(
                                     conversationId: e.conversationId,
                                     userId: e.userId,
-                                    isBot: false,
-                                    isGroup: false,
                                   ))
                               .toList();
 
