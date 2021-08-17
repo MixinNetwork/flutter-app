@@ -56,8 +56,10 @@ class QuoteMessage extends HookWidget {
       if (message != null) {
         quote = message;
         inputMode = true;
-      } else {
+      } else if (decodeMap != null) {
         quote = mapToQuoteMessage(decodeMap as Map<String, dynamic>);
+      } else {
+        return const SizedBox();
       }
       if ((quote?.type as String?).isIllegalMessageCategory) {
         return _QuoteMessageBase(
@@ -95,7 +97,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           image: Image(
             image:
-                MixinFileImage(File(context.accountServer.convertAbsolutePath(
+            MixinFileImage(File(context.accountServer.convertAbsolutePath(
               type,
               quote.conversationId as String,
               quote.mediaUrl as String?,
@@ -130,7 +132,7 @@ class QuoteMessage extends HookWidget {
 
       if (type.isLive) {
         final placeholder =
-            thumbImage != null ? ImageByBase64(thumbImage) : const SizedBox();
+        thumbImage != null ? ImageByBase64(thumbImage) : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -247,16 +249,17 @@ class QuoteMessage extends HookWidget {
       if (type == MessageCategory.appCard ||
           type == MessageCategory.appButtonGroup) {
         String? description;
+        final json = jsonDecode(quote.content as String);
         switch (type) {
           case MessageCategory.appButtonGroup:
-            description = (decodeMap as List?)
+            description = (json as List?)
                 ?.map((e) => ActionData.fromJson(e as Map<String, dynamic>))
                 .map((e) => '[${e.label}]')
                 .join();
             break;
           case MessageCategory.appCard:
             description =
-                AppCardData.fromJson(decodeMap as Map<String, dynamic>).title;
+                AppCardData.fromJson(json as Map<String, dynamic>).title;
             break;
           default:
             break;
@@ -373,7 +376,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                   name!,
                                   style: TextStyle(
                                     fontSize:
-                                        MessageItemWidget.secondaryFontSize,
+                                    MessageItemWidget.secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
@@ -393,7 +396,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                     _description,
                                     style: TextStyle(
                                       fontSize:
-                                          MessageItemWidget.tertiaryFontSize,
+                                      MessageItemWidget.tertiaryFontSize,
                                       color: context.theme.secondaryText,
                                       height: 1,
                                     ),

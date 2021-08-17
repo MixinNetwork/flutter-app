@@ -47,16 +47,16 @@ import 'sender.dart';
 
 class DecryptMessage extends Injector {
   DecryptMessage(
-    String userId,
-    Database database,
-    this._signalProtocol,
-    this._sender,
-    Client client,
-    this._sessionId,
-    this._privateKey,
-    this._attachmentUtil,
-    this.multiAuthCubit,
-  ) : super(userId, database, client) {
+      String userId,
+      Database database,
+      this._signalProtocol,
+      this._sender,
+      Client client,
+      this._sessionId,
+      this._privateKey,
+      this._attachmentUtil,
+      this.multiAuthCubit,
+      ) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
 
@@ -93,7 +93,7 @@ class DecryptMessage extends Injector {
       return true;
     }
     final messageHistory =
-        await database.messagesHistoryDao.findMessageHistoryById(messageId);
+    await database.messagesHistoryDao.findMessageHistoryById(messageId);
     return messageHistory != null;
   }
 
@@ -195,7 +195,7 @@ class DecryptMessage extends Injector {
 
         final address = SignalProtocolAddress(data.senderId, deviceId);
         final status = (await SignalDatabase.get.ratchetSenderKeyDao
-                .getRatchetSenderKey(data.conversationId, address.toString()))
+            .getRatchetSenderKey(data.conversationId, address.toString()))
             ?.status;
         if (status == RatchetStatus.requesting.toString()) {
           await _requestResendMessage(
@@ -213,7 +213,7 @@ class DecryptMessage extends Injector {
         await _insertFailedMessage(data);
         final address = SignalProtocolAddress(data.senderId, deviceId);
         final status = (await SignalDatabase.get.ratchetSenderKeyDao
-                .getRatchetSenderKey(data.conversationId, address.toString()))
+            .getRatchetSenderKey(data.conversationId, address.toString()))
             ?.status;
         if (status == null) {
           await _requestResendKey(data.conversationId, data.senderId,
@@ -434,9 +434,9 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processDecryptSuccess(
-    BlazeMessageData data,
-    String plainText,
-  ) async {
+      BlazeMessageData data,
+      String plainText,
+      ) async {
     await refreshUsers(<String>[data.senderId]);
 
     if (data.category.isText) {
@@ -448,7 +448,7 @@ class DecryptMessage extends Injector {
       }
       QuoteMessageItem? _quoteContent;
       final message =
-          await _generateMessage(data, (QuoteMessageItem? quoteContent) {
+      await _generateMessage(data, (QuoteMessageItem? quoteContent) {
         _quoteContent = quoteContent;
         return Message(
           messageId: data.messageId,
@@ -476,7 +476,7 @@ class DecryptMessage extends Injector {
           await _jsonDecodeWithIsolate(plainText) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
+              (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -510,7 +510,7 @@ class DecryptMessage extends Injector {
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
+              (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -546,7 +546,7 @@ class DecryptMessage extends Injector {
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
+              (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -578,7 +578,7 @@ class DecryptMessage extends Injector {
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
+              (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -632,7 +632,7 @@ class DecryptMessage extends Injector {
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
+              (QuoteMessageItem? quoteContent) => Message(
               messageId: data.messageId,
               conversationId: data.conversationId,
               userId: data.senderId,
@@ -673,8 +673,8 @@ class DecryptMessage extends Injector {
       try {
         locationMessage = LocationMessage.fromJson(
             await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
-      } catch (e) {
-        w('decode locationMessage error $e');
+      } catch (e, s) {
+        w('decode locationMessage error $e, $s');
       }
       if (locationMessage == null ||
           locationMessage.latitude == 0.0 ||
@@ -818,7 +818,7 @@ class DecryptMessage extends Injector {
       unawaited(refreshCircle(circleId: systemMessage.circleId));
     } else if (systemMessage.action == SystemCircleAction.add) {
       final circle =
-          await database.circleDao.findCircleById(systemMessage.circleId);
+      await database.circleDao.findCircleById(systemMessage.circleId);
       if (circle == null) {
         unawaited(refreshCircle(circleId: systemMessage.circleId));
       }
@@ -914,7 +914,7 @@ class DecryptMessage extends Injector {
     if (messageIds.isNotEmpty) {
       await database.messageDao.markMessageRead(accountId, messageIds);
       final conversationIds =
-          await database.messageDao.findConversationIdsByMessages(messageIds);
+      await database.messageDao.findConversationIdsByMessages(messageIds);
       for (final cId in conversationIds) {
         await database.messageDao.takeUnseen(accountId, cId);
       }
@@ -1027,7 +1027,7 @@ class DecryptMessage extends Injector {
           data.status);
     }
     if (await database.messageDao
-            .countMessageByQuoteId(data.conversationId, messageId) >
+        .countMessageByQuoteId(data.conversationId, messageId) >
         0) {
       final messageItem = await database.messageDao
           .findMessageItemById(data.conversationId, messageId);
@@ -1041,7 +1041,7 @@ class DecryptMessage extends Injector {
   Future<void> _requestResendKey(String conversationId, String recipientId,
       String messageId, String? sessionId) async {
     final plainJsonMessage =
-        PlainJsonMessage(resendKey, null, null, messageId, null, null);
+    PlainJsonMessage(resendKey, null, null, messageId, null, null);
     final encoded = await _jsonEncodeWithIsolate(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
@@ -1059,7 +1059,7 @@ class DecryptMessage extends Injector {
   Future<void> _requestResendMessage(
       String conversationId, String userId, String? sessionId) async {
     final messages =
-        await database.messageDao.findFailedMessages(conversationId, userId);
+    await database.messageDao.findFailedMessages(conversationId, userId);
     if (messages.isEmpty) {
       return;
     }
@@ -1092,7 +1092,7 @@ class DecryptMessage extends Injector {
       return;
     }
     final bm =
-        createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
+    createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
     final result = await _sender.signalKeysChannel(bm);
     if (result == null) {
       i('Registering new pre keys...');
