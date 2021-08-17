@@ -354,7 +354,6 @@ class _ActionAddParticipants extends StatelessWidget {
                   color: context.theme.icon,
                   onTapUp: (event) =>
                       context.read<OffsetCubit>().emit(event.globalPosition),
-                  padding: const EdgeInsets.all(8),
                 )),
       );
 }

@@ -137,7 +137,6 @@ class SendMessageHelper {
       mediaSize: await attachment.length(),
       mediaWidth: imageWidth,
       mediaHeight: imageHeight,
-      thumbImage: null,
       name: fileName,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.sending,
@@ -578,7 +577,6 @@ class SendMessageHelper {
         file: XFile(_attachmentUtil.convertAbsolutePath(
             message.category, message.conversationId, message.mediaUrl)),
         category: category,
-        quoteMessageId: null,
         attachmentResult: attachmentResult,
       );
     } else if (message.category.isVideo) {
@@ -733,7 +731,7 @@ class SendMessageHelper {
     AttachmentMessage? attachmentMessage;
     try {
       attachmentMessage = AttachmentMessage.fromJson(
-          await jsonBase64DecodeWithIsolate(content));
+          await jsonBase64DecodeWithIsolate(content) as Map<String, dynamic>);
     } catch (e) {
       attachmentMessage = null;
     }
@@ -746,8 +744,8 @@ class SendMessageHelper {
       if (date?.isToady == true) {
         return AttachmentResult(
           attachmentMessage.attachmentId,
-          attachmentMessage.key,
-          attachmentMessage.digest,
+          attachmentMessage.key as String?,
+          attachmentMessage.digest as String?,
           attachmentMessage.createdAt,
         );
       }
@@ -757,7 +755,7 @@ class SendMessageHelper {
 }
 
 Future<Image> _getSmallImage(String path) async {
-  final fileImage = FileImage(File(path), scale: 1.0);
+  final fileImage = FileImage(File(path));
   final imageProvider = ExtendedResizeImage(fileImage, maxBytes: 128 << 10);
   final image = await imageProvider.toImage();
 

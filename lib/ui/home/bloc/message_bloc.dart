@@ -146,8 +146,6 @@ class MessageState extends Equatable {
       );
 
   MessageState _copyWithJumpCurrentState() => MessageState(
-        center: null,
-        bottom: const [],
         top: list.toList(),
         refreshKey: Object(),
         conversationId: conversationId,
@@ -158,9 +156,7 @@ class MessageState extends Equatable {
 
   MessageState removeMessage(String messageId) {
     if (center?.messageId == messageId) {
-      return copyWith(
-        center: null,
-      );
+      return copyWith();
     }
 
     var message =
@@ -381,7 +377,6 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           .messagesByConversationId(
             conversationId,
             limit,
-            0,
           )
           .get();
 

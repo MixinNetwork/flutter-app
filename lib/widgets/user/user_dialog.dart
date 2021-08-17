@@ -154,7 +154,6 @@ class _UserProfileBody extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedSize(
         duration: const Duration(milliseconds: 150),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             const SizedBox(height: 72),
@@ -220,7 +219,6 @@ class _BioText extends StatelessWidget {
   Widget build(BuildContext context) => ConstrainedBox(
         constraints: const BoxConstraints(
           maxHeight: 74,
-          minHeight: 0,
           minWidth: 160,
         ),
         child: SingleChildScrollView(

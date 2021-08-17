@@ -125,7 +125,7 @@ class VideoMessageWidget extends StatelessWidget {
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 color: const Color.fromRGBO(0, 0, 0, 0.3),
-                                borderRadius: BorderRadius.circular(5.0),
+                                borderRadius: BorderRadius.circular(5),
                               ),
                               child: Padding(
                                 padding: const EdgeInsets.all(4),

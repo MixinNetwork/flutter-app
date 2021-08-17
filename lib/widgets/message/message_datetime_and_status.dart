@@ -43,7 +43,7 @@ class MessageDatetimeAndStatus extends StatelessWidget {
         children: [
           if (message.isSecret)
             Padding(
-              padding: const EdgeInsets.only(right: 4.0),
+              padding: const EdgeInsets.only(right: 4),
               child: _ChatIcon(
                 color: color,
                 assetName: Resources.assetsImagesChatSecretSvg,
@@ -54,7 +54,7 @@ class MessageDatetimeAndStatus extends StatelessWidget {
               context.read<ConversationCubit>().state,
               context.accountServer.userId))
             Padding(
-              padding: const EdgeInsets.only(right: 4.0),
+              padding: const EdgeInsets.only(right: 4),
               child: _ChatIcon(
                 color: color,
                 assetName: Resources.assetsImagesChatRepresentativeSvg,
@@ -151,7 +151,7 @@ class _MessageStatusWidget extends StatelessWidget {
         break;
     }
     return Padding(
-      padding: const EdgeInsets.only(left: 8.0),
+      padding: const EdgeInsets.only(left: 8),
       child: SvgPicture.asset(
         assetName,
         color: color,

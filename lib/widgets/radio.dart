@@ -33,7 +33,7 @@ class RadioItem<T> extends StatelessWidget {
                       : context.theme.secondaryText,
                   height: 16,
                   width: 16,
-                  alignment: const Alignment(0.0, -0.2),
+                  alignment: const Alignment(0, -0.2),
                   child: SvgPicture.asset(
                     Resources.assetsImagesSelectedSvg,
                     height: 10,

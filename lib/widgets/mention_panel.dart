@@ -191,7 +191,7 @@ class _MentionItem extends StatelessWidget {
         onTap: () => onSelect?.call(user),
         child: Container(
           height: kMentionItemHeight,
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: Row(
             children: [
               AvatarWidget(

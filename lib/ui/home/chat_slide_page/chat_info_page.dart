@@ -112,7 +112,6 @@ class ChatInfoPage extends HookWidget {
                 conversationId: conversationId,
                 userId: conversation.userId,
                 isGroup: conversation.isGroup!,
-                fontSize: 14,
               ),
             ),
             const SizedBox(height: 32),

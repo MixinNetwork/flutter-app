@@ -36,15 +36,15 @@ class SnapshotMessage {
   @JsonKey(name: 'trace_id')
   String traceId;
   @JsonKey(name: 'transaction_hash')
-  String transactionHash;
+  String? transactionHash;
   @JsonKey(name: 'sender')
-  String sender;
+  String? sender;
   @JsonKey(name: 'receiver')
-  String receiver;
+  String? receiver;
   @JsonKey(name: 'memo')
   String memo;
   @JsonKey(name: 'confirmations')
-  int confirmations;
+  int? confirmations;
 
   Map<String, dynamic> toJson() => _$SnapshotMessageToJson(this);
 }

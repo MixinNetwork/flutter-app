@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:latlng/latlng.dart';
-import 'package:map/map.dart';
+import 'package:map/map.dart' as map;
 
 import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
@@ -31,7 +31,8 @@ class LocationMessageWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final location = useMemoized(
-      () => LocationPayload.fromJson(jsonDecode(message.content!)),
+      () => LocationPayload.fromJson(
+          jsonDecode(message.content!) as Map<String, dynamic>),
       [message.content],
     );
     return MessageBubble(
@@ -60,13 +61,13 @@ class LocationMessageWidget extends HookWidget {
           },
           child: Stack(
             children: [
-              Map(
+              map.Map(
                 builder: (BuildContext context, int x, int y, int z) {
                   final url =
                       'https://www.google.com/maps/vt/pb=!1m4!1m3!1i$z!2i$x!3i$y!2m3!1e0!2sm!3i420120488!3m7!2sen!5e1105!12m4!1e68!2m2!1sset!2sRoadmap!4e0!5m1!1e0!23i4111425';
                   return CacheImage(url);
                 },
-                controller: MapController(
+                controller: map.MapController(
                   location: LatLng(location.latitude, location.longitude),
                 ),
               ),

@@ -69,7 +69,8 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
       streamSubscription = Stream.periodic(const Duration(seconds: 1), (i) => i)
           .listen(periodicStreamController.add);
       addSubscription(streamSubscription);
-    } catch (_) {
+    } catch (error, stack) {
+      e('requestAuthUrl failed: $error $stack');
       emit(state.copyWith(
         status: LandingStatus.needReload,
       ));
@@ -99,7 +100,10 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           ));
         })
         .asyncMap(_verify)
-        .handleError((_) => null)
+        .handleError((error, stack) {
+          e('_verify: $error $stack');
+          return null;
+        })
         .doOnData((auth) {
           if (auth == null) {
             streamSubscription?.cancel();
@@ -119,33 +123,31 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
     addSubscription(subscription);
   }
 
-  FutureOr<Tuple2<Account, String>?> _verify(secret) async {
+  FutureOr<Tuple2<Account, String>?> _verify(String secret) async {
     try {
       final result =
           signal.decrypt(base64Encode(keyPair.privateKey.serialize()), secret);
-      final msg = json.decode(String.fromCharCodes(result));
+      final msg =
+          json.decode(String.fromCharCodes(result)) as Map<String, dynamic>;
 
       final edKeyPair = ed.generateKey();
 
       await CryptoKeyValue.instance.init();
       // ignore: avoid_dynamic_calls
-      final private = base64.decode(msg['identity_key_private']);
+      final private = base64.decode(msg['identity_key_private'] as String);
       await SignalProtocol.initSignal(private);
       final registrationId = CryptoKeyValue.instance.localRegistrationId;
 
       await AccountKeyValue.instance.init();
-      // ignore: avoid_dynamic_calls
-      final sessionId = msg['session_id'];
+      final sessionId = msg['session_id'] as String;
       AccountKeyValue.instance.primarySessionId = sessionId;
       final info = await PackageInfo.fromPlatform();
       final appVersion = '${info.version}(${info.buildNumber})';
       final platformVersion = await getPlatformVersion();
       final rsp = await client.provisioningApi.verifyProvisioning(
         ProvisioningRequest(
-          // ignore: avoid_dynamic_calls
-          code: msg['provisioning_code'],
-          // ignore: avoid_dynamic_calls
-          userId: msg['user_id'],
+          code: msg['provisioning_code'] as String,
+          userId: msg['user_id'] as String,
           sessionId: sessionId,
           purpose: 'SESSION',
           sessionSecret: base64Encode(edKeyPair.publicKey.bytes),

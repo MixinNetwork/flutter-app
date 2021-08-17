@@ -6,7 +6,16 @@ analyzer:
     public_member_api_docs: ignore
     lines_longer_than_80_chars: ignore
     avoid_function_literals_in_foreach_calls: ignore
-    control_flow_in_finally: true
+    implicit_dynamic_parameter: ignore
+    implicit_dynamic_type: ignore
+    implicit_dynamic_map_literal: ignore
+    implicit_dynamic_method: ignore
+    implicit_dynamic_list_literal: ignore
+    implicit_dynamic_variable: ignore
+    implicit_dynamic_function: ignore
+    avoid_setters_without_getters: ignore
+#    experimental lint
+    use_build_context_synchronously: ignore
   exclude:
     - 'bin/cache/**'
     # the following two are relative to the stocks example and the flutter package respectively

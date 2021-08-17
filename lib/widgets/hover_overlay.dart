@@ -31,11 +31,11 @@ class HoverOverlay extends HookWidget {
   final Duration closeWaitDuration;
   final Curve inCurve;
   final Curve outCurve;
-  final ValueWidgetBuilder? portalBuilder;
+  final ValueWidgetBuilder<double>? portalBuilder;
 
   @override
   Widget build(BuildContext context) {
-    final cancelableRef = useRef<CancelableOperation?>(null);
+    final cancelableRef = useRef<CancelableOperation<bool>?>(null);
 
     final childHovering = useState(false);
     final portalHovering = useState(false);

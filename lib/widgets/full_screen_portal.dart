@@ -30,7 +30,8 @@ class FullScreenPortal extends HookWidget {
   Widget build(BuildContext context) {
     final visibleBloc =
         useBloc<FullScreenVisibleCubit>(() => FullScreenVisibleCubit(false));
-    final visible = useBlocState(bloc: visibleBloc);
+    final visible =
+        useBlocState<FullScreenVisibleCubit, bool>(bloc: visibleBloc);
     return BlocProvider.value(
       value: visibleBloc,
       child: Barrier(

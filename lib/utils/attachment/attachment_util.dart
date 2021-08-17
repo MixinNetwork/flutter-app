@@ -102,8 +102,8 @@ class AttachmentUtil extends ChangeNotifier {
         String? mediaDigest;
 
         if (category.isSignal || category.isEncrypted) {
-          mediaKey = attachmentMessage?.key;
-          mediaDigest = attachmentMessage?.digest;
+          mediaKey = attachmentMessage?.key as String?;
+          mediaDigest = attachmentMessage?.digest as String?;
           if (mediaKey == null || mediaDigest == null) {
             final message = await _messageDao.findMessageByMessageId(messageId);
             if (message != null) {

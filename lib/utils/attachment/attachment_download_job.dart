@@ -76,12 +76,12 @@ class _AttachmentDownloadJob extends _AttachmentJobBase {
 }
 
 Future<void> _download(_AttachmentDownloadJobOption options) async {
-  final CancelToken? cancelToken = CancelToken();
+  final cancelToken = CancelToken();
 
   final receivePort = ReceivePort();
   options.sendPort.send(receivePort.sendPort);
 
-  receivePort.listen((message) => cancelToken?.cancel());
+  receivePort.listen((message) => cancelToken.cancel());
 
   try {
     var received = 0;
@@ -145,7 +145,7 @@ extension _AttachmentDownloadExtension on Dio {
         if (e.response!.requestOptions.receiveDataWhenStatusError == true) {
           final res = await transformer.transformResponse(
             e.response!.requestOptions..responseType = ResponseType.json,
-            e.response!.data,
+            e.response!.data as ResponseBody,
           );
           e.response!.data = res;
         } else {
@@ -205,7 +205,7 @@ extension _AttachmentDownloadExtension on Dio {
           if (cancelToken == null || !cancelToken.isCancelled) {
             subscription.resume();
           }
-        }).catchError((err, stackTrace) async {
+        }).catchError((err, StackTrace? stackTrace) async {
           try {
             await subscription.cancel();
           } finally {
@@ -261,6 +261,7 @@ extension _AttachmentDownloadExtension on Dio {
             type: DioErrorType.receiveTimeout,
           );
         } else {
+          // ignore: throw_of_invalid_type
           throw err;
         }
       });

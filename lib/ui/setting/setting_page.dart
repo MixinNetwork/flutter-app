@@ -29,7 +29,6 @@ class SettingPage extends HookWidget {
     if (hasDrawer.value) {
       leading = ActionButton(
         onTapUp: (event) => Scaffold.of(context).openDrawer(),
-        padding: const EdgeInsets.all(8),
         child: Icon(
           Icons.menu,
           size: 20,

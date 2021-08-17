@@ -38,7 +38,7 @@ class MentionCache {
     final contents =
         _contents.where((element) => element != null).cast<String>().toSet();
 
-    for (var element in contents) {
+    for (final element in contents) {
       final cache = _contentMentionLruCache.get(element.hashCode);
       if (cache != null) {
         map.addAll(cache);
@@ -63,7 +63,7 @@ class MentionCache {
     };
 
     if (userNumbers.isEmpty) {
-      for (var e in noCacheContents) {
+      for (final e in noCacheContents) {
         _contentMentionLruCache.set(e.hashCode, {});
       }
     } else {
@@ -81,7 +81,7 @@ class MentionCache {
         map[element.identityNumber] = element;
       });
 
-      for (var element in noCacheContentUserIdMap.entries) {
+      for (final element in noCacheContentUserIdMap.entries) {
         element.value.forEach((String element) {
           if (map[element] != null) return;
           final mentionUser = _userLruCache.get(element);

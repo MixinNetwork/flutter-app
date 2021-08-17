@@ -203,8 +203,7 @@ class Injector {
         await database.circleDao.insertUpdate(db.Circle(
             circleId: circle.circleId,
             name: circle.name,
-            createdAt: circle.createdAt,
-            orderedAt: null));
+            createdAt: circle.createdAt));
         await handleCircle(circle);
       });
     } else {
@@ -212,8 +211,7 @@ class Injector {
       await database.circleDao.insertUpdate(db.Circle(
           circleId: circle.circleId,
           name: circle.name,
-          createdAt: circle.createdAt,
-          orderedAt: null));
+          createdAt: circle.createdAt));
       await handleCircle(circle);
     }
 

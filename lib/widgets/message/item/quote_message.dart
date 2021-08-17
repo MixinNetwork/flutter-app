@@ -11,7 +11,6 @@ import '../../../db/extension/message.dart';
 import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
-
 import '../../../ui/home/bloc/blink_cubit.dart';
 import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
@@ -57,8 +56,10 @@ class QuoteMessage extends HookWidget {
       if (message != null) {
         quote = message;
         inputMode = true;
+      } else if (decodeMap != null) {
+        quote = mapToQuoteMessage(decodeMap as Map<String, dynamic>);
       } else {
-        quote = mapToQuoteMessage(decodeMap);
+        return const SizedBox();
       }
       if ((quote?.type as String?).isIllegalMessageCategory) {
         return _QuoteMessageBase(
@@ -74,29 +75,36 @@ class QuoteMessage extends HookWidget {
           onTap: () {},
         );
       }
-      final String type = quote.type;
+      final type = quote.type as String;
+      final userId = quote.userId as String?;
+      final userFullName = quote.userFullName as String?;
       if (type.isText) {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
-          description: quote.content!,
+          userId: userId,
+          name: userFullName,
+          description: quote.content as String,
           inputMode: inputMode,
         );
       }
+      final thumbImage = quote.thumbImage as String?;
       if (type.isImage) {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
-          image: Image.file(
-            File(context.accountServer.convertAbsolutePath(
-                quote.type, quote.conversationId, quote.mediaUrl)),
+          userId: userId,
+          name: userFullName,
+          image: Image(
+            image:
+                MixinFileImage(File(context.accountServer.convertAbsolutePath(
+              type,
+              quote.conversationId as String,
+              quote.mediaUrl as String?,
+            ))),
             fit: BoxFit.cover,
             errorBuilder: (_, __, ___) =>
-                ImageByBlurHashOrBase64(imageData: quote.thumbImage),
+                ImageByBlurHashOrBase64(imageData: thumbImage!),
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesImageSvg,
@@ -110,9 +118,9 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
-          image: ImageByBase64(quote.thumbImage!),
+          userId: userId,
+          name: userFullName,
+          image: ImageByBase64(thumbImage!),
           icon: SvgPicture.asset(
             Resources.assetsImagesVideoSvg,
             color: iconColor,
@@ -123,16 +131,15 @@ class QuoteMessage extends HookWidget {
       }
 
       if (type.isLive) {
-        final placeholder = quote.thumbImage != null
-            ? ImageByBase64(quote.thumbImage!)
-            : const SizedBox();
+        final placeholder =
+            thumbImage != null ? ImageByBase64(thumbImage) : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
+          userId: userId,
+          name: userFullName,
           image: CacheImage(
-            quote.thumbUrl,
+            quote.thumbUrl as String,
             placeholder: (_, __) => placeholder,
             errorWidget: (_, __, ___) => placeholder,
           ),
@@ -149,13 +156,13 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
+          userId: userId,
+          name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
             color: iconColor,
           ),
-          description: quote.mediaName ?? context.l10n.file,
+          description: quote.mediaName as String? ?? context.l10n.file,
           inputMode: inputMode,
         );
       }
@@ -163,8 +170,8 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
+          userId: userId,
+          name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesFileSvg,
             color: iconColor,
@@ -177,8 +184,8 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
+          userId: userId,
+          name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesLocationSvg,
             color: iconColor,
@@ -191,8 +198,8 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
+          userId: userId,
+          name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesAudioSvg,
             color: iconColor,
@@ -205,9 +212,9 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
-          image: CacheImage(quote.assetUrl!),
+          userId: userId,
+          name: userFullName,
+          image: CacheImage(quote.assetUrl as String),
           icon: SvgPicture.asset(
             Resources.assetsImagesStickerSvg,
             color: iconColor,
@@ -220,37 +227,39 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
+          userId: userId,
+          name: userFullName,
           image: Padding(
             padding: const EdgeInsets.all(6),
             child: AvatarWidget(
-              name: quote.sharedUserFullName!,
-              userId: quote.sharedUserId!,
+              name: quote.sharedUserFullName as String,
+              userId: quote.sharedUserId as String,
               size: 48,
-              avatarUrl: quote.sharedUserAvatarUrl,
+              avatarUrl: quote.sharedUserAvatarUrl as String?,
             ),
           ),
           icon: SvgPicture.asset(
             Resources.assetsImagesContactSvg,
             color: iconColor,
           ),
-          description: quote.sharedUserIdentityNumber,
+          description: quote.sharedUserIdentityNumber as String,
           inputMode: inputMode,
         );
       }
       if (type == MessageCategory.appCard ||
           type == MessageCategory.appButtonGroup) {
         String? description;
+        final json = jsonDecode(quote.content as String);
         switch (type) {
           case MessageCategory.appButtonGroup:
-            description = decodeMap
-                .map((e) => ActionData.fromJson(e))
+            description = (json as List?)
+                ?.map((e) => ActionData.fromJson(e as Map<String, dynamic>))
                 .map((e) => '[${e.label}]')
                 .join();
             break;
           case MessageCategory.appCard:
-            description = AppCardData.fromJson(decodeMap).title;
+            description =
+                AppCardData.fromJson(json as Map<String, dynamic>).title;
             break;
           default:
             break;
@@ -259,8 +268,8 @@ class QuoteMessage extends HookWidget {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
-          userId: quote.userId,
-          name: quote.userFullName,
+          userId: userId,
+          name: userFullName,
           icon: SvgPicture.asset(
             Resources.assetsImagesAppButtonSvg,
             color: iconColor,

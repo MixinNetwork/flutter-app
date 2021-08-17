@@ -90,7 +90,6 @@ extension MarkdownStyleSheetExtension on BuildContext {
         border: Border(
           top: BorderSide(
             color: theme.sidebarSelected,
-            width: 1,
           ),
         ),
       ),

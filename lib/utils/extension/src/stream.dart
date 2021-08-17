@@ -37,7 +37,7 @@ extension StreamExtension<T> on Stream<T> {
           drop = true;
           newValue.then(add, onError: addError).whenComplete(resume);
         } else {
-          controller.add(newValue as dynamic);
+          controller.add(newValue);
         }
       });
       controller.onCancel = subscription.cancel;

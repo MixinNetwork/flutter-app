@@ -262,9 +262,12 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final Map map = await jsonDecodeWithIsolate(e.blazeMessage!);
+          final map = await jsonDecodeWithIsolate(e.blazeMessage!)
+              as Map<String, dynamic>;
           return BlazeAckMessage(
-              messageId: map['message_id'], status: map['status']);
+            messageId: map['message_id'] as String,
+            status: map['status'] as String,
+          );
         },
       ),
     );
@@ -287,9 +290,12 @@ class AccountServer {
     final ack = await Future.wait(
       jobs.where((element) => element.blazeMessage != null).map(
         (e) async {
-          final Map map = await jsonDecodeWithIsolate(e.blazeMessage!);
+          final map = await jsonDecodeWithIsolate(e.blazeMessage!)
+              as Map<String, dynamic>;
           return BlazeAckMessage(
-              messageId: map['message_id'], status: map['status']);
+            messageId: map['message_id'] as String,
+            status: map['status'] as String,
+          );
         },
       ),
     );
@@ -344,9 +350,9 @@ class AccountServer {
       var silent = false;
       try {
         final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
-        messageId = json[JobDao.messageIdKey]!;
-        recipientId = json[JobDao.recipientIdKey];
-        silent = json[JobDao.silentKey];
+        messageId = json[JobDao.messageIdKey] as String;
+        recipientId = json[JobDao.recipientIdKey] as String?;
+        silent = json[JobDao.silentKey] as bool;
       } catch (_) {
         messageId = job.blazeMessage!;
       }
@@ -719,7 +725,6 @@ class AccountServer {
       isVerified: me.isVerified,
       createdAt: me.createdAt,
       muteUntil: DateTime.tryParse(me.muteUntil),
-      appId: null,
       biography: me.biography,
       isScam: me.isScam ? 1 : 0,
     ));
@@ -842,8 +847,7 @@ class AccountServer {
       await database.circleDao.insertUpdate(db.Circle(
           circleId: circle.circleId,
           name: circle.name,
-          createdAt: circle.createdAt,
-          orderedAt: null));
+          createdAt: circle.createdAt));
       await handleCircle(circle);
     });
 

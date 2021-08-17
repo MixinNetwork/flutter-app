@@ -16,11 +16,10 @@ class MixinBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(right: 8.0),
+        padding: const EdgeInsets.only(right: 8),
         child: ActionButton(
           name: Resources.assetsImagesIcBackSvg,
           color: color ?? context.theme.icon,
-          size: 24,
           onTap: () {
             if (onTap != null) return onTap?.call();
             Navigator.pop(context);
