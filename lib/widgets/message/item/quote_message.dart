@@ -97,7 +97,7 @@ class QuoteMessage extends HookWidget {
           name: userFullName,
           image: Image(
             image:
-            MixinFileImage(File(context.accountServer.convertAbsolutePath(
+                MixinFileImage(File(context.accountServer.convertAbsolutePath(
               type,
               quote.conversationId as String,
               quote.mediaUrl as String?,
@@ -132,7 +132,7 @@ class QuoteMessage extends HookWidget {
 
       if (type.isLive) {
         final placeholder =
-        thumbImage != null ? ImageByBase64(thumbImage) : const SizedBox();
+            thumbImage != null ? ImageByBase64(thumbImage) : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -376,7 +376,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                   name!,
                                   style: TextStyle(
                                     fontSize:
-                                    MessageItemWidget.secondaryFontSize,
+                                        MessageItemWidget.secondaryFontSize,
                                     color: color,
                                     height: 1,
                                   ),
@@ -396,7 +396,7 @@ class _QuoteMessageBase extends StatelessWidget {
                                     _description,
                                     style: TextStyle(
                                       fontSize:
-                                      MessageItemWidget.tertiaryFontSize,
+                                          MessageItemWidget.tertiaryFontSize,
                                       color: context.theme.secondaryText,
                                       height: 1,
                                     ),

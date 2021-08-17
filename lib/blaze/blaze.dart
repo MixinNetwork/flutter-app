@@ -24,12 +24,12 @@ const String _wsHost2 = 'wss://mixin-blaze.zeromesh.net';
 
 class Blaze {
   Blaze(
-      this.userId,
-      this.sessionId,
-      this.privateKey,
-      this.database,
-      this.client,
-      ) {
+    this.userId,
+    this.sessionId,
+    this.privateKey,
+    this.database,
+    this.client,
+  ) {
     connectivitySubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) {
@@ -55,7 +55,7 @@ class Blaze {
   String? _token;
 
   StreamController<bool> connectedStateStreamController =
-  StreamController<bool>.broadcast();
+      StreamController<bool>.broadcast();
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
@@ -92,47 +92,47 @@ class Blaze {
     );
     subscription =
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
-              (blazeMessage) async {
-            connectedStateStreamController.add(true);
-            d('blazeMessage receive: ${blazeMessage.toJson()}');
+      (blazeMessage) async {
+        connectedStateStreamController.add(true);
+        d('blazeMessage receive: ${blazeMessage.toJson()}');
 
-            if (blazeMessage.action == errorAction &&
-                blazeMessage.error?.code == authentication) {
-              await _reconnect();
-              return;
-            }
+        if (blazeMessage.action == errorAction &&
+            blazeMessage.error?.code == authentication) {
+          await _reconnect();
+          return;
+        }
 
-            if (blazeMessage.error == null) {
-              final transaction = transactions[blazeMessage.id];
-              if (transaction != null) {
-                d('transaction success id: ${transaction.tid}');
-                transaction.success(blazeMessage);
-                transactions.removeWhere((key, value) => key == blazeMessage.id);
-              }
-            } else {
-              final transaction = transactions[blazeMessage.id];
-              if (transaction != null) {
-                d('transaction error id: ${transaction.tid}');
-                transaction.error(blazeMessage);
-                transactions.removeWhere((key, value) => key == blazeMessage.id);
-              }
-            }
+        if (blazeMessage.error == null) {
+          final transaction = transactions[blazeMessage.id];
+          if (transaction != null) {
+            d('transaction success id: ${transaction.tid}');
+            transaction.success(blazeMessage);
+            transactions.removeWhere((key, value) => key == blazeMessage.id);
+          }
+        } else {
+          final transaction = transactions[blazeMessage.id];
+          if (transaction != null) {
+            d('transaction error id: ${transaction.tid}');
+            transaction.error(blazeMessage);
+            transactions.removeWhere((key, value) => key == blazeMessage.id);
+          }
+        }
 
-            if (blazeMessage.data != null &&
-                blazeMessage.isReceiveMessageAction()) {
-              await handleReceiveMessage(blazeMessage);
-            }
-          },
-          onError: (error, s) {
-            i('ws error: $error, s: $s');
-            _reconnect();
-          },
-          onDone: () {
-            i('web socket done');
-            _reconnect();
-          },
-          cancelOnError: true,
-        );
+        if (blazeMessage.data != null &&
+            blazeMessage.isReceiveMessageAction()) {
+          await handleReceiveMessage(blazeMessage);
+        }
+      },
+      onError: (error, s) {
+        i('ws error: $error, s: $s');
+        _reconnect();
+      },
+      onDone: () {
+        i('web socket done');
+        _reconnect();
+      },
+      cancelOnError: true,
+    );
     _refreshOffset();
     _sendListPending();
   }
@@ -175,7 +175,7 @@ class Blaze {
 
   Future<void> makeMessageStatus(String messageId, MessageStatus status) async {
     final currentStatus =
-    await database.messageDao.findMessageStatusById(messageId);
+        await database.messageDao.findMessageStatusById(messageId);
     if (currentStatus == MessageStatus.sending) {
       await database.messageDao.updateMessageStatusById(messageId, status);
     } else if (currentStatus == MessageStatus.sent &&
@@ -189,7 +189,7 @@ class Blaze {
 
   Future<void> _sendListPending() async {
     final offset =
-    await database.floodMessageDao.getLastBlazeMessageCreatedAt();
+        await database.floodMessageDao.getLastBlazeMessageCreatedAt();
     final param = offset?.toIso8601String();
     final m = createPendingBlazeMessage(BlazeMessageParamOffset(offset: param));
     d('blaze send: ${m.toJson()}');
@@ -198,7 +198,7 @@ class Blaze {
 
   Future<void> _refreshOffset() async {
     final offset =
-    await database.offsetDao.findStatusOffset().getSingleOrNull();
+        await database.offsetDao.findStatusOffset().getSingleOrNull();
     var status = 0;
     if (offset != null) {
       status = offset.epochNano;
@@ -209,7 +209,7 @@ class Blaze {
       final response = await client.messageApi.messageStatusOffset(status);
       final blazeMessages = (response.data as List<dynamic>)
           .map((itemJson) =>
-          BlazeMessageData.fromJson(itemJson as Map<String, dynamic>))
+              BlazeMessageData.fromJson(itemJson as Map<String, dynamic>))
           .toList();
       if (blazeMessages.isEmpty) {
         break;
@@ -248,9 +248,9 @@ class Blaze {
     transactions[blazeMessage.id] = transaction;
     d('sendMessage transactions size: ${transactions.length}');
     return transaction.run(
-            () => channel?.sink.add(GZipEncoder()
+        () => channel?.sink.add(GZipEncoder()
             .encode(Uint8List.fromList(jsonEncode(blazeMessage).codeUnits))),
-            () => null);
+        () => null);
   }
 
   Future<void> _reconnect() async {
@@ -291,7 +291,7 @@ Future<BlazeMessage> parseBlazeMessage(List<int> list) =>
 BlazeMessage _parseBlazeMessageInternal(List<int> message) {
   final content = String.fromCharCodes(GZipDecoder().decodeBytes(message));
   final blazeMessage =
-  BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
+      BlazeMessage.fromJson(jsonDecode(content) as Map<String, dynamic>);
   return blazeMessage;
 }
 
