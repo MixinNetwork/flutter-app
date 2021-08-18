@@ -1,4 +1,5 @@
-import 'package:extended_text/extended_text.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
@@ -6,7 +7,6 @@ import '../utils/extension/extension.dart';
 import '../utils/reg_exp_utils.dart';
 import '../utils/uri_utils.dart';
 import 'high_light_text.dart';
-import 'interacter_decorated_box.dart';
 
 class MoreExtendedText extends HookWidget {
   const MoreExtendedText(
@@ -19,16 +19,82 @@ class MoreExtendedText extends HookWidget {
   final TextStyle? style;
 
   @override
+  Widget build(BuildContext context) => LayoutBuilder(
+        builder: (context, constraints) => _MoreExtendedText(
+          text,
+          style: style,
+          constraints: constraints,
+        ),
+      );
+}
+
+class _MoreExtendedText extends HookWidget {
+  const _MoreExtendedText(
+    this.text, {
+    required this.constraints,
+    Key? key,
+    this.style,
+  }) : super(key: key);
+
+  final String text;
+  final TextStyle? style;
+  final BoxConstraints constraints;
+
+  @override
   Widget build(BuildContext context) {
     final expand = useState(false);
-
     final style =
         useMemoized(() => this.style?.merge(const TextStyle(height: 1)));
 
-    final textSpans = useMemoized(
+    final overflowTextSpan = TextSpan(
+      text: '...${context.l10n.more}',
+      style: style,
+    );
+
+    final endIndex = useMemoized(() {
+      if (!expand.value) {
+        final maxWidth = constraints.maxWidth;
+        final textSpan = TextSpan(
+          text: text,
+          style: style,
+        );
+
+        final textPainter = TextPainter(
+          text: overflowTextSpan,
+          textDirection: TextDirection.rtl,
+          maxLines: 3,
+        )..layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
+        final overflowTextSpanSize = textPainter.size;
+
+        textPainter
+          ..text = textSpan
+          ..layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
+
+        if (textPainter.didExceedMaxLines) {
+          final textSize = textPainter.size;
+
+          final pos = textPainter.getPositionForOffset(Offset(
+            textSize.width - overflowTextSpanSize.width,
+            textSize.height,
+          ));
+          final endIndex = textPainter.getOffsetBefore(pos.offset);
+          return endIndex;
+        }
+      }
+
+      return -1;
+    }, [text, style, expand.value]);
+
+    final textSpan = useMemoized(
       () {
+        var resultText = text;
+
+        if (endIndex != -1) {
+          resultText = resultText.substring(0, endIndex);
+        }
+
         final highlightTextSpans = uriRegExp
-            .allMatches(text)
+            .allMatches(resultText)
             .map(
               (e) => HighlightTextSpan(
                 e[0]!,
@@ -40,36 +106,18 @@ class MoreExtendedText extends HookWidget {
             )
             .toList();
         return TextSpan(
-          children: buildHighlightTextSpan(text, highlightTextSpans, style),
+          children:
+              buildHighlightTextSpan(resultText, highlightTextSpans, style),
         );
       },
-      [text, style],
+      [text, style, endIndex],
     );
 
-    return DefaultTextStyle(
-      style: style ?? const TextStyle(),
-      child: ExtendedText.rich(
-        textSpans,
-        joinZeroWidthSpace: !expand.value,
-        maxLines: expand.value ? null : 3,
-        overflow: TextOverflow.fade,
-        textAlign: TextAlign.center,
-        selectionEnabled: true,
-        overflowWidget: TextOverflowWidget(
-          child: InteractableDecoratedBox(
-            cursor: SystemMouseCursors.click,
-            onTap: () {
-              expand.value = true;
-            },
-            child: Text(
-              context.l10n.more,
-              style: style?.merge(TextStyle(
-                color: context.theme.accent,
-              )),
-            ),
-          ),
-        ),
+    return SelectableText.rich(
+      TextSpan(
+        children: [textSpan, if (endIndex != -1) overflowTextSpan],
       ),
+      textAlign: TextAlign.center,
     );
   }
 }
