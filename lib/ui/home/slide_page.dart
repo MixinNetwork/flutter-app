@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -45,7 +46,10 @@ class SlidePage extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 72),
+                    SizedBox(
+                        height: (defaultTargetPlatform == TargetPlatform.macOS)
+                            ? 72.0
+                            : 16.0),
                     _Item(
                       asset: Resources.assetsImagesChatSvg,
                       title: context.l10n.chats,
