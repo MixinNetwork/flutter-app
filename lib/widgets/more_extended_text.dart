@@ -83,7 +83,7 @@ class _MoreExtendedText extends HookWidget {
       }
 
       return -1;
-    }, [expand.value]);
+    }, [text, style, expand.value]);
 
     final textSpan = useMemoized(
       () {
