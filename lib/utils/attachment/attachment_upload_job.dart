@@ -46,7 +46,7 @@ class _AttachmentUploadJob extends _AttachmentJobBase {
   ) async {
     late Isolate? isolate;
     _receivePort = ReceivePort();
-    final completer = Completer<List<int>>();
+    final completer = Completer<List<int>?>();
 
     _receivePort!.listen((message) {
       if (message == _killMessage) {
