@@ -29,8 +29,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' as db;
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -1032,6 +1032,10 @@ class DecryptMessage extends Injector {
           liveMessage.url,
           liveMessage.thumbUrl,
           data.status);
+    } else if (data.category == MessageCategory.signalTranscript) {
+      final plain = await _decodeWithIsolate(plaintext);
+      final list = await jsonDecodeWithIsolate(plain) as List<dynamic>;
+      await processTranscriptMessage(data, list);
     }
     if (await database.messageDao
             .countMessageByQuoteId(data.conversationId, messageId) >
@@ -1116,6 +1120,81 @@ class DecryptMessage extends Injector {
     } catch (e, s) {
       w('updateUserByIdentityNumber error $e, stack: $s');
     }
+  }
+
+  Future processTranscriptMessage(
+      BlazeMessageData data, List<dynamic> list) async {
+    if (list.isEmpty) {
+      await database.messageDao.insert(
+        Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category!,
+          mediaSize: 0,
+          createdAt: data.createdAt,
+          status: MessageStatus.unknown,
+        ),
+        data.userId,
+      );
+      return null;
+    }
+
+    final transcripts = list
+        .map((e) => TranscriptMessage.fromJson(e as Map<String, dynamic>))
+        .where((transcript) => transcript.transcriptId == data.messageId)
+        .toList();
+
+    Future<void> insertFts() async {
+      final contents = await Future.wait(transcripts.where((transcript) {
+        final category = transcript.category;
+        return category.isText ||
+            category.isPost ||
+            category.isData ||
+            category.isContact;
+      }).map((transcript) async {
+        final category = transcript.category;
+        if (category.isData) {
+          return transcript.mediaName;
+        }
+
+        if (category.isContact &&
+            (transcript.sharedUserId?.isNotEmpty ?? false)) {
+          return database.userDao
+              .userFullNameByUserId(transcript.sharedUserId!)
+              .getSingleOrNull();
+        }
+
+        return transcript.content;
+      }));
+
+      final join = contents.whereNotNull().join(' ');
+      await database.messageDao.insertFts(data.messageId, data.conversationId,
+          join, data.createdAt, data.userId);
+    }
+
+    Future _refreshSticker() => Future.wait(transcripts
+            .where((transcript) =>
+                transcript.category.isSticker &&
+                (transcript.stickerId?.isNotEmpty ?? false))
+            .map((transcript) async {
+          final hasSticker =
+              await database.stickerDao.hasSticker(transcript.stickerId!);
+          if (hasSticker) return;
+          await refreshSticker(transcript.stickerId!);
+        }));
+
+    Future _refreshUser() => refreshUsers(transcripts
+        .where((transcript) =>
+            transcript.category.isContact &&
+            (transcript.sharedUserId?.isNotEmpty ?? false))
+        .map((transcript) => transcript.sharedUserId!)
+        .toList());
+
+    final insertFtsFuture = insertFts();
+    final refreshStickerFuture = _refreshSticker();
+    final refreshUserFuture = _refreshUser();
+    // todo attachment
   }
 }
 

@@ -9014,7 +9014,7 @@ class StickerRelationships extends Table
 
   @override
   List<String> get customConstraints =>
-      const ['PRIMARY KEY(album_id,sticker_id)'];
+      const ['PRIMARY KEY(album_id, sticker_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -10116,6 +10116,1159 @@ class Users extends Table with TableInfo<Users, User> {
   bool get dontWriteConstraints => true;
 }
 
+class TranscriptMessage extends DataClass
+    implements Insertable<TranscriptMessage> {
+  final String transcriptId;
+  final String messageId;
+  final String? userId;
+  final String? userFullName;
+  final String category;
+  final DateTime createdAt;
+  final String? content;
+  final String? mediaUrl;
+  final String? mediaName;
+  final int? mediaSize;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? mediaMimeType;
+  final String? mediaDuration;
+  final MediaStatus? mediaStatus;
+  final String? mediaWaveform;
+  final String? thumbImage;
+  final String? mediaKey;
+  final String? mediaDigest;
+  final DateTime mediaCreatedAt;
+  final String? stickerId;
+  final String? sharedUserId;
+  final String? mentions;
+  final String? quoteId;
+  final String? quoteContent;
+  final String? caption;
+  TranscriptMessage(
+      {required this.transcriptId,
+      required this.messageId,
+      this.userId,
+      this.userFullName,
+      required this.category,
+      required this.createdAt,
+      this.content,
+      this.mediaUrl,
+      this.mediaName,
+      this.mediaSize,
+      this.mediaWidth,
+      this.mediaHeight,
+      this.mediaMimeType,
+      this.mediaDuration,
+      this.mediaStatus,
+      this.mediaWaveform,
+      this.thumbImage,
+      this.mediaKey,
+      this.mediaDigest,
+      required this.mediaCreatedAt,
+      this.stickerId,
+      this.sharedUserId,
+      this.mentions,
+      this.quoteId,
+      this.quoteContent,
+      this.caption});
+  factory TranscriptMessage.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return TranscriptMessage(
+      transcriptId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}transcript_id'])!,
+      messageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+      userId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_id']),
+      userFullName: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}user_full_name']),
+      category: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}category'])!,
+      createdAt: TranscriptMessages.$converter0.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
+      content: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}content']),
+      mediaUrl: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_url']),
+      mediaName: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_name']),
+      mediaSize: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_size']),
+      mediaWidth: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_width']),
+      mediaHeight: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_height']),
+      mediaMimeType: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_mime_type']),
+      mediaDuration: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_duration']),
+      mediaStatus: TranscriptMessages.$converter1.mapToDart(const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_status'])),
+      mediaWaveform: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_waveform']),
+      thumbImage: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}thumb_image']),
+      mediaKey: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_key']),
+      mediaDigest: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_digest']),
+      mediaCreatedAt: TranscriptMessages.$converter2.mapToDart(const IntType()
+          .mapFromDatabaseResponse(
+              data['${effectivePrefix}media_created_at']))!,
+      stickerId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}stickerId']),
+      sharedUserId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}sharedUserId']),
+      mentions: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}mentions']),
+      quoteId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}quote_id']),
+      quoteContent: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}quote_content']),
+      caption: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}caption']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['transcript_id'] = Variable<String>(transcriptId);
+    map['message_id'] = Variable<String>(messageId);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String?>(userId);
+    }
+    if (!nullToAbsent || userFullName != null) {
+      map['user_full_name'] = Variable<String?>(userFullName);
+    }
+    map['category'] = Variable<String>(category);
+    {
+      final converter = TranscriptMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
+    }
+    if (!nullToAbsent || content != null) {
+      map['content'] = Variable<String?>(content);
+    }
+    if (!nullToAbsent || mediaUrl != null) {
+      map['media_url'] = Variable<String?>(mediaUrl);
+    }
+    if (!nullToAbsent || mediaName != null) {
+      map['media_name'] = Variable<String?>(mediaName);
+    }
+    if (!nullToAbsent || mediaSize != null) {
+      map['media_size'] = Variable<int?>(mediaSize);
+    }
+    if (!nullToAbsent || mediaWidth != null) {
+      map['media_width'] = Variable<int?>(mediaWidth);
+    }
+    if (!nullToAbsent || mediaHeight != null) {
+      map['media_height'] = Variable<int?>(mediaHeight);
+    }
+    if (!nullToAbsent || mediaMimeType != null) {
+      map['media_mime_type'] = Variable<String?>(mediaMimeType);
+    }
+    if (!nullToAbsent || mediaDuration != null) {
+      map['media_duration'] = Variable<String?>(mediaDuration);
+    }
+    if (!nullToAbsent || mediaStatus != null) {
+      final converter = TranscriptMessages.$converter1;
+      map['media_status'] = Variable<String?>(converter.mapToSql(mediaStatus));
+    }
+    if (!nullToAbsent || mediaWaveform != null) {
+      map['media_waveform'] = Variable<String?>(mediaWaveform);
+    }
+    if (!nullToAbsent || thumbImage != null) {
+      map['thumb_image'] = Variable<String?>(thumbImage);
+    }
+    if (!nullToAbsent || mediaKey != null) {
+      map['media_key'] = Variable<String?>(mediaKey);
+    }
+    if (!nullToAbsent || mediaDigest != null) {
+      map['media_digest'] = Variable<String?>(mediaDigest);
+    }
+    {
+      final converter = TranscriptMessages.$converter2;
+      map['media_created_at'] =
+          Variable<int>(converter.mapToSql(mediaCreatedAt)!);
+    }
+    if (!nullToAbsent || stickerId != null) {
+      map['stickerId'] = Variable<String?>(stickerId);
+    }
+    if (!nullToAbsent || sharedUserId != null) {
+      map['sharedUserId'] = Variable<String?>(sharedUserId);
+    }
+    if (!nullToAbsent || mentions != null) {
+      map['mentions'] = Variable<String?>(mentions);
+    }
+    if (!nullToAbsent || quoteId != null) {
+      map['quote_id'] = Variable<String?>(quoteId);
+    }
+    if (!nullToAbsent || quoteContent != null) {
+      map['quote_content'] = Variable<String?>(quoteContent);
+    }
+    if (!nullToAbsent || caption != null) {
+      map['caption'] = Variable<String?>(caption);
+    }
+    return map;
+  }
+
+  TranscriptMessagesCompanion toCompanion(bool nullToAbsent) {
+    return TranscriptMessagesCompanion(
+      transcriptId: Value(transcriptId),
+      messageId: Value(messageId),
+      userId:
+          userId == null && nullToAbsent ? const Value.absent() : Value(userId),
+      userFullName: userFullName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userFullName),
+      category: Value(category),
+      createdAt: Value(createdAt),
+      content: content == null && nullToAbsent
+          ? const Value.absent()
+          : Value(content),
+      mediaUrl: mediaUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaUrl),
+      mediaName: mediaName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaName),
+      mediaSize: mediaSize == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaSize),
+      mediaWidth: mediaWidth == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaWidth),
+      mediaHeight: mediaHeight == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaHeight),
+      mediaMimeType: mediaMimeType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaMimeType),
+      mediaDuration: mediaDuration == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaDuration),
+      mediaStatus: mediaStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaStatus),
+      mediaWaveform: mediaWaveform == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaWaveform),
+      thumbImage: thumbImage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbImage),
+      mediaKey: mediaKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaKey),
+      mediaDigest: mediaDigest == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaDigest),
+      mediaCreatedAt: Value(mediaCreatedAt),
+      stickerId: stickerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(stickerId),
+      sharedUserId: sharedUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sharedUserId),
+      mentions: mentions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mentions),
+      quoteId: quoteId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteId),
+      quoteContent: quoteContent == null && nullToAbsent
+          ? const Value.absent()
+          : Value(quoteContent),
+      caption: caption == null && nullToAbsent
+          ? const Value.absent()
+          : Value(caption),
+    );
+  }
+
+  factory TranscriptMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return TranscriptMessage(
+      transcriptId: serializer.fromJson<String>(json['transcript_id']),
+      messageId: serializer.fromJson<String>(json['message_id']),
+      userId: serializer.fromJson<String?>(json['user_id']),
+      userFullName: serializer.fromJson<String?>(json['user_full_name']),
+      category: serializer.fromJson<String>(json['category']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+      content: serializer.fromJson<String?>(json['content']),
+      mediaUrl: serializer.fromJson<String?>(json['media_url']),
+      mediaName: serializer.fromJson<String?>(json['media_name']),
+      mediaSize: serializer.fromJson<int?>(json['media_size']),
+      mediaWidth: serializer.fromJson<int?>(json['media_width']),
+      mediaHeight: serializer.fromJson<int?>(json['media_height']),
+      mediaMimeType: serializer.fromJson<String?>(json['media_mime_type']),
+      mediaDuration: serializer.fromJson<String?>(json['media_duration']),
+      mediaStatus: serializer.fromJson<MediaStatus?>(json['media_status']),
+      mediaWaveform: serializer.fromJson<String?>(json['media_waveform']),
+      thumbImage: serializer.fromJson<String?>(json['thumb_image']),
+      mediaKey: serializer.fromJson<String?>(json['media_key']),
+      mediaDigest: serializer.fromJson<String?>(json['media_digest']),
+      mediaCreatedAt: serializer.fromJson<DateTime>(json['media_created_at']),
+      stickerId: serializer.fromJson<String?>(json['stickerId']),
+      sharedUserId: serializer.fromJson<String?>(json['sharedUserId']),
+      mentions: serializer.fromJson<String?>(json['mentions']),
+      quoteId: serializer.fromJson<String?>(json['quote_id']),
+      quoteContent: serializer.fromJson<String?>(json['quote_content']),
+      caption: serializer.fromJson<String?>(json['caption']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'transcript_id': serializer.toJson<String>(transcriptId),
+      'message_id': serializer.toJson<String>(messageId),
+      'user_id': serializer.toJson<String?>(userId),
+      'user_full_name': serializer.toJson<String?>(userFullName),
+      'category': serializer.toJson<String>(category),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+      'content': serializer.toJson<String?>(content),
+      'media_url': serializer.toJson<String?>(mediaUrl),
+      'media_name': serializer.toJson<String?>(mediaName),
+      'media_size': serializer.toJson<int?>(mediaSize),
+      'media_width': serializer.toJson<int?>(mediaWidth),
+      'media_height': serializer.toJson<int?>(mediaHeight),
+      'media_mime_type': serializer.toJson<String?>(mediaMimeType),
+      'media_duration': serializer.toJson<String?>(mediaDuration),
+      'media_status': serializer.toJson<MediaStatus?>(mediaStatus),
+      'media_waveform': serializer.toJson<String?>(mediaWaveform),
+      'thumb_image': serializer.toJson<String?>(thumbImage),
+      'media_key': serializer.toJson<String?>(mediaKey),
+      'media_digest': serializer.toJson<String?>(mediaDigest),
+      'media_created_at': serializer.toJson<DateTime>(mediaCreatedAt),
+      'stickerId': serializer.toJson<String?>(stickerId),
+      'sharedUserId': serializer.toJson<String?>(sharedUserId),
+      'mentions': serializer.toJson<String?>(mentions),
+      'quote_id': serializer.toJson<String?>(quoteId),
+      'quote_content': serializer.toJson<String?>(quoteContent),
+      'caption': serializer.toJson<String?>(caption),
+    };
+  }
+
+  TranscriptMessage copyWith(
+          {String? transcriptId,
+          String? messageId,
+          Value<String?> userId = const Value.absent(),
+          Value<String?> userFullName = const Value.absent(),
+          String? category,
+          DateTime? createdAt,
+          Value<String?> content = const Value.absent(),
+          Value<String?> mediaUrl = const Value.absent(),
+          Value<String?> mediaName = const Value.absent(),
+          Value<int?> mediaSize = const Value.absent(),
+          Value<int?> mediaWidth = const Value.absent(),
+          Value<int?> mediaHeight = const Value.absent(),
+          Value<String?> mediaMimeType = const Value.absent(),
+          Value<String?> mediaDuration = const Value.absent(),
+          Value<MediaStatus?> mediaStatus = const Value.absent(),
+          Value<String?> mediaWaveform = const Value.absent(),
+          Value<String?> thumbImage = const Value.absent(),
+          Value<String?> mediaKey = const Value.absent(),
+          Value<String?> mediaDigest = const Value.absent(),
+          DateTime? mediaCreatedAt,
+          Value<String?> stickerId = const Value.absent(),
+          Value<String?> sharedUserId = const Value.absent(),
+          Value<String?> mentions = const Value.absent(),
+          Value<String?> quoteId = const Value.absent(),
+          Value<String?> quoteContent = const Value.absent(),
+          Value<String?> caption = const Value.absent()}) =>
+      TranscriptMessage(
+        transcriptId: transcriptId ?? this.transcriptId,
+        messageId: messageId ?? this.messageId,
+        userId: userId.present ? userId.value : this.userId,
+        userFullName:
+            userFullName.present ? userFullName.value : this.userFullName,
+        category: category ?? this.category,
+        createdAt: createdAt ?? this.createdAt,
+        content: content.present ? content.value : this.content,
+        mediaUrl: mediaUrl.present ? mediaUrl.value : this.mediaUrl,
+        mediaName: mediaName.present ? mediaName.value : this.mediaName,
+        mediaSize: mediaSize.present ? mediaSize.value : this.mediaSize,
+        mediaWidth: mediaWidth.present ? mediaWidth.value : this.mediaWidth,
+        mediaHeight: mediaHeight.present ? mediaHeight.value : this.mediaHeight,
+        mediaMimeType:
+            mediaMimeType.present ? mediaMimeType.value : this.mediaMimeType,
+        mediaDuration:
+            mediaDuration.present ? mediaDuration.value : this.mediaDuration,
+        mediaStatus: mediaStatus.present ? mediaStatus.value : this.mediaStatus,
+        mediaWaveform:
+            mediaWaveform.present ? mediaWaveform.value : this.mediaWaveform,
+        thumbImage: thumbImage.present ? thumbImage.value : this.thumbImage,
+        mediaKey: mediaKey.present ? mediaKey.value : this.mediaKey,
+        mediaDigest: mediaDigest.present ? mediaDigest.value : this.mediaDigest,
+        mediaCreatedAt: mediaCreatedAt ?? this.mediaCreatedAt,
+        stickerId: stickerId.present ? stickerId.value : this.stickerId,
+        sharedUserId:
+            sharedUserId.present ? sharedUserId.value : this.sharedUserId,
+        mentions: mentions.present ? mentions.value : this.mentions,
+        quoteId: quoteId.present ? quoteId.value : this.quoteId,
+        quoteContent:
+            quoteContent.present ? quoteContent.value : this.quoteContent,
+        caption: caption.present ? caption.value : this.caption,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('TranscriptMessage(')
+          ..write('transcriptId: $transcriptId, ')
+          ..write('messageId: $messageId, ')
+          ..write('userId: $userId, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('category: $category, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('content: $content, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('mediaName: $mediaName, ')
+          ..write('mediaSize: $mediaSize, ')
+          ..write('mediaWidth: $mediaWidth, ')
+          ..write('mediaHeight: $mediaHeight, ')
+          ..write('mediaMimeType: $mediaMimeType, ')
+          ..write('mediaDuration: $mediaDuration, ')
+          ..write('mediaStatus: $mediaStatus, ')
+          ..write('mediaWaveform: $mediaWaveform, ')
+          ..write('thumbImage: $thumbImage, ')
+          ..write('mediaKey: $mediaKey, ')
+          ..write('mediaDigest: $mediaDigest, ')
+          ..write('mediaCreatedAt: $mediaCreatedAt, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('sharedUserId: $sharedUserId, ')
+          ..write('mentions: $mentions, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('quoteContent: $quoteContent, ')
+          ..write('caption: $caption')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      transcriptId.hashCode,
+      $mrjc(
+          messageId.hashCode,
+          $mrjc(
+              userId.hashCode,
+              $mrjc(
+                  userFullName.hashCode,
+                  $mrjc(
+                      category.hashCode,
+                      $mrjc(
+                          createdAt.hashCode,
+                          $mrjc(
+                              content.hashCode,
+                              $mrjc(
+                                  mediaUrl.hashCode,
+                                  $mrjc(
+                                      mediaName.hashCode,
+                                      $mrjc(
+                                          mediaSize.hashCode,
+                                          $mrjc(
+                                              mediaWidth.hashCode,
+                                              $mrjc(
+                                                  mediaHeight.hashCode,
+                                                  $mrjc(
+                                                      mediaMimeType.hashCode,
+                                                      $mrjc(
+                                                          mediaDuration
+                                                              .hashCode,
+                                                          $mrjc(
+                                                              mediaStatus
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  mediaWaveform
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      thumbImage
+                                                                          .hashCode,
+                                                                      $mrjc(
+                                                                          mediaKey
+                                                                              .hashCode,
+                                                                          $mrjc(
+                                                                              mediaDigest.hashCode,
+                                                                              $mrjc(mediaCreatedAt.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mentions.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, caption.hashCode))))))))))))))))))))))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TranscriptMessage &&
+          other.transcriptId == this.transcriptId &&
+          other.messageId == this.messageId &&
+          other.userId == this.userId &&
+          other.userFullName == this.userFullName &&
+          other.category == this.category &&
+          other.createdAt == this.createdAt &&
+          other.content == this.content &&
+          other.mediaUrl == this.mediaUrl &&
+          other.mediaName == this.mediaName &&
+          other.mediaSize == this.mediaSize &&
+          other.mediaWidth == this.mediaWidth &&
+          other.mediaHeight == this.mediaHeight &&
+          other.mediaMimeType == this.mediaMimeType &&
+          other.mediaDuration == this.mediaDuration &&
+          other.mediaStatus == this.mediaStatus &&
+          other.mediaWaveform == this.mediaWaveform &&
+          other.thumbImage == this.thumbImage &&
+          other.mediaKey == this.mediaKey &&
+          other.mediaDigest == this.mediaDigest &&
+          other.mediaCreatedAt == this.mediaCreatedAt &&
+          other.stickerId == this.stickerId &&
+          other.sharedUserId == this.sharedUserId &&
+          other.mentions == this.mentions &&
+          other.quoteId == this.quoteId &&
+          other.quoteContent == this.quoteContent &&
+          other.caption == this.caption);
+}
+
+class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
+  final Value<String> transcriptId;
+  final Value<String> messageId;
+  final Value<String?> userId;
+  final Value<String?> userFullName;
+  final Value<String> category;
+  final Value<DateTime> createdAt;
+  final Value<String?> content;
+  final Value<String?> mediaUrl;
+  final Value<String?> mediaName;
+  final Value<int?> mediaSize;
+  final Value<int?> mediaWidth;
+  final Value<int?> mediaHeight;
+  final Value<String?> mediaMimeType;
+  final Value<String?> mediaDuration;
+  final Value<MediaStatus?> mediaStatus;
+  final Value<String?> mediaWaveform;
+  final Value<String?> thumbImage;
+  final Value<String?> mediaKey;
+  final Value<String?> mediaDigest;
+  final Value<DateTime> mediaCreatedAt;
+  final Value<String?> stickerId;
+  final Value<String?> sharedUserId;
+  final Value<String?> mentions;
+  final Value<String?> quoteId;
+  final Value<String?> quoteContent;
+  final Value<String?> caption;
+  const TranscriptMessagesCompanion({
+    this.transcriptId = const Value.absent(),
+    this.messageId = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.userFullName = const Value.absent(),
+    this.category = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.content = const Value.absent(),
+    this.mediaUrl = const Value.absent(),
+    this.mediaName = const Value.absent(),
+    this.mediaSize = const Value.absent(),
+    this.mediaWidth = const Value.absent(),
+    this.mediaHeight = const Value.absent(),
+    this.mediaMimeType = const Value.absent(),
+    this.mediaDuration = const Value.absent(),
+    this.mediaStatus = const Value.absent(),
+    this.mediaWaveform = const Value.absent(),
+    this.thumbImage = const Value.absent(),
+    this.mediaKey = const Value.absent(),
+    this.mediaDigest = const Value.absent(),
+    this.mediaCreatedAt = const Value.absent(),
+    this.stickerId = const Value.absent(),
+    this.sharedUserId = const Value.absent(),
+    this.mentions = const Value.absent(),
+    this.quoteId = const Value.absent(),
+    this.quoteContent = const Value.absent(),
+    this.caption = const Value.absent(),
+  });
+  TranscriptMessagesCompanion.insert({
+    required String transcriptId,
+    required String messageId,
+    this.userId = const Value.absent(),
+    this.userFullName = const Value.absent(),
+    required String category,
+    required DateTime createdAt,
+    this.content = const Value.absent(),
+    this.mediaUrl = const Value.absent(),
+    this.mediaName = const Value.absent(),
+    this.mediaSize = const Value.absent(),
+    this.mediaWidth = const Value.absent(),
+    this.mediaHeight = const Value.absent(),
+    this.mediaMimeType = const Value.absent(),
+    this.mediaDuration = const Value.absent(),
+    this.mediaStatus = const Value.absent(),
+    this.mediaWaveform = const Value.absent(),
+    this.thumbImage = const Value.absent(),
+    this.mediaKey = const Value.absent(),
+    this.mediaDigest = const Value.absent(),
+    required DateTime mediaCreatedAt,
+    this.stickerId = const Value.absent(),
+    this.sharedUserId = const Value.absent(),
+    this.mentions = const Value.absent(),
+    this.quoteId = const Value.absent(),
+    this.quoteContent = const Value.absent(),
+    this.caption = const Value.absent(),
+  })  : transcriptId = Value(transcriptId),
+        messageId = Value(messageId),
+        category = Value(category),
+        createdAt = Value(createdAt),
+        mediaCreatedAt = Value(mediaCreatedAt);
+  static Insertable<TranscriptMessage> custom({
+    Expression<String>? transcriptId,
+    Expression<String>? messageId,
+    Expression<String?>? userId,
+    Expression<String?>? userFullName,
+    Expression<String>? category,
+    Expression<DateTime>? createdAt,
+    Expression<String?>? content,
+    Expression<String?>? mediaUrl,
+    Expression<String?>? mediaName,
+    Expression<int?>? mediaSize,
+    Expression<int?>? mediaWidth,
+    Expression<int?>? mediaHeight,
+    Expression<String?>? mediaMimeType,
+    Expression<String?>? mediaDuration,
+    Expression<MediaStatus?>? mediaStatus,
+    Expression<String?>? mediaWaveform,
+    Expression<String?>? thumbImage,
+    Expression<String?>? mediaKey,
+    Expression<String?>? mediaDigest,
+    Expression<DateTime>? mediaCreatedAt,
+    Expression<String?>? stickerId,
+    Expression<String?>? sharedUserId,
+    Expression<String?>? mentions,
+    Expression<String?>? quoteId,
+    Expression<String?>? quoteContent,
+    Expression<String?>? caption,
+  }) {
+    return RawValuesInsertable({
+      if (transcriptId != null) 'transcript_id': transcriptId,
+      if (messageId != null) 'message_id': messageId,
+      if (userId != null) 'user_id': userId,
+      if (userFullName != null) 'user_full_name': userFullName,
+      if (category != null) 'category': category,
+      if (createdAt != null) 'created_at': createdAt,
+      if (content != null) 'content': content,
+      if (mediaUrl != null) 'media_url': mediaUrl,
+      if (mediaName != null) 'media_name': mediaName,
+      if (mediaSize != null) 'media_size': mediaSize,
+      if (mediaWidth != null) 'media_width': mediaWidth,
+      if (mediaHeight != null) 'media_height': mediaHeight,
+      if (mediaMimeType != null) 'media_mime_type': mediaMimeType,
+      if (mediaDuration != null) 'media_duration': mediaDuration,
+      if (mediaStatus != null) 'media_status': mediaStatus,
+      if (mediaWaveform != null) 'media_waveform': mediaWaveform,
+      if (thumbImage != null) 'thumb_image': thumbImage,
+      if (mediaKey != null) 'media_key': mediaKey,
+      if (mediaDigest != null) 'media_digest': mediaDigest,
+      if (mediaCreatedAt != null) 'media_created_at': mediaCreatedAt,
+      if (stickerId != null) 'stickerId': stickerId,
+      if (sharedUserId != null) 'sharedUserId': sharedUserId,
+      if (mentions != null) 'mentions': mentions,
+      if (quoteId != null) 'quote_id': quoteId,
+      if (quoteContent != null) 'quote_content': quoteContent,
+      if (caption != null) 'caption': caption,
+    });
+  }
+
+  TranscriptMessagesCompanion copyWith(
+      {Value<String>? transcriptId,
+      Value<String>? messageId,
+      Value<String?>? userId,
+      Value<String?>? userFullName,
+      Value<String>? category,
+      Value<DateTime>? createdAt,
+      Value<String?>? content,
+      Value<String?>? mediaUrl,
+      Value<String?>? mediaName,
+      Value<int?>? mediaSize,
+      Value<int?>? mediaWidth,
+      Value<int?>? mediaHeight,
+      Value<String?>? mediaMimeType,
+      Value<String?>? mediaDuration,
+      Value<MediaStatus?>? mediaStatus,
+      Value<String?>? mediaWaveform,
+      Value<String?>? thumbImage,
+      Value<String?>? mediaKey,
+      Value<String?>? mediaDigest,
+      Value<DateTime>? mediaCreatedAt,
+      Value<String?>? stickerId,
+      Value<String?>? sharedUserId,
+      Value<String?>? mentions,
+      Value<String?>? quoteId,
+      Value<String?>? quoteContent,
+      Value<String?>? caption}) {
+    return TranscriptMessagesCompanion(
+      transcriptId: transcriptId ?? this.transcriptId,
+      messageId: messageId ?? this.messageId,
+      userId: userId ?? this.userId,
+      userFullName: userFullName ?? this.userFullName,
+      category: category ?? this.category,
+      createdAt: createdAt ?? this.createdAt,
+      content: content ?? this.content,
+      mediaUrl: mediaUrl ?? this.mediaUrl,
+      mediaName: mediaName ?? this.mediaName,
+      mediaSize: mediaSize ?? this.mediaSize,
+      mediaWidth: mediaWidth ?? this.mediaWidth,
+      mediaHeight: mediaHeight ?? this.mediaHeight,
+      mediaMimeType: mediaMimeType ?? this.mediaMimeType,
+      mediaDuration: mediaDuration ?? this.mediaDuration,
+      mediaStatus: mediaStatus ?? this.mediaStatus,
+      mediaWaveform: mediaWaveform ?? this.mediaWaveform,
+      thumbImage: thumbImage ?? this.thumbImage,
+      mediaKey: mediaKey ?? this.mediaKey,
+      mediaDigest: mediaDigest ?? this.mediaDigest,
+      mediaCreatedAt: mediaCreatedAt ?? this.mediaCreatedAt,
+      stickerId: stickerId ?? this.stickerId,
+      sharedUserId: sharedUserId ?? this.sharedUserId,
+      mentions: mentions ?? this.mentions,
+      quoteId: quoteId ?? this.quoteId,
+      quoteContent: quoteContent ?? this.quoteContent,
+      caption: caption ?? this.caption,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (transcriptId.present) {
+      map['transcript_id'] = Variable<String>(transcriptId.value);
+    }
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String?>(userId.value);
+    }
+    if (userFullName.present) {
+      map['user_full_name'] = Variable<String?>(userFullName.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (createdAt.present) {
+      final converter = TranscriptMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
+    }
+    if (content.present) {
+      map['content'] = Variable<String?>(content.value);
+    }
+    if (mediaUrl.present) {
+      map['media_url'] = Variable<String?>(mediaUrl.value);
+    }
+    if (mediaName.present) {
+      map['media_name'] = Variable<String?>(mediaName.value);
+    }
+    if (mediaSize.present) {
+      map['media_size'] = Variable<int?>(mediaSize.value);
+    }
+    if (mediaWidth.present) {
+      map['media_width'] = Variable<int?>(mediaWidth.value);
+    }
+    if (mediaHeight.present) {
+      map['media_height'] = Variable<int?>(mediaHeight.value);
+    }
+    if (mediaMimeType.present) {
+      map['media_mime_type'] = Variable<String?>(mediaMimeType.value);
+    }
+    if (mediaDuration.present) {
+      map['media_duration'] = Variable<String?>(mediaDuration.value);
+    }
+    if (mediaStatus.present) {
+      final converter = TranscriptMessages.$converter1;
+      map['media_status'] =
+          Variable<String?>(converter.mapToSql(mediaStatus.value));
+    }
+    if (mediaWaveform.present) {
+      map['media_waveform'] = Variable<String?>(mediaWaveform.value);
+    }
+    if (thumbImage.present) {
+      map['thumb_image'] = Variable<String?>(thumbImage.value);
+    }
+    if (mediaKey.present) {
+      map['media_key'] = Variable<String?>(mediaKey.value);
+    }
+    if (mediaDigest.present) {
+      map['media_digest'] = Variable<String?>(mediaDigest.value);
+    }
+    if (mediaCreatedAt.present) {
+      final converter = TranscriptMessages.$converter2;
+      map['media_created_at'] =
+          Variable<int>(converter.mapToSql(mediaCreatedAt.value)!);
+    }
+    if (stickerId.present) {
+      map['stickerId'] = Variable<String?>(stickerId.value);
+    }
+    if (sharedUserId.present) {
+      map['sharedUserId'] = Variable<String?>(sharedUserId.value);
+    }
+    if (mentions.present) {
+      map['mentions'] = Variable<String?>(mentions.value);
+    }
+    if (quoteId.present) {
+      map['quote_id'] = Variable<String?>(quoteId.value);
+    }
+    if (quoteContent.present) {
+      map['quote_content'] = Variable<String?>(quoteContent.value);
+    }
+    if (caption.present) {
+      map['caption'] = Variable<String?>(caption.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TranscriptMessagesCompanion(')
+          ..write('transcriptId: $transcriptId, ')
+          ..write('messageId: $messageId, ')
+          ..write('userId: $userId, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('category: $category, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('content: $content, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('mediaName: $mediaName, ')
+          ..write('mediaSize: $mediaSize, ')
+          ..write('mediaWidth: $mediaWidth, ')
+          ..write('mediaHeight: $mediaHeight, ')
+          ..write('mediaMimeType: $mediaMimeType, ')
+          ..write('mediaDuration: $mediaDuration, ')
+          ..write('mediaStatus: $mediaStatus, ')
+          ..write('mediaWaveform: $mediaWaveform, ')
+          ..write('thumbImage: $thumbImage, ')
+          ..write('mediaKey: $mediaKey, ')
+          ..write('mediaDigest: $mediaDigest, ')
+          ..write('mediaCreatedAt: $mediaCreatedAt, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('sharedUserId: $sharedUserId, ')
+          ..write('mentions: $mentions, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('quoteContent: $quoteContent, ')
+          ..write('caption: $caption')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class TranscriptMessages extends Table
+    with TableInfo<TranscriptMessages, TranscriptMessage> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  TranscriptMessages(this._db, [this._alias]);
+  final VerificationMeta _transcriptIdMeta =
+      const VerificationMeta('transcriptId');
+  late final GeneratedColumn<String?> transcriptId = GeneratedColumn<String?>(
+      'transcript_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  late final GeneratedColumn<String?> userId = GeneratedColumn<String?>(
+      'user_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _userFullNameMeta =
+      const VerificationMeta('userFullName');
+  late final GeneratedColumn<String?> userFullName = GeneratedColumn<String?>(
+      'user_full_name', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _categoryMeta = const VerificationMeta('category');
+  late final GeneratedColumn<String?> category = GeneratedColumn<String?>(
+      'category', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(TranscriptMessages.$converter0);
+  final VerificationMeta _contentMeta = const VerificationMeta('content');
+  late final GeneratedColumn<String?> content = GeneratedColumn<String?>(
+      'content', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaUrlMeta = const VerificationMeta('mediaUrl');
+  late final GeneratedColumn<String?> mediaUrl = GeneratedColumn<String?>(
+      'media_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaNameMeta = const VerificationMeta('mediaName');
+  late final GeneratedColumn<String?> mediaName = GeneratedColumn<String?>(
+      'media_name', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaSizeMeta = const VerificationMeta('mediaSize');
+  late final GeneratedColumn<int?> mediaSize = GeneratedColumn<int?>(
+      'media_size', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaWidthMeta = const VerificationMeta('mediaWidth');
+  late final GeneratedColumn<int?> mediaWidth = GeneratedColumn<int?>(
+      'media_width', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaHeightMeta =
+      const VerificationMeta('mediaHeight');
+  late final GeneratedColumn<int?> mediaHeight = GeneratedColumn<int?>(
+      'media_height', aliasedName, true,
+      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaMimeTypeMeta =
+      const VerificationMeta('mediaMimeType');
+  late final GeneratedColumn<String?> mediaMimeType = GeneratedColumn<String?>(
+      'media_mime_type', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaDurationMeta =
+      const VerificationMeta('mediaDuration');
+  late final GeneratedColumn<String?> mediaDuration = GeneratedColumn<String?>(
+      'media_duration', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaStatusMeta =
+      const VerificationMeta('mediaStatus');
+  late final GeneratedColumnWithTypeConverter<MediaStatus, String?>
+      mediaStatus = GeneratedColumn<String?>('media_status', aliasedName, true,
+              typeName: 'TEXT',
+              requiredDuringInsert: false,
+              $customConstraints: '')
+          .withConverter<MediaStatus>(TranscriptMessages.$converter1);
+  final VerificationMeta _mediaWaveformMeta =
+      const VerificationMeta('mediaWaveform');
+  late final GeneratedColumn<String?> mediaWaveform = GeneratedColumn<String?>(
+      'media_waveform', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _thumbImageMeta = const VerificationMeta('thumbImage');
+  late final GeneratedColumn<String?> thumbImage = GeneratedColumn<String?>(
+      'thumb_image', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaKeyMeta = const VerificationMeta('mediaKey');
+  late final GeneratedColumn<String?> mediaKey = GeneratedColumn<String?>(
+      'media_key', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaDigestMeta =
+      const VerificationMeta('mediaDigest');
+  late final GeneratedColumn<String?> mediaDigest = GeneratedColumn<String?>(
+      'media_digest', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mediaCreatedAtMeta =
+      const VerificationMeta('mediaCreatedAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> mediaCreatedAt =
+      GeneratedColumn<int?>('media_created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(TranscriptMessages.$converter2);
+  final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
+  late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
+      'stickerId', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _sharedUserIdMeta =
+      const VerificationMeta('sharedUserId');
+  late final GeneratedColumn<String?> sharedUserId = GeneratedColumn<String?>(
+      'sharedUserId', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _mentionsMeta = const VerificationMeta('mentions');
+  late final GeneratedColumn<String?> mentions = GeneratedColumn<String?>(
+      'mentions', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _quoteIdMeta = const VerificationMeta('quoteId');
+  late final GeneratedColumn<String?> quoteId = GeneratedColumn<String?>(
+      'quote_id', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _quoteContentMeta =
+      const VerificationMeta('quoteContent');
+  late final GeneratedColumn<String?> quoteContent = GeneratedColumn<String?>(
+      'quote_content', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _captionMeta = const VerificationMeta('caption');
+  late final GeneratedColumn<String?> caption = GeneratedColumn<String?>(
+      'caption', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  @override
+  List<GeneratedColumn> get $columns => [
+        transcriptId,
+        messageId,
+        userId,
+        userFullName,
+        category,
+        createdAt,
+        content,
+        mediaUrl,
+        mediaName,
+        mediaSize,
+        mediaWidth,
+        mediaHeight,
+        mediaMimeType,
+        mediaDuration,
+        mediaStatus,
+        mediaWaveform,
+        thumbImage,
+        mediaKey,
+        mediaDigest,
+        mediaCreatedAt,
+        stickerId,
+        sharedUserId,
+        mentions,
+        quoteId,
+        quoteContent,
+        caption
+      ];
+  @override
+  String get aliasedName => _alias ?? 'transcript_messages';
+  @override
+  String get actualTableName => 'transcript_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<TranscriptMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('transcript_id')) {
+      context.handle(
+          _transcriptIdMeta,
+          transcriptId.isAcceptableOrUnknown(
+              data['transcript_id']!, _transcriptIdMeta));
+    } else if (isInserting) {
+      context.missing(_transcriptIdMeta);
+    }
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    }
+    if (data.containsKey('user_full_name')) {
+      context.handle(
+          _userFullNameMeta,
+          userFullName.isAcceptableOrUnknown(
+              data['user_full_name']!, _userFullNameMeta));
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    }
+    if (data.containsKey('media_url')) {
+      context.handle(_mediaUrlMeta,
+          mediaUrl.isAcceptableOrUnknown(data['media_url']!, _mediaUrlMeta));
+    }
+    if (data.containsKey('media_name')) {
+      context.handle(_mediaNameMeta,
+          mediaName.isAcceptableOrUnknown(data['media_name']!, _mediaNameMeta));
+    }
+    if (data.containsKey('media_size')) {
+      context.handle(_mediaSizeMeta,
+          mediaSize.isAcceptableOrUnknown(data['media_size']!, _mediaSizeMeta));
+    }
+    if (data.containsKey('media_width')) {
+      context.handle(
+          _mediaWidthMeta,
+          mediaWidth.isAcceptableOrUnknown(
+              data['media_width']!, _mediaWidthMeta));
+    }
+    if (data.containsKey('media_height')) {
+      context.handle(
+          _mediaHeightMeta,
+          mediaHeight.isAcceptableOrUnknown(
+              data['media_height']!, _mediaHeightMeta));
+    }
+    if (data.containsKey('media_mime_type')) {
+      context.handle(
+          _mediaMimeTypeMeta,
+          mediaMimeType.isAcceptableOrUnknown(
+              data['media_mime_type']!, _mediaMimeTypeMeta));
+    }
+    if (data.containsKey('media_duration')) {
+      context.handle(
+          _mediaDurationMeta,
+          mediaDuration.isAcceptableOrUnknown(
+              data['media_duration']!, _mediaDurationMeta));
+    }
+    context.handle(_mediaStatusMeta, const VerificationResult.success());
+    if (data.containsKey('media_waveform')) {
+      context.handle(
+          _mediaWaveformMeta,
+          mediaWaveform.isAcceptableOrUnknown(
+              data['media_waveform']!, _mediaWaveformMeta));
+    }
+    if (data.containsKey('thumb_image')) {
+      context.handle(
+          _thumbImageMeta,
+          thumbImage.isAcceptableOrUnknown(
+              data['thumb_image']!, _thumbImageMeta));
+    }
+    if (data.containsKey('media_key')) {
+      context.handle(_mediaKeyMeta,
+          mediaKey.isAcceptableOrUnknown(data['media_key']!, _mediaKeyMeta));
+    }
+    if (data.containsKey('media_digest')) {
+      context.handle(
+          _mediaDigestMeta,
+          mediaDigest.isAcceptableOrUnknown(
+              data['media_digest']!, _mediaDigestMeta));
+    }
+    context.handle(_mediaCreatedAtMeta, const VerificationResult.success());
+    if (data.containsKey('stickerId')) {
+      context.handle(_stickerIdMeta,
+          stickerId.isAcceptableOrUnknown(data['stickerId']!, _stickerIdMeta));
+    }
+    if (data.containsKey('sharedUserId')) {
+      context.handle(
+          _sharedUserIdMeta,
+          sharedUserId.isAcceptableOrUnknown(
+              data['sharedUserId']!, _sharedUserIdMeta));
+    }
+    if (data.containsKey('mentions')) {
+      context.handle(_mentionsMeta,
+          mentions.isAcceptableOrUnknown(data['mentions']!, _mentionsMeta));
+    }
+    if (data.containsKey('quote_id')) {
+      context.handle(_quoteIdMeta,
+          quoteId.isAcceptableOrUnknown(data['quote_id']!, _quoteIdMeta));
+    }
+    if (data.containsKey('quote_content')) {
+      context.handle(
+          _quoteContentMeta,
+          quoteContent.isAcceptableOrUnknown(
+              data['quote_content']!, _quoteContentMeta));
+    }
+    if (data.containsKey('caption')) {
+      context.handle(_captionMeta,
+          caption.isAcceptableOrUnknown(data['caption']!, _captionMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {transcriptId, messageId};
+  @override
+  TranscriptMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return TranscriptMessage.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  TranscriptMessages createAlias(String alias) {
+    return TranscriptMessages(_db, alias);
+  }
+
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  static TypeConverter<MediaStatus, String> $converter1 =
+      const MediaStatusTypeConverter();
+  static TypeConverter<DateTime, int> $converter2 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints =>
+      const ['PRIMARY KEY(transcript_id, message_id)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -10175,6 +11328,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       StickerRelationships(this);
   late final Stickers stickers = Stickers(this);
   late final Users users = Users(this);
+  late final TranscriptMessages transcriptMessages = TranscriptMessages(this);
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -11326,7 +12480,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         snapshots,
         stickerRelationships,
         stickers,
-        users
+        users,
+        transcriptMessages
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
