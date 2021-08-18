@@ -320,8 +320,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/desktop_drop"
-      ref: ec5a7117f1c7e53cea54b4fb12f8dcdc68c3e592
-      resolved-ref: ec5a7117f1c7e53cea54b4fb12f8dcdc68c3e592
+      ref: "85ced7872c3c4c257a32c73989786b679e804453"
+      resolved-ref: "85ced7872c3c4c257a32c73989786b679e804453"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
