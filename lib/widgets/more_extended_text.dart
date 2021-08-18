@@ -46,7 +46,7 @@ class _MoreExtendedText extends HookWidget {
     final style =
         useMemoized(() => this.style?.merge(const TextStyle(height: 1)));
 
-    final layoutOverflowTextSpan = TextSpan(
+    final overflowTextSpan = TextSpan(
       text: '...${context.l10n.more}',
       style: style,
     );
@@ -60,7 +60,7 @@ class _MoreExtendedText extends HookWidget {
         );
 
         final textPainter = TextPainter(
-          text: layoutOverflowTextSpan,
+          text: overflowTextSpan,
           textDirection: TextDirection.rtl,
           maxLines: 3,
         )..layout(minWidth: constraints.minWidth, maxWidth: maxWidth);
@@ -115,24 +115,7 @@ class _MoreExtendedText extends HookWidget {
 
     return SelectableText.rich(
       TextSpan(
-        children: [
-          textSpan,
-          if (endIndex != -1) ...[
-            TextSpan(
-              text: '...',
-              style: style,
-            ),
-            TextSpan(
-                text: context.l10n.more,
-                style: style?.merge(TextStyle(
-                  color: context.theme.accent,
-                )),
-                recognizer: TapGestureRecognizer()
-                  ..onTap = () {
-                    expand.value = true;
-                  }),
-          ],
-        ],
+        children: [textSpan, if (endIndex != -1) overflowTextSpan],
       ),
       textAlign: TextAlign.center,
     );
