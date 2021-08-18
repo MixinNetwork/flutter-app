@@ -114,31 +114,34 @@ class _SearchList extends HookWidget {
     final accountServer = context.accountServer;
 
     final users = useMemoizedFuture(
-        () => accountServer.database.userDao
-            .fuzzySearchUser(
-                id: accountServer.userId,
-                username: keyword,
-                identityNumber: keyword)
-            .get(),
-        <User>[],
-        keys: [keyword]);
+            () => accountServer.database.userDao
+                .fuzzySearchUser(
+                    id: accountServer.userId,
+                    username: keyword,
+                    identityNumber: keyword)
+                .get(),
+            <User>[],
+            keys: [keyword]).data ??
+        [];
 
     final messages = useMemoizedFuture(() async {
-      if (keyword.trim().isEmpty) {
-        return <SearchMessageDetailItem>[];
-      } else {
-        return accountServer.database.messageDao
-            .fuzzySearchMessage(query: keyword, limit: 4)
-            .get();
-      }
-    }, <SearchMessageDetailItem>[], keys: [keyword]);
+          if (keyword.trim().isEmpty) {
+            return <SearchMessageDetailItem>[];
+          } else {
+            return accountServer.database.messageDao
+                .fuzzySearchMessage(query: keyword, limit: 4)
+                .get();
+          }
+        }, <SearchMessageDetailItem>[], keys: [keyword]).data ??
+        [];
 
     final conversations = useMemoizedFuture(
-        () => accountServer.database.conversationDao
-            .fuzzySearchConversation(keyword)
-            .get(),
-        <SearchConversationItem>[],
-        keys: [keyword]);
+            () => accountServer.database.conversationDao
+                .fuzzySearchConversation(keyword)
+                .get(),
+            <SearchConversationItem>[],
+            keys: [keyword]).data ??
+        [];
 
     final type = useState<_ShowMoreType?>(null);
 
@@ -1165,7 +1168,7 @@ class _MessageContent extends HookWidget {
         conversation.senderFullName,
         conversation.groupName,
       ],
-    );
+    ).data;
 
     final icon = useMemoized(
         () => messagePreviewIcon(

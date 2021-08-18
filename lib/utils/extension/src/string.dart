@@ -93,16 +93,8 @@ String maxOf(String a, String b) {
   }
 }
 
-const _kEscapeSqlChars = {r'\', '%', '_', '[', ']'};
-
 extension SqlStringExt on String {
-  String escapeSql() {
-    var result = this;
-    for (final c in _kEscapeSqlChars) {
-      result = result.replaceAll(c.toString(), '\\$c');
-    }
-    return result;
-  }
+  String escapeSql() => RegExp.escape(this);
 
   String joinStar() => joinWithCharacter('*');
 

@@ -199,7 +199,7 @@ class _NewConversationConfirm extends HookWidget {
           .usersByIn(userIds.sublist(0, min(4, userIds.length)))
           .get(),
       <User>[],
-    );
+    ).requireData;
 
     final textEditingController = useTextEditingController();
     final textEditingValue = useValueListenable(textEditingController);
