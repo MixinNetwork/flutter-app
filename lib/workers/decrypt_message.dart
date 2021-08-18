@@ -396,8 +396,9 @@ class DecryptMessage extends Injector {
     final message = await database.messageDao
         .findMessageByMessageId(recallMessage.messageId);
     if (message?.category.isAttachment == true) {
-      await _attachmentUtil.cancelProgressAttachmentJob(recallMessage.messageId);
-      if(message?.mediaUrl?.isNotEmpty ?? false) {
+      await _attachmentUtil
+          .cancelProgressAttachmentJob(recallMessage.messageId);
+      if (message?.mediaUrl?.isNotEmpty ?? false) {
         final file = File(message!.mediaUrl!);
         final exists = file.existsSync();
         if (exists) {
