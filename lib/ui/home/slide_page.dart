@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
@@ -25,7 +26,9 @@ class SlidePage extends StatelessWidget {
   const SlidePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
+  Widget build(BuildContext context) {
+    double sideBarTopPadding = (defaultTargetPlatform == TargetPlatform.macOS) ? 72.0 : 16.0;
+    return DecoratedBox(
         decoration: BoxDecoration(
           color: context.brightnessValue == 1.0
               ? Colors.black.withOpacity(0.03)
@@ -45,7 +48,7 @@ class SlidePage extends StatelessWidget {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 72),
+                    SizedBox(height: sideBarTopPadding),
                     _Item(
                       asset: Resources.assetsImagesChatSvg,
                       title: context.l10n.chats,
@@ -120,6 +123,7 @@ class SlidePage extends StatelessWidget {
           ),
         ),
       );
+  }
 }
 
 class _CircleList extends HookWidget {
