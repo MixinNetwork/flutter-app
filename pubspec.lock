@@ -49,7 +49,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.8.1"
+    version: "2.8.2"
   bitsdojo_window:
     dependency: "direct main"
     description:
@@ -432,20 +432,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.1.0"
-  extended_text:
-    dependency: "direct main"
-    description:
-      name: extended_text
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "7.0.0"
-  extended_text_library:
-    dependency: transitive
-    description:
-      name: extended_text_library
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "7.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -796,7 +782,7 @@ packages:
       name: matcher
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.12.10"
+    version: "0.12.11"
   meta:
     dependency: transitive
     description:
@@ -1232,7 +1218,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.4.2"
+    version: "0.4.3"
   timezone:
     dependency: transitive
     description:
