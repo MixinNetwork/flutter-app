@@ -26,104 +26,104 @@ class SlidePage extends StatelessWidget {
   const SlidePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final sideBarTopPadding =
-        (defaultTargetPlatform == TargetPlatform.macOS) ? 72.0 : 16.0;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: context.brightnessValue == 1.0
-            ? Colors.black.withOpacity(0.03)
-            : Colors.white.withOpacity(0.01),
-        border: Border(
-          right: BorderSide(
-            color: context.theme.divider,
+  Widget build(BuildContext context) => DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.brightnessValue == 1.0
+              ? Colors.black.withOpacity(0.03)
+              : Colors.white.withOpacity(0.01),
+          border: Border(
+            right: BorderSide(
+              color: context.theme.divider,
+            ),
           ),
         ),
-      ),
-      child: MoveWindow(
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: 200,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child:
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              SizedBox(height: sideBarTopPadding),
-              _Item(
-                asset: Resources.assetsImagesChatSvg,
-                title: context.l10n.chats,
-                type: SlideCategoryType.chats,
-              ),
-              const SizedBox(height: 12),
-              _Title(data: context.l10n.people),
-              const SizedBox(height: 12),
-              _CategoryList(
-                children: [
-                  _Item(
-                    asset: Resources.assetsImagesSlideContactsSvg,
-                    title: context.l10n.contacts,
-                    type: SlideCategoryType.contacts,
-                  ),
-                  _Item(
-                    asset: Resources.assetsImagesGroupSvg,
-                    title: context.l10n.groups,
-                    type: SlideCategoryType.groups,
-                  ),
-                  _Item(
-                    asset: Resources.assetsImagesBotSvg,
-                    title: Localization.current.bots,
-                    type: SlideCategoryType.bots,
-                  ),
-                  _Item(
-                    asset: Resources.assetsImagesStrangersSvg,
-                    title: context.l10n.strangers,
-                    type: SlideCategoryType.strangers,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              const Expanded(child: _CircleList()),
-              MoveWindowBarrier(
-                child: Builder(
-                  builder: (context) =>
-                      BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
-                    converter: (state) => state.current?.account,
-                    when: (a, b) => b?.fullName != null,
-                    builder: (context, account) => BlocConverter<
-                        SlideCategoryCubit, SlideCategoryState, bool>(
-                      converter: (state) =>
-                          state.type == SlideCategoryType.setting,
-                      builder: (context, selected) {
-                        assert(account != null);
-                        return SelectItem(
-                          icon: AvatarWidget(
-                            avatarUrl: account!.avatarUrl,
-                            size: 30,
-                            name: account.fullName!,
-                            userId: account.userId,
-                          ),
-                          title: account.fullName!,
-                          selected: selected,
-                          onTap: () {
-                            BlocProvider.of<SlideCategoryCubit>(context)
-                                .select(SlideCategoryType.setting);
-                            if (ModalRoute.of(context)?.canPop == true) {
-                              Navigator.pop(context);
-                            }
-                          },
-                        );
-                      },
+        child: MoveWindow(
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            width: 200,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                        height: (defaultTargetPlatform == TargetPlatform.macOS)
+                            ? 72.0
+                            : 16.0),
+                    _Item(
+                      asset: Resources.assetsImagesChatSvg,
+                      title: context.l10n.chats,
+                      type: SlideCategoryType.chats,
                     ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 4),
-            ]),
+                    const SizedBox(height: 12),
+                    _Title(data: context.l10n.people),
+                    const SizedBox(height: 12),
+                    _CategoryList(
+                      children: [
+                        _Item(
+                          asset: Resources.assetsImagesSlideContactsSvg,
+                          title: context.l10n.contacts,
+                          type: SlideCategoryType.contacts,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesGroupSvg,
+                          title: context.l10n.groups,
+                          type: SlideCategoryType.groups,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesBotSvg,
+                          title: Localization.current.bots,
+                          type: SlideCategoryType.bots,
+                        ),
+                        _Item(
+                          asset: Resources.assetsImagesStrangersSvg,
+                          title: context.l10n.strangers,
+                          type: SlideCategoryType.strangers,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Expanded(child: _CircleList()),
+                    MoveWindowBarrier(
+                      child: Builder(
+                        builder: (context) => BlocConverter<MultiAuthCubit,
+                            MultiAuthState, Account?>(
+                          converter: (state) => state.current?.account,
+                          when: (a, b) => b?.fullName != null,
+                          builder: (context, account) => BlocConverter<
+                              SlideCategoryCubit, SlideCategoryState, bool>(
+                            converter: (state) =>
+                                state.type == SlideCategoryType.setting,
+                            builder: (context, selected) {
+                              assert(account != null);
+                              return SelectItem(
+                                icon: AvatarWidget(
+                                  avatarUrl: account!.avatarUrl,
+                                  size: 30,
+                                  name: account.fullName!,
+                                  userId: account.userId,
+                                ),
+                                title: account.fullName!,
+                                selected: selected,
+                                onTap: () {
+                                  BlocProvider.of<SlideCategoryCubit>(context)
+                                      .select(SlideCategoryType.setting);
+                                  if (ModalRoute.of(context)?.canPop == true) {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ]),
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
 
 class _CircleList extends HookWidget {
