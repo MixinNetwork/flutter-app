@@ -43,7 +43,6 @@ dependencies:
   ecache: ^2.0.1
   equatable: ^2.0.3
   extended_image: ^4.1.0
-  extended_text: ^7.0.0
   file_selector: ^0.8.2
   file_selector_linux: ^0.0.2
   file_selector_macos: ^0.0.4
