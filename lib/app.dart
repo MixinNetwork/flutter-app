@@ -207,13 +207,17 @@ class _App extends StatelessWidget {
                     Localizations.localeOf(context).languageCode;
               } catch (_) {}
               final mediaQueryData = MediaQuery.of(context);
+              // Different linux distro change the value, e.g. 1.2
+              const textScaleFactor = 1.0;
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,
                 darkThemeData: darkBrightnessThemeData,
                 forceBrightness: context.watch<SettingCubit>().brightness,
                 child: MediaQuery(
                   data: mediaQueryData.copyWith(
-                    textScaleFactor: Platform.isLinux ? 1.2 : 1,
+                    textScaleFactor: Platform.isLinux
+                        ? textScaleFactor
+                        : mediaQueryData.textScaleFactor,
                   ),
                   child: child!,
                 ),
