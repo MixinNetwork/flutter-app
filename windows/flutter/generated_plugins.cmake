@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_windows
   connectivity_plus_windows
+  desktop_drop
   file_selector_windows
   flutter_app_icon_badge
   url_launcher_windows
