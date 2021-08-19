@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart' hide AnimatedTheme;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -204,11 +206,21 @@ class _App extends StatelessWidget {
                 context.accountServer.language =
                     Localizations.localeOf(context).languageCode;
               } catch (_) {}
+              final mediaQueryData = MediaQuery.of(context);
+              // Different linux distro change the value, e.g. 1.2
+              const textScaleFactor = 1.0;
               return BrightnessObserver(
                 lightThemeData: lightBrightnessThemeData,
                 darkThemeData: darkBrightnessThemeData,
                 forceBrightness: context.watch<SettingCubit>().brightness,
-                child: child!,
+                child: MediaQuery(
+                  data: mediaQueryData.copyWith(
+                    textScaleFactor: Platform.isLinux
+                        ? textScaleFactor
+                        : mediaQueryData.textScaleFactor,
+                  ),
+                  child: child!,
+                ),
               );
             },
             home: const _Home(),

@@ -21,10 +21,10 @@ class SnapshotMessage {
   factory SnapshotMessage.fromJson(Map<String, dynamic> json) =>
       _$SnapshotMessageFromJson(json);
 
-  @JsonKey(name: 'snapshot_id')
-  String snapshotId;
   @JsonKey(name: 'type')
   String type;
+  @JsonKey(name: 'snapshot_id')
+  String snapshotId;
   @JsonKey(name: 'asset_id')
   String assetId;
   @JsonKey(name: 'amount')
@@ -32,7 +32,7 @@ class SnapshotMessage {
   @JsonKey(name: 'created_at')
   String createdAt;
   @JsonKey(name: 'opponent_id')
-  String opponentId;
+  String? opponentId;
   @JsonKey(name: 'trace_id')
   String traceId;
   @JsonKey(name: 'transaction_hash')
@@ -42,7 +42,7 @@ class SnapshotMessage {
   @JsonKey(name: 'receiver')
   String? receiver;
   @JsonKey(name: 'memo')
-  String memo;
+  String? memo;
   @JsonKey(name: 'confirmations')
   int? confirmations;
 

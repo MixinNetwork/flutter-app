@@ -707,15 +707,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     int offset = 0,
   }) =>
       db.fuzzySearchMessage(
-        query.trim().escapeSql().joinStar().replaceQuotationMark(),
+        query.trim().escapeFts5(),
         limit,
         offset,
       );
 
   Selectable<int> fuzzySearchMessageCount(String keyword) =>
-      db.fuzzySearchMessageCount(
-        keyword.trim().escapeSql().joinStar().replaceQuotationMark(),
-      );
+      db.fuzzySearchMessageCount(keyword.trim().escapeFts5());
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId({
     required String conversationId,
@@ -725,7 +723,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }) =>
       db.fuzzySearchMessageByConversationId(
         conversationId,
-        query.trim().escapeSql().joinStar().replaceQuotationMark(),
+        query.trim().escapeFts5(),
         limit,
         offset,
       );
@@ -734,7 +732,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           String keyword, String conversationId) =>
       db.fuzzySearchMessageCountByConversationId(
         conversationId,
-        keyword.trim().escapeSql().joinStar().replaceQuotationMark(),
+        keyword.trim().escapeFts5(),
       );
 
   Selectable<int> messageRowId(String messageId) => db.messageRowId(messageId);

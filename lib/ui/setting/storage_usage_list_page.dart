@@ -61,7 +61,7 @@ class _Content extends HookWidget {
       } catch (e) {
         return [];
       }
-    }, null, keys: [watchEvent]);
+    }, null, keys: [watchEvent]).data;
 
     if (list == null) {
       return Center(

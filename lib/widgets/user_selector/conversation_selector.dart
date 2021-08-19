@@ -190,7 +190,7 @@ class _ConversationSelector extends HookWidget {
       },
       <String, App>{},
       keys: [conversationFilterState],
-    );
+    ).requireData;
 
     useEffect(
       () => selector.stream.listen((event) {

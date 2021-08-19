@@ -40,25 +40,25 @@ class StorageUsageDetailPage extends HookWidget {
           context.accountServer.getImagesPath(conversationId))),
       '0 B',
       keys: [watchEvent],
-    );
+    ).requireData;
     final videosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
           context.accountServer.getVideosPath(conversationId))),
       '0 B',
       keys: [watchEvent],
-    );
+    ).requireData;
     final audiosSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
           context.accountServer.getAudiosPath(conversationId))),
       '0 B',
       keys: [watchEvent],
-    );
+    ).requireData;
     final filesSize = useMemoizedFuture(
       () async => filesize(await getTotalSizeOfFile(
           context.accountServer.getFilesPath(conversationId))),
       '0 B',
       keys: [watchEvent],
-    );
+    ).requireData;
 
     final selected = useState<Tuple4<bool, bool, bool, bool>>(
         const Tuple4(false, false, false, false));
