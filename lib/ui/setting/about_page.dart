@@ -17,7 +17,7 @@ class AboutPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final info = useMemoizedFuture(PackageInfo.fromPlatform, null);
+    final info = useMemoizedFuture(PackageInfo.fromPlatform, null).data;
     final version = info == null ? '' : '${info.version}(${info.buildNumber})';
     return Scaffold(
       backgroundColor: context.theme.background,

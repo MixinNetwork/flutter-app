@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-T useMemoizedFuture<T>(
+AsyncSnapshot<T> useMemoizedFuture<T>(
   Future<T> Function() futureBuilder,
   T initialData, {
   List<Object?> keys = const <Object>[],
@@ -16,7 +16,7 @@ T useMemoizedFuture<T>(
         keys,
       ),
       initialData: initialData,
-    ).data as T;
+    );
 
 AsyncSnapshot<T> useMemoizedStream<T>(
   Stream<T> Function() valueBuilder, {

@@ -141,7 +141,7 @@ class MentionBuilder extends HookWidget {
       () => mentionCache.checkMentionCache({content}),
       mentionCache.mentionCache(content),
       keys: [content],
-    );
+    ).requireData;
 
     final newContent = useMemoized(
       () => mentionCache.replaceMention(content, mentionMap),
