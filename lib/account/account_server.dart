@@ -594,6 +594,8 @@ class AccountServer {
         quoteMessageId: quoteMessageId,
       );
 
+  // NOTE: Send video as DataMessage, cause we can not retriever video metadata
+  // from video file.
   Future<void> sendVideoMessage(XFile video, EncryptCategory encryptCategory,
           {String? conversationId,
           String? recipientId,
@@ -602,8 +604,8 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           video,
-          encryptCategory.toCategory(MessageCategory.plainVideo,
-              MessageCategory.signalVideo, MessageCategory.encryptedVideo),
+          encryptCategory.toCategory(MessageCategory.plainData,
+              MessageCategory.signalData, MessageCategory.encryptedData),
           quoteMessageId);
 
   Future<void> sendAudioMessage(XFile audio, EncryptCategory encryptCategory,
