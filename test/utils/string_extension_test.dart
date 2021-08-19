@@ -19,8 +19,8 @@ void main() {
   });
 
   test('test escape sql', () {
-    const keyword = r'\%_[]';
-    expect(r'\\\%\_\[\]', keyword.escapeSql());
+    const keyword = r'()[]{}*+?.^$|\';
+    expect(r'\\(\\)\\[\\]\\{\\}\\*\\+\\?\\.\\^\\$\\|\\\\', keyword.escapeSql());
   });
 
   test('test join start', () {
