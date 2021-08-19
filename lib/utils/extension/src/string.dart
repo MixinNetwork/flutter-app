@@ -96,6 +96,8 @@ String maxOf(String a, String b) {
 extension SqlStringExt on String {
   String escapeSql() => RegExp.escape(this);
 
+  String escapeFts5() => '"${escapeSql().joinStar().replaceQuotationMark()}"';
+
   String joinStar() => joinWithCharacter('*');
 
   String joinWhiteSpace() => joinWithCharacter(' ');
