@@ -46,4 +46,5 @@ FROM transcript_messages transcript
          LEFT JOIN users sharedUser ON transcript.shared_user_id = sharedUser.user_id
          LEFT JOIN stickers sticker ON sticker.sticker_id = transcript.sticker_id
 WHERE $where
-ORDER BY transcript.created_at, transcript.rowid;
+ORDER BY transcript.created_at, transcript.rowid
+LIMIT $limit;

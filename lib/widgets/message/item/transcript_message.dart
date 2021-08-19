@@ -71,26 +71,26 @@ class TranscriptMessageWidget extends HookWidget {
           previews,
         ]);
 
-    return InteractableDecoratedBox(
-      onTap: () => showMixinDialog(
-          context: context,
-          padding: const EdgeInsets.symmetric(vertical: 80),
-          child: TranscriptPage(
-            messageId: message.messageId,
-            conversationId: message.conversationId,
-          )),
-      child: MessageBubble(
-        messageId: message.messageId,
-        quoteMessageId: message.quoteId,
-        quoteMessageContent: message.quoteContent,
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        padding: const EdgeInsets.only(
-          top: 4,
-          bottom: 2,
-          right: 2,
-          left: 2,
-        ),
+    return MessageBubble(
+      messageId: message.messageId,
+      quoteMessageId: message.quoteId,
+      quoteMessageContent: message.quoteContent,
+      showNip: showNip,
+      isCurrentUser: isCurrentUser,
+      padding: const EdgeInsets.only(
+        top: 4,
+        bottom: 2,
+        right: 2,
+        left: 2,
+      ),
+      child: InteractableDecoratedBox(
+        onTap: () => showMixinDialog(
+            context: context,
+            padding: const EdgeInsets.symmetric(vertical: 80),
+            child: TranscriptPage(
+              messageId: message.messageId,
+              conversationId: message.conversationId,
+            )),
         child: SizedBox(
           width: 260,
           child: Stack(

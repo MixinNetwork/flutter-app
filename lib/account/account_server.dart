@@ -128,8 +128,12 @@ class AccountServer {
       String privateKey, MultiAuthCubit multiAuthCubit) async {
     final databaseConnection = await db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
-    attachmentUtil =
-        AttachmentUtil.init(client, database.messageDao, identityNumber);
+    attachmentUtil = AttachmentUtil.init(
+      client,
+      database.messageDao,
+      database.transcriptMessageDao,
+      identityNumber,
+    );
     _sendMessageHelper = SendMessageHelper(
       database.messageDao,
       database.messageMentionDao,

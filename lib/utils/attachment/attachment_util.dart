@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/db/dao/transcript_message_dao.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -53,7 +54,12 @@ abstract class _AttachmentJobBase {
 }
 
 class AttachmentUtil extends ChangeNotifier {
-  AttachmentUtil(this._client, this._messageDao, this.mediaPath) {
+  AttachmentUtil(
+    this._client,
+    this._messageDao,
+    this._transcriptMessageDao,
+    this.mediaPath,
+  ) {
     (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
         (client) {
       client.badCertificateCallback =
@@ -63,6 +69,7 @@ class AttachmentUtil extends ChangeNotifier {
 
   final String mediaPath;
   final MessageDao _messageDao;
+  final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
 
   final Dio _dio = Dio(
@@ -74,14 +81,15 @@ class AttachmentUtil extends ChangeNotifier {
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
-  Future<String?> downloadAttachment({
+  Future<void> downloadAttachment({
     required String messageId,
     required String content,
     required String conversationId,
     required String category,
     AttachmentMessage? attachmentMessage,
   }) async {
-    assert(_attachmentJob[messageId] == null);
+    if (_attachmentJob[messageId] != null) return;
+
     await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
 
     final file = getAttachmentFile(
@@ -95,7 +103,7 @@ class AttachmentUtil extends ChangeNotifier {
       final response = await _client.attachmentApi.getAttachment(content);
       d('download ${response.data.viewUrl}');
 
-      if (await isNotPending(messageId)) return null;
+      if (await isNotPending(messageId)) return;
 
       if (response.data.viewUrl != null) {
         String? mediaKey;
@@ -142,7 +150,6 @@ class AttachmentUtil extends ChangeNotifier {
         await _messageDao.updateMediaMessageUrl(file.path, messageId);
         await _messageDao.updateMediaSize(fileSize, messageId);
         await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
-        return file.absolute.path;
       }
     } catch (er) {
       e(er.toString());
@@ -204,7 +211,8 @@ class AttachmentUtil extends ChangeNotifier {
 
   Future<bool> isNotPending(String messageId) async =>
       MediaStatus.pending !=
-      await _messageDao.mediaStatus(messageId).getSingleOrNull();
+      (await _messageDao.mediaStatus(messageId).getSingleOrNull() ??
+          await _transcriptMessageDao.mediaStatus(messageId).getSingleOrNull());
 
   void deleteCryptoTmpFile(String category, File file) {
     if (category.isSignal || category.isEncrypted) {
@@ -280,11 +288,20 @@ class AttachmentUtil extends ChangeNotifier {
       p.join(mediaPath, 'Files', conversationId);
 
   static AttachmentUtil init(
-      Client client, MessageDao messageDao, String identityNumber) {
+    Client client,
+    MessageDao messageDao,
+    TranscriptMessageDao transcriptMessageDao,
+    String identityNumber,
+  ) {
     final documentDirectory = mixinDocumentsDirectory;
     final mediaDirectory =
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
-    return AttachmentUtil(client, messageDao, mediaDirectory.path);
+    return AttachmentUtil(
+      client,
+      messageDao,
+      transcriptMessageDao,
+      mediaDirectory.path,
+    );
   }
 
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
