@@ -20,6 +20,8 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
+const _kDefaultVideoSize = 200;
+
 class VideoMessageWidget extends StatelessWidget {
   const VideoMessageWidget({
     Key? key,
@@ -36,8 +38,10 @@ class VideoMessageWidget extends StatelessWidget {
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, boxConstraints) {
           final maxWidth = min(boxConstraints.maxWidth * 0.6, 200);
-          final width = min(message.mediaWidth!, maxWidth).toDouble();
-          final scale = message.mediaWidth! / message.mediaHeight!;
+          final width = min(message.mediaWidth ?? _kDefaultVideoSize, maxWidth)
+              .toDouble();
+          final scale = (message.mediaWidth ?? _kDefaultVideoSize) /
+              (message.mediaHeight ?? _kDefaultVideoSize);
           final height = width / scale;
 
           return MessageBubble(
