@@ -20,7 +20,7 @@ void main() {
 
   test('test escape sql', () {
     const keyword = r'()[]{}*+?.^$|\';
-    expect(r'\\(\\)\\[\\]\\{\\}\\*\\+\\?\\.\\^\\$\\|\\\\', keyword.escapeSql());
+    expect(r'\(\)\[\]\{\}\*\+\?\.\^\$\|\\', keyword.escapeSql());
   });
 
   test('test join start', () {
