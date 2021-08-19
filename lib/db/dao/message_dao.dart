@@ -741,4 +741,25 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       (db.delete(db.messagesFts)
             ..where((tbl) => tbl.messageId.equals(messageId)))
           .go();
+
+  Future<int> updateTranscriptMessage(
+    String? content,
+    int? mediaSize,
+    MediaStatus? mediaStatus,
+    MessageStatus status,
+    String messageId,
+  ) =>
+      _sendInsertOrReplaceEventWithFuture(
+          [messageId],
+          (db.update(db.messages)
+                ..where((tbl) =>
+                    tbl.messageId.equals(messageId) &
+                    tbl.category.equals('SIGNAL_TRANSCRIPT').not()))
+              .write(MessagesCompanion(
+            content: Value(content),
+            mediaSize: Value(mediaSize),
+            mediaStatus: Value(mediaStatus),
+            status: Value(status),
+            messageId: Value(messageId),
+          )));
 }

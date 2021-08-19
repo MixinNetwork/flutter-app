@@ -19,6 +19,7 @@ import '../blaze/vo/snapshot_message.dart';
 import '../blaze/vo/system_circle_message.dart';
 import '../blaze/vo/system_conversation_message.dart';
 import '../blaze/vo/system_user_message.dart';
+import '../blaze/vo/transcript_minimal.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
 import '../crypto/signal/ratchet_status.dart';
@@ -29,8 +30,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -722,16 +723,11 @@ class DecryptMessage extends Injector {
       } else {
         plain = await _decodeWithIsolate(plainText);
       }
-      final message = Message(
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        userId: data.senderId,
-        category: data.category!,
-        content: plain,
-        status: data.status,
-        createdAt: data.createdAt,
-      );
-      await database.messageDao.insert(message, accountId, data.silent);
+      final list = await jsonDecodeWithIsolate(plain) as List<dynamic>;
+      final message = await processTranscriptMessage(data, list);
+      if (message != null) {
+        await database.messageDao.insert(message, accountId, data.silent);
+      }
     }
   }
 
@@ -1035,7 +1031,11 @@ class DecryptMessage extends Injector {
     } else if (data.category == MessageCategory.signalTranscript) {
       final plain = await _decodeWithIsolate(plaintext);
       final list = await jsonDecodeWithIsolate(plain) as List<dynamic>;
-      await processTranscriptMessage(data, list);
+      final message = await processTranscriptMessage(data, list);
+      if (message != null) {
+        await database.messageDao.updateTranscriptMessage(message.content,
+            message.mediaSize, message.mediaStatus, message.status, messageId);
+      }
     }
     if (await database.messageDao
             .countMessageByQuoteId(data.conversationId, messageId) >
@@ -1122,7 +1122,7 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future processTranscriptMessage(
+  Future<Message?>? processTranscriptMessage(
       BlazeMessageData data, List<dynamic> list) async {
     if (list.isEmpty) {
       await database.messageDao.insert(
@@ -1141,7 +1141,17 @@ class DecryptMessage extends Injector {
     }
 
     final transcripts = list
-        .map((e) => TranscriptMessage.fromJson(e as Map<String, dynamic>))
+        .map((e) {
+          // ignore: avoid_dynamic_calls
+          e['created_at'] = DateTime.tryParse(e['created_at'] as String? ?? '')
+              ?.millisecondsSinceEpoch;
+          // ignore: avoid_dynamic_calls
+          e['media_created_at'] =
+              // ignore: avoid_dynamic_calls
+              DateTime.tryParse(e['media_created_at'] as String? ?? '')
+                  ?.millisecondsSinceEpoch;
+          return TranscriptMessage.fromJson(e as Map<String, dynamic>);
+        })
         .where((transcript) => transcript.transcriptId == data.messageId)
         .toList();
 
@@ -1191,10 +1201,53 @@ class DecryptMessage extends Injector {
         .map((transcript) => transcript.sharedUserId!)
         .toList());
 
-    final insertFtsFuture = insertFts();
-    final refreshStickerFuture = _refreshSticker();
-    final refreshUserFuture = _refreshUser();
-    // todo attachment
+    final attachmentTranscript =
+        transcripts.where((transcript) => transcript.category.isAttachment);
+
+    await Future.wait([
+      insertFts(),
+      _refreshSticker(),
+      _refreshUser(),
+      database.transcriptMessageDao.insertAll(transcripts),
+    ]);
+
+    final transcriptMinimalList =
+        (transcripts..sort((a, b) => a.createdAt.compareTo(b.createdAt)))
+            .map((transcript) => TranscriptMinimal(
+                  name: transcript.userFullName ?? '',
+                  category: transcript.category,
+                  content: transcript.content,
+                ))
+            .toList();
+
+    final totalMediaSize = attachmentTranscript
+        .where((transcript) => transcript.mediaSize != null)
+        .map((transcript) => transcript.mediaSize!)
+        .fold<int>(0, (a, b) => a + b);
+
+    return Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      category: data.category!,
+      content: await jsonEncodeWithIsolate(transcriptMinimalList),
+      mediaSize: totalMediaSize,
+      status: data.status,
+      createdAt: data.createdAt,
+      mediaStatus:
+          totalMediaSize == 0 ? MediaStatus.done : MediaStatus.canceled,
+    );
+
+    // todo
+    // Future download() async {
+    //   attachmentTranscript.forEach((transcript) {
+    //     // transcript.mediaStatus = MediaStatus.canceled;
+    //     // transcript.mediaUrl = null;
+    //
+    //     final category = transcript.category;
+    //     if (category.isImage) {}
+    //   });
+    // }
   }
 }
 

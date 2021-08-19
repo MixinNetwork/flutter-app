@@ -60,6 +60,7 @@ part 'mixin_database.g.dart';
     'moor/dao/user.moor',
     'moor/dao/circle.moor',
     'moor/dao/flood.moor',
+    'moor/dao/transcript_message.moor',
   },
   daos: [
     AddressDao,
@@ -91,7 +92,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   final eventBus = DataBaseEventBus();
 
@@ -143,6 +144,9 @@ class MixinDatabase extends _$MixinDatabase {
             await m.createTable(addresses);
             await m.addColumn(assets, assets.reserve);
             await m.addColumn(messages, messages.caption);
+          }
+          if(from <= 4) {
+            await m.createTable(transcriptMessages);
           }
         },
       );

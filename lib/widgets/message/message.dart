@@ -35,6 +35,7 @@ import 'item/sticker_message.dart';
 import 'item/stranger_message.dart';
 import 'item/system_message.dart';
 import 'item/text/text_message.dart';
+import 'item/transcript_message.dart';
 import 'item/transfer_message.dart';
 import 'item/unknown_message.dart';
 import 'item/video_message.dart';
@@ -197,6 +198,15 @@ class MessageItemWidget extends HookWidget {
                       message: message,
                     );
                   }
+
+                  if(message.type.isTranscript) {
+                    return TranscriptMessageWidget(
+                      showNip: showNip,
+                      isCurrentUser: isCurrentUser,
+                      message: message,
+                    );
+                  }
+
                   if (message.type.isLocation) {
                     return LocationMessageWidget(
                       showNip: showNip,

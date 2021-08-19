@@ -10135,9 +10135,10 @@ class TranscriptMessage extends DataClass
   final MediaStatus? mediaStatus;
   final String? mediaWaveform;
   final String? thumbImage;
+  final String? thumbUrl;
   final String? mediaKey;
   final String? mediaDigest;
-  final DateTime mediaCreatedAt;
+  final DateTime? mediaCreatedAt;
   final String? stickerId;
   final String? sharedUserId;
   final String? mentions;
@@ -10162,9 +10163,10 @@ class TranscriptMessage extends DataClass
       this.mediaStatus,
       this.mediaWaveform,
       this.thumbImage,
+      this.thumbUrl,
       this.mediaKey,
       this.mediaDigest,
-      required this.mediaCreatedAt,
+      this.mediaCreatedAt,
       this.stickerId,
       this.sharedUserId,
       this.mentions,
@@ -10210,17 +10212,18 @@ class TranscriptMessage extends DataClass
           .mapFromDatabaseResponse(data['${effectivePrefix}media_waveform']),
       thumbImage: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}thumb_image']),
+      thumbUrl: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}thumb_url']),
       mediaKey: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_key']),
       mediaDigest: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}media_digest']),
       mediaCreatedAt: TranscriptMessages.$converter2.mapToDart(const IntType()
-          .mapFromDatabaseResponse(
-              data['${effectivePrefix}media_created_at']))!,
+          .mapFromDatabaseResponse(data['${effectivePrefix}media_created_at'])),
       stickerId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}stickerId']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}sticker_id']),
       sharedUserId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}sharedUserId']),
+          .mapFromDatabaseResponse(data['${effectivePrefix}shared_user_id']),
       mentions: const StringType()
           .mapFromDatabaseResponse(data['${effectivePrefix}mentions']),
       quoteId: const StringType()
@@ -10281,22 +10284,25 @@ class TranscriptMessage extends DataClass
     if (!nullToAbsent || thumbImage != null) {
       map['thumb_image'] = Variable<String?>(thumbImage);
     }
+    if (!nullToAbsent || thumbUrl != null) {
+      map['thumb_url'] = Variable<String?>(thumbUrl);
+    }
     if (!nullToAbsent || mediaKey != null) {
       map['media_key'] = Variable<String?>(mediaKey);
     }
     if (!nullToAbsent || mediaDigest != null) {
       map['media_digest'] = Variable<String?>(mediaDigest);
     }
-    {
+    if (!nullToAbsent || mediaCreatedAt != null) {
       final converter = TranscriptMessages.$converter2;
       map['media_created_at'] =
-          Variable<int>(converter.mapToSql(mediaCreatedAt)!);
+          Variable<int?>(converter.mapToSql(mediaCreatedAt));
     }
     if (!nullToAbsent || stickerId != null) {
-      map['stickerId'] = Variable<String?>(stickerId);
+      map['sticker_id'] = Variable<String?>(stickerId);
     }
     if (!nullToAbsent || sharedUserId != null) {
-      map['sharedUserId'] = Variable<String?>(sharedUserId);
+      map['shared_user_id'] = Variable<String?>(sharedUserId);
     }
     if (!nullToAbsent || mentions != null) {
       map['mentions'] = Variable<String?>(mentions);
@@ -10357,13 +10363,18 @@ class TranscriptMessage extends DataClass
       thumbImage: thumbImage == null && nullToAbsent
           ? const Value.absent()
           : Value(thumbImage),
+      thumbUrl: thumbUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(thumbUrl),
       mediaKey: mediaKey == null && nullToAbsent
           ? const Value.absent()
           : Value(mediaKey),
       mediaDigest: mediaDigest == null && nullToAbsent
           ? const Value.absent()
           : Value(mediaDigest),
-      mediaCreatedAt: Value(mediaCreatedAt),
+      mediaCreatedAt: mediaCreatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mediaCreatedAt),
       stickerId: stickerId == null && nullToAbsent
           ? const Value.absent()
           : Value(stickerId),
@@ -10406,11 +10417,12 @@ class TranscriptMessage extends DataClass
       mediaStatus: serializer.fromJson<MediaStatus?>(json['media_status']),
       mediaWaveform: serializer.fromJson<String?>(json['media_waveform']),
       thumbImage: serializer.fromJson<String?>(json['thumb_image']),
+      thumbUrl: serializer.fromJson<String?>(json['thumb_url']),
       mediaKey: serializer.fromJson<String?>(json['media_key']),
       mediaDigest: serializer.fromJson<String?>(json['media_digest']),
-      mediaCreatedAt: serializer.fromJson<DateTime>(json['media_created_at']),
-      stickerId: serializer.fromJson<String?>(json['stickerId']),
-      sharedUserId: serializer.fromJson<String?>(json['sharedUserId']),
+      mediaCreatedAt: serializer.fromJson<DateTime?>(json['media_created_at']),
+      stickerId: serializer.fromJson<String?>(json['sticker_id']),
+      sharedUserId: serializer.fromJson<String?>(json['shared_user_id']),
       mentions: serializer.fromJson<String?>(json['mentions']),
       quoteId: serializer.fromJson<String?>(json['quote_id']),
       quoteContent: serializer.fromJson<String?>(json['quote_content']),
@@ -10438,11 +10450,12 @@ class TranscriptMessage extends DataClass
       'media_status': serializer.toJson<MediaStatus?>(mediaStatus),
       'media_waveform': serializer.toJson<String?>(mediaWaveform),
       'thumb_image': serializer.toJson<String?>(thumbImage),
+      'thumb_url': serializer.toJson<String?>(thumbUrl),
       'media_key': serializer.toJson<String?>(mediaKey),
       'media_digest': serializer.toJson<String?>(mediaDigest),
-      'media_created_at': serializer.toJson<DateTime>(mediaCreatedAt),
-      'stickerId': serializer.toJson<String?>(stickerId),
-      'sharedUserId': serializer.toJson<String?>(sharedUserId),
+      'media_created_at': serializer.toJson<DateTime?>(mediaCreatedAt),
+      'sticker_id': serializer.toJson<String?>(stickerId),
+      'shared_user_id': serializer.toJson<String?>(sharedUserId),
       'mentions': serializer.toJson<String?>(mentions),
       'quote_id': serializer.toJson<String?>(quoteId),
       'quote_content': serializer.toJson<String?>(quoteContent),
@@ -10468,9 +10481,10 @@ class TranscriptMessage extends DataClass
           Value<MediaStatus?> mediaStatus = const Value.absent(),
           Value<String?> mediaWaveform = const Value.absent(),
           Value<String?> thumbImage = const Value.absent(),
+          Value<String?> thumbUrl = const Value.absent(),
           Value<String?> mediaKey = const Value.absent(),
           Value<String?> mediaDigest = const Value.absent(),
-          DateTime? mediaCreatedAt,
+          Value<DateTime?> mediaCreatedAt = const Value.absent(),
           Value<String?> stickerId = const Value.absent(),
           Value<String?> sharedUserId = const Value.absent(),
           Value<String?> mentions = const Value.absent(),
@@ -10499,9 +10513,11 @@ class TranscriptMessage extends DataClass
         mediaWaveform:
             mediaWaveform.present ? mediaWaveform.value : this.mediaWaveform,
         thumbImage: thumbImage.present ? thumbImage.value : this.thumbImage,
+        thumbUrl: thumbUrl.present ? thumbUrl.value : this.thumbUrl,
         mediaKey: mediaKey.present ? mediaKey.value : this.mediaKey,
         mediaDigest: mediaDigest.present ? mediaDigest.value : this.mediaDigest,
-        mediaCreatedAt: mediaCreatedAt ?? this.mediaCreatedAt,
+        mediaCreatedAt:
+            mediaCreatedAt.present ? mediaCreatedAt.value : this.mediaCreatedAt,
         stickerId: stickerId.present ? stickerId.value : this.stickerId,
         sharedUserId:
             sharedUserId.present ? sharedUserId.value : this.sharedUserId,
@@ -10531,6 +10547,7 @@ class TranscriptMessage extends DataClass
           ..write('mediaStatus: $mediaStatus, ')
           ..write('mediaWaveform: $mediaWaveform, ')
           ..write('thumbImage: $thumbImage, ')
+          ..write('thumbUrl: $thumbUrl, ')
           ..write('mediaKey: $mediaKey, ')
           ..write('mediaDigest: $mediaDigest, ')
           ..write('mediaCreatedAt: $mediaCreatedAt, ')
@@ -10584,11 +10601,11 @@ class TranscriptMessage extends DataClass
                                                                       thumbImage
                                                                           .hashCode,
                                                                       $mrjc(
-                                                                          mediaKey
+                                                                          thumbUrl
                                                                               .hashCode,
                                                                           $mrjc(
-                                                                              mediaDigest.hashCode,
-                                                                              $mrjc(mediaCreatedAt.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mentions.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, caption.hashCode))))))))))))))))))))))))));
+                                                                              mediaKey.hashCode,
+                                                                              $mrjc(mediaDigest.hashCode, $mrjc(mediaCreatedAt.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mentions.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, caption.hashCode)))))))))))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -10610,6 +10627,7 @@ class TranscriptMessage extends DataClass
           other.mediaStatus == this.mediaStatus &&
           other.mediaWaveform == this.mediaWaveform &&
           other.thumbImage == this.thumbImage &&
+          other.thumbUrl == this.thumbUrl &&
           other.mediaKey == this.mediaKey &&
           other.mediaDigest == this.mediaDigest &&
           other.mediaCreatedAt == this.mediaCreatedAt &&
@@ -10639,9 +10657,10 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
   final Value<MediaStatus?> mediaStatus;
   final Value<String?> mediaWaveform;
   final Value<String?> thumbImage;
+  final Value<String?> thumbUrl;
   final Value<String?> mediaKey;
   final Value<String?> mediaDigest;
-  final Value<DateTime> mediaCreatedAt;
+  final Value<DateTime?> mediaCreatedAt;
   final Value<String?> stickerId;
   final Value<String?> sharedUserId;
   final Value<String?> mentions;
@@ -10666,6 +10685,7 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
     this.mediaStatus = const Value.absent(),
     this.mediaWaveform = const Value.absent(),
     this.thumbImage = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
     this.mediaKey = const Value.absent(),
     this.mediaDigest = const Value.absent(),
     this.mediaCreatedAt = const Value.absent(),
@@ -10694,9 +10714,10 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
     this.mediaStatus = const Value.absent(),
     this.mediaWaveform = const Value.absent(),
     this.thumbImage = const Value.absent(),
+    this.thumbUrl = const Value.absent(),
     this.mediaKey = const Value.absent(),
     this.mediaDigest = const Value.absent(),
-    required DateTime mediaCreatedAt,
+    this.mediaCreatedAt = const Value.absent(),
     this.stickerId = const Value.absent(),
     this.sharedUserId = const Value.absent(),
     this.mentions = const Value.absent(),
@@ -10706,8 +10727,7 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
   })  : transcriptId = Value(transcriptId),
         messageId = Value(messageId),
         category = Value(category),
-        createdAt = Value(createdAt),
-        mediaCreatedAt = Value(mediaCreatedAt);
+        createdAt = Value(createdAt);
   static Insertable<TranscriptMessage> custom({
     Expression<String>? transcriptId,
     Expression<String>? messageId,
@@ -10726,9 +10746,10 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
     Expression<MediaStatus?>? mediaStatus,
     Expression<String?>? mediaWaveform,
     Expression<String?>? thumbImage,
+    Expression<String?>? thumbUrl,
     Expression<String?>? mediaKey,
     Expression<String?>? mediaDigest,
-    Expression<DateTime>? mediaCreatedAt,
+    Expression<DateTime?>? mediaCreatedAt,
     Expression<String?>? stickerId,
     Expression<String?>? sharedUserId,
     Expression<String?>? mentions,
@@ -10754,11 +10775,12 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
       if (mediaStatus != null) 'media_status': mediaStatus,
       if (mediaWaveform != null) 'media_waveform': mediaWaveform,
       if (thumbImage != null) 'thumb_image': thumbImage,
+      if (thumbUrl != null) 'thumb_url': thumbUrl,
       if (mediaKey != null) 'media_key': mediaKey,
       if (mediaDigest != null) 'media_digest': mediaDigest,
       if (mediaCreatedAt != null) 'media_created_at': mediaCreatedAt,
-      if (stickerId != null) 'stickerId': stickerId,
-      if (sharedUserId != null) 'sharedUserId': sharedUserId,
+      if (stickerId != null) 'sticker_id': stickerId,
+      if (sharedUserId != null) 'shared_user_id': sharedUserId,
       if (mentions != null) 'mentions': mentions,
       if (quoteId != null) 'quote_id': quoteId,
       if (quoteContent != null) 'quote_content': quoteContent,
@@ -10784,9 +10806,10 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
       Value<MediaStatus?>? mediaStatus,
       Value<String?>? mediaWaveform,
       Value<String?>? thumbImage,
+      Value<String?>? thumbUrl,
       Value<String?>? mediaKey,
       Value<String?>? mediaDigest,
-      Value<DateTime>? mediaCreatedAt,
+      Value<DateTime?>? mediaCreatedAt,
       Value<String?>? stickerId,
       Value<String?>? sharedUserId,
       Value<String?>? mentions,
@@ -10811,6 +10834,7 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
       mediaStatus: mediaStatus ?? this.mediaStatus,
       mediaWaveform: mediaWaveform ?? this.mediaWaveform,
       thumbImage: thumbImage ?? this.thumbImage,
+      thumbUrl: thumbUrl ?? this.thumbUrl,
       mediaKey: mediaKey ?? this.mediaKey,
       mediaDigest: mediaDigest ?? this.mediaDigest,
       mediaCreatedAt: mediaCreatedAt ?? this.mediaCreatedAt,
@@ -10880,6 +10904,9 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
     if (thumbImage.present) {
       map['thumb_image'] = Variable<String?>(thumbImage.value);
     }
+    if (thumbUrl.present) {
+      map['thumb_url'] = Variable<String?>(thumbUrl.value);
+    }
     if (mediaKey.present) {
       map['media_key'] = Variable<String?>(mediaKey.value);
     }
@@ -10889,13 +10916,13 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
     if (mediaCreatedAt.present) {
       final converter = TranscriptMessages.$converter2;
       map['media_created_at'] =
-          Variable<int>(converter.mapToSql(mediaCreatedAt.value)!);
+          Variable<int?>(converter.mapToSql(mediaCreatedAt.value));
     }
     if (stickerId.present) {
-      map['stickerId'] = Variable<String?>(stickerId.value);
+      map['sticker_id'] = Variable<String?>(stickerId.value);
     }
     if (sharedUserId.present) {
-      map['sharedUserId'] = Variable<String?>(sharedUserId.value);
+      map['shared_user_id'] = Variable<String?>(sharedUserId.value);
     }
     if (mentions.present) {
       map['mentions'] = Variable<String?>(mentions.value);
@@ -10932,6 +10959,7 @@ class TranscriptMessagesCompanion extends UpdateCompanion<TranscriptMessage> {
           ..write('mediaStatus: $mediaStatus, ')
           ..write('mediaWaveform: $mediaWaveform, ')
           ..write('thumbImage: $thumbImage, ')
+          ..write('thumbUrl: $thumbUrl, ')
           ..write('mediaKey: $mediaKey, ')
           ..write('mediaDigest: $mediaDigest, ')
           ..write('mediaCreatedAt: $mediaCreatedAt, ')
@@ -11038,6 +11066,10 @@ class TranscriptMessages extends Table
   late final GeneratedColumn<String?> thumbImage = GeneratedColumn<String?>(
       'thumb_image', aliasedName, true,
       typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+  final VerificationMeta _thumbUrlMeta = const VerificationMeta('thumbUrl');
+  late final GeneratedColumn<String?> thumbUrl = GeneratedColumn<String?>(
+      'thumb_url', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mediaKeyMeta = const VerificationMeta('mediaKey');
   late final GeneratedColumn<String?> mediaKey = GeneratedColumn<String?>(
       'media_key', aliasedName, true,
@@ -11050,19 +11082,19 @@ class TranscriptMessages extends Table
   final VerificationMeta _mediaCreatedAtMeta =
       const VerificationMeta('mediaCreatedAt');
   late final GeneratedColumnWithTypeConverter<DateTime, int?> mediaCreatedAt =
-      GeneratedColumn<int?>('media_created_at', aliasedName, false,
+      GeneratedColumn<int?>('media_created_at', aliasedName, true,
               typeName: 'INTEGER',
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
+              requiredDuringInsert: false,
+              $customConstraints: '')
           .withConverter<DateTime>(TranscriptMessages.$converter2);
   final VerificationMeta _stickerIdMeta = const VerificationMeta('stickerId');
   late final GeneratedColumn<String?> stickerId = GeneratedColumn<String?>(
-      'stickerId', aliasedName, true,
+      'sticker_id', aliasedName, true,
       typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _sharedUserIdMeta =
       const VerificationMeta('sharedUserId');
   late final GeneratedColumn<String?> sharedUserId = GeneratedColumn<String?>(
-      'sharedUserId', aliasedName, true,
+      'shared_user_id', aliasedName, true,
       typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
   final VerificationMeta _mentionsMeta = const VerificationMeta('mentions');
   late final GeneratedColumn<String?> mentions = GeneratedColumn<String?>(
@@ -11100,6 +11132,7 @@ class TranscriptMessages extends Table
         mediaStatus,
         mediaWaveform,
         thumbImage,
+        thumbUrl,
         mediaKey,
         mediaDigest,
         mediaCreatedAt,
@@ -11203,6 +11236,10 @@ class TranscriptMessages extends Table
           thumbImage.isAcceptableOrUnknown(
               data['thumb_image']!, _thumbImageMeta));
     }
+    if (data.containsKey('thumb_url')) {
+      context.handle(_thumbUrlMeta,
+          thumbUrl.isAcceptableOrUnknown(data['thumb_url']!, _thumbUrlMeta));
+    }
     if (data.containsKey('media_key')) {
       context.handle(_mediaKeyMeta,
           mediaKey.isAcceptableOrUnknown(data['media_key']!, _mediaKeyMeta));
@@ -11214,15 +11251,15 @@ class TranscriptMessages extends Table
               data['media_digest']!, _mediaDigestMeta));
     }
     context.handle(_mediaCreatedAtMeta, const VerificationResult.success());
-    if (data.containsKey('stickerId')) {
+    if (data.containsKey('sticker_id')) {
       context.handle(_stickerIdMeta,
-          stickerId.isAcceptableOrUnknown(data['stickerId']!, _stickerIdMeta));
+          stickerId.isAcceptableOrUnknown(data['sticker_id']!, _stickerIdMeta));
     }
-    if (data.containsKey('sharedUserId')) {
+    if (data.containsKey('shared_user_id')) {
       context.handle(
           _sharedUserIdMeta,
           sharedUserId.isAcceptableOrUnknown(
-              data['sharedUserId']!, _sharedUserIdMeta));
+              data['shared_user_id']!, _sharedUserIdMeta));
     }
     if (data.containsKey('mentions')) {
       context.handle(_mentionsMeta,
@@ -11362,6 +11399,80 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final StickerRelationshipDao stickerRelationshipDao =
       StickerRelationshipDao(this as MixinDatabase);
   late final UserDao userDao = UserDao(this as MixinDatabase);
+  Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
+      Expression<bool?> Function(
+              TranscriptMessages transcript,
+              Messages message,
+              Users sender,
+              Users sharedUser,
+              Stickers sticker)
+          where) {
+    final generatedwhere = $write(
+        where(
+            alias(this.transcriptMessages, 'transcript'),
+            alias(this.messages, 'message'),
+            alias(this.users, 'sender'),
+            alias(this.users, 'sharedUser'),
+            alias(this.stickers, 'sticker')),
+        hasMultipleTables: true);
+    return customSelect(
+        'SELECT transcript.transcript_id AS transcriptId, transcript.message_id AS messageId, message.conversation_id AS conversationId, transcript.category AS type, transcript.content AS content, transcript.created_at AS createdAt, message.status AS status, transcript.media_status AS mediaStatus, transcript.media_waveform AS mediaWaveform, transcript.media_name AS mediaName, transcript.media_mime_type AS mediaMimeType, transcript.media_size AS mediaSize, transcript.media_width AS mediaWidth, transcript.media_height AS mediaHeight, transcript.thumb_image AS thumbImage, transcript.thumb_url AS thumbUrl, transcript.media_url AS mediaUrl, transcript.media_duration AS mediaDuration, transcript.quote_id AS quoteId, transcript.quote_content AS quoteContent, transcript.shared_user_id AS sharedUserId, sender.user_id AS userId, IFNULL(sender.full_name, transcript.user_full_name) AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType FROM transcript_messages AS transcript INNER JOIN messages AS message ON message.message_id = transcript.transcript_id LEFT JOIN users AS sender ON transcript.user_id = sender.user_id LEFT JOIN users AS sharedUser ON transcript.shared_user_id = sharedUser.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = transcript.sticker_id WHERE ${generatedwhere.sql} ORDER BY transcript.created_at, transcript."rowid"',
+        variables: [
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          transcriptMessages,
+          messages,
+          users,
+          stickers,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) {
+      return TranscriptMessageItem(
+        transcriptId: row.read<String>('transcriptId'),
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: TranscriptMessages.$converter0
+            .mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
+        mediaStatus: TranscriptMessages.$converter1
+            .mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        userId: row.read<String?>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String?>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        relationship:
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+      );
+    });
+  }
+
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(
         'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
@@ -11830,7 +11941,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.messageMentions, 'messageMention')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, sender.user_id AS userId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, participant.full_name AS participantFullName, message."action" AS actionName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, asset.symbol AS assetSymbol, snapshot.asset_id AS assetId, asset.icon_url AS assetIcon, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, message.shared_user_id AS sharedUserId, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, messageMention.has_read AS mentionRead, conversation.name AS groupName, sender.relationship AS relationship, sender.avatar_url AS avatarUrl FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -11840,9 +11951,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           messages,
           users,
           conversations,
+          stickers,
           snapshots,
           assets,
-          stickers,
           hyperlinks,
           messageMentions,
           ...generatedwhere.watchedTables,
@@ -11852,13 +11963,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       return MessageItem(
         messageId: row.read<String>('messageId'),
         conversationId: row.read<String>('conversationId'),
-        userId: row.read<String>('userId'),
-        conversationOwnerId: row.read<String?>('conversationOwnerId'),
-        conversionCategory: Conversations.$converter0
-            .mapToDart(row.read<String?>('conversionCategory')),
-        userFullName: row.read<String?>('userFullName'),
-        userIdentityNumber: row.read<String>('userIdentityNumber'),
-        appId: row.read<String?>('appId'),
         type: row.read<String>('type'),
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
@@ -11877,37 +11981,44 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         mediaDuration: row.read<String?>('mediaDuration'),
         quoteId: row.read<String?>('quoteId'),
         quoteContent: row.read<String?>('quoteContent'),
-        participantFullName: row.read<String?>('participantFullName'),
         actionName:
             Messages.$converter3.mapToDart(row.read<String?>('actionName')),
-        participantUserId: row.read<String?>('participantUserId'),
-        snapshotId: row.read<String?>('snapshotId'),
-        snapshotType: row.read<String?>('snapshotType'),
-        snapshotAmount: row.read<String?>('snapshotAmount'),
-        assetSymbol: row.read<String?>('assetSymbol'),
-        assetId: row.read<String?>('assetId'),
-        assetIcon: row.read<String?>('assetIcon'),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        relationship:
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        conversationOwnerId: row.read<String?>('conversationOwnerId'),
+        conversionCategory: Conversations.$converter0
+            .mapToDart(row.read<String?>('conversionCategory')),
+        groupName: row.read<String?>('groupName'),
         assetUrl: row.read<String?>('assetUrl'),
         assetWidth: row.read<int?>('assetWidth'),
         assetHeight: row.read<int?>('assetHeight'),
         stickerId: row.read<String?>('stickerId'),
         assetName: row.read<String?>('assetName'),
         assetType: row.read<String?>('assetType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String?>('participantUserId'),
+        snapshotId: row.read<String?>('snapshotId'),
+        snapshotType: row.read<String?>('snapshotType'),
+        snapshotAmount: row.read<String?>('snapshotAmount'),
+        assetId: row.read<String?>('assetId'),
+        assetSymbol: row.read<String?>('assetSymbol'),
+        assetIcon: row.read<String?>('assetIcon'),
         siteName: row.read<String?>('siteName'),
         siteTitle: row.read<String?>('siteTitle'),
         siteDescription: row.read<String?>('siteDescription'),
         siteImage: row.read<String?>('siteImage'),
-        sharedUserId: row.read<String?>('sharedUserId'),
-        sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
-        sharedUserAppId: row.read<String?>('sharedUserAppId'),
         mentionRead: row.read<bool?>('mentionRead'),
-        groupName: row.read<String?>('groupName'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-        avatarUrl: row.read<String?>('avatarUrl'),
       );
     });
   }
@@ -12518,6 +12629,217 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       );
 }
 
+class TranscriptMessageItem {
+  final String transcriptId;
+  final String messageId;
+  final String conversationId;
+  final String type;
+  final String? content;
+  final DateTime createdAt;
+  final MessageStatus status;
+  final MediaStatus? mediaStatus;
+  final String? mediaWaveform;
+  final String? mediaName;
+  final String? mediaMimeType;
+  final int? mediaSize;
+  final int? mediaWidth;
+  final int? mediaHeight;
+  final String? thumbImage;
+  final String? thumbUrl;
+  final String? mediaUrl;
+  final String? mediaDuration;
+  final String? quoteId;
+  final String? quoteContent;
+  final String? sharedUserId;
+  final String? userId;
+  final String? userFullName;
+  final String? userIdentityNumber;
+  final String? appId;
+  final UserRelationship? relationship;
+  final String? avatarUrl;
+  final String? sharedUserFullName;
+  final String? sharedUserIdentityNumber;
+  final String? sharedUserAvatarUrl;
+  final bool? sharedUserIsVerified;
+  final String? sharedUserAppId;
+  final String? assetUrl;
+  final int? assetWidth;
+  final int? assetHeight;
+  final String? stickerId;
+  final String? assetName;
+  final String? assetType;
+  TranscriptMessageItem({
+    required this.transcriptId,
+    required this.messageId,
+    required this.conversationId,
+    required this.type,
+    this.content,
+    required this.createdAt,
+    required this.status,
+    this.mediaStatus,
+    this.mediaWaveform,
+    this.mediaName,
+    this.mediaMimeType,
+    this.mediaSize,
+    this.mediaWidth,
+    this.mediaHeight,
+    this.thumbImage,
+    this.thumbUrl,
+    this.mediaUrl,
+    this.mediaDuration,
+    this.quoteId,
+    this.quoteContent,
+    this.sharedUserId,
+    this.userId,
+    this.userFullName,
+    this.userIdentityNumber,
+    this.appId,
+    this.relationship,
+    this.avatarUrl,
+    this.sharedUserFullName,
+    this.sharedUserIdentityNumber,
+    this.sharedUserAvatarUrl,
+    this.sharedUserIsVerified,
+    this.sharedUserAppId,
+    this.assetUrl,
+    this.assetWidth,
+    this.assetHeight,
+    this.stickerId,
+    this.assetName,
+    this.assetType,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      transcriptId.hashCode,
+      $mrjc(
+          messageId.hashCode,
+          $mrjc(
+              conversationId.hashCode,
+              $mrjc(
+                  type.hashCode,
+                  $mrjc(
+                      content.hashCode,
+                      $mrjc(
+                          createdAt.hashCode,
+                          $mrjc(
+                              status.hashCode,
+                              $mrjc(
+                                  mediaStatus.hashCode,
+                                  $mrjc(
+                                      mediaWaveform.hashCode,
+                                      $mrjc(
+                                          mediaName.hashCode,
+                                          $mrjc(
+                                              mediaMimeType.hashCode,
+                                              $mrjc(
+                                                  mediaSize.hashCode,
+                                                  $mrjc(
+                                                      mediaWidth.hashCode,
+                                                      $mrjc(
+                                                          mediaHeight.hashCode,
+                                                          $mrjc(
+                                                              thumbImage
+                                                                  .hashCode,
+                                                              $mrjc(
+                                                                  thumbUrl
+                                                                      .hashCode,
+                                                                  $mrjc(
+                                                                      mediaUrl
+                                                                          .hashCode,
+                                                                      $mrjc(
+                                                                          mediaDuration
+                                                                              .hashCode,
+                                                                          $mrjc(
+                                                                              quoteId.hashCode,
+                                                                              $mrjc(quoteContent.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(userId.hashCode, $mrjc(userFullName.hashCode, $mrjc(userIdentityNumber.hashCode, $mrjc(appId.hashCode, $mrjc(relationship.hashCode, $mrjc(avatarUrl.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, assetType.hashCode))))))))))))))))))))))))))))))))))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TranscriptMessageItem &&
+          other.transcriptId == this.transcriptId &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.type == this.type &&
+          other.content == this.content &&
+          other.createdAt == this.createdAt &&
+          other.status == this.status &&
+          other.mediaStatus == this.mediaStatus &&
+          other.mediaWaveform == this.mediaWaveform &&
+          other.mediaName == this.mediaName &&
+          other.mediaMimeType == this.mediaMimeType &&
+          other.mediaSize == this.mediaSize &&
+          other.mediaWidth == this.mediaWidth &&
+          other.mediaHeight == this.mediaHeight &&
+          other.thumbImage == this.thumbImage &&
+          other.thumbUrl == this.thumbUrl &&
+          other.mediaUrl == this.mediaUrl &&
+          other.mediaDuration == this.mediaDuration &&
+          other.quoteId == this.quoteId &&
+          other.quoteContent == this.quoteContent &&
+          other.sharedUserId == this.sharedUserId &&
+          other.userId == this.userId &&
+          other.userFullName == this.userFullName &&
+          other.userIdentityNumber == this.userIdentityNumber &&
+          other.appId == this.appId &&
+          other.relationship == this.relationship &&
+          other.avatarUrl == this.avatarUrl &&
+          other.sharedUserFullName == this.sharedUserFullName &&
+          other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
+          other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
+          other.sharedUserIsVerified == this.sharedUserIsVerified &&
+          other.sharedUserAppId == this.sharedUserAppId &&
+          other.assetUrl == this.assetUrl &&
+          other.assetWidth == this.assetWidth &&
+          other.assetHeight == this.assetHeight &&
+          other.stickerId == this.stickerId &&
+          other.assetName == this.assetName &&
+          other.assetType == this.assetType);
+  @override
+  String toString() {
+    return (StringBuffer('TranscriptMessageItem(')
+          ..write('transcriptId: $transcriptId, ')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('type: $type, ')
+          ..write('content: $content, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('status: $status, ')
+          ..write('mediaStatus: $mediaStatus, ')
+          ..write('mediaWaveform: $mediaWaveform, ')
+          ..write('mediaName: $mediaName, ')
+          ..write('mediaMimeType: $mediaMimeType, ')
+          ..write('mediaSize: $mediaSize, ')
+          ..write('mediaWidth: $mediaWidth, ')
+          ..write('mediaHeight: $mediaHeight, ')
+          ..write('thumbImage: $thumbImage, ')
+          ..write('thumbUrl: $thumbUrl, ')
+          ..write('mediaUrl: $mediaUrl, ')
+          ..write('mediaDuration: $mediaDuration, ')
+          ..write('quoteId: $quoteId, ')
+          ..write('quoteContent: $quoteContent, ')
+          ..write('sharedUserId: $sharedUserId, ')
+          ..write('userId: $userId, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('userIdentityNumber: $userIdentityNumber, ')
+          ..write('appId: $appId, ')
+          ..write('relationship: $relationship, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('sharedUserFullName: $sharedUserFullName, ')
+          ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
+          ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
+          ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
+          ..write('sharedUserAppId: $sharedUserAppId, ')
+          ..write('assetUrl: $assetUrl, ')
+          ..write('assetWidth: $assetWidth, ')
+          ..write('assetHeight: $assetHeight, ')
+          ..write('stickerId: $stickerId, ')
+          ..write('assetName: $assetName, ')
+          ..write('assetType: $assetType')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class ConversationCircleItem {
   final String circleId;
   final String name;
@@ -12769,12 +13091,6 @@ class ParticipantUser {
 class MessageItem {
   final String messageId;
   final String conversationId;
-  final String userId;
-  final String? conversationOwnerId;
-  final ConversationCategory? conversionCategory;
-  final String? userFullName;
-  final String userIdentityNumber;
-  final String? appId;
   final String type;
   final String? content;
   final DateTime createdAt;
@@ -12792,44 +13108,44 @@ class MessageItem {
   final String? mediaDuration;
   final String? quoteId;
   final String? quoteContent;
-  final String? participantFullName;
   final MessageAction? actionName;
-  final String? participantUserId;
-  final String? snapshotId;
-  final String? snapshotType;
-  final String? snapshotAmount;
-  final String? assetSymbol;
-  final String? assetId;
-  final String? assetIcon;
+  final String? sharedUserId;
+  final String userId;
+  final String? userFullName;
+  final String userIdentityNumber;
+  final String? appId;
+  final UserRelationship? relationship;
+  final String? avatarUrl;
+  final String? sharedUserFullName;
+  final String? sharedUserIdentityNumber;
+  final String? sharedUserAvatarUrl;
+  final bool? sharedUserIsVerified;
+  final String? sharedUserAppId;
+  final String? conversationOwnerId;
+  final ConversationCategory? conversionCategory;
+  final String? groupName;
   final String? assetUrl;
   final int? assetWidth;
   final int? assetHeight;
   final String? stickerId;
   final String? assetName;
   final String? assetType;
+  final String? participantFullName;
+  final String? participantUserId;
+  final String? snapshotId;
+  final String? snapshotType;
+  final String? snapshotAmount;
+  final String? assetId;
+  final String? assetSymbol;
+  final String? assetIcon;
   final String? siteName;
   final String? siteTitle;
   final String? siteDescription;
   final String? siteImage;
-  final String? sharedUserId;
-  final String? sharedUserFullName;
-  final String? sharedUserIdentityNumber;
-  final String? sharedUserAvatarUrl;
-  final bool? sharedUserIsVerified;
-  final String? sharedUserAppId;
   final bool? mentionRead;
-  final String? groupName;
-  final UserRelationship? relationship;
-  final String? avatarUrl;
   MessageItem({
     required this.messageId,
     required this.conversationId,
-    required this.userId,
-    this.conversationOwnerId,
-    this.conversionCategory,
-    this.userFullName,
-    required this.userIdentityNumber,
-    this.appId,
     required this.type,
     this.content,
     required this.createdAt,
@@ -12847,35 +13163,41 @@ class MessageItem {
     this.mediaDuration,
     this.quoteId,
     this.quoteContent,
-    this.participantFullName,
     this.actionName,
-    this.participantUserId,
-    this.snapshotId,
-    this.snapshotType,
-    this.snapshotAmount,
-    this.assetSymbol,
-    this.assetId,
-    this.assetIcon,
+    this.sharedUserId,
+    required this.userId,
+    this.userFullName,
+    required this.userIdentityNumber,
+    this.appId,
+    this.relationship,
+    this.avatarUrl,
+    this.sharedUserFullName,
+    this.sharedUserIdentityNumber,
+    this.sharedUserAvatarUrl,
+    this.sharedUserIsVerified,
+    this.sharedUserAppId,
+    this.conversationOwnerId,
+    this.conversionCategory,
+    this.groupName,
     this.assetUrl,
     this.assetWidth,
     this.assetHeight,
     this.stickerId,
     this.assetName,
     this.assetType,
+    this.participantFullName,
+    this.participantUserId,
+    this.snapshotId,
+    this.snapshotType,
+    this.snapshotAmount,
+    this.assetId,
+    this.assetSymbol,
+    this.assetIcon,
     this.siteName,
     this.siteTitle,
     this.siteDescription,
     this.siteImage,
-    this.sharedUserId,
-    this.sharedUserFullName,
-    this.sharedUserIdentityNumber,
-    this.sharedUserAvatarUrl,
-    this.sharedUserIsVerified,
-    this.sharedUserAppId,
     this.mentionRead,
-    this.groupName,
-    this.relationship,
-    this.avatarUrl,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -12883,57 +13205,49 @@ class MessageItem {
       $mrjc(
           conversationId.hashCode,
           $mrjc(
-              userId.hashCode,
+              type.hashCode,
               $mrjc(
-                  conversationOwnerId.hashCode,
+                  content.hashCode,
                   $mrjc(
-                      conversionCategory.hashCode,
+                      createdAt.hashCode,
                       $mrjc(
-                          userFullName.hashCode,
+                          status.hashCode,
                           $mrjc(
-                              userIdentityNumber.hashCode,
+                              mediaStatus.hashCode,
                               $mrjc(
-                                  appId.hashCode,
+                                  mediaWaveform.hashCode,
                                   $mrjc(
-                                      type.hashCode,
+                                      mediaName.hashCode,
                                       $mrjc(
-                                          content.hashCode,
+                                          mediaMimeType.hashCode,
                                           $mrjc(
-                                              createdAt.hashCode,
+                                              mediaSize.hashCode,
                                               $mrjc(
-                                                  status.hashCode,
+                                                  mediaWidth.hashCode,
                                                   $mrjc(
-                                                      mediaStatus.hashCode,
+                                                      mediaHeight.hashCode,
                                                       $mrjc(
-                                                          mediaWaveform
-                                                              .hashCode,
+                                                          thumbImage.hashCode,
                                                           $mrjc(
-                                                              mediaName
-                                                                  .hashCode,
+                                                              thumbUrl.hashCode,
                                                               $mrjc(
-                                                                  mediaMimeType
+                                                                  mediaUrl
                                                                       .hashCode,
                                                                   $mrjc(
-                                                                      mediaSize
+                                                                      mediaDuration
                                                                           .hashCode,
                                                                       $mrjc(
-                                                                          mediaWidth
+                                                                          quoteId
                                                                               .hashCode,
                                                                           $mrjc(
-                                                                              mediaHeight.hashCode,
-                                                                              $mrjc(thumbImage.hashCode, $mrjc(thumbUrl.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(participantFullName.hashCode, $mrjc(actionName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetId.hashCode, $mrjc(assetIcon.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(mentionRead.hashCode, $mrjc(groupName.hashCode, $mrjc(relationship.hashCode, avatarUrl.hashCode))))))))))))))))))))))))))))))))))))))))))))))))))))));
+                                                                              quoteContent.hashCode,
+                                                                              $mrjc(actionName.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(userId.hashCode, $mrjc(userFullName.hashCode, $mrjc(userIdentityNumber.hashCode, $mrjc(appId.hashCode, $mrjc(relationship.hashCode, $mrjc(avatarUrl.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(conversationOwnerId.hashCode, $mrjc(conversionCategory.hashCode, $mrjc(groupName.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetId.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetIcon.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, mentionRead.hashCode))))))))))))))))))))))))))))))))))))))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is MessageItem &&
           other.messageId == this.messageId &&
           other.conversationId == this.conversationId &&
-          other.userId == this.userId &&
-          other.conversationOwnerId == this.conversationOwnerId &&
-          other.conversionCategory == this.conversionCategory &&
-          other.userFullName == this.userFullName &&
-          other.userIdentityNumber == this.userIdentityNumber &&
-          other.appId == this.appId &&
           other.type == this.type &&
           other.content == this.content &&
           other.createdAt == this.createdAt &&
@@ -12951,46 +13265,46 @@ class MessageItem {
           other.mediaDuration == this.mediaDuration &&
           other.quoteId == this.quoteId &&
           other.quoteContent == this.quoteContent &&
-          other.participantFullName == this.participantFullName &&
           other.actionName == this.actionName &&
-          other.participantUserId == this.participantUserId &&
-          other.snapshotId == this.snapshotId &&
-          other.snapshotType == this.snapshotType &&
-          other.snapshotAmount == this.snapshotAmount &&
-          other.assetSymbol == this.assetSymbol &&
-          other.assetId == this.assetId &&
-          other.assetIcon == this.assetIcon &&
+          other.sharedUserId == this.sharedUserId &&
+          other.userId == this.userId &&
+          other.userFullName == this.userFullName &&
+          other.userIdentityNumber == this.userIdentityNumber &&
+          other.appId == this.appId &&
+          other.relationship == this.relationship &&
+          other.avatarUrl == this.avatarUrl &&
+          other.sharedUserFullName == this.sharedUserFullName &&
+          other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
+          other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
+          other.sharedUserIsVerified == this.sharedUserIsVerified &&
+          other.sharedUserAppId == this.sharedUserAppId &&
+          other.conversationOwnerId == this.conversationOwnerId &&
+          other.conversionCategory == this.conversionCategory &&
+          other.groupName == this.groupName &&
           other.assetUrl == this.assetUrl &&
           other.assetWidth == this.assetWidth &&
           other.assetHeight == this.assetHeight &&
           other.stickerId == this.stickerId &&
           other.assetName == this.assetName &&
           other.assetType == this.assetType &&
+          other.participantFullName == this.participantFullName &&
+          other.participantUserId == this.participantUserId &&
+          other.snapshotId == this.snapshotId &&
+          other.snapshotType == this.snapshotType &&
+          other.snapshotAmount == this.snapshotAmount &&
+          other.assetId == this.assetId &&
+          other.assetSymbol == this.assetSymbol &&
+          other.assetIcon == this.assetIcon &&
           other.siteName == this.siteName &&
           other.siteTitle == this.siteTitle &&
           other.siteDescription == this.siteDescription &&
           other.siteImage == this.siteImage &&
-          other.sharedUserId == this.sharedUserId &&
-          other.sharedUserFullName == this.sharedUserFullName &&
-          other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
-          other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
-          other.sharedUserIsVerified == this.sharedUserIsVerified &&
-          other.sharedUserAppId == this.sharedUserAppId &&
-          other.mentionRead == this.mentionRead &&
-          other.groupName == this.groupName &&
-          other.relationship == this.relationship &&
-          other.avatarUrl == this.avatarUrl);
+          other.mentionRead == this.mentionRead);
   @override
   String toString() {
     return (StringBuffer('MessageItem(')
           ..write('messageId: $messageId, ')
           ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('conversationOwnerId: $conversationOwnerId, ')
-          ..write('conversionCategory: $conversionCategory, ')
-          ..write('userFullName: $userFullName, ')
-          ..write('userIdentityNumber: $userIdentityNumber, ')
-          ..write('appId: $appId, ')
           ..write('type: $type, ')
           ..write('content: $content, ')
           ..write('createdAt: $createdAt, ')
@@ -13008,35 +13322,41 @@ class MessageItem {
           ..write('mediaDuration: $mediaDuration, ')
           ..write('quoteId: $quoteId, ')
           ..write('quoteContent: $quoteContent, ')
-          ..write('participantFullName: $participantFullName, ')
           ..write('actionName: $actionName, ')
-          ..write('participantUserId: $participantUserId, ')
-          ..write('snapshotId: $snapshotId, ')
-          ..write('snapshotType: $snapshotType, ')
-          ..write('snapshotAmount: $snapshotAmount, ')
-          ..write('assetSymbol: $assetSymbol, ')
-          ..write('assetId: $assetId, ')
-          ..write('assetIcon: $assetIcon, ')
+          ..write('sharedUserId: $sharedUserId, ')
+          ..write('userId: $userId, ')
+          ..write('userFullName: $userFullName, ')
+          ..write('userIdentityNumber: $userIdentityNumber, ')
+          ..write('appId: $appId, ')
+          ..write('relationship: $relationship, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('sharedUserFullName: $sharedUserFullName, ')
+          ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
+          ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
+          ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
+          ..write('sharedUserAppId: $sharedUserAppId, ')
+          ..write('conversationOwnerId: $conversationOwnerId, ')
+          ..write('conversionCategory: $conversionCategory, ')
+          ..write('groupName: $groupName, ')
           ..write('assetUrl: $assetUrl, ')
           ..write('assetWidth: $assetWidth, ')
           ..write('assetHeight: $assetHeight, ')
           ..write('stickerId: $stickerId, ')
           ..write('assetName: $assetName, ')
           ..write('assetType: $assetType, ')
+          ..write('participantFullName: $participantFullName, ')
+          ..write('participantUserId: $participantUserId, ')
+          ..write('snapshotId: $snapshotId, ')
+          ..write('snapshotType: $snapshotType, ')
+          ..write('snapshotAmount: $snapshotAmount, ')
+          ..write('assetId: $assetId, ')
+          ..write('assetSymbol: $assetSymbol, ')
+          ..write('assetIcon: $assetIcon, ')
           ..write('siteName: $siteName, ')
           ..write('siteTitle: $siteTitle, ')
           ..write('siteDescription: $siteDescription, ')
           ..write('siteImage: $siteImage, ')
-          ..write('sharedUserId: $sharedUserId, ')
-          ..write('sharedUserFullName: $sharedUserFullName, ')
-          ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
-          ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
-          ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
-          ..write('sharedUserAppId: $sharedUserAppId, ')
-          ..write('mentionRead: $mentionRead, ')
-          ..write('groupName: $groupName, ')
-          ..write('relationship: $relationship, ')
-          ..write('avatarUrl: $avatarUrl')
+          ..write('mentionRead: $mentionRead')
           ..write(')'))
         .toString();
   }
