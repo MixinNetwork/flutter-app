@@ -66,7 +66,7 @@ class GroupParticipantsPage extends HookWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: SearchTextField(
               hintText: context.l10n.groupSearchParticipants,
-              autofocus: true,
+              autofocus: context.textFieldAutoGainFocus,
               controller: controller,
             ),
           ),

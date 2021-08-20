@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+
+import 'interacter_decorated_box.dart';
 
 class HoverOverlay extends HookWidget {
   const HoverOverlay({
@@ -40,7 +43,11 @@ class HoverOverlay extends HookWidget {
     final childHovering = useState(false);
     final portalHovering = useState(false);
 
-    final visible = childHovering.value || portalHovering.value;
+    final tapped = useState(false);
+
+    final visible =
+        (!tapped.value && (childHovering.value || portalHovering.value)) ||
+            tapped.value;
 
     final wait = closeWaitDuration.inMicroseconds;
     final totalClose = wait + closeDuration.inMicroseconds;
@@ -69,31 +76,43 @@ class HoverOverlay extends HookWidget {
       childAnchor: childAnchor,
       portalAnchor: portalAnchor,
       closeDuration: Duration(microseconds: totalClose),
-      portal: TweenAnimationBuilder<double>(
-        tween: Tween(begin: 0, end: visible ? 1 : 0),
-        curve: Interval(
-          visible ? 0 : (wait / totalClose),
-          1,
-          curve: visible ? inCurve : outCurve,
-        ),
-        duration: visible ? duration : Duration(microseconds: totalClose),
-        builder: (context, progress, child) =>
-            portalBuilder?.call(context, progress, child) ?? child!,
-        child: MouseRegion(
-          onEnter: (_) => portalHovering.value = true,
-          onHover: (_) => portalHovering.value = true,
-          onExit: (_) => portalHovering.value = false,
-          child: portal,
+      portal: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => tapped.value = false,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween(begin: 0, end: visible ? 1 : 0),
+          curve: Interval(
+            visible ? 0 : (wait / totalClose),
+            1,
+            curve: visible ? inCurve : outCurve,
+          ),
+          duration: visible ? duration : Duration(microseconds: totalClose),
+          builder: (context, progress, child) =>
+              portalBuilder?.call(context, progress, child) ?? child!,
+          child: MouseRegionIgnoreTouch(
+            onEnter: (_) => portalHovering.value = true,
+            onHover: (_) => portalHovering.value = true,
+            onExit: (_) => portalHovering.value = false,
+            child: portal,
+          ),
         ),
       ),
-      child: MouseRegion(
+      child: MouseRegionIgnoreTouch(
         onEnter: onChildHovering,
         onHover: onChildHovering,
         onExit: (_) async {
           await cancelableRef.value?.cancel();
           childHovering.value = false;
         },
-        child: child,
+        child: GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTapUp: (detail) {
+            if (detail.kind == PointerDeviceKind.touch) {
+              tapped.value = true;
+            }
+          },
+          child: child,
+        ),
       ),
     );
   }
