@@ -199,7 +199,7 @@ class MessageItemWidget extends HookWidget {
                     );
                   }
 
-                  if(message.type.isTranscript) {
+                  if (message.type.isTranscript) {
                     return TranscriptMessageWidget(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,

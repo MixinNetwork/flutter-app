@@ -145,7 +145,7 @@ class MixinDatabase extends _$MixinDatabase {
             await m.addColumn(assets, assets.reserve);
             await m.addColumn(messages, messages.caption);
           }
-          if(from <= 4) {
+          if (from <= 4) {
             await m.createTable(transcriptMessages);
           }
         },

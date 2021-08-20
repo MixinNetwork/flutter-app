@@ -1,8 +1,7 @@
-import 'package:flutter_app/db/util/util.dart';
-import 'package:flutter_app/enum/media_status.dart';
 import 'package:moor/moor.dart';
 
 import '../mixin_database.dart';
+import '../util/util.dart';
 
 part 'transcript_message_dao.g.dart';
 
@@ -21,13 +20,12 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
               transcript.transcriptId.equals(messageId),
           (transcript, message, sender, sharedUser, sticker) => maxLimit);
 
-  Selectable<MediaStatus?> mediaStatus(String messageId) =>
-      (db.selectOnly(db.transcriptMessages)
-            ..addColumns([db.transcriptMessages.mediaStatus])
-            ..where(db.transcriptMessages.messageId.equals(messageId))
+  Future<TranscriptMessage?> findTranscriptMessageByMessageId(
+          String messageId) =>
+      (db.select(db.transcriptMessages)
+            ..where((tbl) => tbl.messageId.equals(messageId))
             ..limit(1))
-          .map((row) => db.transcriptMessages.mediaStatus.converter
-              .mapToDart(row.read(db.transcriptMessages.mediaStatus)));
+          .getSingleOrNull();
 }
 
 extension TranscriptMessageItemExtension on TranscriptMessageItem {

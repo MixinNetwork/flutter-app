@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:moor/moor.dart';
+import 'package:tuple/tuple.dart';
 
+import '../../blaze/vo/transcript_minimal.dart';
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
@@ -190,7 +192,98 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         updates: {db.messagesFts},
       );
 
-  Future<void> deleteMessage(String messageId) async {
+  Future<Tuple2<String, List<Tuple2<String, String>>>?> pathWithoutReferences(
+      String messageId) async {
+    var pathMap = <String, Tuple2<String, String>>{};
+
+    final result = await (db.selectOnly(db.messages)
+          ..addColumns([
+            db.messages.conversationId,
+            db.messages.content,
+            db.messages.category,
+            db.messages.mediaUrl,
+          ])
+          ..where(db.messages.messageId.equals(messageId))
+          ..limit(1))
+        .getSingleOrNull();
+    final category = result?.read(db.messages.category);
+    if (category == null) return null;
+
+    if (category.isAttachment) {
+      final path = result?.read(db.messages.mediaUrl);
+      pathMap = {
+        if (path?.isNotEmpty ?? false) messageId: Tuple2(path!, category)
+      };
+    } else if (category.isTranscript) {
+      final content = result?.read(db.messages.content) ?? '';
+      final json = await jsonDecodeWithIsolate(content);
+      Iterable<TranscriptMinimal> transcriptMinimals = [];
+      if (json is List<dynamic>) {
+        transcriptMinimals = json
+            .map((json) =>
+                TranscriptMinimal.fromJson(json as Map<String, dynamic>))
+            .where((element) => element.category.isAttachment);
+      }
+      if (transcriptMinimals.isNotEmpty) {
+        final list = await (db.selectOnly(db.transcriptMessages)
+              ..addColumns([
+                db.transcriptMessages.messageId,
+                db.transcriptMessages.mediaUrl,
+                db.transcriptMessages.category,
+              ])
+              ..where(db.transcriptMessages.transcriptId.equals(messageId) &
+                  db.transcriptMessages.category
+                      .isIn(transcriptMinimals.map((e) => e.category))))
+            .get();
+
+        for (final typedResult in list) {
+          final messageId = typedResult.read(db.transcriptMessages.messageId);
+          final path = typedResult.read(db.transcriptMessages.mediaUrl);
+          final category = typedResult.read(db.transcriptMessages.category);
+
+          if (messageId?.isEmpty ?? true) continue;
+          if (path?.isEmpty ?? true) continue;
+          if (category?.isEmpty ?? true) continue;
+
+          pathMap[messageId!] = Tuple2(path!, category!);
+        }
+      }
+    }
+
+    if (pathMap.isEmpty) return null;
+
+    final messageIds = await (db.selectOnly(db.messages)
+          ..addColumns([db.messages.messageId])
+          ..where(db.messages.messageId.isIn(pathMap.keys)))
+        .map((row) => row.read(db.messages.messageId))
+        .get();
+
+    final transcriptMessagesIds = await (db.selectOnly(db.transcriptMessages)
+          ..addColumns([db.transcriptMessages.messageId])
+          ..where(db.transcriptMessages.messageId.isIn(pathMap.keys)))
+        .map((row) => row.read(db.transcriptMessages.messageId))
+        .get();
+
+    final countMap = <String, int>{};
+
+    for (final id in [...messageIds, ...transcriptMessagesIds]) {
+      countMap[id!] = (countMap[id] ?? 0) + 1;
+    }
+
+    final deletePath = countMap.entries
+        .where((element) => element.value == 1)
+        .map((e) => pathMap[e.key])
+        .where((element) => element != null)
+        .cast<Tuple2<String, String>>()
+        .toList();
+    final conversationId = result!.read(db.messages.conversationId);
+
+    return Tuple2(conversationId!, deletePath);
+  }
+
+  Future<Tuple2<String, List<Tuple2<String, String>>>?>? deleteMessage(
+      String messageId) async {
+    final tuple2 = await pathWithoutReferences(messageId);
     await db.transaction(() async {
       await Future.wait([
         (delete(db.messages)..where((tbl) => tbl.messageId.equals(messageId)))
@@ -198,9 +291,13 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (delete(db.messagesFts)
               ..where((tbl) => tbl.messageId.equals(messageId)))
             .go(),
+        (delete(db.transcriptMessages)
+              ..where((tbl) => tbl.transcriptId.equals(messageId)))
+            .go(),
       ]);
     });
     db.eventBus.send(DatabaseEvent.delete, messageId);
+    return tuple2;
   }
 
   Future<void> deleteMessageByConversationId(String conversationId) =>
@@ -222,61 +319,134 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<MessageStatus?> findMessageStatusById(String messageId) =>
       db.findMessageStatusById(messageId).getSingleOrNull();
 
-  Future<int> updateMediaMessageUrl(String path, String messageId) =>
+  Future<void> updateMedia({
+    required String path,
+    required String messageId,
+    required int mediaSize,
+    required MediaStatus mediaStatus,
+    String? content,
+  }) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        (db.update(db.messages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(MessagesCompanion(mediaUrl: Value(path.pathBasename))),
+        db.transaction(() async {
+          await Future.wait([
+            (db.update(db.messages)
+                  ..where((tbl) => tbl.messageId.equals(messageId)))
+                .write(MessagesCompanion(
+              mediaUrl: Value(path.pathBasename),
+              mediaSize: Value(mediaSize),
+              mediaStatus: Value(mediaStatus),
+            )),
+            (db.update(db.transcriptMessages)
+                  ..where((tbl) => tbl.messageId.equals(messageId)))
+                .write(TranscriptMessagesCompanion(
+              mediaUrl: Value(path.pathBasename),
+              mediaSize: Value(mediaSize),
+              mediaStatus: Value(mediaStatus),
+              content: content != null ? Value(content) : const Value.absent(),
+            )),
+          ]);
+        }),
       );
 
-  Future<int> updateMediaSize(int length, String messageId) =>
+  Future<void> updateMediaStatus(MediaStatus status, String messageId) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        (db.update(db.messages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(MessagesCompanion(mediaSize: Value(length))),
+        db.transaction<void>(() async {
+          await Future.wait([
+            (db.update(db.messages)
+                  ..where((tbl) => tbl.messageId.equals(messageId)))
+                .write(MessagesCompanion(mediaStatus: Value(status))),
+            (db.update(db.transcriptMessages)
+                  ..where((tbl) => tbl.messageId.equals(messageId)))
+                .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
+          ]);
+        }),
       );
 
-  Future<void> updateMediaStatus(MediaStatus status, String messageId) => _sendInsertOrReplaceEventWithFuture(
-      [messageId],
-      db.transaction<void>(() async {
-         await Future.wait([
-          (db.update(db.messages)
-                ..where((tbl) => tbl.messageId.equals(messageId)))
-              .write(MessagesCompanion(mediaStatus: Value(status))),
-          (db.update(db.transcriptMessages)
-                ..where((tbl) => tbl.messageId.equals(messageId)))
-              .write(TranscriptMessagesCompanion(mediaStatus: Value(status))),
-        ]);
-      }),
-    );
-
-  Future<int> updateMediaStatusToCanceled(String messageId) async {
-    final result = await db.transaction(() async {
-      if (MediaStatus.canceled ==
-          await mediaStatus(messageId).getSingleOrNull()) {
-        return -1;
+  Future<void> updateMediaStatusToCanceled(String messageId) async {
+    final result = await db.transaction<List>(() async {
+      if (await hasMediaStatus(messageId, MediaStatus.canceled)) {
+        return [-1];
       }
 
-      return (db.update(db.messages)
-            ..where((tbl) => tbl.messageId.equals(messageId)))
-          .write(const MessagesCompanion(
-              mediaStatus: Value(MediaStatus.canceled)));
+      return Future.wait([
+        (db.update(db.messages)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(const MessagesCompanion(
+                mediaStatus: Value(MediaStatus.canceled))),
+        (db.update(db.transcriptMessages)
+              ..where((tbl) => tbl.messageId.equals(messageId)))
+            .write(const TranscriptMessagesCompanion(
+                mediaStatus: Value(MediaStatus.canceled))),
+      ]);
     });
-    if (result > -1) {
+    if (result.cast<int>().any((element) => element > -1)) {
       db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
     }
-    return result;
   }
 
-  Selectable<MediaStatus?> mediaStatus(String messageId) =>
-      (db.selectOnly(db.messages)
-            ..addColumns([db.messages.mediaStatus])
-            ..where(db.messages.messageId.equals(messageId))
+  Future<bool> _messageHasMediaStatus(
+      String messageId, MediaStatus mediaStatus, bool not) {
+    final equalsId = db.messages.messageId.equals(messageId);
+    final equalsStatus = db.messages.mediaStatus.equalsValue(mediaStatus);
+    final predicate =
+        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    return db.hasData(db.messages, [], predicate);
+  }
+
+  Future<bool> _transcriptMessageHasMediaStatus(
+      String messageId, MediaStatus mediaStatus, bool not) {
+    final equalsId = db.transcriptMessages.messageId.equals(messageId);
+    final equalsStatus =
+        db.transcriptMessages.mediaStatus.equalsValue(mediaStatus);
+    final predicate =
+        not ? equalsId & equalsStatus.not() : equalsId & equalsStatus;
+    return db.hasData(db.transcriptMessages, [], predicate);
+  }
+
+  Future<bool> hasMediaStatus(String messageId, MediaStatus mediaStatus,
+      [bool not = false]) async {
+    final messageHasData = _messageHasMediaStatus(messageId, mediaStatus, not);
+    final transcriptMessageHasData =
+        _transcriptMessageHasMediaStatus(messageId, mediaStatus, not);
+    return await messageHasData || await transcriptMessageHasData;
+  }
+
+  Future<void> syncMessageMedia(String messageId) async {
+    var content = db.messages.content;
+    var mediaUrl = db.messages.mediaUrl;
+    var mediaSize = db.messages.mediaSize;
+    var mediaStatus = db.messages.mediaStatus;
+
+    var result = await (db.selectOnly(db.messages)
+          ..addColumns([content, mediaUrl, mediaSize, mediaStatus])
+          ..where(db.messages.messageId.equals(messageId))
+          ..limit(1))
+        .getSingleOrNull();
+    if (result == null) {
+      content = db.transcriptMessages.content;
+      mediaUrl = db.transcriptMessages.mediaUrl;
+      mediaSize = db.transcriptMessages.mediaSize;
+      mediaStatus = db.transcriptMessages.mediaStatus;
+
+      result = await (db.selectOnly(db.transcriptMessages)
+            ..addColumns([content, mediaUrl, mediaSize, mediaStatus])
+            ..where(db.transcriptMessages.messageId.equals(messageId))
             ..limit(1))
-          .map((row) => db.messages.mediaStatus.converter
-              .mapToDart(row.read(db.messages.mediaStatus)));
+          .getSingleOrNull();
+    }
+
+    if (result == null) return;
+
+    await updateMedia(
+      path: result.read(mediaUrl)!,
+      messageId: messageId,
+      mediaSize: result.read(mediaSize)!,
+      mediaStatus: mediaStatus.converter.mapToDart(result.read(mediaStatus))!,
+      content: result.read(content),
+    );
+  }
 
   Future<int> takeUnseen(String userId, String conversationId) async {
     final messageId = await (db.selectOnly(db.messages)
@@ -478,12 +648,19 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         )),
       );
 
-  Future<int> updateMessageContent(String messageId, String content) =>
+  Future<void> updateMessageContent(String messageId, String content) =>
       _sendInsertOrReplaceEventWithFuture(
         [messageId],
-        (db.update(db.messages)
-              ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(MessagesCompanion(content: Value(content))),
+        db.transaction(() async {
+          await Future.wait([
+            (db.update(db.messages)
+                  ..where((tbl) => tbl.messageId.equals(messageId)))
+                .write(MessagesCompanion(content: Value(content))),
+            (db.update(db.transcriptMessages)
+                  ..where((tbl) => tbl.messageId.equals(messageId)))
+                .write(TranscriptMessagesCompanion(content: Value(content))),
+          ]);
+        }),
       );
 
   Future<int> updateMessageContentAndStatus(

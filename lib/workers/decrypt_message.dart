@@ -30,8 +30,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' as db;
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -1204,11 +1204,17 @@ class DecryptMessage extends Injector {
     final attachmentTranscript =
         transcripts.where((transcript) => transcript.category.isAttachment);
 
+    final insertAllTranscriptMessageFuture = database.transcriptMessageDao
+        .insertAll(transcripts
+            .map((transcript) => transcript.copyWith(
+                mediaStatus: const Value(MediaStatus.canceled)))
+            .toList());
+
     await Future.wait([
       insertFts(),
       _refreshSticker(),
       _refreshUser(),
-      database.transcriptMessageDao.insertAll(transcripts),
+      insertAllTranscriptMessageFuture,
     ]);
 
     final transcriptMinimalList =
@@ -1225,6 +1231,22 @@ class DecryptMessage extends Injector {
         .map((transcript) => transcript.mediaSize!)
         .fold<int>(0, (a, b) => a + b);
 
+    void downloadTranscriptAttachment() {
+      transcripts
+          .where((transcript) =>
+              transcript.category.isAttachment && transcript.content != null)
+          .forEach((transcript) {
+        _attachmentUtil.downloadAttachment(
+          messageId: transcript.messageId,
+          content: transcript.content!,
+          conversationId: data.conversationId,
+          category: transcript.category,
+        );
+      });
+    }
+
+    downloadTranscriptAttachment();
+
     return Message(
       messageId: data.messageId,
       conversationId: data.conversationId,
@@ -1237,17 +1259,6 @@ class DecryptMessage extends Injector {
       mediaStatus:
           totalMediaSize == 0 ? MediaStatus.done : MediaStatus.canceled,
     );
-
-    // todo
-    // Future download() async {
-    //   attachmentTranscript.forEach((transcript) {
-    //     // transcript.mediaStatus = MediaStatus.canceled;
-    //     // transcript.mediaUrl = null;
-    //
-    //     final category = transcript.category;
-    //     if (category.isImage) {}
-    //   });
-    // }
   }
 }
 

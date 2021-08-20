@@ -269,6 +269,7 @@ class TranscriptPage extends HookWidget {
               ),
               Expanded(
                 child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 16),
                   itemBuilder: (BuildContext context, int index) =>
                       MessageItemWidget(
                     prev: list.getOrNull(index - 1),

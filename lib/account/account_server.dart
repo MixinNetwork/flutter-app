@@ -1355,8 +1355,16 @@ class AccountServer {
   Future<bool> cancelProgressAttachmentJob(String messageId) =>
       attachmentUtil.cancelProgressAttachmentJob(messageId);
 
-  Future<void> deleteMessage(String messageId) =>
-      database.messageDao.deleteMessage(messageId);
+  Future<void> deleteMessage(String messageId) async {
+    final tuple2 = await database.messageDao.deleteMessage(messageId);
+    final paths = tuple2?.item2
+        .map((e) => convertAbsolutePath(e.item2, tuple2.item1, e.item1));
+    paths?.forEach((element) {
+      final file = File(element);
+      if (!file.existsSync()) return;
+      unawaited(file.delete());
+    });
+  }
 
   String convertAbsolutePath(
           String category, String conversationId, String? fileName) =>

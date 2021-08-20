@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/db/dao/transcript_message_dao.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -17,6 +16,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../crypto/attachment/crypto_attachment.dart';
 import '../../db/dao/message_dao.dart';
+import '../../db/dao/transcript_message_dao.dart';
 import '../../db/extension/message_category.dart';
 import '../../enum/media_status.dart';
 import '../crypto_util.dart';
@@ -88,9 +88,15 @@ class AttachmentUtil extends ChangeNotifier {
     required String category,
     AttachmentMessage? attachmentMessage,
   }) async {
-    if (_attachmentJob[messageId] != null) return;
+    if (_attachmentJob[messageId] != null) {
+      return _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    } else {
+      if (await _messageDao.hasMediaStatus(messageId, MediaStatus.done)) {
+        return _messageDao.syncMessageMedia(messageId);
+      }
 
-    await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+      await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    }
 
     final file = getAttachmentFile(
       category,
@@ -118,10 +124,18 @@ class AttachmentUtil extends ChangeNotifier {
               mediaKey = message.mediaKey;
               mediaDigest = message.mediaDigest;
             }
-            if (mediaKey == null || mediaDigest == null) {
-              throw InvalidKeyException(
-                  'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
+          }
+          if (mediaKey == null || mediaDigest == null) {
+            final transcriptMessage = await _transcriptMessageDao
+                .findTranscriptMessageByMessageId(messageId);
+            if (transcriptMessage != null) {
+              mediaKey = transcriptMessage.mediaKey;
+              mediaDigest = transcriptMessage.mediaDigest;
             }
+          }
+          if (mediaKey == null || mediaDigest == null) {
+            throw InvalidKeyException(
+                'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
           }
         }
 
@@ -147,9 +161,12 @@ class AttachmentUtil extends ChangeNotifier {
           await _messageDao.updateMessageContent(messageId, encoded);
         }
 
-        await _messageDao.updateMediaMessageUrl(file.path, messageId);
-        await _messageDao.updateMediaSize(fileSize, messageId);
-        await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
+        await _messageDao.updateMedia(
+          messageId: messageId,
+          path: file.path,
+          mediaSize: fileSize,
+          mediaStatus: MediaStatus.done,
+        );
       }
     } catch (er) {
       e(er.toString());
@@ -209,10 +226,8 @@ class AttachmentUtil extends ChangeNotifier {
     }
   }
 
-  Future<bool> isNotPending(String messageId) async =>
-      MediaStatus.pending !=
-      (await _messageDao.mediaStatus(messageId).getSingleOrNull() ??
-          await _transcriptMessageDao.mediaStatus(messageId).getSingleOrNull());
+  Future<bool> isNotPending(String messageId) =>
+      _messageDao.hasMediaStatus(messageId, MediaStatus.pending, true);
 
   void deleteCryptoTmpFile(String category, File file) {
     if (category.isSignal || category.isEncrypted) {
