@@ -20,7 +20,6 @@ import '../../../../utils/file.dart';
 import '../../../../utils/hook.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/status.dart';
-import '../../../../widgets/toast.dart';
 
 class FilePage extends HookWidget {
   const FilePage({
