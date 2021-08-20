@@ -413,7 +413,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return await messageHasData || await transcriptMessageHasData;
   }
 
-  Future<void> syncMessageMedia(String messageId) async {
+  Future<void> syncMessageMedia(String messageId, [bool force = false]) async {
+    if (!force && !await hasMediaStatus(messageId, MediaStatus.done)) {
+      return;
+    }
+
     var content = db.messages.content;
     var mediaUrl = db.messages.mediaUrl;
     var mediaSize = db.messages.mediaSize;

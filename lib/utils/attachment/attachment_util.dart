@@ -92,7 +92,7 @@ class AttachmentUtil extends ChangeNotifier {
       return _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
     } else {
       if (await _messageDao.hasMediaStatus(messageId, MediaStatus.done)) {
-        return _messageDao.syncMessageMedia(messageId);
+        return _messageDao.syncMessageMedia(messageId, true);
       }
 
       await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
