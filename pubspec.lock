@@ -453,6 +453,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "6.1.2"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   file_selector:
     dependency: "direct main"
     description:
@@ -577,6 +584,13 @@ packages:
       url: "https://github.com/YeungKC/packages.git"
     source: git
     version: "0.6.4"
+  flutter_plugin_android_lifecycle:
+    dependency: transitive
+    description:
+      name: flutter_plugin_android_lifecycle
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.2"
   flutter_portal:
     dependency: "direct main"
     description:
@@ -1163,6 +1177,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.2"
+  sqlite3_flutter_libs:
+    dependency: "direct main"
+    description:
+      name: sqlite3_flutter_libs
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.5.0"
   sqlparser:
     dependency: transitive
     description:

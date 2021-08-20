@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -16,6 +14,7 @@ import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../utils/file.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
@@ -300,16 +299,17 @@ class _Bar extends StatelessWidget {
             size: 20,
             onTap: () async {
               if (message.mediaUrl?.isEmpty ?? true) return;
-              final path = await getSavePath(
-                confirmButtonText: context.l10n.save,
-                suggestedName: message.mediaName ?? basename(message.mediaUrl!),
-              );
-              if (path?.isEmpty ?? true) return;
-              await runFutureWithToast(
+              await saveFileToSystem(
                 context,
-                File(context.accountServer.convertMessageAbsolutePath(message))
-                    .copy(path!),
-              );
+                context.accountServer.convertMessageAbsolutePath(message),
+                suggestName: message.mediaName,
+              ).then((succeed) {
+                if (succeed) {
+                  showToastSuccessful(context);
+                }
+              }).onError((error, stackTrace) {
+                showToastFailed(context, error);
+              });
             },
           ),
           const SizedBox(width: 14),

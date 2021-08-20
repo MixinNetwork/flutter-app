@@ -4,8 +4,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:cross_file/cross_file.dart';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:file_selector/file_selector.dart' as file_selector;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:markdown/markdown.dart';
@@ -37,19 +37,12 @@ export '../datetime_format_utils.dart'
     show DateTimeExtension, StringEpochNanoExtension;
 
 part 'src/file.dart';
-
 part 'src/image.dart';
-
 part 'src/iterable.dart';
-
 part 'src/markdown.dart';
-
 part 'src/provider.dart';
-
 part 'src/stream.dart';
-
 part 'src/string.dart';
-
 part 'src/ui.dart';
 
 void importExtension() {}
