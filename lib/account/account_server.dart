@@ -906,26 +906,48 @@ class AccountServer {
   }
 
   Future<String?> downloadAttachment(db.MessageItem message) async {
+    AttachmentMessage? attachmentMessage;
     final m =
         await database.messageDao.findMessageByMessageId(message.messageId);
-    if (m == null) {
-      return null;
+    if (m != null) {
+      attachmentMessage = AttachmentMessage(
+        m.mediaKey,
+        m.mediaDigest,
+        m.content!,
+        m.mediaMimeType!,
+        m.mediaSize!,
+        m.name,
+        m.mediaWidth,
+        m.mediaHeight,
+        m.thumbImage,
+        int.tryParse(m.mediaDuration ?? '0'),
+        m.mediaWaveform,
+        null,
+        null,
+      );
     }
-    final attachmentMessage = AttachmentMessage(
-      m.mediaKey,
-      m.mediaDigest,
-      m.content!,
-      m.mediaMimeType!,
-      m.mediaSize!,
-      m.name,
-      m.mediaWidth,
-      m.mediaHeight,
-      m.thumbImage,
-      int.tryParse(m.mediaDuration ?? '0'),
-      m.mediaWaveform,
-      null,
-      null,
-    );
+    if (attachmentMessage == null) {
+      final m = await database.transcriptMessageDao
+          .findTranscriptMessageByMessageId(message.messageId);
+
+      if (m != null) {
+        attachmentMessage = AttachmentMessage(
+          m.mediaKey,
+          m.mediaDigest,
+          m.content!,
+          m.mediaMimeType!,
+          m.mediaSize!,
+          m.userFullName,
+          m.mediaWidth,
+          m.mediaHeight,
+          m.thumbImage,
+          int.tryParse(m.mediaDuration ?? '0'),
+          m.mediaWaveform,
+          null,
+          null,
+        );
+      }
+    }
     await attachmentUtil.downloadAttachment(
         content: message.content!,
         messageId: message.messageId,
