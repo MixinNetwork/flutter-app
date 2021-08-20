@@ -129,8 +129,10 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => _copyUrl(context,
-              context.accountServer.convertMessageAbsolutePath(current.value)),
+          onInvoke: (Intent intent) => _copyUrl(
+              context,
+              context.accountServer.convertMessageAbsolutePath(
+                  current.value, context.isTranscript)),
         ),
       },
       autofocus: true,
@@ -290,8 +292,10 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesCopySvg,
             color: context.theme.icon,
             size: 20,
-            onTap: () => _copyUrl(context,
-                context.accountServer.convertMessageAbsolutePath(message)),
+            onTap: () => _copyUrl(
+                context,
+                context.accountServer
+                    .convertMessageAbsolutePath(message, context.isTranscript)),
           ),
           const SizedBox(width: 14),
           ActionButton(
@@ -307,7 +311,8 @@ class _Bar extends StatelessWidget {
               if (path?.isEmpty ?? true) return;
               await runFutureWithToast(
                 context,
-                File(context.accountServer.convertMessageAbsolutePath(message))
+                File(context.accountServer.convertMessageAbsolutePath(
+                        message, context.isTranscript))
                     .copy(path!),
               );
             },
@@ -353,8 +358,9 @@ class _Item extends HookWidget {
                   : SystemMouseCursors.zoomOut,
               child: PhotoView(
                 tightMode: true,
-                imageProvider: FileImage(File(
-                    context.accountServer.convertMessageAbsolutePath(message))),
+                imageProvider: FileImage(File(context.accountServer
+                    .convertMessageAbsolutePath(
+                        message, context.isTranscript))),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 initialScale: PhotoViewComputedScale.contained,

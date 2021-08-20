@@ -62,15 +62,15 @@ class VideoMessageWidget extends StatelessWidget {
                     message.mediaUrl != null) {
                   openUri(
                       context,
-                      Uri.file(context.accountServer
-                              .convertMessageAbsolutePath(message))
+                      Uri.file(context.accountServer.convertMessageAbsolutePath(
+                              message, context.isTranscript))
                           .toString());
                 } else if (message.mediaStatus == MediaStatus.pending) {
                   context.accountServer
                       .cancelProgressAttachmentJob(message.messageId);
                 } else if (message.type.isLive && message.mediaUrl != null) {
-                  launch(context.accountServer
-                      .convertMessageAbsolutePath(message));
+                  launch(context.accountServer.convertMessageAbsolutePath(
+                      message, context.isTranscript));
                 }
               },
               child: ClipRRect(

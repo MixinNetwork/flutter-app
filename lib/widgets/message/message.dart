@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,6 +43,25 @@ import 'item/video_message.dart';
 import 'item/waiting_message.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
+
+class _MessageIsTranscript extends Equatable {
+  const _MessageIsTranscript(this.isTranscript);
+
+  final bool isTranscript;
+
+  @override
+  List<Object?> get props => [isTranscript];
+}
+
+extension MessageIsTranscriptExtension on BuildContext {
+  bool get isTranscript {
+    try {
+      return read<_MessageIsTranscript>().isTranscript;
+    } catch (e) {
+      return false;
+    }
+  }
+}
 
 class MessageItemWidget extends HookWidget {
   const MessageItemWidget({
@@ -341,9 +361,12 @@ class MessageItemWidget extends HookWidget {
       );
     }
 
-    return Padding(
-      padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
-      child: child,
+    return Provider(
+      create: (context) => _MessageIsTranscript(isTranscript),
+      child: Padding(
+        padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
+        child: child,
+      ),
     );
   }
 }

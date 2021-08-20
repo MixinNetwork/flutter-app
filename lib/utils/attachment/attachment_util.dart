@@ -20,6 +20,7 @@ import '../../db/dao/transcript_message_dao.dart';
 import '../../db/extension/message_category.dart';
 import '../../enum/media_status.dart';
 import '../crypto_util.dart';
+import '../extension/extension.dart';
 import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
@@ -65,9 +66,12 @@ class AttachmentUtil extends ChangeNotifier {
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
     };
+    transcriptPath = p.join(mediaPath, 'Transcripts');
+    Directory(transcriptPath).create(recursive: true);
   }
 
   final String mediaPath;
+  late final String transcriptPath;
   final MessageDao _messageDao;
   final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
@@ -91,18 +95,24 @@ class AttachmentUtil extends ChangeNotifier {
     if (_attachmentJob[messageId] != null) {
       return _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
     } else {
-      if (await _messageDao.hasMediaStatus(messageId, MediaStatus.done)) {
-        return _messageDao.syncMessageMedia(messageId, true);
+      if (await _messageDao.messageHasMediaStatus(
+              messageId, MediaStatus.done) &&
+          await _messageDao.transcriptMessageHasMediaStatus(
+              messageId, MediaStatus.done, true)) {
+        await syncMessageMedia(messageId);
+        return;
       }
 
       await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
     }
 
+    final message = await _messageDao.findMessageByMessageId(messageId);
     final file = getAttachmentFile(
       category,
       conversationId,
       messageId,
       mimeType: attachmentMessage?.mimeType,
+      isTranscript: message == null,
     );
 
     try {
@@ -119,7 +129,6 @@ class AttachmentUtil extends ChangeNotifier {
           mediaKey = attachmentMessage?.key as String?;
           mediaDigest = attachmentMessage?.digest as String?;
           if (mediaKey == null || mediaDigest == null) {
-            final message = await _messageDao.findMessageByMessageId(messageId);
             if (message != null) {
               mediaKey = message.mediaKey;
               mediaDigest = message.mediaDigest;
@@ -159,6 +168,20 @@ class AttachmentUtil extends ChangeNotifier {
         if (attachmentMessage != null) {
           final encoded = await jsonBase64EncodeWithIsolate(attachmentMessage);
           await _messageDao.updateMessageContent(messageId, encoded);
+        }
+
+        if (message != null &&
+            (await _transcriptMessageDao
+                    .findTranscriptMessageByMessageId(messageId) !=
+                null)) {
+          final transcriptPath = convertAbsolutePath(
+            category: message.category,
+            fileName: file.pathBasename,
+            messageId: messageId,
+            isTranscript: true,
+          );
+
+          await file.copy(transcriptPath);
         }
 
         await _messageDao.updateMedia(
@@ -250,21 +273,40 @@ class AttachmentUtil extends ChangeNotifier {
     return path;
   }
 
-  String convertAbsolutePath(
-      String category, String conversationId, String? fileName) {
+  String convertAbsolutePath({
+    String? category,
+    required String? fileName,
+    String? conversationId,
+    String? messageId,
+    bool isTranscript = false,
+  }) {
     if (fileName?.trim().isEmpty ?? true) return '';
-    assert(category.isAttachment);
+    if (isTranscript) {
+      var name = '$messageId${fileName!.fileExtension}';
+      if (messageId == null) {
+        name = fileName;
+      }
+      return p.join(transcriptPath, name);
+    }
     if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
       return fileName!;
     }
+    assert(conversationId != null);
+    assert(category != null);
     return p.join(
-        getAttachmentDirectoryPath(category, conversationId), fileName);
+        getAttachmentDirectoryPath(category!, conversationId!), fileName);
   }
 
   File getAttachmentFile(
-      String category, String conversationId, String messageId,
-      {String? mimeType}) {
-    final path = getAttachmentDirectoryPath(category, conversationId);
+    String category,
+    String conversationId,
+    String messageId, {
+    String? mimeType,
+    bool isTranscript = false,
+  }) {
+    final path = isTranscript
+        ? transcriptPath
+        : getAttachmentDirectoryPath(category, conversationId);
     String suffix;
     if (category.isImage) {
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
@@ -329,6 +371,58 @@ class AttachmentUtil extends ChangeNotifier {
 
   double getAttachmentProgress(String messageId) =>
       _attachmentJob[messageId]?.progress ?? 0;
+
+  Future<bool> syncMessageMedia(String messageId) async {
+    Future<bool> fromMessage() async {
+      if (await _messageDao.messageHasMediaStatus(
+          messageId, MediaStatus.done)) {
+        final message = await _messageDao.findMessageByMessageId(messageId);
+        final path = convertAbsolutePath(
+          category: message!.category,
+          fileName: message.mediaUrl,
+          conversationId: message.conversationId,
+          messageId: messageId,
+        );
+        final transcriptPath = convertAbsolutePath(
+          category: message.category,
+          fileName: message.mediaUrl,
+          messageId: messageId,
+          isTranscript: true,
+        );
+
+        await File(path).copy(transcriptPath);
+
+        await _messageDao.syncMessageMedia(messageId, true);
+        return true;
+      }
+
+      return false;
+    }
+
+    Future<bool> fromOtherTranscript() async {
+      final done = _messageDao.transcriptMessageHasMediaStatus(
+        messageId,
+        MediaStatus.done,
+      );
+      final notDone = _messageDao.transcriptMessageHasMediaStatus(
+        messageId,
+        MediaStatus.done,
+        true,
+      );
+      if (await done && !await notDone) {
+        await _messageDao.syncMessageMedia(messageId, true);
+        return true;
+      }
+
+      return false;
+    }
+
+    final result = await Future.wait([
+      fromMessage(),
+      fromOtherTranscript(),
+    ]);
+    return result.any((result) => result);
+  }
 }
 
 class AttachmentResult {

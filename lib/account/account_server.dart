@@ -949,11 +949,12 @@ class AccountServer {
       }
     }
     await attachmentUtil.downloadAttachment(
-        content: message.content!,
-        messageId: message.messageId,
-        conversationId: message.conversationId,
-        category: message.type,
-        attachmentMessage: attachmentMessage);
+      content: message.content!,
+      messageId: message.messageId,
+      conversationId: message.conversationId,
+      category: message.type,
+      attachmentMessage: attachmentMessage,
+    );
   }
 
   Future<void> reUploadAttachment(db.MessageItem message) =>
@@ -1378,24 +1379,62 @@ class AccountServer {
       attachmentUtil.cancelProgressAttachmentJob(messageId);
 
   Future<void> deleteMessage(String messageId) async {
-    final tuple2 = await database.messageDao.deleteMessage(messageId);
-    final paths = tuple2?.item2
-        .map((e) => convertAbsolutePath(e.item2, tuple2.item1, e.item1));
-    paths?.forEach((element) {
-      final file = File(element);
-      if (!file.existsSync()) return;
-      unawaited(file.delete());
-    });
+    final message = await database.messageDao.findMessageByMessageId(messageId);
+    if (message == null) return;
+    Future<void> Function()? delete;
+    if (message.category.isAttachment) {
+      delete = () async {
+        final path = attachmentUtil.convertAbsolutePath(
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        );
+        final file = File(path);
+        if (file.existsSync()) await file.delete();
+      };
+    } else if (message.category.isTranscript) {
+      final iterable = await database.transcriptMessageDao
+          .transcriptMessageByTranscriptId(message.messageId)
+          .get();
+
+      delete = () async {
+        final list = await database.transcriptMessageDao
+            .messageIdsByMessageIds(iterable.map((e) => e.messageId))
+            .get();
+        iterable
+            .where((element) => !list.contains(element.messageId))
+            .forEach((e) {
+          final path = attachmentUtil.convertAbsolutePath(
+            fileName: e.mediaUrl,
+            messageId: e.messageId,
+            isTranscript: true,
+          );
+
+          final file = File(path);
+          if (file.existsSync()) unawaited(file.delete());
+        });
+      };
+    }
+    await database.messageDao.deleteMessage(messageId);
+
+    unawaited(delete?.call());
   }
 
   String convertAbsolutePath(
-          String category, String conversationId, String? fileName) =>
-      attachmentUtil.convertAbsolutePath(category, conversationId, fileName);
+          String category, String conversationId, String? fileName,
+          [bool isTranscript = false]) =>
+      attachmentUtil.convertAbsolutePath(
+        category: category,
+        conversationId: conversationId,
+        fileName: fileName,
+        isTranscript: isTranscript,
+      );
 
-  String convertMessageAbsolutePath(db.MessageItem? messageItem) {
+  String convertMessageAbsolutePath(db.MessageItem? messageItem,
+      [bool isTranscript = false]) {
     if (messageItem == null) return '';
-    return convertAbsolutePath(
-        messageItem.type, messageItem.conversationId, messageItem.mediaUrl);
+    return convertAbsolutePath(messageItem.type, messageItem.conversationId,
+        messageItem.mediaUrl, isTranscript);
   }
 
   Future<List<db.User>?> updateUserByIdentityNumber(String identityNumber) =>

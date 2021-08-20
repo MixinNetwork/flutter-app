@@ -168,8 +168,14 @@ class MixinDatabase extends _$MixinDatabase {
     ResultSetImplementation<T, R> table, [
     List<Join> joins = const [],
     Expression<bool?> predicate = ignoreWhere,
-  ]) =>
-      watchHasData(table, joins, predicate).first;
+  ]) async =>
+      (await (selectOnly(table)
+                ..addColumns([const CustomExpression<String>('1')])
+                ..join(joins)
+                ..where(predicate)
+                ..limit(1))
+              .get())
+          .isNotEmpty;
 }
 
 LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {

@@ -26,6 +26,27 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
             ..where((tbl) => tbl.messageId.equals(messageId))
             ..limit(1))
           .getSingleOrNull();
+
+  Future<int> findCountByMessageId(String messageId) async {
+    final count = countAll();
+    return await (db.selectOnly(db.transcriptMessages)
+              ..addColumns([count])
+              ..where(db.transcriptMessages.messageId.equals(messageId)))
+            .map((row) => row.read(count))
+            .getSingleOrNull() ??
+        0;
+  }
+
+  SimpleSelectStatement<TranscriptMessages, TranscriptMessage>
+      transcriptMessageByTranscriptId(String transcriptId) =>
+          db.select(db.transcriptMessages)
+            ..where((tbl) => tbl.transcriptId.equals(transcriptId));
+
+  Selectable<String?> messageIdsByMessageIds(Iterable<String> messageIds) =>
+      (db.selectOnly(db.transcriptMessages)
+            ..addColumns([db.transcriptMessages.messageId])
+            ..where(db.transcriptMessages.messageId.isIn(messageIds)))
+          .map((row) => row.read(db.transcriptMessages.messageId));
 }
 
 extension TranscriptMessageItemExtension on TranscriptMessageItem {

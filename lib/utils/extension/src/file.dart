@@ -30,8 +30,10 @@ extension XFileExtension on file_selector.XFile {
 
 extension FileRelativePath on File {
   String get pathBasename => path.pathBasename;
+  String get fileExtension => path.fileExtension;
 }
 
 extension StringPathRelativePath on String {
   String get pathBasename => basename(this);
+  String get fileExtension => extension(this);
 }

@@ -21,9 +21,12 @@ import '../../generated/l10n.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
 
+export 'package:flutter_app/widgets/message/message.dart'
+    show MessageIsTranscriptExtension;
 export 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     show UuidHashcodeExtension;
 export 'package:provider/provider.dart' show ReadContext, WatchContext;
+
 export '../../crypto/attachment/crypto_attachment.dart'
     show EncryptAttachmentStreamExtension, DecryptAttachmentStreamExtension;
 export '../../db/dao/transcript_message_dao.dart'

@@ -30,8 +30,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' as db;
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -1244,7 +1244,9 @@ class DecryptMessage extends Injector {
           .forEach((transcript) async {
         final category = transcript.category;
 
-        await database.messageDao.syncMessageMedia(transcript.messageId);
+        if (await _attachmentUtil.syncMessageMedia(transcript.messageId)) {
+          return;
+        }
 
         if (category.isImage && !_photoAutoDownload) return;
         if (category.isVideo && !_videoAutoDownload) return;
