@@ -1198,12 +1198,14 @@ class DecryptMessage extends Injector {
           await refreshSticker(transcript.stickerId!);
         }));
 
-    Future _refreshUser() => refreshUsers(transcripts
-        .where((transcript) =>
-            transcript.category.isContact &&
-            (transcript.sharedUserId?.isNotEmpty ?? false))
-        .map((transcript) => transcript.sharedUserId!)
-        .toList());
+    Future _refreshUser() => refreshUsers([
+          ...transcripts.map((e) => e.userId).whereNotNull(),
+          ...transcripts
+              .where((transcript) =>
+                  transcript.category.isContact &&
+                  (transcript.sharedUserId?.isNotEmpty ?? false))
+              .map((transcript) => transcript.sharedUserId!),
+        ]);
 
     final attachmentTranscript =
         transcripts.where((transcript) => transcript.category.isAttachment);
