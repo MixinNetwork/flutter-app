@@ -82,7 +82,7 @@ class VideoMessageWidget extends StatelessWidget {
                     fit: StackFit.expand,
                     children: [
                       if (message.thumbImage != null)
-                        ImageByBase64(message.thumbImage!),
+                        ImageByBlurHashOrBase64(imageData: message.thumbImage!),
                       if (message.thumbUrl != null)
                         CachedNetworkImage(
                           imageUrl: message.thumbUrl!,

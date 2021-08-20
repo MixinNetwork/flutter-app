@@ -120,7 +120,7 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: ImageByBase64(thumbImage!),
+          image: ImageByBlurHashOrBase64(imageData: thumbImage!),
           icon: SvgPicture.asset(
             Resources.assetsImagesVideoSvg,
             color: iconColor,
@@ -131,8 +131,9 @@ class QuoteMessage extends HookWidget {
       }
 
       if (type.isLive) {
-        final placeholder =
-            thumbImage != null ? ImageByBase64(thumbImage) : const SizedBox();
+        final placeholder = thumbImage != null
+            ? ImageByBlurHashOrBase64(imageData: thumbImage)
+            : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,

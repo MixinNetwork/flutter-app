@@ -363,8 +363,8 @@ class _Item extends HookWidget {
                     controller.scaleState == PhotoViewScaleState.initial
                         ? PhotoViewScaleState.covering
                         : PhotoViewScaleState.initial,
-                errorBuilder: (_, __, ___) => ImageByBase64(
-                  message.thumbImage!,
+                errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
+                  imageData: message.thumbImage!,
                   fit: BoxFit.contain,
                 ),
               ),

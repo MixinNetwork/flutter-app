@@ -1150,6 +1150,10 @@ class DecryptMessage extends Injector {
               // ignore: avoid_dynamic_calls
               DateTime.tryParse(e['media_created_at'] as String? ?? '')
                   ?.millisecondsSinceEpoch;
+          // ignore: avoid_dynamic_calls
+          final mediaDuration = e['media_duration'];
+          // ignore: avoid_dynamic_calls
+          e['media_duration'] = mediaDuration != null ? '$mediaDuration' : null;
           return TranscriptMessage.fromJson(e as Map<String, dynamic>);
         })
         .where((transcript) => transcript.transcriptId == data.messageId)

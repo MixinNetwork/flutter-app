@@ -50,12 +50,14 @@ class MessageItemWidget extends HookWidget {
     this.prev,
     this.next,
     this.lastReadMessageId,
+    this.isTranscript = false,
   }) : super(key: key);
 
   final MessageItem message;
   final MessageItem? prev;
   final MessageItem? next;
   final String? lastReadMessageId;
+  final bool isTranscript;
 
   static const primaryFontSize = 16.0;
   static const secondaryFontSize = 14.0;
@@ -123,7 +125,7 @@ class MessageItemWidget extends HookWidget {
                 userId: userId,
                 isCurrentUser: isCurrentUser,
                 buildMenus: () => [
-                  if (message.type.isText ||
+                  if (!isTranscript && message.type.isText ||
                       message.type.isImage ||
                       message.type.isVideo ||
                       message.type.isLive ||
@@ -140,7 +142,7 @@ class MessageItemWidget extends HookWidget {
                       onTap: () =>
                           context.read<QuoteMessageCubit>().emit(message),
                     ),
-                  if (message.canForward)
+                  if (!isTranscript && message.canForward)
                     ContextMenu(
                       title: context.l10n.forward,
                       onTap: () async {
@@ -165,7 +167,8 @@ class MessageItemWidget extends HookWidget {
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.content)),
                     ),
-                  if (isCurrentUser &&
+                  if (!isTranscript &&
+                      isCurrentUser &&
                       !message.type.isRecall &&
                       DateTime.now().isBefore(
                           message.createdAt.add(const Duration(minutes: 30))))
@@ -176,12 +179,13 @@ class MessageItemWidget extends HookWidget {
                           [message.messageId],
                           conversationId: message.conversationId),
                     ),
-                  ContextMenu(
-                    title: context.l10n.deleteForMe,
-                    isDestructiveAction: true,
-                    onTap: () =>
-                        context.accountServer.deleteMessage(message.messageId),
-                  ),
+                  if (!isTranscript)
+                    ContextMenu(
+                      title: context.l10n.deleteForMe,
+                      isDestructiveAction: true,
+                      onTap: () => context.accountServer
+                          .deleteMessage(message.messageId),
+                    ),
                   if (!kReleaseMode)
                     ContextMenu(
                       title: 'Copy message',
