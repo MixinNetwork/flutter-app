@@ -1,19 +1,17 @@
-import 'dart:io';
-
-import 'package:file_selector/file_selector.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:path/path.dart';
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/file.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
+import '../../toast.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -53,14 +51,11 @@ class FileMessage extends StatelessWidget {
             } else if (message.mediaStatus == MediaStatus.done &&
                 message.mediaUrl != null) {
               if (message.mediaUrl?.isEmpty ?? true) return;
-              final path = await getSavePath(
-                confirmButtonText: context.l10n.save,
-                suggestedName: message.mediaName ?? basename(message.mediaUrl!),
+              await saveFileToSystem(
+                context,
+                context.accountServer.convertMessageAbsolutePath(message),
+                suggestName: message.mediaName,
               );
-              if (path?.isEmpty ?? true) return;
-              await File(
-                      context.accountServer.convertMessageAbsolutePath(message))
-                  .copy(path!);
             } else if (message.mediaStatus == MediaStatus.pending) {
               await context.accountServer
                   .cancelProgressAttachmentJob(message.messageId);

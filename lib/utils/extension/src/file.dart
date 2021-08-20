@@ -1,14 +1,14 @@
 part of '../extension.dart';
 
 extension FileExtension on File {
-  file_selector.XFile get xFile => file_selector.XFile(
+  XFile get xFile => XFile(
         path,
         mimeType: lookupMimeType(path),
         name: basename(path),
       );
 }
 
-extension XFileExtension on file_selector.XFile {
+extension XFileExtension on XFile {
   bool get isImage => {
         'image/jpeg',
         'image/png',

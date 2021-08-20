@@ -1,7 +1,4 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -9,7 +6,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:path/path.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -20,9 +16,11 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/media_status.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../utils/file.dart';
 import '../../../../utils/hook.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/status.dart';
+import '../../../../widgets/toast.dart';
 
 class FilePage extends HookWidget {
   const FilePage({
@@ -182,14 +180,11 @@ class _Item extends StatelessWidget {
           } else if (message.mediaStatus == MediaStatus.done &&
               message.mediaUrl != null) {
             if (message.mediaUrl?.isEmpty ?? true) return;
-            final path = await getSavePath(
-              confirmButtonText: context.l10n.save,
-              suggestedName: message.mediaName ?? basename(message.mediaUrl!),
+            await saveFileToSystem(
+              context,
+              context.accountServer.convertMessageAbsolutePath(message),
+              suggestName: message.mediaName,
             );
-            if (path?.isEmpty ?? true) return;
-            await File(
-                    context.accountServer.convertMessageAbsolutePath(message))
-                .copy(path!);
           }
         },
         child: Padding(

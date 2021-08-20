@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:extended_image/extended_image.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
