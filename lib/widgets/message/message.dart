@@ -125,18 +125,19 @@ class MessageItemWidget extends HookWidget {
                 userId: userId,
                 isCurrentUser: isCurrentUser,
                 buildMenus: () => [
-                  if (!isTranscript && message.type.isText ||
-                      message.type.isImage ||
-                      message.type.isVideo ||
-                      message.type.isLive ||
-                      message.type.isData ||
-                      message.type.isPost ||
-                      message.type.isLocation ||
-                      message.type.isAudio ||
-                      message.type.isSticker ||
-                      message.type.isContact ||
-                      message.type == MessageCategory.appCard ||
-                      message.type == MessageCategory.appButtonGroup)
+                  if (!isTranscript &&
+                      (message.type.isText ||
+                          message.type.isImage ||
+                          message.type.isVideo ||
+                          message.type.isLive ||
+                          message.type.isData ||
+                          message.type.isPost ||
+                          message.type.isLocation ||
+                          message.type.isAudio ||
+                          message.type.isSticker ||
+                          message.type.isContact ||
+                          message.type == MessageCategory.appCard ||
+                          message.type == MessageCategory.appButtonGroup))
                     ContextMenu(
                       title: context.l10n.reply,
                       onTap: () =>

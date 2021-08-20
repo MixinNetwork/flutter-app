@@ -275,6 +275,7 @@ class TranscriptPage extends HookWidget {
                     prev: list.getOrNull(index - 1),
                     message: list[index],
                     next: list.getOrNull(index + 1),
+                    isTranscript: true,
                   ),
                   itemCount: list.length,
                 ),
