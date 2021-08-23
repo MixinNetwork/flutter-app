@@ -305,8 +305,8 @@ class _Bar extends StatelessWidget {
               if (message.mediaUrl?.isEmpty ?? true) return;
               await saveFileToSystem(
                 context,
-                context.accountServer.convertMessageAbsolutePath(
-                        message, context.isTranscript),
+                context.accountServer
+                    .convertMessageAbsolutePath(message, context.isTranscript),
                 suggestName: message.mediaName,
               ).then((succeed) {
                 if (succeed) {
