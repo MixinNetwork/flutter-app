@@ -930,7 +930,8 @@ class AccountServer {
     }
     if (attachmentMessage == null) {
       final m = await database.transcriptMessageDao
-          .transcriptMessageByMessageId(message.messageId).getSingleOrNull();
+          .transcriptMessageByMessageId(message.messageId)
+          .getSingleOrNull();
 
       if (m != null) {
         attachmentMessage = AttachmentMessage(
