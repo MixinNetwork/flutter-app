@@ -108,6 +108,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("This message was deleted"),
         "chatRecallMe":
             MessageLookupByLibrary.simpleMessage("You deleted this message"),
+        "chatTranscript": MessageLookupByLibrary.simpleMessage("Transcript"),
         "chatWaiting": m5,
         "chatWaitingDesktop": MessageLookupByLibrary.simpleMessage("desktop"),
         "chats": MessageLookupByLibrary.simpleMessage("Chats"),

@@ -61,7 +61,13 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
       stopwatch = Stopwatch()..start();
     }
 
-    final result = await run();
+    T result;
+    try {
+      result = await run();
+    } catch (error, s) {
+      e('queryExecutor Error: $error\n$s\nstatement: $statement, args: $args');
+      rethrow;
+    }
     stopwatch?.stop();
 
     if (stopwatch != null && stopwatch.elapsed.inMilliseconds > 5) {

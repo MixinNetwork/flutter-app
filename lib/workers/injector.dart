@@ -117,7 +117,7 @@ class Injector {
 
     final existsUsersIds = existsUsers.map((e) => e.userId).toSet();
     final queryUsers = ids.where((id) => !existsUsersIds.contains(id)).toList();
-    assert(queryUsers.isNotEmpty);
+    if (queryUsers.isEmpty) return existsUsers;
 
     return [
       ...existsUsers,

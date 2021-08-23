@@ -38,4 +38,7 @@ class StickerDao extends DatabaseAccessor<MixinDatabase>
           lastUseAt: Value(dateTime),
         ),
       );
+
+  Future<bool> hasSticker(String stickerId) async => db.hasData(
+      db.stickers, const [], db.stickers.stickerId.equals(stickerId));
 }

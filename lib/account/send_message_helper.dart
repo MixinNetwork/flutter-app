@@ -575,7 +575,10 @@ class SendMessageHelper {
         conversationId: conversationId,
         senderId: senderId,
         file: XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category: category,
         attachmentResult: attachmentResult,
       );
@@ -592,7 +595,10 @@ class SendMessageHelper {
         conversationId,
         senderId,
         XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category,
         null,
         attachmentResult: attachmentResult,
@@ -614,7 +620,10 @@ class SendMessageHelper {
         conversationId,
         senderId,
         XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category,
         null,
         attachmentResult: attachmentResult,
@@ -633,7 +642,10 @@ class SendMessageHelper {
         conversationId,
         senderId,
         XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category,
         null,
         attachmentResult: attachmentResult,

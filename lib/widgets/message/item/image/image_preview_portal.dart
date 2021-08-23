@@ -128,8 +128,10 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => _copyUrl(context,
-              context.accountServer.convertMessageAbsolutePath(current.value)),
+          onInvoke: (Intent intent) => _copyUrl(
+              context,
+              context.accountServer.convertMessageAbsolutePath(
+                  current.value, context.isTranscript)),
         ),
       },
       autofocus: true,
@@ -289,8 +291,10 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesCopySvg,
             color: context.theme.icon,
             size: 20,
-            onTap: () => _copyUrl(context,
-                context.accountServer.convertMessageAbsolutePath(message)),
+            onTap: () => _copyUrl(
+                context,
+                context.accountServer
+                    .convertMessageAbsolutePath(message, context.isTranscript)),
           ),
           const SizedBox(width: 14),
           ActionButton(
@@ -301,7 +305,8 @@ class _Bar extends StatelessWidget {
               if (message.mediaUrl?.isEmpty ?? true) return;
               await saveFileToSystem(
                 context,
-                context.accountServer.convertMessageAbsolutePath(message),
+                context.accountServer
+                    .convertMessageAbsolutePath(message, context.isTranscript),
                 suggestName: message.mediaName,
               ).then((succeed) {
                 if (succeed) {
@@ -353,8 +358,9 @@ class _Item extends HookWidget {
                   : SystemMouseCursors.zoomOut,
               child: PhotoView(
                 tightMode: true,
-                imageProvider: FileImage(File(
-                    context.accountServer.convertMessageAbsolutePath(message))),
+                imageProvider: FileImage(File(context.accountServer
+                    .convertMessageAbsolutePath(
+                        message, context.isTranscript))),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 initialScale: PhotoViewComputedScale.contained,
@@ -363,8 +369,8 @@ class _Item extends HookWidget {
                     controller.scaleState == PhotoViewScaleState.initial
                         ? PhotoViewScaleState.covering
                         : PhotoViewScaleState.initial,
-                errorBuilder: (_, __, ___) => ImageByBase64(
-                  message.thumbImage!,
+                errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
+                  imageData: message.thumbImage!,
                   fit: BoxFit.contain,
                 ),
               ),

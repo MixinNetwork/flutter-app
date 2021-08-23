@@ -67,6 +67,8 @@ Future<String?> messagePreviewOptimize(
   } else if (messageCategory.isRecall) {
     _content =
         '[${isCurrentUser ? Localization.current.chatRecallMe : Localization.current.chatRecallDelete}]';
+  } else if (messageCategory.isTranscript) {
+    _content = Localization.current.chatTranscript;
   } else {
     _content = Localization.current.chatNotSupport;
   }
@@ -120,6 +122,8 @@ String? messagePreviewIcon(
     icon = Resources.assetsImagesVideoCallSvg;
   } else if (messageCategory.isRecall) {
     icon = Resources.assetsImagesRecallSvg;
+  } else if (messageCategory.isTranscript) {
+    icon = Resources.assetsImagesFileSvg;
   }
   return icon;
 }

@@ -19,6 +19,7 @@ import '../blaze/vo/snapshot_message.dart';
 import '../blaze/vo/system_circle_message.dart';
 import '../blaze/vo/system_conversation_message.dart';
 import '../blaze/vo/system_user_message.dart';
+import '../blaze/vo/transcript_minimal.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
 import '../crypto/signal/ratchet_status.dart';
@@ -722,16 +723,11 @@ class DecryptMessage extends Injector {
       } else {
         plain = await _decodeWithIsolate(plainText);
       }
-      final message = Message(
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        userId: data.senderId,
-        category: data.category!,
-        content: plain,
-        status: data.status,
-        createdAt: data.createdAt,
-      );
-      await database.messageDao.insert(message, accountId, data.silent);
+      final list = await jsonDecodeWithIsolate(plain) as List<dynamic>;
+      final message = await processTranscriptMessage(data, list);
+      if (message != null) {
+        await database.messageDao.insert(message, accountId, data.silent);
+      }
     }
   }
 
@@ -1032,6 +1028,14 @@ class DecryptMessage extends Injector {
           liveMessage.url,
           liveMessage.thumbUrl,
           data.status);
+    } else if (data.category == MessageCategory.signalTranscript) {
+      final plain = await _decodeWithIsolate(plaintext);
+      final list = await jsonDecodeWithIsolate(plain) as List<dynamic>;
+      final message = await processTranscriptMessage(data, list);
+      if (message != null) {
+        await database.messageDao.updateTranscriptMessage(message.content,
+            message.mediaSize, message.mediaStatus, message.status, messageId);
+      }
     }
     if (await database.messageDao
             .countMessageByQuoteId(data.conversationId, messageId) >
@@ -1116,6 +1120,171 @@ class DecryptMessage extends Injector {
     } catch (e, s) {
       w('updateUserByIdentityNumber error $e, stack: $s');
     }
+  }
+
+  Future<Message?>? processTranscriptMessage(
+      BlazeMessageData data, List<dynamic> list) async {
+    final transcripts = list
+        .map((e) {
+          // ignore: avoid_dynamic_calls
+          e['created_at'] = DateTime.tryParse(e['created_at'] as String? ?? '')
+              ?.millisecondsSinceEpoch;
+          // ignore: avoid_dynamic_calls
+          e['media_created_at'] =
+              // ignore: avoid_dynamic_calls
+              DateTime.tryParse(e['media_created_at'] as String? ?? '')
+                  ?.millisecondsSinceEpoch;
+          // ignore: avoid_dynamic_calls
+          final mediaDuration = e['media_duration'];
+          // ignore: avoid_dynamic_calls
+          e['media_duration'] = mediaDuration != null ? '$mediaDuration' : null;
+          return TranscriptMessage.fromJson(e as Map<String, dynamic>);
+        })
+        .where((transcript) => transcript.transcriptId == data.messageId)
+        .toList();
+
+    if (transcripts.isEmpty) {
+      await database.messageDao.insert(
+        Message(
+          messageId: data.messageId,
+          conversationId: data.conversationId,
+          userId: data.userId,
+          category: data.category!,
+          mediaSize: 0,
+          createdAt: data.createdAt,
+          status: MessageStatus.unknown,
+        ),
+        data.userId,
+      );
+      return null;
+    }
+
+    Future<void> insertFts() async {
+      final contents = await Future.wait(transcripts.where((transcript) {
+        final category = transcript.category;
+        return category.isText ||
+            category.isPost ||
+            category.isData ||
+            category.isContact;
+      }).map((transcript) async {
+        final category = transcript.category;
+        if (category.isData) {
+          return transcript.mediaName;
+        }
+
+        if (category.isContact &&
+            (transcript.sharedUserId?.isNotEmpty ?? false)) {
+          return database.userDao
+              .userFullNameByUserId(transcript.sharedUserId!)
+              .getSingleOrNull();
+        }
+
+        return transcript.content;
+      }));
+
+      final join = contents.whereNotNull().join(' ');
+      await database.messageDao.insertFts(data.messageId, data.conversationId,
+          join, data.createdAt, data.userId);
+    }
+
+    Future _refreshSticker() => Future.wait(transcripts
+            .where((transcript) =>
+                transcript.category.isSticker &&
+                (transcript.stickerId?.isNotEmpty ?? false))
+            .map((transcript) async {
+          final hasSticker =
+              await database.stickerDao.hasSticker(transcript.stickerId!);
+          if (hasSticker) return;
+          await refreshSticker(transcript.stickerId!);
+        }));
+
+    Future _refreshUser() => refreshUsers([
+          ...transcripts.map((e) => e.userId).whereNotNull(),
+          ...transcripts
+              .where((transcript) =>
+                  transcript.category.isContact &&
+                  (transcript.sharedUserId?.isNotEmpty ?? false))
+              .map((transcript) => transcript.sharedUserId!),
+        ]);
+
+    final attachmentTranscript =
+        transcripts.where((transcript) => transcript.category.isAttachment);
+
+    final insertAllTranscriptMessageFuture = database.transcriptMessageDao
+        .insertAll(transcripts
+            .map((transcript) => transcript.copyWith(
+                mediaStatus: const Value(MediaStatus.canceled)))
+            .toList());
+
+    await Future.wait([
+      insertFts(),
+      _refreshSticker(),
+      _refreshUser(),
+      insertAllTranscriptMessageFuture,
+    ]);
+
+    final transcriptMinimalList =
+        (transcripts..sort((a, b) => a.createdAt.compareTo(b.createdAt)))
+            .map((transcript) => TranscriptMinimal(
+                  name: transcript.userFullName ?? '',
+                  category: transcript.category,
+                  content: transcript.content,
+                ))
+            .toList();
+
+    final totalMediaSize = attachmentTranscript
+        .where((transcript) => transcript.mediaSize != null)
+        .map((transcript) => transcript.mediaSize!)
+        .fold<int>(0, (a, b) => a + b);
+
+    Future<bool> downloadTranscriptAttachment() async {
+      var needDownload = false;
+
+      final futures = transcripts
+          .where((transcript) =>
+              transcript.category.isAttachment && transcript.content != null)
+          .map((transcript) async {
+        final category = transcript.category;
+
+        if (await _attachmentUtil.syncMessageMedia(transcript.messageId)) {
+          return;
+        }
+
+        needDownload = needDownload || true;
+
+        if (category.isImage && !_photoAutoDownload) return;
+        if (category.isVideo && !_videoAutoDownload) return;
+        if (category.isData && !_fileAutoDownload) return;
+
+        await _attachmentUtil.downloadAttachment(
+          messageId: transcript.messageId,
+          content: transcript.content!,
+          conversationId: data.conversationId,
+          category: transcript.category,
+        );
+      });
+
+      await Future.wait(futures);
+      return needDownload;
+    }
+
+    final needDownload = await downloadTranscriptAttachment();
+
+    final mediaStatus = (totalMediaSize == 0 || !needDownload)
+        ? MediaStatus.done
+        : MediaStatus.canceled;
+
+    return Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      category: data.category!,
+      content: await jsonEncodeWithIsolate(transcriptMinimalList),
+      mediaSize: totalMediaSize,
+      status: data.status,
+      createdAt: data.createdAt,
+      mediaStatus: mediaStatus,
+    );
   }
 }
 

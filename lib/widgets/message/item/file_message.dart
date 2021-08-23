@@ -52,7 +52,8 @@ class FileMessage extends StatelessWidget {
               if (message.mediaUrl?.isEmpty ?? true) return;
               await saveFileToSystem(
                 context,
-                context.accountServer.convertMessageAbsolutePath(message),
+                context.accountServer
+                    .convertMessageAbsolutePath(message, context.isTranscript),
                 suggestName: message.mediaName,
               );
             } else if (message.mediaStatus == MediaStatus.pending) {

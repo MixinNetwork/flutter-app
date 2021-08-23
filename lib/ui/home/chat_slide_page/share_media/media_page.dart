@@ -210,7 +210,8 @@ class _Item extends StatelessWidget {
           image: MixinFileImage(
               File(context.accountServer.convertMessageAbsolutePath(message))),
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => ImageByBase64(message.thumbImage!),
+          errorBuilder: (_, __, ___) =>
+              ImageByBlurHashOrBase64(imageData: message.thumbImage!),
         ),
       );
 }
