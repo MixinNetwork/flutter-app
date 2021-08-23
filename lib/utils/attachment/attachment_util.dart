@@ -18,6 +18,7 @@ import '../../crypto/attachment/crypto_attachment.dart';
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';
 import '../../db/extension/message_category.dart';
+import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
 import '../crypto_util.dart';
 import '../extension/extension.dart';
@@ -100,6 +101,7 @@ class AttachmentUtil extends ChangeNotifier {
           await _messageDao.transcriptMessageHasMediaStatus(
               messageId, MediaStatus.done, true)) {
         await syncMessageMedia(messageId);
+        await _updateTranscriptMessageStatus(messageId);
         return;
       }
 
@@ -136,7 +138,8 @@ class AttachmentUtil extends ChangeNotifier {
           }
           if (mediaKey == null || mediaDigest == null) {
             final transcriptMessage = await _transcriptMessageDao
-                .findTranscriptMessageByMessageId(messageId);
+                .transcriptMessageByMessageId(messageId)
+                .getSingleOrNull();
             if (transcriptMessage != null) {
               mediaKey = transcriptMessage.mediaKey;
               mediaDigest = transcriptMessage.mediaDigest;
@@ -172,7 +175,8 @@ class AttachmentUtil extends ChangeNotifier {
 
         if (message != null &&
             (await _transcriptMessageDao
-                    .findTranscriptMessageByMessageId(messageId) !=
+                    .transcriptMessageByMessageId(messageId)
+                    .getSingleOrNull() !=
                 null)) {
           final transcriptPath = convertAbsolutePath(
             category: message.category,
@@ -190,6 +194,8 @@ class AttachmentUtil extends ChangeNotifier {
           mediaSize: fileSize,
           mediaStatus: MediaStatus.done,
         );
+
+        await _updateTranscriptMessageStatus(messageId);
       }
     } catch (er) {
       e(er.toString());
@@ -422,6 +428,28 @@ class AttachmentUtil extends ChangeNotifier {
       fromOtherTranscript(),
     ]);
     return result.any((result) => result);
+  }
+
+  Future _updateTranscriptMessageStatus(String messageId) async {
+    final transcriptIds = (await _transcriptMessageDao
+            .transcriptMessageByMessageId(messageId, maxLimit)
+            .get())
+        .map((e) => e.transcriptId);
+    await Future.forEach<String>(transcriptIds, (transcriptId) async {
+      final list = await _transcriptMessageDao
+          .transcriptMessageByTranscriptId(transcriptId)
+          .get();
+      final attachmentList =
+          list.where((element) => element.category.isAttachment);
+
+      if (attachmentList.isEmpty) return;
+
+      final status = attachmentList
+              .every((element) => element.mediaStatus == MediaStatus.done)
+          ? MediaStatus.done
+          : MediaStatus.canceled;
+      await _messageDao.updateMediaStatus(status, transcriptId);
+    });
   }
 }
 

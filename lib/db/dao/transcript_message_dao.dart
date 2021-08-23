@@ -20,12 +20,12 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
               transcript.transcriptId.equals(messageId),
           (transcript, message, sender, sharedUser, sticker) => maxLimit);
 
-  Future<TranscriptMessage?> findTranscriptMessageByMessageId(
-          String messageId) =>
-      (db.select(db.transcriptMessages)
+  SimpleSelectStatement<TranscriptMessages, TranscriptMessage>
+      transcriptMessageByMessageId(String messageId, [Limit? limit]) =>
+          (db.select(db.transcriptMessages)
             ..where((tbl) => tbl.messageId.equals(messageId))
-            ..limit(1))
-          .getSingleOrNull();
+            // ignore: invalid_use_of_protected_member
+            ..limitExpr = limit ?? Limit(1, 0));
 
   Future<int> findCountByMessageId(String messageId) async {
     final count = countAll();

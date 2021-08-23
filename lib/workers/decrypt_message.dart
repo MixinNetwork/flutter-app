@@ -30,8 +30,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart';
 import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -47,17 +47,15 @@ import 'injector.dart';
 import 'sender.dart';
 
 class DecryptMessage extends Injector {
-  DecryptMessage(
-    String userId,
-    Database database,
-    this._signalProtocol,
-    this._sender,
-    Client client,
-    this._sessionId,
-    this._privateKey,
-    this._attachmentUtil,
-    this.multiAuthCubit,
-  ) : super(userId, database, client) {
+  DecryptMessage(String userId,
+      Database database,
+      this._signalProtocol,
+      this._sender,
+      Client client,
+      this._sessionId,
+      this._privateKey,
+      this._attachmentUtil,
+      this.multiAuthCubit,) : super(userId, database, client) {
     _encryptedProtocol = EncryptedProtocol();
   }
 
@@ -94,7 +92,7 @@ class DecryptMessage extends Injector {
       return true;
     }
     final messageHistory =
-        await database.messagesHistoryDao.findMessageHistoryById(messageId);
+    await database.messagesHistoryDao.findMessageHistoryById(messageId);
     return messageHistory != null;
   }
 
@@ -196,7 +194,7 @@ class DecryptMessage extends Injector {
 
         final address = SignalProtocolAddress(data.senderId, deviceId);
         final status = (await SignalDatabase.get.ratchetSenderKeyDao
-                .getRatchetSenderKey(data.conversationId, address.toString()))
+            .getRatchetSenderKey(data.conversationId, address.toString()))
             ?.status;
         if (status == RatchetStatus.requesting.toString()) {
           await _requestResendMessage(
@@ -214,7 +212,7 @@ class DecryptMessage extends Injector {
         await _insertFailedMessage(data);
         final address = SignalProtocolAddress(data.senderId, deviceId);
         final status = (await SignalDatabase.get.ratchetSenderKeyDao
-                .getRatchetSenderKey(data.conversationId, address.toString()))
+            .getRatchetSenderKey(data.conversationId, address.toString()))
             ?.status;
         if (status == null) {
           await _requestResendKey(data.conversationId, data.senderId,
@@ -278,8 +276,8 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processResendMessage(
-      BlazeMessageData data, PlainJsonMessage plainData) async {
+  Future<void> _processResendMessage(BlazeMessageData data,
+      PlainJsonMessage plainData) async {
     final messages = plainData.messages;
     if (messages == null) {
       return;
@@ -342,7 +340,8 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _processApp(BlazeMessageData data) async {
-    d('data.conversationId: ${data.conversationId}, _conversationId: $_conversationId');
+    d('data.conversationId: ${data
+        .conversationId}, _conversationId: $_conversationId');
     if (data.category == MessageCategory.appButtonGroup) {
       await _processAppButton(data);
     } else if (data.category == MessageCategory.appCard) {
@@ -421,8 +420,8 @@ class DecryptMessage extends Injector {
         .insert(MessagesHistoryData(messageId: data.messageId));
   }
 
-  Future<Message> _generateMessage(
-      BlazeMessageData data, MessageGenerator generator) async {
+  Future<Message> _generateMessage(BlazeMessageData data,
+      MessageGenerator generator) async {
     if (data.quoteMessageId == null || (data.quoteMessageId?.isEmpty ?? true)) {
       return generator(null);
     }
@@ -437,10 +436,8 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processDecryptSuccess(
-    BlazeMessageData data,
-    String plainText,
-  ) async {
+  Future<void> _processDecryptSuccess(BlazeMessageData data,
+      String plainText,) async {
     await refreshUsers(<String>[data.senderId]);
 
     if (data.category.isText) {
@@ -453,7 +450,7 @@ class DecryptMessage extends Injector {
       }
       QuoteMessageItem? _quoteContent;
       final message =
-          await _generateMessage(data, (QuoteMessageItem? quoteContent) {
+      await _generateMessage(data, (QuoteMessageItem? quoteContent) {
         _quoteContent = quoteContent;
         return Message(
           messageId: data.messageId,
@@ -481,24 +478,25 @@ class DecryptMessage extends Injector {
           await _jsonDecodeWithIsolate(plainText) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: attachment.attachmentId,
-              mediaMimeType: attachment.mimeType,
-              mediaSize: attachment.size,
-              mediaWidth: attachment.width,
-              mediaHeight: attachment.height,
-              thumbImage: attachment.thumbnail,
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.canceled,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+              (QuoteMessageItem? quoteContent) =>
+              Message(
+                  messageId: data.messageId,
+                  conversationId: data.conversationId,
+                  userId: data.senderId,
+                  category: data.category!,
+                  content: attachment.attachmentId,
+                  mediaMimeType: attachment.mimeType,
+                  mediaSize: attachment.size,
+                  mediaWidth: attachment.width,
+                  mediaHeight: attachment.height,
+                  thumbImage: attachment.thumbnail,
+                  mediaKey: attachment.key as String?,
+                  mediaDigest: attachment.digest as String?,
+                  status: data.status,
+                  createdAt: data.createdAt,
+                  mediaStatus: MediaStatus.canceled,
+                  quoteMessageId: data.quoteMessageId,
+                  quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
       if (_photoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
@@ -515,26 +513,27 @@ class DecryptMessage extends Injector {
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: attachment.attachmentId,
-              name: attachment.name,
-              mediaMimeType: attachment.mimeType,
-              mediaDuration: attachment.duration.toString(),
-              mediaSize: attachment.size,
-              mediaWidth: attachment.width,
-              mediaHeight: attachment.height,
-              thumbImage: attachment.thumbnail,
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.canceled,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+              (QuoteMessageItem? quoteContent) =>
+              Message(
+                  messageId: data.messageId,
+                  conversationId: data.conversationId,
+                  userId: data.senderId,
+                  category: data.category!,
+                  content: attachment.attachmentId,
+                  name: attachment.name,
+                  mediaMimeType: attachment.mimeType,
+                  mediaDuration: attachment.duration.toString(),
+                  mediaSize: attachment.size,
+                  mediaWidth: attachment.width,
+                  mediaHeight: attachment.height,
+                  thumbImage: attachment.thumbnail,
+                  mediaKey: attachment.key as String?,
+                  mediaDigest: attachment.digest as String?,
+                  status: data.status,
+                  createdAt: data.createdAt,
+                  mediaStatus: MediaStatus.canceled,
+                  quoteMessageId: data.quoteMessageId,
+                  quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
       if (_videoAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
@@ -551,22 +550,23 @@ class DecryptMessage extends Injector {
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: attachment.attachmentId,
-              name: attachment.name,
-              mediaMimeType: attachment.mimeType,
-              mediaSize: attachment.size,
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.canceled,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+              (QuoteMessageItem? quoteContent) =>
+              Message(
+                  messageId: data.messageId,
+                  conversationId: data.conversationId,
+                  userId: data.senderId,
+                  category: data.category!,
+                  content: attachment.attachmentId,
+                  name: attachment.name,
+                  mediaMimeType: attachment.mimeType,
+                  mediaSize: attachment.size,
+                  mediaKey: attachment.key as String?,
+                  mediaDigest: attachment.digest as String?,
+                  status: data.status,
+                  createdAt: data.createdAt,
+                  mediaStatus: MediaStatus.canceled,
+                  quoteMessageId: data.quoteMessageId,
+                  quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
       if (_fileAutoDownload) {
         unawaited(_attachmentUtil.downloadAttachment(
@@ -583,23 +583,24 @@ class DecryptMessage extends Injector {
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: attachment.attachmentId,
-              name: attachment.name,
-              mediaMimeType: attachment.mimeType,
-              mediaSize: attachment.size,
-              mediaKey: attachment.key as String?,
-              mediaDigest: attachment.digest as String?,
-              mediaWaveform: attachment.waveform as String?,
-              status: data.status,
-              createdAt: data.createdAt,
-              mediaStatus: MediaStatus.pending,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+              (QuoteMessageItem? quoteContent) =>
+              Message(
+                  messageId: data.messageId,
+                  conversationId: data.conversationId,
+                  userId: data.senderId,
+                  category: data.category!,
+                  content: attachment.attachmentId,
+                  name: attachment.name,
+                  mediaMimeType: attachment.mimeType,
+                  mediaSize: attachment.size,
+                  mediaKey: attachment.key as String?,
+                  mediaDigest: attachment.digest as String?,
+                  mediaWaveform: attachment.waveform as String?,
+                  status: data.status,
+                  createdAt: data.createdAt,
+                  mediaStatus: MediaStatus.pending,
+                  quoteMessageId: data.quoteMessageId,
+                  quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
       unawaited(_attachmentUtil.downloadAttachment(
         messageId: message.messageId,
@@ -637,18 +638,19 @@ class DecryptMessage extends Injector {
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
           data,
-          (QuoteMessageItem? quoteContent) => Message(
-              messageId: data.messageId,
-              conversationId: data.conversationId,
-              userId: data.senderId,
-              category: data.category!,
-              content: plainText,
-              name: user?.fullName,
-              sharedUserId: contactMessage.userId,
-              status: data.status,
-              createdAt: data.createdAt,
-              quoteMessageId: data.quoteMessageId,
-              quoteContent: quoteContent?.toJson()));
+              (QuoteMessageItem? quoteContent) =>
+              Message(
+                  messageId: data.messageId,
+                  conversationId: data.conversationId,
+                  userId: data.senderId,
+                  category: data.category!,
+                  content: plainText,
+                  name: user?.fullName,
+                  sharedUserId: contactMessage.userId,
+                  status: data.status,
+                  createdAt: data.createdAt,
+                  quoteMessageId: data.quoteMessageId,
+                  quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isLive) {
       final plain = await _decodeWithIsolate(plainText);
@@ -731,8 +733,8 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processSystemConversationMessage(
-      BlazeMessageData data, SystemConversationMessage systemMessage) async {
+  Future<void> _processSystemConversationMessage(BlazeMessageData data,
+      SystemConversationMessage systemMessage) async {
     if (systemMessage.action != MessageAction.update) {
       await syncConversion(data.conversationId);
     }
@@ -793,8 +795,8 @@ class DecryptMessage extends Injector {
         await syncConversion(data.conversationId, force: true, unWait: true);
       }
       return;
-    } else if (systemMessage.action == MessageAction.create) {
-    } else if (systemMessage.action == MessageAction.role) {
+    } else if (systemMessage.action == MessageAction.create) {} else
+    if (systemMessage.action == MessageAction.role) {
       await database.participantDao.updateParticipantRole(
         data.conversationId,
         systemMessage.participantId!,
@@ -814,14 +816,14 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processSystemCircleMessage(
-      BlazeMessageData data, SystemCircleMessage systemMessage) async {
+  Future<void> _processSystemCircleMessage(BlazeMessageData data,
+      SystemCircleMessage systemMessage) async {
     if (systemMessage.action == SystemCircleAction.create ||
         systemMessage.action == SystemCircleAction.update) {
       unawaited(refreshCircle(circleId: systemMessage.circleId));
     } else if (systemMessage.action == SystemCircleAction.add) {
       final circle =
-          await database.circleDao.findCircleById(systemMessage.circleId);
+      await database.circleDao.findCircleById(systemMessage.circleId);
       if (circle == null) {
         unawaited(refreshCircle(circleId: systemMessage.circleId));
       }
@@ -848,8 +850,8 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processSystemSnapshotMessage(
-      BlazeMessageData data, SnapshotMessage snapshotMessage) async {
+  Future<void> _processSystemSnapshotMessage(BlazeMessageData data,
+      SnapshotMessage snapshotMessage) async {
     final snapshot = db.Snapshot(
         snapshotId: snapshotMessage.snapshotId,
         type: snapshotMessage.type,
@@ -893,8 +895,8 @@ class DecryptMessage extends Injector {
     await database.messageDao.insert(message, accountId, data.silent);
   }
 
-  Future<void> _updateRemoteMessageStatus(
-      String messageId, MessageStatus status) async {
+  Future<void> _updateRemoteMessageStatus(String messageId,
+      MessageStatus status) async {
     if (status != MessageStatus.delivered && status != MessageStatus.read) {
       return;
     }
@@ -917,7 +919,7 @@ class DecryptMessage extends Injector {
     if (messageIds.isNotEmpty) {
       await database.messageDao.markMessageRead(accountId, messageIds);
       final conversationIds =
-          await database.messageDao.findConversationIdsByMessages(messageIds);
+      await database.messageDao.findConversationIdsByMessages(messageIds);
       for (final cId in conversationIds) {
         await database.messageDao.takeUnseen(accountId, cId);
       }
@@ -959,8 +961,8 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<void> _processReDecryptMessage(
-      BlazeMessageData data, String messageId, String plaintext) async {
+  Future<void> _processReDecryptMessage(BlazeMessageData data, String messageId,
+      String plaintext) async {
     if (data.category == MessageCategory.signalText) {
       await database.messageMentionDao.parseMentionData(
         plaintext,
@@ -1038,7 +1040,7 @@ class DecryptMessage extends Injector {
       }
     }
     if (await database.messageDao
-            .countMessageByQuoteId(data.conversationId, messageId) >
+        .countMessageByQuoteId(data.conversationId, messageId) >
         0) {
       final messageItem = await database.messageDao
           .findMessageItemById(data.conversationId, messageId);
@@ -1052,7 +1054,7 @@ class DecryptMessage extends Injector {
   Future<void> _requestResendKey(String conversationId, String recipientId,
       String messageId, String? sessionId) async {
     final plainJsonMessage =
-        PlainJsonMessage(resendKey, null, null, messageId, null, null);
+    PlainJsonMessage(resendKey, null, null, messageId, null, null);
     final encoded = await _jsonEncodeWithIsolate(plainJsonMessage);
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, recipientId, encoded,
@@ -1063,14 +1065,17 @@ class DecryptMessage extends Injector {
         groupId: conversationId,
         senderId: address.toString(),
         status: RatchetStatus.requesting.toString(),
-        createdAt: DateTime.now().millisecondsSinceEpoch.toString());
+        createdAt: DateTime
+            .now()
+            .millisecondsSinceEpoch
+            .toString());
     await SignalDatabase.get.ratchetSenderKeyDao.insertSenderKey(ratchet);
   }
 
-  Future<void> _requestResendMessage(
-      String conversationId, String userId, String? sessionId) async {
+  Future<void> _requestResendMessage(String conversationId, String userId,
+      String? sessionId) async {
     final messages =
-        await database.messageDao.findFailedMessages(conversationId, userId);
+    await database.messageDao.findFailedMessages(conversationId, userId);
     if (messages.isEmpty) {
       return;
     }
@@ -1088,7 +1093,9 @@ class DecryptMessage extends Injector {
 
   Future<void> _refreshSignalKeys(String conversationId) async {
     final start = refreshKeyMap[conversationId] ?? 0;
-    final current = DateTime.now().millisecondsSinceEpoch;
+    final current = DateTime
+        .now()
+        .millisecondsSinceEpoch;
     if (start == 0) {
       refreshKeyMap[conversationId] = current;
     }
@@ -1103,7 +1110,7 @@ class DecryptMessage extends Injector {
       return;
     }
     final bm =
-        createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
+    createSyncSignalKeys(createSyncSignalKeysParam(await generateKeys()));
     final result = await _sender.signalKeysChannel(bm);
     if (result == null) {
       i('Registering new pre keys...');
@@ -1122,8 +1129,8 @@ class DecryptMessage extends Injector {
     }
   }
 
-  Future<Message?>? processTranscriptMessage(
-      BlazeMessageData data, List<dynamic> list) async {
+  Future<Message?>? processTranscriptMessage(BlazeMessageData data,
+      List<dynamic> list) async {
     if (list.isEmpty) {
       await database.messageDao.insert(
         Message(
@@ -1142,20 +1149,22 @@ class DecryptMessage extends Injector {
 
     final transcripts = list
         .map((e) {
-          // ignore: avoid_dynamic_calls
-          e['created_at'] = DateTime.tryParse(e['created_at'] as String? ?? '')
-              ?.millisecondsSinceEpoch;
-          // ignore: avoid_dynamic_calls
-          e['media_created_at'] =
-              // ignore: avoid_dynamic_calls
-              DateTime.tryParse(e['media_created_at'] as String? ?? '')
-                  ?.millisecondsSinceEpoch;
-          // ignore: avoid_dynamic_calls
-          final mediaDuration = e['media_duration'];
-          // ignore: avoid_dynamic_calls
-          e['media_duration'] = mediaDuration != null ? '$mediaDuration' : null;
-          return TranscriptMessage.fromJson(e as Map<String, dynamic>);
-        })
+      // ignore: avoid_dynamic_calls
+      e['created_at'] = DateTime
+          .tryParse(e['created_at'] as String? ?? '')
+          ?.millisecondsSinceEpoch;
+      // ignore: avoid_dynamic_calls
+      e['media_created_at'] =
+      // ignore: avoid_dynamic_calls
+      DateTime
+          .tryParse(e['media_created_at'] as String? ?? '')
+          ?.millisecondsSinceEpoch;
+      // ignore: avoid_dynamic_calls
+      final mediaDuration = e['media_duration'];
+      // ignore: avoid_dynamic_calls
+      e['media_duration'] = mediaDuration != null ? '$mediaDuration' : null;
+      return TranscriptMessage.fromJson(e as Map<String, dynamic>);
+    })
         .where((transcript) => transcript.transcriptId == data.messageId)
         .toList();
 
@@ -1187,34 +1196,37 @@ class DecryptMessage extends Injector {
           join, data.createdAt, data.userId);
     }
 
-    Future _refreshSticker() => Future.wait(transcripts
+    Future _refreshSticker() =>
+        Future.wait(transcripts
             .where((transcript) =>
-                transcript.category.isSticker &&
-                (transcript.stickerId?.isNotEmpty ?? false))
+        transcript.category.isSticker &&
+            (transcript.stickerId?.isNotEmpty ?? false))
             .map((transcript) async {
           final hasSticker =
-              await database.stickerDao.hasSticker(transcript.stickerId!);
+          await database.stickerDao.hasSticker(transcript.stickerId!);
           if (hasSticker) return;
           await refreshSticker(transcript.stickerId!);
         }));
 
-    Future _refreshUser() => refreshUsers([
+    Future _refreshUser() =>
+        refreshUsers([
           ...transcripts.map((e) => e.userId).whereNotNull(),
           ...transcripts
               .where((transcript) =>
-                  transcript.category.isContact &&
-                  (transcript.sharedUserId?.isNotEmpty ?? false))
+          transcript.category.isContact &&
+              (transcript.sharedUserId?.isNotEmpty ?? false))
               .map((transcript) => transcript.sharedUserId!),
         ]);
 
     final attachmentTranscript =
-        transcripts.where((transcript) => transcript.category.isAttachment);
+    transcripts.where((transcript) => transcript.category.isAttachment);
 
     final insertAllTranscriptMessageFuture = database.transcriptMessageDao
         .insertAll(transcripts
-            .map((transcript) => transcript.copyWith(
-                mediaStatus: const Value(MediaStatus.canceled)))
-            .toList());
+        .map((transcript) =>
+        transcript.copyWith(
+            mediaStatus: const Value(MediaStatus.canceled)))
+        .toList());
 
     await Future.wait([
       insertFts(),
@@ -1224,29 +1236,34 @@ class DecryptMessage extends Injector {
     ]);
 
     final transcriptMinimalList =
-        (transcripts..sort((a, b) => a.createdAt.compareTo(b.createdAt)))
-            .map((transcript) => TranscriptMinimal(
-                  name: transcript.userFullName ?? '',
-                  category: transcript.category,
-                  content: transcript.content,
-                ))
-            .toList();
+    (transcripts..sort((a, b) => a.createdAt.compareTo(b.createdAt)))
+        .map((transcript) =>
+        TranscriptMinimal(
+          name: transcript.userFullName ?? '',
+          category: transcript.category,
+          content: transcript.content,
+        ))
+        .toList();
 
     final totalMediaSize = attachmentTranscript
         .where((transcript) => transcript.mediaSize != null)
         .map((transcript) => transcript.mediaSize!)
         .fold<int>(0, (a, b) => a + b);
 
-    void downloadTranscriptAttachment() {
-      transcripts
+    Future<bool> downloadTranscriptAttachment() async {
+      var needDownload = false;
+
+      final futures = transcripts
           .where((transcript) =>
-              transcript.category.isAttachment && transcript.content != null)
-          .forEach((transcript) async {
+      transcript.category.isAttachment && transcript.content != null)
+          .map((transcript) async {
         final category = transcript.category;
 
         if (await _attachmentUtil.syncMessageMedia(transcript.messageId)) {
           return;
         }
+
+        needDownload = needDownload || true;
 
         if (category.isImage && !_photoAutoDownload) return;
         if (category.isVideo && !_videoAutoDownload) return;
@@ -1259,9 +1276,15 @@ class DecryptMessage extends Injector {
           category: transcript.category,
         );
       });
+
+      await Future.wait(futures);
+      return needDownload;
     }
 
-    downloadTranscriptAttachment();
+    final needDownload = await downloadTranscriptAttachment();
+
+    final mediaStatus = (totalMediaSize == 0 || !needDownload) ? MediaStatus
+        .done : MediaStatus.canceled;
 
     return Message(
       messageId: data.messageId,
@@ -1272,8 +1295,7 @@ class DecryptMessage extends Injector {
       mediaSize: totalMediaSize,
       status: data.status,
       createdAt: data.createdAt,
-      mediaStatus:
-          totalMediaSize == 0 ? MediaStatus.done : MediaStatus.canceled,
+      mediaStatus: mediaStatus,
     );
   }
 }
