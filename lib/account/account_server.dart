@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cross_file/cross_file.dart';
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
@@ -598,6 +598,8 @@ class AccountServer {
         quoteMessageId: quoteMessageId,
       );
 
+  // NOTE: Send video as DataMessage, cause we can not retriever video metadata
+  // from video file.
   Future<void> sendVideoMessage(XFile video, EncryptCategory encryptCategory,
           {String? conversationId,
           String? recipientId,
@@ -606,8 +608,8 @@ class AccountServer {
           await _initConversation(conversationId, recipientId),
           userId,
           video,
-          encryptCategory.toCategory(MessageCategory.plainVideo,
-              MessageCategory.signalVideo, MessageCategory.encryptedVideo),
+          encryptCategory.toCategory(MessageCategory.plainData,
+              MessageCategory.signalData, MessageCategory.encryptedData),
           quoteMessageId);
 
   Future<void> sendAudioMessage(XFile audio, EncryptCategory encryptCategory,
