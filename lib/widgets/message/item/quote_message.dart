@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/utils/hook.dart';
-import 'package:flutter_app/widgets/message/item/text/mention_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +16,7 @@ import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../cache_image.dart';
@@ -25,6 +24,7 @@ import '../../image.dart';
 import '../message.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
+import 'text/mention_builder.dart';
 
 // ignore_for_file: avoid_dynamic_calls
 class QuoteMessage extends HookWidget {
