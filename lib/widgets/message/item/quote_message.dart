@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/utils/hook.dart';
+import 'package:flutter_app/widgets/message/item/text/mention_builder.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -79,13 +81,29 @@ class QuoteMessage extends HookWidget {
       final userId = quote.userId as String?;
       final userFullName = quote.userFullName as String?;
       if (type.isText) {
-        return _QuoteMessageBase(
-          messageId: messageId,
-          quoteMessageId: quoteMessageId!,
-          userId: userId,
-          name: userFullName,
-          description: quote.content as String,
-          inputMode: inputMode,
+        return HookBuilder(
+          builder: (context) {
+            final rawContent = quote.content as String;
+            final mentionCache = context.read<MentionCache>();
+            final mentionMap = useMemoizedFuture(
+              () => mentionCache.checkMentionCache({rawContent}),
+              mentionCache.mentionCache(rawContent),
+              keys: [rawContent],
+            ).requireData;
+            final content = useMemoized(() => mentionMap.values.fold<String>(
+                rawContent,
+                (previousValue, element) => previousValue.replaceAll(
+                    '@${element.identityNumber}', '@${element.fullName}')));
+
+            return _QuoteMessageBase(
+              messageId: messageId,
+              quoteMessageId: quoteMessageId!,
+              userId: userId,
+              name: userFullName,
+              description: content,
+              inputMode: inputMode,
+            );
+          },
         );
       }
       final thumbImage = quote.thumbImage as String?;
