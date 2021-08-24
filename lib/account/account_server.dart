@@ -6,6 +6,7 @@ import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter/foundation.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
@@ -243,7 +244,16 @@ class AccountServer {
       return;
     }
     for (final message in floodMessages) {
+      Stopwatch? stopwatch;
+      if (!kReleaseMode) {
+        stopwatch = Stopwatch()..start();
+      }
+
       await _decryptMessage.process(message);
+
+      if (stopwatch != null) {
+        d('process execution time: ${stopwatch.elapsedMilliseconds}');
+      }
     }
     await _processFloodJob();
   }

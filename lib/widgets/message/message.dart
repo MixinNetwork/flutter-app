@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -180,6 +181,13 @@ class MessageItemWidget extends HookWidget {
                     onTap: () =>
                         context.accountServer.deleteMessage(message.messageId),
                   ),
+                  if (!kReleaseMode)
+                    ContextMenu(
+                      title: 'Copy message',
+                      isDestructiveAction: true,
+                      onTap: () => Clipboard.setData(
+                          ClipboardData(text: message.toString())),
+                    ),
                 ],
                 builder: (BuildContext context) {
                   if (message.type.isIllegalMessageCategory) {
