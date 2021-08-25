@@ -5,6 +5,8 @@ extension MessageCategoryExtension on String? {
 
   bool get isSystem => this?.startsWith('SYSTEM_') ?? false;
 
+  bool get isPin => this == MessageCategory.messagePin;
+
   bool get isEncrypted => this?.startsWith('ENCRYPTED_') ?? false;
 
   bool get isSignal => this?.startsWith('SIGNAL_') ?? false;

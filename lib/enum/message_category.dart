@@ -24,6 +24,7 @@ class MessageCategory {
   static const plainLocation = 'PLAIN_LOCATION';
   static const plainTranscript = 'PLAIN_TRANSCRIPT';
   static const messageRecall = 'MESSAGE_RECALL';
+  static const messagePin = 'MESSAGE_PIN';
   static const stranger = 'STRANGER';
   static const secret = 'SECRET';
   static const systemConversation = 'SYSTEM_CONVERSATION';

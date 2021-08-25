@@ -13,6 +13,7 @@ import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/blaze_message_data.dart';
+import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/snapshot_message.dart';
@@ -30,8 +31,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' as db;
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -145,6 +146,10 @@ class DecryptMessage extends Injector {
           category == MessageCategory.appCard) {
         d('DecryptMessage isApp');
         await _processApp(data);
+      } else if (category.isPin) {
+        d('DecryptMessage isMessagePin');
+        await _processPinMessage(data);
+        _remoteStatus = MessageStatus.read;
       } else if (category == MessageCategory.messageRecall) {
         d('DecryptMessage isMessageRecall');
         _remoteStatus = MessageStatus.read;
@@ -389,6 +394,27 @@ class DecryptMessage extends Injector {
       }
     });
     await database.messageDao.insert(message, accountId, data.silent);
+  }
+
+  Future<void> _processPinMessage(BlazeMessageData data) async {
+    final pinMessage = PinMessagePayload.fromJson(
+        await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+
+    if (pinMessage.action == PinMessagePayloadAction.pin) {
+      await Future.forEach<String>(pinMessage.messageIds, (messageId) async {
+        final message =
+            await database.messageDao.findMessageByMessageId(messageId);
+        if (message == null) return;
+        await database.pinMessageDao.insert(PinMessage(
+            messageId: messageId,
+            conversationId: message.conversationId,
+            createdAt: data.createdAt));
+      });
+    } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
+      await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
+    }
+    await database.messagesHistoryDao
+        .insert(MessagesHistoryData(messageId: data.messageId));
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {

@@ -1,11 +1,18 @@
+import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
 
+import '../../enum/media_status.dart';
+import '../../enum/message_status.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 
 part 'transcript_message_dao.g.dart';
 
-@UseDao(tables: [TranscriptMessages])
+@UseDao(tables: [
+  TranscriptMessages
+], include: {
+  '../moor/dao/transcript_message.moor',
+})
 class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$TranscriptMessageDaoMixin {
   TranscriptMessageDao(MixinDatabase db) : super(db);
@@ -15,7 +22,7 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
           mode: InsertMode.insertOrReplace));
 
   Selectable<TranscriptMessageItem> transactionMessageItem(String messageId) =>
-      db.baseTranscriptMessageItem(
+      baseTranscriptMessageItem(
           (transcript, message, sender, sharedUser, sticker) =>
               transcript.transcriptId.equals(messageId),
           (transcript, message, sender, sharedUser, sticker) => maxLimit);

@@ -37,6 +37,7 @@ import 'dao/message_mention_dao.dart';
 import 'dao/offset_dao.dart';
 import 'dao/participant_dao.dart';
 import 'dao/participant_session_dao.dart';
+import 'dao/pin_message_dao.dart';
 import 'dao/resend_session_message_dao.dart';
 import 'dao/sent_session_sender_key_dao.dart';
 import 'dao/snapshot_dao.dart';
@@ -60,7 +61,6 @@ part 'mixin_database.g.dart';
     'moor/dao/user.moor',
     'moor/dao/circle.moor',
     'moor/dao/flood.moor',
-    'moor/dao/transcript_message.moor',
   },
   daos: [
     AddressDao,
@@ -85,6 +85,7 @@ part 'mixin_database.g.dart';
     StickerAlbumDao,
     StickerRelationshipDao,
     UserDao,
+    PinMessageDao,
   ],
   queries: {},
 )
@@ -92,12 +93,13 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   final eventBus = DataBaseEventBus();
 
   @override
-  MigrationStrategy get migration => MigrationStrategy(
+  MigrationStrategy get migration =>
+      MigrationStrategy(
         beforeOpen: (_) async {
           if (executor.dialect == SqlDialect.sqlite) {
             await customStatement('PRAGMA journal_mode=WAL');
@@ -148,37 +150,41 @@ class MixinDatabase extends _$MixinDatabase {
           if (from <= 4) {
             await m.createTable(transcriptMessages);
           }
+          if (from <= 5) {
+            await m.createTable(pinMessages);
+          }
         },
       );
 
   Stream<bool> watchHasData<T extends HasResultSet, R>(
-    ResultSetImplementation<T, R> table, [
-    List<Join> joins = const [],
-    Expression<bool?> predicate = ignoreWhere,
-  ]) =>
+      ResultSetImplementation<T, R> table, [
+        List<Join> joins = const [],
+        Expression<bool?> predicate = ignoreWhere,
+      ]) =>
       (selectOnly(table)
-            ..addColumns([const CustomExpression<String>('1')])
-            ..join(joins)
-            ..where(predicate)
-            ..limit(1))
+        ..addColumns([const CustomExpression<String>('1')])
+        ..join(joins)
+        ..where(predicate)
+        ..limit(1))
           .watch()
           .map((event) => event.isNotEmpty);
 
   Future<bool> hasData<T extends HasResultSet, R>(
-    ResultSetImplementation<T, R> table, [
-    List<Join> joins = const [],
-    Expression<bool?> predicate = ignoreWhere,
-  ]) async =>
+      ResultSetImplementation<T, R> table, [
+        List<Join> joins = const [],
+        Expression<bool?> predicate = ignoreWhere,
+      ]) async =>
       (await (selectOnly(table)
-                ..addColumns([const CustomExpression<String>('1')])
-                ..join(joins)
-                ..where(predicate)
-                ..limit(1))
-              .get())
+        ..addColumns([const CustomExpression<String>('1')])
+        ..join(joins)
+        ..where(predicate)
+        ..limit(1))
+          .get())
           .isNotEmpty;
 }
 
-LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
+LazyDatabase _openConnection(File dbFile) =>
+    LazyDatabase(() {
       final vmDatabase = VmDatabase(dbFile);
       if (!kDebugMode) {
         return vmDatabase;
@@ -207,7 +213,7 @@ Future<MoorIsolate> _createMoorIsolate(File dbFile) async {
 void _startBackground(_IsolateStartRequest request) {
   final executor = _openConnection(request.dbFile);
   final moorIsolate = MoorIsolate.inCurrent(
-    () => DatabaseConnection.fromExecutor(executor),
+        () => DatabaseConnection.fromExecutor(executor),
   );
   request.sendMoorIsolate.send(moorIsolate);
 }

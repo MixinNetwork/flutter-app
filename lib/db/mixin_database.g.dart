@@ -11306,6 +11306,237 @@ class TranscriptMessages extends Table
   bool get dontWriteConstraints => true;
 }
 
+class PinMessage extends DataClass implements Insertable<PinMessage> {
+  final String messageId;
+  final String conversationId;
+  final DateTime createdAt;
+  PinMessage(
+      {required this.messageId,
+      required this.conversationId,
+      required this.createdAt});
+  factory PinMessage.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return PinMessage(
+      messageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+      conversationId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
+      createdAt: PinMessages.$converter0.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['conversation_id'] = Variable<String>(conversationId);
+    {
+      final converter = PinMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
+    }
+    return map;
+  }
+
+  PinMessagesCompanion toCompanion(bool nullToAbsent) {
+    return PinMessagesCompanion(
+      messageId: Value(messageId),
+      conversationId: Value(conversationId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PinMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return PinMessage(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PinMessage copyWith(
+          {String? messageId, String? conversationId, DateTime? createdAt}) =>
+      PinMessage(
+        messageId: messageId ?? this.messageId,
+        conversationId: conversationId ?? this.conversationId,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PinMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode, $mrjc(conversationId.hashCode, createdAt.hashCode)));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PinMessage &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.createdAt == this.createdAt);
+}
+
+class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<DateTime> createdAt;
+  const PinMessagesCompanion({
+    this.messageId = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  PinMessagesCompanion.insert({
+    required String messageId,
+    required String conversationId,
+    required DateTime createdAt,
+  })  : messageId = Value(messageId),
+        conversationId = Value(conversationId),
+        createdAt = Value(createdAt);
+  static Insertable<PinMessage> custom({
+    Expression<String>? messageId,
+    Expression<String>? conversationId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  PinMessagesCompanion copyWith(
+      {Value<String>? messageId,
+      Value<String>? conversationId,
+      Value<DateTime>? createdAt}) {
+    return PinMessagesCompanion(
+      messageId: messageId ?? this.messageId,
+      conversationId: conversationId ?? this.conversationId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (createdAt.present) {
+      final converter = PinMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PinMessagesCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  PinMessages(this._db, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(PinMessages.$converter0);
+  @override
+  List<GeneratedColumn> get $columns => [messageId, conversationId, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'pin_messages';
+  @override
+  String get actualTableName => 'pin_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<PinMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  PinMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return PinMessage.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  PinMessages createAlias(String alias) {
+    return PinMessages(_db, alias);
+  }
+
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const [
+        'PRIMARY KEY (message_id)',
+        'FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE',
+        'FOREIGN KEY (message_id) REFERENCES messages(message_id) ON UPDATE NO ACTION ON DELETE CASCADE'
+      ];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -11366,6 +11597,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Stickers stickers = Stickers(this);
   late final Users users = Users(this);
   late final TranscriptMessages transcriptMessages = TranscriptMessages(this);
+  late final PinMessages pinMessages = PinMessages(this);
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -11399,93 +11631,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final StickerRelationshipDao stickerRelationshipDao =
       StickerRelationshipDao(this as MixinDatabase);
   late final UserDao userDao = UserDao(this as MixinDatabase);
-  Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
-      Expression<bool?> Function(
-              TranscriptMessages transcript,
-              Messages message,
-              Users sender,
-              Users sharedUser,
-              Stickers sticker)
-          where,
-      Limit Function(TranscriptMessages transcript, Messages message,
-              Users sender, Users sharedUser, Stickers sticker)
-          limit) {
-    final generatedwhere = $write(
-        where(
-            alias(this.transcriptMessages, 'transcript'),
-            alias(this.messages, 'message'),
-            alias(this.users, 'sender'),
-            alias(this.users, 'sharedUser'),
-            alias(this.stickers, 'sticker')),
-        hasMultipleTables: true);
-    final generatedlimit = $write(
-        limit(
-            alias(this.transcriptMessages, 'transcript'),
-            alias(this.messages, 'message'),
-            alias(this.users, 'sender'),
-            alias(this.users, 'sharedUser'),
-            alias(this.stickers, 'sticker')),
-        hasMultipleTables: true);
-    return customSelect(
-        'SELECT transcript.transcript_id AS transcriptId, transcript.message_id AS messageId, message.conversation_id AS conversationId, transcript.category AS type, transcript.content AS content, transcript.created_at AS createdAt, message.status AS status, transcript.media_status AS mediaStatus, transcript.media_waveform AS mediaWaveform, transcript.media_name AS mediaName, transcript.media_mime_type AS mediaMimeType, transcript.media_size AS mediaSize, transcript.media_width AS mediaWidth, transcript.media_height AS mediaHeight, transcript.thumb_image AS thumbImage, transcript.thumb_url AS thumbUrl, transcript.media_url AS mediaUrl, transcript.media_duration AS mediaDuration, transcript.quote_id AS quoteId, transcript.quote_content AS quoteContent, transcript.shared_user_id AS sharedUserId, sender.user_id AS userId, IFNULL(sender.full_name, transcript.user_full_name) AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType FROM transcript_messages AS transcript INNER JOIN messages AS message ON message.message_id = transcript.transcript_id LEFT JOIN users AS sender ON transcript.user_id = sender.user_id LEFT JOIN users AS sharedUser ON transcript.shared_user_id = sharedUser.user_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = transcript.sticker_id WHERE ${generatedwhere.sql} ORDER BY transcript.created_at, transcript."rowid" ${generatedlimit.sql}',
-        variables: [
-          ...generatedwhere.introducedVariables,
-          ...generatedlimit.introducedVariables
-        ],
-        readsFrom: {
-          transcriptMessages,
-          messages,
-          users,
-          stickers,
-          ...generatedwhere.watchedTables,
-          ...generatedlimit.watchedTables,
-        }).map((QueryRow row) {
-      return TranscriptMessageItem(
-        transcriptId: row.read<String>('transcriptId'),
-        messageId: row.read<String>('messageId'),
-        conversationId: row.read<String>('conversationId'),
-        type: row.read<String>('type'),
-        content: row.read<String?>('content'),
-        createdAt: TranscriptMessages.$converter0
-            .mapToDart(row.read<int>('createdAt'))!,
-        status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
-        mediaStatus: TranscriptMessages.$converter1
-            .mapToDart(row.read<String?>('mediaStatus')),
-        mediaWaveform: row.read<String?>('mediaWaveform'),
-        mediaName: row.read<String?>('mediaName'),
-        mediaMimeType: row.read<String?>('mediaMimeType'),
-        mediaSize: row.read<int?>('mediaSize'),
-        mediaWidth: row.read<int?>('mediaWidth'),
-        mediaHeight: row.read<int?>('mediaHeight'),
-        thumbImage: row.read<String?>('thumbImage'),
-        thumbUrl: row.read<String?>('thumbUrl'),
-        mediaUrl: row.read<String?>('mediaUrl'),
-        mediaDuration: row.read<String?>('mediaDuration'),
-        quoteId: row.read<String?>('quoteId'),
-        quoteContent: row.read<String?>('quoteContent'),
-        sharedUserId: row.read<String?>('sharedUserId'),
-        userId: row.read<String?>('userId'),
-        userFullName: row.read<String?>('userFullName'),
-        userIdentityNumber: row.read<String?>('userIdentityNumber'),
-        appId: row.read<String?>('appId'),
-        relationship:
-            Users.$converter0.mapToDart(row.read<String?>('relationship')),
-        avatarUrl: row.read<String?>('avatarUrl'),
-        sharedUserFullName: row.read<String?>('sharedUserFullName'),
-        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
-        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
-        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
-        sharedUserAppId: row.read<String?>('sharedUserAppId'),
-        assetUrl: row.read<String?>('assetUrl'),
-        assetWidth: row.read<int?>('assetWidth'),
-        assetHeight: row.read<int?>('assetHeight'),
-        stickerId: row.read<String?>('stickerId'),
-        assetName: row.read<String?>('assetName'),
-        assetType: row.read<String?>('assetType'),
-      );
-    });
-  }
-
+  late final PinMessageDao pinMessageDao = PinMessageDao(this as MixinDatabase);
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(
         'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
@@ -12605,7 +12751,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         stickerRelationships,
         stickers,
         users,
-        transcriptMessages
+        transcriptMessages,
+        pinMessages
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -12638,219 +12785,22 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               TableUpdate('conversations', kind: UpdateKind.update),
             ],
           ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('conversations',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('pin_messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('pin_messages', kind: UpdateKind.delete),
+            ],
+          ),
         ],
       );
-}
-
-class TranscriptMessageItem {
-  final String transcriptId;
-  final String messageId;
-  final String conversationId;
-  final String type;
-  final String? content;
-  final DateTime createdAt;
-  final MessageStatus status;
-  final MediaStatus? mediaStatus;
-  final String? mediaWaveform;
-  final String? mediaName;
-  final String? mediaMimeType;
-  final int? mediaSize;
-  final int? mediaWidth;
-  final int? mediaHeight;
-  final String? thumbImage;
-  final String? thumbUrl;
-  final String? mediaUrl;
-  final String? mediaDuration;
-  final String? quoteId;
-  final String? quoteContent;
-  final String? sharedUserId;
-  final String? userId;
-  final String? userFullName;
-  final String? userIdentityNumber;
-  final String? appId;
-  final UserRelationship? relationship;
-  final String? avatarUrl;
-  final String? sharedUserFullName;
-  final String? sharedUserIdentityNumber;
-  final String? sharedUserAvatarUrl;
-  final bool? sharedUserIsVerified;
-  final String? sharedUserAppId;
-  final String? assetUrl;
-  final int? assetWidth;
-  final int? assetHeight;
-  final String? stickerId;
-  final String? assetName;
-  final String? assetType;
-  TranscriptMessageItem({
-    required this.transcriptId,
-    required this.messageId,
-    required this.conversationId,
-    required this.type,
-    this.content,
-    required this.createdAt,
-    required this.status,
-    this.mediaStatus,
-    this.mediaWaveform,
-    this.mediaName,
-    this.mediaMimeType,
-    this.mediaSize,
-    this.mediaWidth,
-    this.mediaHeight,
-    this.thumbImage,
-    this.thumbUrl,
-    this.mediaUrl,
-    this.mediaDuration,
-    this.quoteId,
-    this.quoteContent,
-    this.sharedUserId,
-    this.userId,
-    this.userFullName,
-    this.userIdentityNumber,
-    this.appId,
-    this.relationship,
-    this.avatarUrl,
-    this.sharedUserFullName,
-    this.sharedUserIdentityNumber,
-    this.sharedUserAvatarUrl,
-    this.sharedUserIsVerified,
-    this.sharedUserAppId,
-    this.assetUrl,
-    this.assetWidth,
-    this.assetHeight,
-    this.stickerId,
-    this.assetName,
-    this.assetType,
-  });
-  @override
-  int get hashCode => $mrjf($mrjc(
-      transcriptId.hashCode,
-      $mrjc(
-          messageId.hashCode,
-          $mrjc(
-              conversationId.hashCode,
-              $mrjc(
-                  type.hashCode,
-                  $mrjc(
-                      content.hashCode,
-                      $mrjc(
-                          createdAt.hashCode,
-                          $mrjc(
-                              status.hashCode,
-                              $mrjc(
-                                  mediaStatus.hashCode,
-                                  $mrjc(
-                                      mediaWaveform.hashCode,
-                                      $mrjc(
-                                          mediaName.hashCode,
-                                          $mrjc(
-                                              mediaMimeType.hashCode,
-                                              $mrjc(
-                                                  mediaSize.hashCode,
-                                                  $mrjc(
-                                                      mediaWidth.hashCode,
-                                                      $mrjc(
-                                                          mediaHeight.hashCode,
-                                                          $mrjc(
-                                                              thumbImage
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  thumbUrl
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      mediaUrl
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          mediaDuration
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              quoteId.hashCode,
-                                                                              $mrjc(quoteContent.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(userId.hashCode, $mrjc(userFullName.hashCode, $mrjc(userIdentityNumber.hashCode, $mrjc(appId.hashCode, $mrjc(relationship.hashCode, $mrjc(avatarUrl.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, assetType.hashCode))))))))))))))))))))))))))))))))))))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is TranscriptMessageItem &&
-          other.transcriptId == this.transcriptId &&
-          other.messageId == this.messageId &&
-          other.conversationId == this.conversationId &&
-          other.type == this.type &&
-          other.content == this.content &&
-          other.createdAt == this.createdAt &&
-          other.status == this.status &&
-          other.mediaStatus == this.mediaStatus &&
-          other.mediaWaveform == this.mediaWaveform &&
-          other.mediaName == this.mediaName &&
-          other.mediaMimeType == this.mediaMimeType &&
-          other.mediaSize == this.mediaSize &&
-          other.mediaWidth == this.mediaWidth &&
-          other.mediaHeight == this.mediaHeight &&
-          other.thumbImage == this.thumbImage &&
-          other.thumbUrl == this.thumbUrl &&
-          other.mediaUrl == this.mediaUrl &&
-          other.mediaDuration == this.mediaDuration &&
-          other.quoteId == this.quoteId &&
-          other.quoteContent == this.quoteContent &&
-          other.sharedUserId == this.sharedUserId &&
-          other.userId == this.userId &&
-          other.userFullName == this.userFullName &&
-          other.userIdentityNumber == this.userIdentityNumber &&
-          other.appId == this.appId &&
-          other.relationship == this.relationship &&
-          other.avatarUrl == this.avatarUrl &&
-          other.sharedUserFullName == this.sharedUserFullName &&
-          other.sharedUserIdentityNumber == this.sharedUserIdentityNumber &&
-          other.sharedUserAvatarUrl == this.sharedUserAvatarUrl &&
-          other.sharedUserIsVerified == this.sharedUserIsVerified &&
-          other.sharedUserAppId == this.sharedUserAppId &&
-          other.assetUrl == this.assetUrl &&
-          other.assetWidth == this.assetWidth &&
-          other.assetHeight == this.assetHeight &&
-          other.stickerId == this.stickerId &&
-          other.assetName == this.assetName &&
-          other.assetType == this.assetType);
-  @override
-  String toString() {
-    return (StringBuffer('TranscriptMessageItem(')
-          ..write('transcriptId: $transcriptId, ')
-          ..write('messageId: $messageId, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('type: $type, ')
-          ..write('content: $content, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('status: $status, ')
-          ..write('mediaStatus: $mediaStatus, ')
-          ..write('mediaWaveform: $mediaWaveform, ')
-          ..write('mediaName: $mediaName, ')
-          ..write('mediaMimeType: $mediaMimeType, ')
-          ..write('mediaSize: $mediaSize, ')
-          ..write('mediaWidth: $mediaWidth, ')
-          ..write('mediaHeight: $mediaHeight, ')
-          ..write('thumbImage: $thumbImage, ')
-          ..write('thumbUrl: $thumbUrl, ')
-          ..write('mediaUrl: $mediaUrl, ')
-          ..write('mediaDuration: $mediaDuration, ')
-          ..write('quoteId: $quoteId, ')
-          ..write('quoteContent: $quoteContent, ')
-          ..write('sharedUserId: $sharedUserId, ')
-          ..write('userId: $userId, ')
-          ..write('userFullName: $userFullName, ')
-          ..write('userIdentityNumber: $userIdentityNumber, ')
-          ..write('appId: $appId, ')
-          ..write('relationship: $relationship, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('sharedUserFullName: $sharedUserFullName, ')
-          ..write('sharedUserIdentityNumber: $sharedUserIdentityNumber, ')
-          ..write('sharedUserAvatarUrl: $sharedUserAvatarUrl, ')
-          ..write('sharedUserIsVerified: $sharedUserIsVerified, ')
-          ..write('sharedUserAppId: $sharedUserAppId, ')
-          ..write('assetUrl: $assetUrl, ')
-          ..write('assetWidth: $assetWidth, ')
-          ..write('assetHeight: $assetHeight, ')
-          ..write('stickerId: $stickerId, ')
-          ..write('assetName: $assetName, ')
-          ..write('assetType: $assetType')
-          ..write(')'))
-        .toString();
-  }
 }
 
 class ConversationCircleItem {
