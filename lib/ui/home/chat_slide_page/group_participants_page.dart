@@ -6,15 +6,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 
-import '../../../bloc/simple_cubit.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
-
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
-
 import '../../../widgets/high_light_text.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/search_text_field.dart';
@@ -353,7 +350,7 @@ class _ActionAddParticipants extends StatelessWidget {
                   name: Resources.assetsImagesIcAddSvg,
                   color: context.theme.icon,
                   onTapUp: (event) =>
-                      context.read<OffsetCubit>().emit(event.globalPosition),
+                      context.sendMenuPosition(event.globalPosition),
                 )),
       );
 }

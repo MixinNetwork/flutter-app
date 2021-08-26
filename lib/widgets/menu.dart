@@ -3,14 +3,26 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
+import 'package:provider/provider.dart';
 
 import '../bloc/simple_cubit.dart';
 import '../utils/extension/extension.dart';
-
+import '../utils/hook.dart';
 import 'interacter_decorated_box.dart';
 
-class ContextMenuPortalEntry extends StatelessWidget {
+class _OffsetCubit extends SimpleCubit<Offset?> {
+  _OffsetCubit(Offset? state) : super(state);
+}
+
+extension ContextMenuPortalEntrySender on BuildContext {
+  void sendMenuPosition(Offset offset) => read<_OffsetCubit>().emit(offset);
+
+  void closeMenu() => read<_OffsetCubit>().emit(null);
+}
+
+class ContextMenuPortalEntry extends HookWidget {
   const ContextMenuPortalEntry({
     Key? key,
     required this.child,
@@ -21,47 +33,56 @@ class ContextMenuPortalEntry extends StatelessWidget {
   final List<ContextMenu> Function() buildMenus;
 
   @override
-  Widget build(BuildContext context) => BlocProvider(
-        create: (context) => OffsetCubit(null),
-        child: Builder(
-          builder: (context) => BlocBuilder<OffsetCubit, Offset?>(
-            builder: (context, offset) => Barrier(
-              duration: const Duration(milliseconds: 100),
-              visible: offset != null,
-              onClose: () => BlocProvider.of<OffsetCubit>(context).emit(null),
-              child: PortalEntry(
-                visible: offset != null,
-                closeDuration: const Duration(milliseconds: 100),
-                portal: TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: offset != null ? 1 : 0),
-                  duration: const Duration(milliseconds: 100),
-                  curve: Curves.easeOut,
-                  builder: (context, progress, child) => Opacity(
-                    opacity: progress,
-                    child: child,
-                  ),
-                  child: BlocBuilder<OffsetCubit, Offset?>(
-                    buildWhen: (a, b) => b != null,
-                    builder: (context, offset) => CustomSingleChildLayout(
-                      delegate: PositionedLayoutDelegate(
-                        position: offset!,
-                      ),
-                      child: ContextMenuPage(menus: buildMenus()),
-                    ),
-                  ),
-                ),
-                child: InteractableDecoratedBox(
-                  onRightClick: (PointerUpEvent pointerUpEvent) {
-                    BlocProvider.of<OffsetCubit>(context)
-                        .emit(pointerUpEvent.position);
-                  },
-                  child: child,
-                ),
-              ),
+  Widget build(BuildContext context) {
+    final offsetCubit = useBloc(() => _OffsetCubit(null));
+    final offset = useBlocState<_OffsetCubit, Offset?>(
+      bloc: offsetCubit,
+      when: (state) => state != null,
+    );
+    final visible = useBlocStateConverter<_OffsetCubit, Offset?, bool>(
+      bloc: offsetCubit,
+      converter: (state) => state != null,
+    );
+
+    return Provider.value(
+      value: offsetCubit,
+      child: Barrier(
+        duration: const Duration(milliseconds: 100),
+        visible: visible,
+        onClose: () => offsetCubit.emit(null),
+        child: PortalEntry(
+          visible: visible,
+          closeDuration: const Duration(milliseconds: 100),
+          portal: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: visible ? 1 : 0),
+            duration: const Duration(milliseconds: 100),
+            curve: Curves.easeOut,
+            builder: (context, progress, child) => Opacity(
+              opacity: progress,
+              child: child,
             ),
+            child: Builder(builder: (context) {
+              if (offset != null) {
+                return CustomSingleChildLayout(
+                  delegate: PositionedLayoutDelegate(
+                    position: offset,
+                  ),
+                  child: ContextMenuPage(menus: buildMenus()),
+                );
+              }
+
+              return const SizedBox();
+            }),
+          ),
+          child: InteractableDecoratedBox(
+            onRightClick: (PointerUpEvent pointerUpEvent) =>
+                offsetCubit.emit(pointerUpEvent.position),
+            child: child,
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 class Barrier extends StatelessWidget {
@@ -208,7 +229,7 @@ class ContextMenu extends StatelessWidget {
         ),
         onTap: () {
           onTap?.call();
-          BlocProvider.of<OffsetCubit>(context).emit(null);
+          context.closeMenu();
         },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),

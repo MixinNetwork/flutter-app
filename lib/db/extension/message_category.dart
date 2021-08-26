@@ -136,4 +136,17 @@ extension MessageCategoryExtension on String? {
         MessageCategory.encryptedLocation,
         MessageCategory.encryptedTranscript
       }.every((element) => element != this);
+
+  bool get canReply =>  isText ||
+      isImage ||
+      isVideo ||
+      isLive ||
+      isData ||
+      isPost ||
+      isLocation ||
+      isAudio ||
+      isSticker ||
+      isContact ||
+      this == MessageCategory.appCard ||
+      this == MessageCategory.appButtonGroup;
 }
