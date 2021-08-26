@@ -89,6 +89,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("不支持此类型消息。请升级 Mixin 查看。"),
         "chatRecallDelete": MessageLookupByLibrary.simpleMessage("此消息已撤回"),
         "chatRecallMe": MessageLookupByLibrary.simpleMessage("你撤回了一条消息"),
+        "chatTranscript": MessageLookupByLibrary.simpleMessage("聊天记录"),
         "chatWaiting": m5,
         "chatWaitingDesktop": MessageLookupByLibrary.simpleMessage("桌面端"),
         "chats": MessageLookupByLibrary.simpleMessage("全部聊天"),

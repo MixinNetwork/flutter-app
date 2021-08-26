@@ -1,23 +1,58 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:cross_file/cross_file.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:file_selector/file_selector.dart' as file_selector;
+import 'package:flutter/cupertino.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'extension/extension.dart';
 import 'logger.dart';
 
-Future<List<file_selector.XFile>> selectFiles() async {
-  final files = await file_selector.openFiles();
-  if (files.isEmpty) return const [];
-  return files
-      .map((xFile) => file_selector.XFile(
-            xFile.path,
-            mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
-            name: xFile.name,
-          ))
-      .toList();
+Future<List<XFile>> selectFiles() async {
+  if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    // Use file_selector for desktop platforms.
+    // because file_selector has better localizations.
+    final files = await file_selector.openFiles();
+    if (files.isEmpty) return const [];
+    return files
+        .map((xFile) => file_selector.XFile(
+              xFile.path,
+              mimeType: xFile.mimeType ?? lookupMimeType(xFile.path),
+              name: xFile.name,
+            ))
+        .toList();
+  } else {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result == null) {
+      return const [];
+    }
+    return result.paths
+        .whereNotNull()
+        .map((e) => XFile(e, mimeType: lookupMimeType(e)))
+        .toList();
+  }
+}
+
+/// Copy [file] to user file system.
+/// TODO: support Android/iOS.
+Future<bool> saveFileToSystem(
+  BuildContext context,
+  String file, {
+  String? suggestName,
+}) async {
+  final path = await file_selector.getSavePath(
+    confirmButtonText: context.l10n.save,
+    suggestedName: suggestName ?? p.basename(file),
+  );
+  if (path?.isEmpty ?? true) {
+    return false;
+  }
+  await File(file).copy(path!);
+  return true;
 }
 
 Future<int> getTotalSizeOfFile(String path) async {

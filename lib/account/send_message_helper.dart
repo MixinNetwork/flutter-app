@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:extended_image/extended_image.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/rendering.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
@@ -575,7 +575,10 @@ class SendMessageHelper {
         conversationId: conversationId,
         senderId: senderId,
         file: XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category: category,
         attachmentResult: attachmentResult,
       );
@@ -592,7 +595,10 @@ class SendMessageHelper {
         conversationId,
         senderId,
         XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category,
         null,
         attachmentResult: attachmentResult,
@@ -614,7 +620,10 @@ class SendMessageHelper {
         conversationId,
         senderId,
         XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category,
         null,
         attachmentResult: attachmentResult,
@@ -633,7 +642,10 @@ class SendMessageHelper {
         conversationId,
         senderId,
         XFile(_attachmentUtil.convertAbsolutePath(
-            message.category, message.conversationId, message.mediaUrl)),
+          category: message.category,
+          conversationId: message.conversationId,
+          fileName: message.mediaUrl,
+        )),
         category,
         null,
         attachmentResult: attachmentResult,

@@ -16,6 +16,7 @@ import '../../../ui/home/bloc/message_bloc.dart';
 import '../../../ui/home/bloc/pending_jump_message_cubit.dart';
 import '../../../utils/color_utils.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/hook.dart';
 import '../../../utils/logger.dart';
 import '../../avatar_view/avatar_view.dart';
 import '../../cache_image.dart';
@@ -23,6 +24,7 @@ import '../../image.dart';
 import '../message.dart';
 import 'action/action_data.dart';
 import 'action_card/action_card_data.dart';
+import 'text/mention_builder.dart';
 
 // ignore_for_file: avoid_dynamic_calls
 class QuoteMessage extends HookWidget {
@@ -79,13 +81,29 @@ class QuoteMessage extends HookWidget {
       final userId = quote.userId as String?;
       final userFullName = quote.userFullName as String?;
       if (type.isText) {
-        return _QuoteMessageBase(
-          messageId: messageId,
-          quoteMessageId: quoteMessageId!,
-          userId: userId,
-          name: userFullName,
-          description: quote.content as String,
-          inputMode: inputMode,
+        return HookBuilder(
+          builder: (context) {
+            final rawContent = quote.content as String;
+            final mentionCache = context.read<MentionCache>();
+            final mentionMap = useMemoizedFuture(
+              () => mentionCache.checkMentionCache({rawContent}),
+              mentionCache.mentionCache(rawContent),
+              keys: [rawContent],
+            ).requireData;
+            final content = useMemoized(() => mentionMap.values.fold<String>(
+                rawContent,
+                (previousValue, element) => previousValue.replaceAll(
+                    '@${element.identityNumber}', '@${element.fullName}')));
+
+            return _QuoteMessageBase(
+              messageId: messageId,
+              quoteMessageId: quoteMessageId!,
+              userId: userId,
+              name: userFullName,
+              description: content,
+              inputMode: inputMode,
+            );
+          },
         );
       }
       final thumbImage = quote.thumbImage as String?;
@@ -120,7 +138,7 @@ class QuoteMessage extends HookWidget {
           quoteMessageId: quoteMessageId!,
           userId: userId,
           name: userFullName,
-          image: ImageByBase64(thumbImage!),
+          image: ImageByBlurHashOrBase64(imageData: thumbImage!),
           icon: SvgPicture.asset(
             Resources.assetsImagesVideoSvg,
             color: iconColor,
@@ -131,8 +149,9 @@ class QuoteMessage extends HookWidget {
       }
 
       if (type.isLive) {
-        final placeholder =
-            thumbImage != null ? ImageByBase64(thumbImage) : const SizedBox();
+        final placeholder = thumbImage != null
+            ? ImageByBlurHashOrBase64(imageData: thumbImage)
+            : const SizedBox();
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,

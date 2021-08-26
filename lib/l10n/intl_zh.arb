@@ -183,5 +183,6 @@
   "sendWithoutCompression": "发送原始文件",
   "sendArchived": "打包成 zip 发送",
   "sendWithoutSound": "静音发送",
-  "conversations": "会话"
+  "conversations": "会话",
+  "chatTranscript": "聊天记录"
 }

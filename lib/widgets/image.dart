@@ -5,8 +5,8 @@ import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class ImageByBase64 extends HookWidget {
-  const ImageByBase64(
+class _ImageByBase64 extends HookWidget {
+  const _ImageByBase64(
     this.base64String, {
     Key? key,
     this.fit = BoxFit.cover,
@@ -27,8 +27,8 @@ class ImageByBase64 extends HookWidget {
 
 const _kDefaultBlurHashSize = 20;
 
-class ImageByBlurHash extends HookWidget {
-  const ImageByBlurHash({
+class _ImageByBlurHash extends HookWidget {
+  const _ImageByBlurHash({
     Key? key,
     required this.blurHash,
     this.width = _kDefaultBlurHashSize,
@@ -69,8 +69,8 @@ class ImageByBlurHash extends HookWidget {
 }
 
 ///
-/// when [imageData] is blur hash. render it with [ImageByBlurHash]
-/// when [imageData] is Base64, render it with [ImageByBase64]
+/// when [imageData] is blur hash. render it with [_ImageByBlurHash]
+/// when [imageData] is Base64, render it with [_ImageByBase64]
 ///
 class ImageByBlurHashOrBase64 extends HookWidget {
   const ImageByBlurHashOrBase64({
@@ -95,9 +95,9 @@ class ImageByBlurHashOrBase64 extends HookWidget {
     }, [imageData]);
 
     if (blurHash != null) {
-      return ImageByBlurHash(blurHash: blurHash);
+      return _ImageByBlurHash(blurHash: blurHash);
     } else {
-      return ImageByBase64(imageData, fit: fit);
+      return _ImageByBase64(imageData, fit: fit);
     }
   }
 }

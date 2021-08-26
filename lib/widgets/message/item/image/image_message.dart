@@ -75,7 +75,8 @@ class ImageMessageWidget extends StatelessWidget {
                 children: [
                   Image(
                     image: MixinFileImage(File(context.accountServer
-                        .convertMessageAbsolutePath(message))),
+                        .convertMessageAbsolutePath(
+                            message, context.isTranscript))),
                     fit: BoxFit.cover,
                     errorBuilder: (_, __, ___) =>
                         ImageByBlurHashOrBase64(imageData: message.thumbImage!),

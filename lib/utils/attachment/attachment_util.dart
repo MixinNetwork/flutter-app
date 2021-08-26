@@ -16,9 +16,12 @@ import 'package:tuple/tuple.dart';
 
 import '../../crypto/attachment/crypto_attachment.dart';
 import '../../db/dao/message_dao.dart';
+import '../../db/dao/transcript_message_dao.dart';
 import '../../db/extension/message_category.dart';
+import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
 import '../crypto_util.dart';
+import '../extension/extension.dart';
 import '../file.dart';
 import '../load_balancer_utils.dart';
 import '../logger.dart';
@@ -53,16 +56,25 @@ abstract class _AttachmentJobBase {
 }
 
 class AttachmentUtil extends ChangeNotifier {
-  AttachmentUtil(this._client, this._messageDao, this.mediaPath) {
+  AttachmentUtil(
+    this._client,
+    this._messageDao,
+    this._transcriptMessageDao,
+    this.mediaPath,
+  ) {
     (_dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate =
         (client) {
       client.badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
     };
+    transcriptPath = p.join(mediaPath, 'Transcripts');
+    Directory(transcriptPath).create(recursive: true);
   }
 
   final String mediaPath;
+  late final String transcriptPath;
   final MessageDao _messageDao;
+  final TranscriptMessageDao _transcriptMessageDao;
   final Client _client;
 
   final Dio _dio = Dio(
@@ -74,28 +86,42 @@ class AttachmentUtil extends ChangeNotifier {
 
   final _attachmentJob = <String, _AttachmentJobBase>{};
 
-  Future<String?> downloadAttachment({
+  Future<void> downloadAttachment({
     required String messageId,
     required String content,
     required String conversationId,
     required String category,
     AttachmentMessage? attachmentMessage,
   }) async {
-    assert(_attachmentJob[messageId] == null);
-    await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    if (_attachmentJob[messageId] != null) {
+      return _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    } else {
+      if (await _messageDao.messageHasMediaStatus(
+              messageId, MediaStatus.done) &&
+          await _messageDao.transcriptMessageHasMediaStatus(
+              messageId, MediaStatus.done, true)) {
+        await syncMessageMedia(messageId);
+        await _updateTranscriptMessageStatus(messageId);
+        return;
+      }
 
+      await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    }
+
+    final message = await _messageDao.findMessageByMessageId(messageId);
     final file = getAttachmentFile(
       category,
       conversationId,
       messageId,
       mimeType: attachmentMessage?.mimeType,
+      isTranscript: message == null,
     );
 
     try {
       final response = await _client.attachmentApi.getAttachment(content);
       d('download ${response.data.viewUrl}');
 
-      if (await isNotPending(messageId)) return null;
+      if (await isNotPending(messageId)) return;
 
       if (response.data.viewUrl != null) {
         String? mediaKey;
@@ -105,15 +131,23 @@ class AttachmentUtil extends ChangeNotifier {
           mediaKey = attachmentMessage?.key as String?;
           mediaDigest = attachmentMessage?.digest as String?;
           if (mediaKey == null || mediaDigest == null) {
-            final message = await _messageDao.findMessageByMessageId(messageId);
             if (message != null) {
               mediaKey = message.mediaKey;
               mediaDigest = message.mediaDigest;
             }
-            if (mediaKey == null || mediaDigest == null) {
-              throw InvalidKeyException(
-                  'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
+          }
+          if (mediaKey == null || mediaDigest == null) {
+            final transcriptMessage = await _transcriptMessageDao
+                .transcriptMessageByMessageId(messageId)
+                .getSingleOrNull();
+            if (transcriptMessage != null) {
+              mediaKey = transcriptMessage.mediaKey;
+              mediaDigest = transcriptMessage.mediaDigest;
             }
+          }
+          if (mediaKey == null || mediaDigest == null) {
+            throw InvalidKeyException(
+                'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
           }
         }
 
@@ -139,10 +173,29 @@ class AttachmentUtil extends ChangeNotifier {
           await _messageDao.updateMessageContent(messageId, encoded);
         }
 
-        await _messageDao.updateMediaMessageUrl(file.path, messageId);
-        await _messageDao.updateMediaSize(fileSize, messageId);
-        await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
-        return file.absolute.path;
+        if (message != null &&
+            (await _transcriptMessageDao
+                    .transcriptMessageByMessageId(messageId)
+                    .getSingleOrNull() !=
+                null)) {
+          final transcriptPath = convertAbsolutePath(
+            category: message.category,
+            fileName: file.pathBasename,
+            messageId: messageId,
+            isTranscript: true,
+          );
+
+          await file.copy(transcriptPath);
+        }
+
+        await _messageDao.updateMedia(
+          messageId: messageId,
+          path: file.path,
+          mediaSize: fileSize,
+          mediaStatus: MediaStatus.done,
+        );
+
+        await _updateTranscriptMessageStatus(messageId);
       }
     } catch (er) {
       e(er.toString());
@@ -202,9 +255,8 @@ class AttachmentUtil extends ChangeNotifier {
     }
   }
 
-  Future<bool> isNotPending(String messageId) async =>
-      MediaStatus.pending !=
-      await _messageDao.mediaStatus(messageId).getSingleOrNull();
+  Future<bool> isNotPending(String messageId) =>
+      _messageDao.hasMediaStatus(messageId, MediaStatus.pending, true);
 
   void deleteCryptoTmpFile(String category, File file) {
     if (category.isSignal || category.isEncrypted) {
@@ -227,21 +279,40 @@ class AttachmentUtil extends ChangeNotifier {
     return path;
   }
 
-  String convertAbsolutePath(
-      String category, String conversationId, String? fileName) {
+  String convertAbsolutePath({
+    String? category,
+    required String? fileName,
+    String? conversationId,
+    String? messageId,
+    bool isTranscript = false,
+  }) {
     if (fileName?.trim().isEmpty ?? true) return '';
-    assert(category.isAttachment);
+    if (isTranscript) {
+      var name = '$messageId${fileName!.fileExtension}';
+      if (messageId == null) {
+        name = fileName;
+      }
+      return p.join(transcriptPath, name);
+    }
     if (fileName?.startsWith(mixinDocumentsDirectory.path) == true) {
       return fileName!;
     }
+    assert(conversationId != null);
+    assert(category != null);
     return p.join(
-        getAttachmentDirectoryPath(category, conversationId), fileName);
+        getAttachmentDirectoryPath(category!, conversationId!), fileName);
   }
 
   File getAttachmentFile(
-      String category, String conversationId, String messageId,
-      {String? mimeType}) {
-    final path = getAttachmentDirectoryPath(category, conversationId);
+    String category,
+    String conversationId,
+    String messageId, {
+    String? mimeType,
+    bool isTranscript = false,
+  }) {
+    final path = isTranscript
+        ? transcriptPath
+        : getAttachmentDirectoryPath(category, conversationId);
     String suffix;
     if (category.isImage) {
       if (_equalsIgnoreCase(mimeType, 'image/png')) {
@@ -280,11 +351,20 @@ class AttachmentUtil extends ChangeNotifier {
       p.join(mediaPath, 'Files', conversationId);
 
   static AttachmentUtil init(
-      Client client, MessageDao messageDao, String identityNumber) {
+    Client client,
+    MessageDao messageDao,
+    TranscriptMessageDao transcriptMessageDao,
+    String identityNumber,
+  ) {
     final documentDirectory = mixinDocumentsDirectory;
     final mediaDirectory =
         File(p.join(documentDirectory.path, identityNumber, 'Media'));
-    return AttachmentUtil(client, messageDao, mediaDirectory.path);
+    return AttachmentUtil(
+      client,
+      messageDao,
+      transcriptMessageDao,
+      mediaDirectory.path,
+    );
   }
 
   Future<bool> cancelProgressAttachmentJob(String messageId) async {
@@ -297,6 +377,80 @@ class AttachmentUtil extends ChangeNotifier {
 
   double getAttachmentProgress(String messageId) =>
       _attachmentJob[messageId]?.progress ?? 0;
+
+  Future<bool> syncMessageMedia(String messageId) async {
+    Future<bool> fromMessage() async {
+      if (await _messageDao.messageHasMediaStatus(
+          messageId, MediaStatus.done)) {
+        final message = await _messageDao.findMessageByMessageId(messageId);
+        final path = convertAbsolutePath(
+          category: message!.category,
+          fileName: message.mediaUrl,
+          conversationId: message.conversationId,
+          messageId: messageId,
+        );
+        final transcriptPath = convertAbsolutePath(
+          category: message.category,
+          fileName: message.mediaUrl,
+          messageId: messageId,
+          isTranscript: true,
+        );
+
+        await File(path).copy(transcriptPath);
+
+        await _messageDao.syncMessageMedia(messageId, true);
+        return true;
+      }
+
+      return false;
+    }
+
+    Future<bool> fromOtherTranscript() async {
+      final done = _messageDao.transcriptMessageHasMediaStatus(
+        messageId,
+        MediaStatus.done,
+      );
+      final notDone = _messageDao.transcriptMessageHasMediaStatus(
+        messageId,
+        MediaStatus.done,
+        true,
+      );
+      if (await done && !await notDone) {
+        await _messageDao.syncMessageMedia(messageId, true);
+        return true;
+      }
+
+      return false;
+    }
+
+    final result = await Future.wait([
+      fromMessage(),
+      fromOtherTranscript(),
+    ]);
+    return result.any((result) => result);
+  }
+
+  Future _updateTranscriptMessageStatus(String messageId) async {
+    final transcriptIds = (await _transcriptMessageDao
+            .transcriptMessageByMessageId(messageId, maxLimit)
+            .get())
+        .map((e) => e.transcriptId);
+    await Future.forEach<String>(transcriptIds, (transcriptId) async {
+      final list = await _transcriptMessageDao
+          .transcriptMessageByTranscriptId(transcriptId)
+          .get();
+      final attachmentList =
+          list.where((element) => element.category.isAttachment);
+
+      if (attachmentList.isEmpty) return;
+
+      final status = attachmentList
+              .every((element) => element.mediaStatus == MediaStatus.done)
+          ? MediaStatus.done
+          : MediaStatus.canceled;
+      await _messageDao.updateMediaStatus(status, transcriptId);
+    });
+  }
 }
 
 class AttachmentResult {

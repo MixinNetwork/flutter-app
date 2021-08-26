@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/extension/extension.dart';
-
 import 'disable.dart';
 import 'interacter_decorated_box.dart';
 
@@ -44,6 +43,7 @@ Future<T?> showMixinDialog<T>({
   required BuildContext context,
   RouteSettings? routeSettings,
   required Widget child,
+  EdgeInsetsGeometry? padding,
 }) =>
     _showDialog(
       context: context,
@@ -52,6 +52,7 @@ Future<T?> showMixinDialog<T>({
               Animation<double> secondaryAnimation) =>
           Center(
         child: _DialogPage(
+          padding: padding,
           child: child,
         ),
       ),
@@ -125,37 +126,42 @@ class _DialogPage extends StatelessWidget {
   const _DialogPage({
     Key? key,
     required this.child,
+    this.padding,
   }) : super(key: key);
 
   final Widget child;
+  final EdgeInsetsGeometry? padding;
 
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(11),
-          border: Border.all(
-            color: const Color.fromRGBO(255, 255, 255, 0.08),
-          ),
-          boxShadow: [
-            const BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.15),
-              offset: Offset(0, 8),
-              blurRadius: 40,
+  Widget build(BuildContext context) => Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(11),
+            border: Border.all(
+              color: const Color.fromRGBO(255, 255, 255, 0.08),
             ),
-            BoxShadow(
-              color: const Color.fromRGBO(0, 0, 0, 0.07),
-              offset: const Offset(0, 4),
-              blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
+            boxShadow: [
+              const BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.15),
+                offset: Offset(0, 8),
+                blurRadius: 40,
+              ),
+              BoxShadow(
+                color: const Color.fromRGBO(0, 0, 0, 0.07),
+                offset: const Offset(0, 4),
+                blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
+              ),
+            ],
+            color: context.dynamicColor(
+              const Color.fromRGBO(255, 255, 255, 1),
+              darkColor: const Color.fromRGBO(62, 65, 72, 1),
             ),
-          ],
-          color: context.dynamicColor(
-            const Color.fromRGBO(255, 255, 255, 1),
-            darkColor: const Color.fromRGBO(62, 65, 72, 1),
           ),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(11),
-          child: child,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            child: child,
+          ),
         ),
       );
 }

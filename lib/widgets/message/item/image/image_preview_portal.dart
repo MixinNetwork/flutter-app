@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:path/path.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -16,6 +14,7 @@ import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../utils/file.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
@@ -129,8 +128,10 @@ class ImagePreviewPage extends HookWidget {
       },
       actions: {
         CopyIntent: CallbackAction<Intent>(
-          onInvoke: (Intent intent) => _copyUrl(context,
-              context.accountServer.convertMessageAbsolutePath(current.value)),
+          onInvoke: (Intent intent) => _copyUrl(
+              context,
+              context.accountServer.convertMessageAbsolutePath(
+                  current.value, context.isTranscript)),
         ),
       },
       autofocus: true,
@@ -290,8 +291,10 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesCopySvg,
             color: context.theme.icon,
             size: 20,
-            onTap: () => _copyUrl(context,
-                context.accountServer.convertMessageAbsolutePath(message)),
+            onTap: () => _copyUrl(
+                context,
+                context.accountServer
+                    .convertMessageAbsolutePath(message, context.isTranscript)),
           ),
           const SizedBox(width: 14),
           ActionButton(
@@ -300,16 +303,18 @@ class _Bar extends StatelessWidget {
             size: 20,
             onTap: () async {
               if (message.mediaUrl?.isEmpty ?? true) return;
-              final path = await getSavePath(
-                confirmButtonText: context.l10n.save,
-                suggestedName: message.mediaName ?? basename(message.mediaUrl!),
-              );
-              if (path?.isEmpty ?? true) return;
-              await runFutureWithToast(
+              await saveFileToSystem(
                 context,
-                File(context.accountServer.convertMessageAbsolutePath(message))
-                    .copy(path!),
-              );
+                context.accountServer
+                    .convertMessageAbsolutePath(message, context.isTranscript),
+                suggestName: message.mediaName,
+              ).then((succeed) {
+                if (succeed) {
+                  showToastSuccessful(context);
+                }
+              }).onError((error, stackTrace) {
+                showToastFailed(context, error);
+              });
             },
           ),
           const SizedBox(width: 14),
@@ -353,8 +358,9 @@ class _Item extends HookWidget {
                   : SystemMouseCursors.zoomOut,
               child: PhotoView(
                 tightMode: true,
-                imageProvider: FileImage(File(
-                    context.accountServer.convertMessageAbsolutePath(message))),
+                imageProvider: FileImage(File(context.accountServer
+                    .convertMessageAbsolutePath(
+                        message, context.isTranscript))),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 initialScale: PhotoViewComputedScale.contained,
@@ -363,8 +369,8 @@ class _Item extends HookWidget {
                     controller.scaleState == PhotoViewScaleState.initial
                         ? PhotoViewScaleState.covering
                         : PhotoViewScaleState.initial,
-                errorBuilder: (_, __, ___) => ImageByBase64(
-                  message.thumbImage!,
+                errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
+                  imageData: message.thumbImage!,
                   fit: BoxFit.contain,
                 ),
               ),

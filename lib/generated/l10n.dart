@@ -1949,6 +1949,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Transcript`
+  String get chatTranscript {
+    return Intl.message(
+      'Transcript',
+      name: 'chatTranscript',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

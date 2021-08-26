@@ -47,9 +47,14 @@ class _MoreExtendedText extends HookWidget {
         useMemoized(() => this.style?.merge(const TextStyle(height: 1)));
 
     final overflowTextSpan = TextSpan(
-      text: '...${context.l10n.more}',
-      style: style,
-    );
+        text: '...${context.l10n.more}',
+        style: style?.merge(TextStyle(
+          color: context.theme.accent,
+        )),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () {
+            expand.value = true;
+          });
 
     final endIndex = useMemoized(() {
       if (!expand.value) {

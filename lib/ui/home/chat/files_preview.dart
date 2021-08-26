@@ -3,8 +3,8 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:archive/archive_io.dart';
+import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
-import 'package:file_selector/file_selector.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
