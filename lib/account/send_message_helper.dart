@@ -11,6 +11,8 @@ import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
+import '../blaze/vo/pin_message_minimal.dart';
+import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/recall_message.dart';
 import '../constants/constants.dart';
 import '../db/dao/job_dao.dart';
@@ -544,7 +546,6 @@ class SendMessageHelper {
           blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
           createdAt: DateTime.now(),
           runCount: 0));
-      await _messageDao.recallMessage(messageId);
       await _messageDao.deleteFtsByMessageId(messageId);
     });
   }
@@ -763,6 +764,48 @@ class SendMessageHelper {
       }
     }
     return null;
+  }
+
+  Future<void> sendPinMessage({
+    required String conversationId,
+    required String senderId,
+    required List<PinMessageMinimal> pinMessageMinimals,
+    required bool pin,
+  }) async {
+    final pinMessagePayload = PinMessagePayload(
+      action: pin ? PinMessagePayloadAction.pin : PinMessagePayloadAction.unpin,
+      messageIds: pinMessageMinimals.map((e) => e.messageId).toList(),
+    );
+    final encoded = await jsonBase64EncodeWithIsolate(pinMessagePayload);
+
+    if (pin) {
+      await Future.forEach<PinMessageMinimal>(pinMessageMinimals,
+          (pinMessageMinimal) async {
+        await _messageDao.insert(
+          Message(
+            messageId: const Uuid().v4(),
+            conversationId: conversationId,
+            userId: senderId,
+            status: MessageStatus.read,
+            content: await jsonEncodeWithIsolate(pinMessageMinimal),
+            createdAt: DateTime.now(),
+            category: pinMessageMinimal.type,
+          ),
+          senderId,
+        );
+      });
+    }
+    await _jobDao.insert(
+      Job(
+        conversationId: conversationId,
+        jobId: const Uuid().v4(),
+        action: recallMessage,
+        priority: 5,
+        blazeMessage: encoded,
+        createdAt: DateTime.now(),
+        runCount: 0,
+      ),
+    );
   }
 }
 

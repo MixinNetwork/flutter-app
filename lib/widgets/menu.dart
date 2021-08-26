@@ -30,7 +30,7 @@ class ContextMenuPortalEntry extends HookWidget {
   }) : super(key: key);
 
   final Widget child;
-  final List<ContextMenu> Function() buildMenus;
+  final List<Widget> Function() buildMenus;
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +151,7 @@ class ContextMenuPage extends StatelessWidget {
     required this.menus,
   }) : super(key: key);
 
-  final List<ContextMenu> menus;
+  final List<Widget> menus;
 
   @override
   Widget build(BuildContext context) {

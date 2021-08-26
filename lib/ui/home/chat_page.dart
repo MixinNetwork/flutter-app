@@ -25,6 +25,7 @@ import 'bloc/blink_cubit.dart';
 import 'bloc/conversation_cubit.dart';
 import 'bloc/message_bloc.dart';
 import 'bloc/pending_jump_message_cubit.dart';
+import 'bloc/pin_message_cubit.dart';
 import 'bloc/quote_message_cubit.dart';
 import 'chat/chat_bar.dart';
 import 'chat/files_preview.dart';
@@ -319,11 +320,14 @@ class ChatContainer extends HookWidget {
 
     final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
 
+    final pinMessageCubit = useBloc(() => PinMessageCubit());
+
     return MultiProvider(
       providers: [
         BlocProvider.value(value: blinkCubit),
         BlocProvider.value(value: quoteMessageCubit),
         BlocProvider.value(value: pendingJumpMessageCubit),
+        BlocProvider.value(value: pinMessageCubit),
       ],
       child: Column(
         children: [
@@ -385,6 +389,16 @@ class ChatContainer extends HookWidget {
                                       children: const [
                                         _JumpMentionButton(),
                                         _JumpCurrentButton(),
+                                      ],
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 12,
+                                    right: 16,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: const [
+                                        _PinMessagesButton(),
                                       ],
                                     ),
                                   ),
@@ -604,6 +618,13 @@ class _JumpCurrentButton extends HookWidget {
       ),
     );
   }
+}
+
+class _PinMessagesButton extends StatelessWidget {
+  const _PinMessagesButton({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => const SizedBox();
 }
 
 class _JumpMentionButton extends HookWidget {

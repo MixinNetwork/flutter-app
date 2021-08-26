@@ -10,11 +10,13 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import '../../blaze/vo/pin_message_minimal.dart';
 import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/bloc/pin_message_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
@@ -153,13 +155,38 @@ class MessageItemWidget extends HookWidget {
                     ),
                   if (!isTranscript &&
                       message.type.canReply &&
-                      (message.status != MessageStatus.delivered ||
-                          message.status != MessageStatus.read))
-                    ContextMenu(
-                      title: context.l10n.pin,
-                      onTap: () =>
-                          context.read<QuoteMessageCubit>().emit(message),
-                    ),
+                      (message.status == MessageStatus.delivered ||
+                          message.status == MessageStatus.read))
+                    HookBuilder(builder: (context) {
+                      final pined = useBlocStateConverter<PinMessageCubit,
+                          PinMessageState, bool>(
+                        converter: (state) =>
+                            state.messageIds.contains(message.messageId),
+                        keys: [message.messageId],
+                      );
+                      return ContextMenu(
+                        title: pined ? context.l10n.unPin : context.l10n.pin,
+                        onTap: () async {
+                          final pinMessageMinimal = PinMessageMinimal(
+                            messageId: message.messageId,
+                            type: message.type,
+                            content:
+                                message.type.isText ? message.content : null,
+                          );
+                          if (pined) {
+                            await context.accountServer.unpinMessage(
+                              conversationId: message.conversationId,
+                              pinMessageMinimals: [pinMessageMinimal],
+                            );
+                            return;
+                          }
+                          await context.accountServer.pinMessage(
+                            conversationId: message.conversationId,
+                            pinMessageMinimals: [pinMessageMinimal],
+                          );
+                        },
+                      );
+                    }),
                   if (!isTranscript && message.canForward)
                     ContextMenu(
                       title: context.l10n.forward,
@@ -381,7 +408,7 @@ class _MessageBubbleMargin extends StatelessWidget {
   final String? userName;
   final String? userId;
   final WidgetBuilder builder;
-  final List<ContextMenu> Function() buildMenus;
+  final List<Widget> Function() buildMenus;
 
   @override
   Widget build(BuildContext context) => Padding(

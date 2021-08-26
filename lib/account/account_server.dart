@@ -17,6 +17,7 @@ import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/blaze_param.dart';
 import '../blaze/vo/message_result.dart';
+import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
@@ -372,7 +373,8 @@ class AccountServer {
       var content = message.content;
 
       if (message.category.isPlain ||
-          message.category == MessageCategory.appCard) {
+          message.category == MessageCategory.appCard ||
+          message.category.isPin) {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isText) {
@@ -1442,4 +1444,26 @@ class AccountServer {
 
   Future<List<db.User>?> updateUserByIdentityNumber(String identityNumber) =>
       _decryptMessage.updateUserByIdentityNumber(identityNumber);
+
+  Future<void> pinMessage({
+    required String conversationId,
+    required List<PinMessageMinimal> pinMessageMinimals,
+  }) =>
+      _sendMessageHelper.sendPinMessage(
+        conversationId: conversationId,
+        senderId: userId,
+        pinMessageMinimals: pinMessageMinimals,
+        pin: true,
+      );
+
+  Future<void> unpinMessage({
+    required String conversationId,
+    required List<PinMessageMinimal> pinMessageMinimals,
+  }) =>
+      _sendMessageHelper.sendPinMessage(
+        conversationId: conversationId,
+        senderId: userId,
+        pinMessageMinimals: pinMessageMinimals,
+        pin: false,
+      );
 }
