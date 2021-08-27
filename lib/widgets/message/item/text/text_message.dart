@@ -117,7 +117,7 @@ class TextMessage extends HookWidget {
       ),
     );
     final dateAndStatus = MessageDatetimeAndStatus(
-      isCurrentUser: isCurrentUser,
+      showStatus: isCurrentUser,
       message: message,
     );
 

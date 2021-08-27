@@ -40,7 +40,7 @@ class LocationMessageWidget extends HookWidget {
       isCurrentUser: isCurrentUser,
       padding: EdgeInsets.zero,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-        isCurrentUser: isCurrentUser,
+        showStatus: isCurrentUser,
         message: message,
       ),
       showNip: showNip,

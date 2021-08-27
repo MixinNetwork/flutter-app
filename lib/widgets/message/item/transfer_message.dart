@@ -30,7 +30,7 @@ class TransferMessage extends StatelessWidget {
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-          isCurrentUser: isCurrentUser,
+          showStatus: false,
           message: message,
         ),
         child: InteractableDecoratedBox(

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:web_socket_channel/io.dart';
 
@@ -138,6 +139,11 @@ class Blaze {
   }
 
   Future<void> handleReceiveMessage(BlazeMessage blazeMessage) async {
+    Stopwatch? stopwatch;
+    if (!kReleaseMode) {
+      stopwatch = Stopwatch()..start();
+    }
+
     BlazeMessageData? data;
     try {
       data =
@@ -167,6 +173,9 @@ class Blaze {
     } else {
       await database.jobDao.insertNoReplace(createAckJob(
           acknowledgeMessageReceipts, data.messageId, MessageStatus.delivered));
+    }
+    if (stopwatch != null) {
+      d('handle execution time: ${stopwatch.elapsedMilliseconds}');
     }
   }
 

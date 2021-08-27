@@ -28,12 +28,12 @@ bool _isRepresentative(
 class MessageDatetimeAndStatus extends StatelessWidget {
   const MessageDatetimeAndStatus({
     Key? key,
-    required this.isCurrentUser,
+    required this.showStatus,
     this.color,
     required this.message,
   }) : super(key: key);
 
-  final bool isCurrentUser;
+  final bool showStatus;
   final Color? color;
   final MessageItem message;
 
@@ -64,7 +64,7 @@ class MessageDatetimeAndStatus extends StatelessWidget {
             dateTime: message.createdAt,
             color: color,
           ),
-          if (isCurrentUser)
+          if (showStatus && !context.isTranscript)
             _MessageStatusWidget(
               status: message.status,
               color: color,

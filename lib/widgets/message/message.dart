@@ -92,7 +92,8 @@ class MessageItemWidget extends HookWidget {
     final isCurrentUser = message.relationship == UserRelationship.me;
 
     final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
-    final sameUserPrev = prev?.userId == message.userId;
+    final prevIsSystem = prev?.type.isSystem ?? false;
+    final sameUserPrev = !prevIsSystem && prev?.userId == message.userId;
 
     final sameDayNext = isSameDay(next?.createdAt, message.createdAt);
     final sameUserNext = next?.userId == message.userId;

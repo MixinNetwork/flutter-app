@@ -39,7 +39,7 @@ class ActionCardMessage extends HookWidget {
       showNip: showNip,
       isCurrentUser: isCurrentUser,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-        isCurrentUser: isCurrentUser,
+        showStatus: isCurrentUser,
         message: message,
       ),
       child: InteractableDecoratedBox(
