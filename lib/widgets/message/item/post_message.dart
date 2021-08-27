@@ -23,11 +23,13 @@ class PostMessage extends StatelessWidget {
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
+    this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   static const _decoration = BoxDecoration(
     borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -40,6 +42,7 @@ class PostMessage extends StatelessWidget {
           messageId: message.messageId,
           showNip: showNip,
           isCurrentUser: isCurrentUser,
+          pinArrow: pinArrow,
           child: FullScreenPortal(
             builder: (context) => InteractableDecoratedBox(
               onTap: () => context.read<FullScreenVisibleCubit>().emit(true),

@@ -11632,6 +11632,145 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       StickerRelationshipDao(this as MixinDatabase);
   late final UserDao userDao = UserDao(this as MixinDatabase);
   late final PinMessageDao pinMessageDao = PinMessageDao(this as MixinDatabase);
+  Selectable<MessageItem> basePinMessageItems(
+      String conversationId,
+      OrderBy Function(
+              PinMessages pinMessage,
+              Messages message,
+              Users sender,
+              Users participant,
+              Snapshots snapshot,
+              Assets asset,
+              Stickers sticker,
+              Hyperlinks hyperlink,
+              Users sharedUser,
+              Conversations conversation,
+              MessageMentions messageMention)
+          order,
+      Limit Function(
+              PinMessages pinMessage,
+              Messages message,
+              Users sender,
+              Users participant,
+              Snapshots snapshot,
+              Assets asset,
+              Stickers sticker,
+              Hyperlinks hyperlink,
+              Users sharedUser,
+              Conversations conversation,
+              MessageMentions messageMention)
+          limit) {
+    final generatedorder = $write(
+        order(
+            alias(this.pinMessages, 'pinMessage'),
+            alias(this.messages, 'message'),
+            alias(this.users, 'sender'),
+            alias(this.users, 'participant'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.assets, 'asset'),
+            alias(this.stickers, 'sticker'),
+            alias(this.hyperlinks, 'hyperlink'),
+            alias(this.users, 'sharedUser'),
+            alias(this.conversations, 'conversation'),
+            alias(this.messageMentions, 'messageMention')),
+        hasMultipleTables: true);
+    final generatedlimit = $write(
+        limit(
+            alias(this.pinMessages, 'pinMessage'),
+            alias(this.messages, 'message'),
+            alias(this.users, 'sender'),
+            alias(this.users, 'participant'),
+            alias(this.snapshots, 'snapshot'),
+            alias(this.assets, 'asset'),
+            alias(this.stickers, 'sticker'),
+            alias(this.hyperlinks, 'hyperlink'),
+            alias(this.users, 'sharedUser'),
+            alias(this.conversations, 'conversation'),
+            alias(this.messageMentions, 'messageMention')),
+        hasMultipleTables: true);
+    return customSelect(
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(conversationId),
+          ...generatedorder.introducedVariables,
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          stickers,
+          snapshots,
+          assets,
+          hyperlinks,
+          messageMentions,
+          pinMessages,
+          ...generatedorder.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return MessageItem(
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
+        mediaStatus:
+            Messages.$converter0.mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        actionName:
+            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        relationship:
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        conversationOwnerId: row.read<String?>('conversationOwnerId'),
+        conversionCategory: Conversations.$converter0
+            .mapToDart(row.read<String?>('conversionCategory')),
+        groupName: row.read<String?>('groupName'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String?>('participantUserId'),
+        snapshotId: row.read<String?>('snapshotId'),
+        snapshotType: row.read<String?>('snapshotType'),
+        snapshotAmount: row.read<String?>('snapshotAmount'),
+        assetId: row.read<String?>('assetId'),
+        assetSymbol: row.read<String?>('assetSymbol'),
+        assetIcon: row.read<String?>('assetIcon'),
+        siteName: row.read<String?>('siteName'),
+        siteTitle: row.read<String?>('siteTitle'),
+        siteDescription: row.read<String?>('siteDescription'),
+        siteImage: row.read<String?>('siteImage'),
+        mentionRead: row.read<bool?>('mentionRead'),
+      );
+    });
+  }
+
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(
         'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',
@@ -12803,254 +12942,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       );
 }
 
-class ConversationCircleItem {
-  final String circleId;
-  final String name;
-  final DateTime createdAt;
-  final int count;
-  final int? unseenMessageCount;
-  ConversationCircleItem({
-    required this.circleId,
-    required this.name,
-    required this.createdAt,
-    required this.count,
-    this.unseenMessageCount,
-  });
-  @override
-  int get hashCode => $mrjf($mrjc(
-      circleId.hashCode,
-      $mrjc(
-          name.hashCode,
-          $mrjc(createdAt.hashCode,
-              $mrjc(count.hashCode, unseenMessageCount.hashCode)))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ConversationCircleItem &&
-          other.circleId == this.circleId &&
-          other.name == this.name &&
-          other.createdAt == this.createdAt &&
-          other.count == this.count &&
-          other.unseenMessageCount == this.unseenMessageCount);
-  @override
-  String toString() {
-    return (StringBuffer('ConversationCircleItem(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('count: $count, ')
-          ..write('unseenMessageCount: $unseenMessageCount')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class ConversationCircleManagerItem {
-  final String circleId;
-  final String name;
-  final int count;
-  ConversationCircleManagerItem({
-    required this.circleId,
-    required this.name,
-    required this.count,
-  });
-  @override
-  int get hashCode =>
-      $mrjf($mrjc(circleId.hashCode, $mrjc(name.hashCode, count.hashCode)));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ConversationCircleManagerItem &&
-          other.circleId == this.circleId &&
-          other.name == this.name &&
-          other.count == this.count);
-  @override
-  String toString() {
-    return (StringBuffer('ConversationCircleManagerItem(')
-          ..write('circleId: $circleId, ')
-          ..write('name: $name, ')
-          ..write('count: $count')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class MentionUser {
-  final String userId;
-  final String identityNumber;
-  final String? fullName;
-  MentionUser({
-    required this.userId,
-    required this.identityNumber,
-    this.fullName,
-  });
-  @override
-  int get hashCode => $mrjf($mrjc(
-      userId.hashCode, $mrjc(identityNumber.hashCode, fullName.hashCode)));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is MentionUser &&
-          other.userId == this.userId &&
-          other.identityNumber == this.identityNumber &&
-          other.fullName == this.fullName);
-  @override
-  String toString() {
-    return (StringBuffer('MentionUser(')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('fullName: $fullName')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class ParticipantSessionKey {
-  final String conversationId;
-  final String userId;
-  final String sessionId;
-  final String? publicKey;
-  ParticipantSessionKey({
-    required this.conversationId,
-    required this.userId,
-    required this.sessionId,
-    this.publicKey,
-  });
-  @override
-  int get hashCode => $mrjf($mrjc(conversationId.hashCode,
-      $mrjc(userId.hashCode, $mrjc(sessionId.hashCode, publicKey.hashCode))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ParticipantSessionKey &&
-          other.conversationId == this.conversationId &&
-          other.userId == this.userId &&
-          other.sessionId == this.sessionId &&
-          other.publicKey == this.publicKey);
-  @override
-  String toString() {
-    return (StringBuffer('ParticipantSessionKey(')
-          ..write('conversationId: $conversationId, ')
-          ..write('userId: $userId, ')
-          ..write('sessionId: $sessionId, ')
-          ..write('publicKey: $publicKey')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class ParticipantUser {
-  final String conversationId;
-  final ParticipantRole? role;
-  final DateTime createdAt;
-  final String userId;
-  final String identityNumber;
-  final UserRelationship? relationship;
-  final String? biography;
-  final String? fullName;
-  final String? avatarUrl;
-  final String? phone;
-  final bool? isVerified;
-  final DateTime? userCreatedAt;
-  final DateTime? muteUntil;
-  final int? hasPin;
-  final String? appId;
-  final int? isScam;
-  ParticipantUser({
-    required this.conversationId,
-    this.role,
-    required this.createdAt,
-    required this.userId,
-    required this.identityNumber,
-    this.relationship,
-    this.biography,
-    this.fullName,
-    this.avatarUrl,
-    this.phone,
-    this.isVerified,
-    this.userCreatedAt,
-    this.muteUntil,
-    this.hasPin,
-    this.appId,
-    this.isScam,
-  });
-  @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          role.hashCode,
-          $mrjc(
-              createdAt.hashCode,
-              $mrjc(
-                  userId.hashCode,
-                  $mrjc(
-                      identityNumber.hashCode,
-                      $mrjc(
-                          relationship.hashCode,
-                          $mrjc(
-                              biography.hashCode,
-                              $mrjc(
-                                  fullName.hashCode,
-                                  $mrjc(
-                                      avatarUrl.hashCode,
-                                      $mrjc(
-                                          phone.hashCode,
-                                          $mrjc(
-                                              isVerified.hashCode,
-                                              $mrjc(
-                                                  userCreatedAt.hashCode,
-                                                  $mrjc(
-                                                      muteUntil.hashCode,
-                                                      $mrjc(
-                                                          hasPin.hashCode,
-                                                          $mrjc(
-                                                              appId.hashCode,
-                                                              isScam
-                                                                  .hashCode))))))))))))))));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is ParticipantUser &&
-          other.conversationId == this.conversationId &&
-          other.role == this.role &&
-          other.createdAt == this.createdAt &&
-          other.userId == this.userId &&
-          other.identityNumber == this.identityNumber &&
-          other.relationship == this.relationship &&
-          other.biography == this.biography &&
-          other.fullName == this.fullName &&
-          other.avatarUrl == this.avatarUrl &&
-          other.phone == this.phone &&
-          other.isVerified == this.isVerified &&
-          other.userCreatedAt == this.userCreatedAt &&
-          other.muteUntil == this.muteUntil &&
-          other.hasPin == this.hasPin &&
-          other.appId == this.appId &&
-          other.isScam == this.isScam);
-  @override
-  String toString() {
-    return (StringBuffer('ParticipantUser(')
-          ..write('conversationId: $conversationId, ')
-          ..write('role: $role, ')
-          ..write('createdAt: $createdAt, ')
-          ..write('userId: $userId, ')
-          ..write('identityNumber: $identityNumber, ')
-          ..write('relationship: $relationship, ')
-          ..write('biography: $biography, ')
-          ..write('fullName: $fullName, ')
-          ..write('avatarUrl: $avatarUrl, ')
-          ..write('phone: $phone, ')
-          ..write('isVerified: $isVerified, ')
-          ..write('userCreatedAt: $userCreatedAt, ')
-          ..write('muteUntil: $muteUntil, ')
-          ..write('hasPin: $hasPin, ')
-          ..write('appId: $appId, ')
-          ..write('isScam: $isScam')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class MessageItem {
   final String messageId;
   final String conversationId;
@@ -13320,6 +13211,254 @@ class MessageItem {
           ..write('siteDescription: $siteDescription, ')
           ..write('siteImage: $siteImage, ')
           ..write('mentionRead: $mentionRead')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ConversationCircleItem {
+  final String circleId;
+  final String name;
+  final DateTime createdAt;
+  final int count;
+  final int? unseenMessageCount;
+  ConversationCircleItem({
+    required this.circleId,
+    required this.name,
+    required this.createdAt,
+    required this.count,
+    this.unseenMessageCount,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      circleId.hashCode,
+      $mrjc(
+          name.hashCode,
+          $mrjc(createdAt.hashCode,
+              $mrjc(count.hashCode, unseenMessageCount.hashCode)))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ConversationCircleItem &&
+          other.circleId == this.circleId &&
+          other.name == this.name &&
+          other.createdAt == this.createdAt &&
+          other.count == this.count &&
+          other.unseenMessageCount == this.unseenMessageCount);
+  @override
+  String toString() {
+    return (StringBuffer('ConversationCircleItem(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('count: $count, ')
+          ..write('unseenMessageCount: $unseenMessageCount')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ConversationCircleManagerItem {
+  final String circleId;
+  final String name;
+  final int count;
+  ConversationCircleManagerItem({
+    required this.circleId,
+    required this.name,
+    required this.count,
+  });
+  @override
+  int get hashCode =>
+      $mrjf($mrjc(circleId.hashCode, $mrjc(name.hashCode, count.hashCode)));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ConversationCircleManagerItem &&
+          other.circleId == this.circleId &&
+          other.name == this.name &&
+          other.count == this.count);
+  @override
+  String toString() {
+    return (StringBuffer('ConversationCircleManagerItem(')
+          ..write('circleId: $circleId, ')
+          ..write('name: $name, ')
+          ..write('count: $count')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class MentionUser {
+  final String userId;
+  final String identityNumber;
+  final String? fullName;
+  MentionUser({
+    required this.userId,
+    required this.identityNumber,
+    this.fullName,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      userId.hashCode, $mrjc(identityNumber.hashCode, fullName.hashCode)));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MentionUser &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.fullName == this.fullName);
+  @override
+  String toString() {
+    return (StringBuffer('MentionUser(')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('fullName: $fullName')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ParticipantSessionKey {
+  final String conversationId;
+  final String userId;
+  final String sessionId;
+  final String? publicKey;
+  ParticipantSessionKey({
+    required this.conversationId,
+    required this.userId,
+    required this.sessionId,
+    this.publicKey,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(conversationId.hashCode,
+      $mrjc(userId.hashCode, $mrjc(sessionId.hashCode, publicKey.hashCode))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParticipantSessionKey &&
+          other.conversationId == this.conversationId &&
+          other.userId == this.userId &&
+          other.sessionId == this.sessionId &&
+          other.publicKey == this.publicKey);
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantSessionKey(')
+          ..write('conversationId: $conversationId, ')
+          ..write('userId: $userId, ')
+          ..write('sessionId: $sessionId, ')
+          ..write('publicKey: $publicKey')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class ParticipantUser {
+  final String conversationId;
+  final ParticipantRole? role;
+  final DateTime createdAt;
+  final String userId;
+  final String identityNumber;
+  final UserRelationship? relationship;
+  final String? biography;
+  final String? fullName;
+  final String? avatarUrl;
+  final String? phone;
+  final bool? isVerified;
+  final DateTime? userCreatedAt;
+  final DateTime? muteUntil;
+  final int? hasPin;
+  final String? appId;
+  final int? isScam;
+  ParticipantUser({
+    required this.conversationId,
+    this.role,
+    required this.createdAt,
+    required this.userId,
+    required this.identityNumber,
+    this.relationship,
+    this.biography,
+    this.fullName,
+    this.avatarUrl,
+    this.phone,
+    this.isVerified,
+    this.userCreatedAt,
+    this.muteUntil,
+    this.hasPin,
+    this.appId,
+    this.isScam,
+  });
+  @override
+  int get hashCode => $mrjf($mrjc(
+      conversationId.hashCode,
+      $mrjc(
+          role.hashCode,
+          $mrjc(
+              createdAt.hashCode,
+              $mrjc(
+                  userId.hashCode,
+                  $mrjc(
+                      identityNumber.hashCode,
+                      $mrjc(
+                          relationship.hashCode,
+                          $mrjc(
+                              biography.hashCode,
+                              $mrjc(
+                                  fullName.hashCode,
+                                  $mrjc(
+                                      avatarUrl.hashCode,
+                                      $mrjc(
+                                          phone.hashCode,
+                                          $mrjc(
+                                              isVerified.hashCode,
+                                              $mrjc(
+                                                  userCreatedAt.hashCode,
+                                                  $mrjc(
+                                                      muteUntil.hashCode,
+                                                      $mrjc(
+                                                          hasPin.hashCode,
+                                                          $mrjc(
+                                                              appId.hashCode,
+                                                              isScam
+                                                                  .hashCode))))))))))))))));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ParticipantUser &&
+          other.conversationId == this.conversationId &&
+          other.role == this.role &&
+          other.createdAt == this.createdAt &&
+          other.userId == this.userId &&
+          other.identityNumber == this.identityNumber &&
+          other.relationship == this.relationship &&
+          other.biography == this.biography &&
+          other.fullName == this.fullName &&
+          other.avatarUrl == this.avatarUrl &&
+          other.phone == this.phone &&
+          other.isVerified == this.isVerified &&
+          other.userCreatedAt == this.userCreatedAt &&
+          other.muteUntil == this.muteUntil &&
+          other.hasPin == this.hasPin &&
+          other.appId == this.appId &&
+          other.isScam == this.isScam);
+  @override
+  String toString() {
+    return (StringBuffer('ParticipantUser(')
+          ..write('conversationId: $conversationId, ')
+          ..write('role: $role, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('userId: $userId, ')
+          ..write('identityNumber: $identityNumber, ')
+          ..write('relationship: $relationship, ')
+          ..write('biography: $biography, ')
+          ..write('fullName: $fullName, ')
+          ..write('avatarUrl: $avatarUrl, ')
+          ..write('phone: $phone, ')
+          ..write('isVerified: $isVerified, ')
+          ..write('userCreatedAt: $userCreatedAt, ')
+          ..write('muteUntil: $muteUntil, ')
+          ..write('hasPin: $hasPin, ')
+          ..write('appId: $appId, ')
+          ..write('isScam: $isScam')
           ..write(')'))
         .toString();
   }

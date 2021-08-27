@@ -11,6 +11,7 @@ import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
+import '../account/show_pin_message_key_value.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/blaze_message_data.dart';
 import '../blaze/vo/pin_message_minimal.dart';
@@ -428,6 +429,7 @@ class DecryptMessage extends Injector {
           accountId,
         );
       });
+      unawaited(ShowPinMessageKeyValue.instance.show(data.conversationId));
     } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
       await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
     }

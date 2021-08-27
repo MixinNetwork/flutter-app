@@ -31,6 +31,7 @@ class MessageBubble extends StatelessWidget {
     this.outerTimeAndStatusWidget,
     this.quoteMessageId,
     this.quoteMessageContent,
+    this.pinArrow,
   }) : super(key: key);
 
   final String messageId;
@@ -44,6 +45,7 @@ class MessageBubble extends StatelessWidget {
   final Widget? outerTimeAndStatusWidget;
   final String? quoteMessageContent;
   final String? quoteMessageId;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +106,17 @@ class MessageBubble extends StatelessWidget {
           clipper: clipper,
         ),
         child: _child,
+      );
+    }
+
+    if (pinArrow != null) {
+      _child = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isCurrentUser) pinArrow!,
+          Flexible(child: _child),
+          if (!isCurrentUser) pinArrow!,
+        ],
       );
     }
 

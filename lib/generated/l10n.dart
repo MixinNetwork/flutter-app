@@ -1959,6 +1959,36 @@ class Localization {
       args: [],
     );
   }
+
+  /// `{user} pinned {preview}`
+  String pinned(Object user, Object preview) {
+    return Intl.message(
+      '$user pinned $preview',
+      name: 'pinned',
+      desc: '',
+      args: [user, preview],
+    );
+  }
+
+  /// `Unpin All Messages`
+  String get unpinAllMessages {
+    return Intl.message(
+      'Unpin All Messages',
+      name: 'unpinAllMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to unpin all messages?`
+  String get unpinAllMessagesDescription {
+    return Intl.message(
+      'Are you sure you want to unpin all messages?',
+      name: 'unpinAllMessagesDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

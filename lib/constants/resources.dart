@@ -25,6 +25,8 @@ class Resources {
   static const String assetsImagesChatBackupSvg =
       'assets/images/chat_backup.svg';
 
+  static const String assetsImagesChatPinSvg = 'assets/images/chat_pin.svg';
+
   static const String assetsImagesChatRepresentativeSvg =
       'assets/images/chat_representative.svg';
 
@@ -172,6 +174,8 @@ class Resources {
       'assets/images/personal_sticker.svg';
 
   static const String assetsImagesPinSvg = 'assets/images/pin.svg';
+
+  static const String assetsImagesPinArrowSvg = 'assets/images/pin_arrow.svg';
 
   static const String assetsImagesPlaySvg = 'assets/images/play.svg';
 

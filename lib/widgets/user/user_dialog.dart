@@ -5,7 +5,7 @@ import '../../constants/resources.dart';
 import '../../db/extension/user.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
-import '../../ui/home/chat_page.dart';
+import '../../ui/home/chat/chat_page.dart';
 import '../../ui/home/conversation_page.dart';
 import '../../utils/extension/extension.dart';
 import '../action_button.dart';

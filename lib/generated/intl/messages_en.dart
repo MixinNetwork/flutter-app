@@ -52,7 +52,9 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(count) => "${count} Participants";
 
-  static String m16(count) => "${count} related messages";
+  static String m16(user, preview) => "${user} pinned ${preview}";
+
+  static String m17(count) => "${count} related messages";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -239,6 +241,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
+        "pinned": m16,
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
@@ -258,7 +261,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m16,
+        "searchRelatedMessage": m17,
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),
@@ -292,6 +295,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "unMute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unPin": MessageLookupByLibrary.simpleMessage("Unpin"),
         "unblock": MessageLookupByLibrary.simpleMessage("Unblock"),
+        "unpinAllMessages":
+            MessageLookupByLibrary.simpleMessage("Unpin All Messages"),
+        "unpinAllMessagesDescription": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to unpin all messages?"),
         "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),

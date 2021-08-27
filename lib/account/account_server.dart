@@ -142,6 +142,7 @@ class AccountServer {
       database.jobDao,
       database.participantDao,
       attachmentUtil,
+      database.pinMessageDao,
     );
     blaze = Blaze(
       userId,
@@ -175,7 +176,7 @@ class AccountServer {
       multiAuthCubit,
     );
 
-    await HiveKeyValue.initKeyValues();
+    await initKeyValues();
   }
 
   late String userId;
@@ -552,7 +553,7 @@ class AccountServer {
     await client.accountApi.logout(LogoutRequest(sessionId));
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
-    await HiveKeyValue.clearKeyValues();
+    await clearKeyValues();
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);
     await database.participantSessionDao.updateSentToServer();

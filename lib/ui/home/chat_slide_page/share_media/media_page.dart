@@ -21,7 +21,7 @@ import '../../../../widgets/cache_image.dart';
 import '../../../../widgets/image.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/image/image_preview_portal.dart';
-import '../../chat_page.dart';
+import '../../chat/chat_page.dart';
 
 class MediaPage extends HookWidget {
   const MediaPage({

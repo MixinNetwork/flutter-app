@@ -4,7 +4,7 @@ import 'package:libsignal_protocol_dart/src/util/medium.dart';
 import '../utils/crypto_util.dart';
 import '../utils/hive_key_values.dart';
 
-class CryptoKeyValue extends HiveKeyValue {
+class CryptoKeyValue extends HiveKeyValue<int> {
   CryptoKeyValue._() : super(_hiveCrypto);
 
   static CryptoKeyValue? _instance;
@@ -18,22 +18,25 @@ class CryptoKeyValue extends HiveKeyValue {
   static const _activeSignedPreKeyId = 'active_signed_pre_key_id';
 
   int get localRegistrationId =>
-      box.get(_localRegistrationId, defaultValue: 0) as int;
+      box.get(_localRegistrationId, defaultValue: 0)!;
+
   set localRegistrationId(int registrationId) =>
       box.put(_localRegistrationId, registrationId);
 
   int get nextPreKeyId =>
-      box.get(_nextPreKeyId, defaultValue: generateRandomInt(maxValue)) as int;
+      box.get(_nextPreKeyId, defaultValue: generateRandomInt(maxValue))!;
+
   set nextPreKeyId(int preKeyId) => box.put(_nextPreKeyId, preKeyId);
 
   int get nextSignedPreKeyId =>
-      box.get(_nextSignedPreKeyId, defaultValue: generateRandomInt(maxValue))
-          as int;
+      box.get(_nextSignedPreKeyId, defaultValue: generateRandomInt(maxValue))!;
+
   set nextSignedPreKeyId(int preKeyId) =>
       box.put(_nextSignedPreKeyId, preKeyId);
 
   int get activeSignedPreKeyId =>
-      box.get(_activeSignedPreKeyId, defaultValue: -1) as int;
+      box.get(_activeSignedPreKeyId, defaultValue: -1)!;
+
   set activeSignedPreKeyId(int preKeyId) =>
       box.put(_activeSignedPreKeyId, preKeyId);
 }

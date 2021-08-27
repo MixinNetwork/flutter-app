@@ -11,7 +11,7 @@ import '../../../blaze/vo/transcript_minimal.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
 import '../../../ui/home/bloc/blink_cubit.dart';
-import '../../../ui/home/chat_page.dart';
+import '../../../ui/home/chat/chat_page.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';

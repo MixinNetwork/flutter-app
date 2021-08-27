@@ -1,22 +1,48 @@
 import 'package:moor/moor.dart';
 
 import '../mixin_database.dart';
+import '../util/util.dart';
 
 part 'pin_message_dao.g.dart';
 
-@UseDao(tables: [
-  PinMessages
-], include: {
-  '../moor/dao/pin_message.moor',
-})
+@UseDao(tables: [PinMessages])
 class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
   PinMessageDao(MixinDatabase attachedDatabase) : super(attachedDatabase);
 
   Future<int> insert(PinMessage pinMessage) =>
-      into(pinMessages).insertOnConflictUpdate(pinMessage);
+      into(db.pinMessages).insertOnConflictUpdate(pinMessage);
 
   Future<int> deleteByIds(List<String> messageIds) =>
-      (delete(pinMessages)..where((tbl) => tbl.messageId.isIn(messageIds)))
+      (delete(db.pinMessages)..where((tbl) => tbl.messageId.isIn(messageIds)))
           .go();
+
+  Selectable<String?> getPinMessageIds(String conversationId) =>
+      (selectOnly(db.pinMessages)
+            ..addColumns([db.pinMessages.messageId])
+            ..where(db.pinMessages.conversationId.equals(conversationId))
+            ..orderBy([OrderingTerm.desc(db.pinMessages.createdAt)]))
+          .map((row) => row.read(db.pinMessages.messageId));
+
+  Selectable<MessageItem> lastPinMessageItem(String conversationId) =>
+      db.basePinMessageItems(
+        conversationId,
+        (pinMessage, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________) =>
+            OrderBy([OrderingTerm.desc(pinMessage.createdAt)]),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________) =>
+            Limit(1, 0),
+      );
+
+  Selectable<MessageItem> messageItems(String conversationId) =>
+      db.basePinMessageItems(
+        conversationId,
+        (pinMessage, _, __, ___, ____, _____, ______, _______, ________,
+                _________, __________) =>
+            OrderBy([OrderingTerm.asc(pinMessage.createdAt)]),
+        (_, __, ___, ____, _____, ______, _______, ________, _________,
+                __________, ___________) =>
+            maxLimit,
+      );
 }

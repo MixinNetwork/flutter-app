@@ -7,7 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
-import '../../utils/logger.dart';
+import 'logger.dart';
 
 abstract class _NotificationManager {
   final StreamController<Uri> _payloadStreamController =

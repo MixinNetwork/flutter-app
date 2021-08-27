@@ -10,34 +10,38 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../bloc/simple_cubit.dart';
-import '../../bloc/subscribe_mixin.dart';
-import '../../constants/resources.dart';
-import '../../utils/extension/extension.dart';
-import '../../utils/hook.dart';
-import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
-import '../../widgets/dash_path_border.dart';
-import '../../widgets/interacter_decorated_box.dart';
-import '../../widgets/message/item/text/mention_builder.dart';
-import '../../widgets/message/message.dart';
-import '../../widgets/message/message_bubble.dart';
-import 'bloc/blink_cubit.dart';
-import 'bloc/conversation_cubit.dart';
-import 'bloc/message_bloc.dart';
-import 'bloc/pending_jump_message_cubit.dart';
-import 'bloc/pin_message_cubit.dart';
-import 'bloc/quote_message_cubit.dart';
-import 'chat/chat_bar.dart';
-import 'chat/files_preview.dart';
-import 'chat/input_container.dart';
-import 'chat_slide_page/chat_info_page.dart';
-import 'chat_slide_page/circle_manager_page.dart';
-import 'chat_slide_page/group_participants_page.dart';
-import 'chat_slide_page/search_message_page.dart';
-import 'chat_slide_page/shared_media_page.dart';
-import 'home.dart';
-import 'route/responsive_navigator.dart';
-import 'route/responsive_navigator_cubit.dart';
+import '../../../account/show_pin_message_key_value.dart';
+import '../../../bloc/simple_cubit.dart';
+import '../../../bloc/subscribe_mixin.dart';
+import '../../../constants/resources.dart';
+import '../../../utils/extension/extension.dart';
+import '../../../utils/hook.dart';
+import '../../../widgets/action_button.dart';
+import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
+import '../../../widgets/dash_path_border.dart';
+import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/message/item/text/mention_builder.dart';
+import '../../../widgets/message/message.dart';
+import '../../../widgets/message/message_bubble.dart';
+import '../../../widgets/pin_bubble.dart';
+import '../bloc/blink_cubit.dart';
+import '../bloc/conversation_cubit.dart';
+import '../bloc/message_bloc.dart';
+import '../bloc/pending_jump_message_cubit.dart';
+import '../bloc/quote_message_cubit.dart';
+import '../chat_slide_page/chat_info_page.dart';
+import '../chat_slide_page/circle_manager_page.dart';
+import '../chat_slide_page/group_participants_page.dart';
+import '../chat_slide_page/pin_messages_page.dart';
+import '../chat_slide_page/search_message_page.dart';
+import '../chat_slide_page/shared_media_page.dart';
+import '../home.dart';
+import '../hook/pin_message_cubit.dart';
+import '../route/responsive_navigator.dart';
+import '../route/responsive_navigator_cubit.dart';
+import 'chat_bar.dart';
+import 'files_preview.dart';
+import 'input_container.dart';
 
 class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   ChatSideCubit() : super(const ResponsiveNavigatorState());
@@ -46,7 +50,8 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   static const circles = 'circles';
   static const searchMessageHistory = 'searchMessageHistory';
   static const sharedMedia = 'sharedMedia';
-  static const participants = 'members';
+  static const participants = 'participants';
+  static const pinMessages = 'pinMessages';
 
   @override
   MaterialPage route(String name, Object? arguments) {
@@ -80,6 +85,12 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
           key: ValueKey(participants),
           name: participants,
           child: GroupParticipantsPage(),
+        );
+      case pinMessages:
+        return const MaterialPage(
+          key: ValueKey(pinMessages),
+          name: pinMessages,
+          child: PinMessagesPage(),
         );
       default:
         throw ArgumentError('Invalid route');
@@ -144,8 +155,17 @@ class ChatPage extends HookWidget {
 
     final windowHeight = MediaQuery.of(context).size.height;
 
+    final tickerProvider = useSingleTickerProvider();
+    final blinkCubit = useBloc(
+          () => BlinkCubit(
+        tickerProvider,
+        context.theme.accent.withOpacity(0.5),
+      ),
+    );
+
     return MultiProvider(
       providers: [
+        BlocProvider.value(value: blinkCubit),
         BlocProvider.value(value: chatSideCubit),
         BlocProvider.value(value: searchConversationKeywordCubit),
         BlocProvider(
@@ -309,25 +329,15 @@ class ChatContainer extends HookWidget {
     BlocProvider.of<MessageBloc>(context).limit =
         MediaQuery.of(context).size.height ~/ 20;
 
-    final tickerProvider = useSingleTickerProvider();
-
-    final blinkCubit = useBloc(
-      () => BlinkCubit(
-        tickerProvider,
-        context.theme.accent.withOpacity(0.5),
-      ),
-    );
-
     final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
 
-    final pinMessageCubit = useBloc(() => PinMessageCubit());
+    final pinMessageState = usePinMessageState();
 
     return MultiProvider(
       providers: [
-        BlocProvider.value(value: blinkCubit),
         BlocProvider.value(value: quoteMessageCubit),
         BlocProvider.value(value: pendingJumpMessageCubit),
-        BlocProvider.value(value: pinMessageCubit),
+        Provider.value(value: pinMessageState),
       ],
       child: Column(
         children: [
@@ -392,16 +402,7 @@ class ChatContainer extends HookWidget {
                                       ],
                                     ),
                                   ),
-                                  Positioned(
-                                    top: 12,
-                                    right: 16,
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: const [
-                                        _PinMessagesButton(),
-                                      ],
-                                    ),
-                                  ),
+                                  const _PinMessagesButton(),
                                 ],
                               ),
                             ),
@@ -594,25 +595,24 @@ class _JumpCurrentButton extends HookWidget {
           }
           messageBloc.jumpToCurrent();
         },
-        child: ClipOval(
-          child: Container(
-            height: 40,
-            width: 40,
-            decoration: BoxDecoration(
-              color: context.messageBubbleColor(false),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color.fromRGBO(0, 0, 0, 0.15),
-                  offset: Offset(0, 2),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: SvgPicture.asset(
-              Resources.assetsImagesJumpCurrentArrowSvg,
-              color: context.theme.text,
-            ),
+        child: Container(
+          height: 40,
+          width: 40,
+          decoration: BoxDecoration(
+            color: context.messageBubbleColor(false),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.15),
+                offset: Offset(0, 2),
+                blurRadius: 10,
+              ),
+            ],
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: SvgPicture.asset(
+            Resources.assetsImagesJumpCurrentArrowSvg,
+            color: context.theme.text,
           ),
         ),
       ),
@@ -620,11 +620,122 @@ class _JumpCurrentButton extends HookWidget {
   }
 }
 
-class _PinMessagesButton extends StatelessWidget {
+class _PinMessagesButton extends HookWidget {
   const _PinMessagesButton({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => const SizedBox();
+  Widget build(BuildContext context) {
+    final currentPinMessageIds = context.watchCurrentPinMessageIds;
+    final lastMessage = context.lastMessage;
+
+    if (currentPinMessageIds.isEmpty) return const SizedBox();
+
+    final showLastPinMessage = lastMessage?.isNotEmpty ?? false;
+    return Positioned(
+      top: 12,
+      right: 16,
+      left: 10,
+      height: 64,
+      child: Row(
+        children: [
+          if (showLastPinMessage)
+            Expanded(
+              child: PinMessageBubble(
+                child: Row(
+                  children: [
+                    ActionButton(
+                      name: Resources.assetsImagesIcCloseSvg,
+                      color: context.theme.icon,
+                      size: 20,
+                      onTap: () {
+                        final conversationId = context
+                            .read<ConversationCubit>()
+                            .state
+                            ?.conversationId;
+                        if (conversationId == null) return;
+                        ShowPinMessageKeyValue.instance.dismiss(conversationId);
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        lastMessage!.overflow,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          if (!showLastPinMessage) const Spacer(),
+          const SizedBox(width: 8),
+          InteractableDecoratedBox(
+            onTap: () => context.read<ChatSideCubit>()
+              ..popWhere((page) => page.name == ChatSideCubit.pinMessages)
+              ..pushPage(ChatSideCubit.pinMessages),
+            child: SizedBox(
+              height: 52,
+              width: 40,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: 12,
+                    child: Container(
+                      height: 34,
+                      width: 34,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: context.messageBubbleColor(false),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color.fromRGBO(0, 0, 0, 0.15),
+                            offset: Offset(0, 2),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: SvgPicture.asset(
+                        Resources.assetsImagesChatPinSvg,
+                        width: 25,
+                        height: 25,
+                        color: context.theme.text,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 40,
+                    height: 18,
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: context.theme.accent,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 5,
+                        vertical: 1,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '${currentPinMessageIds.length}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          height: 1,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _JumpMentionButton extends HookWidget {
@@ -662,28 +773,27 @@ class _JumpMentionButton extends HookWidget {
           children: [
             Positioned(
               top: 12,
-              child: ClipOval(
-                child: Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    color: context.messageBubbleColor(false),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Color.fromRGBO(0, 0, 0, 0.15),
-                        offset: Offset(0, 2),
-                        blurRadius: 10,
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '@',
-                    style: TextStyle(
-                      fontSize: 17,
-                      height: 1,
-                      color: context.theme.text,
+              child: Container(
+                height: 40,
+                width: 40,
+                decoration: BoxDecoration(
+                  color: context.messageBubbleColor(false),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color.fromRGBO(0, 0, 0, 0.15),
+                      offset: Offset(0, 2),
+                      blurRadius: 10,
                     ),
+                  ],
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  '@',
+                  style: TextStyle(
+                    fontSize: 17,
+                    height: 1,
+                    color: context.theme.text,
                   ),
                 ),
               ),

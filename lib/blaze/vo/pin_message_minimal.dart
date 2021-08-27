@@ -1,13 +1,14 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'pin_message_minimal.g.dart';
 
 @JsonSerializable()
-class PinMessageMinimal {
-  PinMessageMinimal({
+class PinMessageMinimal extends Equatable {
+  const PinMessageMinimal({
     required this.messageId,
     required this.type,
-    this.content,
+    required this.content,
   });
 
   factory PinMessageMinimal.fromJson(Map<String, dynamic> json) =>
@@ -20,4 +21,11 @@ class PinMessageMinimal {
   final String? content;
 
   Map<String, dynamic> toJson() => _$PinMessageMinimalToJson(this);
+
+  @override
+  List<Object?> get props => [
+        messageId,
+        type,
+        content,
+      ];
 }

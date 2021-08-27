@@ -184,5 +184,8 @@
   "sendArchived": "打包成 zip 发送",
   "sendWithoutSound": "静音发送",
   "conversations": "会话",
-  "chatTranscript": "聊天记录"
+  "chatTranscript": "聊天记录",
+  "pinned": "{user}置顶了{preview}",
+  "unpinAllMessages": "取消所有置顶",
+  "unpinAllMessagesDescription": "确认取消所有置顶吗？"
 }

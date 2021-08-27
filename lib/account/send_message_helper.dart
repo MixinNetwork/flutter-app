@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -19,6 +20,7 @@ import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
+import '../db/dao/pin_message_dao.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
@@ -31,6 +33,7 @@ import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
+import 'show_pin_message_key_value.dart';
 
 const _kEnableImageBlurHashThumb = true;
 
@@ -41,6 +44,7 @@ class SendMessageHelper {
     this._jobDao,
     this._participantDao,
     this._attachmentUtil,
+    this._pinMessageDao,
   );
 
   final MessageDao _messageDao;
@@ -48,6 +52,7 @@ class SendMessageHelper {
   final ParticipantDao _participantDao;
   final JobDao _jobDao;
   final AttachmentUtil _attachmentUtil;
+  final PinMessageDao _pinMessageDao;
 
   Future<void> sendTextMessage(
     String conversationId,
@@ -778,9 +783,21 @@ class SendMessageHelper {
     );
     final encoded = await jsonBase64EncodeWithIsolate(pinMessagePayload);
 
+    const mock = true;
+
     if (pin) {
       await Future.forEach<PinMessageMinimal>(pinMessageMinimals,
           (pinMessageMinimal) async {
+        if (mock) {
+          await _pinMessageDao.insert(
+            PinMessage(
+              messageId: pinMessageMinimal.messageId,
+              conversationId: conversationId,
+              createdAt: DateTime.now(),
+            ),
+          );
+        }
+
         await _messageDao.insert(
           Message(
             messageId: const Uuid().v4(),
@@ -789,11 +806,15 @@ class SendMessageHelper {
             status: MessageStatus.read,
             content: await jsonEncodeWithIsolate(pinMessageMinimal),
             createdAt: DateTime.now(),
-            category: pinMessageMinimal.type,
+            category: MessageCategory.messagePin,
           ),
           senderId,
         );
       });
+      if (mock) {
+        unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
+        return;
+      }
     }
     await _jobDao.insert(
       Job(

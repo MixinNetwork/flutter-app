@@ -13,9 +13,9 @@ import 'package:very_good_analysis/very_good_analysis.dart';
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
-import 'ui/home/local_notification_center.dart';
 import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
+import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
 
 Future<void> main() async {

@@ -16,8 +16,8 @@ import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/pin_message_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
+import '../../ui/home/hook/pin_message_cubit.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -31,6 +31,7 @@ import 'item/contact_message_widget.dart';
 import 'item/file_message.dart';
 import 'item/image/image_message.dart';
 import 'item/location/location_message_widget.dart';
+import 'item/pin_message.dart';
 import 'item/post_message.dart';
 import 'item/recall_message.dart';
 import 'item/secret_message.dart';
@@ -73,6 +74,9 @@ class MessageItemWidget extends HookWidget {
     this.next,
     this.lastReadMessageId,
     this.isTranscript = false,
+    this.blink = true,
+    this.pinArrow,
+    this.pinArrowWidth,
   }) : super(key: key);
 
   final MessageItem message;
@@ -80,6 +84,9 @@ class MessageItemWidget extends HookWidget {
   final MessageItem? next;
   final String? lastReadMessageId;
   final bool isTranscript;
+  final bool blink;
+  final double? pinArrowWidth;
+  final Widget? pinArrow;
 
   static const primaryFontSize = 16.0;
   static const secondaryFontSize = 14.0;
@@ -113,7 +120,7 @@ class MessageItemWidget extends HookWidget {
 
     final blinkColor = useBlocStateConverter<BlinkCubit, BlinkState, Color>(
       converter: (state) {
-        if (state.messageId == message.messageId) return state.color;
+        if (state.messageId == message.messageId && blink) return state.color;
         return Colors.transparent;
       },
     );
@@ -133,6 +140,10 @@ class MessageItemWidget extends HookWidget {
                 );
               }
 
+              if (message.type.isPin) {
+                return PinMessageWidget(message: message);
+              }
+
               if (message.type == MessageCategory.secret) {
                 return const SecretMessage();
               }
@@ -147,6 +158,7 @@ class MessageItemWidget extends HookWidget {
                 userName: userName,
                 userId: userId,
                 isCurrentUser: isCurrentUser,
+                pinArrowWidth: pinArrowWidth ?? 0,
                 buildMenus: () => [
                   if (!isTranscript && message.type.canReply)
                     ContextMenu(
@@ -156,15 +168,18 @@ class MessageItemWidget extends HookWidget {
                     ),
                   if (!isTranscript &&
                       message.type.canReply &&
-                      (message.status == MessageStatus.delivered ||
-                          message.status == MessageStatus.read))
+                      const [
+                        MessageStatus.delivered,
+                        MessageStatus.read,
+                        MessageStatus.sent
+                      ].contains(message.status))
                     HookBuilder(builder: (context) {
-                      final pined = useBlocStateConverter<PinMessageCubit,
-                          PinMessageState, bool>(
-                        converter: (state) =>
-                            state.messageIds.contains(message.messageId),
-                        keys: [message.messageId],
-                      );
+                      final pined = useMemoized(
+                          () => context
+                              .watch<PinMessageState>()
+                              .messageIds
+                              .contains(message.messageId),
+                          [message.messageId]);
                       return ContextMenu(
                         title: pined ? context.l10n.unPin : context.l10n.pin,
                         onTap: () async {
@@ -261,6 +276,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
+                      pinArrow: pinArrow,
                     );
                   }
 
@@ -269,6 +285,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
+                      pinArrow: pinArrow,
                     );
                   }
 
@@ -285,6 +302,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
+                      pinArrow: pinArrow,
                     );
                   }
 
@@ -300,6 +318,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
+                      pinArrow: pinArrow,
                     );
                   }
 
@@ -308,6 +327,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
+                      pinArrow: pinArrow,
                     );
                   }
                   if (message.status == MessageStatus.failed) {
@@ -322,12 +342,14 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
+                      pinArrow: pinArrow,
                     );
                   }
                   if (message.type.isSticker) {
                     return StickerMessageWidget(
                       message: message,
                       isCurrentUser: isCurrentUser,
+                      pinArrow: pinArrow,
                     );
                   }
                   if (message.type.isImage) {
@@ -335,6 +357,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       message: message,
                       isCurrentUser: isCurrentUser,
+                      pinArrow: pinArrow,
                     );
                   }
                   if (message.type.isVideo || message.type.isLive) {
@@ -342,6 +365,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       message: message,
                       isCurrentUser: isCurrentUser,
+                      pinArrow: pinArrow,
                     );
                   }
                   if (message.type.notSupportedYet) {
@@ -403,6 +427,7 @@ class _MessageBubbleMargin extends StatelessWidget {
     required this.userId,
     required this.builder,
     required this.buildMenus,
+    required this.pinArrowWidth,
   }) : super(key: key);
 
   final bool isCurrentUser;
@@ -410,12 +435,13 @@ class _MessageBubbleMargin extends StatelessWidget {
   final String? userId;
   final WidgetBuilder builder;
   final List<Widget> Function() buildMenus;
+  final double pinArrowWidth;
 
   @override
   Widget build(BuildContext context) => Padding(
         padding: EdgeInsets.only(
-          left: isCurrentUser ? 65 : 16,
-          right: !isCurrentUser ? 65 : 16,
+          left: isCurrentUser ? 65 - pinArrowWidth : 16,
+          right: !isCurrentUser ? 65 - pinArrowWidth : 16,
           top: 2,
           bottom: 2,
         ),

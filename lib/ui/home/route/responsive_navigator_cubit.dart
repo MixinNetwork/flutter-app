@@ -10,7 +10,7 @@ import '../../setting/notification_page.dart';
 import '../../setting/storage_page.dart';
 import '../../setting/storage_usage_detail_page.dart';
 import '../../setting/storage_usage_list_page.dart';
-import '../chat_page.dart';
+import '../chat/chat_page.dart';
 import 'responsive_navigator.dart';
 
 part 'responsive_navigator_state.dart';
