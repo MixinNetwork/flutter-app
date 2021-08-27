@@ -53,7 +53,7 @@ class WaitingMessage extends StatelessWidget {
       ),
     );
     final dateAndStatus = MessageDatetimeAndStatus(
-      isCurrentUser: isCurrentUser,
+      showStatus: isCurrentUser,
       message: message,
     );
     return MessageBubble(

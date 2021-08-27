@@ -31,7 +31,7 @@ class ContactMessageWidget extends StatelessWidget {
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-          isCurrentUser: isCurrentUser,
+          showStatus: isCurrentUser,
           message: message,
         ),
         child: InteractableDecoratedBox(

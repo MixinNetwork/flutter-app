@@ -55,7 +55,7 @@ dependencies:
   flutter_bloc: ^7.1.0
   flutter_cache_manager: ^3.1.2
   flutter_hooks: ^0.18.0
-  flutter_local_notifications: ^8.0.0
+  flutter_local_notifications: 8.0.0
   flutter_localizations:
     sdk: flutter
   flutter_markdown:
