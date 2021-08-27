@@ -168,7 +168,7 @@ class TranscriptMessageWidget extends HookWidget {
                       horizontal: 5,
                     ),
                     child: MessageDatetimeAndStatus(
-                      isCurrentUser: isCurrentUser,
+                      showStatus: isCurrentUser,
                       color: Colors.white,
                       message: message,
                     ),

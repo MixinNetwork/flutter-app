@@ -75,7 +75,7 @@ class StickerMessageWidget extends StatelessWidget {
       padding: EdgeInsets.zero,
       clip: true,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-        isCurrentUser: isCurrentUser,
+        showStatus: isCurrentUser,
         message: message,
       ),
       child: Builder(

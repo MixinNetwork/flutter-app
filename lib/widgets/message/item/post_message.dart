@@ -89,7 +89,7 @@ class PostMessage extends StatelessWidget {
                         vertical: 2,
                       ),
                       child: MessageDatetimeAndStatus(
-                        isCurrentUser: isCurrentUser,
+                        showStatus: isCurrentUser,
                         color: const Color.fromRGBO(255, 255, 255, 1),
                         message: message,
                       ),
