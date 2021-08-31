@@ -3,7 +3,6 @@ PODS:
     - FlutterMacOS
   - connectivity_plus_macos (0.0.1):
     - FlutterMacOS
-    - Reachability
   - desktop_drop (0.0.1):
     - FlutterMacOS
   - desktop_lifecycle (0.0.1):
@@ -26,7 +25,6 @@ PODS:
     - FlutterMacOS
   - path_provider_macos (0.0.1):
     - FlutterMacOS
-  - Reachability (3.2)
   - sqflite (0.0.2):
     - FlutterMacOS
     - FMDB (>= 2.7.5)
@@ -74,7 +72,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - FMDB
-    - Reachability
     - sqlite3
 
 EXTERNAL SOURCES:
@@ -113,7 +110,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   bitsdojo_window_macos: 7e9b1bbb09bdce418d9657ead7fc9d824203ff0d
-  connectivity_plus_macos: 3da1605dc99d44cf06fb6852de4ed26ecef3cabc
+  connectivity_plus_macos: 5bcc124e146fbe6796412cdcd29cc97830622bca
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
@@ -125,13 +122,12 @@ SPEC CHECKSUMS:
   package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_macos: 160cab0d5461f0c0e02995469a98f24bdb9a3f1f
-  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   sqflite: a5789cceda41d54d23f31d6de539d65bb14100ea
   sqlite3: 75da32fd4e3574f6c38566a9f0114cfe792c8db5
   sqlite3_flutter_libs: b8781af39b939e25ca76000127ed83312b974f08
   url_launcher_macos: 45af3d61de06997666568a7149c1be98b41c95d4
   window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
 
-PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
+PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7
 
 COCOAPODS: 1.10.2
