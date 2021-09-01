@@ -404,9 +404,15 @@ class AccountServer {
           await _sender.checkConversation(message.conversationId);
           return;
         }
+        List<int> source;
+        if (message.category.isAttachment) {
+          source = await base64DecodeWithIsolate(message.content!);
+        } else {
+          source = await utf8EncodeWithIsolate(message.content!);
+        }
         final content = _encryptedProtocol.encryptMessage(
             privateKey,
-            await utf8EncodeWithIsolate(message.content!),
+            source,
             await base64DecodeWithIsolate(
                 base64.normalize(participantSessionKey.publicKey!)),
             participantSessionKey.sessionId,

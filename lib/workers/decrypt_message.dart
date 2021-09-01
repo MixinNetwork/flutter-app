@@ -477,8 +477,7 @@ class DecryptMessage extends Injector {
 
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isImage) {
-      final attachment = AttachmentMessage.fromJson(
-          await _jsonDecodeWithIsolate(plainText) as Map<String, dynamic>);
+      final attachment = await _decodeAttachment(plainText, data.category!);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -510,9 +509,7 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isVideo) {
-      final plain = await _decodeWithIsolate(plainText);
-      final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+      final attachment = await _decodeAttachment(plainText, data.category!);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -546,9 +543,7 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isData) {
-      final plain = await _decodeWithIsolate(plainText);
-      final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+      final attachment = await _decodeAttachment(plainText, data.category!);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -578,9 +573,7 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isAudio) {
-      final plain = await _decodeWithIsolate(plainText);
-      final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+      final attachment = await _decodeAttachment(plainText, data.category!);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -1286,6 +1279,19 @@ class DecryptMessage extends Injector {
       mediaStatus: mediaStatus,
     );
   }
+}
+
+Future<AttachmentMessage> _decodeAttachment(
+    String plainText, String category) async {
+  String plain;
+  if (category.isEncrypted) {
+    plain = plainText;
+  } else {
+    plain = await _decodeWithIsolate(plainText);
+  }
+  final attachment = AttachmentMessage.fromJson(
+      await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+  return attachment;
 }
 
 dynamic _jsonDecode(String encoded) => jsonDecode(_decode(encoded));
