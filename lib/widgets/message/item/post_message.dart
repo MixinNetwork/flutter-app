@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:markdown/markdown.dart';
-import 'package:provider/provider.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
@@ -12,7 +11,6 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
-import '../../full_screen_portal.dart';
 import '../../interacter_decorated_box.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -40,66 +38,62 @@ class PostMessage extends StatelessWidget {
           messageId: message.messageId,
           showNip: showNip,
           isCurrentUser: isCurrentUser,
-          child: FullScreenPortal(
-            builder: (context) => InteractableDecoratedBox(
-              onTap: () => context.read<FullScreenVisibleCubit>().emit(true),
-              child: Stack(
-                children: [
-                  Builder(
-                    builder: (context) => ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        minHeight: 64,
-                        minWidth: 128,
-                      ),
-                      child: MarkdownBody(
-                        data: message.thumbImage?.postLengthOptimize() ??
-                            message.content!.postOptimize(),
-                        extensionSet: ExtensionSet.gitHubWeb,
-                        styleSheet: context.markdownStyleSheet,
-                        softLineBreak: true,
-                        imageBuilder: (_, __, ___) => const SizedBox(),
-                        onTapLink: (String text, String? href, String title) {
-                          if (href?.isEmpty ?? true) return;
+          child: InteractableDecoratedBox(
+            onTap: () => PostPreview.push(context, message: message),
+            child: Stack(
+              children: [
+                Builder(
+                  builder: (context) => ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: 64,
+                      minWidth: 128,
+                    ),
+                    child: MarkdownBody(
+                      data: message.thumbImage?.postLengthOptimize() ??
+                          message.content!.postOptimize(),
+                      extensionSet: ExtensionSet.gitHubWeb,
+                      styleSheet: context.markdownStyleSheet,
+                      softLineBreak: true,
+                      imageBuilder: (_, __, ___) => const SizedBox(),
+                      onTapLink: (String text, String? href, String title) {
+                        if (href?.isEmpty ?? true) return;
 
-                          openUri(context, href!);
-                        },
-                      ),
+                        openUri(context, href!);
+                      },
                     ),
                   ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: Container(
-                      decoration: _decoration,
-                      alignment: Alignment.center,
-                      child: SvgPicture.asset(
-                        Resources.assetsImagesPostDetailSvg,
-                        width: 20,
-                        height: 20,
-                      ),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: Container(
+                    decoration: _decoration,
+                    alignment: Alignment.center,
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesPostDetailSvg,
+                      width: 20,
+                      height: 20,
                     ),
                   ),
-                  Positioned(
-                    right: 0,
-                    bottom: 0,
-                    child: Container(
-                      decoration: _decoration,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      child: MessageDatetimeAndStatus(
-                        showStatus: isCurrentUser,
-                        color: const Color.fromRGBO(255, 255, 255, 1),
-                        message: message,
-                      ),
+                ),
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    decoration: _decoration,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    child: MessageDatetimeAndStatus(
+                      showStatus: isCurrentUser,
+                      color: const Color.fromRGBO(255, 255, 255, 1),
+                      message: message,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            portalBuilder: (BuildContext context) =>
-                PostPreview(message: message),
           ),
         ),
       );
@@ -111,14 +105,30 @@ class PostPreview extends StatelessWidget {
     required this.message,
   }) : super(key: key);
 
+  static Future<void> push(
+    BuildContext context, {
+    required MessageItem message,
+  }) =>
+      showGeneralDialog(
+        context: context,
+        barrierColor: Colors.transparent,
+        barrierDismissible: true,
+        barrierLabel:
+            MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        pageBuilder: (BuildContext context, Animation<double> animation,
+                Animation<double> secondaryAnimation) =>
+            PostPreview(
+          message: message,
+        ),
+      );
+
   final MessageItem message;
 
   @override
   Widget build(BuildContext context) => CallbackShortcuts(
         bindings: {
-          const SingleActivator(LogicalKeyboardKey.escape): () {
-            context.read<FullScreenVisibleCubit>().emit(false);
-          }
+          const SingleActivator(LogicalKeyboardKey.escape): () =>
+              Navigator.pop(context)
         },
         child: Focus(
           autofocus: true,
@@ -129,11 +139,10 @@ class PostPreview extends StatelessWidget {
             child: Column(
               children: [
                 MixinAppBar(
+                  leading: const SizedBox(),
                   actions: [
                     MixinCloseButton(
-                      onTap: () {
-                        context.read<FullScreenVisibleCubit>().emit(false);
-                      },
+                      onTap: () => Navigator.pop(context),
                     ),
                   ],
                 ),
