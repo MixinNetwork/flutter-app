@@ -602,7 +602,12 @@ class DecryptMessage extends Injector {
         attachmentMessage: attachment,
       ));
     } else if (data.category.isSticker) {
-      final plain = await _decodeWithIsolate(plainText);
+      String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final stickerMessage = StickerMessage.fromJson(
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
@@ -624,7 +629,12 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt);
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isContact) {
-      final plain = await _decodeWithIsolate(plainText);
+      String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final contactMessage = ContactMessage.fromJson(
           await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;

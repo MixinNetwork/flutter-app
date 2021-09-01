@@ -405,7 +405,9 @@ class AccountServer {
           return;
         }
         List<int> source;
-        if (message.category.isAttachment) {
+        if (message.category.isAttachment ||
+            message.category.isSticker ||
+            message.category.isContact) {
           source = await base64DecodeWithIsolate(message.content!);
         } else {
           source = await utf8EncodeWithIsolate(message.content!);
