@@ -184,7 +184,7 @@ class _InputContainer extends HookWidget {
         if (!DesktopLifecycle.instance.isActive.value) return;
 
         final subtreeContext = ModalRoute.of(focusContext)?.subtreeContext;
-        if(subtreeContext == null) return;
+        if (subtreeContext == null) return;
 
         var found = false;
         context.visitAncestorElements((element) {
