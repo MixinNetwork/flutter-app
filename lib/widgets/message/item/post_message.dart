@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
@@ -125,41 +124,32 @@ class PostPreview extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => CallbackShortcuts(
-        bindings: {
-          const SingleActivator(LogicalKeyboardKey.escape): () =>
-              Navigator.pop(context)
-        },
-        child: Focus(
-          autofocus: true,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: context.theme.background,
+  Widget build(BuildContext context) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: context.theme.background,
+    ),
+    child: Column(
+      children: [
+        MixinAppBar(
+          leading: const SizedBox(),
+          actions: [
+            MixinCloseButton(
+              onTap: () => Navigator.pop(context),
             ),
-            child: Column(
-              children: [
-                MixinAppBar(
-                  leading: const SizedBox(),
-                  actions: [
-                    MixinCloseButton(
-                      onTap: () => Navigator.pop(context),
-                    ),
-                  ],
-                ),
-                Expanded(
-                  child: Markdown(
-                    data: message.thumbImage ?? message.content!,
-                    extensionSet: ExtensionSet.gitHubWeb,
-                    styleSheet: context.markdownStyleSheet,
-                    selectable: true,
-                    softLineBreak: true,
-                    onTapLink: (String text, String? href, String title) =>
-                        openUri(context, href!),
-                  ),
-                ),
-              ],
-            ),
+          ],
+        ),
+        Expanded(
+          child: Markdown(
+            data: message.thumbImage ?? message.content!,
+            extensionSet: ExtensionSet.gitHubWeb,
+            styleSheet: context.markdownStyleSheet,
+            selectable: true,
+            softLineBreak: true,
+            onTapLink: (String text, String? href, String title) =>
+                openUri(context, href!),
           ),
         ),
-      );
+      ],
+    ),
+  );
 }
