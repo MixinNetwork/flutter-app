@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -155,15 +156,51 @@ class _InputContainer extends HookWidget {
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
+    // ignore: unnecessary_lambdas
     useEffect(() {
       focusNode.requestFocus();
-      final subscription =
-          context.read<QuoteMessageCubit>().stream.listen((event) {
-        if (event == null) return;
-        focusNode.requestFocus();
-      });
-      return subscription.cancel;
     }, [conversationId]);
+
+    useEffect(() {
+      void onListen() {
+        if (DesktopLifecycle.instance.isActive.value) return;
+        focusNode.unfocus();
+      }
+
+      DesktopLifecycle.instance.isActive.addListener(onListen);
+      return () {
+        DesktopLifecycle.instance.isActive.removeListener(onListen);
+      };
+    });
+
+    useEffect(() {
+      void onListen(RawKeyEvent value) {
+        if (!DesktopLifecycle.instance.isActive.value) return;
+        final focusContext = FocusManager.instance.primaryFocus?.context;
+        if (focusContext == null) return;
+        final focusWidget = focusContext.widget;
+        if (focusWidget is EditableText) return;
+        if (!value.firstInputable) return;
+
+        final subtreeContext = ModalRoute.of(focusContext)?.subtreeContext;
+        if (subtreeContext == null) return;
+
+        var found = false;
+        context.visitAncestorElements((element) {
+          found = subtreeContext == element;
+          return !found;
+        });
+
+        if (!found) return;
+
+        focusNode.requestFocus();
+      }
+
+      RawKeyboard.instance.addListener(onListen);
+      return () {
+        RawKeyboard.instance.removeListener(onListen);
+      };
+    });
 
     return MultiProvider(
       providers: [
