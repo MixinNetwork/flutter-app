@@ -175,12 +175,12 @@ class _InputContainer extends HookWidget {
 
     useEffect(() {
       void onListen(RawKeyEvent value) {
+        if (!DesktopLifecycle.instance.isActive.value) return;
         final focusContext = FocusManager.instance.primaryFocus?.context;
         if (focusContext == null) return;
         final focusWidget = focusContext.widget;
         if (focusWidget is EditableText) return;
         if (!value.firstInputable) return;
-        if (!DesktopLifecycle.instance.isActive.value) return;
 
         final subtreeContext = ModalRoute.of(focusContext)?.subtreeContext;
         if (subtreeContext == null) return;
