@@ -168,7 +168,6 @@ class _InputContainer extends HookWidget {
       }
 
       DesktopLifecycle.instance.isActive.addListener(onListen);
-
       return () {
         DesktopLifecycle.instance.isActive.removeListener(onListen);
       };
