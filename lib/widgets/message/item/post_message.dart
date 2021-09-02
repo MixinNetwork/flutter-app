@@ -125,31 +125,31 @@ class PostPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: context.theme.background,
-    ),
-    child: Column(
-      children: [
-        MixinAppBar(
-          leading: const SizedBox(),
-          actions: [
-            MixinCloseButton(
-              onTap: () => Navigator.pop(context),
+        decoration: BoxDecoration(
+          color: context.theme.background,
+        ),
+        child: Column(
+          children: [
+            MixinAppBar(
+              leading: const SizedBox(),
+              actions: [
+                MixinCloseButton(
+                  onTap: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            Expanded(
+              child: Markdown(
+                data: message.thumbImage ?? message.content!,
+                extensionSet: ExtensionSet.gitHubWeb,
+                styleSheet: context.markdownStyleSheet,
+                selectable: true,
+                softLineBreak: true,
+                onTapLink: (String text, String? href, String title) =>
+                    openUri(context, href!),
+              ),
             ),
           ],
         ),
-        Expanded(
-          child: Markdown(
-            data: message.thumbImage ?? message.content!,
-            extensionSet: ExtensionSet.gitHubWeb,
-            styleSheet: context.markdownStyleSheet,
-            selectable: true,
-            softLineBreak: true,
-            onTapLink: (String text, String? href, String title) =>
-                openUri(context, href!),
-          ),
-        ),
-      ],
-    ),
-  );
+      );
 }
