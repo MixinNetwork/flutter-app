@@ -781,22 +781,17 @@ class SendMessageHelper {
       action: pin ? PinMessagePayloadAction.pin : PinMessagePayloadAction.unpin,
       messageIds: pinMessageMinimals.map((e) => e.messageId).toList(),
     );
-    final encoded = await jsonBase64EncodeWithIsolate(pinMessagePayload);
-
-    const mock = true;
-
+    final encoded = await jsonEncodeWithIsolate(pinMessagePayload);
     if (pin) {
       await Future.forEach<PinMessageMinimal>(pinMessageMinimals,
           (pinMessageMinimal) async {
-        if (mock) {
-          await _pinMessageDao.insert(
-            PinMessage(
-              messageId: pinMessageMinimal.messageId,
-              conversationId: conversationId,
-              createdAt: DateTime.now(),
-            ),
-          );
-        }
+        await _pinMessageDao.insert(
+          PinMessage(
+            messageId: pinMessageMinimal.messageId,
+            conversationId: conversationId,
+            createdAt: DateTime.now(),
+          ),
+        );
 
         await _messageDao.insert(
           Message(
@@ -811,16 +806,12 @@ class SendMessageHelper {
           senderId,
         );
       });
-      if (mock) {
-        unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
-        return;
-      }
     }
     await _jobDao.insert(
       Job(
         conversationId: conversationId,
         jobId: const Uuid().v4(),
-        action: recallMessage,
+        action: pinMessage,
         priority: 5,
         blazeMessage: encoded,
         createdAt: DateTime.now(),

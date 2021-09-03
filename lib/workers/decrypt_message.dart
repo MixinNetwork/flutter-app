@@ -424,7 +424,7 @@ class DecryptMessage extends Injector {
             status: MessageStatus.read,
             content: await jsonEncodeWithIsolate(pinMessageMinimal),
             createdAt: DateTime.now(),
-            category: pinMessageMinimal.type,
+            category: MessageCategory.messagePin,
           ),
           accountId,
         );

@@ -134,10 +134,12 @@ extension MessageCategoryExtension on String? {
         MessageCategory.encryptedLive,
         MessageCategory.encryptedPost,
         MessageCategory.encryptedLocation,
-        MessageCategory.encryptedTranscript
+        MessageCategory.encryptedTranscript,
+        MessageCategory.messagePin
       }.every((element) => element != this);
 
-  bool get canReply =>  isText ||
+  bool get canReply =>
+      isText ||
       isImage ||
       isVideo ||
       isLive ||

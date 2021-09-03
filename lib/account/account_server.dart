@@ -230,6 +230,11 @@ class AccountServer {
 
     jobSubscribers
       ..add(database.jobDao
+          .findPinMessageJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runPinJob)
+          .listen((_) {}))
+      ..add(database.jobDao
           .findRecallMessageJobs()
           .where((jobs) => jobs.isNotEmpty == true)
           .asyncMapDrop(_runRecallJob)
@@ -343,6 +348,30 @@ class AccountServer {
           conversationId: e.conversationId,
           messageId: const Uuid().v4(),
           category: MessageCategory.messageRecall,
+          data: data,
+        );
+        final blazeMessage = BlazeMessage(
+            id: const Uuid().v4(), action: createMessage, params: blazeParam);
+        final result = await _sender.deliver(blazeMessage);
+        if (result.success) {
+          await database.jobDao.deleteJobById(e.jobId);
+        }
+      },
+    );
+
+    await Future.wait(map);
+  }
+
+  Future<void> _runPinJob(List<db.Job> jobs) async {
+    final map = jobs.where((element) => element.blazeMessage != null).map(
+      (e) async {
+        final list = await utf8EncodeWithIsolate(e.blazeMessage!);
+        final data = await base64EncodeWithIsolate(list);
+
+        final blazeParam = BlazeMessageParam(
+          conversationId: e.conversationId,
+          messageId: const Uuid().v4(),
+          category: MessageCategory.messagePin,
           data: data,
         );
         final blazeMessage = BlazeMessage(
