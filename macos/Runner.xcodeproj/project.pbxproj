@@ -326,7 +326,9 @@
 			inputPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/FMDB/FMDB.framework",
+				"${PODS_ROOT}/VLCKit/VLCKit.framework",
 				"${BUILT_PRODUCTS_DIR}/connectivity_plus_macos/connectivity_plus_macos.framework",
+				"${BUILT_PRODUCTS_DIR}/dart_vlc/dart_vlc.framework",
 				"${BUILT_PRODUCTS_DIR}/desktop_drop/desktop_drop.framework",
 				"${BUILT_PRODUCTS_DIR}/desktop_lifecycle/desktop_lifecycle.framework",
 				"${BUILT_PRODUCTS_DIR}/device_info_plus_macos/device_info_plus_macos.framework",
@@ -345,7 +347,9 @@
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FMDB.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/VLCKit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/connectivity_plus_macos.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/dart_vlc.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/desktop_drop.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/desktop_lifecycle.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/device_info_plus_macos.framework",

@@ -15,6 +15,7 @@ import '../../bloc/subscribe_mixin.dart';
 import '../../constants/resources.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../utils/vlc_service.dart';
 import '../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../widgets/dash_path_border.dart';
 import '../../widgets/interacter_decorated_box.dart';
@@ -155,6 +156,11 @@ class ChatPage extends HookWidget {
             mentionCache: context.read<MentionCache>(),
             limit: windowHeight ~/ 20,
           ),
+        ),
+        Provider(
+          create: (context) => VlcService(context.accountServer),
+          dispose: (BuildContext context, VlcService vlcService) =>
+              vlcService.dispose(),
         ),
       ],
       child: DecoratedBox(

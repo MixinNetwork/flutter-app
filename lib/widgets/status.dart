@@ -116,6 +116,38 @@ class StatusUpload extends StatelessWidget {
       );
 }
 
+class StatusAudioPlay extends StatelessWidget {
+  const StatusAudioPlay({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => _StatusLayout(
+        child: Center(
+          child: SvgPicture.asset(
+            Resources.assetsImagesAudioPlaySvg,
+            color: context.theme.accent,
+          ),
+        ),
+      );
+}
+
+class StatusAudioStop extends StatelessWidget {
+  const StatusAudioStop({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => _StatusLayout(
+        child: Center(
+          child: SvgPicture.asset(
+            Resources.assetsImagesAudioStopSvg,
+            color: context.theme.accent,
+          ),
+        ),
+      );
+}
+
 class _StatusLayout extends StatelessWidget {
   const _StatusLayout({
     Key? key,

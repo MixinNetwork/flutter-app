@@ -6,12 +6,12 @@ part of 'system_session_message.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SystemSessionMessage _$SystemSessionMessageFromJson(Map<String, dynamic> json) {
-  return SystemSessionMessage(
-    _$enumDecode(_$SystemUserActionEnumMap, json['action']),
-    json['user_id'] as String,
-  )..sessionId = json['session_id'] as String?;
-}
+SystemSessionMessage _$SystemSessionMessageFromJson(
+        Map<String, dynamic> json) =>
+    SystemSessionMessage(
+      _$enumDecode(_$SystemUserActionEnumMap, json['action']),
+      json['user_id'] as String,
+    )..sessionId = json['session_id'] as String?;
 
 Map<String, dynamic> _$SystemSessionMessageToJson(
         SystemSessionMessage instance) =>

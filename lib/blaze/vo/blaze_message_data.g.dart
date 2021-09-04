@@ -6,22 +6,21 @@ part of 'blaze_message_data.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) {
-  return BlazeMessageData(
-    json['conversation_id'] as String,
-    json['user_id'] as String,
-    json['message_id'] as String,
-    json['category'] as String?,
-    json['data'] as String,
-    _$enumDecode(_$MessageStatusEnumMap, json['status']),
-    DateTime.parse(json['created_at'] as String),
-    DateTime.parse(json['updated_at'] as String),
-    json['source'] as String,
-    json['representative_id'] as String?,
-    json['quote_message_id'] as String?,
-    json['session_id'] as String,
-  )..silent = json['silent'] as bool?;
-}
+BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) =>
+    BlazeMessageData(
+      json['conversation_id'] as String,
+      json['user_id'] as String,
+      json['message_id'] as String,
+      json['category'] as String?,
+      json['data'] as String,
+      _$enumDecode(_$MessageStatusEnumMap, json['status']),
+      DateTime.parse(json['created_at'] as String),
+      DateTime.parse(json['updated_at'] as String),
+      json['source'] as String,
+      json['representative_id'] as String?,
+      json['quote_message_id'] as String?,
+      json['session_id'] as String,
+    )..silent = json['silent'] as bool?;
 
 Map<String, dynamic> _$BlazeMessageDataToJson(BlazeMessageData instance) =>
     <String, dynamic>{

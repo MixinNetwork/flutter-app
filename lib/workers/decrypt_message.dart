@@ -30,8 +30,8 @@ import '../crypto/uuid/uuid.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/extension/message_category.dart';
-import '../db/mixin_database.dart' as db;
 import '../db/mixin_database.dart';
+import '../db/mixin_database.dart' as db;
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_category.dart';
@@ -592,6 +592,7 @@ class DecryptMessage extends Injector {
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
+              mediaDuration: '${attachment.duration ?? 0}',
               mediaKey: attachment.key as String?,
               mediaDigest: attachment.digest as String?,
               mediaWaveform: attachment.waveform as String?,

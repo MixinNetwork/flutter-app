@@ -6,13 +6,12 @@ part of 'transcript_minimal.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-TranscriptMinimal _$TranscriptMinimalFromJson(Map<String, dynamic> json) {
-  return TranscriptMinimal(
-    name: json['name'] as String,
-    category: json['category'] as String,
-    content: json['content'] as String?,
-  );
-}
+TranscriptMinimal _$TranscriptMinimalFromJson(Map<String, dynamic> json) =>
+    TranscriptMinimal(
+      name: json['name'] as String,
+      category: json['category'] as String,
+      content: json['content'] as String?,
+    );
 
 Map<String, dynamic> _$TranscriptMinimalToJson(TranscriptMinimal instance) =>
     <String, dynamic>{

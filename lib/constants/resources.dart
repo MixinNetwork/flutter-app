@@ -13,6 +13,10 @@ class Resources {
 
   static const String assetsImagesAudioSvg = 'assets/images/audio.svg';
 
+  static const String assetsImagesAudioPlaySvg = 'assets/images/audio_play.svg';
+
+  static const String assetsImagesAudioStopSvg = 'assets/images/audio_stop.svg';
+
   static const String assetsImagesBotSvg = 'assets/images/bot.svg';
 
   static const String assetsImagesBotFillSvg = 'assets/images/bot_fill.svg';

@@ -762,6 +762,33 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   __________) =>
               Limit(1, 0));
 
+  Future<MessageItem?> findNextAudioMessageItem({
+    required String conversationId,
+    required String messageId,
+    required DateTime createdAt,
+  }) async {
+    final rowId = await messageRowId(messageId).getSingleOrNull();
+    return _baseMessageItems(
+      (message, _, __, ___, ____, _____, ______, _______, conversation,
+              ________) =>
+          conversation.conversationId.equals(conversationId) &
+          message.category.isIn([
+            MessageCategory.signalAudio,
+            MessageCategory.plainAudio,
+            MessageCategory.encryptedAudio
+          ]) &
+          message.createdAt.isBiggerOrEqualValue(
+              message.createdAt.converter.mapToSql(createdAt)) &
+          message.rowId.isBiggerThanValue(rowId),
+      (_, __, ___, ____, _____, ______, _______, ________, _________,
+              __________) =>
+          Limit(1, 0),
+      order: (message, _, __, ___, ____, _____, ______, _______, ________,
+              _________) =>
+          OrderBy([OrderingTerm.asc(message.createdAt)]),
+    ).getSingleOrNull();
+  }
+
   Future<void> recallMessage(String messageId) async {
     await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
@@ -829,7 +856,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         keyword.trim().escapeFts5(),
       );
 
-  Selectable<int> messageRowId(String messageId) => db.messageRowId(messageId);
+  Selectable<int?> messageRowId(String messageId) => (selectOnly(db.messages)
+        ..addColumns([db.messages.rowId])
+        ..where(db.messages.messageId.equals(messageId))
+        ..limit(1))
+      .map((row) => row.read(db.messages.rowId));
 
   Future<int> deleteFtsByMessageId(String messageId) =>
       (db.delete(db.messagesFts)

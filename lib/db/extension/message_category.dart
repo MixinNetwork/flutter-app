@@ -85,8 +85,6 @@ extension MessageCategoryExtension on String? {
         MessageCategory.appCard,
       }.any((element) => element == this);
 
-  bool get notSupportedYet => isAudio || isTranscript;
-
   bool get isIllegalMessageCategory => {
         MessageCategory.signalKey,
         MessageCategory.signalText,
