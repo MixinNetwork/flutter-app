@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:dart_vlc/dart_vlc.dart';
@@ -16,9 +17,11 @@ const _kConversationIdKey = 'conversation_id';
 const _kCreatedAtKey = 'created_at';
 
 class VlcService {
-  VlcService(this._accountServer) {
+  VlcService(this._accountServer, Stream<String?> conversationIdStream) {
     _player = Player(id: 64);
     initListen();
+    conversationIdSubscription =
+        conversationIdStream.listen((event) => _player.stop());
   }
 
   final AccountServer _accountServer;
@@ -27,6 +30,7 @@ class VlcService {
   MessageItem? _currentMessage;
   List<MessageItem>? _currentMessages;
   bool _isMediaList = false;
+  StreamSubscription<String?>? conversationIdSubscription;
 
   bool get playing => _player.playback.isPlaying;
 
@@ -58,7 +62,10 @@ class VlcService {
     }).listen((event) {});
   }
 
-  void dispose() => _player.dispose();
+  void dispose() {
+    conversationIdSubscription?.cancel();
+    _player.dispose();
+  }
 
   void playAudioMessage(MessageItem message) {
     _currentMessage = null;

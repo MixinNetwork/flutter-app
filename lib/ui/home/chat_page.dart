@@ -113,17 +113,20 @@ class ChatPage extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final chatContainerPageKey = useMemoized(() => GlobalKey());
-    final conversationState =
-        useBlocState<ConversationCubit, ConversationState?>();
+    final conversationId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+            converter: (state) => state?.conversationId);
+    final initialSidePage =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+            converter: (state) => state?.initialSidePage);
 
-    final chatSideCubit = useBloc(() => ChatSideCubit(), keys: [
-      conversationState?.conversationId,
-    ]);
+    final chatSideCubit =
+        useBloc(() => ChatSideCubit(), keys: [conversationId]);
+
     final searchConversationKeywordCubit = useBloc(
         () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
-        keys: [conversationState?.conversationId]);
+        keys: [conversationId]);
 
-    final initialSidePage = conversationState?.initialSidePage;
     useEffect(() {
       if (initialSidePage != null) {
         chatSideCubit.pushPage(initialSidePage);
@@ -158,7 +161,13 @@ class ChatPage extends HookWidget {
           ),
         ),
         Provider(
-          create: (context) => VlcService(context.accountServer),
+          create: (context) => VlcService(
+            context.accountServer,
+            context
+                .read<ConversationCubit>()
+                .stream
+                .map((event) => event?.conversationId),
+          ),
           dispose: (BuildContext context, VlcService vlcService) =>
               vlcService.dispose(),
         ),
