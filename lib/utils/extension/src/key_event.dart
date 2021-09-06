@@ -55,6 +55,8 @@ const numberKeys = [
 extension RawKeyEventExtension on RawKeyEvent {
   bool get firstInputable {
     if (data.modifiersPressed.isNotEmpty) return false;
-    return letterKeys.contains(logicalKey) || numberKeys.contains(logicalKey);
+    return letterKeys.contains(logicalKey) ||
+        numberKeys.contains(logicalKey) ||
+        LogicalKeyboardKey.space == logicalKey;
   }
 }

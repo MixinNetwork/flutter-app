@@ -162,18 +162,6 @@ class _InputContainer extends HookWidget {
     }, [conversationId]);
 
     useEffect(() {
-      void onListen() {
-        if (DesktopLifecycle.instance.isActive.value) return;
-        focusNode.unfocus();
-      }
-
-      DesktopLifecycle.instance.isActive.addListener(onListen);
-      return () {
-        DesktopLifecycle.instance.isActive.removeListener(onListen);
-      };
-    });
-
-    useEffect(() {
       void onListen(RawKeyEvent value) {
         if (!DesktopLifecycle.instance.isActive.value) return;
         final focusContext = FocusManager.instance.primaryFocus?.context;
