@@ -7,6 +7,8 @@ extension ProviderExtension on BuildContext {
 
   AccountServer get accountServer => read<AccountServer>();
 
+  VlcService get vlcService => read<VlcService>();
+
   Database get database => accountServer.database;
 
   Localization get l10n => Localization.of(this);

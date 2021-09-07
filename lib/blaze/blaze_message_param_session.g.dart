@@ -7,12 +7,11 @@ part of 'blaze_message_param_session.dart';
 // **************************************************************************
 
 BlazeMessageParamSession _$BlazeMessageParamSessionFromJson(
-    Map<String, dynamic> json) {
-  return BlazeMessageParamSession(
-    userId: json['user_id'] as String,
-    sessionId: json['session_id'] as String,
-  );
-}
+        Map<String, dynamic> json) =>
+    BlazeMessageParamSession(
+      userId: json['user_id'] as String,
+      sessionId: json['session_id'] as String,
+    );
 
 Map<String, dynamic> _$BlazeMessageParamSessionToJson(
         BlazeMessageParamSession instance) =>
@@ -22,11 +21,10 @@ Map<String, dynamic> _$BlazeMessageParamSessionToJson(
     };
 
 BlazeMessageParamOffset _$BlazeMessageParamOffsetFromJson(
-    Map<String, dynamic> json) {
-  return BlazeMessageParamOffset(
-    offset: json['offset'] as String?,
-  );
-}
+        Map<String, dynamic> json) =>
+    BlazeMessageParamOffset(
+      offset: json['offset'] as String?,
+    );
 
 Map<String, dynamic> _$BlazeMessageParamOffsetToJson(
         BlazeMessageParamOffset instance) =>

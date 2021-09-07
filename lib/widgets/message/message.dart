@@ -368,8 +368,9 @@ class MessageItemWidget extends HookWidget {
                       pinArrow: pinArrow,
                     );
                   }
-                  if (message.type.notSupportedYet) {
-                    return NotSupportedMessage(
+
+                  if (message.type.isAudio) {
+                    return AudioMessage(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,

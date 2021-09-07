@@ -305,7 +305,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final list = await database.transaction(() async {
       final rowId = await messageDao.messageRowId(topMessageId!).getSingle();
       return messageDao
-          .beforeMessagesByConversationId(rowId, conversationId, limit)
+          .beforeMessagesByConversationId(rowId!, conversationId, limit)
           .get();
     });
 
@@ -326,7 +326,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final list = await database.transaction(() async {
       final rowId = await messageDao.messageRowId(bottomMessageId!).getSingle();
       return messageDao
-          .afterMessagesByConversationId(rowId, conversationId, limit)
+          .afterMessagesByConversationId(rowId!, conversationId, limit)
           .get();
     });
 

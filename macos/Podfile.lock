@@ -3,6 +3,9 @@ PODS:
     - FlutterMacOS
   - connectivity_plus_macos (0.0.1):
     - FlutterMacOS
+  - dart_vlc (0.0.1):
+    - FlutterMacOS
+    - VLCKit (~> 3.3)
   - desktop_drop (0.0.1):
     - FlutterMacOS
   - desktop_lifecycle (0.0.1):
@@ -48,12 +51,14 @@ PODS:
     - sqlite3/rtree
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
+  - VLCKit (3.3.17)
   - window_size (0.0.2):
     - FlutterMacOS
 
 DEPENDENCIES:
   - bitsdojo_window_macos (from `Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos`)
   - connectivity_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos`)
+  - dart_vlc (from `Flutter/ephemeral/.symlinks/plugins/dart_vlc/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
   - desktop_lifecycle (from `Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos`)
   - device_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos`)
@@ -73,12 +78,15 @@ SPEC REPOS:
   trunk:
     - FMDB
     - sqlite3
+    - VLCKit
 
 EXTERNAL SOURCES:
   bitsdojo_window_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos
   connectivity_plus_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos
+  dart_vlc:
+    :path: Flutter/ephemeral/.symlinks/plugins/dart_vlc/macos
   desktop_drop:
     :path: Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos
   desktop_lifecycle:
@@ -111,6 +119,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   bitsdojo_window_macos: 7e9b1bbb09bdce418d9657ead7fc9d824203ff0d
   connectivity_plus_macos: c97b3ad707dc9814219086a1ccec7eef64120228
+  dart_vlc: de4ba59a6ded5a914a14fb026f7bcbe74c471dee
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
@@ -126,6 +135,7 @@ SPEC CHECKSUMS:
   sqlite3: 75da32fd4e3574f6c38566a9f0114cfe792c8db5
   sqlite3_flutter_libs: b8781af39b939e25ca76000127ed83312b974f08
   url_launcher_macos: 45af3d61de06997666568a7149c1be98b41c95d4
+  VLCKit: 21651e881f19774ecf9a86ca2c2010859fe68a08
   window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7

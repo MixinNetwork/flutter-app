@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:ansicolor/ansicolor.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:dart_vlc/dart_vlc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -37,6 +38,7 @@ Future<void> main() async {
   unawaited(initListener());
 
   ansiColorDisabled = false;
+  DartVLC.initialize();
   runZonedGuarded(
     () => runApp(const App()),
     (Object error, StackTrace stack) {

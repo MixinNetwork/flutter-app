@@ -7,14 +7,13 @@ part of 'system_conversation_message.dart';
 // **************************************************************************
 
 SystemConversationMessage _$SystemConversationMessageFromJson(
-    Map<String, dynamic> json) {
-  return SystemConversationMessage(
-    const MessageActionJsonConverter().fromJson(json['action'] as String?),
-    json['participant_id'] as String?,
-    json['user_id'] as String?,
-    const ParticipantRoleJsonConverter().fromJson(json['role'] as String?),
-  );
-}
+        Map<String, dynamic> json) =>
+    SystemConversationMessage(
+      const MessageActionJsonConverter().fromJson(json['action'] as String?),
+      json['participant_id'] as String?,
+      json['user_id'] as String?,
+      const ParticipantRoleJsonConverter().fromJson(json['role'] as String?),
+    );
 
 Map<String, dynamic> _$SystemConversationMessageToJson(
         SystemConversationMessage instance) =>

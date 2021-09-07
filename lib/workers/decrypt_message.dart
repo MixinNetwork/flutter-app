@@ -639,6 +639,7 @@ class DecryptMessage extends Injector {
               name: attachment.name,
               mediaMimeType: attachment.mimeType,
               mediaSize: attachment.size,
+              mediaDuration: '${attachment.duration ?? 0}',
               mediaKey: attachment.key as String?,
               mediaDigest: attachment.digest as String?,
               mediaWaveform: attachment.waveform as String?,

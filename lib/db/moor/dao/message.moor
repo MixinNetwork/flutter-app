@@ -182,6 +182,3 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)
     ORDER BY m.created_at DESC
     LIMIT :limit OFFSET :offset;
-
-messageRowId:
-SELECT rowid FROM messages where message_id = :messageId LIMIT 1;

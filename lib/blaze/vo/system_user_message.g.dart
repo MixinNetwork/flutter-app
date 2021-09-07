@@ -6,12 +6,11 @@ part of 'system_user_message.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SystemUserMessage _$SystemUserMessageFromJson(Map<String, dynamic> json) {
-  return SystemUserMessage(
-    _$enumDecode(_$SystemUserActionEnumMap, json['action']),
-    json['user_id'] as String,
-  );
-}
+SystemUserMessage _$SystemUserMessageFromJson(Map<String, dynamic> json) =>
+    SystemUserMessage(
+      _$enumDecode(_$SystemUserActionEnumMap, json['action']),
+      json['user_id'] as String,
+    );
 
 Map<String, dynamic> _$SystemUserMessageToJson(SystemUserMessage instance) =>
     <String, dynamic>{
