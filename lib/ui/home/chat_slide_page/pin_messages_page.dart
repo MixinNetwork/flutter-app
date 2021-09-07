@@ -41,7 +41,9 @@ class PinMessagesPage extends HookWidget {
 
     useEffect(() {
       if (rawList?.isNotEmpty ?? true) return;
-      Navigator.pop(context);
+      try {
+        Navigator.pop(context);
+      } catch (_) {}
     }, [rawList?.isNotEmpty]);
 
     final list = rawList ?? [];
