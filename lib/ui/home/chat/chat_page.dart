@@ -484,6 +484,17 @@ class _List extends HookWidget {
     final center = state.center;
     final bottom = state.bottom;
 
+    final ref = useRef<Map<String, Key>>({});
+
+    final ids = state.list.map((e) => e.messageId);
+
+    useMemoized(() {
+      ref.value.removeWhere((key, value) => !ids.contains(key));
+      ids.forEach((id) {
+        ref.value[id] = ref.value[id] ?? GlobalKey(debugLabel: id);
+      });
+    }, [ids]);
+
     return ClampingCustomScrollView(
       key: key,
       center: key,
@@ -494,9 +505,11 @@ class _List extends HookWidget {
           delegate: SliverChildBuilderDelegate(
             (BuildContext context, int index) {
               final actualIndex = top.length - index - 1;
+              final messageItem = top[actualIndex];
               return MessageItemWidget(
+                key: ref.value[messageItem.messageId],
                 prev: top.getOrNull(actualIndex - 1),
-                message: top[actualIndex],
+                message: messageItem,
                 next: top.getOrNull(actualIndex + 1) ??
                     center ??
                     bottom.lastOrNull,
@@ -511,6 +524,7 @@ class _List extends HookWidget {
           child: Builder(builder: (context) {
             if (center == null) return const SizedBox();
             return MessageItemWidget(
+              key: ref.value[center.messageId],
               prev: top.lastOrNull,
               message: center,
               next: bottom.firstOrNull,
@@ -520,12 +534,16 @@ class _List extends HookWidget {
         ),
         SliverList(
           delegate: SliverChildBuilderDelegate(
-            (BuildContext context, int index) => MessageItemWidget(
-              prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
-              message: bottom[index],
-              next: bottom.getOrNull(index + 1),
-              lastReadMessageId: state.lastReadMessageId,
-            ),
+            (BuildContext context, int index) {
+              final messageItem = bottom[index];
+              return MessageItemWidget(
+                key: ref.value[messageItem.messageId],
+                prev: bottom.getOrNull(index - 1) ?? center ?? top.lastOrNull,
+                message: messageItem,
+                next: bottom.getOrNull(index + 1),
+                lastReadMessageId: state.lastReadMessageId,
+              );
+            },
             childCount: bottom.length,
           ),
         ),
