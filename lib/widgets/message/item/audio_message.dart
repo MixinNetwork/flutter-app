@@ -20,11 +20,13 @@ class AudioMessage extends HookWidget {
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
+    required this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,7 @@ class AudioMessage extends HookWidget {
       messageId: message.messageId,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
+      pinArrow: pinArrow,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
         showStatus: isCurrentUser,
         message: message,
@@ -150,17 +153,9 @@ class AudioMessagesPlayAgent {
   final String Function(MessageItem? messageItem) convertMessageAbsolutePath;
 
   List<MessageItem> getMessages(String messageId) {
-    final messages = <MessageItem>[];
-    var found = false;
-    for (final m in _list.where((element) => element.type.isAudio)) {
-      if (!found && m.messageId == messageId) {
-        found = true;
-        messages.add(m);
-        continue;
-      }
-      messages.add(m);
-    }
-    return messages;
+    final index = _list.indexWhere((element) => element.messageId == messageId);
+    if (index == -1) return [];
+    return _list.sublist(index);
   }
 }
 

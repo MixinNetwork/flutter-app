@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../constants/resources.dart';
@@ -12,6 +13,7 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
 import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
@@ -44,10 +46,14 @@ class PinMessagesPage extends HookWidget {
 
     final list = rawList ?? [];
 
-    return MultiBlocProvider(
+    return MultiProvider(
       providers: [
         BlocProvider.value(
           value: searchConversationKeywordCubit,
+        ),
+        Provider(
+          create: (_) => AudioMessagesPlayAgent(list,
+              (m) => context.accountServer.convertMessageAbsolutePath(m, true)),
         ),
       ],
       child: Scaffold(
