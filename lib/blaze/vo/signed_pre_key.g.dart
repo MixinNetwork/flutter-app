@@ -6,13 +6,11 @@ part of 'signed_pre_key.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-SignedPreKey _$SignedPreKeyFromJson(Map<String, dynamic> json) {
-  return SignedPreKey(
-    json['key_id'] as int,
-    json['pub_key'] as String?,
-    json['signature'] as String,
-  );
-}
+SignedPreKey _$SignedPreKeyFromJson(Map<String, dynamic> json) => SignedPreKey(
+      json['key_id'] as int,
+      json['pub_key'] as String?,
+      json['signature'] as String,
+    );
 
 Map<String, dynamic> _$SignedPreKeyToJson(SignedPreKey instance) =>
     <String, dynamic>{

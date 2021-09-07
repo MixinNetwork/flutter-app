@@ -7,6 +7,7 @@ import Foundation
 
 import bitsdojo_window_macos
 import connectivity_plus_macos
+import dart_vlc
 import desktop_drop
 import desktop_lifecycle
 import device_info_plus_macos
@@ -24,6 +25,7 @@ import window_size
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   BitsdojoWindowPlugin.register(with: registry.registrar(forPlugin: "BitsdojoWindowPlugin"))
   ConnectivityPlugin.register(with: registry.registrar(forPlugin: "ConnectivityPlugin"))
+  DartVlcPlugin.register(with: registry.registrar(forPlugin: "DartVlcPlugin"))
   DesktopDropPlugin.register(with: registry.registrar(forPlugin: "DesktopDropPlugin"))
   DesktopLifecyclePlugin.register(with: registry.registrar(forPlugin: "DesktopLifecyclePlugin"))
   DeviceInfoPlusMacosPlugin.register(with: registry.registrar(forPlugin: "DeviceInfoPlusMacosPlugin"))

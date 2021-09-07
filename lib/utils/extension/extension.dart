@@ -21,6 +21,7 @@ import '../../db/database.dart';
 import '../../generated/l10n.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
+import '../vlc_service.dart';
 
 export 'package:flutter_app/widgets/message/message.dart'
     show MessageIsTranscriptExtension;

@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 
 import '../../../blaze/vo/transcript_minimal.dart';
 import '../../../constants/resources.dart';
@@ -15,12 +16,14 @@ import '../../../ui/home/chat_page.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
+import '../../../utils/vlc_service.dart';
 import '../../action_button.dart';
 import '../../dialog.dart';
 import '../../interacter_decorated_box.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
+import 'audio_message.dart';
 
 class TranscriptMessageWidget extends HookWidget {
   const TranscriptMessageWidget({
@@ -84,13 +87,18 @@ class TranscriptMessageWidget extends HookWidget {
         left: 2,
       ),
       child: InteractableDecoratedBox(
-        onTap: () => showMixinDialog(
-            context: context,
-            padding: const EdgeInsets.symmetric(vertical: 80),
-            child: TranscriptPage(
-              messageId: message.messageId,
-              conversationId: message.conversationId,
-            )),
+        onTap: () async {
+          await showMixinDialog(
+              context: context,
+              padding: const EdgeInsets.symmetric(vertical: 80),
+              child: TranscriptPage(
+                messageId: message.messageId,
+                conversationId: message.conversationId,
+                vlcService: context.vlcService,
+              ));
+
+          if (context.vlcService.playing) context.vlcService.stop();
+        },
         child: SizedBox(
           width: 260,
           child: Stack(
@@ -188,9 +196,11 @@ class TranscriptPage extends HookWidget {
     Key? key,
     required this.messageId,
     required this.conversationId,
+    required this.vlcService,
   }) : super(key: key);
   final String messageId;
   final String conversationId;
+  final VlcService vlcService;
 
   @override
   Widget build(BuildContext context) {
@@ -226,13 +236,16 @@ class TranscriptPage extends HookWidget {
           minWidth: 600,
           minHeight: 800,
         ),
-        child: MultiBlocProvider(
+        child: MultiProvider(
           providers: [
-            BlocProvider.value(
-              value: searchConversationKeywordCubit,
-            ),
-            BlocProvider.value(
-              value: blinkCubit,
+            BlocProvider.value(value: searchConversationKeywordCubit),
+            BlocProvider.value(value: blinkCubit),
+            Provider.value(value: vlcService),
+            Provider(
+              create: (_) => AudioMessagesPlayAgent(
+                  list,
+                  (m) => context.accountServer
+                      .convertMessageAbsolutePath(m, true)),
             ),
           ],
           child: Column(
