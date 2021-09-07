@@ -99,8 +99,7 @@ class MixinDatabase extends _$MixinDatabase {
   final eventBus = DataBaseEventBus();
 
   @override
-  MigrationStrategy get migration =>
-      MigrationStrategy(
+  MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (_) async {
           if (executor.dialect == SqlDialect.sqlite) {
             await customStatement('PRAGMA journal_mode=WAL');
@@ -158,34 +157,33 @@ class MixinDatabase extends _$MixinDatabase {
       );
 
   Stream<bool> watchHasData<T extends HasResultSet, R>(
-      ResultSetImplementation<T, R> table, [
-        List<Join> joins = const [],
-        Expression<bool?> predicate = ignoreWhere,
-      ]) =>
+    ResultSetImplementation<T, R> table, [
+    List<Join> joins = const [],
+    Expression<bool?> predicate = ignoreWhere,
+  ]) =>
       (selectOnly(table)
-        ..addColumns([const CustomExpression<String>('1')])
-        ..join(joins)
-        ..where(predicate)
-        ..limit(1))
+            ..addColumns([const CustomExpression<String>('1')])
+            ..join(joins)
+            ..where(predicate)
+            ..limit(1))
           .watch()
           .map((event) => event.isNotEmpty);
 
   Future<bool> hasData<T extends HasResultSet, R>(
-      ResultSetImplementation<T, R> table, [
-        List<Join> joins = const [],
-        Expression<bool?> predicate = ignoreWhere,
-      ]) async =>
+    ResultSetImplementation<T, R> table, [
+    List<Join> joins = const [],
+    Expression<bool?> predicate = ignoreWhere,
+  ]) async =>
       (await (selectOnly(table)
-        ..addColumns([const CustomExpression<String>('1')])
-        ..join(joins)
-        ..where(predicate)
-        ..limit(1))
-          .get())
+                ..addColumns([const CustomExpression<String>('1')])
+                ..join(joins)
+                ..where(predicate)
+                ..limit(1))
+              .get())
           .isNotEmpty;
 }
 
-LazyDatabase _openConnection(File dbFile) =>
-    LazyDatabase(() {
+LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
       final vmDatabase = VmDatabase(dbFile);
       if (!kDebugMode) {
         return vmDatabase;
@@ -214,7 +212,7 @@ Future<MoorIsolate> _createMoorIsolate(File dbFile) async {
 void _startBackground(_IsolateStartRequest request) {
   final executor = _openConnection(request.dbFile);
   final moorIsolate = MoorIsolate.inCurrent(
-        () => DatabaseConnection.fromExecutor(executor),
+    () => DatabaseConnection.fromExecutor(executor),
   );
   request.sendMoorIsolate.send(moorIsolate);
 }

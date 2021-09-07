@@ -87,19 +87,12 @@ class QuoteMessage extends HookWidget {
             final mentionCache = context.read<MentionCache>();
             final content = useMemoizedFuture(
               () async => mentionCache.replaceMention(
-                  rawContent,
-                  await mentionCache.checkMentionCache({rawContent}),
-                ),
+                rawContent,
+                await mentionCache.checkMentionCache({rawContent}),
+              ),
               rawContent,
               keys: [rawContent],
             ).requireData;
-            final content = useMemoized(
-              () => mentionMap.values.fold<String>(
-                  rawContent,
-                  (previousValue, element) => previousValue.replaceAll(
-                      '@${element.identityNumber}', '@${element.fullName}')),
-              [rawContent],
-            );
 
             return _QuoteMessageBase(
               messageId: messageId,

@@ -157,7 +157,7 @@ class ChatPage extends HookWidget {
 
     final tickerProvider = useSingleTickerProvider();
     final blinkCubit = useBloc(
-          () => BlinkCubit(
+      () => BlinkCubit(
         tickerProvider,
         context.theme.accent.withOpacity(0.5),
       ),
