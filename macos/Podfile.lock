@@ -118,7 +118,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   bitsdojo_window_macos: 7e9b1bbb09bdce418d9657ead7fc9d824203ff0d
-  connectivity_plus_macos: c97b3ad707dc9814219086a1ccec7eef64120228
+  connectivity_plus_macos: 5bcc124e146fbe6796412cdcd29cc97830622bca
   dart_vlc: de4ba59a6ded5a914a14fb026f7bcbe74c471dee
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
