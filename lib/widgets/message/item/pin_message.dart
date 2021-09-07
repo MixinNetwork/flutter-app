@@ -9,6 +9,7 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/load_balancer_utils.dart';
+import '../../../utils/logger.dart';
 import '../../../utils/message_optimize.dart';
 import '../message.dart';
 import 'text/mention_builder.dart';
@@ -23,19 +24,18 @@ class PinMessageWidget extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final previewContent = useMemoizedFuture(
-      () => generatePinPreviewText(
-        content: message.content ?? '',
-        mentionCache: context.read<MentionCache>(),
-      ),
-      '',
-      keys: [message.content],
-    ).requireData;
+    final text = useMemoizedFuture(
+      () async {
+        final preview = await generatePinPreviewText(
+          content: message.content ?? '',
+          mentionCache: context.read<MentionCache>(),
+        );
 
-    final text = useMemoized(
-      () => context.l10n.pinned(message.userFullName ?? '', previewContent),
-      [message.userFullName, previewContent],
-    );
+        return context.l10n.pinned(message.userFullName ?? '', preview);
+      },
+      '',
+      keys: [message.userFullName, message.content],
+    ).requireData;
 
     return Center(
       child: Padding(
@@ -78,24 +78,29 @@ Future<String> generatePinPreviewText({
   required String content,
   required MentionCache mentionCache,
 }) async {
-  final json = await jsonDecodeWithIsolate(content);
-  if (json is! Map) return '';
-  final pinMessageMinimal =
-      PinMessageMinimal.fromJson(json as Map<String, dynamic>);
+  try {
+    final json = await jsonDecodeWithIsolate(content);
+    if (json is! Map) return '';
+    final pinMessageMinimal =
+        PinMessageMinimal.fromJson(json as Map<String, dynamic>);
 
-  if (pinMessageMinimal.type.isText) {
-    return '"${mentionCache.replaceMention(
-          pinMessageMinimal.content,
-          await mentionCache.checkMentionCache({pinMessageMinimal.content}),
-        ) ?? ''}"';
-  } else {
-    return await messagePreviewOptimize(
-          null,
-          pinMessageMinimal.type,
-          pinMessageMinimal.content,
-          false,
-          true,
-        ) ??
-        '';
+    if (pinMessageMinimal.type.isText) {
+      return '"${mentionCache.replaceMention(
+            pinMessageMinimal.content,
+            await mentionCache.checkMentionCache({pinMessageMinimal.content}),
+          ) ?? ''}"';
+    } else {
+      return await messagePreviewOptimize(
+            null,
+            pinMessageMinimal.type,
+            pinMessageMinimal.content,
+            false,
+            true,
+          ) ??
+          '';
+    }
+  } catch (error, s) {
+    e('generate pin message error: $error, $s ');
+    return '';
   }
 }

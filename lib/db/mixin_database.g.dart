@@ -11771,6 +11771,86 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<MessageItem> lastPinMessageItem(String? conversationId) {
+    return customSelect(
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id INNER JOIN pin_messages AS pinMessage ON message.quote_message_id = pinMessage.message_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE conversation.conversation_id = ?1 AND message.category = \'MESSAGE_PIN\' ORDER BY message.created_at DESC LIMIT 1',
+        variables: [
+          Variable<String?>(conversationId)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          stickers,
+          snapshots,
+          assets,
+          hyperlinks,
+          messageMentions,
+          pinMessages,
+        }).map((QueryRow row) {
+      return MessageItem(
+        messageId: row.read<String>('messageId'),
+        conversationId: row.read<String>('conversationId'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        status: Messages.$converter1.mapToDart(row.read<String>('status'))!,
+        mediaStatus:
+            Messages.$converter0.mapToDart(row.read<String?>('mediaStatus')),
+        mediaWaveform: row.read<String?>('mediaWaveform'),
+        mediaName: row.read<String?>('mediaName'),
+        mediaMimeType: row.read<String?>('mediaMimeType'),
+        mediaSize: row.read<int?>('mediaSize'),
+        mediaWidth: row.read<int?>('mediaWidth'),
+        mediaHeight: row.read<int?>('mediaHeight'),
+        thumbImage: row.read<String?>('thumbImage'),
+        thumbUrl: row.read<String?>('thumbUrl'),
+        mediaUrl: row.read<String?>('mediaUrl'),
+        mediaDuration: row.read<String?>('mediaDuration'),
+        quoteId: row.read<String?>('quoteId'),
+        quoteContent: row.read<String?>('quoteContent'),
+        actionName:
+            Messages.$converter3.mapToDart(row.read<String?>('actionName')),
+        sharedUserId: row.read<String?>('sharedUserId'),
+        userId: row.read<String>('userId'),
+        userFullName: row.read<String?>('userFullName'),
+        userIdentityNumber: row.read<String>('userIdentityNumber'),
+        appId: row.read<String?>('appId'),
+        relationship:
+            Users.$converter0.mapToDart(row.read<String?>('relationship')),
+        avatarUrl: row.read<String?>('avatarUrl'),
+        sharedUserFullName: row.read<String?>('sharedUserFullName'),
+        sharedUserIdentityNumber: row.read<String?>('sharedUserIdentityNumber'),
+        sharedUserAvatarUrl: row.read<String?>('sharedUserAvatarUrl'),
+        sharedUserIsVerified: row.read<bool?>('sharedUserIsVerified'),
+        sharedUserAppId: row.read<String?>('sharedUserAppId'),
+        conversationOwnerId: row.read<String?>('conversationOwnerId'),
+        conversionCategory: Conversations.$converter0
+            .mapToDart(row.read<String?>('conversionCategory')),
+        groupName: row.read<String?>('groupName'),
+        assetUrl: row.read<String?>('assetUrl'),
+        assetWidth: row.read<int?>('assetWidth'),
+        assetHeight: row.read<int?>('assetHeight'),
+        stickerId: row.read<String?>('stickerId'),
+        assetName: row.read<String?>('assetName'),
+        assetType: row.read<String?>('assetType'),
+        participantFullName: row.read<String?>('participantFullName'),
+        participantUserId: row.read<String?>('participantUserId'),
+        snapshotId: row.read<String?>('snapshotId'),
+        snapshotType: row.read<String?>('snapshotType'),
+        snapshotAmount: row.read<String?>('snapshotAmount'),
+        assetId: row.read<String?>('assetId'),
+        assetSymbol: row.read<String?>('assetSymbol'),
+        assetIcon: row.read<String?>('assetIcon'),
+        siteName: row.read<String?>('siteName'),
+        siteTitle: row.read<String?>('siteTitle'),
+        siteDescription: row.read<String?>('siteDescription'),
+        siteImage: row.read<String?>('siteImage'),
+        mentionRead: row.read<bool?>('mentionRead'),
+      );
+    });
+  }
+
   Selectable<DateTime> getLastBlazeMessageCreatedAt() {
     return customSelect(
         'SELECT created_at FROM flood_messages ORDER BY created_at DESC LIMIT 1',

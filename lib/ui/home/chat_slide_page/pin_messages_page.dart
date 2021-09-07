@@ -27,16 +27,22 @@ class PinMessagesPage extends HookWidget {
     final conversationId = useMemoized(
         () => context.read<ConversationCubit>().state!.conversationId);
 
-    final list = useMemoizedStream<List<MessageItem>>(
+    final rawList = useMemoizedStream<List<MessageItem>>(
       () => context.database.pinMessageDao.messageItems(conversationId).watch(),
-      initialData: [],
       keys: [conversationId],
-    ).requireData;
+    ).data;
 
     final chatSideCubit = useBloc(() => ChatSideCubit());
     final searchConversationKeywordCubit = useBloc(
       () => SearchConversationKeywordCubit(chatSideCubit: chatSideCubit),
     );
+
+    useEffect(() {
+      if (rawList?.isNotEmpty ?? true) return;
+      Navigator.pop(context);
+    }, [rawList?.isNotEmpty]);
+
+    final list = rawList ?? [];
 
     return MultiBlocProvider(
       providers: [
@@ -93,35 +99,42 @@ class PinMessagesPage extends HookWidget {
             ),
             InteractableDecoratedBox(
               cursor: MaterialStateMouseCursor.clickable,
-              onTap: () => showMixinDialog(
-                context: context,
-                child: AlertDialogLayout(
-                  title: Text(context.l10n.unpinAllMessagesDescription),
-                  content: const SizedBox(),
-                  actions: [
-                    MixinButton(
-                        backgroundTransparent: true,
-                        onTap: () => Navigator.pop(context, false),
-                        child: Text(context.l10n.cancel)),
-                    MixinButton(
-                      onTap: () {
-                        Navigator.pop(context, true);
-                        context.accountServer.unpinMessage(
-                          conversationId: conversationId,
-                          pinMessageMinimals: list
-                              .map((e) => PinMessageMinimal(
-                                    type: e.type,
-                                    messageId: e.messageId,
-                                    content: e.content,
-                                  ))
-                              .toList(),
-                        );
-                      },
-                      child: Text(context.l10n.confirm),
-                    ),
-                  ],
-                ),
-              ),
+              onTap: () async {
+                final unpinAll = await showMixinDialog<bool>(
+                  context: context,
+                  child: Builder(
+                      builder: (context) => AlertDialogLayout(
+                            title:
+                                Text(context.l10n.unpinAllMessagesDescription),
+                            content: const SizedBox(),
+                            actions: [
+                              MixinButton(
+                                  backgroundTransparent: true,
+                                  onTap: () => Navigator.pop(context, false),
+                                  child: Text(context.l10n.cancel)),
+                              MixinButton(
+                                onTap: () {
+                                  Navigator.pop(context, true);
+                                  context.accountServer.unpinMessage(
+                                    conversationId: conversationId,
+                                    pinMessageMinimals: list
+                                        .map((e) => PinMessageMinimal(
+                                              type: e.type,
+                                              messageId: e.messageId,
+                                              content: e.content,
+                                            ))
+                                        .toList(),
+                                  );
+                                },
+                                child: Text(context.l10n.confirm),
+                              ),
+                            ],
+                          )),
+                );
+                if (unpinAll ?? false) {
+                  Navigator.pop(context);
+                }
+              },
               child: Container(
                 height: 56,
                 alignment: Alignment.center,

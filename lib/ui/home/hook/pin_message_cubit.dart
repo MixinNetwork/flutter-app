@@ -6,7 +6,8 @@ import 'package:provider/provider.dart';
 import '../../../account/show_pin_message_key_value.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
-import '../../../utils/message_optimize.dart';
+import '../../../widgets/message/item/pin_message.dart';
+import '../../../widgets/message/item/text/mention_builder.dart';
 import '../bloc/conversation_cubit.dart';
 
 class PinMessageState extends Equatable {
@@ -35,6 +36,7 @@ extension PinMessageCubitExtension on BuildContext {
 }
 
 PinMessageState usePinMessageState() {
+  final context = useContext();
   final conversationId =
       useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
     converter: (state) => state?.conversationId,
@@ -43,9 +45,7 @@ PinMessageState usePinMessageState() {
   final pinMessageIds = useMemoizedStream<List<String>>(
     () {
       if (conversationId == null) return Stream.value([]);
-      return useContext()
-          .database
-          .pinMessageDao
+      return context.database.pinMessageDao
           .getPinMessageIds(conversationId)
           .watch()
           .map(
@@ -69,21 +69,18 @@ PinMessageState usePinMessageState() {
       if (!showLastPinMessage || conversationId == null) {
         return Stream.value(null);
       }
-      return useContext()
-          .database
-          .pinMessageDao
+      return context.database.pinMessageDao
           .lastPinMessageItem(conversationId)
           .watchSingleOrNull()
-          .asyncMap((event) {
-        if (event == null) return null;
-        return messagePreviewOptimize(
-          event.status,
-          event.type,
-          event.content,
-          false,
-          true,
-          event.userFullName,
+          .asyncMap((message) async {
+        if (message == null) return null;
+
+        final preview = await generatePinPreviewText(
+          content: message.content ?? '',
+          mentionCache: context.read<MentionCache>(),
         );
+
+        return context.l10n.pinned(message.userFullName ?? '', preview);
       });
     },
     keys: [showLastPinMessage, conversationId],

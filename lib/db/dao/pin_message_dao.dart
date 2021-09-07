@@ -25,15 +25,7 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
           .map((row) => row.read(db.pinMessages.messageId));
 
   Selectable<MessageItem> lastPinMessageItem(String conversationId) =>
-      db.basePinMessageItems(
-        conversationId,
-        (pinMessage, _, __, ___, ____, _____, ______, _______, ________,
-                _________, __________) =>
-            OrderBy([OrderingTerm.desc(pinMessage.createdAt)]),
-        (_, __, ___, ____, _____, ______, _______, ________, _________,
-                __________, ___________) =>
-            Limit(1, 0),
-      );
+      db.lastPinMessageItem(conversationId);
 
   Selectable<MessageItem> messageItems(String conversationId) =>
       db.basePinMessageItems(

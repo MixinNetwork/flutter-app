@@ -33,7 +33,6 @@ import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
-import 'show_pin_message_key_value.dart';
 
 const _kEnableImageBlurHashThumb = true;
 
@@ -806,6 +805,9 @@ class SendMessageHelper {
           senderId,
         );
       });
+    } else {
+      await _pinMessageDao
+          .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
     }
     await _jobDao.insert(
       Job(

@@ -420,6 +420,7 @@ class DecryptMessage extends Injector {
           Message(
             messageId: const Uuid().v4(),
             conversationId: data.conversationId,
+            quoteMessageId: message.messageId,
             userId: data.userId,
             status: MessageStatus.read,
             content: await jsonEncodeWithIsolate(pinMessageMinimal),
@@ -1190,18 +1191,7 @@ class DecryptMessage extends Injector {
         .toList();
 
     if (transcripts.isEmpty) {
-      await database.messageDao.insert(
-        Message(
-          messageId: data.messageId,
-          conversationId: data.conversationId,
-          userId: data.userId,
-          category: data.category!,
-          mediaSize: 0,
-          createdAt: data.createdAt,
-          status: MessageStatus.unknown,
-        ),
-        data.userId,
-      );
+      await _insertInvalidMessage(data);
       return null;
     }
 
