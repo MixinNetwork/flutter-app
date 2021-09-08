@@ -152,6 +152,7 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 5) {
             await m.createTable(pinMessages);
+            await m.createIndex(indexPinMessagesConversationId);
           }
         },
       );

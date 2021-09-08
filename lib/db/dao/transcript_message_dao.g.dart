@@ -14,6 +14,7 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   Messages get messages => attachedDatabase.messages;
   Participants get participants => attachedDatabase.participants;
   StickerAlbums get stickerAlbums => attachedDatabase.stickerAlbums;
+  PinMessages get pinMessages => attachedDatabase.pinMessages;
   Addresses get addresses => attachedDatabase.addresses;
   Apps get apps => attachedDatabase.apps;
   Assets get assets => attachedDatabase.assets;
@@ -37,7 +38,6 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   Users get users => attachedDatabase.users;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
-  PinMessages get pinMessages => attachedDatabase.pinMessages;
   Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
       Expression<bool?> Function(
               TranscriptMessages transcript,

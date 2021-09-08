@@ -70,6 +70,7 @@ CREATE INDEX IF NOT EXISTS index_message_mentions_conversation_id_has_read ON me
 CREATE INDEX IF NOT EXISTS index_messages_conversation_id_created_at ON messages(conversation_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS index_participants_conversation_id_created_at ON participants(conversation_id, created_at);
 CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums(category, created_at DESC);
+CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages(conversation_id);
 
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at  WHERE conversation_id = new.conversation_id; END;
 CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (select message_id from messages where conversation_id = old.conversation_id order by created_at DESC limit 1) WHERE conversation_id = old.conversation_id; END;

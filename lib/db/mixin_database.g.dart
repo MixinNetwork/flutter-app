@@ -3824,6 +3824,237 @@ class StickerAlbums extends Table with TableInfo<StickerAlbums, StickerAlbum> {
   bool get dontWriteConstraints => true;
 }
 
+class PinMessage extends DataClass implements Insertable<PinMessage> {
+  final String messageId;
+  final String conversationId;
+  final DateTime createdAt;
+  PinMessage(
+      {required this.messageId,
+      required this.conversationId,
+      required this.createdAt});
+  factory PinMessage.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return PinMessage(
+      messageId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
+      conversationId: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
+      createdAt: PinMessages.$converter0.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['message_id'] = Variable<String>(messageId);
+    map['conversation_id'] = Variable<String>(conversationId);
+    {
+      final converter = PinMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
+    }
+    return map;
+  }
+
+  PinMessagesCompanion toCompanion(bool nullToAbsent) {
+    return PinMessagesCompanion(
+      messageId: Value(messageId),
+      conversationId: Value(conversationId),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory PinMessage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return PinMessage(
+      messageId: serializer.fromJson<String>(json['message_id']),
+      conversationId: serializer.fromJson<String>(json['conversation_id']),
+      createdAt: serializer.fromJson<DateTime>(json['created_at']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'message_id': serializer.toJson<String>(messageId),
+      'conversation_id': serializer.toJson<String>(conversationId),
+      'created_at': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PinMessage copyWith(
+          {String? messageId, String? conversationId, DateTime? createdAt}) =>
+      PinMessage(
+        messageId: messageId ?? this.messageId,
+        conversationId: conversationId ?? this.conversationId,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PinMessage(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(
+      messageId.hashCode, $mrjc(conversationId.hashCode, createdAt.hashCode)));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PinMessage &&
+          other.messageId == this.messageId &&
+          other.conversationId == this.conversationId &&
+          other.createdAt == this.createdAt);
+}
+
+class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
+  final Value<String> messageId;
+  final Value<String> conversationId;
+  final Value<DateTime> createdAt;
+  const PinMessagesCompanion({
+    this.messageId = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  PinMessagesCompanion.insert({
+    required String messageId,
+    required String conversationId,
+    required DateTime createdAt,
+  })  : messageId = Value(messageId),
+        conversationId = Value(conversationId),
+        createdAt = Value(createdAt);
+  static Insertable<PinMessage> custom({
+    Expression<String>? messageId,
+    Expression<String>? conversationId,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (messageId != null) 'message_id': messageId,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  PinMessagesCompanion copyWith(
+      {Value<String>? messageId,
+      Value<String>? conversationId,
+      Value<DateTime>? createdAt}) {
+    return PinMessagesCompanion(
+      messageId: messageId ?? this.messageId,
+      conversationId: conversationId ?? this.conversationId,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (messageId.present) {
+      map['message_id'] = Variable<String>(messageId.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (createdAt.present) {
+      final converter = PinMessages.$converter0;
+      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PinMessagesCompanion(')
+          ..write('messageId: $messageId, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  PinMessages(this._db, [this._alias]);
+  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
+  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
+      'message_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
+      'conversation_id', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
+  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
+      GeneratedColumn<int?>('created_at', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: true,
+              $customConstraints: 'NOT NULL')
+          .withConverter<DateTime>(PinMessages.$converter0);
+  @override
+  List<GeneratedColumn> get $columns => [messageId, conversationId, createdAt];
+  @override
+  String get aliasedName => _alias ?? 'pin_messages';
+  @override
+  String get actualTableName => 'pin_messages';
+  @override
+  VerificationContext validateIntegrity(Insertable<PinMessage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('message_id')) {
+      context.handle(_messageIdMeta,
+          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
+    } else if (isInserting) {
+      context.missing(_messageIdMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    context.handle(_createdAtMeta, const VerificationResult.success());
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {messageId};
+  @override
+  PinMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return PinMessage.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  PinMessages createAlias(String alias) {
+    return PinMessages(_db, alias);
+  }
+
+  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
+  @override
+  List<String> get customConstraints => const [
+        'PRIMARY KEY (message_id)',
+        'FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE',
+        'FOREIGN KEY (message_id) REFERENCES messages(message_id) ON UPDATE NO ACTION ON DELETE CASCADE'
+      ];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 class Addresse extends DataClass implements Insertable<Addresse> {
   final String addressId;
   final String type;
@@ -11306,237 +11537,6 @@ class TranscriptMessages extends Table
   bool get dontWriteConstraints => true;
 }
 
-class PinMessage extends DataClass implements Insertable<PinMessage> {
-  final String messageId;
-  final String conversationId;
-  final DateTime createdAt;
-  PinMessage(
-      {required this.messageId,
-      required this.conversationId,
-      required this.createdAt});
-  factory PinMessage.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
-    final effectivePrefix = prefix ?? '';
-    return PinMessage(
-      messageId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}message_id'])!,
-      conversationId: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}conversation_id'])!,
-      createdAt: PinMessages.$converter0.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_at']))!,
-    );
-  }
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['message_id'] = Variable<String>(messageId);
-    map['conversation_id'] = Variable<String>(conversationId);
-    {
-      final converter = PinMessages.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt)!);
-    }
-    return map;
-  }
-
-  PinMessagesCompanion toCompanion(bool nullToAbsent) {
-    return PinMessagesCompanion(
-      messageId: Value(messageId),
-      conversationId: Value(conversationId),
-      createdAt: Value(createdAt),
-    );
-  }
-
-  factory PinMessage.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return PinMessage(
-      messageId: serializer.fromJson<String>(json['message_id']),
-      conversationId: serializer.fromJson<String>(json['conversation_id']),
-      createdAt: serializer.fromJson<DateTime>(json['created_at']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'message_id': serializer.toJson<String>(messageId),
-      'conversation_id': serializer.toJson<String>(conversationId),
-      'created_at': serializer.toJson<DateTime>(createdAt),
-    };
-  }
-
-  PinMessage copyWith(
-          {String? messageId, String? conversationId, DateTime? createdAt}) =>
-      PinMessage(
-        messageId: messageId ?? this.messageId,
-        conversationId: conversationId ?? this.conversationId,
-        createdAt: createdAt ?? this.createdAt,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('PinMessage(')
-          ..write('messageId: $messageId, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode, $mrjc(conversationId.hashCode, createdAt.hashCode)));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is PinMessage &&
-          other.messageId == this.messageId &&
-          other.conversationId == this.conversationId &&
-          other.createdAt == this.createdAt);
-}
-
-class PinMessagesCompanion extends UpdateCompanion<PinMessage> {
-  final Value<String> messageId;
-  final Value<String> conversationId;
-  final Value<DateTime> createdAt;
-  const PinMessagesCompanion({
-    this.messageId = const Value.absent(),
-    this.conversationId = const Value.absent(),
-    this.createdAt = const Value.absent(),
-  });
-  PinMessagesCompanion.insert({
-    required String messageId,
-    required String conversationId,
-    required DateTime createdAt,
-  })  : messageId = Value(messageId),
-        conversationId = Value(conversationId),
-        createdAt = Value(createdAt);
-  static Insertable<PinMessage> custom({
-    Expression<String>? messageId,
-    Expression<String>? conversationId,
-    Expression<DateTime>? createdAt,
-  }) {
-    return RawValuesInsertable({
-      if (messageId != null) 'message_id': messageId,
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (createdAt != null) 'created_at': createdAt,
-    });
-  }
-
-  PinMessagesCompanion copyWith(
-      {Value<String>? messageId,
-      Value<String>? conversationId,
-      Value<DateTime>? createdAt}) {
-    return PinMessagesCompanion(
-      messageId: messageId ?? this.messageId,
-      conversationId: conversationId ?? this.conversationId,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (messageId.present) {
-      map['message_id'] = Variable<String>(messageId.value);
-    }
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (createdAt.present) {
-      final converter = PinMessages.$converter0;
-      map['created_at'] = Variable<int>(converter.mapToSql(createdAt.value)!);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('PinMessagesCompanion(')
-          ..write('messageId: $messageId, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('createdAt: $createdAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
-  final GeneratedDatabase _db;
-  final String? _alias;
-  PinMessages(this._db, [this._alias]);
-  final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
-  late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
-      'message_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _conversationIdMeta =
-      const VerificationMeta('conversationId');
-  late final GeneratedColumn<String?> conversationId = GeneratedColumn<String?>(
-      'conversation_id', aliasedName, false,
-      typeName: 'TEXT',
-      requiredDuringInsert: true,
-      $customConstraints: 'NOT NULL');
-  final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
-  late final GeneratedColumnWithTypeConverter<DateTime, int?> createdAt =
-      GeneratedColumn<int?>('created_at', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: true,
-              $customConstraints: 'NOT NULL')
-          .withConverter<DateTime>(PinMessages.$converter0);
-  @override
-  List<GeneratedColumn> get $columns => [messageId, conversationId, createdAt];
-  @override
-  String get aliasedName => _alias ?? 'pin_messages';
-  @override
-  String get actualTableName => 'pin_messages';
-  @override
-  VerificationContext validateIntegrity(Insertable<PinMessage> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('message_id')) {
-      context.handle(_messageIdMeta,
-          messageId.isAcceptableOrUnknown(data['message_id']!, _messageIdMeta));
-    } else if (isInserting) {
-      context.missing(_messageIdMeta);
-    }
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-          _conversationIdMeta,
-          conversationId.isAcceptableOrUnknown(
-              data['conversation_id']!, _conversationIdMeta));
-    } else if (isInserting) {
-      context.missing(_conversationIdMeta);
-    }
-    context.handle(_createdAtMeta, const VerificationResult.success());
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {messageId};
-  @override
-  PinMessage map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return PinMessage.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
-  }
-
-  @override
-  PinMessages createAlias(String alias) {
-    return PinMessages(_db, alias);
-  }
-
-  static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
-  @override
-  List<String> get customConstraints => const [
-        'PRIMARY KEY (message_id)',
-        'FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE',
-        'FOREIGN KEY (message_id) REFERENCES messages(message_id) ON UPDATE NO ACTION ON DELETE CASCADE'
-      ];
-  @override
-  bool get dontWriteConstraints => true;
-}
-
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -11570,6 +11570,10 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexStickerAlbumsCategoryCreatedAt = Index(
       'index_sticker_albums_category_created_at',
       'CREATE INDEX IF NOT EXISTS index_sticker_albums_category_created_at ON sticker_albums (category, created_at DESC)');
+  late final PinMessages pinMessages = PinMessages(this);
+  late final Index indexPinMessagesConversationId = Index(
+      'index_pin_messages_conversation_id',
+      'CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages (conversation_id)');
   late final Trigger conversationLastMessageUpdate = Trigger(
       'CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at WHERE conversation_id = new.conversation_id;END',
       'conversation_last_message_update');
@@ -11597,7 +11601,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Stickers stickers = Stickers(this);
   late final Users users = Users(this);
   late final TranscriptMessages transcriptMessages = TranscriptMessages(this);
-  late final PinMessages pinMessages = PinMessages(this);
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -12690,17 +12693,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<int> messageRowId(String messageId) {
-    return customSelect(
-        'SELECT "rowid" FROM messages WHERE message_id = ?1 LIMIT 1',
-        variables: [
-          Variable<String>(messageId)
-        ],
-        readsFrom: {
-          messages,
-        }).map((QueryRow row) => row.read<int>('rowid'));
-  }
-
   Selectable<int> baseConversationItemCount(
       Expression<bool?> Function(Conversations conversation, Users owner,
               CircleConversations circleConversation)
@@ -12952,6 +12944,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexParticipantsConversationIdCreatedAt,
         stickerAlbums,
         indexStickerAlbumsCategoryCreatedAt,
+        pinMessages,
+        indexPinMessagesConversationId,
         conversationLastMessageUpdate,
         conversationLastMessageDelete,
         addresses,
@@ -12970,8 +12964,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         stickerRelationships,
         stickers,
         users,
-        transcriptMessages,
-        pinMessages
+        transcriptMessages
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -12991,20 +12984,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             ],
           ),
           WritePropagation(
-            on: TableUpdateQuery.onTableName('messages',
-                limitUpdateKind: UpdateKind.insert),
-            result: [
-              TableUpdate('conversations', kind: UpdateKind.update),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('messages',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('conversations', kind: UpdateKind.update),
-            ],
-          ),
-          WritePropagation(
             on: TableUpdateQuery.onTableName('conversations',
                 limitUpdateKind: UpdateKind.delete),
             result: [
@@ -13016,6 +12995,20 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('pin_messages', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.insert),
+            result: [
+              TableUpdate('conversations', kind: UpdateKind.update),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('messages',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('conversations', kind: UpdateKind.update),
             ],
           ),
         ],
