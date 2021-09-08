@@ -430,7 +430,7 @@ class SendMessageHelper {
       null,
       null,
       null,
-      int.tryParse(mediaDuration ??  ''),
+      int.tryParse(mediaDuration ?? ''),
       mediaWaveform,
       null,
       attachmentResult.createdAt,
