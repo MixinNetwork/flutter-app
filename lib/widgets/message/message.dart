@@ -382,6 +382,7 @@ class MessageItemWidget extends HookWidget {
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,
                       message: message,
+                      pinArrow: pinArrow,
                     );
                   }
                   return UnknownMessage(

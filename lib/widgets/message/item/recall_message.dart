@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
-
 import '../../../utils/extension/extension.dart';
 import '../message.dart';
 import '../message_bubble.dart';
@@ -18,11 +17,13 @@ class RecallMessage extends StatelessWidget {
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
+    required this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +56,7 @@ class RecallMessage extends StatelessWidget {
       messageId: message.messageId,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
+      pinArrow: pinArrow,
       child: MessageLayout(
         spacing: 6,
         content: content,

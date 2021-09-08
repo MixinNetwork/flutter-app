@@ -166,6 +166,7 @@ class ChatPage extends HookWidget {
         context.theme.accent.withOpacity(0.5),
       ),
     );
+    final pinMessageState = usePinMessageState();
 
     return MultiProvider(
       providers: [
@@ -192,6 +193,7 @@ class ChatPage extends HookWidget {
           dispose: (BuildContext context, VlcService vlcService) =>
               vlcService.dispose(),
         ),
+        Provider.value(value: pinMessageState),
       ],
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -346,13 +348,10 @@ class ChatContainer extends HookWidget {
 
     final pendingJumpMessageCubit = useBloc(() => PendingJumpMessageCubit());
 
-    final pinMessageState = usePinMessageState();
-
     return MultiProvider(
       providers: [
         BlocProvider.value(value: quoteMessageCubit),
         BlocProvider.value(value: pendingJumpMessageCubit),
-        Provider.value(value: pinMessageState),
       ],
       child: Column(
         children: [
