@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,9 +43,7 @@ class PinMessagesPage extends HookWidget {
 
     useEffect(() {
       if (rawList?.isNotEmpty ?? true) return;
-      try {
-        Navigator.pop(context);
-      } catch (_) {}
+      scheduleMicrotask(() => Navigator.pop(context));
     }, [rawList?.isNotEmpty]);
 
     final list = rawList ?? [];
@@ -107,7 +107,7 @@ class PinMessagesPage extends HookWidget {
             InteractableDecoratedBox(
               cursor: MaterialStateMouseCursor.clickable,
               onTap: () async {
-                final unpinAll = await showMixinDialog<bool>(
+                await showMixinDialog<bool>(
                   context: context,
                   child: Builder(
                       builder: (context) => AlertDialogLayout(
@@ -117,11 +117,11 @@ class PinMessagesPage extends HookWidget {
                             actions: [
                               MixinButton(
                                   backgroundTransparent: true,
-                                  onTap: () => Navigator.pop(context, false),
+                                  onTap: () => Navigator.pop(context),
                                   child: Text(context.l10n.cancel)),
                               MixinButton(
                                 onTap: () {
-                                  Navigator.pop(context, true);
+                                  Navigator.pop(context);
                                   context.accountServer.unpinMessage(
                                     conversationId: conversationId,
                                     pinMessageMinimals: list
@@ -138,9 +138,6 @@ class PinMessagesPage extends HookWidget {
                             ],
                           )),
                 );
-                if (unpinAll ?? false) {
-                  Navigator.pop(context);
-                }
               },
               child: Container(
                 height: 56,
