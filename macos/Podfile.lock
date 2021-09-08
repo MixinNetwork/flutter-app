@@ -1,8 +1,6 @@
 PODS:
   - bitsdojo_window_macos (0.0.1):
     - FlutterMacOS
-  - connectivity_plus_macos (0.0.1):
-    - FlutterMacOS
   - dart_vlc (0.0.1):
     - FlutterMacOS
     - VLCKit (~> 3.3)
@@ -57,7 +55,6 @@ PODS:
 
 DEPENDENCIES:
   - bitsdojo_window_macos (from `Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos`)
-  - connectivity_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos`)
   - dart_vlc (from `Flutter/ephemeral/.symlinks/plugins/dart_vlc/macos`)
   - desktop_drop (from `Flutter/ephemeral/.symlinks/plugins/desktop_drop/macos`)
   - desktop_lifecycle (from `Flutter/ephemeral/.symlinks/plugins/desktop_lifecycle/macos`)
@@ -83,8 +80,6 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   bitsdojo_window_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/bitsdojo_window_macos/macos
-  connectivity_plus_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos
   dart_vlc:
     :path: Flutter/ephemeral/.symlinks/plugins/dart_vlc/macos
   desktop_drop:
@@ -118,7 +113,6 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   bitsdojo_window_macos: 7e9b1bbb09bdce418d9657ead7fc9d824203ff0d
-  connectivity_plus_macos: c97b3ad707dc9814219086a1ccec7eef64120228
   dart_vlc: de4ba59a6ded5a914a14fb026f7bcbe74c471dee
   desktop_drop: 69eeff437544aa619c8db7f4481b3a65f7696898
   desktop_lifecycle: a600c10e12fe033c7be9078f2e929b8241f2c1e3
