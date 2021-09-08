@@ -1989,6 +1989,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `{count} Pinned Messages`
+  String pinMessageCount(Object count) {
+    return Intl.message(
+      '$count Pinned Messages',
+      name: 'pinMessageCount',
+      desc: '',
+      args: [count],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

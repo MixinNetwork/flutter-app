@@ -49,9 +49,11 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m15(count) => "共 ${count} 人";
 
-  static String m16(user, preview) => "${user}置顶了${preview}";
+  static String m16(count) => "${count}条置顶消息";
 
-  static String m17(count) => "${count} 条相关的消息";
+  static String m17(user, preview) => "${user}置顶了${preview}";
+
+  static String m18(count) => "${count} 条相关的消息";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -208,7 +210,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pin": MessageLookupByLibrary.simpleMessage("置顶"),
-        "pinned": m16,
+        "pinMessageCount": m16,
+        "pinned": m17,
         "pleaseWait": MessageLookupByLibrary.simpleMessage("请稍等一下"),
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
@@ -224,7 +227,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
-        "searchRelatedMessage": m17,
+        "searchRelatedMessage": m18,
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
         "sendQuick": MessageLookupByLibrary.simpleMessage("快速发送"),

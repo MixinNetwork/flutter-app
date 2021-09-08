@@ -61,7 +61,7 @@ class PinMessagesPage extends HookWidget {
       child: Scaffold(
         backgroundColor: context.theme.popUp,
         appBar: MixinAppBar(
-          title: Text(context.l10n.searchMessageHistory),
+          title: Text(context.l10n.pinMessageCount(list.length)),
           backgroundColor: context.theme.popUp,
           actions: [
             if (!Navigator.of(context).canPop())

@@ -187,5 +187,6 @@
   "chatTranscript": "聊天记录",
   "pinned": "{user}置顶了{preview}",
   "unpinAllMessages": "取消所有置顶",
-  "unpinAllMessagesDescription": "确认取消所有置顶吗？"
+  "unpinAllMessagesDescription": "确认取消所有置顶吗？",
+  "pinMessageCount": "{count}条置顶消息"
 }
