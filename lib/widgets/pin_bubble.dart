@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 
@@ -42,7 +41,7 @@ class PinMessageBubble extends StatelessWidget {
   }
 }
 
-class _PinBubbleClipper extends CustomClipper<Path> with EquatableMixin {
+class _PinBubbleClipper extends CustomClipper<Path> {
   const _PinBubbleClipper();
 
   @override
@@ -76,7 +75,4 @@ class _PinBubbleClipper extends CustomClipper<Path> with EquatableMixin {
   @override
   bool shouldReclip(covariant _PinBubbleClipper oldClipper) =>
       this != oldClipper;
-
-  @override
-  List<Object?> get props => [];
 }
