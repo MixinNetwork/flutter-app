@@ -7,6 +7,7 @@ import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cross_file/cross_file.dart';
 import 'package:extended_image/extended_image.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_app/account/show_pin_message_key_value.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -801,10 +802,12 @@ class SendMessageHelper {
             content: await jsonEncodeWithIsolate(pinMessageMinimal),
             createdAt: DateTime.now(),
             category: MessageCategory.messagePin,
+            quoteMessageId: pinMessageMinimal.messageId,
           ),
           senderId,
         );
       });
+      unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
     } else {
       await _pinMessageDao
           .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());

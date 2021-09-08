@@ -83,7 +83,6 @@ class PinMessagesPage extends HookWidget {
                     prev: list.getOrNull(index - 1),
                     message: messageItem,
                     next: list.getOrNull(index + 1),
-                    isTranscript: true,
                     blink: false,
                     pinArrowWidth: 32,
                     pinArrow: ActionButton(
