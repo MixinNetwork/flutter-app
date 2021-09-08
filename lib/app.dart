@@ -21,6 +21,7 @@ import 'ui/home/bloc/conversation_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
 import 'ui/home/bloc/participants_cubit.dart';
+import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
 import 'ui/home/conversation_page.dart';
 import 'ui/home/home.dart';
@@ -162,6 +163,7 @@ class _Providers extends StatelessWidget {
                   context.read<MentionCache>(),
                 ),
               ),
+              BlocProvider(create: (context) => RecallMessageReeditCubit()),
             ],
             child: Provider<NotificationService>(
               create: (BuildContext context) =>

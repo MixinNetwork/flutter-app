@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/ui/home/bloc/recall_message_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -333,6 +334,16 @@ class _SendTextField extends HookWidget {
               ]),
         ).data ??
         true;
+
+    useEffect(() {
+      final subscription = context
+          .read<RecallMessageReeditCubit>()
+          .onReeditStream
+          .listen((event) {
+        textEditingController.text = textEditingController.text + event;
+      });
+      return subscription.cancel;
+    }, [textEditingController]);
 
     return Container(
       constraints: const BoxConstraints(minHeight: 40),

@@ -247,6 +247,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "provisioning": MessageLookupByLibrary.simpleMessage("Provisioning"),
         "recentConversations":
             MessageLookupByLibrary.simpleMessage("Recent conversations"),
+        "reedit": MessageLookupByLibrary.simpleMessage("Re-edit"),
         "removeBot": MessageLookupByLibrary.simpleMessage("Remove Bot"),
         "removeContact": MessageLookupByLibrary.simpleMessage("Remove Contact"),
         "reply": MessageLookupByLibrary.simpleMessage("Reply"),

@@ -1959,6 +1959,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Re-edit`
+  String get reedit {
+    return Intl.message(
+      'Re-edit',
+      name: 'reedit',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
