@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:web_socket_channel/io.dart';
@@ -30,19 +29,7 @@ class Blaze {
     this.privateKey,
     this.database,
     this.client,
-  ) {
-    connectivitySubscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) {
-      if (result != ConnectivityResult.none) {
-        _reconnect();
-        return;
-      }
-
-      _disconnect();
-      _reconnecting = false;
-    });
-  }
+  );
 
   final String userId;
   final String sessionId;
@@ -60,18 +47,12 @@ class Blaze {
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
-  StreamSubscription? connectivitySubscription;
 
   final transactions = <String, WebSocketTransaction>{};
 
   Future<void> connect() async {
     i('reconnecting set false, ${StackTrace.current}');
     _reconnecting = false;
-
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      return _disconnect();
-    }
 
     i('ws connect');
     _token ??= signAuthTokenWithEdDSA(
@@ -289,7 +270,6 @@ class Blaze {
   void dispose() {
     _disposed = true;
     _disconnect();
-    connectivitySubscription?.cancel();
     connectedStateStreamController.close();
   }
 }

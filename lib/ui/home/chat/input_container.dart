@@ -372,7 +372,7 @@ class _SendTextField extends HookWidget {
                 TextEditingActionTarget? textEditingActionTarget,
                 [_]) async {
               if (!Platform.isMacOS) {
-                return textEditingActionTarget!.renderEditable
+                return textEditingActionTarget!
                     .pasteText(SelectionChangedCause.keyboard);
               }
               final uri = await Pasteboard.uri;
@@ -384,7 +384,7 @@ class _SendTextField extends HookWidget {
               } else {
                 final bytes = await Pasteboard.image;
                 if (bytes == null) {
-                  return textEditingActionTarget!.renderEditable
+                  return textEditingActionTarget!
                       .pasteText(SelectionChangedCause.keyboard);
                 }
                 final file = await saveBytesToTempFile(
