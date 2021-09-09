@@ -32,6 +32,7 @@ import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
 import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
+import '../bloc/recall_message_bloc.dart';
 import 'files_preview.dart';
 
 class InputContainer extends HookWidget {
@@ -333,6 +334,16 @@ class _SendTextField extends HookWidget {
               ]),
         ).data ??
         true;
+
+    useEffect(() {
+      final subscription = context
+          .read<RecallMessageReeditCubit>()
+          .onReeditStream
+          .listen((event) {
+        textEditingController.text = textEditingController.text + event;
+      });
+      return subscription.cancel;
+    }, [textEditingController]);
 
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
