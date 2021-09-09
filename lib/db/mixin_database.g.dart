@@ -4048,7 +4048,6 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
   @override
   List<String> get customConstraints => const [
         'PRIMARY KEY (message_id)',
-        'FOREIGN KEY (conversation_id) REFERENCES conversations(conversation_id) ON UPDATE NO ACTION ON DELETE CASCADE',
         'FOREIGN KEY (message_id) REFERENCES messages(message_id) ON UPDATE NO ACTION ON DELETE CASCADE'
       ];
   @override
@@ -12920,13 +12919,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('participants', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('conversations',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('pin_messages', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(
