@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/ui/home/bloc/recall_message_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -33,6 +32,7 @@ import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
 import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
+import '../bloc/recall_message_bloc.dart';
 import 'files_preview.dart';
 
 class InputContainer extends HookWidget {
