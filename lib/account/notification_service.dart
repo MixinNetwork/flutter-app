@@ -93,7 +93,7 @@ class NotificationService {
                     await mentionCache.checkMentionCache({event.content!}),
                   );
                 }
-                body = await messagePreviewOptimize(
+                body = messagePreviewOptimize(
                   event.status,
                   event.type,
                   body,

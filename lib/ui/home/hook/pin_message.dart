@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
 
 import '../../../account/show_pin_message_key_value.dart';
+import '../../../blaze/vo/pin_message_minimal.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/message/item/pin_message.dart';
@@ -75,8 +76,11 @@ PinMessageState usePinMessageState() {
           .asyncMap((message) async {
         if (message == null) return null;
 
+        final pinMessageMinimal =
+            PinMessageMinimal.fromJsonString(message.content ?? '');
+        if (pinMessageMinimal == null) return null;
         final preview = await generatePinPreviewText(
-          content: message.content ?? '',
+          pinMessageMinimal: pinMessageMinimal,
           mentionCache: context.read<MentionCache>(),
         );
 
