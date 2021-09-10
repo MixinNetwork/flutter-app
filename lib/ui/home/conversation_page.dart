@@ -122,34 +122,36 @@ class _SearchList extends HookWidget {
 
     final accountServer = context.accountServer;
 
-    final users = useMemoizedFuture(() async {
-          if (keyword.trim().isEmpty) return <User>[];
+    final users = useMemoizedStream(() {
+          if (keyword.trim().isEmpty) return Stream.value(<User>[]);
           return accountServer.database.userDao
               .fuzzySearchUser(
                   id: accountServer.userId,
                   username: keyword,
                   identityNumber: keyword)
-              .get();
-        }, <User>[], keys: [keyword]).data ??
+              .watch();
+        }, keys: [keyword]).data ??
         [];
 
-    final messages = useMemoizedFuture(() async {
+    final messages = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
-            return <SearchMessageDetailItem>[];
+            return Stream.value(<SearchMessageDetailItem>[]);
           } else {
             return accountServer.database.messageDao
                 .fuzzySearchMessage(query: keyword, limit: 4)
-                .get();
+                .watch();
           }
-        }, <SearchMessageDetailItem>[], keys: [keyword]).data ??
+        }, keys: [keyword]).data ??
         [];
 
-    final conversations = useMemoizedFuture(() async {
-          if (keyword.trim().isEmpty) return <SearchConversationItem>[];
+    final conversations = useMemoizedStream(() {
+          if (keyword.trim().isEmpty) {
+            return Stream.value(<SearchConversationItem>[]);
+          }
           return accountServer.database.conversationDao
               .fuzzySearchConversation(keyword)
-              .get();
-        }, <SearchConversationItem>[], keys: [keyword]).data ??
+              .watch();
+        }, keys: [keyword]).data ??
         [];
 
     final type = useState<_ShowMoreType?>(null);
