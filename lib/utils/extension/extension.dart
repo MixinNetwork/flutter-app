@@ -51,5 +51,6 @@ part 'src/stream.dart';
 part 'src/string.dart';
 part 'src/ui.dart';
 part 'src/key_event.dart';
+part 'src/regexp.dart';
 
 void importExtension() {}
