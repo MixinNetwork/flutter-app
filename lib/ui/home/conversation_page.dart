@@ -838,6 +838,8 @@ class _ConversationMenuWrapper extends StatelessWidget {
           onTap: () async {
             await context.database.conversationDao
                 .deleteConversation(conversationId);
+            await context.database.pinMessageDao
+                .deleteByConversationId(conversationId);
             if (context.read<ConversationCubit>().state?.conversationId ==
                 conversationId) {
               context.read<ConversationCubit>().unselected();

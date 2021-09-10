@@ -4046,10 +4046,7 @@ class PinMessages extends Table with TableInfo<PinMessages, PinMessage> {
 
   static TypeConverter<DateTime, int> $converter0 = const MillisDateConverter();
   @override
-  List<String> get customConstraints => const [
-        'PRIMARY KEY (message_id)',
-        'FOREIGN KEY (message_id) REFERENCES messages(message_id) ON UPDATE NO ACTION ON DELETE CASCADE'
-      ];
+  List<String> get customConstraints => const ['PRIMARY KEY (message_id)'];
   @override
   bool get dontWriteConstraints => true;
 }
@@ -12919,13 +12916,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('participants', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('messages',
-                limitUpdateKind: UpdateKind.delete),
-            result: [
-              TableUpdate('pin_messages', kind: UpdateKind.delete),
             ],
           ),
           WritePropagation(

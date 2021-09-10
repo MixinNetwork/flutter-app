@@ -200,6 +200,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
+        db.pinMessageDao.deleteByIds([messageId]),
       ]);
     });
     db.eventBus.send(DatabaseEvent.delete, messageId);

@@ -17,6 +17,11 @@ class PinMessageDao extends DatabaseAccessor<MixinDatabase>
       (delete(db.pinMessages)..where((tbl) => tbl.messageId.isIn(messageIds)))
           .go();
 
+  Future<int> deleteByConversationId(String conversationId) =>
+      (delete(db.pinMessages)
+            ..where((tbl) => tbl.conversationId.equals(conversationId)))
+          .go();
+
   Selectable<String?> getPinMessageIds(String conversationId) =>
       (selectOnly(db.pinMessages)
             ..addColumns([db.pinMessages.messageId])
