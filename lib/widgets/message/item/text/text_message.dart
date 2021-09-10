@@ -37,7 +37,7 @@ class TextMessage extends HookWidget {
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
 
     final urlHighlightTextSpans = useMemoized(
-      () => uriRegExp.allMatches(message.content!).map(
+      () => uriRegExp.allMatchesAndSort(message.content!).map(
             (e) => HighlightTextSpan(
               e[0]!,
               style: TextStyle(
@@ -50,7 +50,7 @@ class TextMessage extends HookWidget {
     );
 
     final botNumberHighlightTextSpans = useMemoized(
-      () => botNumberRegExp.allMatches(message.content!).map(
+      () => botNumberRegExp.allMatchesAndSort(message.content!).map(
             (e) => HighlightTextSpan(
               e[0]!,
               style: TextStyle(
