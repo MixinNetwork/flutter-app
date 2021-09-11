@@ -8,7 +8,6 @@ import '../../enum/message_status.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
-import '../converter/message_status_type_converter.dart';
 import '../database_event_bus.dart';
 import '../extension/message_category.dart';
 import '../mixin_database.dart';
@@ -201,6 +200,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
+        db.pinMessageDao.deleteByIds([messageId]),
       ]);
     });
     db.eventBus.send(DatabaseEvent.delete, messageId);
@@ -363,8 +363,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final messageId = await (db.selectOnly(db.messages)
           ..addColumns([db.messages.messageId])
           ..where(db.messages.conversationId.equals(conversationId) &
-              db.messages.status.equals(const MessageStatusTypeConverter()
-                  .mapToSql(MessageStatus.read)))
+              db.messages.status.equalsValue(MessageStatus.read))
           ..orderBy([
             OrderingTerm(
                 expression: db.messages.createdAt, mode: OrderingMode.desc)
@@ -393,7 +392,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     final result = await (db.update(db.messages)
           ..where((tbl) =>
               tbl.messageId.isIn(messageIds) &
-              tbl.status.equalsValue(MessageStatus.failed).not()))
+              tbl.status.equalsValue(MessageStatus.failed).not() &
+              tbl.status.equalsValue(MessageStatus.unknown).not()))
         .write(const MessagesCompanion(status: Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
     return result;

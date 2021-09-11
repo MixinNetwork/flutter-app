@@ -11,6 +11,7 @@ import 'dao/message_mention_dao.dart';
 import 'dao/offset_dao.dart';
 import 'dao/participant_dao.dart';
 import 'dao/participant_session_dao.dart';
+import 'dao/pin_message_dao.dart';
 import 'dao/resend_session_message_dao.dart';
 import 'dao/snapshot_dao.dart';
 import 'dao/sticker_album_dao.dart';
@@ -42,6 +43,7 @@ class Database {
     participantSessionDao = ParticipantSessionDao(mixinDatabase);
     userDao = UserDao(mixinDatabase);
     transcriptMessageDao = TranscriptMessageDao(mixinDatabase);
+    pinMessageDao = PinMessageDao(mixinDatabase);
   }
 
   // static MixinDatabase _database;
@@ -90,6 +92,8 @@ class Database {
   late final UserDao userDao;
 
   late final TranscriptMessageDao transcriptMessageDao;
+
+  late final PinMessageDao pinMessageDao;
 
   Future<void> dispose() async {
     await mixinDatabase.eventBus.dispose();

@@ -17,11 +17,13 @@ class ContactMessageWidget extends StatelessWidget {
     required this.message,
     required this.showNip,
     required this.isCurrentUser,
+    this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) => MessageBubble(
@@ -30,6 +32,7 @@ class ContactMessageWidget extends StatelessWidget {
         quoteMessageContent: message.quoteContent,
         showNip: showNip,
         isCurrentUser: isCurrentUser,
+        pinArrow: pinArrow,
         outerTimeAndStatusWidget: MessageDatetimeAndStatus(
           showStatus: isCurrentUser,
           message: message,

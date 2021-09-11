@@ -15,7 +15,7 @@ import '../../../widgets/app_bar.dart';
 import '../../../widgets/search_text_field.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
-import '../chat_page.dart';
+import '../chat/chat_page.dart';
 import '../conversation_page.dart';
 
 class SearchMessagePage extends HookWidget {

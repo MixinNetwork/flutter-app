@@ -6,15 +6,30 @@ import 'package:hive/hive.dart';
 import 'package:path/path.dart' as p;
 
 import '../account/account_key_value.dart';
+import '../account/show_pin_message_key_value.dart';
 import '../crypto/crypto_key_value.dart';
 import '../crypto/privacy_key_value.dart';
 import 'file.dart';
 
-abstract class HiveKeyValue {
+Future<void> initKeyValues() => Future.wait([
+      PrivacyKeyValue.instance.init(),
+      CryptoKeyValue.instance.init(),
+      AccountKeyValue.instance.init(),
+      ShowPinMessageKeyValue.instance.init(),
+    ]);
+
+Future<void> clearKeyValues() => Future.wait([
+      PrivacyKeyValue.instance.delete(),
+      CryptoKeyValue.instance.delete(),
+      AccountKeyValue.instance.delete(),
+      ShowPinMessageKeyValue.instance.delete(),
+    ]);
+
+abstract class HiveKeyValue<E> {
   HiveKeyValue(this._boxName);
 
   final String _boxName;
-  late Box box;
+  late Box<E> box;
   bool _hasInit = false;
 
   Future init() async {
@@ -27,7 +42,7 @@ abstract class HiveKeyValue {
     if (!kIsWeb) {
       Hive.init(file.absolute.path);
     }
-    box = await Hive.openBox(_boxName);
+    box = await Hive.openBox<E>(_boxName);
     _hasInit = true;
   }
 
@@ -37,17 +52,5 @@ abstract class HiveKeyValue {
     }
     await Hive.deleteBoxFromDisk(_boxName);
     _hasInit = false;
-  }
-
-  static Future<void> initKeyValues() async {
-    await PrivacyKeyValue.instance.init();
-    await CryptoKeyValue.instance.init();
-    await AccountKeyValue.instance.init();
-  }
-
-  static Future<void> clearKeyValues() async {
-    await PrivacyKeyValue.instance.delete();
-    await CryptoKeyValue.instance.delete();
-    await AccountKeyValue.instance.delete();
   }
 }

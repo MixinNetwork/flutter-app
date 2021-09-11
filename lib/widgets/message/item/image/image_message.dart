@@ -22,11 +22,13 @@ class ImageMessageWidget extends StatelessWidget {
     required this.showNip,
     required this.message,
     required this.isCurrentUser,
+    this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final MessageItem message;
   final bool isCurrentUser;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) => ImageMessageLayout(
@@ -41,6 +43,7 @@ class ImageMessageWidget extends StatelessWidget {
           showNip: showNip,
           includeNip: true,
           clip: true,
+          pinArrow: pinArrow,
           child: InteractableDecoratedBox(
             onTap: () {
               switch (message.mediaStatus) {

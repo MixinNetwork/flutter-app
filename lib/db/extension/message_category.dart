@@ -5,6 +5,8 @@ extension MessageCategoryExtension on String? {
 
   bool get isSystem => this?.startsWith('SYSTEM_') ?? false;
 
+  bool get isPin => this == MessageCategory.messagePin;
+
   bool get isEncrypted => this?.startsWith('ENCRYPTED_') ?? false;
 
   bool get isSignal => this?.startsWith('SIGNAL_') ?? false;
@@ -130,6 +132,21 @@ extension MessageCategoryExtension on String? {
         MessageCategory.encryptedLive,
         MessageCategory.encryptedPost,
         MessageCategory.encryptedLocation,
-        MessageCategory.encryptedTranscript
+        MessageCategory.encryptedTranscript,
+        MessageCategory.messagePin
       }.every((element) => element != this);
+
+  bool get canReply =>
+      isText ||
+      isImage ||
+      isVideo ||
+      isLive ||
+      isData ||
+      isPost ||
+      isLocation ||
+      isAudio ||
+      isSticker ||
+      isContact ||
+      this == MessageCategory.appCard ||
+      this == MessageCategory.appButtonGroup;
 }

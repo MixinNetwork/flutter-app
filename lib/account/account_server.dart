@@ -18,6 +18,7 @@ import '../blaze/blaze.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/blaze_param.dart';
 import '../blaze/vo/message_result.dart';
+import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
@@ -141,6 +142,7 @@ class AccountServer {
       database.jobDao,
       database.participantDao,
       attachmentUtil,
+      database.pinMessageDao,
     );
     blaze = Blaze(
       userId,
@@ -174,7 +176,7 @@ class AccountServer {
       multiAuthCubit,
     );
 
-    await HiveKeyValue.initKeyValues();
+    await initKeyValues();
   }
 
   late String userId;
@@ -227,6 +229,11 @@ class AccountServer {
     }
 
     jobSubscribers
+      ..add(database.jobDao
+          .findPinMessageJobs()
+          .where((jobs) => jobs.isNotEmpty == true)
+          .asyncMapDrop(_runPinJob)
+          .listen((_) {}))
       ..add(database.jobDao
           .findRecallMessageJobs()
           .where((jobs) => jobs.isNotEmpty == true)
@@ -355,6 +362,30 @@ class AccountServer {
     await Future.wait(map);
   }
 
+  Future<void> _runPinJob(List<db.Job> jobs) async {
+    final map = jobs.where((element) => element.blazeMessage != null).map(
+      (e) async {
+        final list = await utf8EncodeWithIsolate(e.blazeMessage!);
+        final data = await base64EncodeWithIsolate(list);
+
+        final blazeParam = BlazeMessageParam(
+          conversationId: e.conversationId,
+          messageId: const Uuid().v4(),
+          category: MessageCategory.messagePin,
+          data: data,
+        );
+        final blazeMessage = BlazeMessage(
+            id: const Uuid().v4(), action: createMessage, params: blazeParam);
+        final result = await _sender.deliver(blazeMessage);
+        if (result.success) {
+          await database.jobDao.deleteJobById(e.jobId);
+        }
+      },
+    );
+
+    await Future.wait(map);
+  }
+
   Future<void> _runSendJob(List<db.Job> jobs) async {
     final futures =
         jobs.where((element) => element.blazeMessage != null).map((job) async {
@@ -382,7 +413,8 @@ class AccountServer {
       var content = message.content;
 
       if (message.category.isPlain ||
-          message.category == MessageCategory.appCard) {
+          message.category == MessageCategory.appCard ||
+          message.category.isPin) {
         if (message.category == MessageCategory.appCard ||
             message.category.isPost ||
             message.category.isText) {
@@ -550,7 +582,7 @@ class AccountServer {
     await client.accountApi.logout(LogoutRequest(sessionId));
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
-    await HiveKeyValue.clearKeyValues();
+    await clearKeyValues();
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);
     await database.participantSessionDao.updateSentToServer();
@@ -1452,4 +1484,26 @@ class AccountServer {
 
   Future<List<db.User>?> updateUserByIdentityNumber(String identityNumber) =>
       _decryptMessage.updateUserByIdentityNumber(identityNumber);
+
+  Future<void> pinMessage({
+    required String conversationId,
+    required List<PinMessageMinimal> pinMessageMinimals,
+  }) =>
+      _sendMessageHelper.sendPinMessage(
+        conversationId: conversationId,
+        senderId: userId,
+        pinMessageMinimals: pinMessageMinimals,
+        pin: true,
+      );
+
+  Future<void> unpinMessage({
+    required String conversationId,
+    required List<PinMessageMinimal> pinMessageMinimals,
+  }) =>
+      _sendMessageHelper.sendPinMessage(
+        conversationId: conversationId,
+        senderId: userId,
+        pinMessageMinimals: pinMessageMinimals,
+        pin: false,
+      );
 }

@@ -14,10 +14,12 @@ class StickerMessageWidget extends StatelessWidget {
     Key? key,
     required this.message,
     required this.isCurrentUser,
+    this.pinArrow,
   }) : super(key: key);
 
   final MessageItem message;
   final bool isCurrentUser;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +76,7 @@ class StickerMessageWidget extends StatelessWidget {
       showBubble: false,
       padding: EdgeInsets.zero,
       clip: true,
+      pinArrow: pinArrow,
       outerTimeAndStatusWidget: MessageDatetimeAndStatus(
         showStatus: isCurrentUser,
         message: message,

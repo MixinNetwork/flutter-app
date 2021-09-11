@@ -1,6 +1,6 @@
 import '../utils/hive_key_values.dart';
 
-class PrivacyKeyValue extends HiveKeyValue {
+class PrivacyKeyValue extends HiveKeyValue<bool> {
   PrivacyKeyValue._() : super(_hivePrivacy);
 
   static PrivacyKeyValue? _instance;
@@ -11,13 +11,12 @@ class PrivacyKeyValue extends HiveKeyValue {
   static const _hasSyncSession = 'has_sync_session';
   static const _hasPushSignalKeys = 'has_push_signal_keys';
 
-  bool get hasSyncSession =>
-      box.get(_hasSyncSession, defaultValue: false) as bool;
+  bool get hasSyncSession => box.get(_hasSyncSession, defaultValue: false)!;
 
   set hasSyncSession(bool value) => box.put(_hasSyncSession, value);
 
   bool get hasPushSignalKeys =>
-      box.get(_hasPushSignalKeys, defaultValue: false) as bool;
+      box.get(_hasPushSignalKeys, defaultValue: false)!;
 
   set hasPushSignalKeys(bool value) => box.put(_hasPushSignalKeys, value);
 }

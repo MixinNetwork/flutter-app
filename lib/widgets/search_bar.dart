@@ -6,7 +6,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
 
 import '../bloc/keyword_cubit.dart';
-import '../bloc/simple_cubit.dart';
 import '../constants/resources.dart';
 import '../db/mixin_database.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
@@ -170,7 +169,7 @@ class SearchBar extends HookWidget {
                   child: ActionButton(
                     name: Resources.assetsImagesIcAddSvg,
                     onTapUp: (event) =>
-                        context.read<OffsetCubit>().emit(event.globalPosition),
+                        context.sendMenuPosition(event.globalPosition),
                     color: context.theme.icon,
                   ),
                 ),

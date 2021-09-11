@@ -22,7 +22,7 @@ import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
 import '../chat/chat_bar.dart';
-import '../chat_page.dart';
+import '../chat/chat_page.dart';
 import '../conversation_page.dart';
 
 class ChatInfoPage extends HookWidget {

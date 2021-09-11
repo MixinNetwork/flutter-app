@@ -29,6 +29,7 @@ import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/menu.dart';
+import '../../widgets/message/item/pin_message.dart';
 import '../../widgets/message/item/system_message.dart';
 import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message_status_icon.dart';
@@ -848,6 +849,8 @@ class _ConversationMenuWrapper extends StatelessWidget {
           onTap: () async {
             await context.database.conversationDao
                 .deleteConversation(conversationId);
+            await context.database.pinMessageDao
+                .deleteByConversationId(conversationId);
             if (context.read<ConversationCubit>().state?.conversationId ==
                 conversationId) {
               context.read<ConversationCubit>().unselected();
@@ -1150,6 +1153,13 @@ class _MessageContent extends HookWidget {
             senderFullName: conversation.senderFullName,
             groupName: conversation.groupName,
           );
+        } else if (conversation.contentType.isPin) {
+          final preview = await generatePinPreviewText(
+            content: conversation.content ?? '',
+            mentionCache: context.read<MentionCache>(),
+          );
+          return context.l10n
+              .pinned(conversation.senderFullName ?? '', preview);
         }
 
         final mentionCache = context.read<MentionCache>();

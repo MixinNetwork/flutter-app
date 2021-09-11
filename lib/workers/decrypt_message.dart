@@ -11,8 +11,11 @@ import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
+import '../account/show_pin_message_key_value.dart';
 import '../blaze/blaze_message.dart';
 import '../blaze/vo/blaze_message_data.dart';
+import '../blaze/vo/pin_message_minimal.dart';
+import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/plain_json_message.dart';
 import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/snapshot_message.dart';
@@ -145,6 +148,10 @@ class DecryptMessage extends Injector {
           category == MessageCategory.appCard) {
         d('DecryptMessage isApp');
         await _processApp(data);
+      } else if (category.isPin) {
+        d('DecryptMessage isMessagePin');
+        await _processPinMessage(data);
+        _remoteStatus = MessageStatus.read;
       } else if (category == MessageCategory.messageRecall) {
         d('DecryptMessage isMessageRecall');
         _remoteStatus = MessageStatus.read;
@@ -389,6 +396,46 @@ class DecryptMessage extends Injector {
       }
     });
     await database.messageDao.insert(message, accountId, data.silent);
+  }
+
+  Future<void> _processPinMessage(BlazeMessageData data) async {
+    final pinMessage = PinMessagePayload.fromJson(
+        await _jsonDecodeWithIsolate(data.data) as Map<String, dynamic>);
+
+    if (pinMessage.action == PinMessagePayloadAction.pin) {
+      await Future.forEach<String>(pinMessage.messageIds, (messageId) async {
+        final message =
+            await database.messageDao.findMessageByMessageId(messageId);
+        if (message == null) return;
+        final pinMessageMinimal = PinMessageMinimal(
+          type: message.category,
+          messageId: message.messageId,
+          content: message.category.isText ? message.content : null,
+        );
+        await database.pinMessageDao.insert(PinMessage(
+            messageId: messageId,
+            conversationId: message.conversationId,
+            createdAt: data.createdAt));
+        await database.messageDao.insert(
+          Message(
+            messageId: const Uuid().v4(),
+            conversationId: data.conversationId,
+            quoteMessageId: message.messageId,
+            userId: data.userId,
+            status: MessageStatus.read,
+            content: await jsonEncodeWithIsolate(pinMessageMinimal),
+            createdAt: DateTime.now(),
+            category: MessageCategory.messagePin,
+          ),
+          accountId,
+        );
+      });
+      unawaited(ShowPinMessageKeyValue.instance.show(data.conversationId));
+    } else if (pinMessage.action == PinMessagePayloadAction.unpin) {
+      await database.pinMessageDao.deleteByIds(pinMessage.messageIds);
+    }
+    await database.messagesHistoryDao
+        .insert(MessagesHistoryData(messageId: data.messageId));
   }
 
   Future<void> _processRecallMessage(BlazeMessageData data) async {
@@ -1145,18 +1192,7 @@ class DecryptMessage extends Injector {
         .toList();
 
     if (transcripts.isEmpty) {
-      await database.messageDao.insert(
-        Message(
-          messageId: data.messageId,
-          conversationId: data.conversationId,
-          userId: data.userId,
-          category: data.category!,
-          mediaSize: 0,
-          createdAt: data.createdAt,
-          status: MessageStatus.unknown,
-        ),
-        data.userId,
-      );
+      await _insertInvalidMessage(data);
       return null;
     }
 
