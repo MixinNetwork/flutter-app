@@ -383,9 +383,16 @@ class SendMessageHelper {
     await _jobDao.insertSendingJob(message.messageId, conversationId);
   }
 
-  Future<void> sendAudioMessage(String conversationId, String senderId,
-      XFile file, String category, String? quoteMessageId,
-      {AttachmentResult? attachmentResult}) async {
+  Future<void> sendAudioMessage(
+    String conversationId,
+    String senderId,
+    XFile file,
+    String category,
+    String? quoteMessageId, {
+    AttachmentResult? attachmentResult,
+    String? mediaDuration,
+    String? mediaWaveform,
+  }) async {
     final messageId = const Uuid().v4();
     final mimeType = file.mimeType ?? lookupMimeType(file.path) ?? 'audio/ogg';
     final attachment = _attachmentUtil.getAttachmentFile(
@@ -406,8 +413,8 @@ class SendMessageHelper {
       mediaUrl: attachment.pathBasename,
       mediaMimeType: mimeType,
       mediaSize: await attachment.length(),
-      // mediaDuration: , // todo
-      // waveForm: , // todo
+      mediaDuration: mediaDuration,
+      mediaWaveform: mediaWaveform,
       name: file.name,
       mediaStatus: MediaStatus.pending,
       status: MessageStatus.sending,
@@ -430,8 +437,8 @@ class SendMessageHelper {
       null,
       null,
       null,
-      null,
-      null,
+      int.tryParse(mediaDuration ?? ''),
+      mediaWaveform,
       null,
       attachmentResult.createdAt,
     );
@@ -633,6 +640,8 @@ class SendMessageHelper {
         category,
         null,
         attachmentResult: attachmentResult,
+        mediaDuration: message.mediaDuration,
+        mediaWaveform: message.mediaWaveform,
       );
     } else if (message.category.isData) {
       final category = encryptCategory.toCategory(MessageCategory.plainData,

@@ -1,6 +1,7 @@
 import 'package:moor/moor.dart';
 
 import '../../ui/home/bloc/multi_auth_cubit.dart';
+import '../../utils/extension/extension.dart';
 import '../../utils/reg_exp_utils.dart';
 import '../mixin_database.dart';
 
@@ -34,7 +35,7 @@ class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
 
     if (content?.isNotEmpty == true) {
       final numbers =
-          mentionNumberRegExp.allMatches(content!).map((e) => e[1]!);
+          mentionNumberRegExp.allMatchesAndSort(content!).map((e) => e[1]!);
       mentionMe = senderId != currentUserId &&
           numbers.contains(MultiAuthCubit.currentAccount?.identityNumber);
     }
