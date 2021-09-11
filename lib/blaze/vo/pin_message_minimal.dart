@@ -25,7 +25,6 @@ class PinMessageMinimal extends Equatable {
     }
   }
 
-
   @JsonKey(name: 'message_id')
   final String messageId;
   @JsonKey(name: 'category')
