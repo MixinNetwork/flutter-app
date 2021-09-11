@@ -193,5 +193,6 @@
   "pinned": "{user} pinned {preview}",
   "unpinAllMessages": "Unpin All Messages",
   "unpinAllMessagesDescription": "Are you sure you want to unpin all messages?",
-  "pinMessageCount": "{count} Pinned Messages"
+  "pinMessageCount": "{count} Pinned Messages",
+  "reedit": "Re-edit"
 }

@@ -47,7 +47,7 @@ class NotificationService {
 
             // mention current user
             if (mentionNumberRegExp
-                .allMatches(event.content ?? '')
+                .allMatchesAndSort(event.content ?? '')
                 .any((element) => element[1] == account.identityNumber)) {
               return true;
             }

@@ -18,6 +18,7 @@ import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/hook/pin_message.dart';
+import '../../ui/home/bloc/recall_message_bloc.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -236,9 +237,20 @@ class MessageItemWidget extends HookWidget {
                     ContextMenu(
                       title: context.l10n.deleteForEveryone,
                       isDestructiveAction: true,
-                      onTap: () => context.accountServer.sendRecallMessage(
-                          [message.messageId],
-                          conversationId: message.conversationId),
+                      onTap: () async {
+                        String? content;
+                        if (message.type.isText) {
+                          content = message.content;
+                        }
+                        await context.accountServer.sendRecallMessage(
+                            [message.messageId],
+                            conversationId: message.conversationId);
+                        if (content != null) {
+                          context
+                              .read<RecallMessageReeditCubit>()
+                              .onRecalled(message.messageId, content);
+                        }
+                      },
                     ),
                   if (!isTranscript)
                     ContextMenu(
