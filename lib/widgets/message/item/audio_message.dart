@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -10,6 +12,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/vlc_service.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
+import '../../waveform_widget.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -38,6 +41,11 @@ class AudioMessage extends HookWidget {
               milliseconds: int.tryParse(message.mediaDuration ?? '') ?? 0,
             ),
         [message.mediaDuration]);
+
+    final waveform = useMemoized(
+      () => base64Decode(message.mediaWaveform ?? ''),
+      [message.mediaWaveform],
+    );
 
     return MessageBubble(
       messageId: message.messageId,
@@ -118,8 +126,11 @@ class AudioMessage extends HookWidget {
                   child: TweenAnimationBuilder<double>(
                     tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
                     duration: playing ? duration : Duration.zero,
-                    builder: (context, value, _) => LinearProgressIndicator(
+                    builder: (context, value, _) => WaveformWidget(
                       value: value,
+                      width: 50,
+                      waveform: waveform,
+                      duration: duration.inSeconds,
                     ),
                   ),
                 ),
