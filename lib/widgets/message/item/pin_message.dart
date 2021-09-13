@@ -28,7 +28,7 @@ class PinMessageWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final pinMessageMinimal = useMemoized(
-            () => PinMessageMinimal.fromJsonString(message.content ?? ''));
+        () => PinMessageMinimal.fromJsonString(message.content ?? ''));
 
     if (pinMessageMinimal == null) {
       return UnknownMessage(
@@ -40,7 +40,7 @@ class PinMessageWidget extends HookWidget {
 
     return HookBuilder(builder: (context) {
       final text = useMemoizedFuture(
-            () async {
+        () async {
           final preview = await generatePinPreviewText(
             pinMessageMinimal: pinMessageMinimal,
             mentionCache: context.read<MentionCache>(),
@@ -96,17 +96,17 @@ Future<String> generatePinPreviewText({
 }) async {
   if (pinMessageMinimal.type.isText) {
     return '"${mentionCache.replaceMention(
-      pinMessageMinimal.content,
-      await mentionCache.checkMentionCache({pinMessageMinimal.content}),
-    ) ?? ''}"';
+          pinMessageMinimal.content,
+          await mentionCache.checkMentionCache({pinMessageMinimal.content}),
+        ) ?? ''}"';
   } else {
     return messagePreviewOptimize(
-      null,
-      pinMessageMinimal.type,
-      pinMessageMinimal.content,
-      false,
-      true,
-    ) ??
+          null,
+          pinMessageMinimal.type,
+          pinMessageMinimal.content,
+          false,
+          true,
+        ) ??
         '';
   }
 }
@@ -117,17 +117,17 @@ String cachePinPreviewText({
 }) {
   if (pinMessageMinimal.type.isText) {
     return '"${mentionCache.replaceMention(
-      pinMessageMinimal.content,
-      mentionCache.mentionCache(pinMessageMinimal.content),
-    ) ?? ''}"';
+          pinMessageMinimal.content,
+          mentionCache.mentionCache(pinMessageMinimal.content),
+        ) ?? ''}"';
   } else {
     return messagePreviewOptimize(
-      null,
-      pinMessageMinimal.type,
-      pinMessageMinimal.content,
-      false,
-      true,
-    ) ??
+          null,
+          pinMessageMinimal.type,
+          pinMessageMinimal.content,
+          false,
+          true,
+        ) ??
         '';
   }
 }
