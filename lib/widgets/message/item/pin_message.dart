@@ -39,10 +39,13 @@ class PinMessageWidget extends HookWidget {
     }
 
     return HookBuilder(builder: (context) {
-      final cachePreview = useMemoized(() => cachePinPreviewText(
-            pinMessageMinimal: pinMessageMinimal,
-            mentionCache: context.read<MentionCache>(),
-          ));
+      final cachePreview = useMemoized(() {
+        final preview = cachePinPreviewText(
+          pinMessageMinimal: pinMessageMinimal,
+          mentionCache: context.read<MentionCache>(),
+        );
+        return context.l10n.pinned(message.userFullName ?? '', preview);
+      });
 
       final text = useMemoizedFuture(
         () async {
