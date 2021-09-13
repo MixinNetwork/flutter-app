@@ -58,6 +58,7 @@ class AudioMessage extends HookWidget {
       child: InteractableDecoratedBox(
         onTap: () {
           switch (message.mediaStatus) {
+            case MediaStatus.read:
             case MediaStatus.done:
               if (playing) {
                 context.vlcService.stop();
@@ -130,6 +131,12 @@ class AudioMessage extends HookWidget {
                         width: 50,
                         waveform: waveform,
                         duration: duration.inSeconds,
+                        backgroundColor: message.mediaStatus == MediaStatus.read
+                            ? context.theme.waveformBackground
+                            : context.theme.accent,
+                        foregroundColor: message.mediaStatus == MediaStatus.read
+                            ? context.theme.waveformForeground
+                            : context.theme.accent,
                       ),
                     ),
                   ),

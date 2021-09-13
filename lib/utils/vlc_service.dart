@@ -72,10 +72,17 @@ class VlcService {
     _player.stop();
     _isMediaList = false;
 
-    if (message.mediaStatus != MediaStatus.done) return;
+    if (![MediaStatus.done, MediaStatus.read].contains(message.mediaStatus)) {
+      return;
+    }
     final path = _accountServer.convertMessageAbsolutePath(message);
     final file = File(path);
     if (!file.existsSync()) return;
+
+    if (message.mediaStatus == MediaStatus.done) {
+      unawaited(_accountServer.database.messageDao
+          .updateMediaStatus(MediaStatus.read, message.messageId));
+    }
 
     _currentMessage = message;
     // todo in fact, extras not implement.

@@ -4,8 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../utils/extension/extension.dart';
-
 const _maxBarCount = 60;
 const _barWidth = 2.0;
 const _barRadius = _barWidth / 2;
@@ -18,12 +16,16 @@ class WaveformWidget extends HookWidget {
     required this.value,
     required this.width,
     required this.waveform,
+    required this.backgroundColor,
+    required this.foregroundColor,
   }) : super(key: key);
 
   final int duration;
   final double value;
   final double width;
   final List<int> waveform;
+  final Color backgroundColor;
+  final Color foregroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +61,8 @@ class WaveformWidget extends HookWidget {
               painter: _WaveformPainter(
                 waveform: samples,
                 value: value,
-                backgroundColor: context.theme.waveformBackground,
-                foregroundColor: context.theme.waveformForeground,
+                backgroundColor: backgroundColor,
+                foregroundColor: foregroundColor,
               ),
             ),
           );
