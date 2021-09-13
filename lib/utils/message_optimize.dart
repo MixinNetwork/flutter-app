@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../constants/resources.dart';
 import '../db/extension/message_category.dart';
 import '../enum/message_category.dart';
@@ -6,16 +8,15 @@ import '../generated/l10n.dart';
 import '../widgets/message/item/action/action_data.dart';
 import '../widgets/message/item/action_card/action_card_data.dart';
 import 'extension/extension.dart';
-import 'load_balancer_utils.dart';
 
-Future<String?> messagePreviewOptimize(
+String? messagePreviewOptimize(
   MessageStatus? messageStatus,
   String? messageCategory,
   String? content, [
   bool isCurrentUser = false,
   bool isGroup = false,
   String? senderFullName,
-]) async {
+]) {
   String? _content;
 
   final trimContent = content?.trim();
@@ -46,7 +47,7 @@ Future<String?> messagePreviewOptimize(
   } else if (messageCategory == MessageCategory.appButtonGroup) {
     _content = '';
     if (trimContent != null) {
-      final list = await jsonDecodeWithIsolate(trimContent) as List<dynamic>;
+      final list = jsonDecode(trimContent) as List<dynamic>;
       _content = list
           .map((e) => ActionData.fromJson(e as Map<String, dynamic>))
           // ignore: avoid_dynamic_calls
@@ -56,9 +57,9 @@ Future<String?> messagePreviewOptimize(
   } else if (messageCategory == MessageCategory.appCard) {
     _content = '';
     if (trimContent != null) {
-      _content = AppCardData.fromJson(
-              await jsonDecodeWithIsolate(trimContent) as Map<String, dynamic>)
-          .title;
+      _content =
+          AppCardData.fromJson(jsonDecode(trimContent) as Map<String, dynamic>)
+              .title;
     }
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';

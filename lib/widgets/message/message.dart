@@ -142,7 +142,11 @@ class MessageItemWidget extends HookWidget {
               }
 
               if (message.type.isPin) {
-                return PinMessageWidget(message: message);
+                return PinMessageWidget(
+                  showNip: showNip,
+                  isCurrentUser: isCurrentUser,
+                  message: message,
+                );
               }
 
               if (message.type == MessageCategory.secret) {
@@ -267,7 +271,8 @@ class MessageItemWidget extends HookWidget {
                     ),
                 ],
                 builder: (BuildContext context) {
-                  if (message.type.isIllegalMessageCategory) {
+                  if (message.type.isIllegalMessageCategory ||
+                      message.status == MessageStatus.unknown) {
                     return UnknownMessage(
                       showNip: showNip,
                       isCurrentUser: isCurrentUser,

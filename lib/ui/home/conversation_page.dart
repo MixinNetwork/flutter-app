@@ -10,6 +10,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/keyword_cubit.dart';
 import '../../bloc/minute_timer_cubit.dart';
@@ -1154,8 +1155,11 @@ class _MessageContent extends HookWidget {
             groupName: conversation.groupName,
           );
         } else if (conversation.contentType.isPin) {
-          final preview = await generatePinPreviewText(
-            content: conversation.content ?? '',
+          final pinMessageMinimal =
+              PinMessageMinimal.fromJsonString(conversation.content ?? '');
+          if (pinMessageMinimal == null) return '';
+          final preview = generatePinPreviewText(
+            pinMessageMinimal: pinMessageMinimal,
             mentionCache: context.read<MentionCache>(),
           );
           return context.l10n

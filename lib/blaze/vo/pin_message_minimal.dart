@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -13,6 +15,15 @@ class PinMessageMinimal extends Equatable {
 
   factory PinMessageMinimal.fromJson(Map<String, dynamic> json) =>
       _$PinMessageMinimalFromJson(json);
+
+  static PinMessageMinimal? fromJsonString(String jsonString) {
+    try {
+      final json = jsonDecode(jsonString);
+      return _$PinMessageMinimalFromJson(json as Map<String, dynamic>);
+    } catch (_) {
+      return null;
+    }
+  }
 
   @JsonKey(name: 'message_id')
   final String messageId;
