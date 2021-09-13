@@ -10,14 +10,6 @@ extension IterableExtenstionNull<T> on Iterable<T?> {
 }
 
 extension ListExtension<T> on List<T> {
-  List<List<T>> partition(int size) {
-    final chunks = <List<T>>[];
-    for (var i = 0; i < length; i += size) {
-      chunks.add(sublist(i, i + size > length ? length : i + size));
-    }
-    return chunks;
-  }
-
   List<T> joinList(T separator) {
     final iterator = this.iterator;
     if (!iterator.moveNext()) return [];

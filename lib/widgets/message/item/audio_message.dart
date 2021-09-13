@@ -115,34 +115,34 @@ class AudioMessage extends HookWidget {
               },
             ),
             const SizedBox(width: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 78,
-                  height: 12,
-                  alignment: Alignment.center,
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
-                    duration: playing ? duration : Duration.zero,
-                    builder: (context, value, _) => WaveformWidget(
-                      value: value,
-                      width: 50,
-                      waveform: waveform,
-                      duration: duration.inSeconds,
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 12,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
+                      duration: playing ? duration : Duration.zero,
+                      builder: (context, value, _) => WaveformWidget(
+                        value: value,
+                        width: 50,
+                        waveform: waveform,
+                        duration: duration.inSeconds,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${duration.inSeconds}‘',
-                  style: TextStyle(
-                    fontSize: MessageItemWidget.tertiaryFontSize,
-                    color: context.theme.secondaryText,
+                  const SizedBox(height: 8),
+                  Text(
+                    '${duration.inSeconds}‘',
+                    style: TextStyle(
+                      fontSize: MessageItemWidget.tertiaryFontSize,
+                      color: context.theme.secondaryText,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
