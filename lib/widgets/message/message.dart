@@ -149,14 +149,6 @@ class MessageItemWidget extends HookWidget {
                 );
               }
 
-              if (message.type.isPin) {
-                return PinMessageWidget(
-                  showNip: showNip,
-                  isCurrentUser: isCurrentUser,
-                  message: message,
-                );
-              }
-
               if (message.type == MessageCategory.secret) {
                 return const SecretMessage();
               }
