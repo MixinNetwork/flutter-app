@@ -1,9 +1,10 @@
 import 'dart:math';
 
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+
+import '../utils/extension/extension.dart';
 
 const _maxBarCount = 60;
 const _barWidth = 2.0;
@@ -58,8 +59,8 @@ class WaveformWidget extends HookWidget {
               painter: _WaveformPainter(
                 waveform: samples,
                 value: value,
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.red,
+                backgroundColor: context.theme.waveformBackground,
+                foregroundColor: context.theme.waveformForeground,
               ),
             ),
           );
