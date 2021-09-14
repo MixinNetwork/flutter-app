@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+const _barMinHeight = 2.0;
 const _maxBarCount = 60;
 const _barWidth = 2.0;
 const _barRadius = _barWidth / 2;
@@ -123,7 +124,7 @@ class _WaveformPainter extends CustomPainter with EquatableMixin {
     final maxSample = samples.reduce(max);
 
     final height = size.height;
-    final minTop = height * 0.85;
+    final minTop = height - _barMinHeight;
 
     final ratio = height / maxSample;
     final path = Path();

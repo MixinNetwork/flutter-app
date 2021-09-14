@@ -31,6 +31,7 @@ class MessageBubble extends StatelessWidget {
     this.outerTimeAndStatusWidget,
     this.quoteMessageId,
     this.quoteMessageContent,
+    this.forceIsCurrentUserColor,
   }) : super(key: key);
 
   final String messageId;
@@ -44,10 +45,11 @@ class MessageBubble extends StatelessWidget {
   final Widget? outerTimeAndStatusWidget;
   final String? quoteMessageContent;
   final String? quoteMessageId;
+  final bool? forceIsCurrentUserColor;
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = context.messageBubbleColor(isCurrentUser);
+    final bubbleColor = context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
 
     var _child = child;
 
