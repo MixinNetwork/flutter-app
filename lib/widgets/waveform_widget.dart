@@ -10,7 +10,7 @@ const _barWidth = 2.0;
 const _barRadius = _barWidth / 2;
 const _barSpacing = 2.0;
 
-class WaveformWidget extends HookWidget {
+class WaveformWidget extends StatelessWidget {
   const WaveformWidget({
     Key? key,
     required this.duration,
