@@ -21,7 +21,7 @@ class VlcService {
     _player = Player(id: 64);
     initListen();
     conversationIdSubscription =
-        conversationIdStream.listen((event) => _player.stop());
+        conversationIdStream.distinct().listen((event) => _player.stop());
   }
 
   final AccountServer _accountServer;
