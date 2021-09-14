@@ -6,9 +6,11 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
+import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/bloc_converter.dart';
 import '../../bloc/keyword_cubit.dart';
 import '../../bloc/minute_timer_cubit.dart';
@@ -28,6 +30,7 @@ import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
 import '../../widgets/interacter_decorated_box.dart';
 import '../../widgets/menu.dart';
+import '../../widgets/message/item/pin_message.dart';
 import '../../widgets/message/item/system_message.dart';
 import '../../widgets/message/item/text/mention_builder.dart';
 import '../../widgets/message_status_icon.dart';
@@ -109,38 +112,48 @@ class _SearchList extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final keyword =
-        useBlocState<KeywordCubit, String>(bloc: context.read<KeywordCubit>());
+    final keyword = useMemoizedStream(
+          () => context.read<KeywordCubit>().stream.throttleTime(
+                const Duration(milliseconds: 100),
+                trailing: true,
+                leading: false,
+              ),
+          initialData: context.read<KeywordCubit>().state,
+        ).data ??
+        '';
+
     final accountServer = context.accountServer;
 
-    final users = useMemoizedFuture(
-            () => accountServer.database.userDao
-                .fuzzySearchUser(
-                    id: accountServer.userId,
-                    username: keyword,
-                    identityNumber: keyword)
-                .get(),
-            <User>[],
-            keys: [keyword]).data ??
+    final users = useMemoizedStream(() {
+          if (keyword.trim().isEmpty) return Stream.value(<User>[]);
+          return accountServer.database.userDao
+              .fuzzySearchUser(
+                  id: accountServer.userId,
+                  username: keyword,
+                  identityNumber: keyword)
+              .watch();
+        }, keys: [keyword]).data ??
         [];
 
-    final messages = useMemoizedFuture(() async {
+    final messages = useMemoizedStream(() {
           if (keyword.trim().isEmpty) {
-            return <SearchMessageDetailItem>[];
+            return Stream.value(<SearchMessageDetailItem>[]);
           } else {
             return accountServer.database.messageDao
                 .fuzzySearchMessage(query: keyword, limit: 4)
-                .get();
+                .watch();
           }
-        }, <SearchMessageDetailItem>[], keys: [keyword]).data ??
+        }, keys: [keyword]).data ??
         [];
 
-    final conversations = useMemoizedFuture(
-            () => accountServer.database.conversationDao
-                .fuzzySearchConversation(keyword)
-                .get(),
-            <SearchConversationItem>[],
-            keys: [keyword]).data ??
+    final conversations = useMemoizedStream(() {
+          if (keyword.trim().isEmpty) {
+            return Stream.value(<SearchConversationItem>[]);
+          }
+          return accountServer.database.conversationDao
+              .fuzzySearchConversation(keyword)
+              .watch();
+        }, keys: [keyword]).data ??
         [];
 
     final type = useState<_ShowMoreType?>(null);
@@ -837,6 +850,8 @@ class _ConversationMenuWrapper extends StatelessWidget {
           onTap: () async {
             await context.database.conversationDao
                 .deleteConversation(conversationId);
+            await context.database.pinMessageDao
+                .deleteByConversationId(conversationId);
             if (context.read<ConversationCubit>().state?.conversationId ==
                 conversationId) {
               context.read<ConversationCubit>().unselected();
@@ -1139,6 +1154,16 @@ class _MessageContent extends HookWidget {
             senderFullName: conversation.senderFullName,
             groupName: conversation.groupName,
           );
+        } else if (conversation.contentType.isPin) {
+          final pinMessageMinimal =
+              PinMessageMinimal.fromJsonString(conversation.content ?? '');
+          if (pinMessageMinimal == null) return '';
+          final preview = generatePinPreviewText(
+            pinMessageMinimal: pinMessageMinimal,
+            mentionCache: context.read<MentionCache>(),
+          );
+          return context.l10n
+              .pinned(conversation.senderFullName ?? '', preview);
         }
 
         final mentionCache = context.read<MentionCache>();

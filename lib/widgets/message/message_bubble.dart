@@ -31,6 +31,7 @@ class MessageBubble extends StatelessWidget {
     this.outerTimeAndStatusWidget,
     this.quoteMessageId,
     this.quoteMessageContent,
+    this.pinArrow,
     this.forceIsCurrentUserColor,
   }) : super(key: key);
 
@@ -45,6 +46,7 @@ class MessageBubble extends StatelessWidget {
   final Widget? outerTimeAndStatusWidget;
   final String? quoteMessageContent;
   final String? quoteMessageId;
+  final Widget? pinArrow;
   final bool? forceIsCurrentUserColor;
 
   @override
@@ -107,6 +109,17 @@ class MessageBubble extends StatelessWidget {
           clipper: clipper,
         ),
         child: _child,
+      );
+    }
+
+    if (pinArrow != null) {
+      _child = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isCurrentUser) pinArrow!,
+          Flexible(child: _child),
+          if (!isCurrentUser) pinArrow!,
+        ],
       );
     }
 

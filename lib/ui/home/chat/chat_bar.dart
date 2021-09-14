@@ -11,9 +11,9 @@ import '../../../widgets/buttons.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
 import '../bloc/conversation_cubit.dart';
-import '../chat_page.dart';
 import '../conversation_page.dart';
 import '../route/responsive_navigator_cubit.dart';
+import 'chat_page.dart';
 
 class ChatBar extends HookWidget {
   const ChatBar({

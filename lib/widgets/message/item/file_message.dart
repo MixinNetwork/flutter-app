@@ -21,11 +21,13 @@ class FileMessage extends StatelessWidget {
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
+    this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) => MessageBubble(
@@ -34,6 +36,7 @@ class FileMessage extends StatelessWidget {
         quoteMessageContent: message.quoteContent,
         showNip: showNip,
         isCurrentUser: isCurrentUser,
+        pinArrow: pinArrow,
         outerTimeAndStatusWidget: MessageDatetimeAndStatus(
           showStatus: isCurrentUser,
           message: message,

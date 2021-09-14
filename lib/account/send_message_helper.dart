@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -11,12 +12,15 @@ import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:uuid/uuid.dart';
 
+import '../blaze/vo/pin_message_minimal.dart';
+import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/recall_message.dart';
 import '../constants/constants.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
+import '../db/dao/pin_message_dao.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
@@ -29,6 +33,7 @@ import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
+import 'show_pin_message_key_value.dart';
 
 const _kEnableImageBlurHashThumb = true;
 
@@ -39,6 +44,7 @@ class SendMessageHelper {
     this._jobDao,
     this._participantDao,
     this._attachmentUtil,
+    this._pinMessageDao,
   );
 
   final MessageDao _messageDao;
@@ -46,6 +52,7 @@ class SendMessageHelper {
   final ParticipantDao _participantDao;
   final JobDao _jobDao;
   final AttachmentUtil _attachmentUtil;
+  final PinMessageDao _pinMessageDao;
 
   Future<void> sendTextMessage(
     String conversationId,
@@ -551,7 +558,6 @@ class SendMessageHelper {
           blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
           createdAt: DateTime.now(),
           runCount: 0));
-      await _messageDao.recallMessage(messageId);
       await _messageDao.deleteFtsByMessageId(messageId);
     });
   }
@@ -772,6 +778,60 @@ class SendMessageHelper {
       }
     }
     return null;
+  }
+
+  Future<void> sendPinMessage({
+    required String conversationId,
+    required String senderId,
+    required List<PinMessageMinimal> pinMessageMinimals,
+    required bool pin,
+  }) async {
+    final pinMessagePayload = PinMessagePayload(
+      action: pin ? PinMessagePayloadAction.pin : PinMessagePayloadAction.unpin,
+      messageIds: pinMessageMinimals.map((e) => e.messageId).toList(),
+    );
+    final encoded = await jsonEncodeWithIsolate(pinMessagePayload);
+    if (pin) {
+      await Future.forEach<PinMessageMinimal>(pinMessageMinimals,
+          (pinMessageMinimal) async {
+        await _pinMessageDao.insert(
+          PinMessage(
+            messageId: pinMessageMinimal.messageId,
+            conversationId: conversationId,
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        await _messageDao.insert(
+          Message(
+            messageId: const Uuid().v4(),
+            conversationId: conversationId,
+            userId: senderId,
+            status: MessageStatus.read,
+            content: await jsonEncodeWithIsolate(pinMessageMinimal),
+            createdAt: DateTime.now(),
+            category: MessageCategory.messagePin,
+            quoteMessageId: pinMessageMinimal.messageId,
+          ),
+          senderId,
+        );
+      });
+      unawaited(ShowPinMessageKeyValue.instance.show(conversationId));
+    } else {
+      await _pinMessageDao
+          .deleteByIds(pinMessageMinimals.map((e) => e.messageId).toList());
+    }
+    await _jobDao.insert(
+      Job(
+        conversationId: conversationId,
+        jobId: const Uuid().v4(),
+        action: pinMessage,
+        priority: 5,
+        blazeMessage: encoded,
+        createdAt: DateTime.now(),
+        runCount: 0,
+      ),
+    );
   }
 }
 

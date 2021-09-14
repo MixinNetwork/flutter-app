@@ -53,7 +53,7 @@ class MentionCache {
       noCacheContents.map(
         (e) => MapEntry(
           e,
-          mentionNumberRegExp.allMatches(e).map((e) => e[1]!),
+          mentionNumberRegExp.allMatchesAndSort(e).map((e) => e[1]!),
         ),
       ),
     );

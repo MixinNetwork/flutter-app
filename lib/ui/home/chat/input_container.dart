@@ -115,6 +115,11 @@ class _InputContainer extends HookWidget {
           (state?.isLoaded ?? false) ? state?.conversationId : null,
     );
 
+    final quoteMessageId =
+        useBlocStateConverter<QuoteMessageCubit, MessageItem?, String?>(
+      converter: (state) => state?.messageId,
+    );
+
     final textEditingController = useMemoized(
       () {
         final draft =
@@ -160,7 +165,7 @@ class _InputContainer extends HookWidget {
     // ignore: unnecessary_lambdas
     useEffect(() {
       focusNode.requestFocus();
-    }, [conversationId]);
+    }, [conversationId, quoteMessageId]);
 
     useEffect(() {
       void onListen(RawKeyEvent value) {
@@ -360,25 +365,27 @@ class _SendTextField extends HookWidget {
         shortcuts: {
           if (sendable)
             const SingleActivator(LogicalKeyboardKey.enter):
-                const SendMessageIntent(),
+                const _SendMessageIntent(),
           SingleActivator(
             LogicalKeyboardKey.enter,
             meta: kPlatformIsDarwin,
             shift: true,
             alt: !kPlatformIsDarwin,
-          ): const SendPostMessageIntent(),
+          ): const _SendPostMessageIntent(),
           SingleActivator(
             LogicalKeyboardKey.keyV,
             meta: kPlatformIsDarwin,
             control: !kPlatformIsDarwin,
-          ): const PasteIntent(),
+          ): const _PasteIntent(),
+          const SingleActivator(LogicalKeyboardKey.escape):
+              const _EscapeIntent(),
         },
         actions: {
-          SendMessageIntent: CallbackAction<Intent>(
+          _SendMessageIntent: CallbackAction<Intent>(
             onInvoke: (Intent intent) =>
                 _sendMessage(context, textEditingController),
           ),
-          PasteIntent: CallbackTextEditingAction<Intent>(
+          _PasteIntent: CallbackTextEditingAction<Intent>(
             onInvoke: (Intent intent,
                 TextEditingActionTarget? textEditingActionTarget,
                 [_]) async {
@@ -405,8 +412,11 @@ class _SendTextField extends HookWidget {
               }
             },
           ),
-          SendPostMessageIntent: CallbackAction<Intent>(
+          _SendPostMessageIntent: CallbackAction<Intent>(
             onInvoke: (_) => _sendPostMessage(context, textEditingController),
+          ),
+          _EscapeIntent: CallbackAction<Intent>(
+            onInvoke: (_) => context.read<QuoteMessageCubit>().emit(null),
           ),
         },
         child: AnimatedSize(
@@ -668,14 +678,18 @@ class HighlightTextEditingController extends TextEditingController {
   }
 }
 
-class SendMessageIntent extends Intent {
-  const SendMessageIntent();
+class _SendMessageIntent extends Intent {
+  const _SendMessageIntent();
 }
 
-class SendPostMessageIntent extends Intent {
-  const SendPostMessageIntent();
+class _SendPostMessageIntent extends Intent {
+  const _SendPostMessageIntent();
 }
 
-class PasteIntent extends Intent {
-  const PasteIntent();
+class _PasteIntent extends Intent {
+  const _PasteIntent();
+}
+
+class _EscapeIntent extends Intent {
+  const _EscapeIntent();
 }

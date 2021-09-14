@@ -28,11 +28,13 @@ class VideoMessageWidget extends StatelessWidget {
     required this.message,
     required this.isCurrentUser,
     required this.showNip,
+    this.pinArrow,
   }) : super(key: key);
 
   final MessageItem message;
   final bool isCurrentUser;
   final bool showNip;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
@@ -53,6 +55,7 @@ class VideoMessageWidget extends StatelessWidget {
             showNip: showNip,
             includeNip: true,
             clip: true,
+            pinArrow: pinArrow,
             child: InteractableDecoratedBox(
               onTap: () {
                 if (message.mediaStatus == MediaStatus.canceled) {

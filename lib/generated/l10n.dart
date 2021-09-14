@@ -1960,6 +1960,46 @@ class Localization {
     );
   }
 
+  /// `{user} pinned {preview}`
+  String pinned(Object user, Object preview) {
+    return Intl.message(
+      '$user pinned $preview',
+      name: 'pinned',
+      desc: '',
+      args: [user, preview],
+    );
+  }
+
+  /// `Unpin All Messages`
+  String get unpinAllMessages {
+    return Intl.message(
+      'Unpin All Messages',
+      name: 'unpinAllMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to unpin all messages?`
+  String get unpinAllMessagesDescription {
+    return Intl.message(
+      'Are you sure you want to unpin all messages?',
+      name: 'unpinAllMessagesDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} Pinned Messages`
+  String pinMessageCount(Object count) {
+    return Intl.message(
+      '$count Pinned Messages',
+      name: 'pinMessageCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
   /// `Re-edit`
   String get reedit {
     return Intl.message(

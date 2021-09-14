@@ -41,7 +41,7 @@ class TransferMessage extends StatelessWidget {
             children: [
               ClipOval(
                 child: CacheImage(
-                  message.assetIcon!,
+                  message.assetIcon ?? '',
                   width: 40,
                   height: 40,
                 ),

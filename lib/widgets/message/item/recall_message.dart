@@ -21,11 +21,13 @@ class RecallMessage extends HookWidget {
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
+    required this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +81,7 @@ class RecallMessage extends HookWidget {
       messageId: message.messageId,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
+      pinArrow: pinArrow,
       child: MessageLayout(
         spacing: 6,
         content: content,

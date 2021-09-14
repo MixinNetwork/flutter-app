@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../../db/mixin_database.dart' hide Offset, Message;
-import '../../../../ui/home/chat_page.dart';
+import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../utils/reg_exp_utils.dart';
@@ -22,11 +22,13 @@ class TextMessage extends HookWidget {
     required this.showNip,
     required this.isCurrentUser,
     required this.message,
+    this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +39,7 @@ class TextMessage extends HookWidget {
     final keyword = useBlocState<SearchConversationKeywordCubit, String>();
 
     final urlHighlightTextSpans = useMemoized(
-      () => uriRegExp.allMatches(message.content!).map(
+      () => uriRegExp.allMatchesAndSort(message.content!).map(
             (e) => HighlightTextSpan(
               e[0]!,
               style: TextStyle(
@@ -50,7 +52,7 @@ class TextMessage extends HookWidget {
     );
 
     final botNumberHighlightTextSpans = useMemoized(
-      () => botNumberRegExp.allMatches(message.content!).map(
+      () => botNumberRegExp.allMatchesAndSort(message.content!).map(
             (e) => HighlightTextSpan(
               e[0]!,
               style: TextStyle(
@@ -127,6 +129,7 @@ class TextMessage extends HookWidget {
       quoteMessageContent: message.quoteContent,
       showNip: showNip,
       isCurrentUser: isCurrentUser,
+      pinArrow: pinArrow,
       child: MessageLayout(
         spacing: 6,
         content: content,

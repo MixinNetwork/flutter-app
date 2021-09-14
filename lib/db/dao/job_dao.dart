@@ -73,6 +73,13 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     return query.watch();
   }
 
+  Stream<List<Job>> findPinMessageJobs() {
+    final query = select(db.jobs)
+      ..where((Jobs row) => row.action.equals(pinMessage))
+      ..limit(100);
+    return query.watch();
+  }
+
   Stream<List<Job>> findSendingJobs() {
     final query = select(db.jobs)
       ..where((Jobs row) => row.action.equals(sendingMessage))

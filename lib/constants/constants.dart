@@ -7,6 +7,7 @@ const acknowledgeMessageReceipt = 'ACKNOWLEDGE_MESSAGE_RECEIPT';
 const acknowledgeMessageReceipts = 'ACKNOWLEDGE_MESSAGE_RECEIPTS';
 const sendingMessage = 'SENDING_MESSAGE';
 const recallMessage = 'RECALL_MESSAGE';
+const pinMessage = 'PIN_MESSAGE';
 const resendMessages = 'RESEND_MESSAGES';
 const createMessage = 'CREATE_MESSAGE';
 const createCall = 'CREATE_CALL';

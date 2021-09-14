@@ -185,5 +185,9 @@
   "sendWithoutSound": "静音发送",
   "conversations": "会话",
   "chatTranscript": "聊天记录",
+  "pinned": "{user}置顶了{preview}",
+  "unpinAllMessages": "取消所有置顶",
+  "unpinAllMessagesDescription": "确认取消所有置顶吗？",
+  "pinMessageCount": "{count}条置顶消息",
   "reedit": "重新编辑"
 }

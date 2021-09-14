@@ -99,7 +99,7 @@ class _MoreExtendedText extends HookWidget {
         }
 
         final highlightTextSpans = uriRegExp
-            .allMatches(resultText)
+            .allMatchesAndSort(resultText)
             .map(
               (e) => HighlightTextSpan(
                 e[0]!,

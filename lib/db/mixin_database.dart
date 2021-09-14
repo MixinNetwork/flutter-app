@@ -37,6 +37,7 @@ import 'dao/message_mention_dao.dart';
 import 'dao/offset_dao.dart';
 import 'dao/participant_dao.dart';
 import 'dao/participant_session_dao.dart';
+import 'dao/pin_message_dao.dart';
 import 'dao/resend_session_message_dao.dart';
 import 'dao/sent_session_sender_key_dao.dart';
 import 'dao/snapshot_dao.dart';
@@ -60,7 +61,7 @@ part 'mixin_database.g.dart';
     'moor/dao/user.moor',
     'moor/dao/circle.moor',
     'moor/dao/flood.moor',
-    'moor/dao/transcript_message.moor',
+    'moor/dao/pin_message.moor',
   },
   daos: [
     AddressDao,
@@ -85,6 +86,7 @@ part 'mixin_database.g.dart';
     StickerAlbumDao,
     StickerRelationshipDao,
     UserDao,
+    PinMessageDao,
   ],
   queries: {},
 )
@@ -92,7 +94,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   final eventBus = DataBaseEventBus();
 
@@ -147,6 +149,10 @@ class MixinDatabase extends _$MixinDatabase {
           }
           if (from <= 4) {
             await m.createTable(transcriptMessages);
+          }
+          if (from <= 5) {
+            await m.createTable(pinMessages);
+            await m.createIndex(indexPinMessagesConversationId);
           }
         },
       );

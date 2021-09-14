@@ -190,5 +190,9 @@
   "sendWithoutSound": "Send Without Sound",
   "conversations": "Conversations",
   "chatTranscript": "Transcript",
+  "pinned": "{user} pinned {preview}",
+  "unpinAllMessages": "Unpin All Messages",
+  "unpinAllMessagesDescription": "Are you sure you want to unpin all messages?",
+  "pinMessageCount": "{count} Pinned Messages",
   "reedit": "Re-edit"
 }

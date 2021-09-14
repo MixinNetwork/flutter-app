@@ -11,9 +11,9 @@ import '../db/extension/message_category.dart';
 import '../enum/message_category.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
-import '../ui/home/local_notification_center.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
+import '../utils/local_notification_center.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
 import '../widgets/message/item/system_message.dart';
@@ -47,7 +47,7 @@ class NotificationService {
 
             // mention current user
             if (mentionNumberRegExp
-                .allMatches(event.content ?? '')
+                .allMatchesAndSort(event.content ?? '')
                 .any((element) => element[1] == account.identityNumber)) {
               return true;
             }
@@ -93,7 +93,7 @@ class NotificationService {
                     await mentionCache.checkMentionCache({event.content!}),
                   );
                 }
-                body = await messagePreviewOptimize(
+                body = messagePreviewOptimize(
                   event.status,
                   event.type,
                   body,
