@@ -73,7 +73,7 @@ class SendMessageHelper {
       recipientId = await _participantDao
           .userIdByIdentityNumber(conversationId, botNumber!)
           .getSingleOrNull();
-      category = recipientId != null ? MessageCategory.encryptedText : category;
+      category = recipientId != null ? MessageCategory.plainText : category;
     }
 
     final message = Message(
