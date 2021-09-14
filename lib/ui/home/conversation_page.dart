@@ -1223,6 +1223,7 @@ class _MessageContent extends HookWidget {
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,
+                height: 1,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
