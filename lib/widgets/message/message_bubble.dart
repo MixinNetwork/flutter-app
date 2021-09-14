@@ -49,7 +49,8 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
+    final bubbleColor =
+        context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
 
     var _child = child;
 
