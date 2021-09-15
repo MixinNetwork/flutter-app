@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -10,6 +12,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/vlc_service.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
+import '../../waveform_widget.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
@@ -41,6 +44,11 @@ class AudioMessage extends HookWidget {
             ),
         [message.mediaDuration]);
 
+    final waveform = useMemoized(
+      () => base64Decode(message.mediaWaveform ?? ''),
+      [message.mediaWaveform],
+    );
+
     return MessageBubble(
       messageId: message.messageId,
       showNip: showNip,
@@ -50,9 +58,11 @@ class AudioMessage extends HookWidget {
         showStatus: isCurrentUser,
         message: message,
       ),
+      forceIsCurrentUserColor: false,
       child: InteractableDecoratedBox(
         onTap: () {
           switch (message.mediaStatus) {
+            case MediaStatus.read:
             case MediaStatus.done:
               if (playing) {
                 context.vlcService.stop();
@@ -110,31 +120,40 @@ class AudioMessage extends HookWidget {
               },
             ),
             const SizedBox(width: 8),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 78,
-                  height: 12,
-                  alignment: Alignment.center,
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
-                    duration: playing ? duration : Duration.zero,
-                    builder: (context, value, _) => LinearProgressIndicator(
-                      value: value,
+            Flexible(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 12,
+                    child: TweenAnimationBuilder<double>(
+                      tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
+                      duration: playing ? duration : Duration.zero,
+                      builder: (context, value, _) => WaveformWidget(
+                        value: value,
+                        width: 50,
+                        waveform: waveform,
+                        duration: duration.inSeconds,
+                        backgroundColor: message.mediaStatus == MediaStatus.read
+                            ? context.theme.waveformBackground
+                            : context.theme.accent,
+                        foregroundColor: message.mediaStatus == MediaStatus.read
+                            ? context.theme.waveformForeground
+                            : context.theme.accent,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  '${duration.inSeconds}‘',
-                  style: TextStyle(
-                    fontSize: MessageItemWidget.tertiaryFontSize,
-                    color: context.theme.secondaryText,
+                  const SizedBox(height: 8),
+                  Text(
+                    '${duration.inSeconds}‘',
+                    style: TextStyle(
+                      fontSize: MessageItemWidget.tertiaryFontSize,
+                      color: context.theme.secondaryText,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),

@@ -32,6 +32,7 @@ class MessageBubble extends StatelessWidget {
     this.quoteMessageId,
     this.quoteMessageContent,
     this.pinArrow,
+    this.forceIsCurrentUserColor,
   }) : super(key: key);
 
   final String messageId;
@@ -46,10 +47,12 @@ class MessageBubble extends StatelessWidget {
   final String? quoteMessageContent;
   final String? quoteMessageId;
   final Widget? pinArrow;
+  final bool? forceIsCurrentUserColor;
 
   @override
   Widget build(BuildContext context) {
-    final bubbleColor = context.messageBubbleColor(isCurrentUser);
+    final bubbleColor =
+        context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
 
     var _child = child;
 

@@ -99,6 +99,8 @@ class BrightnessThemeData {
     required this.popUp,
     required this.statusBackground,
     required this.stickerPlaceholderColor,
+    required this.waveformBackground,
+    required this.waveformForeground,
   });
 
   final Color primary;
@@ -120,6 +122,8 @@ class BrightnessThemeData {
   final Color popUp;
   final Color statusBackground;
   final Color stickerPlaceholderColor;
+  final Color waveformBackground;
+  final Color waveformForeground;
 
   static BrightnessThemeData lerp(
           BrightnessThemeData begin, BrightnessThemeData end, double t) =>
@@ -147,6 +151,10 @@ class BrightnessThemeData {
             Color.lerp(begin.statusBackground, end.statusBackground, t)!,
         stickerPlaceholderColor: Color.lerp(
             begin.stickerPlaceholderColor, end.stickerPlaceholderColor, t)!,
+        waveformBackground:
+            Color.lerp(begin.waveformBackground, end.waveformBackground, t)!,
+        waveformForeground:
+            Color.lerp(begin.waveformForeground, end.waveformForeground, t)!,
       );
 
   @override
@@ -170,7 +178,10 @@ class BrightnessThemeData {
           dateTime == other.dateTime &&
           encrypt == other.encrypt &&
           popUp == other.popUp &&
-          statusBackground == other.statusBackground;
+          statusBackground == other.statusBackground &&
+          stickerPlaceholderColor == other.stickerPlaceholderColor &&
+          waveformBackground == other.waveformBackground &&
+          waveformForeground == other.waveformForeground;
 
   @override
   int get hashCode =>
@@ -190,5 +201,8 @@ class BrightnessThemeData {
       dateTime.hashCode ^
       encrypt.hashCode ^
       popUp.hashCode ^
-      statusBackground.hashCode;
+      statusBackground.hashCode ^
+      stickerPlaceholderColor.hashCode ^
+      waveformBackground.hashCode ^
+      waveformForeground.hashCode;
 }

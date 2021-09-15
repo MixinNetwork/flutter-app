@@ -22,6 +22,8 @@ const lightBrightnessThemeData = BrightnessThemeData(
   encrypt: Color.fromRGBO(255, 247, 173, 1),
   statusBackground: Color.fromRGBO(245, 247, 250, 1),
   stickerPlaceholderColor: Color.fromRGBO(236, 236, 236, 1),
+  waveformBackground: Color.fromRGBO(221, 221, 221, 1),
+  waveformForeground: Color.fromRGBO(155, 155, 155, 1),
 );
 
 const darkBrightnessThemeData = BrightnessThemeData(
@@ -44,6 +46,8 @@ const darkBrightnessThemeData = BrightnessThemeData(
   encrypt: Color.fromRGBO(255, 247, 173, 1),
   statusBackground: Color.fromRGBO(245, 247, 250, 1),
   stickerPlaceholderColor: Color.fromRGBO(40, 44, 48, 1),
+  waveformBackground: Color.fromRGBO(255, 255, 255, 0.4),
+  waveformForeground: Color.fromRGBO(255, 255, 255, 1),
 );
 
 final circleColors = [
