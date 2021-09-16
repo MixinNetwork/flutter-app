@@ -136,14 +136,7 @@ class AccountServer {
       database.transcriptMessageDao,
       identityNumber,
     );
-    _sendMessageHelper = SendMessageHelper(
-      database.messageDao,
-      database.messageMentionDao,
-      database.jobDao,
-      database.participantDao,
-      attachmentUtil,
-      database.pinMessageDao,
-    );
+    _sendMessageHelper = SendMessageHelper(database, attachmentUtil);
     blaze = Blaze(
       userId,
       sessionId,

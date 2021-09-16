@@ -11,7 +11,6 @@ import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../message.dart';
 import 'text/mention_builder.dart';
-import 'unknown_message.dart';
 
 class PinMessageWidget extends HookWidget {
   const PinMessageWidget({
@@ -30,16 +29,12 @@ class PinMessageWidget extends HookWidget {
     final pinMessageMinimal = useMemoized(
         () => PinMessageMinimal.fromJsonString(message.content ?? ''));
 
-    if (pinMessageMinimal == null) {
-      return UnknownMessage(
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        message: message,
-      );
-    }
-
     return HookBuilder(builder: (context) {
       final cachePreview = useMemoized(() {
+        if (pinMessageMinimal == null) {
+          return context.l10n
+              .pinned(message.userFullName ?? '', context.l10n.aMessage);
+        }
         final preview = cachePinPreviewText(
           pinMessageMinimal: pinMessageMinimal,
           mentionCache: context.read<MentionCache>(),
@@ -49,6 +44,8 @@ class PinMessageWidget extends HookWidget {
 
       final text = useMemoizedFuture(
         () async {
+          if (pinMessageMinimal == null) return cachePreview;
+
           final preview = await generatePinPreviewText(
             pinMessageMinimal: pinMessageMinimal,
             mentionCache: context.read<MentionCache>(),

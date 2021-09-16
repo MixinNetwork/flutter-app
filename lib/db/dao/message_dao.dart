@@ -200,6 +200,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         (delete(db.transcriptMessages)
               ..where((tbl) => tbl.transcriptId.equals(messageId)))
             .go(),
+        _recallPinMessage(messageId),
         db.pinMessageDao.deleteByIds([messageId]),
       ]);
     });
@@ -789,6 +790,28 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ).getSingleOrNull();
   }
 
+  Future<void> _recallPinMessage(String messageId) async {
+    final messageIds = (await (db.selectOnly(db.messages)
+              ..addColumns([db.messages.messageId])
+              ..where(db.messages.category.equals(MessageCategory.messagePin) &
+                  db.messages.quoteMessageId.equals(messageId)))
+            .map((row) => row.read(db.messages.messageId))
+            .get())
+        .whereNotNull();
+
+    if (messageIds.isEmpty) return;
+
+    await (db.update(db.messages)
+          ..where(
+            (tbl) => tbl.messageId.isIn(messageIds),
+          ))
+        .write(const MessagesCompanion(
+      content: Value(null),
+    ));
+
+    db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
+  }
+
   Future<void> recallMessage(String messageId) async {
     await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
@@ -818,6 +841,10 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       quoteMessageId: Value(null),
       quoteContent: Value(null),
     ));
+
+    await _recallPinMessage(messageId);
+
+    await db.pinMessageDao.deleteByIds([messageId]);
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
   }

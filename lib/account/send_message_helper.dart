@@ -21,6 +21,7 @@ import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
 import '../db/dao/pin_message_dao.dart';
+import '../db/database.dart';
 import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
@@ -39,20 +40,17 @@ const _kEnableImageBlurHashThumb = true;
 
 class SendMessageHelper {
   SendMessageHelper(
-    this._messageDao,
-    this._messageMentionDao,
-    this._jobDao,
-    this._participantDao,
+    this._database,
     this._attachmentUtil,
-    this._pinMessageDao,
   );
 
-  final MessageDao _messageDao;
-  final MessageMentionDao _messageMentionDao;
-  final ParticipantDao _participantDao;
-  final JobDao _jobDao;
+  final Database _database;
+  late final MessageDao _messageDao = _database.messageDao;
+  late final MessageMentionDao _messageMentionDao = _database.messageMentionDao;
+  late final ParticipantDao _participantDao = _database.participantDao;
+  late final JobDao _jobDao = _database.jobDao;
+  late final PinMessageDao _pinMessageDao = _database.pinMessageDao;
   final AttachmentUtil _attachmentUtil;
-  final PinMessageDao _pinMessageDao;
 
   Future<void> sendTextMessage(
     String conversationId,
@@ -542,23 +540,25 @@ class SendMessageHelper {
           await file.delete();
         }
       }
-      await _messageDao.recallMessage(messageId);
-      await _messageMentionDao.deleteMessageMentionByMessageId(messageId);
-      final quoteMessage =
-          await _messageDao.findMessageItemById(conversationId, messageId);
-      if (quoteMessage != null) {
-        await _messageDao.updateQuoteContentByQuoteId(
-            conversationId, messageId, quoteMessage.toJson());
-      }
-      await _jobDao.insert(Job(
-          conversationId: conversationId,
-          jobId: const Uuid().v4(),
-          action: recallMessage,
-          priority: 5,
-          blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
-          createdAt: DateTime.now(),
-          runCount: 0));
-      await _messageDao.deleteFtsByMessageId(messageId);
+      await _database.mixinDatabase.transaction(() async {
+        await _messageDao.recallMessage(messageId);
+        await _messageMentionDao.deleteMessageMentionByMessageId(messageId);
+        final quoteMessage =
+            await _messageDao.findMessageItemById(conversationId, messageId);
+        if (quoteMessage != null) {
+          await _messageDao.updateQuoteContentByQuoteId(
+              conversationId, messageId, quoteMessage.toJson());
+        }
+        await _jobDao.insert(Job(
+            conversationId: conversationId,
+            jobId: const Uuid().v4(),
+            action: recallMessage,
+            priority: 5,
+            blazeMessage: await jsonEncodeWithIsolate(RecallMessage(messageId)),
+            createdAt: DateTime.now(),
+            runCount: 0));
+        await _messageDao.deleteFtsByMessageId(messageId);
+      });
     });
   }
 

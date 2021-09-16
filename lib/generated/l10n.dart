@@ -2009,6 +2009,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `一条消息`
+  String get aMessage {
+    return Intl.message(
+      '一条消息',
+      name: 'aMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
