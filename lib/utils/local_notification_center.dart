@@ -143,6 +143,15 @@ Stream<Uri> notificationSelectEvent(NotificationScheme notificationScheme) =>
     _notificationManager?.notificationActionEvent(notificationScheme) ??
     const Stream.empty();
 
+int _incrementAndGetId() {
+  _id++;
+  // id should be fit within the size of a 32-bit integer in flutter_local_notifications.
+  if (_id > 0x7FFFFFFF) {
+    _id = 0;
+  }
+  return _id;
+}
+
 Future<void> showNotification({
   required String title,
   String? body,
@@ -152,7 +161,7 @@ Future<void> showNotification({
   await _notificationManager!.showNotification(
     title: title,
     uri: uri,
-    id: _id,
+    id: _incrementAndGetId(),
     body: body,
   );
 }
