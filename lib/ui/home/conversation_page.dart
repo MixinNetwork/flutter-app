@@ -1157,7 +1157,10 @@ class _MessageContent extends HookWidget {
         } else if (conversation.contentType.isPin) {
           final pinMessageMinimal =
               PinMessageMinimal.fromJsonString(conversation.content ?? '');
-          if (pinMessageMinimal == null) return '';
+          if (pinMessageMinimal == null) {
+            return context.l10n.pinned(
+                conversation.senderFullName ?? '', context.l10n.aMessage);
+          }
           final preview = generatePinPreviewText(
             pinMessageMinimal: pinMessageMinimal,
             mentionCache: context.read<MentionCache>(),
