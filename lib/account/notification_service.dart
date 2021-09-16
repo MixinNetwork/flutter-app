@@ -43,7 +43,7 @@ class NotificationService {
 
             if (!event.type.isText) return false;
 
-            final account = context.multiAuthState.current!.account;
+            final account = context.multiAuthState.currentUser!;
 
             // mention current user
             if (mentionNumberRegExp

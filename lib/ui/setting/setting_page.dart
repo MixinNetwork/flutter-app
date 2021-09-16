@@ -186,7 +186,7 @@ class _UserProfile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Builder(builder: (context) {
-            final account = context.multiAuthState.current!.account;
+            final account = context.multiAuthState.currentUser!;
             return AvatarWidget(
               userId: account.userId,
               name: account.fullName!,

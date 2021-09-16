@@ -61,18 +61,13 @@ class InputContainer extends HookWidget {
                     .watchSingleOrNull(),
                 database.participantDao
                     .participantById(
-                      conversationId,
-                      context.multiAuthState.current!.account.userId,
-                    )
+                        conversationId, context.multiAuthState.currentUserId!)
                     .watchSingleOrNull(),
               ], (list) {
                 if (list[0] == null) return true;
                 return list[1] != null;
               }).debounceTime(const Duration(milliseconds: 500));
-            }, [
-              conversationId,
-              context.multiAuthState.current?.account.userId,
-            ]),
+            }, [conversationId, context.multiAuthState.currentUserId]),
             initialData: true)
         .data!;
 
