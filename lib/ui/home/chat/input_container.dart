@@ -60,7 +60,7 @@ class InputContainer extends HookWidget {
                     .conversationItem(conversationId!)
                     .watchSingleOrNull(),
                 database.participantDao
-                    .findParticipantById(
+                    .participantById(
                       conversationId,
                       context.multiAuthState.current!.account.userId,
                     )

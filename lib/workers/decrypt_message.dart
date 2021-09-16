@@ -292,7 +292,7 @@ class DecryptMessage extends Injector {
       return;
     }
     final p = await database.participantDao
-        .findParticipantById(data.conversationId, data.userId)
+        .participantById(data.conversationId, data.userId)
         .getSingleOrNull();
     if (p == null) {
       return;

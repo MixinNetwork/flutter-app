@@ -30,6 +30,12 @@ class MultiAuthState extends Equatable {
 
   bool get currentFileAutoDownload => current?.fileAutoDownload ?? true;
 
+  AuthState? get currentAuthState => current;
+
+  Account? get currentUser => currentAuthState?.account;
+
+  String? get currentUserId => currentUser?.userId;
+
   @override
   List<Object> get props => [
         _auths,

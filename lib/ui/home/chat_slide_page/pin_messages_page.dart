@@ -17,7 +17,6 @@ import '../../../widgets/dialog.dart';
 import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
-import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
 import '../chat/chat_page.dart';
 
@@ -84,21 +83,7 @@ class PinMessagesPage extends HookWidget {
                     message: messageItem,
                     next: list.getOrNull(index + 1),
                     blink: false,
-                    pinArrowWidth: 32,
-                    pinArrow: ActionButton(
-                      size: 16,
-                      name: Resources.assetsImagesPinArrowSvg,
-                      onTap: () {
-                        context
-                            .read<BlinkCubit>()
-                            .blinkByMessageId(messageItem.messageId);
-                        ConversationCubit.selectConversation(
-                          context,
-                          conversationId,
-                          initIndexMessageId: messageItem.messageId,
-                        );
-                      },
-                    ),
+                    pinned: true,
                   );
                 },
                 itemCount: list.length,
