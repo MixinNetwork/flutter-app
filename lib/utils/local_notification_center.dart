@@ -101,12 +101,10 @@ class _LinuxNotificationManager extends _NotificationManager {
     final notification = await _client.notify(title,
         body: body ?? '',
         replacesId: id,
-        expireTimeoutMs: 0,
+        expireTimeoutMs: 5000,
         appName: 'Mixin',
         hints: [
-          NotificationHint.category(NotificationCategory.im()),
-          NotificationHint.resident(),
-          NotificationHint.transient(),
+          NotificationHint.category(NotificationCategory.imReceived()),
         ],
         actions: const [
           NotificationAction(kDefaultAction, ''),
