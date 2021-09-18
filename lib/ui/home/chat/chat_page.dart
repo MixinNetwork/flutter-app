@@ -18,6 +18,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/vlc_service.dart';
 import '../../../widgets/action_button.dart';
+import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/dash_path_border.dart';
 import '../../../widgets/interacter_decorated_box.dart';
@@ -667,50 +668,47 @@ class _PinMessagesBanner extends HookWidget {
       right: 16,
       left: 10,
       height: 64,
-      child: IgnorePointer(
-        ignoring: !showLastPinMessage || currentPinMessageIds.isEmpty,
-        child: AnimatedOpacity(
-          opacity:
-              showLastPinMessage || currentPinMessageIds.isNotEmpty ? 1 : 0,
-          duration: const Duration(milliseconds: 100),
-          child: Row(
-            children: [
-              Expanded(
-                child: AnimatedOpacity(
-                  opacity: showLastPinMessage ? 1 : 0,
-                  duration: const Duration(milliseconds: 100),
-                  child: PinMessageBubble(
-                    child: Row(
-                      children: [
-                        ActionButton(
-                          name: Resources.assetsImagesIcCloseSvg,
-                          color: context.theme.icon,
-                          size: 20,
-                          onTap: () {
-                            final conversationId = context
-                                .read<ConversationCubit>()
-                                .state
-                                ?.conversationId;
-                            if (conversationId == null) return;
-                            ShowPinMessageKeyValue.instance
-                                .dismiss(conversationId);
-                          },
+      child: AnimatedVisibility(
+        visible: showLastPinMessage || currentPinMessageIds.isNotEmpty,
+        child: Row(
+          children: [
+            Expanded(
+              child: AnimatedVisibility(
+                visible: showLastPinMessage,
+                child: PinMessageBubble(
+                  child: Row(
+                    children: [
+                      ActionButton(
+                        name: Resources.assetsImagesIcCloseSvg,
+                        color: context.theme.icon,
+                        size: 20,
+                        onTap: () {
+                          final conversationId = context
+                              .read<ConversationCubit>()
+                              .state
+                              ?.conversationId;
+                          if (conversationId == null) return;
+                          ShowPinMessageKeyValue.instance
+                              .dismiss(conversationId);
+                        },
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          (lastMessage ?? '').overflow,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            (lastMessage ?? '').overflow,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              InteractableDecoratedBox(
+            ),
+            const SizedBox(width: 8),
+            AnimatedVisibility(
+              visible: currentPinMessageIds.isNotEmpty,
+              child: InteractableDecoratedBox(
                 onTap: () {
                   final cubit = context.read<ChatSideCubit>();
                   if (cubit.state.pages.lastOrNull?.name ==
@@ -743,8 +741,8 @@ class _PinMessagesBanner extends HookWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
