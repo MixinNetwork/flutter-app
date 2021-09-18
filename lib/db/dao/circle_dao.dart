@@ -9,10 +9,10 @@ class CircleDao extends DatabaseAccessor<MixinDatabase> with _$CircleDaoMixin {
   CircleDao(MixinDatabase db) : super(db);
 
   Future<void> insertUpdate(Circle circle) async {
+    final c = await (select(db.circles)
+      ..where((tbl) => tbl.circleId.equals(circle.circleId)))
+        .getSingleOrNull();
     await transaction(() async {
-      final c = await (select(db.circles)
-            ..where((tbl) => tbl.circleId.equals(circle.circleId)))
-          .getSingleOrNull();
       if (null == c) {
         return into(db.circles).insert(circle);
       } else {

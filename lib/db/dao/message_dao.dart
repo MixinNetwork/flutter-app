@@ -433,23 +433,24 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   }
 
   Future<List<String>> getUnreadMessageIds(
-          String conversationId, String userId) =>
-      db.transaction(() async {
-        final list = await (db.selectOnly(db.messages)
-              ..addColumns([db.messages.messageId])
-              ..where(db.messages.conversationId.equals(conversationId) &
-                  db.messages.userId.equals(userId).not() &
-                  db.messages.status.isIn(['SENT', 'DELIVERED'])))
-            .map((row) => row.read(db.messages.messageId))
-            .get();
-        final ids =
-            list.where((element) => element != null).cast<String>().toList();
-        if (ids.isNotEmpty) {
-          await markMessageRead(userId, ids);
-        }
-        await takeUnseen(userId, conversationId);
-        return ids;
-      });
+      String conversationId, String userId) async {
+    final list = await (db.selectOnly(db.messages)
+          ..addColumns([db.messages.messageId])
+          ..where(db.messages.conversationId.equals(conversationId) &
+              db.messages.userId.equals(userId).not() &
+              db.messages.status.isIn(['SENT', 'DELIVERED'])))
+        .map((row) => row.read(db.messages.messageId))
+        .get();
+    final ids =
+        list.where((element) => element != null).cast<String>().toList();
+    return db.transaction(() async {
+      if (ids.isNotEmpty) {
+        await markMessageRead(userId, ids);
+      }
+      await takeUnseen(userId, conversationId);
+      return ids;
+    });
+  }
 
   Future<QuoteMessageItem?> findMessageItemById(
           String conversationId, String messageId) =>
