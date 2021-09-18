@@ -23,8 +23,7 @@ Future<T?> _showDialog<T>({
               Animation<double> secondaryAnimation) =>
           InheritedTheme.capture(
                   from: context,
-                  to: Navigator.of(context, rootNavigator: useRootNavigator)
-                      .context)
+                  to: buildContext)
               .wrap(
         Builder(
           builder: (context) =>

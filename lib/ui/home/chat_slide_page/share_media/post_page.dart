@@ -5,7 +5,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown/markdown.dart' hide Text;
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
@@ -15,7 +14,6 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
-import '../../../../widgets/full_screen_portal.dart';
 import '../../../../widgets/interacter_decorated_box.dart';
 import '../../../../widgets/message/item/post_message.dart';
 
@@ -168,39 +166,34 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-        child: FullScreenPortal(
-          portalBuilder: (BuildContext context) =>
-              PostPreview(message: message),
-          builder: (BuildContext context) => InteractableDecoratedBox(
-            onTap: () => context.read<FullScreenVisibleCubit>().emit(true),
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: context.theme.sidebarSelected,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Stack(
-                children: [
-                  MarkdownBody(
-                    data: message.content!
-                        .postOptimize(10)
-                        .postLengthOptimize(256),
-                    extensionSet: ExtensionSet.gitHubWeb,
-                    styleSheet: context.markdownStyleSheet,
-                    softLineBreak: true,
-                    imageBuilder: (_, __, ___) => const SizedBox(),
+        child: InteractableDecoratedBox(
+          onTap: () => PostPreview.push(context, message: message),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: context.theme.sidebarSelected,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Stack(
+              children: [
+                MarkdownBody(
+                  data:
+                      message.content!.postOptimize(10).postLengthOptimize(256),
+                  extensionSet: ExtensionSet.gitHubWeb,
+                  styleSheet: context.markdownStyleSheet,
+                  softLineBreak: true,
+                  imageBuilder: (_, __, ___) => const SizedBox(),
+                ),
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesPostDetailSvg,
+                    width: 20,
+                    height: 20,
                   ),
-                  Positioned(
-                    right: 0,
-                    top: 0,
-                    child: SvgPicture.asset(
-                      Resources.assetsImagesPostDetailSvg,
-                      width: 20,
-                      height: 20,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

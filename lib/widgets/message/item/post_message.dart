@@ -51,8 +51,7 @@ class PostMessage extends StatelessWidget {
                       minWidth: 128,
                     ),
                     child: MarkdownBody(
-                      data: message.thumbImage?.postLengthOptimize() ??
-                          message.content!.postOptimize(),
+                      data: message.content?.postOptimize() ?? '',
                       extensionSet: ExtensionSet.gitHubWeb,
                       styleSheet: context.markdownStyleSheet,
                       softLineBreak: true,
@@ -117,10 +116,15 @@ class PostPreview extends StatelessWidget {
         barrierDismissible: true,
         barrierLabel:
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        pageBuilder: (BuildContext context, Animation<double> animation,
+        pageBuilder: (BuildContext buildContext, Animation<double> animation,
                 Animation<double> secondaryAnimation) =>
-            PostPreview(
-          message: message,
+            InheritedTheme.capture(
+                    from: context,
+                    to: Navigator.of(context, rootNavigator: true).context)
+                .wrap(
+          PostPreview(
+            message: message,
+          ),
         ),
       );
 
@@ -143,7 +147,7 @@ class PostPreview extends StatelessWidget {
             ),
             Expanded(
               child: Markdown(
-                data: message.thumbImage ?? message.content!,
+                data: message.content ?? '',
                 extensionSet: ExtensionSet.gitHubWeb,
                 styleSheet: context.markdownStyleSheet,
                 selectable: true,
