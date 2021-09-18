@@ -708,9 +708,15 @@ class _PinMessagesBanner extends HookWidget {
             ),
             const SizedBox(width: 8),
             InteractableDecoratedBox(
-              onTap: () => context.read<ChatSideCubit>()
-                ..popWhere((page) => page.name == ChatSideCubit.pinMessages)
-                ..pushPage(ChatSideCubit.pinMessages),
+              onTap: () {
+                final cubit = context.read<ChatSideCubit>();
+                if (cubit.state.pages.lastOrNull?.name ==
+                    ChatSideCubit.pinMessages) {
+                  return cubit.pop();
+                }
+
+                cubit.replace(ChatSideCubit.pinMessages);
+              },
               child: SizedBox(
                 height: 52,
                 width: 40,

@@ -61,6 +61,15 @@ abstract class AbstractResponsiveNavigatorCubit
         pages: state.pages.toList()..removeWhere(test),
       ));
 
+  void pop() => emit(state.copyWith(
+      pages: state.pages.sublist(0, max(state.pages.length - 1, 0)).toList()));
+
+  Future<void> replace(String name, {Object? arguments}) async {
+    popWhere((page) => page.name == name);
+    await Future.delayed(Duration.zero);
+    pushPage(name, arguments: arguments);
+  }
+
   void clear() => emit(state.copyWith(pages: []));
 }
 
