@@ -1209,6 +1209,7 @@ class _MessageContent extends HookWidget {
 
     final dynamicColor = context.theme.secondaryText;
 
+    final textOverflow = useMemoized(() => text?.overflow, [text]);
     return Row(
       children: [
         if (icon != null)
@@ -1216,10 +1217,10 @@ class _MessageContent extends HookWidget {
             icon,
             color: dynamicColor,
           ),
-        if (text != null)
+        if (textOverflow != null)
           Expanded(
             child: Text(
-              text.overflow,
+              textOverflow,
               style: TextStyle(
                 color: dynamicColor,
                 fontSize: 14,

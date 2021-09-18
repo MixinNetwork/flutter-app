@@ -31,12 +31,12 @@ class MentionCache {
   }
 
   Future<Map<String, MentionUser>> checkMentionCache(
-      Set<String?> _contents) async {
+      Iterable<String?> _contents) async {
     final map = <String, MentionUser>{};
     final noCacheContents = <String>{};
 
     final contents =
-        _contents.where((element) => element != null).cast<String>().toSet();
+        _contents.where((element) => element != null).cast<String>().toList();
 
     for (final element in contents) {
       final cache = _contentMentionLruCache.get(element.hashCode);

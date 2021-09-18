@@ -184,20 +184,36 @@ class MixinDatabase extends _$MixinDatabase {
           .isNotEmpty;
 }
 
-LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
-      final vmDatabase = VmDatabase(dbFile);
-      if (!kDebugMode) {
-        return vmDatabase;
-      }
-      return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
-    });
+LazyDatabase _openConnection(File dbFile) =>
+    LazyDatabase(() => _createExecutor(dbFile));
 
-Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
+QueryExecutor _createExecutor(File dbFile) {
+  final vmDatabase = VmDatabase(dbFile);
+  if (kReleaseMode) {
+    return vmDatabase;
+  }
+  return CustomVmDatabaseWrapper(vmDatabase, logStatements: true);
+}
+
+Future<DatabaseConnection> _createBackgroundDatabaseConnection(
+    File dbFile) async {
+  final isolate = await _createMoorIsolate(dbFile);
+  return isolate.connect();
+}
+
+MixinDatabase createMoorIsolate(String identityNumber) {
   final dbFolder = mixinDocumentsDirectory;
   final dbFile = File(p.join(dbFolder.path, identityNumber, 'mixin.db'));
-  final moorIsolate = await _createMoorIsolate(dbFile);
-  final databaseConnection = await moorIsolate.connect();
-  return MixinDatabase.connect(databaseConnection);
+
+  return MixinDatabase.connect(DatabaseConnection.delayed(() async {
+    final background = await _createBackgroundDatabaseConnection(dbFile);
+    final foregroundExecutor = _createExecutor(dbFile);
+
+    return background.withExecutor(MultiExecutor(
+      read: foregroundExecutor,
+      write: background.executor,
+    ));
+  }()));
 }
 
 Future<MoorIsolate> _createMoorIsolate(File dbFile) async {

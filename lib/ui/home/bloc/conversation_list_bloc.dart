@@ -182,9 +182,7 @@ class _ConversationListBloc extends PagingBloc<ConversationItem> {
   @override
   Future<List<ConversationItem>> queryRange(int limit, int offset) async {
     final list = await _queryRange(limit, offset);
-    await mentionCache.checkMentionCache(
-      list.map((e) => e.content).toSet(),
-    );
+    await mentionCache.checkMentionCache(list.map((e) => e.content));
 
     return list;
   }

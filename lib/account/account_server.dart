@@ -128,7 +128,7 @@ class AccountServer {
 
   Future<void> _initDatabase(
       String privateKey, MultiAuthCubit multiAuthCubit) async {
-    final databaseConnection = await db.createMoorIsolate(identityNumber);
+    final databaseConnection = db.createMoorIsolate(identityNumber);
     database = Database(databaseConnection);
     attachmentUtil = AttachmentUtil.init(
       client,

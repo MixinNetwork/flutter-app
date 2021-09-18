@@ -23,7 +23,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final result = await Future.wait<dynamic>([
-    LoadBalancer.create(Platform.numberOfProcessors, IsolateRunner.spawn),
+    LoadBalancer.create(Platform.numberOfProcessors * 8, IsolateRunner.spawn),
     initMixinDocumentsDirectory(),
   ]);
   loadBalancer = result[0] as LoadBalancer?;

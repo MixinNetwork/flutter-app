@@ -150,7 +150,7 @@ class AvatarPuzzlesWidget extends StatelessWidget {
       );
 }
 
-class AvatarWidget extends StatelessWidget {
+class AvatarWidget extends HookWidget {
   const AvatarWidget({
     Key? key,
     required this.size,
@@ -168,11 +168,13 @@ class AvatarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final avatarColorById =
+        useMemoized(() => getAvatarColorById(userId), [userId]);
     final placeholder = SizedBox.fromSize(
       size: Size.square(size),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: getAvatarColorById(userId),
+          color: avatarColorById,
         ),
         child: Center(
           child: Text(
