@@ -196,7 +196,7 @@ packages:
       name: characters
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.1.0"
+    version: "1.2.0"
   charcode:
     dependency: transitive
     description:
@@ -557,12 +557,10 @@ packages:
   flutter_markdown:
     dependency: "direct main"
     description:
-      path: "packages/flutter_markdown"
-      ref: "14e22e84025c5dc7dbffc5245f3bdc7d72ce82e7"
-      resolved-ref: "14e22e84025c5dc7dbffc5245f3bdc7d72ce82e7"
-      url: "https://github.com/YeungKC/packages.git"
-    source: git
-    version: "0.6.4"
+      name: flutter_markdown
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.6.6"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

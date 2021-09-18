@@ -21,11 +21,7 @@ Future<T?> _showDialog<T>({
       context: context,
       pageBuilder: (BuildContext buildContext, Animation<double> animation,
               Animation<double> secondaryAnimation) =>
-          InheritedTheme.capture(
-                  from: context,
-                  to: Navigator.of(context, rootNavigator: useRootNavigator)
-                      .context)
-              .wrap(
+          InheritedTheme.capture(from: context, to: buildContext).wrap(
         Builder(
           builder: (context) =>
               pageBuilder(context, animation, secondaryAnimation),
