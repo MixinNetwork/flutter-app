@@ -667,115 +667,84 @@ class _PinMessagesBanner extends HookWidget {
       right: 16,
       left: 10,
       height: 64,
-      child: AnimatedOpacity(
-        opacity: showLastPinMessage || currentPinMessageIds.isNotEmpty ? 1 : 0,
-        duration: const Duration(milliseconds: 100),
-        child: Row(
-          children: [
-            Expanded(
-              child: AnimatedOpacity(
-                opacity: showLastPinMessage ? 1 : 0,
-                duration: const Duration(milliseconds: 100),
-                child: PinMessageBubble(
-                  child: Row(
-                    children: [
-                      ActionButton(
-                        name: Resources.assetsImagesIcCloseSvg,
-                        color: context.theme.icon,
-                        size: 20,
-                        onTap: () {
-                          final conversationId = context
-                              .read<ConversationCubit>()
-                              .state
-                              ?.conversationId;
-                          if (conversationId == null) return;
-                          ShowPinMessageKeyValue.instance
-                              .dismiss(conversationId);
-                        },
-                      ),
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(
-                          (lastMessage ?? '').overflow,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+      child: IgnorePointer(
+        ignoring: !showLastPinMessage || currentPinMessageIds.isEmpty,
+        child: AnimatedOpacity(
+          opacity:
+              showLastPinMessage || currentPinMessageIds.isNotEmpty ? 1 : 0,
+          duration: const Duration(milliseconds: 100),
+          child: Row(
+            children: [
+              Expanded(
+                child: AnimatedOpacity(
+                  opacity: showLastPinMessage ? 1 : 0,
+                  duration: const Duration(milliseconds: 100),
+                  child: PinMessageBubble(
+                    child: Row(
+                      children: [
+                        ActionButton(
+                          name: Resources.assetsImagesIcCloseSvg,
+                          color: context.theme.icon,
+                          size: 20,
+                          onTap: () {
+                            final conversationId = context
+                                .read<ConversationCubit>()
+                                .state
+                                ?.conversationId;
+                            if (conversationId == null) return;
+                            ShowPinMessageKeyValue.instance
+                                .dismiss(conversationId);
+                          },
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            (lastMessage ?? '').overflow,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            InteractableDecoratedBox(
-              onTap: () {
-                final cubit = context.read<ChatSideCubit>();
-                if (cubit.state.pages.lastOrNull?.name ==
-                    ChatSideCubit.pinMessages) {
-                  return cubit.pop();
-                }
+              const SizedBox(width: 8),
+              InteractableDecoratedBox(
+                onTap: () {
+                  final cubit = context.read<ChatSideCubit>();
+                  if (cubit.state.pages.lastOrNull?.name ==
+                      ChatSideCubit.pinMessages) {
+                    return cubit.pop();
+                  }
 
-                cubit.replace(ChatSideCubit.pinMessages);
-              },
-              child: SizedBox(
-                height: 52,
-                width: 40,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      top: 12,
-                      child: Container(
-                        height: 34,
-                        width: 34,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: context.messageBubbleColor(false),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Color.fromRGBO(0, 0, 0, 0.15),
-                              offset: Offset(0, 2),
-                              blurRadius: 10,
-                            ),
-                          ],
-                        ),
-                        alignment: Alignment.center,
-                        child: SvgPicture.asset(
-                          Resources.assetsImagesChatPinSvg,
-                          width: 25,
-                          height: 25,
-                          color: context.theme.waveformForeground,
-                        ),
+                  cubit.replace(ChatSideCubit.pinMessages);
+                },
+                child: Container(
+                  height: 34,
+                  width: 34,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: context.messageBubbleColor(false),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Color.fromRGBO(0, 0, 0, 0.15),
+                        offset: Offset(0, 2),
+                        blurRadius: 10,
                       ),
-                    ),
-                    Container(
-                      width: 40,
-                      height: 18,
-                      alignment: Alignment.topCenter,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: context.theme.secondaryText,
-                          shape: BoxShape.circle,
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 5,
-                          vertical: 1,
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          '${currentPinMessageIds.length}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            height: 1,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: SvgPicture.asset(
+                    Resources.assetsImagesChatPinSvg,
+                    width: 34,
+                    height: 34,
+                    color: context.theme.text,
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
