@@ -737,7 +737,7 @@ class _PinMessagesBanner extends HookWidget {
                           Resources.assetsImagesChatPinSvg,
                           width: 25,
                           height: 25,
-                          color: context.theme.text,
+                          color: context.theme.waveformForeground,
                         ),
                       ),
                     ),
@@ -747,7 +747,7 @@ class _PinMessagesBanner extends HookWidget {
                       alignment: Alignment.topCenter,
                       child: Container(
                         decoration: BoxDecoration(
-                          color: context.theme.accent,
+                          color: context.theme.secondaryText,
                           shape: BoxShape.circle,
                         ),
                         padding: const EdgeInsets.symmetric(
