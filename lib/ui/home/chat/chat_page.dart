@@ -4,6 +4,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/widgets/animated_visibility.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -667,50 +668,47 @@ class _PinMessagesBanner extends HookWidget {
       right: 16,
       left: 10,
       height: 64,
-      child: IgnorePointer(
-        ignoring: !showLastPinMessage || currentPinMessageIds.isEmpty,
-        child: AnimatedOpacity(
-          opacity:
-              showLastPinMessage || currentPinMessageIds.isNotEmpty ? 1 : 0,
-          duration: const Duration(milliseconds: 100),
-          child: Row(
-            children: [
-              Expanded(
-                child: AnimatedOpacity(
-                  opacity: showLastPinMessage ? 1 : 0,
-                  duration: const Duration(milliseconds: 100),
-                  child: PinMessageBubble(
-                    child: Row(
-                      children: [
-                        ActionButton(
-                          name: Resources.assetsImagesIcCloseSvg,
-                          color: context.theme.icon,
-                          size: 20,
-                          onTap: () {
-                            final conversationId = context
-                                .read<ConversationCubit>()
-                                .state
-                                ?.conversationId;
-                            if (conversationId == null) return;
-                            ShowPinMessageKeyValue.instance
-                                .dismiss(conversationId);
-                          },
+      child: AnimatedVisibility(
+        visible: showLastPinMessage || currentPinMessageIds.isNotEmpty,
+        child: Row(
+          children: [
+            Expanded(
+              child: AnimatedVisibility(
+                visible: showLastPinMessage,
+                child: PinMessageBubble(
+                  child: Row(
+                    children: [
+                      ActionButton(
+                        name: Resources.assetsImagesIcCloseSvg,
+                        color: context.theme.icon,
+                        size: 20,
+                        onTap: () {
+                          final conversationId = context
+                              .read<ConversationCubit>()
+                              .state
+                              ?.conversationId;
+                          if (conversationId == null) return;
+                          ShowPinMessageKeyValue.instance
+                              .dismiss(conversationId);
+                        },
+                      ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          (lastMessage ?? '').overflow,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            (lastMessage ?? '').overflow,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              const SizedBox(width: 8),
-              InteractableDecoratedBox(
+            ),
+            const SizedBox(width: 8),
+            AnimatedVisibility(
+              visible: currentPinMessageIds.isNotEmpty,
+              child: InteractableDecoratedBox(
                 onTap: () {
                   final cubit = context.read<ChatSideCubit>();
                   if (cubit.state.pages.lastOrNull?.name ==
@@ -743,8 +741,8 @@ class _PinMessagesBanner extends HookWidget {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
