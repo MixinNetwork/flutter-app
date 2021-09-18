@@ -11,7 +11,6 @@ import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
 import '../message.dart';
 import 'text/mention_builder.dart';
-import 'unknown_message.dart';
 
 class PinMessageWidget extends HookWidget {
   const PinMessageWidget({
@@ -28,73 +27,71 @@ class PinMessageWidget extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final pinMessageMinimal = useMemoized(
-        () => PinMessageMinimal.fromJsonString(message.content ?? ''));
+      () => PinMessageMinimal.fromJsonString(message.content ?? ''),
+      [message.content],
+    );
 
-    if (pinMessageMinimal == null) {
-      return UnknownMessage(
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        message: message,
+    final cachePreview = useMemoized(() {
+      if (pinMessageMinimal == null) {
+        return context.l10n
+            .pinned(message.userFullName ?? '', context.l10n.aMessage);
+      }
+      final preview = cachePinPreviewText(
+        pinMessageMinimal: pinMessageMinimal,
+        mentionCache: context.read<MentionCache>(),
       );
-    }
+      return context.l10n.pinned(message.userFullName ?? '', preview);
+    }, [message.userFullName, message.content]);
 
-    return HookBuilder(builder: (context) {
-      final cachePreview = useMemoized(() {
-        final preview = cachePinPreviewText(
+    final text = useMemoizedFuture(
+      () async {
+        if (pinMessageMinimal == null) return cachePreview;
+
+        final preview = await generatePinPreviewText(
           pinMessageMinimal: pinMessageMinimal,
           mentionCache: context.read<MentionCache>(),
         );
+
         return context.l10n.pinned(message.userFullName ?? '', preview);
-      });
+      },
+      cachePreview,
+      keys: [message.userFullName, message.content],
+    ).requireData;
 
-      final text = useMemoizedFuture(
-        () async {
-          final preview = await generatePinPreviewText(
-            pinMessageMinimal: pinMessageMinimal,
-            mentionCache: context.read<MentionCache>(),
-          );
-
-          return context.l10n.pinned(message.userFullName ?? '', preview);
-        },
-        cachePreview,
-        keys: [message.userFullName, message.content],
-      ).requireData;
-
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
-          ),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: context.dynamicColor(
-                  const Color.fromRGBO(202, 234, 201, 1),
-                ),
-                borderRadius: BorderRadius.circular(10),
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 4,
+          horizontal: 8,
+        ),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.dynamicColor(
+                const Color.fromRGBO(202, 234, 201, 1),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 5,
-                  horizontal: 10,
-                ),
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: MessageItemWidget.secondaryFontSize,
-                    color: context.dynamicColor(
-                      const Color.fromRGBO(0, 0, 0, 1),
-                    ),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 10,
+              ),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: MessageItemWidget.secondaryFontSize,
+                  color: context.dynamicColor(
+                    const Color.fromRGBO(0, 0, 0, 1),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      );
-    });
+      ),
+    );
   }
 }
 

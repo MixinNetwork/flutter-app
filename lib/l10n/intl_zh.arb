@@ -189,5 +189,6 @@
   "unpinAllMessages": "取消所有置顶",
   "unpinAllMessagesDescription": "确认取消所有置顶吗？",
   "pinMessageCount": "{count}条置顶消息",
-  "reedit": "重新编辑"
+  "reedit": "重新编辑",
+  "aMessage": "一条消息"
 }

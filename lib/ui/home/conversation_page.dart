@@ -1157,7 +1157,10 @@ class _MessageContent extends HookWidget {
         } else if (conversation.contentType.isPin) {
           final pinMessageMinimal =
               PinMessageMinimal.fromJsonString(conversation.content ?? '');
-          if (pinMessageMinimal == null) return '';
+          if (pinMessageMinimal == null) {
+            return context.l10n.pinned(
+                conversation.senderFullName ?? '', context.l10n.aMessage);
+          }
           final preview = generatePinPreviewText(
             pinMessageMinimal: pinMessageMinimal,
             mentionCache: context.read<MentionCache>(),
@@ -1244,8 +1247,7 @@ class _MessageStatusIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (context.multiAuthState.current?.account.userId ==
-            conversation.senderId &&
+    if (context.multiAuthState.currentUserId == conversation.senderId &&
         conversation.contentType != MessageCategory.systemConversation &&
         conversation.contentType != MessageCategory.systemAccountSnapshot &&
         !conversation.contentType.isCallMessage &&

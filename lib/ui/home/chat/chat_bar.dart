@@ -106,15 +106,12 @@ class ChatBar extends HookWidget {
               color: actionColor,
               onTap: () {
                 final cubit = context.read<ChatSideCubit>();
-                if (cubit.state.pages.isNotEmpty &&
-                    cubit.state.pages.last.name ==
-                        ChatSideCubit.searchMessageHistory) {
-                  return;
+                if (cubit.state.pages.lastOrNull?.name ==
+                    ChatSideCubit.searchMessageHistory) {
+                  return cubit.pop();
                 }
-                cubit
-                  ..popWhere(
-                      (page) => page.name == ChatSideCubit.searchMessageHistory)
-                  ..pushPage(ChatSideCubit.searchMessageHistory);
+
+                cubit.replace(ChatSideCubit.searchMessageHistory);
               },
             ),
           ),

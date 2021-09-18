@@ -60,7 +60,7 @@ class EditProfilePage extends HookWidget {
             children: [
               const SizedBox(height: 40),
               Builder(builder: (context) {
-                final account = context.multiAuthState.current!.account;
+                final account = context.multiAuthState.currentUser!;
                 return AvatarWidget(
                   userId: account.userId,
                   name: account.fullName!,

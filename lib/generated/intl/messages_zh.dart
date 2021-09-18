@@ -57,6 +57,7 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "aMessage": MessageLookupByLibrary.simpleMessage("一条消息"),
         "about": MessageLookupByLibrary.simpleMessage("关于"),
         "aboutEncryptedInfo":
             MessageLookupByLibrary.simpleMessage("此对话中的消息使用端对端加密。点击了解更多。"),

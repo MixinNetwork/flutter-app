@@ -11,17 +11,20 @@ import 'package:provider/provider.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../blaze/vo/pin_message_minimal.dart';
+import '../../constants/resources.dart';
 import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
 import '../../ui/home/hook/pin_message.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../action_button.dart';
 import '../menu.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
@@ -67,6 +70,8 @@ extension MessageIsTranscriptExtension on BuildContext {
   }
 }
 
+const _pinArrowWidth = 32.0;
+
 class MessageItemWidget extends HookWidget {
   const MessageItemWidget({
     Key? key,
@@ -76,8 +81,7 @@ class MessageItemWidget extends HookWidget {
     this.lastReadMessageId,
     this.isTranscript = false,
     this.blink = true,
-    this.pinArrow,
-    this.pinArrowWidth,
+    this.pinned = false,
   }) : super(key: key);
 
   final MessageItem message;
@@ -86,8 +90,7 @@ class MessageItemWidget extends HookWidget {
   final String? lastReadMessageId;
   final bool isTranscript;
   final bool blink;
-  final double? pinArrowWidth;
-  final Widget? pinArrow;
+  final bool pinned;
 
   static const primaryFontSize = 16.0;
   static const secondaryFontSize = 14.0;
@@ -163,9 +166,9 @@ class MessageItemWidget extends HookWidget {
                 userName: userName,
                 userId: userId,
                 isCurrentUser: isCurrentUser,
-                pinArrowWidth: pinArrowWidth ?? 0,
+                pinArrowWidth: pinned ? _pinArrowWidth : 0,
                 buildMenus: () => [
-                  if (!isTranscript && message.type.canReply)
+                  if (!isTranscript && message.type.canReply && !pinned)
                     ContextMenu(
                       title: context.l10n.reply,
                       onTap: () =>
@@ -178,36 +181,7 @@ class MessageItemWidget extends HookWidget {
                         MessageStatus.read,
                         MessageStatus.sent
                       ].contains(message.status))
-                    HookBuilder(builder: (context) {
-                      final pined = useMemoized(
-                          () => context
-                              .watch<PinMessageState>()
-                              .messageIds
-                              .contains(message.messageId),
-                          [message.messageId]);
-                      return ContextMenu(
-                        title: pined ? context.l10n.unPin : context.l10n.pin,
-                        onTap: () async {
-                          final pinMessageMinimal = PinMessageMinimal(
-                            messageId: message.messageId,
-                            type: message.type,
-                            content:
-                                message.type.isText ? message.content : null,
-                          );
-                          if (pined) {
-                            await context.accountServer.unpinMessage(
-                              conversationId: message.conversationId,
-                              pinMessageMinimals: [pinMessageMinimal],
-                            );
-                            return;
-                          }
-                          await context.accountServer.pinMessage(
-                            conversationId: message.conversationId,
-                            pinMessageMinimals: [pinMessageMinimal],
-                          );
-                        },
-                      );
-                    }),
+                    _PinMenu(message: message),
                   if (!isTranscript && message.canForward)
                     ContextMenu(
                       title: context.l10n.forward,
@@ -271,6 +245,24 @@ class MessageItemWidget extends HookWidget {
                     ),
                 ],
                 builder: (BuildContext context) {
+                  final pinArrow = Opacity(
+                    opacity: pinned ? 1 : 0,
+                    child: ActionButton(
+                      size: 16,
+                      name: Resources.assetsImagesPinArrowSvg,
+                      onTap: () {
+                        context
+                            .read<BlinkCubit>()
+                            .blinkByMessageId(message.messageId);
+                        ConversationCubit.selectConversation(
+                          context,
+                          message.conversationId,
+                          initIndexMessageId: message.messageId,
+                        );
+                      },
+                    ),
+                  );
+
                   if (message.type.isIllegalMessageCategory ||
                       message.status == MessageStatus.unknown) {
                     return UnknownMessage(
@@ -436,6 +428,65 @@ class MessageItemWidget extends HookWidget {
         child: child,
       ),
     );
+  }
+}
+
+class _PinMenu extends HookWidget {
+  const _PinMenu({
+    Key? key,
+    required this.message,
+  }) : super(key: key);
+
+  final MessageItem message;
+
+  @override
+  Widget build(BuildContext context) {
+    final role = useMemoizedStream(
+      () {
+        if (message.conversionCategory == ConversationCategory.contact) {
+          return Stream.value(ParticipantRole.owner);
+        }
+        return context.database.participantDao
+            .participantById(
+                message.conversationId, context.multiAuthState.currentUserId!)
+            .watchSingleOrNull()
+            .map((event) => event?.role);
+      },
+      keys: [message.conversionCategory, message.conversationId],
+    ).data;
+
+    if (role == null) return const SizedBox();
+
+    return HookBuilder(builder: (context) {
+      final pined = useMemoized(
+          () => context
+              .watch<PinMessageState>()
+              .messageIds
+              .contains(message.messageId),
+          [message.messageId]);
+
+      return ContextMenu(
+        title: pined ? context.l10n.unPin : context.l10n.pin,
+        onTap: () async {
+          final pinMessageMinimal = PinMessageMinimal(
+            messageId: message.messageId,
+            type: message.type,
+            content: message.type.isText ? message.content : null,
+          );
+          if (pined) {
+            await context.accountServer.unpinMessage(
+              conversationId: message.conversationId,
+              pinMessageMinimals: [pinMessageMinimal],
+            );
+            return;
+          }
+          await context.accountServer.pinMessage(
+            conversationId: message.conversationId,
+            pinMessageMinimals: [pinMessageMinimal],
+          );
+        },
+      );
+    });
   }
 }
 
