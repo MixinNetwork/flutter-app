@@ -124,14 +124,36 @@ class ImagePreviewPage extends HookWidget {
           LogicalKeyboardKey.keyC,
           meta: kPlatformIsDarwin,
           control: !kPlatformIsDarwin,
-        ): const CopyIntent(),
+        ): const _CopyIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowLeft):
+            const _PreviousImageIntent(),
+        const SingleActivator(LogicalKeyboardKey.arrowRight):
+            const _NextImageIntent(),
       },
       actions: {
-        CopyIntent: CallbackAction<Intent>(
+        _CopyIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) => _copyUrl(
               context,
               context.accountServer.convertMessageAbsolutePath(
                   current.value, context.isTranscript)),
+        ),
+        _PreviousImageIntent: CallbackAction<Intent>(
+          onInvoke: (intent) {
+            if (prev.value == null) {
+              return false;
+            }
+            _messageId.value = prev.value!.messageId;
+            return true;
+          },
+        ),
+        _NextImageIntent: CallbackAction<Intent>(
+          onInvoke: (intent) {
+            if (next.value == null) {
+              return false;
+            }
+            _messageId.value = next.value!.messageId;
+            return true;
+          },
         ),
       },
       autofocus: true,
@@ -397,6 +419,14 @@ Future<void> _copyUrl(BuildContext context, String? filePath) async {
   showToastSuccessful(context);
 }
 
-class CopyIntent extends Intent {
-  const CopyIntent();
+class _CopyIntent extends Intent {
+  const _CopyIntent();
+}
+
+class _PreviousImageIntent extends Intent {
+  const _PreviousImageIntent();
+}
+
+class _NextImageIntent extends Intent {
+  const _NextImageIntent();
 }
