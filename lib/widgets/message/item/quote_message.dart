@@ -169,7 +169,6 @@ class QuoteMessage extends HookWidget {
           inputMode: inputMode,
         );
       }
-
       if (type.isData) {
         return _QuoteMessageBase(
           messageId: messageId,
@@ -181,6 +180,20 @@ class QuoteMessage extends HookWidget {
             color: iconColor,
           ),
           description: quote.mediaName as String? ?? context.l10n.file,
+          inputMode: inputMode,
+        );
+      }
+      if (type.isTranscript) {
+        return _QuoteMessageBase(
+          messageId: messageId,
+          quoteMessageId: quoteMessageId!,
+          userId: userId,
+          name: userFullName,
+          icon: SvgPicture.asset(
+            Resources.assetsImagesFileSvg,
+            color: iconColor,
+          ),
+          description: context.l10n.chatTranscript,
           inputMode: inputMode,
         );
       }
