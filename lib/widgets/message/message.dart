@@ -245,23 +245,22 @@ class MessageItemWidget extends HookWidget {
                     ),
                 ],
                 builder: (BuildContext context) {
-                  final pinArrow = Opacity(
-                    opacity: pinned ? 1 : 0,
-                    child: ActionButton(
-                      size: 16,
-                      name: Resources.assetsImagesPinArrowSvg,
-                      onTap: () {
-                        context
-                            .read<BlinkCubit>()
-                            .blinkByMessageId(message.messageId);
-                        ConversationCubit.selectConversation(
-                          context,
-                          message.conversationId,
-                          initIndexMessageId: message.messageId,
-                        );
-                      },
-                    ),
-                  );
+                  final pinArrow = pinned
+                      ? ActionButton(
+                          size: 16,
+                          name: Resources.assetsImagesPinArrowSvg,
+                          onTap: () {
+                            context
+                                .read<BlinkCubit>()
+                                .blinkByMessageId(message.messageId);
+                            ConversationCubit.selectConversation(
+                              context,
+                              message.conversationId,
+                              initIndexMessageId: message.messageId,
+                            );
+                          },
+                        )
+                      : null;
 
                   if (message.type.isIllegalMessageCategory ||
                       message.status == MessageStatus.unknown) {
