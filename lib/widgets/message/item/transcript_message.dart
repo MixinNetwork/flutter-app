@@ -32,11 +32,13 @@ class TranscriptMessageWidget extends HookWidget {
     required this.message,
     required this.showNip,
     required this.isCurrentUser,
+    required this.pinArrow,
   }) : super(key: key);
 
   final bool showNip;
   final bool isCurrentUser;
   final MessageItem message;
+  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +59,7 @@ class TranscriptMessageWidget extends HookWidget {
         showNip: showNip,
         isCurrentUser: isCurrentUser,
         message: message,
+        pinArrow: pinArrow,
       );
     }
 
@@ -98,6 +101,7 @@ class TranscriptMessageWidget extends HookWidget {
           right: 2,
           left: 2,
         ),
+        pinArrow: pinArrow,
         child: InteractableDecoratedBox(
           onTap: () async {
             await showMixinDialog(
