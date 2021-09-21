@@ -47,9 +47,11 @@ class SlidePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                        height: (defaultTargetPlatform == TargetPlatform.macOS)
-                            ? 72.0
-                            : 16.0),
+                        height:
+                            (defaultTargetPlatform == TargetPlatform.macOS ||
+                                    defaultTargetPlatform == TargetPlatform.iOS)
+                                ? 72.0
+                                : 16.0),
                     _Item(
                       asset: Resources.assetsImagesChatSvg,
                       title: context.l10n.chats,
