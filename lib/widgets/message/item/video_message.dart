@@ -74,8 +74,7 @@ class VideoMessageWidget extends StatelessWidget {
                   context.accountServer
                       .cancelProgressAttachmentJob(message.messageId);
                 } else if (message.type.isLive && message.mediaUrl != null) {
-                  launch(context.accountServer.convertMessageAbsolutePath(
-                      message, context.isTranscript));
+                  launch(message.mediaUrl!);
                 }
               },
               child: ClipRRect(
