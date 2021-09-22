@@ -54,7 +54,7 @@ class VideoMessageWidget extends StatelessWidget {
             includeNip: true,
             clip: true,
             pinArrow: pinArrow,
-            child: InteractableDecoratedBox(
+            child: InteractiveDecoratedBox(
               onTap: () {
                 if (message.mediaStatus == MediaStatus.canceled) {
                   if (message.relationship == UserRelationship.me &&

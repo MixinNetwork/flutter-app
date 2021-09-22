@@ -44,7 +44,7 @@ class ActionCardMessage extends HookWidget {
         showStatus: isCurrentUser,
         message: message,
       ),
-      child: InteractableDecoratedBox(
+      child: InteractiveDecoratedBox(
         onTap: () {
           if (context.openAction(appCardData.action)) return;
           openUri(context, appCardData.action);

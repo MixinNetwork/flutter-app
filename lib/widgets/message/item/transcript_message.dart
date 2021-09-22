@@ -102,7 +102,7 @@ class TranscriptMessageWidget extends HookWidget {
           left: 2,
         ),
         pinArrow: pinArrow,
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () async {
             await showMixinDialog(
                 context: context,

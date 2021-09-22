@@ -93,7 +93,7 @@ class CellItem extends StatelessWidget {
         backgroundColor,
       );
     }
-    return InteractableDecoratedBox(
+    return InteractiveDecoratedBox(
       decoration: BoxDecoration(
         color: selectedBackgroundColor,
       ),

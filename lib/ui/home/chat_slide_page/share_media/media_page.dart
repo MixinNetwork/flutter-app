@@ -178,7 +178,7 @@ class _Item extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => InteractableDecoratedBox(
+  Widget build(BuildContext context) => InteractiveDecoratedBox(
         onTap: () {
           switch (message.mediaStatus) {
             case MediaStatus.done:

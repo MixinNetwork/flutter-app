@@ -2,14 +2,14 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum InteracteStatus {
-  interactable,
+enum InteractiveStatus {
+  interactive,
   hovering,
   tapDowning,
 }
 
-class InteracterBuilder extends StatefulWidget {
-  const InteracterBuilder({
+class InteractiveBuilder extends StatefulWidget {
+  const InteractiveBuilder({
     Key? key,
     required this.builder,
     this.child,
@@ -25,8 +25,8 @@ class InteracterBuilder extends StatefulWidget {
     this.behavior = HitTestBehavior.opaque,
   }) : super(key: key);
 
-  final Widget Function(BuildContext context, InteracteStatus status,
-      InteracteStatus lastStatus, Widget? child) builder;
+  final Widget Function(BuildContext context, InteractiveStatus status,
+      InteractiveStatus lastStatus, Widget? child) builder;
 
   final Widget? child;
   final VoidCallback? onTap;
@@ -41,19 +41,19 @@ class InteracterBuilder extends StatefulWidget {
   final HitTestBehavior? behavior;
 
   @override
-  _InteracterBuilderState createState() => _InteracterBuilderState();
+  _InteractiveBuilderState createState() => _InteractiveBuilderState();
 }
 
-class _InteracterBuilderState extends State<InteracterBuilder> {
+class _InteractiveBuilderState extends State<InteractiveBuilder> {
   bool hovering = false;
   bool tapDowning = false;
 
-  InteracteStatus lastStatus = InteracteStatus.interactable;
+  InteractiveStatus lastStatus = InteractiveStatus.interactive;
 
-  InteracteStatus get status {
-    if (tapDowning) return InteracteStatus.tapDowning;
-    if (hovering) return InteracteStatus.hovering;
-    return InteracteStatus.interactable;
+  InteractiveStatus get status {
+    if (tapDowning) return InteractiveStatus.tapDowning;
+    if (hovering) return InteractiveStatus.hovering;
+    return InteractiveStatus.interactive;
   }
 
   int? lastPointerDown;
@@ -117,8 +117,8 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
   }
 }
 
-class InteractableDecoratedBox extends StatelessWidget {
-  const InteractableDecoratedBox({
+class InteractiveDecoratedBox extends StatelessWidget {
+  const InteractiveDecoratedBox({
     Key? key,
     Decoration? decoration,
     this.hoveringDecoration,
@@ -139,7 +139,7 @@ class InteractableDecoratedBox extends StatelessWidget {
   })  : _decoration = decoration,
         super(key: key);
 
-  InteractableDecoratedBox.color({
+  InteractiveDecoratedBox.color({
     Key? key,
     BoxDecoration? decoration,
     Color? hoveringColor,
@@ -186,7 +186,7 @@ class InteractableDecoratedBox extends StatelessWidget {
   final HitTestBehavior? behavior;
 
   @override
-  Widget build(BuildContext context) => InteracterBuilder(
+  Widget build(BuildContext context) => InteractiveBuilder(
         onTap: onTap,
         onDoubleTap: onDoubleTap,
         onLongPress: onLongPress,
@@ -197,22 +197,22 @@ class InteractableDecoratedBox extends StatelessWidget {
         onHover: onHover,
         cursor: cursor,
         behavior: behavior,
-        builder: (BuildContext context, InteracteStatus status,
-                InteracteStatus lastStatus, Widget? child) =>
+        builder: (BuildContext context, InteractiveStatus status,
+                InteractiveStatus lastStatus, Widget? child) =>
             TweenAnimationBuilder<Decoration>(
           tween: DecorationTween(
             end: {
-                  InteracteStatus.interactable:
+                  InteractiveStatus.interactive:
                       _decoration ?? const BoxDecoration(),
-                  InteracteStatus.hovering:
+                  InteractiveStatus.hovering:
                       hoveringDecoration ?? tapDowningDecoration ?? _decoration,
-                  InteracteStatus.tapDowning:
+                  InteractiveStatus.tapDowning:
                       tapDowningDecoration ?? hoveringDecoration ?? _decoration,
                 }[status] ??
                 const BoxDecoration(),
           ),
-          duration: (lastStatus == InteracteStatus.interactable &&
-                      status != InteracteStatus.interactable
+          duration: (lastStatus == InteractiveStatus.interactive &&
+                      status != InteractiveStatus.interactive
                   ? inDuration
                   : outDuration) ??
               Duration.zero,

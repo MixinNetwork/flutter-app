@@ -37,7 +37,7 @@ class ContactMessageWidget extends StatelessWidget {
           showStatus: isCurrentUser,
           message: message,
         ),
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () => showUserDialog(
             context,
             message.sharedUserId,

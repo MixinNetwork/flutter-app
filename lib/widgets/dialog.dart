@@ -215,7 +215,7 @@ class MixinButton<T> extends DialogInteracterEntry<T> {
           );
     return Disable(
       disable: disable,
-      child: InteractableDecoratedBox.color(
+      child: InteractiveDecoratedBox.color(
         decoration: boxDecoration,
         onTap: () => onTap != null ? onTap?.call() : handleTap(context),
         child: DefaultTextStyle(

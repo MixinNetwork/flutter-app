@@ -166,7 +166,7 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () => PostPreview.push(context, message: message),
           child: Container(
             padding: const EdgeInsets.all(8),

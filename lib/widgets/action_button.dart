@@ -56,7 +56,7 @@ class ActionButton extends StatelessWidget {
       return _child;
     }
 
-    return InteractableDecoratedBox.color(
+    return InteractiveDecoratedBox.color(
       onTap: onTap,
       onTapUp: onTapUp,
       onEnter: onEnter,

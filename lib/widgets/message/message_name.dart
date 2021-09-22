@@ -18,7 +18,7 @@ class MessageName extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Align(
         alignment: Alignment.centerLeft,
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () => showUserDialog(context, userId),
           cursor: SystemMouseCursors.click,
           child: Padding(

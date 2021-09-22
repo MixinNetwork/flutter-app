@@ -43,7 +43,7 @@ class ImageMessageWidget extends StatelessWidget {
           includeNip: true,
           clip: true,
           pinArrow: pinArrow,
-          child: InteractableDecoratedBox(
+          child: InteractiveDecoratedBox(
             onTap: () {
               switch (message.mediaStatus) {
                 case MediaStatus.done:

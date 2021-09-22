@@ -111,7 +111,7 @@ class _SearchClearIcon extends HookWidget {
     } else {
       return MouseRegion(
         cursor: SystemMouseCursors.basic,
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () {
             controller.text = '';
           },

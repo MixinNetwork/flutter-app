@@ -72,7 +72,7 @@ class ContextMenuPortalEntry extends HookWidget {
               return const SizedBox();
             }),
           ),
-          child: InteractableDecoratedBox(
+          child: InteractiveDecoratedBox(
             onRightClick: (PointerUpEvent pointerUpEvent) =>
                 offsetCubit.emit(pointerUpEvent.position),
             child: child,
@@ -217,7 +217,7 @@ class ContextMenu extends StatelessWidget {
     );
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
-      child: InteractableDecoratedBox.color(
+      child: InteractiveDecoratedBox.color(
         decoration: BoxDecoration(
           color: backgroundColor,
         ),

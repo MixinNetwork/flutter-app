@@ -922,7 +922,7 @@ class _Item extends StatelessWidget {
     final messageColor = context.theme.secondaryText;
     return SizedBox(
       height: ConversationPage.conversationItemHeight,
-      child: InteractableDecoratedBox(
+      child: InteractiveDecoratedBox(
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),

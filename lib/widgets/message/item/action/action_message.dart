@@ -40,7 +40,7 @@ class ActionMessage extends StatelessWidget {
         runSpacing: 6,
         children: List<Widget>.from(
           list.map((e) => ActionData.fromJson(e as Map<String, dynamic>)).map(
-                (e) => InteractableDecoratedBox.color(
+                (e) => InteractiveDecoratedBox.color(
                   cursor: MaterialStateMouseCursor.clickable,
                   onTap: () {
                     // ignore: avoid_dynamic_calls
