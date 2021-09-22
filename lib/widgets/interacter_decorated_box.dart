@@ -31,7 +31,7 @@ class InteractiveBuilder extends StatefulWidget {
   final Widget? child;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
-  final VoidCallback? onLongPress;
+  final ValueChanged<LongPressStartDetails>? onLongPress;
   final GestureTapUpCallback? onTapUp;
   final ValueChanged<PointerUpEvent>? onRightClick;
   final PointerEnterEventListener? onEnter;
@@ -98,7 +98,7 @@ class _InteractiveBuilderState extends State<InteractiveBuilder> {
         },
         onTapUp: widget.onTapUp,
         onDoubleTap: widget.onDoubleTap,
-        onLongPress: widget.onLongPress,
+        onLongPressStart: widget.onLongPress,
         child: Listener(
           onPointerUp: (PointerUpEvent event) {
             if (event.pointer == lastPointerDown) {
@@ -176,9 +176,10 @@ class InteractiveDecoratedBox extends StatelessWidget {
   final Widget child;
   final VoidCallback? onTap;
   final VoidCallback? onDoubleTap;
-  final VoidCallback? onLongPress;
+  final ValueChanged<LongPressStartDetails>? onLongPress;
   final GestureTapUpCallback? onTapUp;
   final ValueChanged<PointerUpEvent>? onRightClick;
+
   final PointerEnterEventListener? onEnter;
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;

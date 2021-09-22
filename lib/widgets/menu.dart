@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -75,6 +76,11 @@ class ContextMenuPortalEntry extends HookWidget {
           child: InteractiveDecoratedBox(
             onRightClick: (PointerUpEvent pointerUpEvent) =>
                 offsetCubit.emit(pointerUpEvent.position),
+            onLongPress: (details) {
+              if (Platform.isAndroid || Platform.isIOS) {
+                offsetCubit.emit(details.globalPosition);
+              }
+            },
             child: child,
           ),
         ),
