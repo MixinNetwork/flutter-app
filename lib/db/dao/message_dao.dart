@@ -9,7 +9,6 @@ import '../../utils/extension/extension.dart';
 import '../../utils/load_balancer_utils.dart';
 import '../../widgets/message/item/action_card/action_card_data.dart';
 import '../database_event_bus.dart';
-import '../extension/message_category.dart';
 import '../mixin_database.dart';
 import '../util/util.dart';
 

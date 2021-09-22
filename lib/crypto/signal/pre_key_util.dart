@@ -3,9 +3,6 @@ import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/util/key_helper.dart' as helper;
 
-// ignore: implementation_imports
-import 'package:libsignal_protocol_dart/src/util/medium.dart';
-
 import '../crypto_key_value.dart';
 import 'signal_database.dart';
 import 'storage/mixin_prekey_store.dart';

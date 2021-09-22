@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
@@ -17,11 +16,9 @@ import '../../bloc/minute_timer_cubit.dart';
 import '../../bloc/paging/paging_bloc.dart';
 import '../../constants/resources.dart';
 import '../../db/extension/conversation.dart';
-import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
 import '../../generated/l10n.dart';
-import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/message_optimize.dart';

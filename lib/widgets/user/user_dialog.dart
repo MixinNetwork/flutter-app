@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../constants/resources.dart';
-import '../../db/extension/user.dart';
 import '../../db/mixin_database.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/chat/chat_page.dart';

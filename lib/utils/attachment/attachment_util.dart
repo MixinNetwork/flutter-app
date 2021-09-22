@@ -14,10 +14,8 @@ import 'package:path/path.dart' as p;
 import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../crypto/attachment/crypto_attachment.dart';
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';
-import '../../db/extension/message_category.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
 import '../crypto_util.dart';

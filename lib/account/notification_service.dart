@@ -3,11 +3,9 @@ import 'dart:async';
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:provider/provider.dart';
 import 'package:stream_transform/stream_transform.dart';
 
 import '../db/extension/conversation.dart';
-import '../db/extension/message_category.dart';
 import '../enum/message_category.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';

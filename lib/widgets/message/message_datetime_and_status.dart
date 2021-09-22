@@ -3,11 +3,9 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 
 import '../../bloc/minute_timer_cubit.dart';
 import '../../constants/resources.dart';
-import '../../db/extension/message.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';

@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 
 import '../../../account/show_pin_message_key_value.dart';
 import '../../../blaze/vo/pin_message_minimal.dart';

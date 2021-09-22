@@ -2,13 +2,11 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/extension/message_category.dart';
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';

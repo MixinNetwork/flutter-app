@@ -1,15 +1,12 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
-import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/uuid/uuid.dart';
-import '../../../db/extension/conversation.dart';
-import '../../../db/extension/user.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';

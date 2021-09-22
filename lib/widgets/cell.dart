@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:provider/provider.dart';
 
 import '../constants/resources.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
