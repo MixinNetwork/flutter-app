@@ -142,15 +142,16 @@ class _InputContainer extends HookWidget {
       );
     }, [identityHashCode(textEditingValueStream)]);
 
-    useEffect(
-        () => () {
-              if (conversationId == null) return;
-              context.database.conversationDao.updateDraft(
-                conversationId,
-                textEditingController.text,
-              );
-            },
-        [conversationId]);
+    useEffect(() {
+      final updateDraft = context.database.conversationDao.updateDraft;
+      return () {
+        if (conversationId == null) return;
+        updateDraft(
+          conversationId,
+          textEditingController.text,
+        );
+      };
+    }, [conversationId]);
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 

@@ -42,25 +42,27 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(count) => "${count} Participants";
 
-  static String m11(name) => "Message ${name}";
+  static String m11(count) => "${count} Participants";
 
-  static String m12(name) => "Remove ${name}";
+  static String m12(name) => "Message ${name}";
 
-  static String m13(name) => "Do you want to delete ${name} circle?";
+  static String m13(name) => "Remove ${name}";
 
-  static String m14(date) => "${date} join";
+  static String m14(name) => "Do you want to delete ${name} circle?";
 
-  static String m15(count) => "${count} Participants";
+  static String m15(date) => "${date} join";
 
-  static String m16(count) => "${count} Pinned Messages";
+  static String m16(count) => "${count} Participants";
 
-  static String m17(user, preview) => "${user} pinned ${preview}";
+  static String m17(count) => "${count} Pinned Messages";
 
-  static String m18(count) => "${count} related messages";
+  static String m18(user, preview) => "${user} pinned ${preview}";
+
+  static String m19(count) => "${count} related messages";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "aMessage": MessageLookupByLibrary.simpleMessage("一条消息"),
+        "aMessage": MessageLookupByLibrary.simpleMessage("a message"),
         "about": MessageLookupByLibrary.simpleMessage("About"),
         "aboutEncryptedInfo": MessageLookupByLibrary.simpleMessage(
             "Messages to this conversation are encrypted end-to-end, tap for more info."),
@@ -133,6 +135,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversationName":
             MessageLookupByLibrary.simpleMessage("Conversation Name"),
         "conversationParticipantsCount": m10,
+        "conversationParticipantsCountDescription": m11,
         "conversations": MessageLookupByLibrary.simpleMessage("Conversations"),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "create": MessageLookupByLibrary.simpleMessage("Create"),
@@ -185,8 +188,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dismiss admin"),
         "groupPopMenuMakeAdmin":
             MessageLookupByLibrary.simpleMessage("Make group admin"),
-        "groupPopMenuMessage": m11,
-        "groupPopMenuRemoveParticipants": m12,
+        "groupPopMenuMessage": m12,
+        "groupPopMenuRemoveParticipants": m13,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
@@ -196,6 +199,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "includeVideos": MessageLookupByLibrary.simpleMessage("Include Videos"),
         "initializing": MessageLookupByLibrary.simpleMessage("Initializing"),
         "introduction": MessageLookupByLibrary.simpleMessage("Introduction"),
+        "joinGroup": MessageLookupByLibrary.simpleMessage("+ Join the group"),
         "less": MessageLookupByLibrary.simpleMessage("less"),
         "links": MessageLookupByLibrary.simpleMessage("Links"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
@@ -229,8 +233,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("NO MEDIA"),
         "noPost": MessageLookupByLibrary.simpleMessage("NO POST"),
         "notification": MessageLookupByLibrary.simpleMessage("Notification"),
-        "pageDeleteCircle": m13,
-        "pageEditProfileJoin": m14,
+        "pageDeleteCircle": m14,
+        "pageEditProfileJoin": m15,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -239,13 +243,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
-        "participantsCount": m15,
+        "participantsCount": m16,
         "people": MessageLookupByLibrary.simpleMessage("People"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinMessageCount": m16,
-        "pinned": m17,
+        "pinMessageCount": m17,
+        "pinned": m18,
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
@@ -266,7 +270,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m18,
+        "searchRelatedMessage": m19,
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),

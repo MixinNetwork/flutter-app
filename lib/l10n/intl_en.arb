@@ -195,5 +195,7 @@
   "unpinAllMessagesDescription": "Are you sure you want to unpin all messages?",
   "pinMessageCount": "{count} Pinned Messages",
   "reedit": "Re-edit",
-  "aMessage": "一条消息"
+  "aMessage": "a message",
+  "conversationParticipantsCountDescription": "{count} Participants",
+  "joinGroup": "+ Join the group"
 }

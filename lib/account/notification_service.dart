@@ -125,8 +125,7 @@ class NotificationService {
               title: name,
               body: body ?? Localization.current.chatNotSupport,
               uri: Uri(
-                scheme: EnumToString.convertToString(
-                    NotificationScheme.conversation),
+                scheme: enumConvertToString(NotificationScheme.conversation),
                 host: event.conversationId,
                 path: event.messageId,
               ),

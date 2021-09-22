@@ -1069,7 +1069,11 @@ class AccountServer {
   }
 
   Future<void> exitGroup(String conversationId) async {
-    final response = await client.conversationApi.exit(conversationId);
+    await client.conversationApi.exit(conversationId);
+  }
+
+  Future<void> joinGroup(String code) async {
+    final response = await client.conversationApi.join(code);
     await database.conversationDao.updateConversation(response.data);
   }
 
@@ -1403,6 +1407,9 @@ class AccountServer {
 
   Future<List<db.User>?> refreshUsers(List<String> ids, {bool force = false}) =>
       _decryptMessage.refreshUsers(ids, force: force);
+
+  Future<void> refreshConversation(String conversationId) =>
+      _decryptMessage.refreshConversation(conversationId);
 
   Future<void> updateAccount({String? fullName, String? biography}) async {
     final user = await client.accountApi.update(AccountUpdateRequest(

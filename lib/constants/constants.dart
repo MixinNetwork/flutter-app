@@ -22,6 +22,8 @@ const countSignalKeys = 'COUNT_SIGNAL_KEYS';
 const syncSignalKeys = 'SYNC_SIGNAL_KEYS';
 
 const mixinScheme = 'mixin';
+const mixinHost = 'mixin.one';
+
 enum MixinSchemeHost {
   codes,
   pay,

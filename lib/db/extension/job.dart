@@ -9,8 +9,7 @@ import '../mixin_database.dart';
 
 Job createAckJob(String action, String messageId, MessageStatus status) {
   final blazeMessage = BlazeAckMessage(
-      messageId: messageId,
-      status: EnumToString.convertToString(status)!.toUpperCase());
+      messageId: messageId, status: enumConvertToString(status)!.toUpperCase());
   final jobId =
       '${blazeMessage.messageId}${blazeMessage.status}$action'.nameUuid();
   d('createAckJob jobId: $jobId, status: $status');

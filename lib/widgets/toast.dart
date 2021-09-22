@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../constants/resources.dart';
 import '../utils/extension/extension.dart';
+import '../utils/logger.dart';
 
 class Toast {
   factory Toast() => _singleton;
@@ -175,7 +176,8 @@ Future<bool> runFutureWithToast(
   showToastLoading(context);
   try {
     await future;
-  } catch (error) {
+  } catch (error, s) {
+    e("runFutureWithToast's error: $error, $s");
     await showToastFailed(context, error);
     return false;
   }
