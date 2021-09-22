@@ -58,7 +58,7 @@ class AudioMessage extends HookWidget {
         message: message,
       ),
       forceIsCurrentUserColor: false,
-      child: InteractableDecoratedBox(
+      child: InteractiveDecoratedBox(
         onTap: () {
           switch (message.mediaStatus) {
             case MediaStatus.read:

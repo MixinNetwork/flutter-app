@@ -203,7 +203,7 @@ class _IconButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => InteractableDecoratedBox.color(
+  Widget build(BuildContext context) => InteractiveDecoratedBox.color(
         onTap: onTap,
         decoration: const BoxDecoration(),
         hoveringColor: context.dynamicColor(

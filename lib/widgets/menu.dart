@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -72,9 +73,14 @@ class ContextMenuPortalEntry extends HookWidget {
               return const SizedBox();
             }),
           ),
-          child: InteractableDecoratedBox(
+          child: InteractiveDecoratedBox(
             onRightClick: (PointerUpEvent pointerUpEvent) =>
                 offsetCubit.emit(pointerUpEvent.position),
+            onLongPress: (details) {
+              if (Platform.isAndroid || Platform.isIOS) {
+                offsetCubit.emit(details.globalPosition);
+              }
+            },
             child: child,
           ),
         ),
@@ -217,7 +223,7 @@ class ContextMenu extends StatelessWidget {
     );
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 160),
-      child: InteractableDecoratedBox.color(
+      child: InteractiveDecoratedBox.color(
         decoration: BoxDecoration(
           color: backgroundColor,
         ),

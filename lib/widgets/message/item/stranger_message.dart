@@ -88,7 +88,7 @@ class _StrangerButton extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) => InteractableDecoratedBox.color(
+  Widget build(BuildContext context) => InteractiveDecoratedBox.color(
         onTap: onTap,
         decoration: BoxDecoration(
           color: context.theme.primary,

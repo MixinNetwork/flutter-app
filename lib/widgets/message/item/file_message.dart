@@ -41,7 +41,7 @@ class FileMessage extends StatelessWidget {
           showStatus: isCurrentUser,
           message: message,
         ),
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () async {
             if (message.mediaStatus == MediaStatus.canceled) {
               if (message.relationship == UserRelationship.me &&

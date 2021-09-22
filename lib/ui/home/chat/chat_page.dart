@@ -616,7 +616,7 @@ class _JumpCurrentButton extends HookWidget {
 
     return Padding(
       padding: const EdgeInsets.only(top: 8),
-      child: InteractableDecoratedBox(
+      child: InteractiveDecoratedBox(
         onTap: () {
           final messageId = pendingJumpMessageCubit.state;
           if (messageId != null) {
@@ -707,7 +707,7 @@ class _PinMessagesBanner extends HookWidget {
             const SizedBox(width: 8),
             AnimatedVisibility(
               visible: currentPinMessageIds.isNotEmpty,
-              child: InteractableDecoratedBox(
+              child: InteractiveDecoratedBox(
                 onTap: () {
                   final cubit = context.read<ChatSideCubit>();
                   if (cubit.state.pages.lastOrNull?.name ==
@@ -769,7 +769,7 @@ class _JumpMentionButton extends HookWidget {
 
     if (messageMentions.isEmpty) return const SizedBox();
 
-    return InteractableDecoratedBox(
+    return InteractiveDecoratedBox(
       onTap: () {
         final mention = messageMentions.first;
         context.read<MessageBloc>().scrollTo(mention.messageId);

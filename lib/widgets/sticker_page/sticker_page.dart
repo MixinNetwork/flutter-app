@@ -142,7 +142,7 @@ class _StickerAlbumPageItem extends HookWidget {
       keys: [index],
     );
 
-    return InteractableDecoratedBox(
+    return InteractiveDecoratedBox(
       onTap: () async {
         final accountServer = context.accountServer;
         final conversationItem = context.read<ConversationCubit>().state;

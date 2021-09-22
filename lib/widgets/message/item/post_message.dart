@@ -39,7 +39,7 @@ class PostMessage extends StatelessWidget {
           showNip: showNip,
           isCurrentUser: isCurrentUser,
           pinArrow: pinArrow,
-          child: InteractableDecoratedBox(
+          child: InteractiveDecoratedBox(
             onTap: () => PostPreview.push(context, message: message),
             child: Stack(
               children: [

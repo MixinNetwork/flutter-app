@@ -88,7 +88,7 @@ class PinMessagesPage extends HookWidget {
                 itemCount: list.length,
               ),
             ),
-            InteractableDecoratedBox(
+            InteractiveDecoratedBox(
               cursor: MaterialStateMouseCursor.clickable,
               onTap: () async {
                 await showMixinDialog<bool>(

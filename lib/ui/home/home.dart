@@ -98,44 +98,46 @@ class _HomePage extends HookWidget {
                 ),
               )
             : null,
-        body: Row(
-          children: [
-            if (!hasDrawer)
-              SizedBox(
-                width: slideWidth,
-                child: OverflowBox(
-                  alignment: Alignment.centerLeft,
-                  minWidth: kSlidePageMinWidth,
-                  maxWidth: clampSlideWidth,
-                  child: const SlidePage(),
-                ),
-              ),
-            Expanded(
-              child: ResponsiveNavigator(
-                switchWidth:
-                    kResponsiveNavigationMinWidth + kConversationListWidth,
-                leftPage: MaterialPage(
-                  key: const ValueKey('center'),
-                  name: 'center',
-                  child: SizedBox(
-                    key: _conversationPageKey,
-                    width: kConversationListWidth,
-                    child: const _CenterPage(),
+        body: SafeArea(
+          child: Row(
+            children: [
+              if (!hasDrawer)
+                SizedBox(
+                  width: slideWidth,
+                  child: OverflowBox(
+                    alignment: Alignment.centerLeft,
+                    minWidth: kSlidePageMinWidth,
+                    maxWidth: clampSlideWidth,
+                    child: const SlidePage(),
                   ),
                 ),
-                rightEmptyPage: MaterialPage(
-                  key: const ValueKey('empty'),
-                  name: 'empty',
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: context.theme.chatBackground,
+              Expanded(
+                child: ResponsiveNavigator(
+                  switchWidth:
+                      kResponsiveNavigationMinWidth + kConversationListWidth,
+                  leftPage: MaterialPage(
+                    key: const ValueKey('center'),
+                    name: 'center',
+                    child: SizedBox(
+                      key: _conversationPageKey,
+                      width: kConversationListWidth,
+                      child: const _CenterPage(),
                     ),
-                    child: Empty(text: context.l10n.pageRightEmptyMessage),
+                  ),
+                  rightEmptyPage: MaterialPage(
+                    key: const ValueKey('empty'),
+                    name: 'empty',
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: context.theme.chatBackground,
+                      ),
+                      child: Empty(text: context.l10n.pageRightEmptyMessage),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

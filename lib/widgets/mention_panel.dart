@@ -183,7 +183,7 @@ class _MentionItem extends StatelessWidget {
   final Function(User user)? onSelect;
 
   @override
-  Widget build(BuildContext context) => InteractableDecoratedBox.color(
+  Widget build(BuildContext context) => InteractiveDecoratedBox.color(
         decoration:
             selected ? BoxDecoration(color: context.theme.listSelected) : null,
         onTap: () => onSelect?.call(user),

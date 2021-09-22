@@ -33,8 +33,14 @@ class _Content extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final watchEvent = useStream(
-      useMemoized(() => File(context.accountServer.getMediaFilePath())
-          .watch(recursive: true)),
+      useMemoized(() {
+        // File.watch only support desktop platforms.
+        if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
+          return File(context.accountServer.getMediaFilePath())
+              .watch(recursive: true);
+        }
+        return const Stream<FileSystemEvent>.empty();
+      }),
       initialData: null,
     ).data;
 

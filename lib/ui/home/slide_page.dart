@@ -47,11 +47,9 @@ class SlidePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                        height:
-                            (defaultTargetPlatform == TargetPlatform.macOS ||
-                                    defaultTargetPlatform == TargetPlatform.iOS)
-                                ? 72.0
-                                : 16.0),
+                        height: (defaultTargetPlatform == TargetPlatform.macOS)
+                            ? 72.0
+                            : 16.0),
                     _Item(
                       asset: Resources.assetsImagesChatSvg,
                       title: context.l10n.chats,
@@ -292,6 +290,7 @@ class _CategoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListView.separated(
         shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (BuildContext context, int index) => children[index],
         separatorBuilder: (BuildContext context, int index) =>
             const SizedBox(height: 8),

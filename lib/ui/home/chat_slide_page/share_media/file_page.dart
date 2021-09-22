@@ -167,7 +167,7 @@ class _Item extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => InteractableDecoratedBox(
+  Widget build(BuildContext context) => InteractiveDecoratedBox(
         onTap: () async {
           if (message.mediaStatus == MediaStatus.canceled) {
             if (message.relationship == UserRelationship.me &&

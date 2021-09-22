@@ -25,7 +25,7 @@ class SelectItem extends StatelessWidget {
     final boxDecoration = BoxDecoration(
       borderRadius: BorderRadius.circular(8),
     );
-    return InteractableDecoratedBox.color(
+    return InteractiveDecoratedBox.color(
       onTap: onTap,
       decoration: selected == true
           ? boxDecoration.copyWith(color: context.theme.sidebarSelected)

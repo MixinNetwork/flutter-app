@@ -198,7 +198,7 @@ class ImagePreviewPage extends HookWidget {
                           child: Row(
                             children: [
                               if (prev.value != null)
-                                InteractableDecoratedBox(
+                                InteractiveDecoratedBox(
                                   onTap: () =>
                                       _messageId.value = prev.value!.messageId,
                                   child: SvgPicture.asset(
@@ -207,7 +207,7 @@ class ImagePreviewPage extends HookWidget {
                                 ),
                               const Spacer(),
                               if (next.value != null)
-                                InteractableDecoratedBox(
+                                InteractiveDecoratedBox(
                                   onTap: () =>
                                       _messageId.value = next.value!.messageId,
                                   child: SvgPicture.asset(

@@ -52,7 +52,7 @@ class LocationMessageWidget extends HookWidget {
       child: SizedBox(
         width: 260,
         height: 180,
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () {
             var url =
                 'https://www.google.com/maps/place/@${location.latitude},${location.longitude},17z?hl=zh-CN';

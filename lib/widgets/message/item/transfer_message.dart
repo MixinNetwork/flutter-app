@@ -33,7 +33,7 @@ class TransferMessage extends StatelessWidget {
           showStatus: false,
           message: message,
         ),
-        child: InteractableDecoratedBox(
+        child: InteractiveDecoratedBox(
           onTap: () => openUri(context,
               '${mixinProtocolUrls[MixinSchemeHost.snapshots]}/${message.snapshotId}'),
           child: Row(
