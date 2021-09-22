@@ -82,7 +82,8 @@ class TranscriptMessageWidget extends HookWidget {
               min(transcriptMinimals.length, 4),
               (index) =>
                   index).map((i) =>
-              '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'.overflow),
+              '${transcriptMinimals[i].name}: ${previews.isEmpty ? '' : previews[i]}'
+                  .overflow),
           [
             transcriptMinimals,
             previews,
