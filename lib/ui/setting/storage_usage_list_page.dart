@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../db/extension/conversation.dart';

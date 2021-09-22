@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import '../constants/resources.dart';
-import '../db/extension/message_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../generated/l10n.dart';

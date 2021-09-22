@@ -1,7 +1,4 @@
-import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
 
 import '../utils/extension/extension.dart';
 import 'message/message_bubble.dart';

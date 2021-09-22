@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/painting.dart';
 
 /// Creates a new path that is drawn from the segments of `source`.

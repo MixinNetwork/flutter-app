@@ -4,7 +4,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +11,6 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../constants/resources.dart';
-import '../../db/extension/message_category.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';

@@ -1,7 +1,6 @@
 import 'package:ecache/ecache.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../db/dao/user_dao.dart';
 import '../../../../db/mixin_database.dart';

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:archive/archive_io.dart';
 import 'package:cross_file/cross_file.dart';
@@ -14,7 +13,6 @@ import 'package:mime/mime.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
 import 'package:tuple/tuple.dart';
 
 import '../../../constants/brightness_theme_data.dart';

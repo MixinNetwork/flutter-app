@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
-// ignore: implementation_imports
-import 'package:libsignal_protocol_dart/src/groups/state/sender_key_record.dart';
 
 import '../../../utils/logger.dart';
 import '../dao/sender_key_dao.dart';

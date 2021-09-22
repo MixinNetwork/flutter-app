@@ -30,7 +30,6 @@ import '../crypto/uuid/uuid.dart';
 import '../db/dao/job_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
-import '../db/extension/message_category.dart';
 import '../db/mixin_database.dart' as db;
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
