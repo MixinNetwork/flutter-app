@@ -290,6 +290,7 @@ class _CategoryList extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ListView.separated(
         shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
         itemBuilder: (BuildContext context, int index) => children[index],
         separatorBuilder: (BuildContext context, int index) =>
             const SizedBox(height: 8),
