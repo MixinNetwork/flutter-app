@@ -35,7 +35,7 @@ class NotificationService {
             }
             return true;
           })
-          // .where((event) => event.senderId != context.accountServer.userId)
+          .where((event) => event.senderId != context.accountServer.userId)
           .asyncWhere((event) async {
             final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
