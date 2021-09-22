@@ -41,6 +41,7 @@ export '../../db/extension/user.dart' show UserExtension;
 export '../action_utils.dart' show OpenUriExtension;
 export '../datetime_format_utils.dart'
     show DateTimeExtension, StringEpochNanoExtension;
+export 'src/platforms.dart';
 
 part 'src/file.dart';
 part 'src/image.dart';

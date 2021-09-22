@@ -22,7 +22,6 @@ import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/hover_overlay.dart';
-import '../../../widgets/interacter_decorated_box.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
@@ -159,6 +158,10 @@ class _InputContainer extends HookWidget {
 
     // ignore: unnecessary_lambdas
     useEffect(() {
+      if (!context.textFieldAutoGainFocus) {
+        focusNode.unfocus();
+        return null;
+      }
       focusNode.requestFocus();
     }, [conversationId, quoteMessageId]);
 
@@ -582,11 +585,10 @@ class _StickerButton extends HookWidget {
               tabLength: tabLength,
             ),
           ),
-          child: InteractableDecoratedBox(
-            child: ActionButton(
-              name: Resources.assetsImagesIcStickerSvg,
-              color: context.theme.icon,
-            ),
+          child: ActionButton(
+            name: Resources.assetsImagesIcStickerSvg,
+            color: context.theme.icon,
+            interactive: false,
           ),
         ),
       ),

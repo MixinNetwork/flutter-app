@@ -63,7 +63,7 @@ class _InteracterBuilderState extends State<InteracterBuilder> {
   Widget build(BuildContext context) {
     final child = widget.builder(context, status, lastStatus, widget.child);
     lastStatus = status;
-    return MouseRegion(
+    return MouseRegionIgnoreTouch(
       onEnter: (event) {
         setState(() {
           hovering = true;
@@ -225,6 +225,49 @@ class InteractableDecoratedBox extends StatelessWidget {
           ),
           child: child,
         ),
+        child: child,
+      );
+}
+
+class MouseRegionIgnoreTouch extends StatelessWidget {
+  const MouseRegionIgnoreTouch({
+    Key? key,
+    this.onEnter,
+    this.onExit,
+    this.onHover,
+    this.cursor = MouseCursor.defer,
+    this.opaque = true,
+    this.child,
+  }) : super(key: key);
+  final PointerEnterEventListener? onEnter;
+  final PointerExitEventListener? onExit;
+  final PointerHoverEventListener? onHover;
+  final MouseCursor cursor;
+  final bool opaque;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        onEnter: (event) {
+          if (event.kind == PointerDeviceKind.touch) {
+            return;
+          }
+          onEnter?.call(event);
+        },
+        onExit: (event) {
+          if (event.kind == PointerDeviceKind.touch) {
+            return;
+          }
+          onExit?.call(event);
+        },
+        onHover: (event) {
+          if (event.kind == PointerDeviceKind.touch) {
+            return;
+          }
+          onHover?.call(event);
+        },
+        cursor: cursor,
+        opaque: opaque,
         child: child,
       );
 }

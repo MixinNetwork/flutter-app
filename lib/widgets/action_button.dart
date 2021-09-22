@@ -18,6 +18,7 @@ class ActionButton extends StatelessWidget {
     this.onEnter,
     this.onExit,
     this.onHover,
+    this.interactive = true,
     Key? key,
   })  : assert(name != null || child != null),
         super(key: key);
@@ -33,6 +34,8 @@ class ActionButton extends StatelessWidget {
   final PointerExitEventListener? onExit;
   final PointerHoverEventListener? onHover;
 
+  final bool interactive;
+
   @override
   Widget build(BuildContext context) {
     var _child = child;
@@ -44,6 +47,16 @@ class ActionButton extends StatelessWidget {
         color: color,
       );
     }
+
+    _child = Padding(
+      padding: padding,
+      child: SizedBox.square(dimension: size, child: _child),
+    );
+
+    if (!interactive) {
+      return _child;
+    }
+
     return InteractableDecoratedBox.color(
       onTap: onTap,
       onTapUp: onTapUp,
@@ -55,10 +68,7 @@ class ActionButton extends StatelessWidget {
         const Color.fromRGBO(0, 0, 0, 0.03),
         darkColor: const Color.fromRGBO(255, 255, 255, 0.2),
       ),
-      child: Padding(
-        padding: padding,
-        child: SizedBox.square(dimension: size, child: _child),
-      ),
+      child: _child,
     );
   }
 }
