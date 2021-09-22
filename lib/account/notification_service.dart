@@ -5,8 +5,10 @@ import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:stream_transform/stream_transform.dart';
 
+import '../blaze/vo/pin_message_minimal.dart';
 import '../db/extension/conversation.dart';
 import '../enum/message_category.dart';
+import '../generated/l10n.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
 import '../utils/extension/extension.dart';
@@ -14,6 +16,7 @@ import '../utils/load_balancer_utils.dart';
 import '../utils/local_notification_center.dart';
 import '../utils/message_optimize.dart';
 import '../utils/reg_exp_utils.dart';
+import '../widgets/message/item/pin_message.dart';
 import '../widgets/message/item/system_message.dart';
 import '../widgets/message/item/text/mention_builder.dart';
 
@@ -80,6 +83,22 @@ class NotificationService {
                   senderFullName: event.senderFullName,
                   groupName: event.groupName,
                 );
+              } else if (event.type.isPin) {
+                final pinMessageMinimal =
+                    PinMessageMinimal.fromJsonString(event.content ?? '');
+
+                if (pinMessageMinimal == null) {
+                  body = Localization.current.pinned(event.senderFullName ?? '',
+                      Localization.current.aMessage);
+                } else {
+                  final preview = await generatePinPreviewText(
+                    pinMessageMinimal: pinMessageMinimal,
+                    mentionCache: context.read<MentionCache>(),
+                  );
+
+                  body = Localization.current
+                      .pinned(event.senderFullName ?? '', preview);
+                }
               } else {
                 final isGroup = event.category == ConversationCategory.group ||
                     event.senderId != event.ownerUserId;
@@ -104,7 +123,7 @@ class NotificationService {
 
             await showNotification(
               title: name,
-              body: body,
+              body: body ?? Localization.current.chatNotSupport,
               uri: Uri(
                 scheme: EnumToString.convertToString(
                     NotificationScheme.conversation),

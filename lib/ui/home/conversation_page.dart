@@ -1158,7 +1158,7 @@ class _MessageContent extends HookWidget {
             return context.l10n.pinned(
                 conversation.senderFullName ?? '', context.l10n.aMessage);
           }
-          final preview = generatePinPreviewText(
+          final preview = await generatePinPreviewText(
             pinMessageMinimal: pinMessageMinimal,
             mentionCache: context.read<MentionCache>(),
           );
