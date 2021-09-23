@@ -1,9 +1,9 @@
-import 'dart:io';
-
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
+import 'package:watcher/watcher.dart';
 
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
@@ -32,16 +32,13 @@ class _Content extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final watchEvent = useStream(
-      useMemoized(() {
-        // File.watch only support desktop platforms.
-        if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) {
-          return File(context.accountServer.getMediaFilePath())
-              .watch(recursive: true);
-        }
-        return const Stream<FileSystemEvent>.empty();
-      }),
-      initialData: null,
+    final watchEvent = useMemoizedStream(
+      () => DirectoryWatcher(context.accountServer.getMediaFilePath())
+          .events
+          .throttleTime(
+            const Duration(milliseconds: 400),
+            trailing: true,
+          ),
     ).data;
 
     final list =
