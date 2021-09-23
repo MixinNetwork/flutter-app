@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/extension/extension.dart';
@@ -245,10 +246,12 @@ class DialogTextField extends HookWidget {
     Key? key,
     required this.textEditingController,
     required this.hintText,
+    this.inputFormatters,
   }) : super(key: key);
 
   final TextEditingController textEditingController;
   final String hintText;
+  final List<TextInputFormatter>? inputFormatters;
 
   @override
   Widget build(BuildContext context) => Container(
@@ -273,6 +276,7 @@ class DialogTextField extends HookWidget {
             focusedBorder: InputBorder.none,
             enabledBorder: InputBorder.none,
           ),
+          inputFormatters: inputFormatters,
         ),
       );
 }
@@ -317,7 +321,7 @@ class EditDialog extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textEditingController = useTextEditingController.call(text: editText);
+    final textEditingController = useTextEditingController(text: editText);
     final textEditingValue = useValueListenable(textEditingController);
     return AlertDialogLayout(
       title: title,

@@ -2,6 +2,7 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../constants/constants.dart';
+import '../db/dao/user_dao.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart' as db;
 import '../utils/logger.dart';
@@ -137,20 +138,7 @@ class Injector {
   Future<List<db.User>> insertUpdateUsers(List<User> users) async {
     final result = <db.User>[];
     for (final e in users) {
-      final user = db.User(
-        userId: e.userId,
-        identityNumber: e.identityNumber,
-        relationship: e.relationship,
-        fullName: e.fullName,
-        avatarUrl: e.avatarUrl,
-        phone: e.phone,
-        isVerified: e.isVerified,
-        createdAt: e.createdAt,
-        muteUntil: DateTime.tryParse(e.muteUntil),
-        appId: e.app?.appId,
-        biography: e.biography,
-        isScam: e.isScam ? 1 : 0,
-      );
+      final user = e.asDbUser;
       result.add(user);
 
       await database.userDao.insert(user);

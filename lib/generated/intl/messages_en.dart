@@ -44,21 +44,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m11(count) => "${count} Participants";
 
-  static String m12(name) => "Message ${name}";
+  static String m12(ID) => "My Mixin ID: ${ID}";
 
-  static String m13(name) => "Remove ${name}";
+  static String m13(name) => "Message ${name}";
 
-  static String m14(name) => "Do you want to delete ${name} circle?";
+  static String m14(name) => "Remove ${name}";
 
-  static String m15(date) => "${date} join";
+  static String m15(name) => "Do you want to delete ${name} circle?";
 
-  static String m16(count) => "${count} Participants";
+  static String m16(date) => "${date} join";
 
-  static String m17(count) => "${count} Pinned Messages";
+  static String m17(count) => "${count} Participants";
 
-  static String m18(user, preview) => "${user} pinned ${preview}";
+  static String m18(count) => "${count} Pinned Messages";
 
-  static String m19(count) => "${count} related messages";
+  static String m19(user, preview) => "${user} pinned ${preview}";
+
+  static String m20(count) => "${count} related messages";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -144,6 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("New Conversation"),
         "createGroupConversation":
             MessageLookupByLibrary.simpleMessage("New Group Conversation"),
+        "currentIdentityNumber": m12,
         "dataAndStorageUsage":
             MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
@@ -188,8 +191,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dismiss admin"),
         "groupPopMenuMakeAdmin":
             MessageLookupByLibrary.simpleMessage("Make group admin"),
-        "groupPopMenuMessage": m12,
-        "groupPopMenuRemoveParticipants": m13,
+        "groupPopMenuMessage": m13,
+        "groupPopMenuRemoveParticipants": m14,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
@@ -233,8 +236,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("NO MEDIA"),
         "noPost": MessageLookupByLibrary.simpleMessage("NO POST"),
         "notification": MessageLookupByLibrary.simpleMessage("Notification"),
-        "pageDeleteCircle": m14,
-        "pageEditProfileJoin": m15,
+        "pageDeleteCircle": m15,
+        "pageEditProfileJoin": m16,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -243,13 +246,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
-        "participantsCount": m16,
+        "participantsCount": m17,
         "people": MessageLookupByLibrary.simpleMessage("People"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinMessageCount": m17,
-        "pinned": m18,
+        "pinMessageCount": m18,
+        "pinned": m19,
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
@@ -270,7 +273,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m19,
+        "searchRelatedMessage": m20,
+        "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
+        "searchUserHint":
+            MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
         "send": MessageLookupByLibrary.simpleMessage("send"),
         "sendArchived": MessageLookupByLibrary.simpleMessage(
             "Archived all files in one zip file"),

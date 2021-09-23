@@ -36,6 +36,8 @@ class MultiAuthState extends Equatable {
 
   String? get currentUserId => currentUser?.userId;
 
+  String? get currentIdentityNumber => currentUser?.identityNumber;
+
   @override
   List<Object> get props => [
         _auths,

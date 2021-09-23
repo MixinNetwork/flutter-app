@@ -197,5 +197,8 @@
   "reedit": "Re-edit",
   "aMessage": "a message",
   "conversationParticipantsCountDescription": "{count} Participants",
-  "joinGroup": "+ Join the group"
+  "joinGroup": "+ Join the group",
+  "searchUser": "Search contact",
+  "searchUserHint": "Mixin ID or Phone number",
+  "currentIdentityNumber": "My Mixin ID: {ID}"
 }

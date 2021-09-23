@@ -86,6 +86,7 @@ Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
   useEffect(() {
     void onListen() => streamController.add(valueNotifier.value);
 
+    onListen();
     valueNotifier.addListener(onListen);
     return () {
       valueNotifier.removeListener(onListen);

@@ -192,5 +192,8 @@
   "reedit": "重新编辑",
   "aMessage": "一条消息",
   "conversationParticipantsCountDescription": "{count} 位群组成员",
-  "joinGroup": "+ 加入群组"
+  "joinGroup": "+ 加入群组",
+  "searchUser": "搜索用户",
+  "searchUserHint": "Mixin ID 或手机号",
+  "currentIdentityNumber": "我的 Mixin ID: {ID}"
 }

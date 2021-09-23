@@ -1030,20 +1030,7 @@ class AccountServer {
   Future<void> _relationship(RelationshipRequest request) async {
     try {
       final response = await client.userApi.relationships(request);
-      final user = response.data;
-      await database.userDao.insert(db.User(
-          userId: user.userId,
-          identityNumber: user.identityNumber,
-          relationship: user.relationship,
-          fullName: user.fullName,
-          avatarUrl: user.avatarUrl,
-          phone: user.phone,
-          isVerified: user.isVerified,
-          appId: user.app?.appId,
-          biography: user.biography,
-          muteUntil: DateTime.tryParse(user.muteUntil),
-          isScam: user.isScam ? 1 : 0,
-          createdAt: user.createdAt));
+      await database.userDao.insertSdkUser(response.data);
     } catch (e) {
       w('_relationship error $e');
     }
@@ -1251,22 +1238,7 @@ class AccountServer {
   Future<void> report(String userId) async {
     final response = await client.userApi.report(
         RelationshipRequest(userId: userId, action: RelationshipAction.block));
-    final user = response.data;
-    await database.userDao.insert(db.User(
-      userId: user.userId,
-      identityNumber: user.identityNumber,
-      relationship: user.relationship,
-      fullName: user.fullName,
-      avatarUrl: user.avatarUrl,
-      phone: user.phone,
-      isVerified: user.isVerified,
-      createdAt: user.createdAt,
-      muteUntil: DateTime.tryParse(user.muteUntil),
-      hasPin: user.hasPin == true ? 1 : 0,
-      appId: user.appId,
-      biography: user.biography,
-      isScam: user.isScam ? 1 : 0,
-    ));
+    await database.userDao.insertSdkUser(response.data);
   }
 
   Future<void> unMuteConversation({
