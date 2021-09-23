@@ -2010,11 +2010,31 @@ class Localization {
     );
   }
 
-  /// `一条消息`
+  /// `a message`
   String get aMessage {
     return Intl.message(
-      '一条消息',
+      'a message',
       name: 'aMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `{count} Participants`
+  String conversationParticipantsCountDescription(Object count) {
+    return Intl.message(
+      '$count Participants',
+      name: 'conversationParticipantsCountDescription',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `+ Join the group`
+  String get joinGroup {
+    return Intl.message(
+      '+ Join the group',
+      name: 'joinGroup',
       desc: '',
       args: [],
     );

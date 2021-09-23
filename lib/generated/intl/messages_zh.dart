@@ -39,21 +39,23 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m10(count) => "${count} 成员";
 
-  static String m11(name) => "发送消息至 ${name}";
+  static String m11(count) => "${count} 位群组成员";
 
-  static String m12(name) => "移除 ${name}";
+  static String m12(name) => "发送消息至 ${name}";
 
-  static String m13(name) => "确定删除${name}圈子吗？";
+  static String m13(name) => "移除 ${name}";
 
-  static String m14(date) => "${date}加入";
+  static String m14(name) => "确定删除${name}圈子吗？";
 
-  static String m15(count) => "共 ${count} 人";
+  static String m15(date) => "${date}加入";
 
-  static String m16(count) => "${count}条置顶消息";
+  static String m16(count) => "共 ${count} 人";
 
-  static String m17(user, preview) => "${user}置顶了${preview}";
+  static String m17(count) => "${count}条置顶消息";
 
-  static String m18(count) => "${count} 条相关的消息";
+  static String m18(user, preview) => "${user}置顶了${preview}";
+
+  static String m19(count) => "${count} 条相关的消息";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -112,6 +114,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "conversationCount": m8,
         "conversationName": MessageLookupByLibrary.simpleMessage("群组名称"),
         "conversationParticipantsCount": m10,
+        "conversationParticipantsCountDescription": m11,
         "conversations": MessageLookupByLibrary.simpleMessage("会话"),
         "copy": MessageLookupByLibrary.simpleMessage("复制"),
         "create": MessageLookupByLibrary.simpleMessage("创建"),
@@ -156,8 +159,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("撤销管理员身份"),
         "groupPopMenuMakeAdmin":
             MessageLookupByLibrary.simpleMessage("设定为群组管理员"),
-        "groupPopMenuMessage": m11,
-        "groupPopMenuRemoveParticipants": m12,
+        "groupPopMenuMessage": m12,
+        "groupPopMenuRemoveParticipants": m13,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "groups": MessageLookupByLibrary.simpleMessage("群组"),
@@ -167,6 +170,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "includeVideos": MessageLookupByLibrary.simpleMessage("包括视频"),
         "initializing": MessageLookupByLibrary.simpleMessage("初始化"),
         "introduction": MessageLookupByLibrary.simpleMessage("介绍"),
+        "joinGroup": MessageLookupByLibrary.simpleMessage("+ 加入群组"),
         "less": MessageLookupByLibrary.simpleMessage("更少"),
         "links": MessageLookupByLibrary.simpleMessage("链接"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
@@ -196,8 +200,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("没有媒体"),
         "noPost": MessageLookupByLibrary.simpleMessage("没有文章"),
         "notification": MessageLookupByLibrary.simpleMessage("通知"),
-        "pageDeleteCircle": m13,
-        "pageEditProfileJoin": m14,
+        "pageDeleteCircle": m14,
+        "pageEditProfileJoin": m15,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -206,13 +210,13 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("通过二维码登录 Mixin Messenger"),
         "pageRightEmptyMessage":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
-        "participantsCount": m15,
+        "participantsCount": m16,
         "people": MessageLookupByLibrary.simpleMessage("通讯录"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pin": MessageLookupByLibrary.simpleMessage("置顶"),
-        "pinMessageCount": m16,
-        "pinned": m17,
+        "pinMessageCount": m17,
+        "pinned": m18,
         "pleaseWait": MessageLookupByLibrary.simpleMessage("请稍等一下"),
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
@@ -229,7 +233,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
-        "searchRelatedMessage": m18,
+        "searchRelatedMessage": m19,
         "send": MessageLookupByLibrary.simpleMessage("发送"),
         "sendArchived": MessageLookupByLibrary.simpleMessage("打包成 zip 发送"),
         "sendQuick": MessageLookupByLibrary.simpleMessage("快速发送"),

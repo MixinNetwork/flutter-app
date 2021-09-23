@@ -3,25 +3,71 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../constants/constants.dart';
+import '../widgets/conversation/conversation_dialog.dart';
+import '../widgets/toast.dart';
 import '../widgets/user/user_dialog.dart';
+import 'extension/extension.dart';
 
 Future<bool> openUri(BuildContext context, String text) async {
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
 
-  if (uri.isScheme(mixinScheme)) {
-    final host = EnumToString.fromString(MixinSchemeHost.values, uri.host);
-
-    final protocolUrl = mixinProtocolUrls[host];
-    if (protocolUrl != null) {
-      return launch('$protocolUrl${uri.path}');
-    } else if (MixinSchemeHost.users == host) {
-      if (uri.pathSegments.isEmpty) return false;
-      final userId = uri.pathSegments[0];
+  if (uri.isMixin) {
+    final userId = uri.userId;
+    if (userId != null) {
       await showUserDialog(context, userId);
       return true;
+    }
+
+    final code = uri.code;
+    if (code != null) {
+      showToastLoading(context);
+      try {
+        final mixinResponse =
+            await context.accountServer.client.accountApi.code(code);
+        final data = mixinResponse.data;
+        if (data is User) {
+          await showUserDialog(context, userId);
+          return true;
+        } else if (data is ConversationResponse) {
+          await showConversationDialog(context, data, code);
+          return true;
+        }
+      } catch (e) {
+        await showToastFailed(context, e);
+      }
     }
   }
 
   return launch(uri.toString());
+}
+
+extension _MixinUriExtension on Uri {
+  bool get _isMixinScheme => isScheme(mixinScheme);
+
+  bool get _isMixinHost => host == mixinHost || host == 'www.$mixinHost';
+
+  bool get isMixin => _isMixinScheme || _isMixinHost;
+
+  bool _isTypeScheme(MixinSchemeHost type) =>
+      _isMixinScheme &&
+      host == enumConvertToString(type) &&
+      pathSegments.length == 1 &&
+      pathSegments.single.isNotEmpty;
+
+  bool _isTypeHost(MixinSchemeHost type) =>
+      _isMixinHost &&
+      pathSegments.length == 2 &&
+      pathSegments[0] == enumConvertToString(type) &&
+      pathSegments[1].isNotEmpty;
+
+  String? _getValue(MixinSchemeHost type) {
+    if (_isTypeScheme(type)) return pathSegments.single;
+    if (_isTypeHost(type)) return pathSegments[1];
+    return null;
+  }
+
+  String? get userId => _getValue(MixinSchemeHost.users);
+
+  String? get code => _getValue(MixinSchemeHost.codes);
 }

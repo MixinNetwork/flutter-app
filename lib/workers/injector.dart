@@ -25,14 +25,14 @@ class Injector {
         .getSingleOrNull();
     if (conversation == null || force) {
       if (unWait) {
-        unawaited(_refreshConversation(conversationId));
+        unawaited(refreshConversation(conversationId));
       } else {
-        await _refreshConversation(conversationId);
+        await refreshConversation(conversationId);
       }
     }
   }
 
-  Future<void> _refreshConversation(String conversationId) async {
+  Future<void> refreshConversation(String conversationId) async {
     try {
       final response =
           await client.conversationApi.getConversation(conversationId);

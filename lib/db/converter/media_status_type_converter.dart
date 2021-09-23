@@ -9,9 +9,9 @@ class MediaStatusTypeConverter extends TypeConverter<MediaStatus, String> {
 
   @override
   MediaStatus? mapToDart(String? fromDb) =>
-      EnumToString.fromString(MediaStatus.values, fromDb);
+      fromStringToEnum(MediaStatus.values, fromDb);
 
   @override
   String? mapToSql(MediaStatus? value) =>
-      EnumToString.convertToString(value)?.constantCase;
+      enumConvertToString(value)?.constantCase;
 }

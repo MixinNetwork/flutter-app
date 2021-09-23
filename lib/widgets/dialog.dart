@@ -42,16 +42,23 @@ Future<T?> showMixinDialog<T>({
   RouteSettings? routeSettings,
   required Widget child,
   EdgeInsetsGeometry? padding,
+  Color? backgroundColor,
 }) =>
     _showDialog(
       context: context,
       routeSettings: routeSettings,
       pageBuilder: (BuildContext buildContext, Animation<double> animation,
               Animation<double> secondaryAnimation) =>
-          Center(
-        child: _DialogPage(
-          padding: padding,
-          child: child,
+          InheritedTheme.capture(
+                  from: context,
+                  to: Navigator.of(context, rootNavigator: true).context)
+              .wrap(
+        Center(
+          child: _DialogPage(
+            padding: padding,
+            backgroundColor: backgroundColor,
+            child: child,
+          ),
         ),
       ),
     );
@@ -125,10 +132,12 @@ class _DialogPage extends StatelessWidget {
     Key? key,
     required this.child,
     this.padding,
+    this.backgroundColor,
   }) : super(key: key);
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -151,10 +160,7 @@ class _DialogPage extends StatelessWidget {
                 blurRadius: lerpDouble(16, 6, context.brightnessValue)!,
               ),
             ],
-            color: context.dynamicColor(
-              const Color.fromRGBO(255, 255, 255, 1),
-              darkColor: const Color.fromRGBO(62, 65, 72, 1),
-            ),
+            color: backgroundColor ?? context.theme.popUp,
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(11),
@@ -330,4 +336,31 @@ class EditDialog extends HookWidget {
       ],
     );
   }
+}
+
+class DialogAddOrJoinButton extends StatelessWidget {
+  const DialogAddOrJoinButton({
+    Key? key,
+    required this.onTap,
+    required this.title,
+  }) : super(key: key);
+
+  final VoidCallback onTap;
+  final Widget title;
+
+  @override
+  Widget build(BuildContext context) => TextButton(
+        style: TextButton.styleFrom(
+          backgroundColor: context.theme.statusBackground,
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+        ),
+        onPressed: onTap,
+        child: DefaultTextStyle(
+          style: TextStyle(fontSize: 12, color: context.theme.accent),
+          child: title,
+        ),
+      );
 }

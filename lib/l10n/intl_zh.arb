@@ -190,5 +190,7 @@
   "unpinAllMessagesDescription": "确认取消所有置顶吗？",
   "pinMessageCount": "{count}条置顶消息",
   "reedit": "重新编辑",
-  "aMessage": "一条消息"
+  "aMessage": "一条消息",
+  "conversationParticipantsCountDescription": "{count} 位群组成员",
+  "joinGroup": "+ 加入群组"
 }

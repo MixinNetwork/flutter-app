@@ -84,24 +84,22 @@ class _UserDialog extends StatelessWidget {
   Widget build(BuildContext context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Material(
-            color: context.theme.popUp,
-            child: SizedBox(
-              width: 340,
-              child: Stack(
-                fit: StackFit.passthrough,
-                children: [
-                  Center(
-                      child:
-                          _UserProfileLoader(userId, refreshUser: refreshUser)),
-                  const Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: EdgeInsets.only(right: 12, top: 12),
-                        child: MixinCloseButton(),
-                      )),
-                ],
-              ),
+          SizedBox(
+            width: 340,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: const [
+                    Spacer(),
+                    Padding(
+                      padding: EdgeInsets.only(right: 12, top: 12),
+                      child: MixinCloseButton(),
+                    ),
+                  ],
+                ),
+                _UserProfileLoader(userId, refreshUser: refreshUser),
+              ],
             ),
           ),
         ],
@@ -155,7 +153,6 @@ class _UserProfileBody extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 72),
             AvatarWidget(
               size: 90,
               avatarUrl: user.avatarUrl,
@@ -245,15 +242,8 @@ class _AddToContactsButton extends StatelessWidget {
   final User user;
 
   @override
-  Widget build(BuildContext context) => TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: context.theme.statusBackground,
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-        ),
-        onPressed: () {
+  Widget build(BuildContext context) => DialogAddOrJoinButton(
+        onTap: () {
           assert(user.fullName != null, ' username should not be null.');
           runFutureWithToast(
             context,
@@ -263,7 +253,7 @@ class _AddToContactsButton extends StatelessWidget {
             ),
           );
         },
-        child: Text(
+        title: Text(
           user.isBot
               ? context.l10n.conversationAddBot
               : context.l10n.conversationAddContact,

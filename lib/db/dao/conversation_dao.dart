@@ -458,4 +458,10 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
           .write(ConversationsCompanion(draft: Value(draft)));
+
+  Future<bool> hasConversation(String conversationId) => db.hasData(
+        db.conversations,
+        [],
+        db.conversations.conversationId.equals(conversationId),
+      );
 }

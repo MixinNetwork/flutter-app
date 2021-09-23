@@ -26,8 +26,8 @@ abstract class _NotificationManager {
   void onNotificationSelected(Uri uri) => _payloadStreamController.add(uri);
 
   Stream<Uri> notificationActionEvent(NotificationScheme notificationScheme) =>
-      _payloadStreamController.stream.where(
-          (e) => e.scheme == EnumToString.convertToString(notificationScheme));
+      _payloadStreamController.stream
+          .where((e) => e.scheme == enumConvertToString(notificationScheme));
 }
 
 class _MacosNotificationManager extends _NotificationManager {
