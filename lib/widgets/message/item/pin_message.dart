@@ -51,7 +51,9 @@ class PinMessageWidget extends HookWidget {
           mentionCache: context.read<MentionCache>(),
         );
 
-        return context.l10n.pinned(message.userFullName ?? '', preview);
+        return context.l10n
+            .pinned(message.userFullName ?? '', preview)
+            .overflow;
       },
       cachePreview,
       keys: [message.userFullName, message.content],
@@ -63,8 +65,10 @@ class PinMessageWidget extends HookWidget {
           vertical: 4,
           horizontal: 8,
         ),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 400,
+          ),
           child: DecoratedBox(
             decoration: BoxDecoration(
               color: context.dynamicColor(
@@ -85,6 +89,8 @@ class PinMessageWidget extends HookWidget {
                     const Color.fromRGBO(0, 0, 0, 1),
                   ),
                 ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
             ),
           ),
@@ -99,10 +105,11 @@ Future<String> generatePinPreviewText({
   required MentionCache mentionCache,
 }) async {
   if (pinMessageMinimal.type.isText) {
-    return '"${mentionCache.replaceMention(
+    return mentionCache.replaceMention(
           pinMessageMinimal.content,
           await mentionCache.checkMentionCache({pinMessageMinimal.content}),
-        ) ?? ''}"';
+        ) ??
+        '';
   } else {
     return messagePreviewOptimize(
           null,
@@ -120,10 +127,11 @@ String cachePinPreviewText({
   required MentionCache mentionCache,
 }) {
   if (pinMessageMinimal.type.isText) {
-    return '"${mentionCache.replaceMention(
+    return mentionCache.replaceMention(
           pinMessageMinimal.content,
           mentionCache.mentionCache(pinMessageMinimal.content),
-        ) ?? ''}"';
+        ) ??
+        '';
   } else {
     return messagePreviewOptimize(
           null,
