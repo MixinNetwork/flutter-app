@@ -27,8 +27,7 @@ Future<void> showUserDialog(BuildContext context, String? userId,
     _userId ??= (await context.database.userDao
             .findMultiUserIdsByIdentityNumbers([identityNumber!]))
         .first;
-    await showMixinDialog(
-        context: context, child: _UserDialog(userId: _userId));
+    await showMixinDialog(context: context, child: UserDialog(userId: _userId));
     return;
   }
 
@@ -63,15 +62,15 @@ Future<void> showUserDialog(BuildContext context, String? userId,
   Toast.dismiss();
   await showMixinDialog(
     context: context,
-    child: _UserDialog(
+    child: UserDialog(
       userId: _userId,
       refreshUser: false,
     ),
   );
 }
 
-class _UserDialog extends StatelessWidget {
-  const _UserDialog({
+class UserDialog extends StatelessWidget {
+  const UserDialog({
     Key? key,
     required this.userId,
     this.refreshUser = true,

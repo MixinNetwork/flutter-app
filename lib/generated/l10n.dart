@@ -2039,6 +2039,36 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Search contact`
+  String get searchUser {
+    return Intl.message(
+      'Search contact',
+      name: 'searchUser',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Mixin ID or Phone number`
+  String get searchUserHint {
+    return Intl.message(
+      'Mixin ID or Phone number',
+      name: 'searchUserHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `My Mixin ID: {ID}`
+  String currentIdentityNumber(Object ID) {
+    return Intl.message(
+      'My Mixin ID: $ID',
+      name: 'currentIdentityNumber',
+      desc: '',
+      args: [ID],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
