@@ -77,7 +77,7 @@ class HoverOverlay extends HookWidget {
       portalAnchor: portalAnchor,
       closeDuration: Duration(microseconds: totalClose),
       portal: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+        behavior: HitTestBehavior.translucent,
         onTap: () => tapped.value = false,
         child: TweenAnimationBuilder<double>(
           tween: Tween(begin: 0, end: visible ? 1 : 0),
@@ -105,7 +105,7 @@ class HoverOverlay extends HookWidget {
           childHovering.value = false;
         },
         child: GestureDetector(
-          behavior: HitTestBehavior.translucent,
+          behavior: HitTestBehavior.opaque,
           onTapUp: (detail) {
             if (detail.kind == PointerDeviceKind.touch) {
               tapped.value = true;
