@@ -37,7 +37,7 @@ dependencies:
       url: https://github.com/MixinNetwork/flutter-plugins.git
       ref: 18e4e369cdeda9bbf8c4baade20ad951294a26b3
       path: packages/desktop_lifecycle
-  desktop_notifications: ^0.5.0
+  desktop_notifications: ^0.6.1
   device_info_plus: ^2.0.1
   dio: ^4.0.0
   ecache: ^2.0.1
@@ -55,7 +55,7 @@ dependencies:
   flutter_bloc: ^7.1.0
   flutter_cache_manager: ^3.1.2
   flutter_hooks: ^0.18.0
-  flutter_local_notifications: 8.0.0
+  flutter_local_notifications: 8.2.0
   flutter_localizations:
     sdk: flutter
   flutter_markdown: ^0.6.6
@@ -76,7 +76,7 @@ dependencies:
   mixin_bot_sdk_dart: ^0.2.2
   moor: ^4.5.0
   octo_image: ^1.0.0+1
-  package_info_plus: ^1.0.3
+  package_info_plus: ^1.0.6
   pasteboard:
     git:
       url: https://github.com/MixinNetwork/flutter_pasteboard.git
