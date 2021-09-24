@@ -33,12 +33,7 @@ class AudioMessagePlayService {
 
   bool get playing => _player.isPlaying;
 
-  Duration get currentPosition {
-    assert(supportCurrentPosition, 'not supported.');
-    return _player.currentPosition();
-  }
-
-  bool get supportCurrentPosition => _player.supportCurrentPosition();
+  Duration get currentPosition => _player.currentPosition();
 
   void initListen() {
     _player.playbackStream.asyncMap((playbackState) async {
@@ -117,26 +112,24 @@ class AudioMessagePlayService {
 bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
   final context = useContext();
 
-  final value = useMemoizedStream(
-        () {
-          final ams = context.audioMessageService;
+  final result = useMemoizedStream(
+    () {
+      final ams = context.audioMessageService;
 
-          return CombineLatestStream.combine2(
-            ams._player.currentStream,
-            ams._player.playbackStream,
-            (MessageMedia? a, PlaybackState b) =>
-                Tuple2<MessageMedia?, PlaybackState>(a, b),
-          ).map((event) {
-            if (!event.item2.isPlaying) return false;
+      return CombineLatestStream.combine2(
+        ams._player.currentStream,
+        ams._player.playbackStream.map((e) => e.isPlaying).distinct(),
+        (MessageMedia? a, bool playing) => Tuple2(a, playing),
+      ).map((event) {
+        if (!event.item2) return false;
 
-            final message = event.item1?.messageItem;
-            return message?.messageId == messageId &&
-                isMediaList == ams._isMediaList;
-          }).distinct();
-        },
-        keys: [messageId, isMediaList],
-      ).data ??
-      false;
+        final message = event.item1?.messageItem;
 
-  return value;
+        return message?.messageId == messageId &&
+            isMediaList == ams._isMediaList;
+      }).distinct();
+    },
+    keys: [messageId, isMediaList, context],
+  );
+  return result.data ?? false;
 }

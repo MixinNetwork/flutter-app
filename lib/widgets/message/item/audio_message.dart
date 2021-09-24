@@ -9,7 +9,6 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/logger.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
 import '../../waveform_widget.dart';
@@ -125,19 +124,11 @@ class AudioMessage extends HookWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (!context.audioMessageService.supportCurrentPosition)
-                    _AnimatedWaveWithoutPlayerPosition(
-                      playing: playing,
-                      read: message.mediaStatus == MediaStatus.read,
-                      waveform: waveform,
-                      duration: duration,
-                    )
-                  else
-                    _AnimatedWave(
-                      message: message,
-                      waveform: waveform,
-                      duration: duration,
-                    ),
+                  _AnimatedWave(
+                    message: message,
+                    waveform: waveform,
+                    duration: duration,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     '${duration.inSeconds}‘',
@@ -195,7 +186,6 @@ class _AnimatedWave extends HookWidget {
                   newValue == 1 ||
                   (newValue - position.value).abs() > 0.01) {
                 position.value = newValue;
-                d('_AnimatedWave: animating ${position.value}');
               }
             }),
         [tickerProvider]);
@@ -221,38 +211,6 @@ class _AnimatedWave extends HookWidget {
       ),
     );
   }
-}
-
-class _AnimatedWaveWithoutPlayerPosition extends StatelessWidget {
-  const _AnimatedWaveWithoutPlayerPosition({
-    Key? key,
-    required this.playing,
-    required this.duration,
-    required this.waveform,
-    required this.read,
-  }) : super(key: key);
-
-  final bool playing;
-  final Duration duration;
-  final List<int> waveform;
-  final bool read;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-        height: 12,
-        child: TweenAnimationBuilder<double>(
-          tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
-          duration: playing ? duration : Duration.zero,
-          builder: (context, value, _) => WaveformWidget(
-            value: value,
-            waveform: waveform,
-            backgroundColor:
-                read ? context.theme.waveformBackground : context.theme.accent,
-            foregroundColor:
-                read ? context.theme.waveformForeground : context.theme.accent,
-          ),
-        ),
-      );
 }
 
 class AudioMessagesPlayAgent {
