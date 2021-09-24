@@ -43,6 +43,8 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
+  - ogg_opus_player (0.0.1):
+    - Flutter
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider (0.0.1):
@@ -72,6 +74,8 @@ PODS:
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - SwiftyGif (5.4.0)
+  - system_clock (0.0.1):
+    - Flutter
   - url_launcher (0.0.1):
     - Flutter
 
@@ -81,10 +85,12 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_app_icon_badge (from `.symlinks/plugins/flutter_app_icon_badge/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
+  - ogg_opus_player (from `.symlinks/plugins/ogg_opus_player/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - sqlite3_flutter_libs (from `.symlinks/plugins/sqlite3_flutter_libs/ios`)
+  - system_clock (from `.symlinks/plugins/system_clock/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
 
 SPEC REPOS:
@@ -107,6 +113,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_app_icon_badge/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
+  ogg_opus_player:
+    :path: ".symlinks/plugins/ogg_opus_player/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
   path_provider:
@@ -115,6 +123,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/sqflite/ios"
   sqlite3_flutter_libs:
     :path: ".symlinks/plugins/sqlite3_flutter_libs/ios"
+  system_clock:
+    :path: ".symlinks/plugins/system_clock/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
 
@@ -127,6 +137,7 @@ SPEC CHECKSUMS:
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  ogg_opus_player: 09755f269d1ab4c2879184d4b68168afe19a812a
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   SDWebImage: 7acbb57630ac7db4a495547fb73916ff3e432f6b
@@ -134,8 +145,9 @@ SPEC CHECKSUMS:
   sqlite3: 75da32fd4e3574f6c38566a9f0114cfe792c8db5
   sqlite3_flutter_libs: aedb7b6ba191f9a052dcef77691cf5d37437431c
   SwiftyGif: 5d4af95df24caf1c570dbbcb32a3b8a0763bc6d7
+  system_clock: 3efb51d18e565092e2a97bc605c6255f328bd13a
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
 
 COCOAPODS: 1.11.2
