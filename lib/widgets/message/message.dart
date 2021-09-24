@@ -7,9 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../blaze/vo/pin_message_minimal.dart';
+import '../../bloc/simple_cubit.dart';
 import '../../constants/resources.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
@@ -120,12 +122,26 @@ class MessageItemWidget extends HookWidget {
       userId = message.userId;
     }
 
-    final blinkColor = useBlocStateConverter<BlinkCubit, BlinkState, Color>(
-      converter: (state) {
-        if (state.messageId == message.messageId && blink) return state.color;
-        return Colors.transparent;
-      },
-    );
+    final showedMenuCubit = useBloc(() => SimpleCubit(false));
+
+    final blinkColor = useMemoizedStream(
+          () {
+            final blinkCubit = context.read<BlinkCubit>();
+            return Rx.combineLatest2(
+              blinkCubit.stream.startWith(blinkCubit.state),
+              showedMenuCubit.stream.startWith(showedMenuCubit.state),
+              (BlinkState blinkState, bool showedMenu) {
+                if (showedMenu) return context.theme.listSelected;
+                if (blinkState.messageId == message.messageId && blink) {
+                  return blinkState.color;
+                }
+                return Colors.transparent;
+              },
+            );
+          },
+          keys: [message.messageId],
+        ).data ??
+        Colors.transparent;
 
     final child = Column(
       mainAxisSize: MainAxisSize.min,
@@ -165,6 +181,7 @@ class MessageItemWidget extends HookWidget {
                 userId: userId,
                 isCurrentUser: isCurrentUser,
                 pinArrowWidth: pinned ? _pinArrowWidth : 0,
+                showedMenu: showedMenuCubit.emit,
                 buildMenus: () => [
                   if (!isTranscript && message.type.canReply && !pinned)
                     ContextMenu(
@@ -499,6 +516,7 @@ class _MessageBubbleMargin extends StatelessWidget {
     required this.builder,
     required this.buildMenus,
     required this.pinArrowWidth,
+    this.showedMenu,
   }) : super(key: key);
 
   final bool isCurrentUser;
@@ -507,6 +525,7 @@ class _MessageBubbleMargin extends StatelessWidget {
   final WidgetBuilder builder;
   final List<Widget> Function() buildMenus;
   final double pinArrowWidth;
+  final ValueChanged<bool>? showedMenu;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -526,6 +545,7 @@ class _MessageBubbleMargin extends StatelessWidget {
               ),
             ContextMenuPortalEntry(
               buildMenus: buildMenus,
+              showedMenu: showedMenu,
               child: Builder(builder: builder),
             ),
           ],
