@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tuple/tuple.dart';
 
@@ -129,21 +128,6 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   Future<void> close() async {
     itemPositionsListener?.itemPositions.removeListener(onItemPositions);
     await super.close();
-  }
-
-  @override
-  Stream<Transition<PagingEvent, PagingState<T>>> transformEvents(
-      Stream<PagingEvent> events,
-      TransitionFunction<PagingEvent, PagingState<T>> transitionFn) {
-    final asBroadcastStream = events.asBroadcastStream();
-    final nonDebounceStream =
-        asBroadcastStream.where((event) => event is! PagingItemPositionEvent);
-    final debounceStream = asBroadcastStream
-        .where((event) => event is PagingItemPositionEvent)
-        .distinct();
-
-    return super.transformEvents(
-        Rx.merge([nonDebounceStream, debounceStream]), transitionFn);
   }
 
   @override
