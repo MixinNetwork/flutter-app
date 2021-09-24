@@ -7,8 +7,8 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
+import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/vlc_service.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
 import '../../waveform_widget.dart';
@@ -64,19 +64,19 @@ class AudioMessage extends HookWidget {
             case MediaStatus.read:
             case MediaStatus.done:
               if (playing) {
-                context.vlcService.stop();
+                context.audioMessageService.stop();
                 return;
               }
 
               if (context.audioMessagesPlayAgent != null) {
-                context.vlcService.playMessages(
+                context.audioMessageService.playMessages(
                   context.audioMessagesPlayAgent!
                       .getMessages(message.messageId),
                   context.audioMessagesPlayAgent!.convertMessageAbsolutePath,
                 );
                 return;
               }
-              context.vlcService.playAudioMessage(message);
+              context.audioMessageService.playAudioMessage(message);
               break;
             case MediaStatus.canceled:
               if (message.relationship == UserRelationship.me &&
