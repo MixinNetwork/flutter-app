@@ -514,6 +514,7 @@ class _List extends HookWidget {
       center: key,
       controller: BlocProvider.of<MessageBloc>(context).scrollController,
       anchor: 0.3,
+      physics: const ClampingScrollPhysics(),
       slivers: [
         SliverList(
           delegate: SliverChildBuilderDelegate(
