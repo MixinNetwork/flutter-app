@@ -113,7 +113,9 @@ class TranscriptMessageWidget extends HookWidget {
                   vlcService: context.audioMessageService,
                 ));
 
-            if (context.audioMessageService.playing) context.audioMessageService.stop();
+            if (context.audioMessageService.playing) {
+              context.audioMessageService.stop();
+            }
           },
           child: SizedBox(
             width: 260,

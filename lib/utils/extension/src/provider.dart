@@ -7,7 +7,8 @@ extension ProviderExtension on BuildContext {
 
   AccountServer get accountServer => read<AccountServer>();
 
-  AudioMessagePlayService get audioMessageService => read<AudioMessagePlayService>();
+  AudioMessagePlayService get audioMessageService =>
+      read<AudioMessagePlayService>();
 
   Database get database => accountServer.database;
 
