@@ -41,6 +41,14 @@ class SearchMessagePage extends HookWidget {
         ).data ??
         editingController.text.isEmpty;
 
+    useEffect(() {
+      if (!context.textFieldAutoGainFocus) {
+        focusNode.unfocus();
+        return null;
+      }
+      focusNode.requestFocus();
+    }, [userMode.value, selectedUser.value != null]);
+
     return Scaffold(
       backgroundColor: context.theme.primary,
       appBar: MixinAppBar(
@@ -156,8 +164,6 @@ class SearchMessagePage extends HookWidget {
                     onSelected: (user) {
                       editingController.text = '';
                       selectedUser.value = user;
-
-                      focusNode.requestFocus();
                     },
                   )
                 : _SearchMessageList(
