@@ -9,6 +9,7 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/logger.dart';
 import '../../interacter_decorated_box.dart';
 import '../../status.dart';
 import '../../waveform_widget.dart';
@@ -124,25 +125,19 @@ class AudioMessage extends HookWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: 12,
-                    child: TweenAnimationBuilder<double>(
-                      tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
-                      duration: playing ? duration : Duration.zero,
-                      builder: (context, value, _) => WaveformWidget(
-                        value: value,
-                        width: 50,
-                        waveform: waveform,
-                        duration: duration.inSeconds,
-                        backgroundColor: message.mediaStatus == MediaStatus.read
-                            ? context.theme.waveformBackground
-                            : context.theme.accent,
-                        foregroundColor: message.mediaStatus == MediaStatus.read
-                            ? context.theme.waveformForeground
-                            : context.theme.accent,
-                      ),
+                  if (!context.audioMessageService.supportCurrentPosition)
+                    _AnimatedWaveWithoutPlayerPosition(
+                      playing: playing,
+                      read: message.mediaStatus == MediaStatus.read,
+                      waveform: waveform,
+                      duration: duration,
+                    )
+                  else
+                    _AnimatedWave(
+                      message: message,
+                      waveform: waveform,
+                      duration: duration,
                     ),
-                  ),
                   const SizedBox(height: 8),
                   Text(
                     '${duration.inSeconds}‘',
@@ -159,6 +154,105 @@ class AudioMessage extends HookWidget {
       ),
     );
   }
+}
+
+class _AnimatedWave extends HookWidget {
+  const _AnimatedWave({
+    Key? key,
+    required this.duration,
+    required this.waveform,
+    required this.message,
+  }) : super(key: key);
+
+  final Duration duration;
+  final List<int> waveform;
+  final MessageItem message;
+
+  @override
+  Widget build(BuildContext context) {
+    final read = message.mediaStatus == MediaStatus.read;
+    final playing = useAudioMessagePlaying(
+      message.messageId,
+      isMediaList: context.isTranscript,
+    );
+
+    double getPlayingFriction() {
+      final friction =
+          (context.audioMessageService.currentPosition.inMilliseconds) /
+              duration.inMilliseconds;
+      return friction.clamp(0.0, 1.0);
+    }
+
+    final position = useState(playing ? getPlayingFriction() : 0.0);
+
+    final tickerProvider = useSingleTickerProvider();
+    final ticker = useMemoized(
+        () => tickerProvider.createTicker((elapsed) {
+              final newValue = getPlayingFriction();
+              // Avoid update too often. since there is performance issue in Flutter.
+              // https://github.com/flutter/flutter/issues/85781
+              if (newValue == 0 ||
+                  newValue == 1 ||
+                  (newValue - position.value).abs() > 0.01) {
+                position.value = newValue;
+                d('_AnimatedWave: animating ${position.value}');
+              }
+            }),
+        [tickerProvider]);
+    useEffect(() => ticker.dispose, [ticker]);
+    useEffect(() {
+      if (playing) {
+        ticker.start();
+      } else {
+        ticker.stop();
+        position.value = 0;
+      }
+    }, [playing]);
+
+    return SizedBox(
+      height: 12,
+      child: WaveformWidget(
+        value: position.value,
+        waveform: waveform,
+        backgroundColor:
+            read ? context.theme.waveformBackground : context.theme.accent,
+        foregroundColor:
+            read ? context.theme.waveformForeground : context.theme.accent,
+      ),
+    );
+  }
+}
+
+class _AnimatedWaveWithoutPlayerPosition extends StatelessWidget {
+  const _AnimatedWaveWithoutPlayerPosition({
+    Key? key,
+    required this.playing,
+    required this.duration,
+    required this.waveform,
+    required this.read,
+  }) : super(key: key);
+
+  final bool playing;
+  final Duration duration;
+  final List<int> waveform;
+  final bool read;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 12,
+        child: TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: playing ? 1 : 0),
+          duration: playing ? duration : Duration.zero,
+          builder: (context, value, _) => WaveformWidget(
+            value: value,
+            waveform: waveform,
+            backgroundColor:
+                read ? context.theme.waveformBackground : context.theme.accent,
+            foregroundColor:
+                read ? context.theme.waveformForeground : context.theme.accent,
+          ),
+        ),
+      );
 }
 
 class AudioMessagesPlayAgent {

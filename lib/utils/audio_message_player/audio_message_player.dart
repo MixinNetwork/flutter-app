@@ -57,4 +57,8 @@ abstract class AudioMessagePlayer {
   void stop();
 
   void play(List<MessageMedia> media);
+
+  Duration currentPosition();
+
+  bool supportCurrentPosition();
 }

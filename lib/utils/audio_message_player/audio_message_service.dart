@@ -33,6 +33,13 @@ class AudioMessagePlayService {
 
   bool get playing => _player.isPlaying;
 
+  Duration get currentPosition {
+    assert(supportCurrentPosition, 'not supported.');
+    return _player.currentPosition();
+  }
+
+  bool get supportCurrentPosition => _player.supportCurrentPosition();
+
   void initListen() {
     _player.playbackStream.asyncMap((playbackState) async {
       if (!playbackState.isCompleted) return;

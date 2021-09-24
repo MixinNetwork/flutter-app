@@ -55,4 +55,10 @@ class VlcAudioMessagePlayer extends AudioMessagePlayer {
   void stop() {
     _player.stop();
   }
+
+  @override
+  Duration currentPosition() => Duration.zero;
+
+  @override
+  bool supportCurrentPosition() => false;
 }

@@ -118,4 +118,11 @@ class OggOpusAudioMessagePlayer extends AudioMessagePlayer {
     _disposeCurrentPlayer();
     _playbackState.value = PlayerState.idle;
   }
+
+  @override
+  Duration currentPosition() =>
+      Duration(milliseconds: ((_player?.currentPosition ?? 0) * 1000).toInt());
+
+  @override
+  bool supportCurrentPosition() => true;
 }
