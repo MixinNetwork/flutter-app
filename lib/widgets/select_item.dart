@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/extension/extension.dart';
-import 'interacter_decorated_box.dart';
+import 'interactive_decorated_box.dart';
 import 'unread_text.dart';
 
 class SelectItem extends StatelessWidget {

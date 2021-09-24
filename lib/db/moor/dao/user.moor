@@ -11,8 +11,7 @@ groupParticipants:
 SELECT u.*
 FROM participants AS p
          left join users u on p.user_id = u.user_id
-WHERE p.conversation_id = :conversationId AND
-    p.user_id != :id;
+WHERE p.conversation_id = :conversationId;
 
 friends:
 SELECT * FROM users WHERE relationship = 'FRIEND' AND user_id NOT IN :filterIds ORDER BY full_name, user_id ASC;

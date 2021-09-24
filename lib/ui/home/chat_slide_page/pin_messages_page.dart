@@ -13,7 +13,7 @@ import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/dialog.dart';
-import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/audio_message.dart';
 import '../../../widgets/message/message.dart';
 import '../bloc/conversation_cubit.dart';

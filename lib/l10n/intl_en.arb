@@ -200,5 +200,6 @@
   "joinGroup": "+ Join the group",
   "searchUser": "Search contact",
   "searchUserHint": "Mixin ID or Phone number",
-  "currentIdentityNumber": "My Mixin ID: {ID}"
+  "currentIdentityNumber": "My Mixin ID: {ID}",
+  "fromWithColon": "From: "
 }

@@ -21,7 +21,6 @@ class StatusPending extends HookWidget {
       context.accountServer.attachmentUtil,
       converter: (AttachmentUtil attachmentUtil) =>
           attachmentUtil.getAttachmentProgress(messageId),
-      initialData: 0,
       keys: [messageId],
     ).requireData.toDouble();
 

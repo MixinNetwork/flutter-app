@@ -11,7 +11,7 @@ import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../cache_image.dart';
-import '../interacter_decorated_box.dart';
+import '../interactive_decorated_box.dart';
 import 'bloc/cubit/sticker_albums_cubit.dart';
 import 'bloc/cubit/sticker_cubit.dart';
 

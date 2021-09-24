@@ -20,7 +20,7 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/dash_path_border.dart';
-import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';

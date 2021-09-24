@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import '../bloc/simple_cubit.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
-import 'interacter_decorated_box.dart';
+import 'interactive_decorated_box.dart';
 
 class _OffsetCubit extends SimpleCubit<Offset?> {
   _OffsetCubit(Offset? state) : super(state);

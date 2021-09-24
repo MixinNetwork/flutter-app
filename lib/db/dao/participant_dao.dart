@@ -23,8 +23,9 @@ class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     return query.get();
   }
 
-  Stream<List<ParticipantUser>> watchParticipants(String conversationId) =>
-      db.getGroupParticipants(conversationId).watch();
+  Selectable<ParticipantUser> groupParticipantsByConversationId(
+          String conversationId) =>
+      db.groupParticipantsByConversationId(conversationId);
 
   Future<String?> findJoinedConversationId(String userId) async => db
       .customSelect(

@@ -11914,12 +11914,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
-  Selectable<User> groupParticipants(String conversationId, String id) {
+  Selectable<User> groupParticipants(String conversationId) {
     return customSelect(
-        'SELECT u.* FROM participants AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND p.user_id != ?2',
+        'SELECT u.* FROM participants AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1',
         variables: [
-          Variable<String>(conversationId),
-          Variable<String>(id)
+          Variable<String>(conversationId)
         ],
         readsFrom: {
           participants,
@@ -12064,7 +12063,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
-  Selectable<ParticipantSessionKey> getParticipantSessionKeyWithoutSelf(
+  Selectable<ParticipantSessionKey> participantSessionKeyWithoutSelf(
       String conversationId, String userId) {
     return customSelect(
         'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id != ?2 LIMIT 1',
@@ -12084,7 +12083,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<ParticipantSessionKey> getOtherParticipantSessionKey(
+  Selectable<ParticipantSessionKey> otherParticipantSessionKey(
       String conversationId, String userId, String sessionId) {
     return customSelect(
         'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id == ?2 AND session_id != ?3',
@@ -12105,7 +12104,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<ParticipantSessionData> getNotSendSessionParticipants(
+  Selectable<ParticipantSessionData> notSendSessionParticipants(
       String conversationId, String sessionId) {
     return customSelect(
         'SELECT p.* FROM participant_session AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1 AND p.session_id != ?2 AND u.app_id IS NULL AND p.sent_to_server IS NULL',
@@ -12119,7 +12118,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(participantSession.mapFromRow);
   }
 
-  Selectable<ParticipantSessionData> getParticipantSessionKeyBySessionId(
+  Selectable<ParticipantSessionData> participantSessionKeyBySessionId(
       String conversationId, String sessionId) {
     return customSelect(
         'SELECT * FROM participant_session WHERE conversation_id = ?1 AND session_id == ?2',
@@ -12132,7 +12131,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(participantSession.mapFromRow);
   }
 
-  Selectable<ParticipantUser> getGroupParticipants(String conversationId) {
+  Selectable<ParticipantUser> groupParticipantsByConversationId(
+      String conversationId) {
     return customSelect(
         'SELECT p.conversation_id AS conversationId, p.role AS role, p.created_at AS createdAt, u.user_id AS userId, u.identity_number AS identityNumber, u.relationship AS relationship, u.biography AS biography, u.full_name AS fullName, u.avatar_url AS avatarUrl, u.phone AS phone, u.is_verified AS isVerified, u.created_at AS userCreatedAt, u.mute_until AS muteUntil, u.has_pin AS hasPin, u.app_id AS appId, u.is_scam AS isScam FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id ORDER BY p.created_at DESC',
         variables: [
@@ -12594,12 +12594,113 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
+  Selectable<int> messageCountByConversationIdAndUserId(
+      String conversationId, String userId) {
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId)
+        ],
+        readsFrom: {
+          messages,
+          conversations,
+          users,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<int> fuzzySearchMessageCountByConversationIdAndUserId(
+      String conversationId, String userId, String query) {
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId),
+          Variable<String>(query)
+        ],
+        readsFrom: {
+          messages,
+          conversations,
+          users,
+          messagesFts,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
       String conversationId, String query, int limit, int offset) {
     return customSelect(
         'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
         variables: [
           Variable<String>(conversationId),
+          Variable<String>(query),
+          Variable<int>(limit),
+          Variable<int>(offset)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
+  }
+
+  Selectable<SearchMessageDetailItem> messageByConversationIdAndUserId(
+      String conversationId, String userId, int limit, int offset) {
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId),
+          Variable<int>(limit),
+          Variable<int>(offset)
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
+  }
+
+  Selectable<SearchMessageDetailItem>
+      fuzzySearchMessageByConversationIdAndUserId(String conversationId,
+          String userId, String query, int limit, int offset) {
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId),
           Variable<String>(query),
           Variable<int>(limit),
           Variable<int>(offset)

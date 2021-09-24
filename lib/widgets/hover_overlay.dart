@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 
-import 'interacter_decorated_box.dart';
+import 'interactive_decorated_box.dart';
 
 class HoverOverlay extends HookWidget {
   const HoverOverlay({

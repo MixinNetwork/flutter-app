@@ -146,6 +146,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("关注我们的 Facebook"),
         "followTwitter": MessageLookupByLibrary.simpleMessage("关注我们的 Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
+        "fromWithColon": MessageLookupByLibrary.simpleMessage("来自: "),
         "groupAdd": MessageLookupByLibrary.simpleMessage("添加成员"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
         "groupCantSendDes":

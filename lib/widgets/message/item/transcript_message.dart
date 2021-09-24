@@ -18,7 +18,7 @@ import '../../../utils/message_optimize.dart';
 import '../../../utils/vlc_service.dart';
 import '../../action_button.dart';
 import '../../dialog.dart';
-import '../../interacter_decorated_box.dart';
+import '../../interactive_decorated_box.dart';
 import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';

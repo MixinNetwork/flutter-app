@@ -17,7 +17,7 @@ import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
 import '../../../image.dart';
-import '../../../interacter_decorated_box.dart';
+import '../../../interactive_decorated_box.dart';
 import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';

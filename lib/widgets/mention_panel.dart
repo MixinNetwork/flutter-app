@@ -16,7 +16,7 @@ import '../utils/reg_exp_utils.dart';
 import 'avatar_view/avatar_view.dart';
 
 import 'high_light_text.dart';
-import 'interacter_decorated_box.dart';
+import 'interactive_decorated_box.dart';
 
 const kMentionItemHeight = 48.0;
 
