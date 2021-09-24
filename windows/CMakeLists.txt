@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(flutter_app LANGUAGES CXX)
+project(Mixin LANGUAGES CXX)
 
-set(BINARY_NAME "flutter_app")
+set(BINARY_NAME "Mixin")
 
 cmake_policy(SET CMP0063 NEW)
 
