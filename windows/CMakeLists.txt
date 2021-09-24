@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-project(Mixin LANGUAGES CXX)
+project(mixin_desktop LANGUAGES CXX)
 
-set(BINARY_NAME "Mixin")
+set(BINARY_NAME "mixin_desktop")
 
 cmake_policy(SET CMP0063 NEW)
 
