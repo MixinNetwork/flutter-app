@@ -1,7 +1,7 @@
 import 'package:dart_vlc/dart_vlc.dart' as vlc;
 import 'package:extended_image/extended_image.dart';
-import 'package:flutter_app/utils/extension/extension.dart';
 
+import '../extension/extension.dart';
 import 'audio_message_player.dart';
 
 class _VlcPlaybackState extends PlaybackState {
