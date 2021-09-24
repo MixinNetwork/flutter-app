@@ -123,10 +123,11 @@ bool useAudioMessagePlaying(String messageId, {bool isMediaList = false}) {
             if (!event.item2.isPlaying) return false;
 
             final message = event.item1?.messageItem;
-            return message?.messageId == messageId;
+            return message?.messageId == messageId &&
+                isMediaList == ams._isMediaList;
           }).distinct();
         },
-        keys: [messageId],
+        keys: [messageId, isMediaList],
       ).data ??
       false;
 
