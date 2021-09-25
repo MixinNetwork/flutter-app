@@ -45,18 +45,16 @@ class ContextMenuPortalEntry extends HookWidget {
       converter: (state) => state != null,
     );
 
-    void updateOffset(Offset? value) {
-      offsetCubit.emit(value);
-      if (showedMenu == null) return;
-      showedMenu!(value != null);
-    }
+    useEffect(() {
+      showedMenu?.call(visible);
+    }, [visible]);
 
     return Provider.value(
       value: offsetCubit,
       child: Barrier(
         duration: const Duration(milliseconds: 100),
         visible: visible,
-        onClose: () => updateOffset(null),
+        onClose: () => offsetCubit.emit(null),
         child: PortalEntry(
           visible: visible,
           closeDuration: const Duration(milliseconds: 100),
@@ -83,10 +81,10 @@ class ContextMenuPortalEntry extends HookWidget {
           ),
           child: InteractiveDecoratedBox(
             onRightClick: (PointerUpEvent pointerUpEvent) =>
-                updateOffset(pointerUpEvent.position),
+                offsetCubit.emit(pointerUpEvent.position),
             onLongPress: (details) {
               if (Platform.isAndroid || Platform.isIOS) {
-                updateOffset(details.globalPosition);
+                offsetCubit.emit(details.globalPosition);
               }
             },
             child: child,
