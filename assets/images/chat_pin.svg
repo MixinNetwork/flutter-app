@@ -6,21 +6,4 @@
         stroke="white" stroke-width="2" stroke-linejoin="round"/>
   <rect opacity="0.9" x="9" y="18" width="5" height="2" rx="1" fill="white"/>
   <rect opacity="0.9" x="9" y="24" width="5" height="2" rx="1" fill="white"/>
-  <defs>
-    <filter id="filter0_d" x="0" y="0" width="38" height="38"
-            filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feColorMatrix in="SourceAlpha" type="matrix"
-                     values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
-                     result="hardAlpha"/>
-      <feOffset/>
-      <feGaussianBlur stdDeviation="1"/>
-      <feColorMatrix type="matrix"
-                     values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.16 0"/>
-      <feBlend mode="normal" in2="BackgroundImageFix"
-               result="effect1_dropShadow"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow"
-               result="shape"/>
-    </filter>
-  </defs>
 </svg>
