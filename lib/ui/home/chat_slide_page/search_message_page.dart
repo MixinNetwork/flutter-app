@@ -46,6 +46,10 @@ class SearchMessagePage extends HookWidget {
         focusNode.unfocus();
         return null;
       }
+      SearchConversationKeywordCubit.updateSelectedUser(
+        context,
+        selectedUser.value?.userId,
+      );
       focusNode.requestFocus();
     }, [userMode.value, selectedUser.value != null]);
 
@@ -58,10 +62,7 @@ class SearchMessagePage extends HookWidget {
             ActionButton(
               name: Resources.assetsImagesIcCloseSvg,
               color: context.theme.icon,
-              onTap: () {
-                context.read<SearchConversationKeywordCubit>().emit('');
-                context.read<ChatSideCubit>().onPopPage();
-              },
+              onTap: () => context.read<ChatSideCubit>().onPopPage(),
             ),
         ],
       ),
@@ -127,9 +128,10 @@ class SearchMessagePage extends HookWidget {
                         if (userMode.value && selectedUser.value == null) {
                           return;
                         }
-                        context
-                            .read<SearchConversationKeywordCubit>()
-                            .emit(keyword);
+                        SearchConversationKeywordCubit.updateKeyword(
+                          context,
+                          keyword,
+                        );
                       },
                     ),
                   ),
@@ -191,9 +193,10 @@ class _SearchMessageList extends HookWidget {
           () => context
               .read<SearchConversationKeywordCubit>()
               .stream
+              .map((event) => event.item2)
               .throttleTime(const Duration(milliseconds: 400), trailing: true),
         ).data ??
-        initKeyword;
+        initKeyword.item2;
 
     final conversationId = useMemoized(() {
       final conversationId =

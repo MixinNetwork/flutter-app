@@ -106,16 +106,25 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   }
 }
 
-class SearchConversationKeywordCubit extends SimpleCubit<String>
-    with SubscribeMixin {
+class SearchConversationKeywordCubit
+    extends SimpleCubit<Tuple2<String?, String>> with SubscribeMixin {
   SearchConversationKeywordCubit({required ChatSideCubit chatSideCubit})
-      : super('') {
+      : super(const Tuple2(null, '')) {
     addSubscription(chatSideCubit.stream
         .map((event) => event.pages.any(
             (element) => element.name == ChatSideCubit.searchMessageHistory))
         .distinct()
-        .where((event) => !event)
-        .listen((event) => emit('')));
+        .listen((event) => emit(const Tuple2(null, ''))));
+  }
+
+  static void updateKeyword(BuildContext context, String keyword) {
+    final cubit = context.read<SearchConversationKeywordCubit>();
+    cubit.emit(cubit.state.withItem2(keyword));
+  }
+
+  static void updateSelectedUser(BuildContext context, String? userId) {
+    final cubit = context.read<SearchConversationKeywordCubit>();
+    cubit.emit(cubit.state.withItem1(userId));
   }
 }
 
