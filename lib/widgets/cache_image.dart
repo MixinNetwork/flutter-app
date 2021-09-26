@@ -418,6 +418,14 @@ class MixinFileImage extends FileImage {
   Future<ui.Codec> _loadAsync(FileImage key, DecoderCallback decode) async {
     assert(key == this);
 
+    if (file.path.isEmpty) {
+      throw StateError('file path is empty');
+    }
+
+    if (!file.existsSync()) {
+      throw StateError('file is not exists. ${file.path}');
+    }
+
     final bytes = await file.readAsBytes();
 
     if (bytes.lengthInBytes == 0) {
