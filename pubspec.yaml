@@ -104,6 +104,7 @@ dependencies:
   visibility_detector: ^0.2.0
   watcher: ^1.0.0
   web_socket_channel: ^2.1.0
+  win_toast: ^0.0.1
   window_size:
     git:
       url: git://github.com/google/flutter-desktop-embedding.git
