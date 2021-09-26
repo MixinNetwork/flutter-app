@@ -7,7 +7,8 @@ extension ProviderExtension on BuildContext {
 
   AccountServer get accountServer => read<AccountServer>();
 
-  VlcService get vlcService => read<VlcService>();
+  AudioMessagePlayService get audioMessageService =>
+      read<AudioMessagePlayService>();
 
   Database get database => accountServer.database;
 

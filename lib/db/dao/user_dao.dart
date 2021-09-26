@@ -18,7 +18,7 @@ extension UserExtension on sdk.User {
         createdAt: createdAt,
         muteUntil: DateTime.tryParse(muteUntil),
         hasPin: hasPin == true ? 1 : 0,
-        appId: appId,
+        appId: app?.appId,
         biography: biography,
         isScam: isScam ? 1 : 0,
       );

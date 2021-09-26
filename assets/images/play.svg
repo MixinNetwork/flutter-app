@@ -8,16 +8,4 @@
   <path fill-rule="evenodd" clip-rule="evenodd"
         d="M14 13.2125C14 11.8249 15.535 10.9868 16.7023 11.7372L25.7051 17.5247C26.779 18.2151 26.779 19.7849 25.7051 20.4753L16.7023 26.2628C15.535 27.0132 14 26.1751 14 24.7875V13.2125Z"
         fill="white"/>
-  <defs>
-    <filter id="filter0_b" x="-27.1828" y="-27.1828" width="92.3656"
-            height="92.3656" filterUnits="userSpaceOnUse"
-            color-interpolation-filters="sRGB">
-      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
-      <feGaussianBlur in="BackgroundImage" stdDeviation="13.5914"/>
-      <feComposite in2="SourceAlpha" operator="in"
-                   result="effect1_backgroundBlur"/>
-      <feBlend mode="normal" in="SourceGraphic" in2="effect1_backgroundBlur"
-               result="shape"/>
-    </filter>
-  </defs>
 </svg>

@@ -21,7 +21,7 @@ import '../../db/database.dart';
 import '../../generated/l10n.dart';
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
-import '../vlc_service.dart';
+import '../audio_message_player/audio_message_service.dart';
 
 export 'package:flutter_app/widgets/message/message.dart'
     show MessageIsTranscriptExtension;
@@ -44,14 +44,23 @@ export '../datetime_format_utils.dart'
 export 'src/platforms.dart';
 
 part 'src/file.dart';
+
 part 'src/image.dart';
+
 part 'src/iterable.dart';
-part 'src/markdown.dart';
-part 'src/provider.dart';
-part 'src/stream.dart';
-part 'src/string.dart';
-part 'src/ui.dart';
+
 part 'src/key_event.dart';
+
+part 'src/markdown.dart';
+
+part 'src/provider.dart';
+
 part 'src/regexp.dart';
+
+part 'src/stream.dart';
+
+part 'src/string.dart';
+
+part 'src/ui.dart';
 
 void importExtension() {}

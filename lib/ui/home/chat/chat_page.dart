@@ -13,9 +13,9 @@ import '../../../account/show_pin_message_key_value.dart';
 import '../../../bloc/simple_cubit.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../constants/resources.dart';
+import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
-import '../../../utils/vlc_service.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
@@ -192,14 +192,14 @@ class ChatPage extends HookWidget {
           ),
         ),
         Provider(
-          create: (context) => VlcService(
+          create: (context) => AudioMessagePlayService(
             context.accountServer,
             context
                 .read<ConversationCubit>()
                 .stream
                 .map((event) => event?.conversationId),
           ),
-          dispose: (BuildContext context, VlcService vlcService) =>
+          dispose: (BuildContext context, AudioMessagePlayService vlcService) =>
               vlcService.dispose(),
         ),
         Provider.value(value: pinMessageState),
