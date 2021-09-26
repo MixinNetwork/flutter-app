@@ -123,7 +123,10 @@ class SearchMessagePage extends HookWidget {
                               ],
                             )
                           : null,
-                      onTapClear: () => userMode.value = false,
+                      onTapClear: () {
+                        userMode.value = false;
+                        selectedUser.value = null;
+                      },
                       onChanged: (keyword) {
                         if (userMode.value && selectedUser.value == null) {
                           return;
