@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_drop
   file_selector_windows
   flutter_app_icon_badge
+  system_clock
   url_launcher_windows
   window_size
 )
