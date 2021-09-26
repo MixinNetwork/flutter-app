@@ -5,7 +5,7 @@ import '../constants/resources.dart';
 import '../ui/home/route/responsive_navigator_cubit.dart';
 import '../utils/extension/extension.dart';
 
-import 'interacter_decorated_box.dart';
+import 'interactive_decorated_box.dart';
 
 class CellGroup extends StatelessWidget {
   const CellGroup(

@@ -11,7 +11,7 @@ import '../../../../constants/resources.dart';
 import '../../../../db/mixin_database.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../cache_image.dart';
-import '../../../interacter_decorated_box.dart';
+import '../../../interactive_decorated_box.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import 'location_payload.dart';

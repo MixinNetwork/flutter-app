@@ -9,7 +9,7 @@ import '../../../../utils/extension/extension.dart';
 import '../../../../widgets/avatar_view/avatar_view.dart';
 import '../../../../widgets/buttons.dart';
 import '../../../../widgets/dialog.dart';
-import '../../../../widgets/interacter_decorated_box.dart';
+import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/toast.dart';
 import '../../../../widgets/user_selector/conversation_selector.dart';
 

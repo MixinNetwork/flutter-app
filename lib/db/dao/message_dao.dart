@@ -875,10 +875,59 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         offset,
       );
 
+  Selectable<SearchMessageDetailItem> messageByConversationIdAndUserId({
+    required String conversationId,
+    required String userId,
+    required int limit,
+    int offset = 0,
+  }) =>
+      db.messageByConversationIdAndUserId(
+        conversationId,
+        userId,
+        limit,
+        offset,
+      );
+
+  Selectable<SearchMessageDetailItem>
+      fuzzySearchMessageByConversationIdAndUserId({
+    required String conversationId,
+    required String userId,
+    required String query,
+    required int limit,
+    int offset = 0,
+  }) =>
+          db.fuzzySearchMessageByConversationIdAndUserId(
+            conversationId,
+            userId,
+            query.trim().escapeFts5(),
+            limit,
+            offset,
+          );
+
   Selectable<int> fuzzySearchMessageCountByConversationId(
           String keyword, String conversationId) =>
       db.fuzzySearchMessageCountByConversationId(
         conversationId,
+        keyword.trim().escapeFts5(),
+      );
+
+  Selectable<int> messageCountByConversationIdAndUserId(
+    String conversationId,
+    String userId,
+  ) =>
+      db.messageCountByConversationIdAndUserId(
+        conversationId,
+        userId,
+      );
+
+  Selectable<int> fuzzySearchMessageCountByConversationIdAndUserId(
+    String keyword,
+    String conversationId,
+    String userId,
+  ) =>
+      db.fuzzySearchMessageCountByConversationIdAndUserId(
+        conversationId,
+        userId,
         keyword.trim().escapeFts5(),
       );
 

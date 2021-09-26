@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../utils/extension/extension.dart';
-import 'interacter_decorated_box.dart';
+import 'interactive_decorated_box.dart';
 
 class ActionButton extends StatelessWidget {
   const ActionButton({

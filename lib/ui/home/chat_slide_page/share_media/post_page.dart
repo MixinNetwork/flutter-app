@@ -14,7 +14,7 @@ import '../../../../db/mixin_database.dart';
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
-import '../../../../widgets/interacter_decorated_box.dart';
+import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/message/item/post_message.dart';
 
 class PostPage extends HookWidget {

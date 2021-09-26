@@ -25,7 +25,7 @@ import '../../utils/message_optimize.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/high_light_text.dart';
-import '../../widgets/interacter_decorated_box.dart';
+import '../../widgets/interactive_decorated_box.dart';
 import '../../widgets/menu.dart';
 import '../../widgets/message/item/pin_message.dart';
 import '../../widgets/message/item/system_message.dart';

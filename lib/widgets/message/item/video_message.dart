@@ -12,7 +12,7 @@ import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 import '../../image.dart';
-import '../../interacter_decorated_box.dart';
+import '../../interactive_decorated_box.dart';
 import '../../status.dart';
 import '../message.dart';
 import '../message_bubble.dart';

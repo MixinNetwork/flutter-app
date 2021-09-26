@@ -6,7 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../utils/extension/extension.dart';
 import 'disable.dart';
-import 'interacter_decorated_box.dart';
+import 'interactive_decorated_box.dart';
 
 Future<T?> _showDialog<T>({
   required BuildContext context,

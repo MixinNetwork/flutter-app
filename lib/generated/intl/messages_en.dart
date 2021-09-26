@@ -173,6 +173,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followTwitter":
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
+        "fromWithColon": MessageLookupByLibrary.simpleMessage("From: "),
         "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
         "groupCantSendDes": MessageLookupByLibrary.simpleMessage(

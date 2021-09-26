@@ -155,7 +155,6 @@ class _InputContainer extends HookWidget {
 
     final focusNode = useFocusNode(onKey: (_, __) => KeyEventResult.ignored);
 
-    // ignore: unnecessary_lambdas
     useEffect(() {
       if (!context.textFieldAutoGainFocus) {
         focusNode.unfocus();

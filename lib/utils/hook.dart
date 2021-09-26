@@ -101,11 +101,12 @@ AsyncSnapshot<T> useListenableConverter<L extends Listenable, T>(
   L listenable, {
   required T Function(L) converter,
   List<Object?> keys = const <Object>[],
-  T? initialData,
 }) {
   final streamController = useStreamController<T>(
     keys: [listenable, ...keys],
   );
+
+  final initialData = useMemoized(() => converter(listenable));
 
   useEffect(
     () {

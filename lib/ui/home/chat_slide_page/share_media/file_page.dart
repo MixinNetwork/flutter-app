@@ -18,7 +18,7 @@ import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/file.dart';
 import '../../../../utils/hook.dart';
-import '../../../../widgets/interacter_decorated_box.dart';
+import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/status.dart';
 
 class FilePage extends HookWidget {

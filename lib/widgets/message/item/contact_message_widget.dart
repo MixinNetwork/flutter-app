@@ -5,7 +5,7 @@ import '../../../db/mixin_database.dart';
 import '../../../ui/home/conversation_page.dart';
 import '../../../utils/extension/extension.dart';
 import '../../avatar_view/avatar_view.dart';
-import '../../interacter_decorated_box.dart';
+import '../../interactive_decorated_box.dart';
 import '../../user/user_dialog.dart';
 import '../message.dart';
 import '../message_bubble.dart';
