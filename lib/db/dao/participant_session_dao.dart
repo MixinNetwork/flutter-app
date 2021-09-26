@@ -13,9 +13,6 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
       into(db.participantSession)
           .insert(participantSession, mode: InsertMode.insertOrReplace);
 
-  Future deleteParticipantSession(ParticipantSessionData participantSession) =>
-      delete(db.participantSession).delete(participantSession);
-
   Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
           String conversationId, String userId) =>
       db.participantSessionKeyWithoutSelf(conversationId, userId).getSingle();
