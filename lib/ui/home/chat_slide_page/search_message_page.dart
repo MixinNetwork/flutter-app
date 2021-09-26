@@ -46,12 +46,15 @@ class SearchMessagePage extends HookWidget {
         focusNode.unfocus();
         return null;
       }
+      focusNode.requestFocus();
+    }, [userMode.value, selectedUser.value]);
+
+    useEffect(() {
       SearchConversationKeywordCubit.updateSelectedUser(
         context,
         selectedUser.value?.userId,
       );
-      focusNode.requestFocus();
-    }, [userMode.value, selectedUser.value]);
+    }, [selectedUser.value]);
 
     return Scaffold(
       backgroundColor: context.theme.primary,
