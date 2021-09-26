@@ -2069,6 +2069,16 @@ class Localization {
       args: [ID],
     );
   }
+
+  /// `From: `
+  String get fromWithColon {
+    return Intl.message(
+      'From: ',
+      name: 'fromWithColon',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

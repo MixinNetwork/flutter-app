@@ -20,7 +20,7 @@ import '../../../widgets/action_button.dart';
 import '../../../widgets/animated_visibility.dart';
 import '../../../widgets/clamping_custom_scroll_view/clamping_custom_scroll_view.dart';
 import '../../../widgets/dash_path_border.dart';
-import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/message/message.dart';
 import '../../../widgets/message/message_bubble.dart';
@@ -106,16 +106,25 @@ class ChatSideCubit extends AbstractResponsiveNavigatorCubit {
   }
 }
 
-class SearchConversationKeywordCubit extends SimpleCubit<String>
-    with SubscribeMixin {
+class SearchConversationKeywordCubit
+    extends SimpleCubit<Tuple2<String?, String>> with SubscribeMixin {
   SearchConversationKeywordCubit({required ChatSideCubit chatSideCubit})
-      : super('') {
+      : super(const Tuple2(null, '')) {
     addSubscription(chatSideCubit.stream
         .map((event) => event.pages.any(
             (element) => element.name == ChatSideCubit.searchMessageHistory))
         .distinct()
-        .where((event) => !event)
-        .listen((event) => emit('')));
+        .listen((event) => emit(const Tuple2(null, ''))));
+  }
+
+  static void updateKeyword(BuildContext context, String keyword) {
+    final cubit = context.read<SearchConversationKeywordCubit>();
+    cubit.emit(cubit.state.withItem2(keyword));
+  }
+
+  static void updateSelectedUser(BuildContext context, String? userId) {
+    final cubit = context.read<SearchConversationKeywordCubit>();
+    cubit.emit(cubit.state.withItem1(userId));
   }
 }
 

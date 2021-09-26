@@ -74,7 +74,10 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
     addSubscription(
       Rx.combineLatest2<String?, List<User>, MentionState>(
         mentionTextStream,
-        participantsCubit.stream,
+        participantsCubit.stream.map((event) => event
+            .where((element) =>
+                element.userId != multiAuthCubit.state.currentUserId)
+            .toList()),
         (a, b) {
           late List<User> users;
           if (a == null) {

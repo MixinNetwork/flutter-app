@@ -147,7 +147,6 @@ class _Providers extends StatelessWidget {
                 create: (BuildContext context) => ParticipantsCubit(
                   userDao: accountServer.database.userDao,
                   conversationCubit: context.read<ConversationCubit>(),
-                  userId: accountServer.userId,
                 ),
               ),
               BlocProvider(

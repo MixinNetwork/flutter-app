@@ -68,14 +68,8 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
         identityNumber,
       );
 
-  Selectable<User> groupParticipants({
-    required String conversationId,
-    required String id,
-  }) =>
-      db.groupParticipants(
-        conversationId,
-        id,
-      );
+  Selectable<User> groupParticipants({required String conversationId}) =>
+      db.groupParticipants(conversationId);
 
   Selectable<User> friends(List<String> filterIds) => db.friends(filterIds);
 

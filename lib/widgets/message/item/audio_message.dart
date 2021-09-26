@@ -9,7 +9,7 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/audio_message_player/audio_message_service.dart';
 import '../../../utils/extension/extension.dart';
-import '../../interacter_decorated_box.dart';
+import '../../interactive_decorated_box.dart';
 import '../../status.dart';
 import '../../waveform_widget.dart';
 import '../message.dart';

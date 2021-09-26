@@ -7,7 +7,7 @@ import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/buttons.dart';
-import '../../../widgets/interacter_decorated_box.dart';
+import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/window/move_window.dart';
 import '../bloc/conversation_cubit.dart';
 import '../conversation_page.dart';

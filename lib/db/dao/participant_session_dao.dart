@@ -18,14 +18,12 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
           String conversationId, String userId) =>
-      db
-          .getParticipantSessionKeyWithoutSelf(conversationId, userId)
-          .getSingle();
+      db.participantSessionKeyWithoutSelf(conversationId, userId).getSingle();
 
   Future<ParticipantSessionKey?> getOtherParticipantSessionKey(
           String conversationId, String userId, String sessionId) =>
       db
-          .getOtherParticipantSessionKey(conversationId, userId, sessionId)
+          .otherParticipantSessionKey(conversationId, userId, sessionId)
           .getSingle();
 
   Future deleteByStatus(String conversationId) async {
@@ -80,12 +78,12 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future<List<ParticipantSessionData>> getNotSendSessionParticipants(
           String conversationId, String sessionId) async =>
-      db.getNotSendSessionParticipants(conversationId, sessionId).get();
+      db.notSendSessionParticipants(conversationId, sessionId).get();
 
   Future<ParticipantSessionData?> getParticipantSessionKeyBySessionId(
           String conversationId, String sessionId) async =>
       db
-          .getParticipantSessionKeyBySessionId(conversationId, sessionId)
+          .participantSessionKeyBySessionId(conversationId, sessionId)
           .getSingleOrNull();
 
   Future updateList(List<ParticipantSessionData> list) async {

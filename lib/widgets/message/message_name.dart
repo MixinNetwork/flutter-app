@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../../utils/color_utils.dart';
-import '../interacter_decorated_box.dart';
+import '../interactive_decorated_box.dart';
 import '../user/user_dialog.dart';
 import 'message.dart';
 

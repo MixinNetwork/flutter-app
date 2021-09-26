@@ -6,7 +6,7 @@ import '../../../../db/mixin_database.dart';
 import '../../../../utils/color_utils.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../interacter_decorated_box.dart';
+import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import 'action_data.dart';

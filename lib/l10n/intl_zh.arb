@@ -195,5 +195,6 @@
   "joinGroup": "+ 加入群组",
   "searchUser": "搜索用户",
   "searchUserHint": "Mixin ID 或手机号",
-  "currentIdentityNumber": "我的 Mixin ID: {ID}"
+  "currentIdentityNumber": "我的 Mixin ID: {ID}",
+  "fromWithColon": "来自: "
 }

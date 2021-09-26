@@ -11,7 +11,6 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
   ParticipantsCubit({
     required UserDao userDao,
     required ConversationCubit conversationCubit,
-    required String userId,
   }) : super(const []) {
     StreamSubscription<List<User>>? streamSubscription;
     Future<void> resetConversationId(String? conversationId) async {
@@ -19,8 +18,8 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
 
       await streamSubscription?.cancel();
 
-      final selectable = userDao.groupParticipants(
-          conversationId: conversationId!, id: userId);
+      final selectable =
+          userDao.groupParticipants(conversationId: conversationId!);
       emit(await selectable.get());
       final stream = selectable.watch();
       streamSubscription = stream.listen(emit);

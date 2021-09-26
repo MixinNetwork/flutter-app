@@ -9,7 +9,7 @@ import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
-import '../../interacter_decorated_box.dart';
+import '../../interactive_decorated_box.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 

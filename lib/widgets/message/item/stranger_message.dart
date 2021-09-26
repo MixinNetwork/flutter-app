@@ -6,7 +6,7 @@ import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
-import '../../interacter_decorated_box.dart';
+import '../../interactive_decorated_box.dart';
 import '../../toast.dart';
 import '../message.dart';
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:tuple/tuple.dart';
 
 import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../ui/home/chat/chat_page.dart';
@@ -36,7 +37,11 @@ class TextMessage extends HookWidget {
       backgroundColor: context.theme.highlight,
     );
 
-    final keyword = useBlocState<SearchConversationKeywordCubit, String>();
+    final keyword = useBlocStateConverter<SearchConversationKeywordCubit,
+        Tuple2<String?, String>, String>(
+      converter: (state) => state.item1 != message.userId ? '' : state.item2,
+      keys: [message.userId],
+    );
 
     final urlHighlightTextSpans = useMemoized(
       () => uriRegExp.allMatchesAndSort(message.content!).map(
