@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
@@ -97,17 +96,11 @@ class SettingPage extends HookWidget {
                     assetName: Resources.assetsImagesIcSignOutSvg,
                     title: context.l10n.signOut,
                     onTap: () async {
-                      await runFutureWithToast(
+                      final succeed = await runFutureWithToast(
                         context,
-                        () async {
-                          try {
-                            final accountServer = context.accountServer;
-                            await accountServer.signOutAndClear();
-                          } catch (e) {
-                            if (e is! MixinApiError) rethrow;
-                          }
-                        }(),
+                        context.accountServer.signOutAndClear(),
                       );
+                      if (!succeed) return;
                       context.multiAuthCubit.signOut();
                     },
                     color: context.theme.red,
