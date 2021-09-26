@@ -85,7 +85,61 @@ Future<void> initMixinDocumentsDirectory() async {
     mixinDocumentsDirectory = Directory(p.join(home!, '.mixin'));
     return;
   }
+  if (Platform.isWindows) {
+    mixinDocumentsDirectory = Directory(
+        p.join((await getApplicationDocumentsDirectory()).path, 'Mixin'));
+    if (!mixinDocumentsDirectory.existsSync()) {
+      _copyLegacyWindowsFiles();
+    }
+    return;
+  }
   mixinDocumentsDirectory = await getApplicationDocumentsDirectory();
+}
+
+//TODO remove this in the next version.
+void _copyLegacyWindowsFiles() {
+  mixinDocumentsDirectory.create();
+  final legacyDir = mixinDocumentsDirectory.parent;
+
+  void _copyFile(String source) {
+    final path = p.join(legacyDir.path, source);
+    if (FileSystemEntity.isDirectorySync(path)) {
+      final dir = Directory(path);
+      for (final file in dir.listSync()) {
+        _copyFile(p.relative(file.path, from: legacyDir.path));
+      }
+    } else if (FileSystemEntity.isFileSync(path)) {
+      final file = File(p.join(legacyDir.path, source));
+      final dir = p.dirname(source);
+      Directory(p.join(mixinDocumentsDirectory.path, dir))
+          .createSync(recursive: true);
+      file.copySync(p.join(mixinDocumentsDirectory.path, source));
+    }
+  }
+
+  _copyFile('account_box');
+  _copyFile('crypto_box');
+  _copyFile('privacy_box');
+  _copyFile('show_pin_message_box');
+  _copyFile('hydrated_box.hive');
+  _copyFile('hydrated_box.lock');
+  _copyFile('signal.db');
+  _copyFile('signal.db-shm');
+  _copyFile('signal.db-wal');
+
+  for (final dir in legacyDir.listSync()) {
+    if (!p.basename(dir.path).isNumeric()) {
+      continue;
+    }
+    if (dir is! Directory) {
+      continue;
+    }
+    final db = File(p.join(dir.path, 'mixin.db'));
+    if (!db.existsSync()) {
+      continue;
+    }
+    _copyFile(p.basename(dir.path));
+  }
 }
 
 Future<File?> saveBytesToTempFile(
