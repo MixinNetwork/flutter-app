@@ -713,7 +713,7 @@ class _List extends HookWidget {
         false;
 
     Widget child;
-    if (pagingState.count <= 0) {
+    if (pagingState.count == 0) {
       if (pagingState.hasData) {
         child = Center(
           child: CircularProgressIndicator(
