@@ -830,6 +830,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.0+1"
+  ogg_opus_player:
+    dependency: "direct main"
+    description:
+      name: ogg_opus_player
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1"
   optional:
     dependency: transitive
     description:
@@ -1203,6 +1210,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
+  system_clock:
+    dependency: transitive
+    description:
+      name: system_clock
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.2.0"
   term_glyph:
     dependency: transitive
     description:

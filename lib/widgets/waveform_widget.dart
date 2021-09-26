@@ -13,17 +13,13 @@ const _barSpacing = 2.0;
 class WaveformWidget extends StatelessWidget {
   const WaveformWidget({
     Key? key,
-    required this.duration,
     required this.value,
-    required this.width,
     required this.waveform,
     required this.backgroundColor,
     required this.foregroundColor,
   }) : super(key: key);
 
-  final int duration;
   final double value;
-  final double width;
   final List<int> waveform;
   final Color backgroundColor;
   final Color foregroundColor;

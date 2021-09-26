@@ -76,6 +76,7 @@ dependencies:
   mixin_bot_sdk_dart: ^0.2.2
   moor: ^4.5.0
   octo_image: ^1.0.0+1
+  ogg_opus_player: ^0.0.1
   package_info_plus: ^1.0.6
   pasteboard:
     git:
