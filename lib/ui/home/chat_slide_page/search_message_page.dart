@@ -51,7 +51,7 @@ class SearchMessagePage extends HookWidget {
         selectedUser.value?.userId,
       );
       focusNode.requestFocus();
-    }, [userMode.value, selectedUser.value != null]);
+    }, [userMode.value, selectedUser.value]);
 
     return Scaffold(
       backgroundColor: context.theme.primary,
