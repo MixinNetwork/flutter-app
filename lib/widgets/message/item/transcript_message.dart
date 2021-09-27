@@ -25,6 +25,12 @@ import '../message_datetime_and_status.dart';
 import 'audio_message.dart';
 import 'unknown_message.dart';
 
+class TranscriptMessagesWatcher {
+  const TranscriptMessagesWatcher(this.watchMessages);
+
+  final Stream<List<MessageItem>> Function() watchMessages;
+}
+
 class TranscriptMessageWidget extends HookWidget {
   const TranscriptMessageWidget({
     Key? key,
@@ -207,16 +213,15 @@ class TranscriptPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = useMemoizedStream(() => context.database.transcriptMessageDao
-            .transactionMessageItem(messageId)
-            .watch()
-            .map(
-              (list) => list
-                  .map((transcriptMessageItem) =>
-                      transcriptMessageItem.messageItem)
-                  .toList(),
-            )).data ??
-        <MessageItem>[];
+    Stream<List<MessageItem>> watchMessages() => context
+        .database.transcriptMessageDao
+        .transactionMessageItem(messageId)
+        .watch()
+        .map((list) => list
+            .map((transcriptMessageItem) => transcriptMessageItem.messageItem)
+            .toList());
+
+    final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 
     final chatSideCubit = useBloc(() => ChatSideCubit());
     final searchConversationKeywordCubit = useBloc(
@@ -250,6 +255,7 @@ class TranscriptPage extends HookWidget {
                   (m) => context.accountServer
                       .convertMessageAbsolutePath(m, true)),
             ),
+            Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
           ],
           child: Column(
             children: [
