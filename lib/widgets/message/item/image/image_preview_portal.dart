@@ -178,6 +178,7 @@ class ImagePreviewPage extends HookWidget {
                         child: _Bar(
                           message: current.value!,
                           controller: controller,
+                          isTranscriptPage: isTranscriptPage,
                         ),
                       ),
                     ],
@@ -195,6 +196,7 @@ class ImagePreviewPage extends HookWidget {
                       _Item(
                         message: current.value!,
                         controller: controller,
+                        isTranscriptPage: isTranscriptPage,
                       ),
                       Center(
                         child: Padding(
@@ -234,126 +236,125 @@ class ImagePreviewPage extends HookWidget {
   }
 }
 
-class _Bar extends HookWidget {
+class _Bar extends StatelessWidget {
   const _Bar({
     Key? key,
     required this.message,
     required this.controller,
+    required this.isTranscriptPage,
   }) : super(key: key);
 
   final MessageItem message;
   final PhotoViewScaleStateController controller;
+  final bool isTranscriptPage;
 
   @override
-  Widget build(BuildContext context) {
-    final isTranscriptPage = useIsTranscriptPage();
-    return Row(
-      children: [
-        AvatarWidget(
-          name: message.userFullName!,
-          size: 36,
-          avatarUrl: message.avatarUrl,
-          userId: message.userId,
-        ),
-        const SizedBox(width: 10),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              message.userFullName!,
-              style: TextStyle(
-                fontSize: MessageItemWidget.primaryFontSize,
-                color: context.theme.text,
+  Widget build(BuildContext context) => Row(
+        children: [
+          AvatarWidget(
+            name: message.userFullName!,
+            size: 36,
+            avatarUrl: message.avatarUrl,
+            userId: message.userId,
+          ),
+          const SizedBox(width: 10),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                message.userFullName!,
+                style: TextStyle(
+                  fontSize: MessageItemWidget.primaryFontSize,
+                  color: context.theme.text,
+                ),
               ),
-            ),
-            Text(
-              message.userIdentityNumber,
-              style: TextStyle(
-                fontSize: MessageItemWidget.secondaryFontSize,
-                color: context.theme.secondaryText,
+              Text(
+                message.userIdentityNumber,
+                style: TextStyle(
+                  fontSize: MessageItemWidget.secondaryFontSize,
+                  color: context.theme.secondaryText,
+                ),
               ),
-            ),
-          ],
-        ),
-        const Spacer(),
-        ActionButton(
-          name: Resources.assetsImagesZoomInSvg,
-          color: context.theme.icon,
-          size: 20,
-          onTap: () => controller.scaleState = PhotoViewScaleState.covering,
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesZoomOutSvg,
-          size: 20,
-          color: context.theme.icon,
-          onTap: () => controller.scaleState = PhotoViewScaleState.initial,
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesShareSvg,
-          size: 20,
-          color: context.theme.icon,
-          onTap: () async {
-            final accountServer = context.accountServer;
-            final result = await showConversationSelector(
-              context: context,
-              singleSelect: true,
-              title: context.l10n.forward,
-              onlyContact: false,
-            );
-            if (result.isEmpty) return;
-            await accountServer.forwardMessage(
-              message.messageId,
-              result.first.encryptCategory!,
-              conversationId: result.first.conversationId,
-              recipientId: result.first.userId,
-            );
-          },
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesCopySvg,
-          color: context.theme.icon,
-          size: 20,
-          onTap: () => _copyUrl(
-              context,
-              context.accountServer
-                  .convertMessageAbsolutePath(message, isTranscriptPage)),
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesAttachmentDownloadSvg,
-          color: context.theme.icon,
-          size: 20,
-          onTap: () async {
-            if (message.mediaUrl?.isEmpty ?? true) return;
-            await saveFileToSystem(
-              context,
-              context.accountServer
-                  .convertMessageAbsolutePath(message, isTranscriptPage),
-              suggestName: message.mediaName,
-            ).then((succeed) {
-              if (succeed) {
-                showToastSuccessful(context);
-              }
-            }).onError((error, stackTrace) {
-              showToastFailed(context, error);
-            });
-          },
-        ),
-        const SizedBox(width: 14),
-        ActionButton(
-          name: Resources.assetsImagesIcCloseBigSvg,
-          color: context.theme.icon,
-          size: 20,
-          onTap: () => Navigator.pop(context),
-        ),
-        const SizedBox(width: 24),
-      ],
-    );
-  }
+            ],
+          ),
+          const Spacer(),
+          ActionButton(
+            name: Resources.assetsImagesZoomInSvg,
+            color: context.theme.icon,
+            size: 20,
+            onTap: () => controller.scaleState = PhotoViewScaleState.covering,
+          ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesZoomOutSvg,
+            size: 20,
+            color: context.theme.icon,
+            onTap: () => controller.scaleState = PhotoViewScaleState.initial,
+          ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesShareSvg,
+            size: 20,
+            color: context.theme.icon,
+            onTap: () async {
+              final accountServer = context.accountServer;
+              final result = await showConversationSelector(
+                context: context,
+                singleSelect: true,
+                title: context.l10n.forward,
+                onlyContact: false,
+              );
+              if (result.isEmpty) return;
+              await accountServer.forwardMessage(
+                message.messageId,
+                result.first.encryptCategory!,
+                conversationId: result.first.conversationId,
+                recipientId: result.first.userId,
+              );
+            },
+          ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesCopySvg,
+            color: context.theme.icon,
+            size: 20,
+            onTap: () => _copyUrl(
+                context,
+                context.accountServer
+                    .convertMessageAbsolutePath(message, isTranscriptPage)),
+          ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesAttachmentDownloadSvg,
+            color: context.theme.icon,
+            size: 20,
+            onTap: () async {
+              if (message.mediaUrl?.isEmpty ?? true) return;
+              await saveFileToSystem(
+                context,
+                context.accountServer
+                    .convertMessageAbsolutePath(message, isTranscriptPage),
+                suggestName: message.mediaName,
+              ).then((succeed) {
+                if (succeed) {
+                  showToastSuccessful(context);
+                }
+              }).onError((error, stackTrace) {
+                showToastFailed(context, error);
+              });
+            },
+          ),
+          const SizedBox(width: 14),
+          ActionButton(
+            name: Resources.assetsImagesIcCloseBigSvg,
+            color: context.theme.icon,
+            size: 20,
+            onTap: () => Navigator.pop(context),
+          ),
+          const SizedBox(width: 24),
+        ],
+      );
 }
 
 class _Item extends HookWidget {
@@ -361,13 +362,14 @@ class _Item extends HookWidget {
     Key? key,
     required this.message,
     required this.controller,
+    required this.isTranscriptPage,
   }) : super(key: key);
   final MessageItem message;
   final PhotoViewScaleStateController controller;
+  final bool isTranscriptPage;
 
   @override
   Widget build(BuildContext context) {
-    final isTranscriptPage = useIsTranscriptPage();
     final zoomIn = useStream(controller.outputScaleStateStream,
                 initialData: PhotoViewScaleState.initial)
             .data ==
