@@ -202,7 +202,7 @@ class _Item extends StatelessWidget {
                         return const StatusDownload();
                       }
                     case MediaStatus.pending:
-                      return StatusPending(messageId: message.messageId);
+                      return const StatusPending();
                     case MediaStatus.expired:
                       return const StatusWarning();
                     default:

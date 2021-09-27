@@ -2,8 +2,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../db/mixin_database.dart' hide Offset, Message;
-
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
 import '../message.dart';
@@ -14,16 +12,7 @@ import '../message_layout.dart';
 class UnknownMessage extends StatelessWidget {
   const UnknownMessage({
     Key? key,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
-    required this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
@@ -48,19 +37,11 @@ class UnknownMessage extends StatelessWidget {
         ],
       ),
     );
-    final dateAndStatus = MessageDatetimeAndStatus(
-      showStatus: isCurrentUser,
-      message: message,
-    );
     return MessageBubble(
-      messageId: message.messageId,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
-      pinArrow: pinArrow,
       child: MessageLayout(
         spacing: 6,
         content: content,
-        dateAndStatus: dateAndStatus,
+        dateAndStatus: const MessageDatetimeAndStatus(),
       ),
     );
   }

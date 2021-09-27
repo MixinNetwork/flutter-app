@@ -1,9 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-
-import '../../../db/mixin_database.dart' hide Offset, Message;
 
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
@@ -12,26 +11,24 @@ import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 import '../message_layout.dart';
 
-class WaitingMessage extends StatelessWidget {
+class WaitingMessage extends HookWidget {
   const WaitingMessage({
     Key? key,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
 
   @override
   Widget build(BuildContext context) {
+    final relationship =
+        useMessageConverter(converter: (state) => state.relationship);
+    final userFullName =
+        useMessageConverter(converter: (state) => state.userFullName);
+
     final content = RichText(
       text: TextSpan(
         text: context.l10n.chatWaiting(
-          message.relationship == UserRelationship.me
+          relationship == UserRelationship.me
               ? context.l10n.chatWaitingDesktop
-              : message.userFullName!,
+              : userFullName!,
         ),
         style: TextStyle(
           fontSize: MessageItemWidget.primaryFontSize,
@@ -51,18 +48,11 @@ class WaitingMessage extends StatelessWidget {
         ],
       ),
     );
-    final dateAndStatus = MessageDatetimeAndStatus(
-      showStatus: isCurrentUser,
-      message: message,
-    );
     return MessageBubble(
-      messageId: message.messageId,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
       child: MessageLayout(
         spacing: 6,
         content: content,
-        dateAndStatus: dateAndStatus,
+        dateAndStatus: const MessageDatetimeAndStatus(),
       ),
     );
   }

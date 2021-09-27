@@ -6,17 +6,18 @@ import '../constants/resources.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
+import 'message/message.dart';
 
 class StatusPending extends HookWidget {
   const StatusPending({
     Key? key,
-    required this.messageId,
   }) : super(key: key);
-
-  final String messageId;
 
   @override
   Widget build(BuildContext context) {
+    final messageId =
+        useMessageConverter(converter: (state) => state.messageId);
+
     final value = useListenableConverter(
       context.accountServer.attachmentUtil,
       converter: (AttachmentUtil attachmentUtil) =>

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:markdown/markdown.dart';
@@ -10,22 +11,14 @@ import '../../../utils/uri_utils.dart';
 import '../../app_bar.dart';
 import '../../buttons.dart';
 import '../../interactive_decorated_box.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
 class PostMessage extends StatelessWidget {
   const PostMessage({
     Key? key,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
-    this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   static const _decoration = BoxDecoration(
     borderRadius: BorderRadius.all(Radius.circular(8)),
@@ -35,22 +28,23 @@ class PostMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) => MessageBubble(
-          messageId: message.messageId,
-          showNip: showNip,
-          isCurrentUser: isCurrentUser,
-          pinArrow: pinArrow,
           child: InteractiveDecoratedBox(
-            onTap: () => PostPreview.push(context, message: message),
+            onTap: () => PostPreview.push(context, message: context.message),
             child: Stack(
               children: [
-                Builder(
-                  builder: (context) => ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      minHeight: 64,
-                      minWidth: 128,
-                    ),
-                    child: MarkdownBody(
-                      data: message.content?.postOptimize() ?? '',
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: 64,
+                    minWidth: 128,
+                  ),
+                  child: HookBuilder(builder: (context) {
+                    final content = useMessageConverter(
+                        converter: (state) => state.content ?? '');
+                    final postContent =
+                        useMemoized(content.postOptimize, [content]);
+
+                    return MarkdownBody(
+                      data: postContent,
                       extensionSet: ExtensionSet.gitHubWeb,
                       styleSheet: context.markdownStyleSheet,
                       softLineBreak: true,
@@ -60,8 +54,8 @@ class PostMessage extends StatelessWidget {
 
                         openUri(context, href!);
                       },
-                    ),
-                  ),
+                    );
+                  }),
                 ),
                 Positioned(
                   right: 0,
@@ -85,10 +79,8 @@ class PostMessage extends StatelessWidget {
                       horizontal: 6,
                       vertical: 2,
                     ),
-                    child: MessageDatetimeAndStatus(
-                      showStatus: isCurrentUser,
-                      color: const Color.fromRGBO(255, 255, 255, 1),
-                      message: message,
+                    child: const MessageDatetimeAndStatus(
+                      color: Color.fromRGBO(255, 255, 255, 1),
                     ),
                   ),
                 ),

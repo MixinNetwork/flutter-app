@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../db/mixin_database.dart';
 import '../../../ui/home/conversation_page.dart';
 import '../../../utils/extension/extension.dart';
 import '../../avatar_view/avatar_view.dart';
@@ -11,80 +11,77 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
-class ContactMessageWidget extends StatelessWidget {
+class ContactMessageWidget extends HookWidget {
   const ContactMessageWidget({
     Key? key,
-    required this.message,
-    required this.showNip,
-    required this.isCurrentUser,
-    this.pinArrow,
   }) : super(key: key);
 
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
-
   @override
-  Widget build(BuildContext context) => MessageBubble(
-        messageId: message.messageId,
-        quoteMessageId: message.quoteId,
-        quoteMessageContent: message.quoteContent,
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        pinArrow: pinArrow,
-        outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-          showStatus: isCurrentUser,
-          message: message,
+  Widget build(BuildContext context) {
+    final sharedUserId =
+        useMessageConverter(converter: (state) => state.sharedUserId);
+    final sharedUserAvatarUrl =
+        useMessageConverter(converter: (state) => state.sharedUserAvatarUrl);
+    final sharedUserFullName =
+        useMessageConverter(converter: (state) => state.sharedUserFullName);
+    final sharedUserIsVerified =
+        useMessageConverter(converter: (state) => state.sharedUserIsVerified);
+    final sharedUserAppId =
+        useMessageConverter(converter: (state) => state.sharedUserAppId);
+    final sharedUserIdentityNumber = useMessageConverter(
+        converter: (state) => state.sharedUserIdentityNumber ?? '');
+
+    return MessageBubble(
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
+      child: InteractiveDecoratedBox(
+        onTap: () => showUserDialog(
+          context,
+          sharedUserId,
         ),
-        child: InteractiveDecoratedBox(
-          onTap: () => showUserDialog(
-            context,
-            message.sharedUserId,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AvatarWidget(
-                size: 40,
-                avatarUrl: message.sharedUserAvatarUrl,
-                userId: message.sharedUserId!,
-                name: message.sharedUserFullName!,
-              ),
-              const SizedBox(width: 8),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          message.sharedUserFullName!,
-                          style: TextStyle(
-                            color: context.theme.text,
-                            fontSize: MessageItemWidget.primaryFontSize,
-                          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AvatarWidget(
+              size: 40,
+              avatarUrl: sharedUserAvatarUrl,
+              userId: sharedUserId!,
+              name: sharedUserFullName!,
+            ),
+            const SizedBox(width: 8),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        sharedUserFullName,
+                        style: TextStyle(
+                          color: context.theme.text,
+                          fontSize: MessageItemWidget.primaryFontSize,
                         ),
                       ),
-                      VerifiedOrBotWidget(
-                        verified: message.sharedUserIsVerified,
-                        isBot: message.sharedUserAppId != null,
-                      ),
-                    ],
-                  ),
-                  Text(
-                    message.sharedUserIdentityNumber!,
-                    style: TextStyle(
-                      color: context.theme.secondaryText,
-                      fontSize: MessageItemWidget.secondaryFontSize,
                     ),
+                    VerifiedOrBotWidget(
+                      verified: sharedUserIsVerified,
+                      isBot: sharedUserAppId != null,
+                    ),
+                  ],
+                ),
+                Text(
+                  sharedUserIdentityNumber,
+                  style: TextStyle(
+                    color: context.theme.secondaryText,
+                    fontSize: MessageItemWidget.secondaryFontSize,
                   ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }

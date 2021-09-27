@@ -1,32 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:lottie/lottie.dart';
 
-import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/dp_utils.dart';
 import '../../../utils/extension/extension.dart';
 import '../../cache_image.dart';
+import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
-class StickerMessageWidget extends StatelessWidget {
+class StickerMessageWidget extends HookWidget {
   const StickerMessageWidget({
     Key? key,
-    required this.message,
-    required this.isCurrentUser,
-    this.pinArrow,
   }) : super(key: key);
-
-  final MessageItem message;
-  final bool isCurrentUser;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
+    final assetWidth =
+        useMessageConverter(converter: (state) => state.assetWidth);
+    final assetHeight =
+        useMessageConverter(converter: (state) => state.assetHeight);
+    final assetType =
+        useMessageConverter(converter: (state) => state.assetType);
+    final assetUrl = useMessageConverter(converter: (state) => state.assetUrl);
+
     double width;
     double height;
-    final assetWidth = message.assetWidth;
-    final assetHeight = message.assetHeight;
     if (assetWidth == null || assetHeight == null) {
       height = 120;
       width = 120;
@@ -70,35 +70,29 @@ class StickerMessageWidget extends StatelessWidget {
       color: context.theme.stickerPlaceholderColor,
     );
     return MessageBubble(
-      messageId: message.messageId,
-      showNip: false,
-      isCurrentUser: isCurrentUser,
       showBubble: false,
       padding: EdgeInsets.zero,
       clip: true,
-      pinArrow: pinArrow,
-      outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-        showStatus: isCurrentUser,
-        message: message,
-      ),
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       child: Builder(
         builder: (context) {
-          if (message.assetType == 'json') {
+          if (assetUrl == null) return placeholder;
+
+          if (assetType == 'json') {
             return Lottie.network(
-              message.assetUrl!,
+              assetUrl,
               height: height,
               width: width,
               fit: BoxFit.cover,
             );
-          } else if (message.assetUrl != null) {
+          } else {
             return CacheImage(
-              message.assetUrl!,
+              assetUrl,
               height: height,
               width: width,
               placeholder: (_, __) => placeholder,
             );
           }
-          return placeholder;
         },
       ),
     );
