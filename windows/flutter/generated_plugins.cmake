@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   flutter_app_icon_badge
   system_clock
   url_launcher_windows
+  win_toast
   window_size
 )
 

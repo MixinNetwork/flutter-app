@@ -1357,6 +1357,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.2.9"
+  win_toast:
+    dependency: "direct main"
+    description:
+      name: win_toast
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.1"
   window_size:
     dependency: "direct main"
     description:

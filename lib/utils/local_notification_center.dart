@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
+import 'package:win_toast/win_toast.dart';
 
 import 'logger.dart';
 
@@ -118,6 +119,42 @@ class _LinuxNotificationManager extends _NotificationManager {
   }
 }
 
+class _WindowsNotificationManager extends _NotificationManager {
+  @override
+  Future<void> initialize() async {
+    await WinToast.instance().initialize(
+      appName: 'Mixin',
+      productName: 'mixin_desktop',
+      companyName: 'mixin',
+    );
+  }
+
+  @override
+  Future<void> showNotification({
+    required String title,
+    String? body,
+    required Uri uri,
+    required int id,
+  }) async {
+    final type =
+        body == null || body.isEmpty ? ToastType.text01 : ToastType.text02;
+    final toast = await WinToast.instance().showToast(
+      type: type,
+      title: title,
+      subtitle: body ?? '',
+    );
+    if (toast == null) {
+      return;
+    }
+    toast.eventStream.listen((event) {
+      if (event is ActivatedEvent) {
+        WinToast.instance().bringWindowToFront();
+        onNotificationSelected(uri);
+      }
+    });
+  }
+}
+
 enum NotificationScheme {
   conversation,
 }
@@ -131,6 +168,8 @@ Future<void> initListener() async {
     _notificationManager = _MacosNotificationManager();
   } else if (Platform.isLinux) {
     _notificationManager = _LinuxNotificationManager();
+  } else if (Platform.isWindows) {
+    _notificationManager = _WindowsNotificationManager();
   } else {
     e('notification unsupported for platform: ${Platform.operatingSystem}');
   }
