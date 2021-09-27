@@ -186,17 +186,11 @@ class MessageItemWidget extends HookWidget {
           child: Builder(
             builder: (context) {
               if (message.type == MessageCategory.systemConversation) {
-                return SystemMessage(
-                  message: message,
-                );
+                return const SystemMessage();
               }
 
               if (message.type.isPin) {
-                return PinMessageWidget(
-                  showNip: showNip,
-                  isCurrentUser: isCurrentUser,
-                  message: message,
-                );
+                return const PinMessageWidget();
               }
 
               if (message.type == MessageCategory.secret) {
@@ -204,9 +198,7 @@ class MessageItemWidget extends HookWidget {
               }
 
               if (message.type == MessageCategory.stranger) {
-                return StrangerMessage(
-                  message: message,
-                );
+                return const StrangerMessage();
               }
 
               return _MessageBubbleMargin(
