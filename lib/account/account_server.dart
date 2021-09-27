@@ -461,8 +461,6 @@ class AccountServer {
       if (result?.success ?? false) {
         await database.messageDao
             .updateMessageStatusById(message.messageId, MessageStatus.sent);
-        await database.conversationDao.updateConversationStatusById(
-            message.conversationId, ConversationStatus.success);
         await database.jobDao.deleteJobById(job.jobId);
       }
     });
