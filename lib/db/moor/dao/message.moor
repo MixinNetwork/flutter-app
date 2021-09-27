@@ -53,7 +53,8 @@ SELECT message.message_id AS messageId,
     hyperlink.site_title AS siteTitle,
     hyperlink.site_description AS siteDescription,
     hyperlink.site_image AS siteImage,
-    messageMention.has_read AS mentionRead
+    messageMention.has_read AS mentionRead,
+    CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned
 FROM messages message
          INNER JOIN users sender ON message.user_id = sender.user_id
          LEFT JOIN users participant ON message.participant_id = participant.user_id
@@ -65,6 +66,7 @@ FROM messages message
          LEFT JOIN conversations conversation
 ON message.conversation_id = conversation.conversation_id
          LEFT JOIN message_mentions messageMention ON message.message_id = messageMention.message_id
+         LEFT JOIN pin_messages pinMessage on message.message_id = pinMessage.message_id
 WHERE $where
 ORDER BY $order
 LIMIT $limit;

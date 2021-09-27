@@ -20,7 +20,6 @@ import '../../ui/home/bloc/blink_cubit.dart';
 import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
-import '../../ui/home/hook/pin_message.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
@@ -81,7 +80,7 @@ class MessageItemWidget extends HookWidget {
     this.lastReadMessageId,
     this.isTranscript = false,
     this.blink = true,
-    this.pinned = false,
+    this.isPinnedPage = false,
   }) : super(key: key);
 
   final MessageItem message;
@@ -90,7 +89,7 @@ class MessageItemWidget extends HookWidget {
   final String? lastReadMessageId;
   final bool isTranscript;
   final bool blink;
-  final bool pinned;
+  final bool isPinnedPage;
 
   static const primaryFontSize = 16.0;
   static const secondaryFontSize = 14.0;
@@ -180,10 +179,10 @@ class MessageItemWidget extends HookWidget {
                 userName: userName,
                 userId: userId,
                 isCurrentUser: isCurrentUser,
-                pinArrowWidth: pinned ? _pinArrowWidth : 0,
+                pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
                 showedMenu: showedMenuCubit.emit,
                 buildMenus: () => [
-                  if (!isTranscript && message.type.canReply && !pinned)
+                  if (!isTranscript && message.type.canReply && !isPinnedPage)
                     ContextMenu(
                       title: context.l10n.reply,
                       onTap: () =>
@@ -260,7 +259,7 @@ class MessageItemWidget extends HookWidget {
                     ),
                 ],
                 builder: (BuildContext context) {
-                  final pinArrow = pinned
+                  final pinArrow = isPinnedPage
                       ? ActionButton(
                           size: 16,
                           name: Resources.assetsImagesPinArrowSvg,
@@ -474,36 +473,27 @@ class _PinMenu extends HookWidget {
 
     if (role == null) return const SizedBox();
 
-    return HookBuilder(builder: (context) {
-      final pined = useMemoized(
-          () => context
-              .watch<PinMessageState>()
-              .messageIds
-              .contains(message.messageId),
-          [message.messageId]);
-
-      return ContextMenu(
-        title: pined ? context.l10n.unPin : context.l10n.pin,
-        onTap: () async {
-          final pinMessageMinimal = PinMessageMinimal(
-            messageId: message.messageId,
-            type: message.type,
-            content: message.type.isText ? message.content : null,
-          );
-          if (pined) {
-            await context.accountServer.unpinMessage(
-              conversationId: message.conversationId,
-              pinMessageMinimals: [pinMessageMinimal],
-            );
-            return;
-          }
-          await context.accountServer.pinMessage(
+    return ContextMenu(
+      title: message.pinned ? context.l10n.unPin : context.l10n.pin,
+      onTap: () async {
+        final pinMessageMinimal = PinMessageMinimal(
+          messageId: message.messageId,
+          type: message.type,
+          content: message.type.isText ? message.content : null,
+        );
+        if (message.pinned) {
+          await context.accountServer.unpinMessage(
             conversationId: message.conversationId,
             pinMessageMinimals: [pinMessageMinimal],
           );
-        },
-      );
-    });
+          return;
+        }
+        await context.accountServer.pinMessage(
+          conversationId: message.conversationId,
+          pinMessageMinimals: [pinMessageMinimal],
+        );
+      },
+    );
   }
 }
 

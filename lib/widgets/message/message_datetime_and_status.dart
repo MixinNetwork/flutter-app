@@ -39,12 +39,20 @@ class MessageDatetimeAndStatus extends StatelessWidget {
   Widget build(BuildContext context) => Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (message.pinned)
+            Padding(
+              padding: const EdgeInsets.only(right: 4),
+              child: _ChatIcon(
+                color: color,
+                assetName: Resources.assetsImagesMessagePinSvg,
+              ),
+            ),
           if (message.isSecret)
             Padding(
               padding: const EdgeInsets.only(right: 4),
               child: _ChatIcon(
                 color: color,
-                assetName: Resources.assetsImagesChatSecretSvg,
+                assetName: Resources.assetsImagesMessageSecretSvg,
               ),
             ),
           if (_isRepresentative(
@@ -55,7 +63,7 @@ class MessageDatetimeAndStatus extends StatelessWidget {
               padding: const EdgeInsets.only(right: 4),
               child: _ChatIcon(
                 color: color,
-                assetName: Resources.assetsImagesChatRepresentativeSvg,
+                assetName: Resources.assetsImagesMessageRepresentativeSvg,
               ),
             ),
           _MessageDatetime(

@@ -530,6 +530,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           userId: '',
           type: MessageCategory.secret,
           createdAt: messageState.topMessage?.createdAt ?? DateTime.now(),
+          pinned: false,
         ),
         ...messageState.top,
       ];
