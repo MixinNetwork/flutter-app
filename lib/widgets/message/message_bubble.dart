@@ -68,7 +68,7 @@ class MessageBubble extends HookWidget {
       child: _child,
     );
 
-    if (quoteMessageId != null) {
+    if (quoteMessageId?.isNotEmpty ?? false) {
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,

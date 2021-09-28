@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 
 import '../../../constants/constants.dart';
@@ -11,7 +12,7 @@ import '../message.dart';
 import '../message_bubble.dart';
 import '../message_datetime_and_status.dart';
 
-class TransferMessage extends StatelessWidget {
+class TransferMessage extends HookWidget {
   const TransferMessage({
     Key? key,
   }) : super(key: key);
