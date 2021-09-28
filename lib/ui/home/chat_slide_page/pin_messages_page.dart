@@ -82,7 +82,7 @@ class PinMessagesPage extends HookWidget {
                     message: messageItem,
                     next: list.getOrNull(index + 1),
                     blink: false,
-                    pinned: true,
+                    isPinnedPage: true,
                   );
                 },
                 itemCount: list.length,

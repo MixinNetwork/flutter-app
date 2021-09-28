@@ -23,52 +23,73 @@ bool _isRepresentative(
     (conversation.user?.userId != message.userId) &&
     (message.userId != userId);
 
-class MessageDatetimeAndStatus extends StatelessWidget {
+class MessageDatetimeAndStatus extends HookWidget {
   const MessageDatetimeAndStatus({
     Key? key,
-    required this.showStatus,
     this.color,
-    required this.message,
   }) : super(key: key);
 
-  final bool showStatus;
   final Color? color;
-  final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (message.isSecret)
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: _ChatIcon(
-                color: color,
-                assetName: Resources.assetsImagesChatSecretSvg,
-              ),
-            ),
-          if (_isRepresentative(
-              message,
+  Widget build(BuildContext context) {
+    final isTranscriptPage = useIsTranscriptPage();
+    final isPinnedPage = useIsPinnedPage();
+    final isCurrentUser = useIsCurrentUser();
+    final pinned = useMessageConverter(converter: (state) => state.pinned);
+    final isSecret = useMessageConverter(converter: (state) => state.isSecret);
+    final isRepresentative = useMessageConverter(
+        converter: (state) => _isRepresentative(
+              state,
               context.read<ConversationCubit>().state,
-              context.accountServer.userId))
-            Padding(
-              padding: const EdgeInsets.only(right: 4),
-              child: _ChatIcon(
-                color: color,
-                assetName: Resources.assetsImagesChatRepresentativeSvg,
-              ),
-            ),
-          _MessageDatetime(
-            dateTime: message.createdAt,
-            color: color,
-          ),
-          if (showStatus && !context.isTranscript)
-            _MessageStatusWidget(
-              status: message.status,
+              context.accountServer.userId,
+            ));
+    final createdAt =
+        useMessageConverter(converter: (state) => state.createdAt);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (pinned)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: _ChatIcon(
               color: color,
+              assetName: Resources.assetsImagesMessagePinSvg,
             ),
-        ],
-      );
+          ),
+        if (isSecret)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: _ChatIcon(
+              color: color,
+              assetName: Resources.assetsImagesMessageSecretSvg,
+            ),
+          ),
+        if (isRepresentative)
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: _ChatIcon(
+              color: color,
+              assetName: Resources.assetsImagesMessageRepresentativeSvg,
+            ),
+          ),
+        _MessageDatetime(
+          dateTime: createdAt,
+          color: color,
+        ),
+        if (isCurrentUser && !isTranscriptPage && !isPinnedPage)
+          HookBuilder(builder: (context) {
+            final status =
+                useMessageConverter(converter: (state) => state.status);
+            return _MessageStatusWidget(
+              status: status,
+              color: color,
+            );
+          }),
+      ],
+    );
+  }
 }
 
 class _ChatIcon extends StatelessWidget {

@@ -4,46 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../../../../db/mixin_database.dart';
 import '../../../../utils/extension/extension.dart';
+import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../cache_image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
+import '../unknown_message.dart';
 import 'action_card_data.dart';
 
 class ActionCardMessage extends HookWidget {
   const ActionCardMessage({
     Key? key,
-    required this.message,
-    required this.showNip,
-    required this.isCurrentUser,
-    this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
+    final content = useMessageConverter(converter: (state) => state.content);
     final appCardData = useMemoized(
-      () => AppCardData.fromJson(
-          jsonDecode(message.content!) as Map<String, dynamic>),
-      [message.content],
+      () {
+        try {
+          return AppCardData.fromJson(
+              jsonDecode(content!) as Map<String, dynamic>);
+        } catch (error) {
+          e('ActionCard decode error: $error');
+          return null;
+        }
+      },
+      [content],
     );
+
+    if (appCardData == null) return const UnknownMessage();
+
     return MessageBubble(
-      messageId: message.messageId,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
-      pinArrow: pinArrow,
-      outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-        showStatus: isCurrentUser,
-        message: message,
-      ),
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       child: InteractiveDecoratedBox(
         onTap: () {
           if (context.openAction(appCardData.action)) return;

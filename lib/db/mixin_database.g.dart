@@ -11688,7 +11688,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.messageMentions, 'messageMention')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM pin_messages AS pinMessage INNER JOIN messages AS message ON message.message_id = pinMessage.message_id INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE pinMessage.conversation_id = ?1 ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           ...generatedorder.introducedVariables,
@@ -11766,6 +11766,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteDescription: row.read<String?>('siteDescription'),
         siteImage: row.read<String?>('siteImage'),
         mentionRead: row.read<bool?>('mentionRead'),
+        pinned: row.read<bool>('pinned'),
       );
     });
   }
@@ -12191,7 +12192,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Hyperlinks hyperlink,
               Users sharedUser,
               Conversations conversation,
-              MessageMentions messageMention)
+              MessageMentions messageMention,
+              PinMessages pinMessage)
           where,
       OrderBy Function(
               Messages message,
@@ -12203,7 +12205,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Hyperlinks hyperlink,
               Users sharedUser,
               Conversations conversation,
-              MessageMentions messageMention)
+              MessageMentions messageMention,
+              PinMessages pinMessage)
           order,
       Limit Function(
               Messages message,
@@ -12215,7 +12218,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
               Hyperlinks hyperlink,
               Users sharedUser,
               Conversations conversation,
-              MessageMentions messageMention)
+              MessageMentions messageMention,
+              PinMessages pinMessage)
           limit) {
     final generatedwhere = $write(
         where(
@@ -12228,7 +12232,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
-            alias(this.messageMentions, 'messageMention')),
+            alias(this.messageMentions, 'messageMention'),
+            alias(this.pinMessages, 'pinMessage')),
         hasMultipleTables: true);
     final generatedorder = $write(
         order(
@@ -12241,7 +12246,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
-            alias(this.messageMentions, 'messageMention')),
+            alias(this.messageMentions, 'messageMention'),
+            alias(this.pinMessages, 'pinMessage')),
         hasMultipleTables: true);
     final generatedlimit = $write(
         limit(
@@ -12254,10 +12260,11 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.hyperlinks, 'hyperlink'),
             alias(this.users, 'sharedUser'),
             alias(this.conversations, 'conversation'),
-            alias(this.messageMentions, 'messageMention')),
+            alias(this.messageMentions, 'messageMention'),
+            alias(this.pinMessages, 'pinMessage')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT message.message_id AS messageId, message.conversation_id AS conversationId, message.category AS type, message.content AS content, message.created_at AS createdAt, message.status AS status, message.media_status AS mediaStatus, message.media_waveform AS mediaWaveform, message.name AS mediaName, message.media_mime_type AS mediaMimeType, message.media_size AS mediaSize, message.media_width AS mediaWidth, message.media_height AS mediaHeight, message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl, message.media_duration AS mediaDuration, message.quote_message_id AS quoteId, message.quote_content AS quoteContent, message."action" AS actionName, message.shared_user_id AS sharedUserId, sender.user_id AS userId, sender.full_name AS userFullName, sender.identity_number AS userIdentityNumber, sender.app_id AS appId, sender.relationship AS relationship, sender.avatar_url AS avatarUrl, sharedUser.full_name AS sharedUserFullName, sharedUser.identity_number AS sharedUserIdentityNumber, sharedUser.avatar_url AS sharedUserAvatarUrl, sharedUser.is_verified AS sharedUserIsVerified, sharedUser.app_id AS sharedUserAppId, conversation.owner_id AS conversationOwnerId, conversation.category AS conversionCategory, conversation.name AS groupName, sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth, sticker.asset_height AS assetHeight, sticker.sticker_id AS stickerId, sticker.name AS assetName, sticker.asset_type AS assetType, participant.full_name AS participantFullName, participant.user_id AS participantUserId, snapshot.snapshot_id AS snapshotId, snapshot.type AS snapshotType, snapshot.amount AS snapshotAmount, snapshot.asset_id AS assetId, asset.symbol AS assetSymbol, asset.icon_url AS assetIcon, hyperlink.site_name AS siteName, hyperlink.site_title AS siteTitle, hyperlink.site_description AS siteDescription, hyperlink.site_image AS siteImage, messageMention.has_read AS mentionRead, CASE WHEN pinMessage.message_id IS NOT NULL THEN TRUE ELSE FALSE END AS pinned FROM messages AS message INNER JOIN users AS sender ON message.user_id = sender.user_id LEFT JOIN users AS participant ON message.participant_id = participant.user_id LEFT JOIN snapshots AS snapshot ON message.snapshot_id = snapshot.snapshot_id LEFT JOIN assets AS asset ON snapshot.asset_id = asset.asset_id LEFT JOIN stickers AS sticker ON sticker.sticker_id = message.sticker_id LEFT JOIN hyperlinks AS hyperlink ON message.hyperlink = hyperlink.hyperlink LEFT JOIN users AS sharedUser ON message.shared_user_id = sharedUser.user_id LEFT JOIN conversations AS conversation ON message.conversation_id = conversation.conversation_id LEFT JOIN message_mentions AS messageMention ON message.message_id = messageMention.message_id LEFT JOIN pin_messages AS pinMessage ON message.message_id = pinMessage.message_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
@@ -12272,6 +12279,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
           assets,
           hyperlinks,
           messageMentions,
+          pinMessages,
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
           ...generatedlimit.watchedTables,
@@ -12335,6 +12343,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         siteDescription: row.read<String?>('siteDescription'),
         siteImage: row.read<String?>('siteImage'),
         mentionRead: row.read<bool?>('mentionRead'),
+        pinned: row.read<bool>('pinned'),
       );
     });
   }
@@ -13092,6 +13101,7 @@ class MessageItem {
   final String? siteDescription;
   final String? siteImage;
   final bool? mentionRead;
+  final bool pinned;
   MessageItem({
     required this.messageId,
     required this.conversationId,
@@ -13147,6 +13157,7 @@ class MessageItem {
     this.siteDescription,
     this.siteImage,
     this.mentionRead,
+    required this.pinned,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -13190,7 +13201,7 @@ class MessageItem {
                                                                               .hashCode,
                                                                           $mrjc(
                                                                               quoteContent.hashCode,
-                                                                              $mrjc(actionName.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(userId.hashCode, $mrjc(userFullName.hashCode, $mrjc(userIdentityNumber.hashCode, $mrjc(appId.hashCode, $mrjc(relationship.hashCode, $mrjc(avatarUrl.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(conversationOwnerId.hashCode, $mrjc(conversionCategory.hashCode, $mrjc(groupName.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetId.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetIcon.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, mentionRead.hashCode))))))))))))))))))))))))))))))))))))))))))))))))))))));
+                                                                              $mrjc(actionName.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(userId.hashCode, $mrjc(userFullName.hashCode, $mrjc(userIdentityNumber.hashCode, $mrjc(appId.hashCode, $mrjc(relationship.hashCode, $mrjc(avatarUrl.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(conversationOwnerId.hashCode, $mrjc(conversionCategory.hashCode, $mrjc(groupName.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetId.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetIcon.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(mentionRead.hashCode, pinned.hashCode)))))))))))))))))))))))))))))))))))))))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13248,7 +13259,8 @@ class MessageItem {
           other.siteTitle == this.siteTitle &&
           other.siteDescription == this.siteDescription &&
           other.siteImage == this.siteImage &&
-          other.mentionRead == this.mentionRead);
+          other.mentionRead == this.mentionRead &&
+          other.pinned == this.pinned);
   @override
   String toString() {
     return (StringBuffer('MessageItem(')
@@ -13305,7 +13317,8 @@ class MessageItem {
           ..write('siteTitle: $siteTitle, ')
           ..write('siteDescription: $siteDescription, ')
           ..write('siteImage: $siteImage, ')
-          ..write('mentionRead: $mentionRead')
+          ..write('mentionRead: $mentionRead, ')
+          ..write('pinned: $pinned')
           ..write(')'))
         .toString();
   }

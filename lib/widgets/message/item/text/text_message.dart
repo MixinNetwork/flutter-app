@@ -3,7 +3,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:tuple/tuple.dart';
 
-import '../../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../../ui/home/chat/chat_page.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
@@ -20,31 +19,26 @@ import 'mention_builder.dart';
 class TextMessage extends HookWidget {
   const TextMessage({
     Key? key,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
-    this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
+    final userId = useMessageConverter(converter: (state) => state.userId);
+    final content =
+        useMessageConverter(converter: (state) => state.content ?? '');
+
     final keywordTextStyle = TextStyle(
       backgroundColor: context.theme.highlight,
     );
 
     final keyword = useBlocStateConverter<SearchConversationKeywordCubit,
         Tuple2<String?, String>, String>(
-      converter: (state) => state.item1 != message.userId ? '' : state.item2,
-      keys: [message.userId],
+      converter: (state) => state.item1 != userId ? '' : state.item2,
+      keys: [userId],
     );
 
     final urlHighlightTextSpans = useMemoized(
-      () => uriRegExp.allMatchesAndSort(message.content!).map(
+      () => uriRegExp.allMatchesAndSort(content).map(
             (e) => HighlightTextSpan(
               e[0]!,
               style: TextStyle(
@@ -53,11 +47,11 @@ class TextMessage extends HookWidget {
               onTap: () => openUri(context, e[0]!),
             ),
           ),
-      [message.content],
+      [content],
     );
 
     final botNumberHighlightTextSpans = useMemoized(
-      () => botNumberRegExp.allMatchesAndSort(message.content!).map(
+      () => botNumberRegExp.allMatchesAndSort(content).map(
             (e) => HighlightTextSpan(
               e[0]!,
               style: TextStyle(
@@ -66,7 +60,7 @@ class TextMessage extends HookWidget {
               onTap: () => showUserDialog(context, null, e[0]),
             ),
           ),
-      [message.content],
+      [content],
     );
 
     final keywordHighlightTextSpans = useMemoized(
@@ -102,9 +96,9 @@ class TextMessage extends HookWidget {
               }).toList(),
         [keyword]);
 
-    final content = Builder(
+    final contentWidget = Builder(
       builder: (context) => MentionBuilder(
-        content: message.content,
+        content: content,
         builder: (context, newContent, mentionHighlightTextSpans) =>
             HighlightSelectableText(
           newContent!,
@@ -123,22 +117,12 @@ class TextMessage extends HookWidget {
         ),
       ),
     );
-    final dateAndStatus = MessageDatetimeAndStatus(
-      showStatus: isCurrentUser,
-      message: message,
-    );
 
     return MessageBubble(
-      messageId: message.messageId,
-      quoteMessageId: message.quoteId,
-      quoteMessageContent: message.quoteContent,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
-      pinArrow: pinArrow,
       child: MessageLayout(
         spacing: 6,
-        content: content,
-        dateAndStatus: dateAndStatus,
+        content: contentWidget,
+        dateAndStatus: const MessageDatetimeAndStatus(),
       ),
     );
   }

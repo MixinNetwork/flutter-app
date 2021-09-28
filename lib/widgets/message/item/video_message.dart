@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/media_status.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
@@ -20,163 +20,163 @@ import '../message_datetime_and_status.dart';
 
 const _kDefaultVideoSize = 200;
 
-class VideoMessageWidget extends StatelessWidget {
+class VideoMessageWidget extends HookWidget {
   const VideoMessageWidget({
     Key? key,
-    required this.message,
-    required this.isCurrentUser,
-    required this.showNip,
-    this.pinArrow,
   }) : super(key: key);
 
-  final MessageItem message;
-  final bool isCurrentUser;
-  final bool showNip;
-  final Widget? pinArrow;
-
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (context, boxConstraints) {
-          final maxWidth = min(boxConstraints.maxWidth * 0.6, 200);
-          final width = min(message.mediaWidth ?? _kDefaultVideoSize, maxWidth)
-              .toDouble();
-          final scale = (message.mediaWidth ?? _kDefaultVideoSize) /
-              (message.mediaHeight ?? _kDefaultVideoSize);
-          final height = width / scale;
+  Widget build(BuildContext context) {
+    final isCurrentUser = useIsCurrentUser();
+    final isTranscriptPage = useIsTranscriptPage();
 
-          return MessageBubble(
-            messageId: message.messageId,
-            quoteMessageId: message.quoteId,
-            quoteMessageContent: message.quoteContent,
-            isCurrentUser: isCurrentUser,
-            padding: EdgeInsets.zero,
-            showNip: showNip,
-            includeNip: true,
-            clip: true,
-            pinArrow: pinArrow,
-            child: InteractiveDecoratedBox(
-              onTap: () {
-                if (message.mediaStatus == MediaStatus.canceled) {
-                  if (message.relationship == UserRelationship.me &&
-                      message.mediaUrl?.isNotEmpty == true) {
-                    context.accountServer.reUploadAttachment(message);
-                  } else {
-                    context.accountServer.downloadAttachment(message);
-                  }
-                } else if (message.mediaStatus == MediaStatus.done &&
-                    message.mediaUrl != null) {
-                  openUri(
-                      context,
-                      Uri.file(context.accountServer.convertMessageAbsolutePath(
-                              message, context.isTranscript))
-                          .toString());
-                } else if (message.mediaStatus == MediaStatus.pending) {
-                  context.accountServer
-                      .cancelProgressAttachmentJob(message.messageId);
-                } else if (message.type.isLive && message.mediaUrl != null) {
-                  launch(message.mediaUrl!);
+    final mediaWidth =
+        useMessageConverter(converter: (state) => state.mediaWidth);
+    final mediaHeight =
+        useMessageConverter(converter: (state) => state.mediaHeight);
+
+    final thumbImage =
+        useMessageConverter(converter: (state) => state.thumbImage);
+    final thumbUrl = useMessageConverter(converter: (state) => state.thumbUrl);
+    final mediaStatus =
+        useMessageConverter(converter: (state) => state.mediaStatus);
+    final relationship =
+        useMessageConverter(converter: (state) => state.relationship);
+    final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
+
+    return LayoutBuilder(
+      builder: (context, boxConstraints) {
+        final maxWidth = min(boxConstraints.maxWidth * 0.6, 200);
+        final width =
+            min(mediaWidth ?? _kDefaultVideoSize, maxWidth).toDouble();
+        final scale = (mediaWidth ?? _kDefaultVideoSize) /
+            (mediaHeight ?? _kDefaultVideoSize);
+        final height = width / scale;
+
+        return MessageBubble(
+          padding: EdgeInsets.zero,
+          includeNip: true,
+          clip: true,
+          child: InteractiveDecoratedBox(
+            onTap: () {
+              final message = context.message;
+              if (message.mediaStatus == MediaStatus.canceled) {
+                if (message.relationship == UserRelationship.me &&
+                    message.mediaUrl?.isNotEmpty == true) {
+                  context.accountServer.reUploadAttachment(message);
+                } else {
+                  context.accountServer.downloadAttachment(message);
                 }
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: SizedBox(
-                  height: height,
-                  width: width,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      if (message.thumbImage != null)
-                        ImageByBlurHashOrBase64(imageData: message.thumbImage!),
-                      if (message.thumbUrl != null)
-                        CachedNetworkImage(
-                          imageUrl: message.thumbUrl!,
-                          fit: BoxFit.cover,
-                        ),
-                      Center(
-                        child: Builder(
-                          builder: (BuildContext context) {
-                            switch (message.mediaStatus) {
-                              case MediaStatus.canceled:
-                                if (message.relationship ==
-                                        UserRelationship.me &&
-                                    message.mediaUrl?.isNotEmpty == true) {
-                                  return const StatusUpload();
-                                } else {
-                                  return const StatusDownload();
-                                }
-                              case MediaStatus.pending:
-                                return StatusPending(
-                                    messageId: message.messageId);
-                              case MediaStatus.expired:
-                                return const StatusWarning();
-                              default:
-                                return SvgPicture.asset(
-                                  Resources.assetsImagesPlaySvg,
-                                  width: 38,
-                                  height: 38,
-                                );
-                            }
-                          },
-                        ),
+              } else if (message.mediaStatus == MediaStatus.done &&
+                  message.mediaUrl != null) {
+                openUri(
+                    context,
+                    Uri.file(context.accountServer.convertMessageAbsolutePath(
+                            message, isTranscriptPage))
+                        .toString());
+              } else if (message.mediaStatus == MediaStatus.pending) {
+                context.accountServer
+                    .cancelProgressAttachmentJob(message.messageId);
+              } else if (message.type.isLive && message.mediaUrl != null) {
+                launch(message.mediaUrl!);
+              }
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: SizedBox(
+                height: height,
+                width: width,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    if (thumbImage != null)
+                      ImageByBlurHashOrBase64(imageData: thumbImage),
+                    if (thumbUrl != null)
+                      CachedNetworkImage(
+                        imageUrl: thumbUrl,
+                        fit: BoxFit.cover,
                       ),
-                      Builder(builder: (context) {
-                        try {
-                          final duration = Duration(
-                              milliseconds: int.parse(message.mediaDuration!));
-                          return Positioned(
-                            top: 6,
-                            left: isCurrentUser ? 6 : 14,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: const Color.fromRGBO(0, 0, 0, 0.3),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: Text(
-                                  formatVideoDuration(duration),
-                                  style: const TextStyle(
-                                    fontSize:
-                                        MessageItemWidget.tertiaryFontSize,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        } catch (e) {
-                          return const SizedBox();
-                        }
-                      }),
-                      Positioned(
-                        bottom: 4,
-                        right: isCurrentUser ? 12 : 4,
+                    Center(
+                      child: Builder(
+                        builder: (BuildContext context) {
+                          switch (mediaStatus) {
+                            case MediaStatus.canceled:
+                              if (relationship == UserRelationship.me &&
+                                  mediaUrl?.isNotEmpty == true) {
+                                return const StatusUpload();
+                              } else {
+                                return const StatusDownload();
+                              }
+                            case MediaStatus.pending:
+                              return const StatusPending();
+                            case MediaStatus.expired:
+                              return const StatusWarning();
+                            default:
+                              return SvgPicture.asset(
+                                Resources.assetsImagesPlaySvg,
+                                width: 38,
+                                height: 38,
+                              );
+                          }
+                        },
+                      ),
+                    ),
+                    HookBuilder(builder: (context) {
+                      final durationText = useMessageConverter(
+                        converter: (state) => formatVideoDuration(Duration(
+                            milliseconds:
+                                int.tryParse(state.mediaDuration ?? '') ?? 0)),
+                      );
+
+                      return Positioned(
+                        top: 6,
+                        left: isCurrentUser ? 6 : 14,
                         child: DecoratedBox(
-                          decoration: const ShapeDecoration(
-                            color: Color.fromRGBO(0, 0, 0, 0.3),
-                            shape: StadiumBorder(),
+                          decoration: BoxDecoration(
+                            color: const Color.fromRGBO(0, 0, 0, 0.3),
+                            borderRadius: BorderRadius.circular(5),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 3,
-                              horizontal: 5,
-                            ),
-                            child: MessageDatetimeAndStatus(
-                              showStatus: isCurrentUser,
-                              color: Colors.white,
-                              message: message,
+                            padding: const EdgeInsets.all(4),
+                            child: Text(
+                              durationText,
+                              style: const TextStyle(
+                                fontSize: MessageItemWidget.tertiaryFontSize,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
+                      );
+                    }),
+                    Positioned(
+                      bottom: 4,
+                      right: isCurrentUser ? 12 : 4,
+                      child: const DecoratedBox(
+                        decoration: ShapeDecoration(
+                          color: Color.fromRGBO(0, 0, 0, 0.3),
+                          shape: StadiumBorder(),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 3,
+                            horizontal: 5,
+                          ),
+                          child: MessageDatetimeAndStatus(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          );
-        },
-      );
+          ),
+        );
+      },
+    );
+  }
 }
 
 String formatVideoDuration(Duration duration) =>

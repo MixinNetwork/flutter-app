@@ -6,6 +6,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:photo_view/photo_view.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../constants/resources.dart';
@@ -21,21 +22,25 @@ import '../../../interactive_decorated_box.dart';
 import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
+import '../transcript_message.dart';
 
 class ImagePreviewPage extends HookWidget {
   const ImagePreviewPage({
     Key? key,
     required this.conversationId,
     required this.messageId,
+    required this.isTranscriptPage,
   }) : super(key: key);
 
   final String conversationId;
   final String messageId;
+  final bool isTranscriptPage;
 
   static Future<void> push(
     BuildContext context, {
     required String conversationId,
     required String messageId,
+    bool isTranscriptPage = false,
   }) =>
       showGeneralDialog(
         context: context,
@@ -43,12 +48,23 @@ class ImagePreviewPage extends HookWidget {
         barrierDismissible: true,
         barrierLabel:
             MaterialLocalizations.of(context).modalBarrierDismissLabel,
-        pageBuilder: (BuildContext context, Animation<double> animation,
-                Animation<double> secondaryAnimation) =>
-            ImagePreviewPage(
-          conversationId: conversationId,
-          messageId: messageId,
-        ),
+        pageBuilder: (BuildContext buildContext, Animation<double> animation,
+            Animation<double> secondaryAnimation) {
+          final child = ImagePreviewPage(
+            conversationId: conversationId,
+            messageId: messageId,
+            isTranscriptPage: isTranscriptPage,
+          );
+
+          try {
+            return Provider.value(
+              value: context.read<TranscriptMessagesWatcher>(),
+              child: child,
+            );
+          } catch (_) {}
+
+          return child;
+        },
       );
 
   @override
@@ -59,11 +75,21 @@ class ImagePreviewPage extends HookWidget {
     final prev = useState<MessageItem?>(null);
     final next = useState<MessageItem?>(null);
 
+    final transcriptMessagesWatcher = useMemoized(() {
+      try {
+        return context.read<TranscriptMessagesWatcher>();
+      } catch (_) {
+        return null;
+      }
+    });
+
     useEffect(() {
       controller.scaleState = PhotoViewScaleState.initial;
     }, [_messageId.value]);
 
     useEffect(() {
+      if (transcriptMessagesWatcher != null) return;
+
       if (prev.value?.messageId == _messageId.value) {
         current.value = prev.value;
       } else if (next.value?.messageId == _messageId.value) {
@@ -77,6 +103,8 @@ class ImagePreviewPage extends HookWidget {
     }, [_messageId.value]);
 
     useEffect(() {
+      if (transcriptMessagesWatcher != null) return;
+
       final messageDao = context.database.messageDao;
       () async {
         final rowId =
@@ -90,6 +118,24 @@ class ImagePreviewPage extends HookWidget {
             .mediaMessagesAfter(rowId, conversationId, 1)
             .getSingleOrNull();
       }();
+    }, [_messageId.value]);
+
+    useEffect(() {
+      if (transcriptMessagesWatcher == null) return () {};
+
+      final listen = transcriptMessagesWatcher
+          .watchMessages()
+          .map((event) =>
+              event.where((element) => element.type.isImage).toList())
+          .listen((messages) {
+        final index = messages
+            .indexWhere((element) => element.messageId == _messageId.value);
+
+        current.value = messages.getOrNull(index);
+        prev.value = messages.getOrNull(index - 1);
+        next.value = messages.getOrNull(index + 1);
+      });
+      return listen.cancel;
     }, [_messageId.value]);
 
     useEffect(
@@ -132,8 +178,8 @@ class ImagePreviewPage extends HookWidget {
         _CopyIntent: CallbackAction<Intent>(
           onInvoke: (Intent intent) => _copyUrl(
               context,
-              context.accountServer.convertMessageAbsolutePath(
-                  current.value, context.isTranscript)),
+              context.accountServer
+                  .convertMessageAbsolutePath(current.value, isTranscriptPage)),
         ),
         _PreviousImageIntent: CallbackAction<Intent>(
           onInvoke: (intent) {
@@ -174,6 +220,7 @@ class ImagePreviewPage extends HookWidget {
                         child: _Bar(
                           message: current.value!,
                           controller: controller,
+                          isTranscriptPage: isTranscriptPage,
                         ),
                       ),
                     ],
@@ -191,6 +238,7 @@ class ImagePreviewPage extends HookWidget {
                       _Item(
                         message: current.value!,
                         controller: controller,
+                        isTranscriptPage: isTranscriptPage,
                       ),
                       Center(
                         child: Padding(
@@ -235,10 +283,12 @@ class _Bar extends StatelessWidget {
     Key? key,
     required this.message,
     required this.controller,
+    required this.isTranscriptPage,
   }) : super(key: key);
 
   final MessageItem message;
   final PhotoViewScaleStateController controller;
+  final bool isTranscriptPage;
 
   @override
   Widget build(BuildContext context) => Row(
@@ -285,28 +335,29 @@ class _Bar extends StatelessWidget {
             onTap: () => controller.scaleState = PhotoViewScaleState.initial,
           ),
           const SizedBox(width: 14),
-          ActionButton(
-            name: Resources.assetsImagesShareSvg,
-            size: 20,
-            color: context.theme.icon,
-            onTap: () async {
-              final accountServer = context.accountServer;
-              final result = await showConversationSelector(
-                context: context,
-                singleSelect: true,
-                title: context.l10n.forward,
-                onlyContact: false,
-              );
-              if (result.isEmpty) return;
-              await accountServer.forwardMessage(
-                message.messageId,
-                result.first.encryptCategory!,
-                conversationId: result.first.conversationId,
-                recipientId: result.first.userId,
-              );
-            },
-          ),
-          const SizedBox(width: 14),
+          if (!isTranscriptPage)
+            ActionButton(
+              name: Resources.assetsImagesShareSvg,
+              size: 20,
+              color: context.theme.icon,
+              onTap: () async {
+                final accountServer = context.accountServer;
+                final result = await showConversationSelector(
+                  context: context,
+                  singleSelect: true,
+                  title: context.l10n.forward,
+                  onlyContact: false,
+                );
+                if (result.isEmpty) return;
+                await accountServer.forwardMessage(
+                  message.messageId,
+                  result.first.encryptCategory!,
+                  conversationId: result.first.conversationId,
+                  recipientId: result.first.userId,
+                );
+              },
+            ),
+          if (!isTranscriptPage) const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesCopySvg,
             color: context.theme.icon,
@@ -314,7 +365,7 @@ class _Bar extends StatelessWidget {
             onTap: () => _copyUrl(
                 context,
                 context.accountServer
-                    .convertMessageAbsolutePath(message, context.isTranscript)),
+                    .convertMessageAbsolutePath(message, isTranscriptPage)),
           ),
           const SizedBox(width: 14),
           ActionButton(
@@ -326,7 +377,7 @@ class _Bar extends StatelessWidget {
               await saveFileToSystem(
                 context,
                 context.accountServer
-                    .convertMessageAbsolutePath(message, context.isTranscript),
+                    .convertMessageAbsolutePath(message, isTranscriptPage),
                 suggestName: message.mediaName,
               ).then((succeed) {
                 if (succeed) {
@@ -354,9 +405,11 @@ class _Item extends HookWidget {
     Key? key,
     required this.message,
     required this.controller,
+    required this.isTranscriptPage,
   }) : super(key: key);
   final MessageItem message;
   final PhotoViewScaleStateController controller;
+  final bool isTranscriptPage;
 
   @override
   Widget build(BuildContext context) {
@@ -379,8 +432,7 @@ class _Item extends HookWidget {
               child: PhotoView(
                 tightMode: true,
                 imageProvider: FileImage(File(context.accountServer
-                    .convertMessageAbsolutePath(
-                        message, context.isTranscript))),
+                    .convertMessageAbsolutePath(message, isTranscriptPage))),
                 maxScale: PhotoViewComputedScale.contained * 2.0,
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 initialScale: PhotoViewComputedScale.contained,

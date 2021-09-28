@@ -12,19 +12,15 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/simple_cubit.dart';
-import '../../constants/resources.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
-import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../ui/home/bloc/quote_message_cubit.dart';
 import '../../ui/home/bloc/recall_message_bloc.dart';
-import '../../ui/home/hook/pin_message.dart';
 import '../../utils/datetime_format_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
-import '../action_button.dart';
 import '../menu.dart';
 import '../user_selector/conversation_selector.dart';
 import 'item/action/action_message.dart';
@@ -51,23 +47,60 @@ import 'item/waiting_message.dart';
 import 'message_day_time.dart';
 import 'message_name.dart';
 
-class _MessageIsTranscript extends Equatable {
-  const _MessageIsTranscript(this.isTranscript);
-
-  final bool isTranscript;
-
-  @override
-  List<Object?> get props => [isTranscript];
+class _MessageContextCubit extends SimpleCubit<_MessageContext> {
+  _MessageContextCubit(_MessageContext initialState) : super(initialState);
 }
 
-extension MessageIsTranscriptExtension on BuildContext {
-  bool get isTranscript {
-    try {
-      return read<_MessageIsTranscript>().isTranscript;
-    } catch (e) {
-      return false;
-    }
-  }
+class _MessageContext with EquatableMixin {
+  _MessageContext({
+    required this.isTranscriptPage,
+    required this.isPinnedPage,
+    required this.showNip,
+    required this.isCurrentUser,
+    required this.message,
+  });
+
+  final bool isTranscriptPage;
+  final bool isPinnedPage;
+  final bool showNip;
+  final bool isCurrentUser;
+  final MessageItem message;
+
+  @override
+  List<Object?> get props => [
+        isTranscriptPage,
+        isPinnedPage,
+        showNip,
+        isCurrentUser,
+        message,
+      ];
+}
+
+bool useIsTranscriptPage() =>
+    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
+        converter: (state) => state.isTranscriptPage);
+
+bool useIsPinnedPage() =>
+    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
+        converter: (state) => state.isPinnedPage);
+
+bool useShowNip() =>
+    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
+        converter: (state) => state.showNip);
+
+bool useIsCurrentUser() =>
+    useBlocStateConverter<_MessageContextCubit, _MessageContext, bool>(
+        converter: (state) => state.isCurrentUser);
+
+MessageItem useMessage() =>
+    useMessageConverter<MessageItem>(converter: (state) => state);
+
+T useMessageConverter<T>({required T Function(MessageItem) converter}) =>
+    useBlocStateConverter<_MessageContextCubit, _MessageContext, T>(
+        converter: (state) => converter(state.message));
+
+extension MessageContext on BuildContext {
+  MessageItem get message => read<_MessageContextCubit>().state.message;
 }
 
 const _pinArrowWidth = 32.0;
@@ -79,18 +112,18 @@ class MessageItemWidget extends HookWidget {
     this.prev,
     this.next,
     this.lastReadMessageId,
-    this.isTranscript = false,
+    this.isTranscriptPage = false,
     this.blink = true,
-    this.pinned = false,
+    this.isPinnedPage = false,
   }) : super(key: key);
 
   final MessageItem message;
   final MessageItem? prev;
   final MessageItem? next;
   final String? lastReadMessageId;
-  final bool isTranscript;
+  final bool isTranscriptPage;
   final bool blink;
-  final bool pinned;
+  final bool isPinnedPage;
 
   static const primaryFontSize = 16.0;
   static const secondaryFontSize = 14.0;
@@ -143,7 +176,7 @@ class MessageItemWidget extends HookWidget {
         ).data ??
         Colors.transparent;
 
-    final child = Column(
+    Widget child = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -153,17 +186,11 @@ class MessageItemWidget extends HookWidget {
           child: Builder(
             builder: (context) {
               if (message.type == MessageCategory.systemConversation) {
-                return SystemMessage(
-                  message: message,
-                );
+                return const SystemMessage();
               }
 
               if (message.type.isPin) {
-                return PinMessageWidget(
-                  showNip: showNip,
-                  isCurrentUser: isCurrentUser,
-                  message: message,
-                );
+                return const PinMessageWidget();
               }
 
               if (message.type == MessageCategory.secret) {
@@ -171,25 +198,25 @@ class MessageItemWidget extends HookWidget {
               }
 
               if (message.type == MessageCategory.stranger) {
-                return StrangerMessage(
-                  message: message,
-                );
+                return const StrangerMessage();
               }
 
               return _MessageBubbleMargin(
                 userName: userName,
                 userId: userId,
                 isCurrentUser: isCurrentUser,
-                pinArrowWidth: pinned ? _pinArrowWidth : 0,
+                pinArrowWidth: isPinnedPage ? _pinArrowWidth : 0,
                 showedMenu: showedMenuCubit.emit,
                 buildMenus: () => [
-                  if (!isTranscript && message.type.canReply && !pinned)
+                  if (!isTranscriptPage &&
+                      message.type.canReply &&
+                      !isPinnedPage)
                     ContextMenu(
                       title: context.l10n.reply,
                       onTap: () =>
                           context.read<QuoteMessageCubit>().emit(message),
                     ),
-                  if (!isTranscript &&
+                  if (!isTranscriptPage &&
                       message.type.canReply &&
                       const [
                         MessageStatus.delivered,
@@ -197,7 +224,7 @@ class MessageItemWidget extends HookWidget {
                         MessageStatus.sent
                       ].contains(message.status))
                     _PinMenu(message: message),
-                  if (!isTranscript && message.canForward)
+                  if (!isTranscriptPage && message.canForward)
                     ContextMenu(
                       title: context.l10n.forward,
                       onTap: () async {
@@ -222,7 +249,7 @@ class MessageItemWidget extends HookWidget {
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.content)),
                     ),
-                  if (!isTranscript &&
+                  if (!isTranscriptPage &&
                       isCurrentUser &&
                       !message.type.isRecall &&
                       DateTime.now().isBefore(
@@ -245,7 +272,7 @@ class MessageItemWidget extends HookWidget {
                         }
                       },
                     ),
-                  if (!isTranscript)
+                  if (!isTranscriptPage)
                     ContextMenu(
                       title: context.l10n.deleteForMe,
                       isDestructiveAction: true,
@@ -260,162 +287,72 @@ class MessageItemWidget extends HookWidget {
                     ),
                 ],
                 builder: (BuildContext context) {
-                  final pinArrow = pinned
-                      ? ActionButton(
-                          size: 16,
-                          name: Resources.assetsImagesPinArrowSvg,
-                          onTap: () {
-                            context
-                                .read<BlinkCubit>()
-                                .blinkByMessageId(message.messageId);
-                            ConversationCubit.selectConversation(
-                              context,
-                              message.conversationId,
-                              initIndexMessageId: message.messageId,
-                            );
-                          },
-                        )
-                      : null;
-
                   if (message.type.isIllegalMessageCategory ||
                       message.status == MessageStatus.unknown) {
-                    return UnknownMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const UnknownMessage();
                   }
 
                   if (message.type.isTranscript) {
-                    return TranscriptMessageWidget(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const TranscriptMessageWidget();
                   }
 
                   if (message.type.isLocation) {
-                    return LocationMessageWidget(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const LocationMessageWidget();
                   }
 
                   if (message.type.isPost) {
-                    return PostMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const PostMessage();
                   }
 
                   if (message.type == MessageCategory.systemAccountSnapshot) {
-                    return TransferMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                    );
+                    return const TransferMessage();
                   }
 
                   if (message.type.isContact) {
-                    return ContactMessageWidget(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const ContactMessageWidget();
                   }
 
                   if (message.type == MessageCategory.appButtonGroup) {
-                    return ActionMessage(
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                    );
+                    return const ActionMessage();
                   }
 
                   if (message.type == MessageCategory.appCard) {
-                    return ActionCardMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const ActionCardMessage();
                   }
 
                   if (message.type.isData) {
-                    return FileMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const FileMessage();
                   }
+
                   if (message.status == MessageStatus.failed) {
-                    return WaitingMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                    );
+                    return const WaitingMessage();
                   }
+
                   if (message.type.isText) {
-                    return TextMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const TextMessage();
                   }
+
                   if (message.type.isSticker) {
-                    return StickerMessageWidget(
-                      message: message,
-                      isCurrentUser: isCurrentUser,
-                      pinArrow: pinArrow,
-                    );
+                    return const StickerMessageWidget();
                   }
+
                   if (message.type.isImage) {
-                    return ImageMessageWidget(
-                      showNip: showNip,
-                      message: message,
-                      isCurrentUser: isCurrentUser,
-                      pinArrow: pinArrow,
-                    );
+                    return const ImageMessageWidget();
                   }
+
                   if (message.type.isVideo || message.type.isLive) {
-                    return VideoMessageWidget(
-                      showNip: showNip,
-                      message: message,
-                      isCurrentUser: isCurrentUser,
-                      pinArrow: pinArrow,
-                    );
+                    return const VideoMessageWidget();
                   }
 
                   if (message.type.isAudio) {
-                    return AudioMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const AudioMessage();
                   }
+
                   if (message.type.isRecall) {
-                    return RecallMessage(
-                      showNip: showNip,
-                      isCurrentUser: isCurrentUser,
-                      message: message,
-                      pinArrow: pinArrow,
-                    );
+                    return const RecallMessage();
                   }
-                  return UnknownMessage(
-                    showNip: showNip,
-                    isCurrentUser: isCurrentUser,
-                    message: message,
-                    pinArrow: pinArrow,
-                  );
+
+                  return const UnknownMessage();
                 },
               );
             },
@@ -427,7 +364,7 @@ class MessageItemWidget extends HookWidget {
     );
 
     if (message.mentionRead == false) {
-      return VisibilityDetector(
+      child = VisibilityDetector(
         onVisibilityChanged: (VisibilityInfo info) {
           if (info.visibleFraction < 1) return;
           context.accountServer
@@ -438,8 +375,23 @@ class MessageItemWidget extends HookWidget {
       );
     }
 
-    return Provider(
-      create: (context) => _MessageIsTranscript(isTranscript),
+    _MessageContext newMessageContext() => _MessageContext(
+          isTranscriptPage: isTranscriptPage,
+          isPinnedPage: isPinnedPage,
+          showNip: showNip,
+          isCurrentUser: isCurrentUser,
+          message: message,
+        );
+
+    final messageContextCubit =
+        useBloc(() => _MessageContextCubit(newMessageContext()));
+
+    useEffect(() {
+      messageContextCubit.emit(newMessageContext());
+    }, [isTranscriptPage, isPinnedPage, showNip, isCurrentUser, message]);
+
+    return Provider.value(
+      value: messageContextCubit,
       child: Padding(
         padding: sameUserPrev ? EdgeInsets.zero : const EdgeInsets.only(top: 8),
         child: child,
@@ -474,36 +426,27 @@ class _PinMenu extends HookWidget {
 
     if (role == null) return const SizedBox();
 
-    return HookBuilder(builder: (context) {
-      final pined = useMemoized(
-          () => context
-              .watch<PinMessageState>()
-              .messageIds
-              .contains(message.messageId),
-          [message.messageId]);
-
-      return ContextMenu(
-        title: pined ? context.l10n.unPin : context.l10n.pin,
-        onTap: () async {
-          final pinMessageMinimal = PinMessageMinimal(
-            messageId: message.messageId,
-            type: message.type,
-            content: message.type.isText ? message.content : null,
-          );
-          if (pined) {
-            await context.accountServer.unpinMessage(
-              conversationId: message.conversationId,
-              pinMessageMinimals: [pinMessageMinimal],
-            );
-            return;
-          }
-          await context.accountServer.pinMessage(
+    return ContextMenu(
+      title: message.pinned ? context.l10n.unPin : context.l10n.pin,
+      onTap: () async {
+        final pinMessageMinimal = PinMessageMinimal(
+          messageId: message.messageId,
+          type: message.type,
+          content: message.type.isText ? message.content : null,
+        );
+        if (message.pinned) {
+          await context.accountServer.unpinMessage(
             conversationId: message.conversationId,
             pinMessageMinimals: [pinMessageMinimal],
           );
-        },
-      );
-    });
+          return;
+        }
+        await context.accountServer.pinMessage(
+          conversationId: message.conversationId,
+          pinMessageMinimals: [pinMessageMinimal],
+        );
+      },
+    );
   }
 }
 

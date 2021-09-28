@@ -5,7 +5,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../../constants/resources.dart';
-import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../ui/home/bloc/recall_message_bloc.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
@@ -17,24 +16,20 @@ import '../message_layout.dart';
 class RecallMessage extends HookWidget {
   const RecallMessage({
     Key? key,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
-    required this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
+    final isCurrentUser = useIsCurrentUser();
+    final messageId =
+        useMessageConverter(converter: (state) => state.messageId);
+
     final recalledText = useBlocStateConverter<RecallMessageReeditCubit,
         Map<String, String>, String?>(
-      converter: (state) => state[message.messageId],
-      keys: [message.messageId],
+      converter: (state) => state[messageId],
+      keys: [messageId],
     );
+
     final content = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -72,15 +67,8 @@ class RecallMessage extends HookWidget {
         ),
       ],
     );
-    final dateAndStatus = MessageDatetimeAndStatus(
-      showStatus: isCurrentUser,
-      message: message,
-    );
+    const dateAndStatus = MessageDatetimeAndStatus();
     return MessageBubble(
-      messageId: message.messageId,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
-      pinArrow: pinArrow,
       child: MessageLayout(
         spacing: 6,
         content: content,

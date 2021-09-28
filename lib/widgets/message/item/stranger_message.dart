@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../db/mixin_database.dart';
-import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/uri_utils.dart';
@@ -13,14 +11,13 @@ import '../message.dart';
 class StrangerMessage extends StatelessWidget {
   const StrangerMessage({
     Key? key,
-    required this.message,
   }) : super(key: key);
-
-  final MessageItem message;
 
   @override
   Widget build(BuildContext context) {
-    final isBotConversation = message.appId != null;
+    final isBotConversation =
+        useMessageConverter(converter: (state) => state.appId != null);
+
     return Column(
       children: [
         Text(
@@ -41,6 +38,7 @@ class StrangerMessage extends StatelessWidget {
                   ? context.l10n.botInteractOpen
                   : context.l10n.block,
               onTap: () async {
+                final message = context.message;
                 if (isBotConversation) {
                   final app =
                       await context.database.appDao.findAppById(message.appId!);
@@ -60,6 +58,7 @@ class StrangerMessage extends StatelessWidget {
                   ? context.l10n.botInteractHi
                   : context.l10n.addContact,
               onTap: () {
+                final message = context.message;
                 if (isBotConversation) {
                   context.accountServer.sendTextMessage(
                       'Hi', EncryptCategory.plain,

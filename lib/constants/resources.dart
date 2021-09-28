@@ -31,12 +31,6 @@ class Resources {
 
   static const String assetsImagesChatPinSvg = 'assets/images/chat_pin.svg';
 
-  static const String assetsImagesChatRepresentativeSvg =
-      'assets/images/chat_representative.svg';
-
-  static const String assetsImagesChatSecretSvg =
-      'assets/images/chat_secret.svg';
-
   static const String assetsImagesChatSmallSvg = 'assets/images/chat_small.svg';
 
   static const String assetsImagesCircleSvg = 'assets/images/circle.svg';
@@ -169,6 +163,15 @@ class Resources {
       'assets/images/location_mark.svg';
 
   static const String assetsImagesLogoPng = 'assets/images/logo.png';
+
+  static const String assetsImagesMessagePinSvg =
+      'assets/images/message_pin.svg';
+
+  static const String assetsImagesMessageRepresentativeSvg =
+      'assets/images/message_representative.svg';
+
+  static const String assetsImagesMessageSecretSvg =
+      'assets/images/message_secret.svg';
 
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';
 

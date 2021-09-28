@@ -8,10 +8,10 @@ import 'package:latlng/latlng.dart';
 import 'package:map/map.dart' as map;
 
 import '../../../../constants/resources.dart';
-import '../../../../db/mixin_database.dart';
 import '../../../../utils/uri_utils.dart';
 import '../../../cache_image.dart';
 import '../../../interactive_decorated_box.dart';
+import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import 'location_payload.dart';
@@ -19,34 +19,21 @@ import 'location_payload.dart';
 class LocationMessageWidget extends HookWidget {
   const LocationMessageWidget({
     Key? key,
-    required this.message,
-    required this.showNip,
-    required this.isCurrentUser,
-    this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
+    final content =
+        useMessageConverter(converter: (state) => state.content ?? '');
+
     final location = useMemoized(
-      () => LocationPayload.fromJson(
-          jsonDecode(message.content!) as Map<String, dynamic>),
-      [message.content],
+      () =>
+          LocationPayload.fromJson(jsonDecode(content) as Map<String, dynamic>),
+      [content],
     );
     return MessageBubble(
-      messageId: message.messageId,
-      isCurrentUser: isCurrentUser,
       padding: EdgeInsets.zero,
-      outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-        showStatus: isCurrentUser,
-        message: message,
-      ),
-      pinArrow: pinArrow,
-      showNip: showNip,
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       includeNip: true,
       clip: true,
       child: SizedBox(

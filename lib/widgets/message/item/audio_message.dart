@@ -19,47 +19,34 @@ import '../message_datetime_and_status.dart';
 class AudioMessage extends HookWidget {
   const AudioMessage({
     Key? key,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
-    required this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
-    final playing = useAudioMessagePlaying(
-      message.messageId,
-      isMediaList: context.isTranscript,
-    );
+    final isTranscriptPage = useIsTranscriptPage();
+    final messageId =
+        useMessageConverter(converter: (state) => state.messageId);
+    final mediaStatus =
+        useMessageConverter(converter: (state) => state.mediaStatus);
+    final relationship =
+        useMessageConverter(converter: (state) => state.relationship);
+    final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
 
-    final duration = useMemoized(
-        () => Duration(
-              milliseconds: int.tryParse(message.mediaDuration ?? '') ?? 0,
-            ),
-        [message.mediaDuration]);
+    final playing =
+        useAudioMessagePlaying(messageId, isMediaList: isTranscriptPage);
 
-    final waveform = useMemoized(
-      () => base64Decode(message.mediaWaveform ?? ''),
-      [message.mediaWaveform],
+    final duration = useMessageConverter(
+      converter: (state) => Duration(
+        milliseconds: int.tryParse(state.mediaDuration ?? '') ?? 0,
+      ),
     );
 
     return MessageBubble(
-      messageId: message.messageId,
-      showNip: showNip,
-      isCurrentUser: isCurrentUser,
-      pinArrow: pinArrow,
-      outerTimeAndStatusWidget: MessageDatetimeAndStatus(
-        showStatus: isCurrentUser,
-        message: message,
-      ),
+      outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       forceIsCurrentUserColor: false,
       child: InteractiveDecoratedBox(
         onTap: () {
+          final message = context.message;
           switch (message.mediaStatus) {
             case MediaStatus.read:
             case MediaStatus.done:
@@ -99,16 +86,16 @@ class AudioMessage extends HookWidget {
           children: [
             Builder(
               builder: (BuildContext context) {
-                switch (message.mediaStatus) {
+                switch (mediaStatus) {
                   case MediaStatus.canceled:
-                    if (message.relationship == UserRelationship.me &&
-                        message.mediaUrl?.isNotEmpty == true) {
+                    if (relationship == UserRelationship.me &&
+                        mediaUrl?.isNotEmpty == true) {
                       return const StatusUpload();
                     } else {
                       return const StatusDownload();
                     }
                   case MediaStatus.pending:
-                    return StatusPending(messageId: message.messageId);
+                    return const StatusPending();
                   case MediaStatus.expired:
                     return const StatusWarning();
                   default:
@@ -125,8 +112,6 @@ class AudioMessage extends HookWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _AnimatedWave(
-                    message: message,
-                    waveform: waveform,
                     duration: duration,
                   ),
                   const SizedBox(height: 8),
@@ -151,20 +136,27 @@ class _AnimatedWave extends HookWidget {
   const _AnimatedWave({
     Key? key,
     required this.duration,
-    required this.waveform,
-    required this.message,
   }) : super(key: key);
 
   final Duration duration;
-  final List<int> waveform;
-  final MessageItem message;
 
   @override
   Widget build(BuildContext context) {
-    final read = message.mediaStatus == MediaStatus.read;
+    final mediaWaveform =
+        useMessageConverter(converter: (state) => state.mediaWaveform ?? '');
+    final mediaStatus =
+        useMessageConverter(converter: (state) => state.mediaStatus);
+    final messageId =
+        useMessageConverter(converter: (state) => state.messageId);
+
+    final waveform =
+        useMemoized(() => base64Decode(mediaWaveform), [mediaWaveform]);
+
+    final read = mediaStatus == MediaStatus.read;
+    final isTranscriptPage = useIsTranscriptPage();
     final playing = useAudioMessagePlaying(
-      message.messageId,
-      isMediaList: context.isTranscript,
+      messageId,
+      isMediaList: isTranscriptPage,
     );
 
     double getPlayingFriction() {

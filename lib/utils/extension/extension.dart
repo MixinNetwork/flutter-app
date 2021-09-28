@@ -23,8 +23,6 @@ import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../widgets/brightness_observer.dart';
 import '../audio_message_player/audio_message_service.dart';
 
-export 'package:flutter_app/widgets/message/message.dart'
-    show MessageIsTranscriptExtension;
 export 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     show UuidHashcodeExtension;
 export 'package:provider/provider.dart' show ReadContext, WatchContext;

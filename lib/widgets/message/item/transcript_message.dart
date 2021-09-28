@@ -25,25 +25,24 @@ import '../message_datetime_and_status.dart';
 import 'audio_message.dart';
 import 'unknown_message.dart';
 
+class TranscriptMessagesWatcher {
+  const TranscriptMessagesWatcher(this.watchMessages);
+
+  final Stream<List<MessageItem>> Function() watchMessages;
+}
+
 class TranscriptMessageWidget extends HookWidget {
   const TranscriptMessageWidget({
     Key? key,
-    required this.message,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.pinArrow,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
-  final Widget? pinArrow;
 
   @override
   Widget build(BuildContext context) {
+    final content =
+        useMessageConverter(converter: (state) => state.content ?? '');
     final transcriptMinimals = useMemoized<List<TranscriptMinimal>?>(() {
       try {
-        final json = jsonDecode(message.content ?? '');
+        final json = jsonDecode(content);
         return (json as List<dynamic>)
             .map((json) =>
                 TranscriptMinimal.fromJson(json as Map<String, dynamic>))
@@ -51,15 +50,12 @@ class TranscriptMessageWidget extends HookWidget {
       } catch (_) {
         return null;
       }
-    });
+    }, [content]);
+
+    final isCurrentUser = useIsCurrentUser();
 
     if (transcriptMinimals == null) {
-      return UnknownMessage(
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
-        message: message,
-        pinArrow: pinArrow,
-      );
+      return const UnknownMessage();
     }
 
     return HookBuilder(builder: (context) {
@@ -90,20 +86,15 @@ class TranscriptMessageWidget extends HookWidget {
           ]);
 
       return MessageBubble(
-        messageId: message.messageId,
-        quoteMessageId: message.quoteId,
-        quoteMessageContent: message.quoteContent,
-        showNip: showNip,
-        isCurrentUser: isCurrentUser,
         padding: const EdgeInsets.only(
           top: 4,
           bottom: 2,
           right: 2,
           left: 2,
         ),
-        pinArrow: pinArrow,
         child: InteractiveDecoratedBox(
           onTap: () async {
+            final message = context.message;
             await showMixinDialog(
                 context: context,
                 padding: const EdgeInsets.symmetric(vertical: 80),
@@ -184,20 +175,18 @@ class TranscriptMessageWidget extends HookWidget {
                 Positioned(
                   bottom: 2,
                   right: isCurrentUser ? 1 : 2,
-                  child: DecoratedBox(
-                    decoration: const ShapeDecoration(
+                  child: const DecoratedBox(
+                    decoration: ShapeDecoration(
                       color: Color.fromRGBO(0, 0, 0, 0.3),
                       shape: StadiumBorder(),
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
+                      padding: EdgeInsets.symmetric(
                         vertical: 3,
                         horizontal: 5,
                       ),
                       child: MessageDatetimeAndStatus(
-                        showStatus: isCurrentUser,
                         color: Colors.white,
-                        message: message,
                       ),
                     ),
                   ),
@@ -224,16 +213,15 @@ class TranscriptPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final list = useMemoizedStream(() => context.database.transcriptMessageDao
-            .transactionMessageItem(messageId)
-            .watch()
-            .map(
-              (list) => list
-                  .map((transcriptMessageItem) =>
-                      transcriptMessageItem.messageItem)
-                  .toList(),
-            )).data ??
-        <MessageItem>[];
+    Stream<List<MessageItem>> watchMessages() => context
+        .database.transcriptMessageDao
+        .transactionMessageItem(messageId)
+        .watch()
+        .map((list) => list
+            .map((transcriptMessageItem) => transcriptMessageItem.messageItem)
+            .toList());
+
+    final list = useMemoizedStream(watchMessages).data ?? <MessageItem>[];
 
     final chatSideCubit = useBloc(() => ChatSideCubit());
     final searchConversationKeywordCubit = useBloc(
@@ -267,6 +255,7 @@ class TranscriptPage extends HookWidget {
                   (m) => context.accountServer
                       .convertMessageAbsolutePath(m, true)),
             ),
+            Provider.value(value: TranscriptMessagesWatcher(watchMessages)),
           ],
           child: Column(
             children: [
@@ -308,7 +297,7 @@ class TranscriptPage extends HookWidget {
                     prev: list.getOrNull(index - 1),
                     message: list[index],
                     next: list.getOrNull(index + 1),
-                    isTranscript: true,
+                    isTranscriptPage: true,
                   ),
                   itemCount: list.length,
                 ),

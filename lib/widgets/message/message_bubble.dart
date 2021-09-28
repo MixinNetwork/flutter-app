@@ -1,8 +1,14 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../constants/resources.dart';
+import '../../ui/home/bloc/blink_cubit.dart';
+import '../../ui/home/bloc/conversation_cubit.dart';
 import '../../utils/extension/extension.dart';
+import '../action_button.dart';
 import 'item/quote_message.dart';
+import 'message.dart';
 
 const _nipWidth = 9.0;
 const _lightCurrentBubble = Color.fromRGBO(197, 237, 253, 1);
@@ -16,40 +22,35 @@ extension BubbleColor on BuildContext {
       : dynamicColor(_lightOtherBubble, darkColor: _darkOtherBubble);
 }
 
-class MessageBubble extends StatelessWidget {
+class MessageBubble extends HookWidget {
   const MessageBubble({
     Key? key,
-    required this.isCurrentUser,
     required this.child,
-    required this.messageId,
-    this.showNip = true,
     this.showBubble = true,
     this.includeNip = false,
     this.clip = false,
     this.padding = const EdgeInsets.all(8),
     this.outerTimeAndStatusWidget,
-    this.quoteMessageId,
-    this.quoteMessageContent,
-    this.pinArrow,
     this.forceIsCurrentUserColor,
   }) : super(key: key);
 
-  final String messageId;
   final Widget child;
-  final bool isCurrentUser;
-  final bool showNip;
   final bool showBubble;
   final bool includeNip;
   final bool clip;
   final EdgeInsetsGeometry padding;
   final Widget? outerTimeAndStatusWidget;
-  final String? quoteMessageContent;
-  final String? quoteMessageId;
-  final Widget? pinArrow;
   final bool? forceIsCurrentUserColor;
 
   @override
   Widget build(BuildContext context) {
+    final showNip = useShowNip();
+    final isCurrentUser = useIsCurrentUser();
+    final isPinnedPage = useIsPinnedPage();
+
+    final quoteMessageId =
+        useMessageConverter(converter: (state) => state.quoteId);
+
     final bubbleColor =
         context.messageBubbleColor(forceIsCurrentUserColor ?? isCurrentUser);
 
@@ -67,7 +68,7 @@ class MessageBubble extends StatelessWidget {
       child: _child,
     );
 
-    if (quoteMessageId != null) {
+    if (quoteMessageId?.isNotEmpty ?? false) {
       _child = IntrinsicWidth(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -75,11 +76,18 @@ class MessageBubble extends StatelessWidget {
           children: [
             _MessageBubbleNipPadding(
               currentUser: isCurrentUser,
-              child: QuoteMessage(
-                messageId: messageId,
-                quoteMessageId: quoteMessageId,
-                content: quoteMessageContent,
-              ),
+              child: HookBuilder(builder: (context) {
+                final messageId =
+                    useMessageConverter(converter: (state) => state.messageId);
+                final quoteContent = useMessageConverter(
+                    converter: (state) => state.quoteContent);
+
+                return QuoteMessage(
+                  messageId: messageId,
+                  quoteMessageId: quoteMessageId,
+                  content: quoteContent,
+                );
+              }),
             ),
             _child,
           ],
@@ -111,13 +119,27 @@ class MessageBubble extends StatelessWidget {
       );
     }
 
-    if (pinArrow != null) {
+    if (isPinnedPage) {
+      final pinArrow = ActionButton(
+        size: 16,
+        name: Resources.assetsImagesPinArrowSvg,
+        onTap: () {
+          final message = context.message;
+          context.read<BlinkCubit>().blinkByMessageId(message.messageId);
+          ConversationCubit.selectConversation(
+            context,
+            message.conversationId,
+            initIndexMessageId: message.messageId,
+          );
+        },
+      );
+
       _child = Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (isCurrentUser) pinArrow!,
+          if (isCurrentUser) pinArrow,
           Flexible(child: _child),
-          if (!isCurrentUser) pinArrow!,
+          if (!isCurrentUser) pinArrow,
         ],
       );
     }

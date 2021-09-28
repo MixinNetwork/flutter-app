@@ -95,5 +95,6 @@ extension TranscriptMessageItemExtension on TranscriptMessageItem {
         stickerId: stickerId,
         assetName: assetName,
         assetType: assetType,
+        pinned: false,
       );
 }

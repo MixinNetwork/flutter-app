@@ -1,63 +1,75 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
-import '../../../db/mixin_database.dart';
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
 import '../../../utils/extension/extension.dart';
 import '../message.dart';
 
-class SystemMessage extends StatelessWidget {
+class SystemMessage extends HookWidget {
   const SystemMessage({
     Key? key,
-    required this.message,
   }) : super(key: key);
 
-  final MessageItem message;
-
   @override
-  Widget build(BuildContext context) => Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 8,
-          ),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: context.dynamicColor(
-                  const Color.fromRGBO(202, 234, 201, 1),
-                ),
-                borderRadius: BorderRadius.circular(10),
+  Widget build(BuildContext context) {
+    final actionName =
+        useMessageConverter(converter: (state) => state.actionName);
+    final participantUserId =
+        useMessageConverter(converter: (state) => state.participantUserId);
+    final relationship =
+        useMessageConverter(converter: (state) => state.relationship);
+    final participantFullName =
+        useMessageConverter(converter: (state) => state.participantFullName);
+    final userFullName =
+        useMessageConverter(converter: (state) => state.userFullName);
+    final groupName =
+        useMessageConverter(converter: (state) => state.groupName);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          vertical: 4,
+          horizontal: 8,
+        ),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.dynamicColor(
+                const Color.fromRGBO(202, 234, 201, 1),
               ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 5,
-                  horizontal: 10,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                vertical: 5,
+                horizontal: 10,
+              ),
+              child: Text(
+                generateSystemText(
+                  actionName: actionName,
+                  participantIsCurrentUser:
+                      participantUserId == context.accountServer.userId,
+                  relationship: relationship,
+                  participantFullName: participantFullName,
+                  senderFullName: userFullName,
+                  groupName: groupName,
                 ),
-                child: Text(
-                  generateSystemText(
-                    actionName: message.actionName,
-                    participantIsCurrentUser: message.participantUserId ==
-                        context.accountServer.userId,
-                    relationship: message.relationship,
-                    participantFullName: message.participantFullName,
-                    senderFullName: message.userFullName,
-                    groupName: message.groupName,
-                  ),
-                  style: TextStyle(
-                    fontSize: MessageItemWidget.secondaryFontSize,
-                    color: context.dynamicColor(
-                      const Color.fromRGBO(0, 0, 0, 1),
-                    ),
+                style: TextStyle(
+                  fontSize: MessageItemWidget.secondaryFontSize,
+                  color: context.dynamicColor(
+                    const Color.fromRGBO(0, 0, 0, 1),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
 }
 
 String generateSystemText({

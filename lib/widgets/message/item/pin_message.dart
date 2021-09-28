@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../blaze/vo/pin_message_minimal.dart';
-import '../../../db/mixin_database.dart' hide Offset, Message;
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/message_optimize.dart';
@@ -14,33 +13,30 @@ import 'text/mention_builder.dart';
 class PinMessageWidget extends HookWidget {
   const PinMessageWidget({
     Key? key,
-    required this.showNip,
-    required this.isCurrentUser,
-    required this.message,
   }) : super(key: key);
-
-  final bool showNip;
-  final bool isCurrentUser;
-  final MessageItem message;
 
   @override
   Widget build(BuildContext context) {
+    final content =
+        useMessageConverter(converter: (state) => state.content ?? '');
+    final userFullName =
+        useMessageConverter(converter: (state) => state.userFullName ?? '');
+
     final pinMessageMinimal = useMemoized(
-      () => PinMessageMinimal.fromJsonString(message.content ?? ''),
-      [message.content],
+      () => PinMessageMinimal.fromJsonString(content),
+      [content],
     );
 
     final cachePreview = useMemoized(() {
       if (pinMessageMinimal == null) {
-        return context.l10n
-            .pinned(message.userFullName ?? '', context.l10n.aMessage);
+        return context.l10n.pinned(userFullName, context.l10n.aMessage);
       }
       final preview = cachePinPreviewText(
         pinMessageMinimal: pinMessageMinimal,
         mentionCache: context.read<MentionCache>(),
       );
-      return context.l10n.pinned(message.userFullName ?? '', preview);
-    }, [message.userFullName, message.content]);
+      return context.l10n.pinned(userFullName, preview);
+    }, [userFullName, content]);
 
     final text = useMemoizedFuture(
       () async {
@@ -51,12 +47,10 @@ class PinMessageWidget extends HookWidget {
           mentionCache: context.read<MentionCache>(),
         );
 
-        return context.l10n
-            .pinned(message.userFullName ?? '', preview)
-            .overflow;
+        return context.l10n.pinned(userFullName, preview).overflow;
       },
       cachePreview,
-      keys: [message.userFullName, message.content],
+      keys: [userFullName, content],
     ).requireData;
 
     return Center(
