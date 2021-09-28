@@ -107,7 +107,7 @@ class FileMessage extends HookWidget {
               );
             }),
             const SizedBox(width: 8),
-            Expanded(
+            Flexible(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
