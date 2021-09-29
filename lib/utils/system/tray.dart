@@ -14,6 +14,8 @@ import '../logger.dart';
 
 final SystemTray _systemTray = SystemTray();
 
+final _enableTray = Platform.isWindows;
+
 class SystemTrayWidget extends HookWidget {
   const SystemTrayWidget({Key? key, required this.child}) : super(key: key);
 
@@ -24,9 +26,17 @@ class SystemTrayWidget extends HookWidget {
     final show = context.l10n.show;
     final exitStr = context.l10n.exit;
 
-    useMemoized(_initSystemTray);
+    useMemoized(() {
+      if (!_enableTray) {
+        return;
+      }
+      _initSystemTray();
+    });
 
     useEffect(() {
+      if (!_enableTray) {
+        return;
+      }
       _systemTray.setContextMenu(
         [
           MenuItem(
@@ -51,10 +61,6 @@ class SystemTrayWidget extends HookWidget {
 }
 
 Future<void> _initSystemTray() async {
-  if (!Platform.isWindows) {
-    return;
-  }
-
   String path;
   if (Platform.isWindows) {
     path = p.joinAll([
@@ -64,12 +70,15 @@ Future<void> _initSystemTray() async {
     ]);
   } else if (Platform.isMacOS) {
     path = p.joinAll(['AppIcon']);
-  } else {
+  } else if (Platform.isLinux) {
     path = p.joinAll([
       p.dirname(Platform.resolvedExecutable),
-      'data/flutter_assets/assets',
-      'todo.png'
+      'data/flutter_assets',
+      Resources.assetsIconsWindowsAppIconPng,
     ]);
+  } else {
+    assert(false, 'can not init tray icon path.');
+    return;
   }
 
   // We first init the systray menu and then add the menu entries

@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   file_selector_linux
   flutter_app_icon_badge
   system_clock
+  system_tray
   url_launcher_linux
   window_size
 )
