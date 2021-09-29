@@ -2,18 +2,65 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:path/path.dart' as p;
 import 'package:system_tray/system_tray.dart';
+import 'package:win_toast/win_toast.dart';
+
+import '../../constants/resources.dart';
+import '../extension/extension.dart';
+import '../logger.dart';
 
 final SystemTray _systemTray = SystemTray();
 
-Future<void> initSystemTray() async {
+class SystemTrayWidget extends HookWidget {
+  const SystemTrayWidget({Key? key, required this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final show = context.l10n.show;
+    final exitStr = context.l10n.exit;
+
+    useMemoized(_initSystemTray);
+
+    useEffect(() {
+      _systemTray.setContextMenu(
+        [
+          MenuItem(
+            label: show,
+            onClicked: () {
+              appWindow.show();
+            },
+          ),
+          MenuSeparator(),
+          MenuItem(
+            label: exitStr,
+            onClicked: () {
+              exit(0);
+            },
+          ),
+        ],
+      );
+    }, [show, exit]);
+
+    return child;
+  }
+}
+
+Future<void> _initSystemTray() async {
+  if (!Platform.isWindows) {
+    return;
+  }
+
   String path;
   if (Platform.isWindows) {
     path = p.joinAll([
       p.dirname(Platform.resolvedExecutable),
-      'data/flutter_assets/assets',
-      'windows_app_icon.png'
+      'data/flutter_assets',
+      Resources.assetsImagesNotifyIconIco
     ]);
   } else if (Platform.isMacOS) {
     path = p.joinAll(['AppIcon']);
@@ -21,53 +68,29 @@ Future<void> initSystemTray() async {
     path = p.joinAll([
       p.dirname(Platform.resolvedExecutable),
       'data/flutter_assets/assets',
-      'macos_app_icon.png'
+      'todo.png'
     ]);
   }
 
   // We first init the systray menu and then add the menu entries
-  await _systemTray.initSystemTray("system tray",
-      iconPath: path, toolTip: "How to use system tray with Flutter");
-
-  await _systemTray.setContextMenu(
-    [
-      MenuItem(
-        label: 'Show',
-        onClicked: () {
-          appWindow.show();
-        },
-      ),
-      MenuSeparator(),
-      SubMenu(
-        label: "SubMenu",
-        children: [
-          MenuItem(
-            label: 'SubItem1',
-            enabled: false,
-            onClicked: () {
-              print("click SubItem1");
-            },
-          ),
-          MenuItem(label: 'SubItem2'),
-          MenuItem(label: 'SubItem3'),
-        ],
-      ),
-      MenuSeparator(),
-      MenuItem(
-        label: 'Exit',
-        onClicked: () {
-          appWindow.close();
-        },
-      ),
-    ],
-  );
-
-  await _systemTray.setSystemTrayInfo(
+  unawaited(_systemTray.initSystemTray(
+    'Mixin',
     iconPath: path,
-  );
+    toolTip: 'Mixin',
+  ));
 
   // handle system tray event
   _systemTray.registerSystemTrayEventHandler((eventName) {
-    print("eventName: $eventName");
+    d('eventName: $eventName');
+    switch (eventName) {
+      case 'leftMouseUp':
+        if (Platform.isWindows) {
+          WinToast.instance().bringWindowToFront();
+        }
+        appWindow.show();
+        break;
+      default:
+        break;
+    }
   });
 }

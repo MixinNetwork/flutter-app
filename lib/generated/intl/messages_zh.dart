@@ -137,6 +137,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
         "editName": MessageLookupByLibrary.simpleMessage("编辑名称"),
         "editProfile": MessageLookupByLibrary.simpleMessage("编辑资料"),
+        "exit": MessageLookupByLibrary.simpleMessage("退出"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("退出群组"),
         "extensions": MessageLookupByLibrary.simpleMessage("机器人"),
         "failed": MessageLookupByLibrary.simpleMessage("失败"),
@@ -253,6 +254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareContact": MessageLookupByLibrary.simpleMessage("发送名片"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("分享的应用"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("媒体内容"),
+        "show": MessageLookupByLibrary.simpleMessage("显示"),
         "signOut": MessageLookupByLibrary.simpleMessage("登出"),
         "sticker": MessageLookupByLibrary.simpleMessage("贴纸"),
         "storageAutoDownloadDescription":

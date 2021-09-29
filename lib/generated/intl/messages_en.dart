@@ -163,6 +163,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Edit Circle Name"),
         "editName": MessageLookupByLibrary.simpleMessage("Edit Name"),
         "editProfile": MessageLookupByLibrary.simpleMessage("Edit Profile"),
+        "exit": MessageLookupByLibrary.simpleMessage("Exit"),
         "exitGroup": MessageLookupByLibrary.simpleMessage("Delete and Exit"),
         "extensions": MessageLookupByLibrary.simpleMessage("Extensions"),
         "failed": MessageLookupByLibrary.simpleMessage("Failed"),
@@ -294,6 +295,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "shareContact": MessageLookupByLibrary.simpleMessage("Share Contact"),
         "sharedApps": MessageLookupByLibrary.simpleMessage("Shared Apps"),
         "sharedMedia": MessageLookupByLibrary.simpleMessage("Shared Media"),
+        "show": MessageLookupByLibrary.simpleMessage("Show"),
         "signOut": MessageLookupByLibrary.simpleMessage("Sign Out"),
         "sticker": MessageLookupByLibrary.simpleMessage("Sticker"),
         "storageAutoDownloadDescription": MessageLookupByLibrary.simpleMessage(

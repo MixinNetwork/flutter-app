@@ -17,7 +17,6 @@ import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
-import 'utils/system/tray.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,7 +35,6 @@ Future<void> main() async {
 
   if (kDebugMode) Bloc.observer = CustomBlocObserver();
   unawaited(initListener());
-  unawaited(initSystemTray());
 
   ansiColorDisabled = false;
   DartVLC.initialize();

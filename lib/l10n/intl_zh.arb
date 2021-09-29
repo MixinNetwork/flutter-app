@@ -196,5 +196,7 @@
   "searchUser": "搜索用户",
   "searchUserHint": "Mixin ID 或手机号",
   "currentIdentityNumber": "我的 Mixin ID: {ID}",
-  "fromWithColon": "来自: "
+  "fromWithColon": "来自: ",
+  "show": "显示",
+  "exit": "退出"
 }

@@ -30,6 +30,7 @@ import 'ui/landing/landing.dart';
 import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
+import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/default_text_editing_focusable_action_detector.dart';
 import 'widgets/desktop_lifecycle_auto_fcous.dart';
@@ -223,7 +224,7 @@ class _App extends StatelessWidget {
                         ? textScaleFactor
                         : mediaQueryData.textScaleFactor,
                   ),
-                  child: child!,
+                  child: SystemTrayWidget(child: child!),
                 ),
               );
             },
