@@ -1217,6 +1217,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.2.0"
+  system_tray:
+    dependency: "direct main"
+    description:
+      name: system_tray
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.7"
   term_glyph:
     dependency: transitive
     description:
