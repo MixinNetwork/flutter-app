@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/db/mixin_database.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -17,6 +16,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';
+import '../../db/mixin_database.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
 import '../crypto_util.dart';
@@ -26,7 +26,6 @@ import '../load_balancer_utils.dart';
 import '../logger.dart';
 
 part 'attachment_download_job.dart';
-
 part 'attachment_upload_job.dart';
 
 final _dio = Dio(BaseOptions(
