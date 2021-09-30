@@ -292,6 +292,10 @@ class MessageItemWidget extends HookWidget {
                     return const UnknownMessage();
                   }
 
+                  if (message.status == MessageStatus.failed) {
+                    return const WaitingMessage();
+                  }
+
                   if (message.type.isTranscript) {
                     return const TranscriptMessageWidget();
                   }
@@ -322,10 +326,6 @@ class MessageItemWidget extends HookWidget {
 
                   if (message.type.isData) {
                     return const FileMessage();
-                  }
-
-                  if (message.status == MessageStatus.failed) {
-                    return const WaitingMessage();
                   }
 
                   if (message.type.isText) {
