@@ -91,7 +91,9 @@ class SearchBar extends HookWidget {
                       title: context.l10n.createConversation,
                       onlyContact: true,
                     );
-                    if (list.isEmpty || (list.first.userId?.isEmpty ?? true)) {
+                    if (list == null ||
+                        list.isEmpty ||
+                        (list.first.userId?.isEmpty ?? true)) {
                       return;
                     }
                     final userId = list.first.userId!;
@@ -111,7 +113,7 @@ class SearchBar extends HookWidget {
                       title: context.l10n.createGroupConversation,
                       onlyContact: true,
                     );
-                    if (result.isEmpty) return;
+                    if (result == null || result.isEmpty) return;
                     final userIds = result
                         .where((e) => e.userId != null)
                         .map(
@@ -136,15 +138,6 @@ class SearchBar extends HookWidget {
                 ContextMenu(
                   title: context.l10n.createCircle,
                   onTap: () async {
-                    final list = await showConversationSelector(
-                      context: context,
-                      singleSelect: false,
-                      title: context.l10n.createCircle,
-                      onlyContact: false,
-                    );
-
-                    if (list.isEmpty) return;
-
                     final name = await showMixinDialog<String>(
                       context: context,
                       child: EditDialog(
@@ -154,6 +147,16 @@ class SearchBar extends HookWidget {
                     );
 
                     if (name?.isEmpty ?? true) return;
+
+                    final list = await showConversationSelector(
+                      context: context,
+                      singleSelect: false,
+                      title: context.l10n.createCircle,
+                      onlyContact: false,
+                      allowEmpty: true,
+                    );
+
+                    if (list == null) return;
 
                     await runFutureWithToast(
                       context,

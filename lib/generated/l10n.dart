@@ -2079,6 +2079,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Remove Chat from circle`
+  String get removeChatFromCircle {
+    return Intl.message(
+      'Remove Chat from circle',
+      name: 'removeChatFromCircle',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

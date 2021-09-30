@@ -313,9 +313,8 @@ class _ActionAddParticipants extends StatelessWidget {
                 title: context.l10n.groupAdd,
                 onlyContact: true,
               );
-              if (result.isEmpty) {
-                return;
-              }
+              if (result == null || result.isEmpty) return;
+
               final userIds = [
                 context.accountServer.userId,
                 ...result.where((e) => e.userId != null).map(
