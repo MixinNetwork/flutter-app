@@ -1191,7 +1191,7 @@ class AccountServer {
     String circleId,
     List<CircleConversationRequest> list,
   ) async {
-    if(list.isEmpty) return;
+    if (list.isEmpty) return;
     final response = await client.circleApi.updateCircleConversations(
       circleId,
       list,
