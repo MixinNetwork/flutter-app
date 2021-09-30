@@ -348,7 +348,7 @@ class _Bar extends StatelessWidget {
                   title: context.l10n.forward,
                   onlyContact: false,
                 );
-                if (result.isEmpty) return;
+                if (result == null || result.isEmpty) return;
                 await accountServer.forwardMessage(
                   message.messageId,
                   result.first.encryptCategory!,

@@ -740,6 +740,7 @@ class _List extends HookWidget {
 
           return _ConversationMenuWrapper(
             conversation: conversation,
+            removeChatFromCircle: true,
             child: _Item(
               selected: selected,
               conversation: conversation,
@@ -773,11 +774,13 @@ class _ConversationMenuWrapper extends StatelessWidget {
     this.conversation,
     this.searchConversation,
     required this.child,
+    this.removeChatFromCircle = false,
   }) : super(key: key);
 
   final ConversationItem? conversation;
   final SearchConversationItem? searchConversation;
   final Widget child;
+  final bool removeChatFromCircle;
 
   @override
   Widget build(BuildContext context) {
@@ -855,6 +858,36 @@ class _ConversationMenuWrapper extends StatelessWidget {
             }
           },
         ),
+        if (removeChatFromCircle)
+          HookBuilder(builder: (_) {
+            final circleId = useBlocStateConverter<SlideCategoryCubit,
+                SlideCategoryState, String?>(converter: (state) {
+              if (state.type != SlideCategoryType.circle) return null;
+              return state.id;
+            });
+
+            if (circleId?.isEmpty ?? true) return const SizedBox();
+
+            return ContextMenu(
+              title: Localization.current.removeChatFromCircle,
+              isDestructiveAction: true,
+              onTap: () async {
+                await runFutureWithToast(
+                  context,
+                  context.accountServer.editCircleConversation(
+                    circleId!,
+                    [
+                      CircleConversationRequest(
+                        action: CircleConversationAction.remove,
+                        conversationId: conversationId,
+                        userId: isGroupConversation ? null : ownerId,
+                      )
+                    ],
+                  ),
+                );
+              },
+            );
+          }),
       ],
       child: child,
     );

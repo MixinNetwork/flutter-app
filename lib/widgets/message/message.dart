@@ -234,7 +234,7 @@ class MessageItemWidget extends HookWidget {
                           title: context.l10n.forward,
                           onlyContact: false,
                         );
-                        if (result.isEmpty) return;
+                        if (result == null || result.isEmpty) return;
                         await context.accountServer.forwardMessage(
                           message.messageId,
                           result.first.encryptCategory!,
