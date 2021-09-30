@@ -1,5 +1,8 @@
+import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class ScrollerScrollController extends ScrollController {
   @override
@@ -35,7 +38,14 @@ class _ScrollerScrollPosition extends ScrollPositionWithSingleContext {
   @override
   void pointerScroll(double delta) {
     assert(delta != 0.0);
-    const _kScrollerScale = 4;
-    super.pointerScroll(delta * _kScrollerScale);
+    final double scrollerScale;
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      scrollerScale = window.devicePixelRatio * 2;
+    } else if (defaultTargetPlatform == TargetPlatform.linux) {
+      scrollerScale = window.devicePixelRatio;
+    } else {
+      scrollerScale = 1;
+    }
+    super.pointerScroll(delta * scrollerScale);
   }
 }
