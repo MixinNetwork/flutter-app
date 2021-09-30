@@ -312,6 +312,7 @@ class _ActionAddParticipants extends StatelessWidget {
                 singleSelect: false,
                 title: context.l10n.groupAdd,
                 onlyContact: true,
+                nextText: Text(context.l10n.done),
               );
               if (result == null || result.isEmpty) return;
 

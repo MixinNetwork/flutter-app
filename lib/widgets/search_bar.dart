@@ -154,6 +154,7 @@ class SearchBar extends HookWidget {
                       title: context.l10n.createCircle,
                       onlyContact: false,
                       allowEmpty: true,
+                      nextText: Text(context.l10n.done),
                     );
 
                     if (list == null) return;

@@ -132,6 +132,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteForEveryone": MessageLookupByLibrary.simpleMessage("撤回"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("删除群组"),
+        "done": MessageLookupByLibrary.simpleMessage("完成"),
         "editAnnouncement": MessageLookupByLibrary.simpleMessage("编辑群公告"),
         "editCircle": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
@@ -229,8 +230,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "recentConversations": MessageLookupByLibrary.simpleMessage("最近聊天"),
         "reedit": MessageLookupByLibrary.simpleMessage("重新编辑"),
         "removeBot": MessageLookupByLibrary.simpleMessage("删除机器人"),
-        "removeChatFromCircle":
-            MessageLookupByLibrary.simpleMessage("从圈子里移除对话"),
+        "removeChatFromCircle": MessageLookupByLibrary.simpleMessage("从此圈子中移除"),
         "removeContact": MessageLookupByLibrary.simpleMessage("删除联系人"),
         "reply": MessageLookupByLibrary.simpleMessage("回复"),
         "report": MessageLookupByLibrary.simpleMessage("举报"),
