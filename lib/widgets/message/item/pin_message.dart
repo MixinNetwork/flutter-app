@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -98,17 +100,19 @@ Future<String> generatePinPreviewText({
   required PinMessageMinimal pinMessageMinimal,
   required MentionCache mentionCache,
 }) async {
+  final content = LineSplitter.split(pinMessageMinimal.content ?? '').join(' ');
+
   if (pinMessageMinimal.type.isText) {
     return mentionCache.replaceMention(
-          pinMessageMinimal.content,
-          await mentionCache.checkMentionCache({pinMessageMinimal.content}),
+          content,
+          await mentionCache.checkMentionCache({content}),
         ) ??
         '';
   } else {
     return messagePreviewOptimize(
           null,
           pinMessageMinimal.type,
-          pinMessageMinimal.content,
+          content,
           false,
           true,
         ) ??
@@ -120,17 +124,19 @@ String cachePinPreviewText({
   required PinMessageMinimal pinMessageMinimal,
   required MentionCache mentionCache,
 }) {
+  final content = LineSplitter.split(pinMessageMinimal.content ?? '').join(' ');
+
   if (pinMessageMinimal.type.isText) {
     return mentionCache.replaceMention(
-          pinMessageMinimal.content,
-          mentionCache.mentionCache(pinMessageMinimal.content),
+          content,
+          mentionCache.mentionCache(content),
         ) ??
         '';
   } else {
     return messagePreviewOptimize(
           null,
           pinMessageMinimal.type,
-          pinMessageMinimal.content,
+          content,
           false,
           true,
         ) ??
