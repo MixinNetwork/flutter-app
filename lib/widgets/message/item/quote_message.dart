@@ -59,9 +59,10 @@ class QuoteMessage extends HookWidget {
       } else if (decodeMap != null) {
         quote = mapToQuoteMessage(decodeMap as Map<String, dynamic>);
       } else {
-        return const SizedBox();
+        throw ArgumentError('quote message not found');
       }
-      if ((quote?.type as String?).isIllegalMessageCategory) {
+      final type = quote?.type as String?;
+      if (type == null || type.isIllegalMessageCategory) {
         return _QuoteMessageBase(
           messageId: messageId,
           quoteMessageId: quoteMessageId!,
@@ -75,7 +76,6 @@ class QuoteMessage extends HookWidget {
           onTap: () {},
         );
       }
-      final type = quote.type as String;
       final userId = quote.userId as String?;
       final userFullName = quote.userFullName as String?;
       if (type.isText) {

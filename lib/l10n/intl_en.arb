@@ -202,6 +202,7 @@
   "searchUserHint": "Mixin ID or Phone number",
   "currentIdentityNumber": "My Mixin ID: {ID}",
   "fromWithColon": "From: ",
+  "removeChatFromCircle": "Remove Chat from circle",
   "show": "Show",
   "exit": "Exit"
 }

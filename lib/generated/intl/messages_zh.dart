@@ -230,6 +230,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "recentConversations": MessageLookupByLibrary.simpleMessage("最近聊天"),
         "reedit": MessageLookupByLibrary.simpleMessage("重新编辑"),
         "removeBot": MessageLookupByLibrary.simpleMessage("删除机器人"),
+        "removeChatFromCircle":
+            MessageLookupByLibrary.simpleMessage("从圈子里移除对话"),
         "removeContact": MessageLookupByLibrary.simpleMessage("删除联系人"),
         "reply": MessageLookupByLibrary.simpleMessage("回复"),
         "report": MessageLookupByLibrary.simpleMessage("举报"),

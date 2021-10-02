@@ -16,6 +16,7 @@ import 'package:tuple/tuple.dart';
 
 import '../../db/dao/message_dao.dart';
 import '../../db/dao/transcript_message_dao.dart';
+import '../../db/mixin_database.dart';
 import '../../db/util/util.dart';
 import '../../enum/media_status.dart';
 import '../crypto_util.dart';
@@ -25,7 +26,6 @@ import '../load_balancer_utils.dart';
 import '../logger.dart';
 
 part 'attachment_download_job.dart';
-
 part 'attachment_upload_job.dart';
 
 final _dio = Dio(BaseOptions(
@@ -106,12 +106,21 @@ class AttachmentUtil extends ChangeNotifier {
       await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
     }
 
-    final message = await _messageDao.findMessageByMessageId(messageId);
+    final list = await Future.wait([
+      _messageDao.findMessageByMessageId(messageId),
+      _transcriptMessageDao
+          .transcriptMessageByMessageId(messageId)
+          .getSingleOrNull(),
+    ]);
+    final message = list[0] as Message?;
+    final transcriptMessage = list[1] as TranscriptMessage?;
     final file = getAttachmentFile(
       category,
       conversationId,
       messageId,
-      mimeType: attachmentMessage?.mimeType,
+      mimeType: attachmentMessage?.mimeType ??
+          message?.mediaMimeType ??
+          transcriptMessage?.mediaMimeType,
       isTranscript: message == null,
     );
 
@@ -135,9 +144,6 @@ class AttachmentUtil extends ChangeNotifier {
             }
           }
           if (mediaKey == null || mediaDigest == null) {
-            final transcriptMessage = await _transcriptMessageDao
-                .transcriptMessageByMessageId(messageId)
-                .getSingleOrNull();
             if (transcriptMessage != null) {
               mediaKey = transcriptMessage.mediaKey;
               mediaDigest = transcriptMessage.mediaDigest;
@@ -171,11 +177,7 @@ class AttachmentUtil extends ChangeNotifier {
           await _messageDao.updateMessageContent(messageId, encoded);
         }
 
-        if (message != null &&
-            (await _transcriptMessageDao
-                    .transcriptMessageByMessageId(messageId)
-                    .getSingleOrNull() !=
-                null)) {
+        if (message != null && transcriptMessage != null) {
           final transcriptPath = convertAbsolutePath(
             category: message.category,
             fileName: file.pathBasename,

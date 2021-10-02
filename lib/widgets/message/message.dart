@@ -234,7 +234,7 @@ class MessageItemWidget extends HookWidget {
                           title: context.l10n.forward,
                           onlyContact: false,
                         );
-                        if (result.isEmpty) return;
+                        if (result == null || result.isEmpty) return;
                         await context.accountServer.forwardMessage(
                           message.messageId,
                           result.first.encryptCategory!,
@@ -292,6 +292,10 @@ class MessageItemWidget extends HookWidget {
                     return const UnknownMessage();
                   }
 
+                  if (message.status == MessageStatus.failed) {
+                    return const WaitingMessage();
+                  }
+
                   if (message.type.isTranscript) {
                     return const TranscriptMessageWidget();
                   }
@@ -322,10 +326,6 @@ class MessageItemWidget extends HookWidget {
 
                   if (message.type.isData) {
                     return const FileMessage();
-                  }
-
-                  if (message.status == MessageStatus.failed) {
-                    return const WaitingMessage();
                   }
 
                   if (message.type.isText) {

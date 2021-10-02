@@ -15,6 +15,7 @@ import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../enum/message_status.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../widgets/clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
 import 'conversation_cubit.dart';
 
@@ -220,7 +221,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         .listen((messageId) => add(_MessageDeleteEvent(messageId))));
   }
 
-  final ScrollController scrollController = ScrollController();
+  final ScrollController scrollController = ScrollerScrollController();
   final ConversationCubit conversationCubit;
   final Database database;
   final MentionCache mentionCache;

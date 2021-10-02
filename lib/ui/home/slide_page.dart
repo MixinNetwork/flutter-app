@@ -197,34 +197,41 @@ class _CircleList extends HookWidget {
                             title: circle.name,
                             onlyContact: false,
                             initSelected: initSelected,
+                            allowEmpty: true,
                           );
-                          if (result.isEmpty) return;
 
-                          final add = result.where((element) => !initSelected
-                              .map((e) => e.conversationId)
-                              .contains(element.conversationId));
-                          final remove = initSelected.where((element) => !result
-                              .map((e) => e.conversationId)
-                              .contains(element.conversationId));
+                          if (result == null || result.isEmpty) return;
 
-                          final requests = [
-                            ...add.map((e) => CircleConversationRequest(
-                                  action: CircleConversationAction.add,
-                                  conversationId: e.conversationId,
-                                  userId: e.userId,
-                                )),
-                            ...remove.map((e) => CircleConversationRequest(
-                                  action: CircleConversationAction.remove,
-                                  conversationId: e.conversationId,
-                                  userId: e.userId,
-                                ))
-                          ];
                           await runFutureWithToast(
                             context,
-                            context.accountServer.editCircleConversation(
-                              circle.circleId,
-                              requests,
-                            ),
+                            () async {
+                              final add = result.where((element) =>
+                                  !initSelected
+                                      .map((e) => e.conversationId)
+                                      .contains(element.conversationId));
+                              final remove = initSelected.where((element) =>
+                                  !result
+                                      .map((e) => e.conversationId)
+                                      .contains(element.conversationId));
+
+                              final requests = [
+                                ...add.map((e) => CircleConversationRequest(
+                                      action: CircleConversationAction.add,
+                                      conversationId: e.conversationId,
+                                      userId: e.userId,
+                                    )),
+                                ...remove.map((e) => CircleConversationRequest(
+                                      action: CircleConversationAction.remove,
+                                      conversationId: e.conversationId,
+                                      userId: e.userId,
+                                    ))
+                              ];
+                              await context.accountServer
+                                  .editCircleConversation(
+                                circle.circleId,
+                                requests,
+                              );
+                            }(),
                           );
                         },
                       ),

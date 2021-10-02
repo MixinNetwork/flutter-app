@@ -285,7 +285,7 @@ class _UserProfileButtonBar extends StatelessWidget {
                 onlyContact: false,
               );
 
-              if (result.isEmpty) return;
+              if (result == null || result.isEmpty) return;
               final conversationId = result[0].conversationId;
 
               await runFutureWithToast(

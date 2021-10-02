@@ -263,6 +263,7 @@ class DialogTextField extends HookWidget {
         ),
         alignment: Alignment.center,
         child: TextField(
+          autofocus: true,
           controller: textEditingController,
           style: TextStyle(
             color: context.theme.text,
@@ -326,7 +327,9 @@ class EditDialog extends HookWidget {
     return AlertDialogLayout(
       title: title,
       content: DialogTextField(
-          textEditingController: textEditingController, hintText: hintText),
+        textEditingController: textEditingController,
+        hintText: hintText,
+      ),
       actions: [
         MixinButton(
             backgroundTransparent: true,

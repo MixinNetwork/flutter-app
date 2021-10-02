@@ -16,6 +16,7 @@ import '../action_button.dart';
 import '../avatar_view/avatar_view.dart';
 import '../dialog.dart';
 import '../high_light_text.dart';
+import '../interactive_decorated_box.dart';
 import 'bloc/conversation_filter_cubit.dart';
 
 String _getConversationName(dynamic item) {
@@ -83,23 +84,24 @@ extension _AvatarConversationItem on ConversationItem {
       );
 }
 
-Future<List<ConversationSelector>> showConversationSelector({
+Future<List<ConversationSelector>?> showConversationSelector({
   required BuildContext context,
   required bool singleSelect,
   required String title,
   required bool onlyContact,
+  bool allowEmpty = false,
   List<ConversationSelector> initSelected = const [],
-}) async =>
-    await showMixinDialog<List<ConversationSelector>>(
+}) =>
+    showMixinDialog<List<ConversationSelector>?>(
       context: context,
       child: _ConversationSelector(
         title: title,
         singleSelect: singleSelect,
         onlyContact: onlyContact,
         initSelected: initSelected,
+        allowEmpty: allowEmpty,
       ),
-    ) ??
-    [];
+    );
 
 class ConversationSelector with EquatableMixin {
   const ConversationSelector({
@@ -134,12 +136,14 @@ class _ConversationSelector extends HookWidget {
     required this.title,
     required this.onlyContact,
     this.initSelected = const [],
+    this.allowEmpty = false,
   });
 
   final String title;
   final bool singleSelect;
   final bool onlyContact;
   final List<ConversationSelector> initSelected;
+  final bool allowEmpty;
 
   @override
   Widget build(BuildContext context) {
@@ -201,6 +205,10 @@ class _ConversationSelector extends HookWidget {
     final selected =
         useBlocState<SimpleCubit<List<dynamic>>, List<dynamic>>(bloc: selector);
 
+    final boxDecoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(8),
+    );
+
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -251,27 +259,28 @@ class _ConversationSelector extends HookWidget {
                   Expanded(
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: singleSelect || selected.isEmpty
-                          ? const SizedBox()
-                          : MixinButton(
-                              backgroundTransparent: true,
-                              padding: const EdgeInsets.all(8),
-                              onTap: () => Navigator.pop(
-                                context,
-                                selected
-                                    .map(
-                                      (item) => ConversationSelector.init(
-                                        item,
-                                        context,
-                                        appMap,
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                              child: Text(
-                                context.l10n.next,
-                              ),
-                            ),
+                      child:
+                          !singleSelect && (allowEmpty || selected.isNotEmpty)
+                              ? MixinButton(
+                                  backgroundTransparent: true,
+                                  padding: const EdgeInsets.all(8),
+                                  onTap: () => Navigator.pop(
+                                    context,
+                                    selected
+                                        .map(
+                                          (item) => ConversationSelector.init(
+                                            item,
+                                            context,
+                                            appMap,
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
+                                  child: Text(
+                                    context.l10n.next,
+                                  ),
+                                )
+                              : const SizedBox(),
                     ),
                   ),
                 ],
@@ -371,9 +380,10 @@ class _ConversationSelector extends HookWidget {
                         builder: (BuildContext context, int index) {
                           final item = conversationFilterState
                               .recentConversations[index];
-                          return GestureDetector(
+                          return InteractiveDecoratedBox.color(
+                            decoration: boxDecoration,
+                            hoveringColor: context.theme.listSelected,
                             onTap: () => selectItem(item),
-                            behavior: HitTestBehavior.opaque,
                             child: _BaseItem(
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
@@ -392,9 +402,10 @@ class _ConversationSelector extends HookWidget {
                         count: conversationFilterState.friends.length,
                         builder: (BuildContext context, int index) {
                           final item = conversationFilterState.friends[index];
-                          return GestureDetector(
+                          return InteractiveDecoratedBox.color(
+                            decoration: boxDecoration,
+                            hoveringColor: context.theme.listSelected,
                             onTap: () => selectItem(item),
-                            behavior: HitTestBehavior.opaque,
                             child: _BaseItem(
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
@@ -413,9 +424,10 @@ class _ConversationSelector extends HookWidget {
                         count: conversationFilterState.bots.length,
                         builder: (BuildContext context, int index) {
                           final item = conversationFilterState.bots[index];
-                          return GestureDetector(
+                          return InteractiveDecoratedBox.color(
+                            decoration: boxDecoration,
+                            hoveringColor: context.theme.listSelected,
                             onTap: () => selectItem(item),
-                            behavior: HitTestBehavior.opaque,
                             child: _BaseItem(
                               keyword: conversationFilterState.keyword,
                               avatar: item.avatarWidget,
@@ -568,18 +580,22 @@ class _BaseItem extends StatelessWidget {
               ),
             avatar,
             const SizedBox(width: 16),
-            HighlightText(
-              title,
-              highlightTextSpans: [
-                if (keyword != null)
-                  HighlightTextSpan(
-                    keyword!,
-                    style: TextStyle(color: context.theme.accent),
-                  )
-              ],
-              style: TextStyle(
-                fontSize: 16,
-                color: context.theme.text,
+            Expanded(
+              child: HighlightText(
+                title.overflow,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                highlightTextSpans: [
+                  if (keyword != null)
+                    HighlightTextSpan(
+                      keyword!.overflow,
+                      style: TextStyle(color: context.theme.accent),
+                    )
+                ],
+                style: TextStyle(
+                  fontSize: 16,
+                  color: context.theme.text,
+                ),
               ),
             ),
           ],

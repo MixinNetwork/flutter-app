@@ -2080,6 +2080,16 @@ class Localization {
     );
   }
 
+  /// `Remove Chat from circle`
+  String get removeChatFromCircle {
+    return Intl.message(
+      'Remove Chat from circle',
+      name: 'removeChatFromCircle',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Show`
   String get show {
     return Intl.message(

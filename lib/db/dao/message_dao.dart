@@ -823,6 +823,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..where((tbl) => tbl.messageId.equals(messageId)))
         .write(const MessagesCompanion(
       category: Value(MessageCategory.messageRecall),
+      status: Value(MessageStatus.read),
       content: Value(null),
       mediaUrl: Value(null),
       mediaMimeType: Value(null),
