@@ -4,6 +4,12 @@
 // **************************************************************************
 class Resources {
   const Resources._();
+  static const String assetsIconsMacosAppIconPng =
+      'assets/icons/macos_app_icon.png';
+
+  static const String assetsIconsWindowsAppIconPng =
+      'assets/icons/windows_app_icon.png';
+
   static const String assetsImagesAboutLogoPng = 'assets/images/about_logo.png';
 
   static const String assetsImagesAppButtonSvg = 'assets/images/app_button.svg';
@@ -176,6 +182,9 @@ class Resources {
   static const String assetsImagesMuteSvg = 'assets/images/mute.svg';
 
   static const String assetsImagesNextSvg = 'assets/images/next.svg';
+
+  static const String assetsImagesNotifyIconIco =
+      'assets/images/notify_icon.ico';
 
   static const String assetsImagesPersonalStickerSvg =
       'assets/images/personal_sticker.svg';

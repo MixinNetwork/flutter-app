@@ -55,6 +55,12 @@ FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
     case WM_FONTCHANGE:
       flutter_controller_->engine()->ReloadSystemFonts();
       break;
+    case WM_CLOSE:
+      // Hide window when user click close button.
+      ShowWindow(hwnd, SW_HIDE);
+      return 0;
+     default:
+      break;
   }
 
   return Win32Window::MessageHandler(hwnd, message, wparam, lparam);
