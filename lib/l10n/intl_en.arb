@@ -204,5 +204,7 @@
   "fromWithColon": "From: ",
   "removeChatFromCircle": "Remove Chat from circle",
   "show": "Show",
-  "exit": "Exit"
+  "exit": "Exit",
+  "continueText": "Continue",
+  "localTimeErrorDescription": "System time is unusual, please continue to use again after correction"
 }

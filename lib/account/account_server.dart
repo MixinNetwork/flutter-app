@@ -91,6 +91,17 @@ class AccountServer {
           ) async {
             if (e is MixinApiError &&
                 (e.error as MixinError).code == authentication) {
+              final serverTime = int.tryParse(
+                  e.response?.headers.value('X-Server-Time') ?? '');
+              i('serverTime: $serverTime');
+              if (serverTime != null) {
+                if ((serverTime / 1000000 -
+                        DateTime.now().millisecondsSinceEpoch) >=
+                    5 * 60 * 1000) {
+                  blaze.waitSyncTime();
+                  return;
+                }
+              }
               await signOutAndClear();
               multiAuthCubit.signOut();
             }

@@ -110,6 +110,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contact": MessageLookupByLibrary.simpleMessage("联系人"),
         "contactMixinId": m7,
         "contacts": MessageLookupByLibrary.simpleMessage("联系人"),
+        "continueText": MessageLookupByLibrary.simpleMessage("继续"),
         "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ 添加机器人"),
         "conversationAddContact":
             MessageLookupByLibrary.simpleMessage("+ 添加联系人"),
@@ -180,6 +181,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "links": MessageLookupByLibrary.simpleMessage("链接"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
         "loading": MessageLookupByLibrary.simpleMessage("加载中"),
+        "localTimeErrorDescription":
+            MessageLookupByLibrary.simpleMessage("检测到系统时间异常，请校正后再继续使用"),
         "location": MessageLookupByLibrary.simpleMessage("位置"),
         "media": MessageLookupByLibrary.simpleMessage("媒体"),
         "messagePreview": MessageLookupByLibrary.simpleMessage("消息预览"),
