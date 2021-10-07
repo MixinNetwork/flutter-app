@@ -92,8 +92,7 @@ class AccountServer {
             if (e is MixinApiError &&
                 (e.error as MixinError).code == authentication) {
               final serverTime = int.tryParse(
-                  e.response?.headers.value('X-Server-Time') ?? '');
-              i('serverTime: $serverTime');
+                  e.response?.headers.value('x-server-time') ?? '');
               if (serverTime != null) {
                 if ((serverTime / 1000000 -
                         DateTime.now().millisecondsSinceEpoch) >=
