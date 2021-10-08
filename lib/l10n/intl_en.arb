@@ -204,5 +204,6 @@
   "fromWithColon": "From: ",
   "removeChatFromCircle": "Remove Chat from circle",
   "show": "Show",
-  "exit": "Exit"
+  "exit": "Exit",
+  "done": "Done"
 }

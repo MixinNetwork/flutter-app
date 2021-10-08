@@ -91,6 +91,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
   required bool onlyContact,
   bool allowEmpty = false,
   List<ConversationSelector> initSelected = const [],
+  String? confirmedText,
 }) =>
     showMixinDialog<List<ConversationSelector>?>(
       context: context,
@@ -100,6 +101,7 @@ Future<List<ConversationSelector>?> showConversationSelector({
         onlyContact: onlyContact,
         initSelected: initSelected,
         allowEmpty: allowEmpty,
+        confirmedText: confirmedText,
       ),
     );
 
@@ -137,6 +139,7 @@ class _ConversationSelector extends HookWidget {
     required this.onlyContact,
     this.initSelected = const [],
     this.allowEmpty = false,
+    this.confirmedText,
   });
 
   final String title;
@@ -144,6 +147,7 @@ class _ConversationSelector extends HookWidget {
   final bool onlyContact;
   final List<ConversationSelector> initSelected;
   final bool allowEmpty;
+  final String? confirmedText;
 
   @override
   Widget build(BuildContext context) {
@@ -277,7 +281,7 @@ class _ConversationSelector extends HookWidget {
                                         .toList(),
                                   ),
                                   child: Text(
-                                    context.l10n.next,
+                                    confirmedText ?? context.l10n.next,
                                   ),
                                 )
                               : const SizedBox(),
