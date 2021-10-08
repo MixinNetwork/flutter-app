@@ -47,13 +47,48 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
   SimpleSelectStatement<TranscriptMessages, TranscriptMessage>
       transcriptMessageByTranscriptId(String transcriptId) =>
           db.select(db.transcriptMessages)
-            ..where((tbl) => tbl.transcriptId.equals(transcriptId));
+            ..where((tbl) => tbl.transcriptId.equals(transcriptId))
+            ..orderBy([
+              (tbl) => OrderingTerm.asc(tbl.createdAt),
+            ]);
 
   Selectable<String?> messageIdsByMessageIds(Iterable<String> messageIds) =>
       (db.selectOnly(db.transcriptMessages)
             ..addColumns([db.transcriptMessages.messageId])
             ..where(db.transcriptMessages.messageId.isIn(messageIds)))
           .map((row) => row.read(db.transcriptMessages.messageId));
+
+  Future<void> updateMediaStatus(
+          MediaStatus mediaStatus, String transcriptId, String messageId) =>
+      (db.update(db.transcriptMessages)
+            ..where((tbl) =>
+                tbl.transcriptId.equals(transcriptId) &
+                tbl.messageId.equals(messageId)))
+          .write(TranscriptMessagesCompanion(
+        mediaStatus: Value(mediaStatus),
+      ));
+
+  Future<void> updateTranscript({
+    required String transcriptId,
+    required String messageId,
+    required String attachmentId,
+    required String? key,
+    required String? digest,
+    required MediaStatus mediaStatus,
+    required String? createdAt,
+  }) =>
+      (db.update(db.transcriptMessages)
+            ..where((tbl) =>
+                tbl.transcriptId.equals(transcriptId) &
+                tbl.messageId.equals(messageId)))
+          .write(
+        TranscriptMessagesCompanion(
+          mediaStatus: Value(mediaStatus),
+          mediaKey: Value(key),
+          mediaDigest: Value(digest),
+          content: Value(attachmentId),
+        ),
+      );
 }
 
 extension TranscriptMessageItemExtension on TranscriptMessageItem {

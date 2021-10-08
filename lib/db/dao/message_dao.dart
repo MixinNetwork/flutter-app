@@ -286,12 +286,12 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       return Future.wait([
         (db.update(db.messages)
               ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(const MessagesCompanion(
-                mediaStatus: Value(MediaStatus.canceled))),
+            .write(MessagesCompanion(
+                mediaStatus: const Value(MediaStatus.canceled))),
         (db.update(db.transcriptMessages)
               ..where((tbl) => tbl.messageId.equals(messageId)))
-            .write(const TranscriptMessagesCompanion(
-                mediaStatus: Value(MediaStatus.canceled))),
+            .write(TranscriptMessagesCompanion(
+                mediaStatus: const Value(MediaStatus.canceled))),
       ]);
     });
     if (result.cast<int>().any((element) => element > -1)) {
@@ -401,7 +401,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
               tbl.messageId.isIn(messageIds) &
               tbl.status.equalsValue(MessageStatus.failed).not() &
               tbl.status.equalsValue(MessageStatus.unknown).not()))
-        .write(const MessagesCompanion(status: Value(MessageStatus.read)));
+        .write(MessagesCompanion(status: const Value(MessageStatus.read)));
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
     return result;
   }
@@ -811,8 +811,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..where(
             (tbl) => tbl.messageId.isIn(messageIds),
           ))
-        .write(const MessagesCompanion(
-      content: Value(null),
+        .write(MessagesCompanion(
+      content: const Value(null),
     ));
 
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, messageIds);
@@ -821,32 +821,32 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   Future<void> recallMessage(String messageId) async {
     await (db.update(db.messages)
           ..where((tbl) => tbl.messageId.equals(messageId)))
-        .write(const MessagesCompanion(
-      category: Value(MessageCategory.messageRecall),
-      status: Value(MessageStatus.read),
-      content: Value(null),
-      mediaUrl: Value(null),
-      mediaMimeType: Value(null),
-      mediaSize: Value(null),
-      mediaDuration: Value(null),
-      mediaWidth: Value(null),
-      mediaHeight: Value(null),
-      mediaHash: Value(null),
-      thumbImage: Value(null),
-      mediaKey: Value(null),
-      mediaDigest: Value(null),
-      mediaStatus: Value(null),
-      action: Value(null),
-      participantId: Value(null),
-      snapshotId: Value(null),
-      hyperlink: Value(null),
-      name: Value(null),
-      albumId: Value(null),
-      stickerId: Value(null),
-      sharedUserId: Value(null),
-      mediaWaveform: Value(null),
-      quoteMessageId: Value(null),
-      quoteContent: Value(null),
+        .write(MessagesCompanion(
+      category: const Value(MessageCategory.messageRecall),
+      status: const Value(MessageStatus.read),
+      content: const Value(null),
+      mediaUrl: const Value(null),
+      mediaMimeType: const Value(null),
+      mediaSize: const Value(null),
+      mediaDuration: const Value(null),
+      mediaWidth: const Value(null),
+      mediaHeight: const Value(null),
+      mediaHash: const Value(null),
+      thumbImage: const Value(null),
+      mediaKey: const Value(null),
+      mediaDigest: const Value(null),
+      mediaStatus: const Value(null),
+      action: const Value(null),
+      participantId: const Value(null),
+      snapshotId: const Value(null),
+      hyperlink: const Value(null),
+      name: const Value(null),
+      albumId: const Value(null),
+      stickerId: const Value(null),
+      sharedUserId: const Value(null),
+      mediaWaveform: const Value(null),
+      quoteMessageId: const Value(null),
+      quoteContent: const Value(null),
     ));
 
     await _recallPinMessage(messageId);

@@ -26,6 +26,7 @@ import '../load_balancer_utils.dart';
 import '../logger.dart';
 
 part 'attachment_download_job.dart';
+
 part 'attachment_upload_job.dart';
 
 final _dio = Dio(BaseOptions(
@@ -208,14 +209,23 @@ class AttachmentUtil extends ChangeNotifier {
   }
 
   Future<AttachmentResult?> uploadAttachment(
-      File file, String messageId, String category) async {
+    File file,
+    String messageId,
+    String category, {
+    String? transcriptId,
+  }) async {
     assert(_attachmentJob[messageId] == null);
-    await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    if (transcriptId == null) {
+      await _messageDao.updateMediaStatus(MediaStatus.pending, messageId);
+    } else {
+      await _transcriptMessageDao.updateMediaStatus(
+          MediaStatus.pending, transcriptId, messageId);
+    }
 
     try {
       final response = await _client.attachmentApi.postAttachment();
       if (response.data.uploadUrl == null) throw Error();
-      if (await isNotPending(messageId)) return null;
+      if (transcriptId == null && await isNotPending(messageId)) return null;
 
       List<int>? keys;
       List<int>? iv;
@@ -235,7 +245,12 @@ class AttachmentUtil extends ChangeNotifier {
       _attachmentJob[messageId] = attachmentUploadJob;
       final digest = await attachmentUploadJob
           .upload((int count, int total) => notifyListeners());
-      await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
+      if (transcriptId == null) {
+        await _messageDao.updateMediaStatus(MediaStatus.done, messageId);
+      } else {
+        await _transcriptMessageDao.updateMediaStatus(
+            MediaStatus.pending, transcriptId, messageId);
+      }
       return AttachmentResult(
           response.data.attachmentId,
           category.isSignal || category.isEncrypted
@@ -245,9 +260,14 @@ class AttachmentUtil extends ChangeNotifier {
               ? await base64EncodeWithIsolate(digest!)
               : null,
           response.data.createdAt);
-    } catch (e) {
-      w(e.toString());
-      await _messageDao.updateMediaStatusToCanceled(messageId);
+    } catch (e, s) {
+      w('upload failed error: $e, $s');
+      if (transcriptId == null) {
+        await _messageDao.updateMediaStatusToCanceled(messageId);
+      } else {
+        await _transcriptMessageDao.updateMediaStatus(
+            MediaStatus.canceled, transcriptId, messageId);
+      }
       return null;
     } finally {
       _attachmentJob[messageId]?.cancel();

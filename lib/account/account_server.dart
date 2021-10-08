@@ -20,6 +20,7 @@ import '../blaze/blaze_param.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/plain_json_message.dart';
+import '../blaze/vo/sending_transcript_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
 import '../crypto/privacy_key_value.dart';
@@ -398,6 +399,16 @@ class AccountServer {
       if (message == null) {
         await database.jobDao.deleteJobById(job.jobId);
         return;
+      }
+
+      if (message.category.isTranscript) {
+        final list = await database.transcriptMessageDao
+            .transcriptMessageByTranscriptId(messageId)
+            .get();
+        final json = list
+            .map((e) => SendingTranscriptMessage.fromSendingMessage(e).toJson())
+            .toList();
+        message.content = await jsonEncodeWithIsolate(json);
       }
 
       MessageResult? result;
