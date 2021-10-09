@@ -205,5 +205,6 @@
   "removeChatFromCircle": "Remove Chat from circle",
   "show": "Show",
   "exit": "Exit",
-  "done": "Done"
+  "done": "Done",
+  "comingSoon": "Coming soon..."
 }
