@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   bitsdojo_window_linux
   dart_vlc
   desktop_drop
+  desktop_lifecycle
   file_selector_linux
   flutter_app_icon_badge
   system_clock

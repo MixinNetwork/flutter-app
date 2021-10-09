@@ -307,11 +307,9 @@ packages:
   desktop_lifecycle:
     dependency: "direct main"
     description:
-      path: "packages/desktop_lifecycle"
-      ref: "18e4e369cdeda9bbf8c4baade20ad951294a26b3"
-      resolved-ref: "18e4e369cdeda9bbf8c4baade20ad951294a26b3"
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
+      name: desktop_lifecycle
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.0.1"
   desktop_notifications:
     dependency: "direct main"
@@ -1328,7 +1326,7 @@ packages:
       name: vector_math
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   very_good_analysis:
     dependency: "direct main"
     description:
