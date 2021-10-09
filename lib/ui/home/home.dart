@@ -51,30 +51,43 @@ class HomePage extends HookWidget {
           ),
         ),
         if (localTimeError)
-          Material(
-            color: context.theme.background,
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    context.l10n.localTimeErrorDescription,
-                    style: TextStyle(
-                      color: context.theme.text,
-                      fontSize: 16,
+          HookBuilder(builder: (context) {
+            final loading = useState(false);
+            return Material(
+              color: context.theme.background,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.localTimeErrorDescription,
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: 16,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  MixinButton(
-                    onTap: () {
-                      context.accountServer.blaze.reconnect();
-                    },
-                    child: Text(context.l10n.continueText),
-                  ),
-                ],
+                    const SizedBox(height: 24),
+                    if (loading.value)
+                      CircularProgressIndicator(
+                        color: context.theme.accent,
+                      ),
+                    if (!loading.value)
+                      MixinButton(
+                        onTap: () async {
+                          loading.value = true;
+                          try {
+                            await context.accountServer.blaze.reconnect();
+                          } finally {
+                            loading.value = false;
+                          }
+                        },
+                        child: Text(context.l10n.continueText),
+                      ),
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          }),
       ],
     );
   }

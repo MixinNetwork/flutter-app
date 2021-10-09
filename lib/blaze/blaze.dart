@@ -79,6 +79,7 @@ class Blaze {
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
         connectedStateStreamController.add(true);
+        localTimeErrorStreamController.add(false);
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == errorAction &&
@@ -237,7 +238,7 @@ class Blaze {
 
   void waitSyncTime() {
     _disconnect();
-    localTimeErrorStreamController.add(false);
+    localTimeErrorStreamController.add(true);
   }
 
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
@@ -279,6 +280,7 @@ class Blaze {
     _disposed = true;
     _disconnect();
     connectedStateStreamController.close();
+    localTimeErrorStreamController.close();
   }
 }
 

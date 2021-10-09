@@ -95,7 +95,8 @@ class AccountServer {
                   e.response?.headers.value('x-server-time') ?? '');
               if (serverTime != null) {
                 if ((serverTime / 1000000 -
-                        DateTime.now().millisecondsSinceEpoch).abs() >=
+                            DateTime.now().millisecondsSinceEpoch)
+                        .abs() >=
                     5 * 60 * 1000) {
                   blaze.waitSyncTime();
                   return;
