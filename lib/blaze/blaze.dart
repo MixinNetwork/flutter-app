@@ -46,7 +46,7 @@ class Blaze {
       StreamController<bool>.broadcast();
 
   StreamController<bool> localTimeErrorStreamController =
-  StreamController<bool>.broadcast();
+      StreamController<bool>.broadcast();
 
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
