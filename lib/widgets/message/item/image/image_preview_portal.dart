@@ -1,16 +1,18 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/utils/logger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../constants/resources.dart';
-import '../../../../db/mixin_database.dart';
+import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/file.dart';
@@ -69,11 +71,15 @@ class ImagePreviewPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = useMemoized(() => PhotoViewScaleStateController());
     final _messageId = useState(messageId);
     final current = useState<MessageItem?>(null);
     final prev = useState<MessageItem?>(null);
     final next = useState<MessageItem?>(null);
+
+    final controller = useMemoized(
+      () => TransformationController(),
+      [current.value?.messageId],
+    );
 
     final transcriptMessagesWatcher = useMemoized(() {
       try {
@@ -82,10 +88,6 @@ class ImagePreviewPage extends HookWidget {
         return null;
       }
     });
-
-    useEffect(() {
-      controller.scaleState = PhotoViewScaleState.initial;
-    }, [_messageId.value]);
 
     useEffect(() {
       if (transcriptMessagesWatcher != null) return;
@@ -235,10 +237,13 @@ class ImagePreviewPage extends HookWidget {
                   return Stack(
                     fit: StackFit.expand,
                     children: [
-                      _Item(
-                        message: current.value!,
-                        controller: controller,
-                        isTranscriptPage: isTranscriptPage,
+                      LayoutBuilder(
+                        builder: (context, constraints) => _Item(
+                          message: current.value!,
+                          controller: controller,
+                          isTranscriptPage: isTranscriptPage,
+                          constraints: constraints,
+                        ),
                       ),
                       Center(
                         child: Padding(
@@ -287,7 +292,7 @@ class _Bar extends StatelessWidget {
   }) : super(key: key);
 
   final MessageItem message;
-  final PhotoViewScaleStateController controller;
+  final TransformationController controller;
   final bool isTranscriptPage;
 
   @override
@@ -325,14 +330,14 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesZoomInSvg,
             color: context.theme.icon,
             size: 20,
-            onTap: () => controller.scaleState = PhotoViewScaleState.covering,
+            onTap: controller.zoomIn,
           ),
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesZoomOutSvg,
             size: 20,
             color: context.theme.icon,
-            onTap: () => controller.scaleState = PhotoViewScaleState.initial,
+            onTap: controller.zoomOut,
           ),
           const SizedBox(width: 14),
           if (!isTranscriptPage)
@@ -406,45 +411,81 @@ class _Item extends HookWidget {
     required this.message,
     required this.controller,
     required this.isTranscriptPage,
+    required this.constraints,
   }) : super(key: key);
   final MessageItem message;
-  final PhotoViewScaleStateController controller;
   final bool isTranscriptPage;
+  final TransformationController controller;
+
+  // constraints of layout.
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
-    final zoomIn = useStream(controller.outputScaleStateStream,
-                initialData: PhotoViewScaleState.initial)
-            .data ==
-        PhotoViewScaleState.initial;
+    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
+    // scale image to fit viewport on first show.
+
+    final imageSize = useMemoized(
+        () => Size(
+              (message.mediaWidth ?? 0).toDouble(),
+              (message.mediaHeight ?? 0).toDouble(),
+            ),
+        [message.messageId]);
+
+    assert(!imageSize.isEmpty);
+
+    final enablePan = useState(false);
+
+    final defaultScale = useMemoized(() {
+      if (imageSize.isEmpty) {
+        assert(false, 'image message size is empty: ${message.messageId}');
+        return 1;
+      }
+      final layoutSize = constraints.biggest * pixelRatio;
+
+      final scale = math.min(layoutSize.width / imageSize.width,
+          layoutSize.height / imageSize.height);
+
+      controller.value = controller.value.scaled(scale);
+      enablePan.value = false;
+      return scale;
+    }, [message.messageId]);
+
     return GestureDetector(
       onTap: () => Navigator.pop(context),
       child: Container(
         decoration: const BoxDecoration(
           color: Color.fromRGBO(62, 65, 72, 0.9),
         ),
-        child: Center(
-          child: ClipRect(
-            child: MouseRegion(
-              cursor: zoomIn
-                  ? SystemMouseCursors.zoomIn
-                  : SystemMouseCursors.zoomOut,
-              child: PhotoView(
-                tightMode: true,
-                imageProvider: FileImage(File(context.accountServer
-                    .convertMessageAbsolutePath(message, isTranscriptPage))),
-                maxScale: PhotoViewComputedScale.contained * 2.0,
-                minScale: PhotoViewComputedScale.contained * 0.8,
-                initialScale: PhotoViewComputedScale.contained,
-                scaleStateController: controller,
-                onTapUp: (_, __, ___) => controller.scaleState =
-                    controller.scaleState == PhotoViewScaleState.initial
-                        ? PhotoViewScaleState.covering
-                        : PhotoViewScaleState.initial,
-                errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
-                  imageData: message.thumbImage!,
-                  fit: BoxFit.contain,
-                ),
+        child: ClipRect(
+          child: InteractiveViewer(
+            constrained: false,
+            minScale: 0.01,
+            panEnabled: enablePan.value,
+            boundaryMargin: EdgeInsets.symmetric(
+              horizontal: constraints.maxWidth / 2,
+              vertical: constraints.maxHeight / 2,
+            ),
+            onInteractionUpdate: (details) {
+              enablePan.value =
+                  controller.value.getMaxScaleOnAxis() * details.scale >
+                      defaultScale;
+            },
+            onInteractionEnd: (details) {
+              d('defaultScale = ${defaultScale}');
+              d('controller.value.getMaxScaleOnAxis() = ${controller.value.getMaxScaleOnAxis()}');
+
+              // enablePan.value =
+              //     controller.value.getMaxScaleOnAxis() > defaultScale;
+            },
+            transformationController: controller,
+            child: Image.file(
+              File(context.accountServer
+                  .convertMessageAbsolutePath(message, isTranscriptPage)),
+              fit: BoxFit.none,
+              errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
+                imageData: message.thumbImage ?? '',
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -479,4 +520,88 @@ class _PreviousImageIntent extends Intent {
 
 class _NextImageIntent extends Intent {
   const _NextImageIntent();
+}
+
+extension _TransformationExt on TransformationController {
+  void zoomIn() {
+    // TODO
+  }
+
+  void zoomOut() {
+    // TODO
+  }
+}
+
+class _ScaledRenderWidget extends SingleChildRenderObjectWidget {
+  const _ScaledRenderWidget({required Widget child, Key? key})
+      : super(child: child, key: key);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _ScaledRenderBox();
+}
+
+class _ScaledRenderBox extends RenderShiftedBox {
+  _ScaledRenderBox({RenderBox? child}) : super(child);
+
+  @override
+  void performLayout() {
+    if (child == null) {
+      size = Size.zero;
+      return;
+    }
+    child!.layout(const BoxConstraints.tightFor(), parentUsesSize: true);
+
+    size = child!.size * 2;
+
+    (child!.parentData! as BoxParentData).offset =
+        size.center(Offset.zero) - child!.size.center(Offset.zero);
+  }
+}
+
+@immutable
+class _CenterWithOriginalSizeDelegate extends SingleChildLayoutDelegate {
+  const _CenterWithOriginalSizeDelegate(
+    this.subjectSize,
+    this.basePosition,
+  );
+
+  final Size subjectSize;
+  final Alignment basePosition;
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    debugPrint('size: ${size} childSize: ${childSize}');
+
+    final childWidth = subjectSize.width;
+    final childHeight = subjectSize.height;
+
+    final halfWidth = (size.width - childWidth) / 2;
+    final halfHeight = (size.height - childHeight) / 2;
+
+    final offsetX = halfWidth * (basePosition.x + 1);
+    final offsetY = halfHeight * (basePosition.y + 1);
+    return Offset(offsetX, offsetY);
+  }
+
+  @override
+  Size getSize(BoxConstraints constraints) => subjectSize * 2;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      BoxConstraints.tight(subjectSize);
+
+  @override
+  bool shouldRelayout(_CenterWithOriginalSizeDelegate oldDelegate) =>
+      oldDelegate != this;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is _CenterWithOriginalSizeDelegate &&
+          runtimeType == other.runtimeType &&
+          subjectSize == other.subjectSize &&
+          basePosition == other.basePosition;
+
+  @override
+  int get hashCode => subjectSize.hashCode ^ basePosition.hashCode;
 }
