@@ -44,7 +44,7 @@ class PinMessagesPage extends HookWidget {
       scheduleMicrotask(() => Navigator.pop(context));
     }, [rawList?.isNotEmpty]);
 
-    final list = rawList ?? [];
+    final list = (rawList ?? []).reversed.toList();
 
     return MultiProvider(
       providers: [
@@ -74,13 +74,14 @@ class PinMessagesPage extends HookWidget {
           children: [
             Expanded(
               child: ListView.builder(
+                reverse: true,
                 padding: const EdgeInsets.only(bottom: 16),
                 itemBuilder: (BuildContext context, int index) {
                   final messageItem = list[index];
                   return MessageItemWidget(
-                    prev: list.getOrNull(index - 1),
+                    prev: list.getOrNull(index + 1),
                     message: messageItem,
-                    next: list.getOrNull(index + 1),
+                    next: list.getOrNull(index - 1),
                     blink: false,
                     isPinnedPage: true,
                   );
