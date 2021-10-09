@@ -7,6 +7,7 @@ import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_app/db/converter/utc_value_serializer.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
@@ -20,7 +21,6 @@ import '../blaze/blaze_param.dart';
 import '../blaze/vo/message_result.dart';
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/plain_json_message.dart';
-import '../blaze/vo/sending_transcript_message.dart';
 import '../constants/constants.dart';
 import '../crypto/encrypted/encrypted_protocol.dart';
 import '../crypto/privacy_key_value.dart';
@@ -406,7 +406,8 @@ class AccountServer {
             .transcriptMessageByTranscriptId(messageId)
             .get();
         final json = list
-            .map((e) => SendingTranscriptMessage.fromSendingMessage(e).toJson())
+            .map((e) => e.toJson(serializer: const UtcValueSerializer())
+              ..remove('media_status'))
             .toList();
         message.content = await jsonEncodeWithIsolate(json);
       }
