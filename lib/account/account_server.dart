@@ -7,7 +7,6 @@ import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:dio/dio.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter_app/db/converter/utc_value_serializer.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:moor/moor.dart';
@@ -28,6 +27,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/converter/utc_value_serializer.dart';
 import '../db/dao/job_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
@@ -409,7 +409,7 @@ class AccountServer {
             .map((e) => e.toJson(serializer: const UtcValueSerializer())
               ..remove('media_status'))
             .toList();
-        message.content = await jsonEncodeWithIsolate(json);
+        message.content = jsonEncode(json);
       }
 
       MessageResult? result;
