@@ -751,7 +751,7 @@ class SendMessageHelper {
       if (e.category.isAttachment) {
         if (e.mediaUrl == null) {
           mediaUrl = null;
-          mediaStatus = MediaStatus.done;
+          mediaStatus = MediaStatus.canceled;
         }
       }
       return e.copyWith(
@@ -865,16 +865,24 @@ class SendMessageHelper {
       );
     }
 
-    final attachmentTranscripts =
-        transcripts.where((element) => element.category.isAttachment);
-    if (attachmentTranscripts.isNotEmpty) {
-      await Future.wait(attachmentTranscripts.map(uploadAttachment));
-    }
+    try {
+      await _messageDao.updateMediaStatus(
+          MediaStatus.pending, message!.messageId);
+      final attachmentTranscripts =
+          transcripts.where((element) => element.category.isAttachment);
+      if (attachmentTranscripts.isNotEmpty) {
+        await Future.wait(attachmentTranscripts.map(uploadAttachment));
+      }
 
-    await _jobDao.insertSendingJob(
-      message!.messageId,
-      message.conversationId,
-    );
+      await _messageDao.updateMediaStatus(MediaStatus.done, message.messageId);
+      await _jobDao.insertSendingJob(
+        message.messageId,
+        message.conversationId,
+      );
+    } catch (_) {
+      await _messageDao.updateMediaStatus(
+          MediaStatus.canceled, message!.messageId);
+    }
   }
 
   Future<void> reUploadAttachment(
