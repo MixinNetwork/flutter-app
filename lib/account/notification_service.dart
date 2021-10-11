@@ -121,7 +121,7 @@ class NotificationService {
               }
               body ??= Localization.current.chatNotSupport;
             } else {
-              body ??= Localization.current.sendYouAMessage;
+              body = Localization.current.sendYouAMessage;
             }
 
             await showNotification(
