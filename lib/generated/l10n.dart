@@ -2129,6 +2129,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Send you a message`
+  String get sendYouAMessage {
+    return Intl.message(
+      'Send you a message',
+      name: 'sendYouAMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

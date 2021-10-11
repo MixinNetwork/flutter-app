@@ -251,6 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
+        "sendYouAMessage": MessageLookupByLibrary.simpleMessage("发来一条信息"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

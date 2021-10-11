@@ -206,5 +206,6 @@
   "show": "Show",
   "exit": "Exit",
   "done": "Done",
-  "comingSoon": "Coming soon..."
+  "comingSoon": "Coming soon...",
+  "sendYouAMessage": "Send you a message"
 }
