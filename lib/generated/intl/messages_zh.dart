@@ -229,7 +229,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("隐私政策"),
         "provisioning": MessageLookupByLibrary.simpleMessage("加载中"),
-        "receiveAMessage": MessageLookupByLibrary.simpleMessage("收到一条消息"),
         "recentConversations": MessageLookupByLibrary.simpleMessage("最近聊天"),
         "reedit": MessageLookupByLibrary.simpleMessage("重新编辑"),
         "removeBot": MessageLookupByLibrary.simpleMessage("删除机器人"),
@@ -252,6 +251,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
+        "sendYouAMessage": MessageLookupByLibrary.simpleMessage("发来一条信息"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

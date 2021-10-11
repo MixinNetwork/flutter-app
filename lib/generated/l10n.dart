@@ -2130,11 +2130,11 @@ class Localization {
     );
   }
 
-  /// `Receive a message`
-  String get receiveAMessage {
+  /// `Send you a message`
+  String get sendYouAMessage {
     return Intl.message(
-      'Receive a message',
-      name: 'receiveAMessage',
+      'Send you a message',
+      name: 'sendYouAMessage',
       desc: '',
       args: [],
     );

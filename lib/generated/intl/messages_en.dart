@@ -263,8 +263,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "preview": MessageLookupByLibrary.simpleMessage("Preview"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("Privacy Policy"),
         "provisioning": MessageLookupByLibrary.simpleMessage("Provisioning"),
-        "receiveAMessage":
-            MessageLookupByLibrary.simpleMessage("Receive a message"),
         "recentConversations":
             MessageLookupByLibrary.simpleMessage("Recent conversations"),
         "reedit": MessageLookupByLibrary.simpleMessage("Re-edit"),
@@ -293,6 +291,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Send without compression"),
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
+        "sendYouAMessage":
+            MessageLookupByLibrary.simpleMessage("Send you a message"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),
