@@ -71,7 +71,7 @@ class NotificationService {
               event.ownerFullName,
             );
 
-            var body = event.content;
+            String? body;
             if (context.multiAuthState.currentMessagePreview) {
               if (event.type == MessageCategory.systemConversation) {
                 body = generateSystemText(
@@ -119,11 +119,14 @@ class NotificationService {
                   event.senderFullName,
                 );
               }
+              body ??= Localization.current.chatNotSupport;
+            } else {
+              body ??= Localization.current.receiveAMessage;
             }
 
             await showNotification(
               title: name,
-              body: body ?? Localization.current.chatNotSupport,
+              body: body,
               uri: Uri(
                 scheme: enumConvertToString(NotificationScheme.conversation),
                 host: event.conversationId,

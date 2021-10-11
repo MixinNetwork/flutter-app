@@ -229,6 +229,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
         "privacyPolicy": MessageLookupByLibrary.simpleMessage("隐私政策"),
         "provisioning": MessageLookupByLibrary.simpleMessage("加载中"),
+        "receiveAMessage": MessageLookupByLibrary.simpleMessage("收到一条消息"),
         "recentConversations": MessageLookupByLibrary.simpleMessage("最近聊天"),
         "reedit": MessageLookupByLibrary.simpleMessage("重新编辑"),
         "removeBot": MessageLookupByLibrary.simpleMessage("删除机器人"),
