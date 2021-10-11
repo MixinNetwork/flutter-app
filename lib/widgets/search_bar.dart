@@ -10,7 +10,6 @@ import '../bloc/keyword_cubit.dart';
 import '../constants/resources.dart';
 import '../db/mixin_database.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
-import '../ui/home/home.dart';
 import '../utils/extension/extension.dart';
 import '../utils/hook.dart';
 import 'action_button.dart';
@@ -29,170 +28,143 @@ class SearchBar extends HookWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final hasDrawer = context.watch<HasDrawerValueNotifier>();
+  Widget build(BuildContext context) => MoveWindow(
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            children: [
+              const SizedBox(width: 16),
+              Expanded(
+                child: MoveWindowBarrier(
+                  child: SearchTextField(
+                    focusNode: context.read<FocusNode>(),
+                    controller: context.read<TextEditingController>(),
+                    onChanged: (keyword) =>
+                        context.read<KeywordCubit>().emit(keyword),
+                    hintText: context.l10n.search,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ContextMenuPortalEntry(
+                buildMenus: () => [
+                  ContextMenu(
+                    title: context.l10n.searchUser,
+                    onTap: () => showMixinDialog<String>(
+                      context: context,
+                      child: const _SearchUserDialog(),
+                    ),
+                  ),
+                  ContextMenu(
+                    title: context.l10n.createConversation,
+                    onTap: () async {
+                      final list = await showConversationSelector(
+                        context: context,
+                        singleSelect: true,
+                        title: context.l10n.createConversation,
+                        onlyContact: true,
+                      );
+                      if (list == null ||
+                          list.isEmpty ||
+                          (list.first.userId?.isEmpty ?? true)) {
+                        return;
+                      }
+                      final userId = list.first.userId!;
 
-    Widget? leading;
-    if (hasDrawer.value) {
-      leading = ActionButton(
-        onTapUp: (event) => Scaffold.of(context).openDrawer(),
-        child: Icon(
-          Icons.menu,
-          size: 20,
-          color: context.theme.icon,
+                      await ConversationCubit.selectUser(
+                        context,
+                        userId,
+                      );
+                    },
+                  ),
+                  ContextMenu(
+                    title: context.l10n.createGroupConversation,
+                    onTap: () async {
+                      final result = await showConversationSelector(
+                        context: context,
+                        singleSelect: false,
+                        title: context.l10n.createGroupConversation,
+                        onlyContact: true,
+                      );
+                      if (result == null || result.isEmpty) return;
+                      final userIds = result
+                          .where((e) => e.userId != null)
+                          .map(
+                            (e) => e.userId!,
+                          )
+                          .toList();
+
+                      final name = await showMixinDialog<String>(
+                        context: context,
+                        child: _NewConversationConfirm(
+                            [context.accountServer.userId, ...userIds]),
+                      );
+                      if (name?.isEmpty ?? true) return;
+
+                      await runFutureWithToast(
+                        context,
+                        context.accountServer
+                            .createGroupConversation(name!, userIds),
+                      );
+                    },
+                  ),
+                  ContextMenu(
+                    title: context.l10n.createCircle,
+                    onTap: () async {
+                      final name = await showMixinDialog<String>(
+                        context: context,
+                        child: EditDialog(
+                          title: Text(context.l10n.circles),
+                          hintText: context.l10n.editCircleName,
+                        ),
+                      );
+
+                      if (name?.isEmpty ?? true) return;
+
+                      final list = await showConversationSelector(
+                        context: context,
+                        singleSelect: false,
+                        title: context.l10n.createCircle,
+                        onlyContact: false,
+                        allowEmpty: true,
+                      );
+
+                      if (list == null) return;
+
+                      await runFutureWithToast(
+                        context,
+                        context.accountServer.createCircle(
+                          name!,
+                          list
+                              .map(
+                                (e) => CircleConversationRequest(
+                                  action: CircleConversationAction.add,
+                                  conversationId: e.conversationId,
+                                  userId: e.userId,
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+                child: Builder(
+                  builder: (context) => MoveWindowBarrier(
+                    child: ActionButton(
+                      name: Resources.assetsImagesIcAddSvg,
+                      onTapUp: (event) =>
+                          context.sendMenuPosition(event.globalPosition),
+                      color: context.theme.icon,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+          ),
         ),
       );
-    }
-
-    return MoveWindow(
-      child: SizedBox(
-        height: 64,
-        child: Row(
-          children: [
-            AnimatedSize(
-              duration: const Duration(milliseconds: 150),
-              child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 150),
-                child: leading != null
-                    ? Padding(
-                        padding: const EdgeInsets.only(left: 12, right: 8),
-                        child: leading,
-                      )
-                    : const SizedBox(width: 20),
-              ),
-            ),
-            Expanded(
-              child: MoveWindowBarrier(
-                child: SearchTextField(
-                  focusNode: context.read<FocusNode>(),
-                  controller: context.read<TextEditingController>(),
-                  onChanged: (keyword) =>
-                      context.read<KeywordCubit>().emit(keyword),
-                  hintText: context.l10n.search,
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            ContextMenuPortalEntry(
-              buildMenus: () => [
-                ContextMenu(
-                  title: context.l10n.searchUser,
-                  onTap: () => showMixinDialog<String>(
-                    context: context,
-                    child: const _SearchUserDialog(),
-                  ),
-                ),
-                ContextMenu(
-                  title: context.l10n.createConversation,
-                  onTap: () async {
-                    final list = await showConversationSelector(
-                      context: context,
-                      singleSelect: true,
-                      title: context.l10n.createConversation,
-                      onlyContact: true,
-                    );
-                    if (list == null ||
-                        list.isEmpty ||
-                        (list.first.userId?.isEmpty ?? true)) {
-                      return;
-                    }
-                    final userId = list.first.userId!;
-
-                    await ConversationCubit.selectUser(
-                      context,
-                      userId,
-                    );
-                  },
-                ),
-                ContextMenu(
-                  title: context.l10n.createGroupConversation,
-                  onTap: () async {
-                    final result = await showConversationSelector(
-                      context: context,
-                      singleSelect: false,
-                      title: context.l10n.createGroupConversation,
-                      onlyContact: true,
-                    );
-                    if (result == null || result.isEmpty) return;
-                    final userIds = result
-                        .where((e) => e.userId != null)
-                        .map(
-                          (e) => e.userId!,
-                        )
-                        .toList();
-
-                    final name = await showMixinDialog<String>(
-                      context: context,
-                      child: _NewConversationConfirm(
-                          [context.accountServer.userId, ...userIds]),
-                    );
-                    if (name?.isEmpty ?? true) return;
-
-                    await runFutureWithToast(
-                      context,
-                      context.accountServer
-                          .createGroupConversation(name!, userIds),
-                    );
-                  },
-                ),
-                ContextMenu(
-                  title: context.l10n.createCircle,
-                  onTap: () async {
-                    final name = await showMixinDialog<String>(
-                      context: context,
-                      child: EditDialog(
-                        title: Text(context.l10n.circles),
-                        hintText: context.l10n.editCircleName,
-                      ),
-                    );
-
-                    if (name?.isEmpty ?? true) return;
-
-                    final list = await showConversationSelector(
-                      context: context,
-                      singleSelect: false,
-                      title: context.l10n.createCircle,
-                      onlyContact: false,
-                      allowEmpty: true,
-                    );
-
-                    if (list == null) return;
-
-                    await runFutureWithToast(
-                      context,
-                      context.accountServer.createCircle(
-                        name!,
-                        list
-                            .map(
-                              (e) => CircleConversationRequest(
-                                action: CircleConversationAction.add,
-                                conversationId: e.conversationId,
-                                userId: e.userId,
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    );
-                  },
-                ),
-              ],
-              child: Builder(
-                builder: (context) => MoveWindowBarrier(
-                  child: ActionButton(
-                    name: Resources.assetsImagesIcAddSvg,
-                    onTapUp: (event) =>
-                        context.sendMenuPosition(event.globalPosition),
-                    color: context.theme.icon,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _NewConversationConfirm extends HookWidget {
