@@ -78,6 +78,7 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
     bool? photoAutoDownload,
     bool? videoAutoDownload,
     bool? fileAutoDownload,
+    bool? collapsedSidebar,
   }) {
     final current = state.current;
     assert(current != null);
@@ -89,6 +90,7 @@ class MultiAuthCubit extends HydratedCubit<MultiAuthState> {
         photoAutoDownload: photoAutoDownload,
         videoAutoDownload: videoAutoDownload,
         fileAutoDownload: fileAutoDownload,
+        collapsedSidebar: collapsedSidebar,
       ));
 
     emit(MultiAuthState(

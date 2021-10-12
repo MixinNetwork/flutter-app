@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/hook.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
 import '../../widgets/empty.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
+import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
 import 'route/responsive_navigator.dart';
@@ -57,57 +58,56 @@ class _HomePage extends HookWidget {
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
 
-    final collapseValueNotifier = useState(false);
+    final userCollapse =
+        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
+      converter: (state) => state.collapsedSidebar,
+    );
 
-    final collapse =
-        collapseValueNotifier.value || clampSlideWidth < kSlidePageMaxWidth;
+    final collapse = userCollapse || clampSlideWidth < kSlidePageMaxWidth;
 
-    return ChangeNotifierProvider.value(
-      value: collapseValueNotifier,
-      child: Scaffold(
-        backgroundColor: context.theme.primary,
-        body: SafeArea(
-          child: Row(
-            children: [
-              TweenAnimationBuilder(
-                tween: Tween<double>(
-                  end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
-                ),
-                duration: const Duration(milliseconds: 200),
-                builder: (BuildContext context, double? value, Widget? child) =>
-                    SizedBox(
-                  width: value,
-                  child: child,
-                ),
-                child: SlidePage(collapseValueNotifier: collapseValueNotifier),
+    return Scaffold(
+      backgroundColor: context.theme.primary,
+      body: SafeArea(
+        child: Row(
+          children: [
+            TweenAnimationBuilder(
+              tween: Tween<double>(
+                end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
               ),
-              Expanded(
-                child: ResponsiveNavigator(
-                  switchWidth:
-                      kResponsiveNavigationMinWidth + kConversationListWidth,
-                  leftPage: MaterialPage(
-                    key: const ValueKey('center'),
-                    name: 'center',
-                    child: SizedBox(
-                      key: _conversationPageKey,
-                      width: kConversationListWidth,
-                      child: const _CenterPage(),
-                    ),
-                  ),
-                  rightEmptyPage: MaterialPage(
-                    key: const ValueKey('empty'),
-                    name: 'empty',
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: context.theme.chatBackground,
-                      ),
-                      child: Empty(text: context.l10n.pageRightEmptyMessage),
-                    ),
+              duration: const Duration(milliseconds: 200),
+              builder: (BuildContext context, double? value, Widget? child) =>
+                  SizedBox(
+                width: value,
+                child: child,
+              ),
+              child: const SlidePage(),
+            ),
+            Expanded(
+              child: ResponsiveNavigator(
+                switchWidth:
+                    kResponsiveNavigationMinWidth + kConversationListWidth,
+                leftPage: MaterialPage(
+                  key: const ValueKey('center'),
+                  name: 'center',
+                  child: SizedBox(
+                    key: _conversationPageKey,
+                    width: kConversationListWidth,
+                    child: const _CenterPage(),
                   ),
                 ),
+                rightEmptyPage: MaterialPage(
+                  key: const ValueKey('empty'),
+                  name: 'empty',
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.theme.chatBackground,
+                    ),
+                    child: Empty(text: context.l10n.pageRightEmptyMessage),
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

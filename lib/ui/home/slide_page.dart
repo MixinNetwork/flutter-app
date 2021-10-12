@@ -26,9 +26,7 @@ import 'home.dart';
 class SlidePage extends StatelessWidget {
   const SlidePage({
     Key? key,
-    required this.collapseValueNotifier,
   }) : super(key: key);
-  final ValueNotifier<bool> collapseValueNotifier;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -122,10 +120,11 @@ class SlidePage extends StatelessWidget {
               const SizedBox(height: 16),
               const Expanded(child: _CircleList()),
               HookBuilder(builder: (context) {
-                final collapse = useListenableConverter(collapseValueNotifier,
-                        converter: (ValueNotifier<bool> listenable) =>
-                            listenable.value).data ??
-                    false;
+                final collapse =
+                    useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
+                  converter: (state) => state.collapsedSidebar,
+                );
+
                 return SelectItem(
                   icon: SvgPicture.asset(
                     collapse
@@ -136,8 +135,8 @@ class SlidePage extends StatelessWidget {
                     color: context.theme.text,
                   ),
                   title: 'Collapse sidebar',
-                  onTap: () => collapseValueNotifier.value =
-                      !collapseValueNotifier.value,
+                  onTap: () => context.multiAuthCubit
+                      .setCurrentSetting(collapsedSidebar: !collapse),
                 );
               }),
               const SizedBox(height: 4),

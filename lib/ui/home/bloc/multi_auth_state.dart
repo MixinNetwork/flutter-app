@@ -30,6 +30,8 @@ class MultiAuthState extends Equatable {
 
   bool get currentFileAutoDownload => current?.fileAutoDownload ?? true;
 
+  bool get collapsedSidebar => current?.collapsedSidebar ?? false;
+
   AuthState? get currentAuthState => current;
 
   Account? get currentUser => currentAuthState?.account;
@@ -58,6 +60,7 @@ class AuthState extends Equatable {
     this.photoAutoDownload,
     this.videoAutoDownload,
     this.fileAutoDownload,
+    this.collapsedSidebar,
   });
 
   factory AuthState.fromMap(Map<String, dynamic> map) => AuthState(
@@ -67,6 +70,7 @@ class AuthState extends Equatable {
         photoAutoDownload: map['photoAutoDownload'] as bool?,
         videoAutoDownload: map['videoAutoDownload'] as bool?,
         fileAutoDownload: map['fileAutoDownload'] as bool?,
+        collapsedSidebar: map['collapsedSidebar'] as bool?,
       );
 
   factory AuthState.fromJson(String source) =>
@@ -78,6 +82,7 @@ class AuthState extends Equatable {
   final bool? photoAutoDownload;
   final bool? videoAutoDownload;
   final bool? fileAutoDownload;
+  final bool? collapsedSidebar;
 
   @override
   List<Object?> get props => [
@@ -87,6 +92,7 @@ class AuthState extends Equatable {
         photoAutoDownload,
         videoAutoDownload,
         fileAutoDownload,
+        collapsedSidebar,
       ];
 
   AuthState copyWith({
@@ -96,6 +102,7 @@ class AuthState extends Equatable {
     bool? photoAutoDownload,
     bool? videoAutoDownload,
     bool? fileAutoDownload,
+    bool? collapsedSidebar,
   }) =>
       AuthState(
         account: account ?? this.account,
@@ -104,6 +111,7 @@ class AuthState extends Equatable {
         photoAutoDownload: photoAutoDownload ?? this.photoAutoDownload,
         videoAutoDownload: videoAutoDownload ?? this.videoAutoDownload,
         fileAutoDownload: fileAutoDownload ?? this.fileAutoDownload,
+        collapsedSidebar: collapsedSidebar ?? this.collapsedSidebar,
       );
 
   Map<String, dynamic> toMap() => {
@@ -113,6 +121,7 @@ class AuthState extends Equatable {
         'photoAutoDownload': photoAutoDownload,
         'videoAutoDownload': videoAutoDownload,
         'fileAutoDownload': fileAutoDownload,
+        'collapsedSidebar': collapsedSidebar,
       };
 
   String toJson() => json.encode(toMap());
