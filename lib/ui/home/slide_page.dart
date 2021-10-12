@@ -48,43 +48,8 @@ class SlidePage extends StatelessWidget {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SizedBox(
                   height: (defaultTargetPlatform == TargetPlatform.macOS)
-                      ? 72.0
+                      ? 64.0
                       : 16.0),
-              MoveWindowBarrier(
-                child: Builder(
-                  builder: (context) =>
-                      BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
-                    converter: (state) => state.current?.account,
-                    when: (a, b) => b?.fullName != null,
-                    builder: (context, account) => BlocConverter<
-                        SlideCategoryCubit, SlideCategoryState, bool>(
-                      converter: (state) =>
-                          state.type == SlideCategoryType.setting,
-                      builder: (context, selected) {
-                        assert(account != null);
-                        return SelectItem(
-                          icon: AvatarWidget(
-                            avatarUrl: account!.avatarUrl,
-                            size: 24,
-                            name: account.fullName!,
-                            userId: account.userId,
-                          ),
-                          title: account.fullName!,
-                          selected: selected,
-                          onTap: () {
-                            BlocProvider.of<SlideCategoryCubit>(context)
-                                .select(SlideCategoryType.setting);
-                            if (ModalRoute.of(context)?.canPop == true) {
-                              Navigator.pop(context);
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
               _Item(
                 asset: Resources.assetsImagesChatSvg,
                 title: context.l10n.chats,
@@ -139,6 +104,40 @@ class SlidePage extends StatelessWidget {
                       .setCurrentSetting(collapsedSidebar: !collapse),
                 );
               }),
+              MoveWindowBarrier(
+                child: Builder(
+                  builder: (context) =>
+                      BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
+                    converter: (state) => state.current?.account,
+                    when: (a, b) => b?.fullName != null,
+                    builder: (context, account) => BlocConverter<
+                        SlideCategoryCubit, SlideCategoryState, bool>(
+                      converter: (state) =>
+                          state.type == SlideCategoryType.setting,
+                      builder: (context, selected) {
+                        assert(account != null);
+                        return SelectItem(
+                          icon: AvatarWidget(
+                            avatarUrl: account!.avatarUrl,
+                            size: 24,
+                            name: account.fullName!,
+                            userId: account.userId,
+                          ),
+                          title: account.fullName!,
+                          selected: selected,
+                          onTap: () {
+                            BlocProvider.of<SlideCategoryCubit>(context)
+                                .select(SlideCategoryType.setting);
+                            if (ModalRoute.of(context)?.canPop == true) {
+                              Navigator.pop(context);
+                            }
+                          },
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
               const SizedBox(height: 4),
             ]),
           ),
