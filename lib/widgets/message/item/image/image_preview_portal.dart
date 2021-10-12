@@ -201,77 +201,79 @@ class ImagePreviewPage extends HookWidget {
         ),
       },
       autofocus: true,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Column(
-          children: [
-            Container(
-              height: 70,
-              decoration: BoxDecoration(
-                color: context.theme.primary,
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Column(
+            children: [
+              Container(
+                height: 70,
+                decoration: BoxDecoration(
+                  color: context.theme.primary,
+                ),
+                child: Builder(
+                  builder: (context) {
+                    if (current.value == null) return const SizedBox();
+                    return Row(
+                      children: [
+                        const SizedBox(width: 100),
+                        Expanded(
+                          child: _Bar(
+                            message: current.value!,
+                            controller: controller,
+                            isTranscriptPage: isTranscriptPage,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
               ),
-              child: Builder(
-                builder: (context) {
-                  if (current.value == null) return const SizedBox();
-                  return Row(
-                    children: [
-                      const SizedBox(width: 100),
-                      Expanded(
-                        child: _Bar(
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    if (current.value == null) return const SizedBox();
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        _Item(
                           message: current.value!,
                           controller: controller,
                           isTranscriptPage: isTranscriptPage,
                         ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  if (current.value == null) return const SizedBox();
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _Item(
-                        message: current.value!,
-                        controller: controller,
-                        isTranscriptPage: isTranscriptPage,
-                      ),
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          child: Row(
-                            children: [
-                              if (prev.value != null)
-                                InteractiveDecoratedBox(
-                                  onTap: () =>
-                                      _messageId.value = prev.value!.messageId,
-                                  child: SvgPicture.asset(
-                                    Resources.assetsImagesNextSvg,
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            child: Row(
+                              children: [
+                                if (prev.value != null)
+                                  InteractiveDecoratedBox(
+                                    onTap: () => _messageId.value =
+                                        prev.value!.messageId,
+                                    child: SvgPicture.asset(
+                                      Resources.assetsImagesNextSvg,
+                                    ),
                                   ),
-                                ),
-                              const Spacer(),
-                              if (next.value != null)
-                                InteractiveDecoratedBox(
-                                  onTap: () =>
-                                      _messageId.value = next.value!.messageId,
-                                  child: SvgPicture.asset(
-                                    Resources.assetsImagesPrevSvg,
+                                const Spacer(),
+                                if (next.value != null)
+                                  InteractiveDecoratedBox(
+                                    onTap: () => _messageId.value =
+                                        next.value!.messageId,
+                                    child: SvgPicture.asset(
+                                      Resources.assetsImagesPrevSvg,
+                                    ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
