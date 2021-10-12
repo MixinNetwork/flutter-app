@@ -705,12 +705,12 @@ class _List extends HookWidget {
       converter: (state) => state.routeMode,
     );
 
-    final connectedState = useStream(
-          context.accountServer.blaze.connectedStateStreamController.stream
-              .distinct(),
-          initialData: true,
-        ).data ??
-        false;
+    final connectedState = useMemoizedStream(
+            () => context
+                .accountServer.blaze.connectedStateStreamController.stream
+                .distinct(),
+            initialData: true)
+        .requireData;
 
     Widget child;
     if (pagingState.count == 0) {

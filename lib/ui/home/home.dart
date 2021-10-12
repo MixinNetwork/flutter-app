@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/hook.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
+import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
@@ -27,16 +29,68 @@ const kChatSidePageWidth = 300.0;
 
 final _conversationPageKey = GlobalKey();
 
-class HomePage extends StatelessWidget {
+class HomePage extends HookWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) =>
-            _HomePage(
-          constraints: constraints,
+  Widget build(BuildContext context) {
+    final localTimeError = useMemoizedStream(
+            () => context
+                .accountServer.blaze.localTimeErrorStreamController.stream
+                .distinct(),
+            keys: [context.accountServer]).data ??
+        false;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) =>
+              _HomePage(
+            constraints: constraints,
+          ),
         ),
-      );
+        if (localTimeError)
+          HookBuilder(builder: (context) {
+            final loading = useState(false);
+            return Material(
+              color: context.theme.background,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.localTimeErrorDescription,
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    if (loading.value)
+                      CircularProgressIndicator(
+                        color: context.theme.accent,
+                      ),
+                    if (!loading.value)
+                      MixinButton(
+                        onTap: () async {
+                          loading.value = true;
+                          try {
+                            await context.accountServer.blaze.reconnect();
+                          } finally {
+                            loading.value = false;
+                          }
+                        },
+                        child: Text(context.l10n.continueText),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }),
+      ],
+    );
+  }
 }
 
 class HasDrawerValueNotifier extends ValueNotifier<bool> {

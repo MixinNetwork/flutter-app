@@ -207,5 +207,7 @@
   "exit": "Exit",
   "done": "Done",
   "comingSoon": "Coming soon...",
-  "sendYouAMessage": "Send you a message"
+  "sendYouAMessage": "Send you a message",
+  "continueText": "Continue",
+  "localTimeErrorDescription": "System time is unusual, please continue to use again after correction"
 }

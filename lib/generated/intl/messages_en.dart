@@ -130,6 +130,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contactMixinId": m7,
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
+        "continueText": MessageLookupByLibrary.simpleMessage("Continue"),
         "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
         "conversationAddContact":
             MessageLookupByLibrary.simpleMessage("+ Add Contact"),
@@ -211,6 +212,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "links": MessageLookupByLibrary.simpleMessage("Links"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading"),
+        "localTimeErrorDescription": MessageLookupByLibrary.simpleMessage(
+            "System time is unusual, please continue to use again after correction"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
         "media": MessageLookupByLibrary.simpleMessage("Media"),
         "messagePreview":
