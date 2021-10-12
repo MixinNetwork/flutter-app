@@ -21,6 +21,7 @@ import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
 import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
+import 'home.dart';
 
 class SlidePage extends StatelessWidget {
   const SlidePage({
@@ -405,22 +406,41 @@ class _Title extends StatelessWidget {
   final String data;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                data,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: TextStyle(
-                  color: context.theme.secondaryText,
-                  height: 1,
-                ),
+  Widget build(BuildContext context) =>
+      LayoutBuilder(builder: (context, boxConstraints) {
+        final collapse = boxConstraints.maxWidth < (kSlidePageMaxWidth / 2);
+        return TweenAnimationBuilder(
+          duration: const Duration(milliseconds: 200),
+          tween: Tween<double>(end: collapse ? 0 : 1),
+          builder: (BuildContext context, double value, Widget? child) =>
+              ClipRect(
+            child: Align(
+              alignment: Alignment.topCenter,
+              heightFactor: value,
+              child: Opacity(
+                opacity: value,
+                child: child,
               ),
             ),
-          ],
-        ),
-      );
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    data,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      });
 }
