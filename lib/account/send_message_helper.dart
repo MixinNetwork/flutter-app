@@ -740,23 +740,15 @@ class SendMessageHelper {
         transcripts.any((element) => element.category.isAttachment);
 
     final transcriptMessages = transcripts.map((e) {
-      var category = e.category;
       var mediaUrl = e.mediaUrl;
       var mediaStatus = e.mediaStatus;
 
-      if (e.category != MessageCategory.appCard) {
-        category = encryptCategory.asCategory(e.category);
-      }
-
       if (e.category.isAttachment) {
-        if (e.mediaUrl == null) {
-          mediaUrl = null;
-          mediaStatus = MediaStatus.canceled;
-        }
+        mediaStatus = MediaStatus.canceled;
+        if (e.mediaUrl == null) mediaUrl = null;
       }
       return e.copyWith(
         transcriptId: messageId,
-        category: category,
         mediaUrl: Value(mediaUrl),
         mediaStatus: Value(mediaStatus),
       );
@@ -765,7 +757,7 @@ class SendMessageHelper {
     final transcriptMinimals = transcriptMessages
         .map((e) => TranscriptMinimal(
               name: e.userFullName ?? '',
-              category: e.category,
+              category: encryptCategory.asCategory(e.category),
               content: e.content,
             ).toJson())
         .toList();
@@ -832,42 +824,104 @@ class SendMessageHelper {
 
   Future<void> reUploadTranscriptAttachment(String messageId) async {
     final message = await _messageDao.findMessageByMessageId(messageId);
-    final status = message?.mediaStatus;
+    if (message == null) return;
+
+    final status = message.mediaStatus;
     if (status == MediaStatus.done || status == MediaStatus.pending) return;
     final transcripts = await _transcriptMessageDao
         .transcriptMessageByTranscriptId(messageId)
         .get();
 
-    if (!transcripts.any((element) => element.category.isAttachment)) return;
+    if (!transcripts.any((element) => element.category.isAttachment)) {
+      await _jobDao.insertSendingJob(
+        message.messageId,
+        message.conversationId,
+      );
+      return;
+    }
 
     Future<void> uploadAttachment(TranscriptMessage transcriptMessage) async {
       if (transcriptMessage.mediaStatus == MediaStatus.done) return;
-      final absolutePath = _attachmentUtil.convertAbsolutePath(
-        fileName: transcriptMessage.mediaUrl,
-        messageId: transcriptMessage.messageId,
-        isTranscript: true,
-      );
-      final attachmentResult = await _attachmentUtil.uploadAttachment(
-        File(absolutePath),
-        messageId,
-        transcriptMessage.category,
-        transcriptId: transcriptMessage.transcriptId,
-      );
+      final category = transcriptMessage.category;
 
-      await _transcriptMessageDao.updateTranscript(
-        transcriptId: transcriptMessage.transcriptId,
-        messageId: transcriptMessage.messageId,
-        attachmentId: attachmentResult!.attachmentId,
-        key: attachmentResult.keys,
-        digest: attachmentResult.digest,
-        mediaStatus: MediaStatus.done,
-        createdAt: attachmentResult.createdAt,
-      );
+      final isPlain = category.isPlain;
+      final isValidAttachment = category.isAttachment &&
+          ((isPlain &&
+                  transcriptMessage.mediaKey == null &&
+                  transcriptMessage.mediaDigest == null) ||
+              (transcriptMessage.mediaKey != null &&
+                  transcriptMessage.mediaDigest != null));
+      final isBefore24Hours = transcriptMessage.mediaCreatedAt
+              ?.isBefore(DateTime.now().subtract(const Duration(days: 1))) ??
+          true;
+      final encryptCategory = message.category.encryptCategory;
+
+      var needUpload =
+          encryptCategory != category.encryptCategory || isBefore24Hours;
+
+      String? attachmentId;
+      if (!needUpload) {
+        Future<String?> getAttachmentId(String? content) async {
+          try {
+            final map = await jsonBase64DecodeWithIsolate(content ?? '');
+            final attachmentMessage =
+                AttachmentMessage.fromJson(map as Map<String, dynamic>);
+            return attachmentMessage.attachmentId;
+          } catch (_) {
+            return content!;
+          }
+        }
+
+        if (isValidAttachment) {
+          attachmentId = await getAttachmentId(transcriptMessage.content);
+        } else {
+          needUpload = true;
+        }
+      }
+
+      if (needUpload || attachmentId == null) {
+        final absolutePath = _attachmentUtil.convertAbsolutePath(
+          fileName: transcriptMessage.mediaUrl,
+          messageId: transcriptMessage.messageId,
+          isTranscript: true,
+        );
+        final newCategory = encryptCategory?.asCategory(category) ?? category;
+        final attachmentResult = await _attachmentUtil.uploadAttachment(
+          File(absolutePath),
+          messageId,
+          newCategory,
+          transcriptId: transcriptMessage.transcriptId,
+        );
+        attachmentId = attachmentResult!.attachmentId;
+
+        await _transcriptMessageDao.updateTranscript(
+          transcriptId: transcriptMessage.transcriptId,
+          messageId: transcriptMessage.messageId,
+          attachmentId: attachmentId,
+          category: newCategory,
+          key: attachmentResult.keys,
+          digest: attachmentResult.digest,
+          mediaStatus: MediaStatus.done,
+          mediaCreatedAt: DateTime.tryParse(attachmentResult.createdAt ?? '') ??
+              DateTime.now(),
+        );
+      } else {
+        await _transcriptMessageDao.updateTranscript(
+          transcriptId: transcriptMessage.transcriptId,
+          messageId: transcriptMessage.messageId,
+          attachmentId: attachmentId,
+          category: transcriptMessage.category,
+          key: transcriptMessage.mediaKey,
+          digest: transcriptMessage.mediaDigest,
+          mediaStatus: MediaStatus.done,
+          mediaCreatedAt: transcriptMessage.mediaCreatedAt,
+        );
+      }
     }
 
     try {
       await _messageDao.updateMediaStatus(
-          MediaStatus.pending, message!.messageId);
+          MediaStatus.pending, message.messageId);
       final attachmentTranscripts =
           transcripts.where((element) => element.category.isAttachment);
       if (attachmentTranscripts.isNotEmpty) {
@@ -881,7 +935,7 @@ class SendMessageHelper {
       );
     } catch (_) {
       await _messageDao.updateMediaStatus(
-          MediaStatus.canceled, message!.messageId);
+          MediaStatus.canceled, message.messageId);
     }
   }
 

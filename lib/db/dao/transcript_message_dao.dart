@@ -75,7 +75,8 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     required String? key,
     required String? digest,
     required MediaStatus mediaStatus,
-    required String? createdAt,
+    required DateTime? mediaCreatedAt,
+    required String category,
   }) =>
       (db.update(db.transcriptMessages)
             ..where((tbl) =>
@@ -83,10 +84,12 @@ class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
                 tbl.messageId.equals(messageId)))
           .write(
         TranscriptMessagesCompanion(
+          category: Value(category),
           mediaStatus: Value(mediaStatus),
           mediaKey: Value(key),
           mediaDigest: Value(digest),
           content: Value(attachmentId),
+          mediaCreatedAt: Value(mediaCreatedAt),
         ),
       );
 }
