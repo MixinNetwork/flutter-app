@@ -106,6 +106,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
         "clear": MessageLookupByLibrary.simpleMessage("清除"),
         "clearChat": MessageLookupByLibrary.simpleMessage("清空聊天记录"),
+        "comingSoon": MessageLookupByLibrary.simpleMessage("即将到来..."),
         "confirm": MessageLookupByLibrary.simpleMessage("确定"),
         "contact": MessageLookupByLibrary.simpleMessage("联系人"),
         "contactMixinId": m7,
@@ -133,6 +134,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteForEveryone": MessageLookupByLibrary.simpleMessage("撤回"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("删除群组"),
+        "done": MessageLookupByLibrary.simpleMessage("完成"),
         "editAnnouncement": MessageLookupByLibrary.simpleMessage("编辑群公告"),
         "editCircle": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
@@ -252,6 +254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
+        "sendYouAMessage": MessageLookupByLibrary.simpleMessage("发来一条信息"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

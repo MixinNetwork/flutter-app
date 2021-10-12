@@ -34,7 +34,7 @@ class SnapshotMessage {
   @JsonKey(name: 'opponent_id')
   String? opponentId;
   @JsonKey(name: 'trace_id')
-  String traceId;
+  String? traceId;
   @JsonKey(name: 'transaction_hash')
   String? transactionHash;
   @JsonKey(name: 'sender')

@@ -118,6 +118,21 @@ class ChatBar extends HookWidget {
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.centerLeft,
             child: MoveWindowBarrier(
+              child: (conversation.isBot ?? false)
+                  ? Tooltip(
+                      message: context.l10n.comingSoon,
+                      child: ActionButton(
+                        name: Resources.assetsImagesBotSvg,
+                        color: actionColor,
+                      ),
+                    )
+                  : const SizedBox(),
+            ),
+          ),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.centerLeft,
+            child: MoveWindowBarrier(
               child: chatSideRouteMode
                   ? const SizedBox()
                   : ActionButton(

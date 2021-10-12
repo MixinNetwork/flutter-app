@@ -198,6 +198,7 @@ class _CircleList extends HookWidget {
                             onlyContact: false,
                             initSelected: initSelected,
                             allowEmpty: true,
+                            confirmedText: context.l10n.done,
                           );
 
                           if (result == null || result.isEmpty) return;

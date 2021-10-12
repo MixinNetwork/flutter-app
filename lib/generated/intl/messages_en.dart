@@ -125,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contactMixinId": m7,
@@ -157,6 +158,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete for Everyone"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("Delete for me"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
+        "done": MessageLookupByLibrary.simpleMessage("Done"),
         "editAnnouncement":
             MessageLookupByLibrary.simpleMessage("Edit group description"),
         "editCircle": MessageLookupByLibrary.simpleMessage("Manage Circle"),
@@ -292,6 +294,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Send without compression"),
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
+        "sendYouAMessage":
+            MessageLookupByLibrary.simpleMessage("Send you a message"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),

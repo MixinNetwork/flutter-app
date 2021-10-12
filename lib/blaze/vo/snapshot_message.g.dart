@@ -14,7 +14,7 @@ SnapshotMessage _$SnapshotMessageFromJson(Map<String, dynamic> json) =>
       json['amount'] as String,
       json['created_at'] as String,
       json['opponent_id'] as String?,
-      json['trace_id'] as String,
+      json['trace_id'] as String?,
       json['transaction_hash'] as String?,
       json['sender'] as String?,
       json['receiver'] as String?,

@@ -2110,6 +2110,36 @@ class Localization {
     );
   }
 
+  /// `Done`
+  String get done {
+    return Intl.message(
+      'Done',
+      name: 'done',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Coming soon...`
+  String get comingSoon {
+    return Intl.message(
+      'Coming soon...',
+      name: 'comingSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send you a message`
+  String get sendYouAMessage {
+    return Intl.message(
+      'Send you a message',
+      name: 'sendYouAMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Continue`
   String get continueText {
     return Intl.message(
