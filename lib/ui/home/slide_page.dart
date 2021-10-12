@@ -21,9 +21,14 @@ import '../../widgets/user_selector/conversation_selector.dart';
 import '../../widgets/window/move_window.dart';
 import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
+import 'home.dart';
 
 class SlidePage extends StatelessWidget {
-  const SlidePage({Key? key}) : super(key: key);
+  const SlidePage({
+    Key? key,
+    required this.collapseValueNotifier,
+  }) : super(key: key);
+  final ValueNotifier<bool> collapseValueNotifier;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -39,88 +44,104 @@ class SlidePage extends StatelessWidget {
         ),
         child: MoveWindow(
           behavior: HitTestBehavior.opaque,
-          child: SizedBox(
-            width: 200,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                        height: (defaultTargetPlatform == TargetPlatform.macOS)
-                            ? 72.0
-                            : 16.0),
-                    _Item(
-                      asset: Resources.assetsImagesChatSvg,
-                      title: context.l10n.chats,
-                      type: SlideCategoryType.chats,
-                    ),
-                    const SizedBox(height: 12),
-                    _Title(data: context.l10n.people),
-                    const SizedBox(height: 12),
-                    _CategoryList(
-                      children: [
-                        _Item(
-                          asset: Resources.assetsImagesSlideContactsSvg,
-                          title: context.l10n.contacts,
-                          type: SlideCategoryType.contacts,
-                        ),
-                        _Item(
-                          asset: Resources.assetsImagesGroupSvg,
-                          title: context.l10n.groups,
-                          type: SlideCategoryType.groups,
-                        ),
-                        _Item(
-                          asset: Resources.assetsImagesBotSvg,
-                          title: Localization.current.bots,
-                          type: SlideCategoryType.bots,
-                        ),
-                        _Item(
-                          asset: Resources.assetsImagesStrangersSvg,
-                          title: context.l10n.strangers,
-                          type: SlideCategoryType.strangers,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Expanded(child: _CircleList()),
-                    MoveWindowBarrier(
-                      child: Builder(
-                        builder: (context) => BlocConverter<MultiAuthCubit,
-                            MultiAuthState, Account?>(
-                          converter: (state) => state.current?.account,
-                          when: (a, b) => b?.fullName != null,
-                          builder: (context, account) => BlocConverter<
-                              SlideCategoryCubit, SlideCategoryState, bool>(
-                            converter: (state) =>
-                                state.type == SlideCategoryType.setting,
-                            builder: (context, selected) {
-                              assert(account != null);
-                              return SelectItem(
-                                icon: AvatarWidget(
-                                  avatarUrl: account!.avatarUrl,
-                                  size: 30,
-                                  name: account.fullName!,
-                                  userId: account.userId,
-                                ),
-                                title: account.fullName!,
-                                selected: selected,
-                                onTap: () {
-                                  BlocProvider.of<SlideCategoryCubit>(context)
-                                      .select(SlideCategoryType.setting);
-                                  if (ModalRoute.of(context)?.canPop == true) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                              );
-                            },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child:
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              SizedBox(
+                  height: (defaultTargetPlatform == TargetPlatform.macOS)
+                      ? 72.0
+                      : 16.0),
+              MoveWindowBarrier(
+                child: Builder(
+                  builder: (context) =>
+                      BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
+                    converter: (state) => state.current?.account,
+                    when: (a, b) => b?.fullName != null,
+                    builder: (context, account) => BlocConverter<
+                        SlideCategoryCubit, SlideCategoryState, bool>(
+                      converter: (state) =>
+                          state.type == SlideCategoryType.setting,
+                      builder: (context, selected) {
+                        assert(account != null);
+                        return SelectItem(
+                          icon: AvatarWidget(
+                            avatarUrl: account!.avatarUrl,
+                            size: 24,
+                            name: account.fullName!,
+                            userId: account.userId,
                           ),
-                        ),
-                      ),
+                          title: account.fullName!,
+                          selected: selected,
+                          onTap: () {
+                            BlocProvider.of<SlideCategoryCubit>(context)
+                                .select(SlideCategoryType.setting);
+                            if (ModalRoute.of(context)?.canPop == true) {
+                              Navigator.pop(context);
+                            }
+                          },
+                        );
+                      },
                     ),
-                    const SizedBox(height: 4),
-                  ]),
-            ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _Item(
+                asset: Resources.assetsImagesChatSvg,
+                title: context.l10n.chats,
+                type: SlideCategoryType.chats,
+              ),
+              const SizedBox(height: 12),
+              _Title(data: context.l10n.people),
+              const SizedBox(height: 12),
+              _CategoryList(
+                children: [
+                  _Item(
+                    asset: Resources.assetsImagesSlideContactsSvg,
+                    title: context.l10n.contacts,
+                    type: SlideCategoryType.contacts,
+                  ),
+                  _Item(
+                    asset: Resources.assetsImagesGroupSvg,
+                    title: context.l10n.groups,
+                    type: SlideCategoryType.groups,
+                  ),
+                  _Item(
+                    asset: Resources.assetsImagesBotSvg,
+                    title: Localization.current.bots,
+                    type: SlideCategoryType.bots,
+                  ),
+                  _Item(
+                    asset: Resources.assetsImagesStrangersSvg,
+                    title: context.l10n.strangers,
+                    type: SlideCategoryType.strangers,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Expanded(child: _CircleList()),
+              HookBuilder(builder: (context) {
+                final collapse = useListenableConverter(collapseValueNotifier,
+                        converter: (ValueNotifier<bool> listenable) =>
+                            listenable.value).data ??
+                    false;
+                return SelectItem(
+                  icon: SvgPicture.asset(
+                    collapse
+                        ? Resources.assetsImagesCollapseSvg
+                        : Resources.assetsImagesExpandedSvg,
+                    width: 24,
+                    height: 24,
+                    color: context.theme.text,
+                  ),
+                  title: 'Collapse sidebar',
+                  onTap: () => collapseValueNotifier.value =
+                      !collapseValueNotifier.value,
+                );
+              }),
+              const SizedBox(height: 4),
+            ]),
           ),
         ),
       );
@@ -275,6 +296,7 @@ class _CircleList extends HookWidget {
                       },
                       selected: selected,
                       count: circle.unseenMessageCount ?? 0,
+                      showTooltip: true,
                     ),
                   ),
                 );
@@ -369,6 +391,7 @@ class _Item extends HookWidget {
         },
         selected: selected,
         count: unseenMessageCount,
+        showTooltip: true,
       ),
     );
   }
@@ -383,21 +406,41 @@ class _Title extends StatelessWidget {
   final String data;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                data,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: TextStyle(
-                  color: context.theme.secondaryText,
-                ),
+  Widget build(BuildContext context) =>
+      LayoutBuilder(builder: (context, boxConstraints) {
+        final collapse = boxConstraints.maxWidth < (kSlidePageMaxWidth / 2);
+        return TweenAnimationBuilder(
+          duration: const Duration(milliseconds: 200),
+          tween: Tween<double>(end: collapse ? 0 : 1),
+          builder: (BuildContext context, double value, Widget? child) =>
+              ClipRect(
+            child: Align(
+              alignment: Alignment.topCenter,
+              heightFactor: value,
+              child: Opacity(
+                opacity: value,
+                child: child,
               ),
             ),
-          ],
-        ),
-      );
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    data,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: TextStyle(
+                      color: context.theme.secondaryText,
+                      height: 1.1,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      });
 }

@@ -17,9 +17,9 @@ import 'route/responsive_navigator_cubit.dart';
 import 'slide_page.dart';
 
 // chat category list min width
-const kSlidePageMinWidth = 80.0;
+const kSlidePageMinWidth = 64.0;
 // chat category and chat list max width
-const kSlidePageMaxWidth = 160.0;
+const kSlidePageMaxWidth = 200.0;
 // chat page min width, message list, setting page etc.
 const kResponsiveNavigationMinWidth = 300.0;
 // conversation list fixed width, conversation list, setting list etc.
@@ -93,8 +93,8 @@ class HomePage extends HookWidget {
   }
 }
 
-class HasDrawerValueNotifier extends ValueNotifier<bool> {
-  HasDrawerValueNotifier(bool value) : super(value);
+class CollapseValueNotifier extends ValueNotifier<bool> {
+  CollapseValueNotifier(bool value) : super(value);
 }
 
 class _HomePage extends HookWidget {
@@ -107,64 +107,34 @@ class _HomePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final animationController = useAnimationController(
-      initialValue: 1,
-      duration: const Duration(milliseconds: 150),
-    );
-
     final maxWidth = constraints.maxWidth;
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
 
-    useValueChanged<double, void>(clampSlideWidth, (_, __) {
-      if (animationController.isAnimating) return;
-      if (clampSlideWidth <= kSlidePageMinWidth) {
-        animationController.reverse();
-      } else {
-        animationController.forward();
-      }
-    });
+    final collapseValueNotifier = useState(false);
 
-    final hasDrawerValueNotifier =
-        useMemoized(() => HasDrawerValueNotifier(false));
-
-    final animationProgress = useAnimation(animationController);
-
-    final slideWidth = animationProgress * clampSlideWidth;
-
-    final hasDrawer = animationProgress == 0;
-    if (hasDrawerValueNotifier.value != hasDrawer) {
-      hasDrawerValueNotifier.value = hasDrawer;
-    }
+    final collapse =
+        collapseValueNotifier.value || clampSlideWidth < kSlidePageMaxWidth;
 
     return ChangeNotifierProvider.value(
-      value: hasDrawerValueNotifier,
+      value: collapseValueNotifier,
       child: Scaffold(
         backgroundColor: context.theme.primary,
-        drawer: hasDrawer
-            ? Drawer(
-                child: Scaffold(
-                  backgroundColor: context.theme.primary,
-                  body: const SizedBox(
-                    width: double.infinity,
-                    child: SlidePage(),
-                  ),
-                ),
-              )
-            : null,
         body: SafeArea(
           child: Row(
             children: [
-              if (!hasDrawer)
-                SizedBox(
-                  width: slideWidth,
-                  child: OverflowBox(
-                    alignment: Alignment.centerLeft,
-                    minWidth: kSlidePageMinWidth,
-                    maxWidth: clampSlideWidth,
-                    child: const SlidePage(),
-                  ),
+              TweenAnimationBuilder(
+                tween: Tween<double>(
+                  end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
                 ),
+                duration: const Duration(milliseconds: 200),
+                builder: (BuildContext context, double? value, Widget? child) =>
+                    SizedBox(
+                  width: value,
+                  child: child,
+                ),
+                child: SlidePage(collapseValueNotifier: collapseValueNotifier),
+              ),
               Expanded(
                 child: ResponsiveNavigator(
                   switchWidth:
