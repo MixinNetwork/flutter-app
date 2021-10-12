@@ -137,7 +137,7 @@ SPEC CHECKSUMS:
   flutter_app_icon_badge: 844847adbd7a1c6f325d6b41b942428981b839cc
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  ogg_opus_player: 09755f269d1ab4c2879184d4b68168afe19a812a
+  ogg_opus_player: 0e883df8c4f70995c3e6b8ac3a8ef088f66a8f41
   package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
   path_provider: d1e9807085df1f9cc9318206cd649dc0b76be3de
   SDWebImage: 7acbb57630ac7db4a495547fb73916ff3e432f6b
