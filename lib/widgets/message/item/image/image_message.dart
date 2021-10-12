@@ -15,7 +15,7 @@ import '../../message.dart';
 import '../../message_bubble.dart';
 import '../../message_datetime_and_status.dart';
 import '../unknown_message.dart';
-import 'image_preview_portal.dart';
+import 'image_preview_page.dart';
 
 class ImageMessageWidget extends HookWidget {
   const ImageMessageWidget({

@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_app/utils/logger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pasteboard/pasteboard.dart';
@@ -16,6 +16,7 @@ import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/file.dart';
+import '../../../../utils/logger.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
@@ -25,6 +26,7 @@ import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
 import '../transcript_message.dart';
+import 'preview_image_widget.dart';
 
 class ImagePreviewPage extends HookWidget {
   const ImagePreviewPage({
@@ -422,9 +424,7 @@ class _Item extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final pixelRatio = MediaQuery.of(context).devicePixelRatio;
     // scale image to fit viewport on first show.
-
     final imageSize = useMemoized(
         () => Size(
               (message.mediaWidth ?? 0).toDouble(),
@@ -441,10 +441,14 @@ class _Item extends HookWidget {
         assert(false, 'image message size is empty: ${message.messageId}');
         return 1;
       }
-      final layoutSize = constraints.biggest * pixelRatio;
+      final layoutSize = constraints.biggest * 1;
 
       final scale = math.min(layoutSize.width / imageSize.width,
           layoutSize.height / imageSize.height);
+
+      d('layoutSize.width / imageSize.width = ${layoutSize.width / imageSize.width}');
+      d('layoutSize.height / imageSize.height = ${layoutSize.height / imageSize.height}');
+      d('scale: $layoutSize');
 
       controller.value = controller.value.scaled(scale);
       enablePan.value = false;
@@ -452,37 +456,18 @@ class _Item extends HookWidget {
     }, [message.messageId]);
 
     return GestureDetector(
-      onTap: () => Navigator.pop(context),
+      // onTap: () => Navigator.pop(context),
       child: Container(
         decoration: const BoxDecoration(
           color: Color.fromRGBO(62, 65, 72, 0.9),
         ),
         child: ClipRect(
-          child: InteractiveViewer(
-            constrained: false,
-            minScale: 0.01,
-            panEnabled: enablePan.value,
-            boundaryMargin: EdgeInsets.symmetric(
-              horizontal: constraints.maxWidth / 2,
-              vertical: constraints.maxHeight / 2,
-            ),
-            onInteractionUpdate: (details) {
-              enablePan.value =
-                  controller.value.getMaxScaleOnAxis() * details.scale >
-                      defaultScale;
-            },
-            onInteractionEnd: (details) {
-              d('defaultScale = ${defaultScale}');
-              d('controller.value.getMaxScaleOnAxis() = ${controller.value.getMaxScaleOnAxis()}');
-
-              // enablePan.value =
-              //     controller.value.getMaxScaleOnAxis() > defaultScale;
-            },
-            transformationController: controller,
-            child: Image.file(
+          child: ImagPreviewWidget(
+            initialScale: defaultScale.toDouble(),
+            image: Image.file(
               File(context.accountServer
                   .convertMessageAbsolutePath(message, isTranscriptPage)),
-              fit: BoxFit.none,
+              fit: BoxFit.contain,
               errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
                 imageData: message.thumbImage ?? '',
                 fit: BoxFit.contain,

@@ -19,7 +19,7 @@ import '../../../../utils/hook.dart';
 import '../../../../widgets/cache_image.dart';
 import '../../../../widgets/image.dart';
 import '../../../../widgets/interactive_decorated_box.dart';
-import '../../../../widgets/message/item/image/image_preview_portal.dart';
+import '../../../../widgets/message/item/image/image_preview_page.dart';
 import '../../chat/chat_page.dart';
 
 class MediaPage extends HookWidget {

@@ -398,10 +398,12 @@ packages:
   extended_image:
     dependency: "direct main"
     description:
-      name: extended_image
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "4.2.1"
+      path: "."
+      ref: "5b54a2b04359d9d3bf42c3ac7ee80b56663951f2"
+      resolved-ref: "5b54a2b04359d9d3bf42c3ac7ee80b56663951f2"
+      url: "https://github.com/boyan01/extended_image.git"
+    source: git
+    version: "5.1.2"
   extended_image_library:
     dependency: transitive
     description:
