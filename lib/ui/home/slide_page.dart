@@ -27,7 +27,9 @@ import 'home.dart';
 class SlidePage extends StatelessWidget {
   const SlidePage({
     Key? key,
+    required this.showCollapse,
   }) : super(key: key);
+  final bool showCollapse;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -85,26 +87,31 @@ class SlidePage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Expanded(child: _CircleList()),
-              HookBuilder(builder: (context) {
-                final collapse =
-                    useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
-                  converter: (state) => state.collapsedSidebar,
-                );
+              AnimatedVisibility(
+                alignment: Alignment.bottomCenter,
+                duration: const Duration(milliseconds: 200),
+                visible: showCollapse,
+                child: HookBuilder(builder: (context) {
+                  final collapse = useBlocStateConverter<MultiAuthCubit,
+                      MultiAuthState, bool>(
+                    converter: (state) => state.collapsedSidebar,
+                  );
 
-                return SelectItem(
-                  icon: SvgPicture.asset(
-                    collapse
-                        ? Resources.assetsImagesExpandedSvg
-                        : Resources.assetsImagesCollapseSvg,
-                    width: 24,
-                    height: 24,
-                    color: context.theme.text,
-                  ),
-                  title: 'Collapse sidebar',
-                  onTap: () => context.multiAuthCubit
-                      .setCurrentSetting(collapsedSidebar: !collapse),
-                );
-              }),
+                  return SelectItem(
+                    icon: SvgPicture.asset(
+                      collapse
+                          ? Resources.assetsImagesExpandedSvg
+                          : Resources.assetsImagesCollapseSvg,
+                      width: 24,
+                      height: 24,
+                      color: context.theme.text,
+                    ),
+                    title: 'Collapse sidebar',
+                    onTap: () => context.multiAuthCubit
+                        .setCurrentSetting(collapsedSidebar: !collapse),
+                  );
+                }),
+              ),
               MoveWindowBarrier(
                 child: Builder(
                   builder: (context) =>

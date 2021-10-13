@@ -63,7 +63,8 @@ class _HomePage extends HookWidget {
       converter: (state) => state.collapsedSidebar,
     );
 
-    final collapse = userCollapse || clampSlideWidth < kSlidePageMaxWidth;
+    final autoCollapse = clampSlideWidth < kSlidePageMaxWidth;
+    final collapse = userCollapse || autoCollapse;
 
     return Scaffold(
       backgroundColor: context.theme.primary,
@@ -80,7 +81,7 @@ class _HomePage extends HookWidget {
                 width: value,
                 child: child,
               ),
-              child: const SlidePage(),
+              child: SlidePage(showCollapse: !autoCollapse),
             ),
             Expanded(
               child: ResponsiveNavigator(
