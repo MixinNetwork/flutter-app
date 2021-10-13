@@ -176,6 +176,20 @@ class ImagePreviewPage extends HookWidget {
             const _PreviousImageIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowRight):
             const _NextImageIntent(),
+        const SingleActivator(LogicalKeyboardKey.zoomIn):
+            const _ImageZoomInIntent(),
+        SingleActivator(
+          LogicalKeyboardKey.equal,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageZoomInIntent(),
+        SingleActivator(
+          LogicalKeyboardKey.minus,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageZoomOutIntent(),
+        const SingleActivator(LogicalKeyboardKey.zoomOut):
+            const _ImageZoomOutIntent(),
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
@@ -201,6 +215,12 @@ class ImagePreviewPage extends HookWidget {
             _messageId.value = next.value!.messageId;
             return true;
           },
+        ),
+        _ImageZoomInIntent: CallbackAction<Intent>(
+          onInvoke: (intent) => controller.zoomIn(),
+        ),
+        _ImageZoomOutIntent: CallbackAction<Intent>(
+          onInvoke: (intent) => controller.zoomOut(),
         ),
       },
       autofocus: true,
@@ -495,76 +515,10 @@ class _NextImageIntent extends Intent {
   const _NextImageIntent();
 }
 
-class _ScaledRenderWidget extends SingleChildRenderObjectWidget {
-  const _ScaledRenderWidget({required Widget child, Key? key})
-      : super(child: child, key: key);
-
-  @override
-  RenderObject createRenderObject(BuildContext context) => _ScaledRenderBox();
+class _ImageZoomInIntent extends Intent {
+  const _ImageZoomInIntent();
 }
 
-class _ScaledRenderBox extends RenderShiftedBox {
-  _ScaledRenderBox({RenderBox? child}) : super(child);
-
-  @override
-  void performLayout() {
-    if (child == null) {
-      size = Size.zero;
-      return;
-    }
-    child!.layout(const BoxConstraints.tightFor(), parentUsesSize: true);
-
-    size = child!.size * 2;
-
-    (child!.parentData! as BoxParentData).offset =
-        size.center(Offset.zero) - child!.size.center(Offset.zero);
-  }
-}
-
-@immutable
-class _CenterWithOriginalSizeDelegate extends SingleChildLayoutDelegate {
-  const _CenterWithOriginalSizeDelegate(
-    this.subjectSize,
-    this.basePosition,
-  );
-
-  final Size subjectSize;
-  final Alignment basePosition;
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    debugPrint('size: ${size} childSize: ${childSize}');
-
-    final childWidth = subjectSize.width;
-    final childHeight = subjectSize.height;
-
-    final halfWidth = (size.width - childWidth) / 2;
-    final halfHeight = (size.height - childHeight) / 2;
-
-    final offsetX = halfWidth * (basePosition.x + 1);
-    final offsetY = halfHeight * (basePosition.y + 1);
-    return Offset(offsetX, offsetY);
-  }
-
-  @override
-  Size getSize(BoxConstraints constraints) => subjectSize * 2;
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
-      BoxConstraints.tight(subjectSize);
-
-  @override
-  bool shouldRelayout(_CenterWithOriginalSizeDelegate oldDelegate) =>
-      oldDelegate != this;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is _CenterWithOriginalSizeDelegate &&
-          runtimeType == other.runtimeType &&
-          subjectSize == other.subjectSize &&
-          basePosition == other.basePosition;
-
-  @override
-  int get hashCode => subjectSize.hashCode ^ basePosition.hashCode;
+class _ImageZoomOutIntent extends Intent {
+  const _ImageZoomOutIntent();
 }

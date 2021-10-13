@@ -2,8 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/utils/logger.dart';
 
 class TransformImageController extends ChangeNotifier {
   _ImagPreviewWidgetState? _state;
@@ -33,20 +33,11 @@ class TransformImageController extends ChangeNotifier {
   }
 
   void zoomIn() {
-    _animateScale(1.1);
+    _state?._animateScale(1.2);
   }
 
   void zoomOut() {
-    _animateScale(0.9);
-  }
-
-  void _animateScale(double scaleChange) {
-    final state = _state;
-    d('_animateScale: ${state}');
-    if (state == null) {
-      return;
-    }
-    state._applyScale(scaleChange, state._viewport.center);
+    _state?._animateScale(0.8);
   }
 }
 
@@ -87,6 +78,10 @@ enum _GestureType {
 const _rotateEnabled = false;
 const _scaleEnabled = true;
 
+// Used as the coefficient of friction in the inertial translation animation.
+// This value was eyeballed to give a feel similar to Google Photos.
+const double _kDrag = 0.0000135;
+
 class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     with TickerProviderStateMixin {
   final GlobalKey _childKey = GlobalKey();
@@ -94,6 +89,11 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   late TransformImageController _transformationController;
 
   late AnimationController _controller;
+
+  Animation<Offset>? _animation;
+
+  late AnimationController _scaleAnimationController;
+  Animation<double>? _scaleAnimation;
 
   @override
   void initState() {
@@ -105,6 +105,10 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
       ..scale = widget.scale
       ..addListener(_onTransformationControllerChange);
     _controller = AnimationController(vsync: this);
+    _scaleAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
   }
 
   @override
@@ -127,7 +131,12 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
 
   @override
   void dispose() {
-    _transformationController.removeListener(_onTransformationControllerChange);
+    _controller.dispose();
+    _scaleAnimationController.dispose();
+    _transformationController
+      .._state = null
+      ..removeListener(_onTransformationControllerChange)
+      ..dispose();
     super.dispose();
   }
 
@@ -246,11 +255,63 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
       case _GestureType.scale:
         break;
       case _GestureType.rotate:
+        // ignore rotate action.
         break;
     }
   }
 
-  void _onScaleEnd(ScaleEndDetails details) {}
+  void _onScaleEnd(ScaleEndDetails details) {
+    _scaleStart = null;
+    _focalPoint = null;
+
+    _animation?.removeListener(_onTranslationAnimated);
+    _controller.reset();
+
+    if (_gestureType != _GestureType.pan ||
+        details.velocity.pixelsPerSecond.distance < kMinFlingVelocity) {
+      return;
+    }
+
+    final translation = _transformationController.translate;
+    final fmx = FrictionSimulation(
+        _kDrag, translation.dx, details.velocity.pixelsPerSecond.dx);
+    final fmy = FrictionSimulation(
+        _kDrag, translation.dy, details.velocity.pixelsPerSecond.dy);
+
+    final toFinal = _getFinalTime(
+      details.velocity.pixelsPerSecond.distance,
+      _kDrag,
+    );
+
+    var deltaTranslation =
+        Offset(fmx.finalX, fmy.finalX) - _transformationController.translate;
+    deltaTranslation = _transformedChildRect.ensureEdgeNotInViewport(
+        _viewport, deltaTranslation);
+    if (deltaTranslation.distanceSquared == 0) {
+      // no translation.
+      return;
+    }
+    _animation = Tween<Offset>(
+      begin: translation,
+      end: _transformationController.translate + deltaTranslation,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.decelerate,
+    ));
+    _controller.duration = Duration(milliseconds: (toFinal * 1000).round());
+    _animation!.addListener(_onTranslationAnimated);
+    _controller.forward();
+  }
+
+  void _onTranslationAnimated() {
+    if (!_controller.isAnimating) {
+      _animation?.removeListener(_onTranslationAnimated);
+      _animation = null;
+      _controller.reset();
+      return;
+    }
+    _transformationController.translate = _animation!.value;
+  }
 
   // Decide which type of gesture this is by comparing the amount of scale
   // and rotation in the gesture, if any. Scale starts at 1 and rotation
@@ -355,6 +416,36 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     _transformationController.scale = targetScale;
   }
 
+  void _onScaleAnimated() {
+    if (!_scaleAnimationController.isAnimating) {
+      _scaleAnimation?.removeListener(_onScaleAnimated);
+      _scaleAnimationController.reset();
+      return;
+    }
+    final scale = _scaleAnimation!.value;
+    _applyScale(scale / _transformationController.scale, _viewport.center);
+  }
+
+  void _animateScale(double scaleChange) {
+    assert(scaleChange > 0);
+
+    final targetScale = (_transformationController.scale * scaleChange)
+        .clamp(widget.minScale, widget.maxScale);
+
+    _scaleAnimation?.removeListener(_onScaleAnimated);
+    _scaleAnimationController.reset();
+
+    _scaleAnimation = Tween<double>(
+      begin: _transformationController.scale,
+      end: targetScale,
+    ).animate(CurvedAnimation(
+      parent: _scaleAnimationController,
+      curve: Curves.easeInOut,
+    ));
+    _scaleAnimation!.addListener(_onScaleAnimated);
+    _scaleAnimationController.forward();
+  }
+
   @override
   Widget build(BuildContext context) {
     final matrix = Matrix4.identity()
@@ -380,23 +471,9 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
               minHeight: 0,
               maxWidth: double.infinity,
               maxHeight: double.infinity,
-              child: Stack(
-                children: [
-                  KeyedSubtree(
-                    key: _childKey,
-                    child: widget.image,
-                  ),
-                  // if (_centerTest != null)
-                  //   Padding(
-                  //     padding: EdgeInsets.only(
-                  //         left: _centerTest!.dx, top: _centerTest!.dy),
-                  //     child: Container(
-                  //       width: 10,
-                  //       height: 10,
-                  //       color: Colors.redAccent,
-                  //     ),
-                  //   )
-                ],
+              child: KeyedSubtree(
+                key: _childKey,
+                child: widget.image,
               ),
             ),
           ),
@@ -427,8 +504,53 @@ extension _RectExtension on Rect {
     }
     return Offset(dx, dy);
   }
+
+  Offset ensureEdgeNotInViewport(Rect viewport, Offset offset) {
+    var computedOffset = Offset.zero;
+
+    // The left part of child is not fully displayed and move child to right.
+    if (left <= viewport.left && offset.dx > 0) {
+      // move to right
+      computedOffset = Offset(
+        math.min(viewport.left - left, offset.dx),
+        computedOffset.dy,
+      );
+    }
+
+    // The right part of child is not fully displayed and move child to left.
+    if (right >= viewport.right && offset.dx < 0) {
+      computedOffset = Offset(
+        math.max(viewport.right - right, offset.dx),
+        computedOffset.dy,
+      );
+    }
+
+    // The top part of child is not fully displayed and move child to bottom.
+    if (top <= viewport.top && offset.dy > 0) {
+      computedOffset = Offset(
+        computedOffset.dx,
+        math.min(viewport.top - top, offset.dy),
+      );
+    }
+
+    // The bottom part of child is not fully displayed and move child to top.
+    if (bottom >= viewport.bottom && offset.dy < 0) {
+      computedOffset = Offset(
+        computedOffset.dx,
+        math.max(viewport.bottom - bottom, offset.dy),
+      );
+    }
+    return computedOffset;
+  }
 }
 
 // calculate the scale to a, so a can fit in b.
 double _fitScale(Size a, Size b) =>
     math.min(b.width / a.width, b.height / b.height);
+
+// Given a velocity and drag, calculate the time at which motion will come to
+// a stop, within the margin of effectivelyMotionless.
+double _getFinalTime(double velocity, double drag) {
+  const effectivelyMotionless = 10.0;
+  return math.log(effectivelyMotionless / velocity) / math.log(drag / 100);
+}
