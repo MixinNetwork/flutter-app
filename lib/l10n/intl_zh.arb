@@ -204,5 +204,6 @@
   "comingSoon": "即将到来...",
   "sendYouAMessage": "发来一条信息",
   "continueText": "继续",
-  "localTimeErrorDescription": "检测到系统时间异常，请校正后再继续使用"
+  "localTimeErrorDescription": "检测到系统时间异常，请校正后再继续使用",
+  "collapse": "折叠"
 }

@@ -209,5 +209,6 @@
   "comingSoon": "Coming soon...",
   "sendYouAMessage": "Send you a message",
   "continueText": "Continue",
-  "localTimeErrorDescription": "System time is unusual, please continue to use again after correction"
+  "localTimeErrorDescription": "System time is unusual, please continue to use again after correction",
+  "collapse": "Collapse"
 }

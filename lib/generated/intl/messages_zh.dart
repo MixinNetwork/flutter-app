@@ -106,6 +106,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
         "clear": MessageLookupByLibrary.simpleMessage("清除"),
         "clearChat": MessageLookupByLibrary.simpleMessage("清空聊天记录"),
+        "collapse": MessageLookupByLibrary.simpleMessage("折叠"),
         "comingSoon": MessageLookupByLibrary.simpleMessage("即将到来..."),
         "confirm": MessageLookupByLibrary.simpleMessage("确定"),
         "contact": MessageLookupByLibrary.simpleMessage("联系人"),

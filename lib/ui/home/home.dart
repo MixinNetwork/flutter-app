@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
@@ -10,6 +9,7 @@ import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
+import 'bloc/multi_auth_cubit.dart';
 import 'bloc/slide_category_cubit.dart';
 import 'conversation_page.dart';
 import 'route/responsive_navigator.dart';
@@ -19,7 +19,7 @@ import 'slide_page.dart';
 // chat category list min width
 const kSlidePageMinWidth = 64.0;
 // chat category and chat list max width
-const kSlidePageMaxWidth = 200.0;
+const kSlidePageMaxWidth = 176.0;
 // chat page min width, message list, setting page etc.
 const kResponsiveNavigationMinWidth = 300.0;
 // conversation list fixed width, conversation list, setting list etc.
@@ -93,10 +93,6 @@ class HomePage extends HookWidget {
   }
 }
 
-class CollapseValueNotifier extends ValueNotifier<bool> {
-  CollapseValueNotifier(bool value) : super(value);
-}
-
 class _HomePage extends HookWidget {
   const _HomePage({
     Key? key,
@@ -111,57 +107,57 @@ class _HomePage extends HookWidget {
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
 
-    final collapseValueNotifier = useState(false);
+    final userCollapse =
+        useBlocStateConverter<MultiAuthCubit, MultiAuthState, bool>(
+      converter: (state) => state.collapsedSidebar,
+    );
 
-    final collapse =
-        collapseValueNotifier.value || clampSlideWidth < kSlidePageMaxWidth;
+    final autoCollapse = clampSlideWidth < kSlidePageMaxWidth;
+    final collapse = userCollapse || autoCollapse;
 
-    return ChangeNotifierProvider.value(
-      value: collapseValueNotifier,
-      child: Scaffold(
-        backgroundColor: context.theme.primary,
-        body: SafeArea(
-          child: Row(
-            children: [
-              TweenAnimationBuilder(
-                tween: Tween<double>(
-                  end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
-                ),
-                duration: const Duration(milliseconds: 200),
-                builder: (BuildContext context, double? value, Widget? child) =>
-                    SizedBox(
-                  width: value,
-                  child: child,
-                ),
-                child: SlidePage(collapseValueNotifier: collapseValueNotifier),
+    return Scaffold(
+      backgroundColor: context.theme.primary,
+      body: SafeArea(
+        child: Row(
+          children: [
+            TweenAnimationBuilder(
+              tween: Tween<double>(
+                end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
               ),
-              Expanded(
-                child: ResponsiveNavigator(
-                  switchWidth:
-                      kResponsiveNavigationMinWidth + kConversationListWidth,
-                  leftPage: MaterialPage(
-                    key: const ValueKey('center'),
-                    name: 'center',
-                    child: SizedBox(
-                      key: _conversationPageKey,
-                      width: kConversationListWidth,
-                      child: const _CenterPage(),
-                    ),
-                  ),
-                  rightEmptyPage: MaterialPage(
-                    key: const ValueKey('empty'),
-                    name: 'empty',
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: context.theme.chatBackground,
-                      ),
-                      child: Empty(text: context.l10n.pageRightEmptyMessage),
-                    ),
+              duration: const Duration(milliseconds: 200),
+              builder: (BuildContext context, double? value, Widget? child) =>
+                  SizedBox(
+                width: value,
+                child: child,
+              ),
+              child: SlidePage(showCollapse: !autoCollapse),
+            ),
+            Expanded(
+              child: ResponsiveNavigator(
+                switchWidth:
+                    kResponsiveNavigationMinWidth + kConversationListWidth,
+                leftPage: MaterialPage(
+                  key: const ValueKey('center'),
+                  name: 'center',
+                  child: SizedBox(
+                    key: _conversationPageKey,
+                    width: kConversationListWidth,
+                    child: const _CenterPage(),
                   ),
                 ),
+                rightEmptyPage: MaterialPage(
+                  key: const ValueKey('empty'),
+                  name: 'empty',
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.theme.chatBackground,
+                    ),
+                    child: Empty(text: context.l10n.pageRightEmptyMessage),
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -12,6 +12,7 @@ import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../widgets/animated_visibility.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/menu.dart';
@@ -26,9 +27,9 @@ import 'home.dart';
 class SlidePage extends StatelessWidget {
   const SlidePage({
     Key? key,
-    required this.collapseValueNotifier,
+    required this.showCollapse,
   }) : super(key: key);
-  final ValueNotifier<bool> collapseValueNotifier;
+  final bool showCollapse;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -50,42 +51,9 @@ class SlidePage extends StatelessWidget {
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               SizedBox(
                   height: (defaultTargetPlatform == TargetPlatform.macOS)
-                      ? 72.0
+                      ? 64.0
                       : 16.0),
-              MoveWindowBarrier(
-                child: Builder(
-                  builder: (context) =>
-                      BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
-                    converter: (state) => state.current?.account,
-                    when: (a, b) => b?.fullName != null,
-                    builder: (context, account) => BlocConverter<
-                        SlideCategoryCubit, SlideCategoryState, bool>(
-                      converter: (state) =>
-                          state.type == SlideCategoryType.setting,
-                      builder: (context, selected) {
-                        assert(account != null);
-                        return SelectItem(
-                          icon: AvatarWidget(
-                            avatarUrl: account!.avatarUrl,
-                            size: 24,
-                            name: account.fullName!,
-                            userId: account.userId,
-                          ),
-                          title: account.fullName!,
-                          selected: selected,
-                          onTap: () {
-                            BlocProvider.of<SlideCategoryCubit>(context)
-                                .select(SlideCategoryType.setting);
-                            if (ModalRoute.of(context)?.canPop == true) {
-                              Navigator.pop(context);
-                            }
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
+              const _CurrentUser(),
               const SizedBox(height: 24),
               _Item(
                 asset: Resources.assetsImagesChatSvg,
@@ -121,27 +89,74 @@ class SlidePage extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               const Expanded(child: _CircleList()),
-              HookBuilder(builder: (context) {
-                final collapse = useListenableConverter(collapseValueNotifier,
-                        converter: (ValueNotifier<bool> listenable) =>
-                            listenable.value).data ??
-                    false;
-                return SelectItem(
-                  icon: SvgPicture.asset(
-                    collapse
-                        ? Resources.assetsImagesCollapseSvg
-                        : Resources.assetsImagesExpandedSvg,
-                    width: 24,
-                    height: 24,
-                    color: context.theme.text,
-                  ),
-                  title: 'Collapse sidebar',
-                  onTap: () => collapseValueNotifier.value =
-                      !collapseValueNotifier.value,
-                );
-              }),
+              AnimatedVisibility(
+                alignment: Alignment.bottomCenter,
+                duration: const Duration(milliseconds: 200),
+                visible: showCollapse,
+                child: HookBuilder(builder: (context) {
+                  final collapse = useBlocStateConverter<MultiAuthCubit,
+                      MultiAuthState, bool>(
+                    converter: (state) => state.collapsedSidebar,
+                  );
+
+                  return SelectItem(
+                    icon: SvgPicture.asset(
+                      collapse
+                          ? Resources.assetsImagesExpandedSvg
+                          : Resources.assetsImagesCollapseSvg,
+                      width: 24,
+                      height: 24,
+                      color: context.theme.text,
+                    ),
+                    title: context.l10n.collapse,
+                    onTap: () => context.multiAuthCubit
+                        .setCurrentSetting(collapsedSidebar: !collapse),
+                  );
+                }),
+              ),
               const SizedBox(height: 4),
             ]),
+          ),
+        ),
+      );
+}
+
+class _CurrentUser extends StatelessWidget {
+  const _CurrentUser({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => MoveWindowBarrier(
+        child: Builder(
+          builder: (context) =>
+              BlocConverter<MultiAuthCubit, MultiAuthState, Account?>(
+            converter: (state) => state.current?.account,
+            when: (a, b) => b?.fullName != null,
+            builder: (context, account) =>
+                BlocConverter<SlideCategoryCubit, SlideCategoryState, bool>(
+              converter: (state) => state.type == SlideCategoryType.setting,
+              builder: (context, selected) {
+                assert(account != null);
+                return SelectItem(
+                  icon: AvatarWidget(
+                    avatarUrl: account!.avatarUrl,
+                    size: 24,
+                    name: account.fullName!,
+                    userId: account.userId,
+                  ),
+                  title: account.fullName!,
+                  selected: selected,
+                  onTap: () {
+                    BlocProvider.of<SlideCategoryCubit>(context)
+                        .select(SlideCategoryType.setting);
+                    if (ModalRoute.of(context)?.canPop == true) {
+                      Navigator.pop(context);
+                    }
+                  },
+                );
+              },
+            ),
           ),
         ),
       );
@@ -409,20 +424,11 @@ class _Title extends StatelessWidget {
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, boxConstraints) {
         final collapse = boxConstraints.maxWidth < (kSlidePageMaxWidth / 2);
-        return TweenAnimationBuilder(
+        return AnimatedVisibility(
+          alignment: Alignment.bottomCenter,
           duration: const Duration(milliseconds: 200),
-          tween: Tween<double>(end: collapse ? 0 : 1),
-          builder: (BuildContext context, double value, Widget? child) =>
-              ClipRect(
-            child: Align(
-              alignment: Alignment.topCenter,
-              heightFactor: value,
-              child: Opacity(
-                opacity: value,
-                child: child,
-              ),
-            ),
-          ),
+          maintainSize: false,
+          visible: !collapse,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
