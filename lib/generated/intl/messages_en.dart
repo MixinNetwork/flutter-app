@@ -125,6 +125,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
         "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),

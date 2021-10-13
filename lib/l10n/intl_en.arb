@@ -207,5 +207,6 @@
   "exit": "Exit",
   "done": "Done",
   "comingSoon": "Coming soon...",
-  "sendYouAMessage": "Send you a message"
+  "sendYouAMessage": "Send you a message",
+  "collapse": "Collapse"
 }

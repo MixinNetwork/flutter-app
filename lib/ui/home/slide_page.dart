@@ -108,7 +108,7 @@ class SlidePage extends StatelessWidget {
                       height: 24,
                       color: context.theme.text,
                     ),
-                    title: 'Collapse sidebar',
+                    title: context.l10n.collapse,
                     onTap: () => context.multiAuthCubit
                         .setCurrentSetting(collapsedSidebar: !collapse),
                   );

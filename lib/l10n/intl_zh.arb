@@ -202,5 +202,6 @@
   "exit": "退出",
   "done": "完成",
   "comingSoon": "即将到来...",
-  "sendYouAMessage": "发来一条信息"
+  "sendYouAMessage": "发来一条信息",
+  "collapse": "折叠"
 }

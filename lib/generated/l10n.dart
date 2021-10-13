@@ -2139,6 +2139,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Collapse`
+  String get collapse {
+    return Intl.message(
+      'Collapse',
+      name: 'collapse',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
