@@ -12,6 +12,7 @@ import '../../generated/l10n.dart';
 import '../../utils/color_utils.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
+import '../../widgets/animated_visibility.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/dialog.dart';
 import '../../widgets/menu.dart';
@@ -93,8 +94,8 @@ class SlidePage extends StatelessWidget {
                 return SelectItem(
                   icon: SvgPicture.asset(
                     collapse
-                        ? Resources.assetsImagesCollapseSvg
-                        : Resources.assetsImagesExpandedSvg,
+                        ? Resources.assetsImagesExpandedSvg
+                        : Resources.assetsImagesCollapseSvg,
                     width: 24,
                     height: 24,
                     color: context.theme.text,
@@ -407,20 +408,11 @@ class _Title extends StatelessWidget {
   Widget build(BuildContext context) =>
       LayoutBuilder(builder: (context, boxConstraints) {
         final collapse = boxConstraints.maxWidth < (kSlidePageMaxWidth / 2);
-        return TweenAnimationBuilder(
+        return AnimatedVisibility(
+          alignment: Alignment.bottomCenter,
           duration: const Duration(milliseconds: 200),
-          tween: Tween<double>(end: collapse ? 0 : 1),
-          builder: (BuildContext context, double value, Widget? child) =>
-              ClipRect(
-            child: Align(
-              alignment: Alignment.topCenter,
-              heightFactor: value,
-              child: Opacity(
-                opacity: value,
-                child: child,
-              ),
-            ),
-          ),
+          maintainSize: false,
+          visible: !collapse,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
