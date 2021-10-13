@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_app/utils/logger.dart';
 
-class _TransformImageController extends ChangeNotifier {
+class TransformImageController extends ChangeNotifier {
+  _ImagPreviewWidgetState? _state;
+
   double _scale = 1;
 
   double get scale => _scale;
@@ -29,6 +31,23 @@ class _TransformImageController extends ChangeNotifier {
     _translate = translate;
     notifyListeners();
   }
+
+  void zoomIn() {
+    _animateScale(1.1);
+  }
+
+  void zoomOut() {
+    _animateScale(0.9);
+  }
+
+  void _animateScale(double scaleChange) {
+    final state = _state;
+    d('_animateScale: ${state}');
+    if (state == null) {
+      return;
+    }
+    state._applyScale(scaleChange, state._viewport.center);
+  }
 }
 
 // TODO extract as plugin.
@@ -36,12 +55,22 @@ class ImagPreviewWidget extends StatefulWidget {
   const ImagPreviewWidget({
     Key? key,
     required this.image,
-    this.initialScale,
-  }) : super(key: key);
+    this.scale = 1,
+    this.maxScale = 2.0,
+    this.minScale = 0.5,
+    this.controller,
+  })  : assert(maxScale > scale),
+        assert(minScale < scale),
+        assert(maxScale > minScale),
+        super(key: key);
 
   final Widget image;
 
-  final double? initialScale;
+  final double scale;
+  final double maxScale;
+  final double minScale;
+
+  final TransformImageController? controller;
 
   @override
   State<ImagPreviewWidget> createState() => _ImagPreviewWidgetState();
@@ -62,19 +91,38 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     with TickerProviderStateMixin {
   final GlobalKey _childKey = GlobalKey();
 
-  final _transformationController = _TransformImageController();
+  late TransformImageController _transformationController;
 
   late AnimationController _controller;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialScale != null) {
-      debugPrint('initialScale: ${widget.initialScale}');
-      _transformationController.scale = widget.initialScale!;
-    }
-    _transformationController.addListener(_onTransformationControllerChange);
+    assert(widget.controller?._state == null);
+    _transformationController = widget.controller ?? TransformImageController();
+    _transformationController
+      .._state = this
+      ..scale = widget.scale
+      ..addListener(_onTransformationControllerChange);
     _controller = AnimationController(vsync: this);
+  }
+
+  @override
+  void didUpdateWidget(covariant ImagPreviewWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != null &&
+        widget.controller != _transformationController) {
+      assert(widget.controller?._state == null);
+      _transformationController
+        .._state = null
+        ..removeListener(_onTransformationControllerChange);
+      _transformationController = widget.controller!;
+      _transformationController
+        .._state = this
+        ..scale = widget.scale
+        ..addListener(_onTransformationControllerChange);
+      _controller.stop();
+    }
   }
 
   @override
@@ -220,13 +268,10 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     }
   }
 
-  Offset? _centerTest;
-
   void _onTransformationControllerChange() {
     // A change to the TransformationController's value is a change to the
     // state.
     setState(() {});
-    _centerTest = _toScene(_viewport.center);
   }
 
   // Handle mousewheel scroll events.
@@ -245,53 +290,69 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     // trackpads and mousewheels on all platforms.
     final scaleChange = math.exp(-event.scrollDelta.dy / 200);
 
+    _applyScale(scaleChange, event.localPosition);
+  }
+
+  void _applyScale(double scaleChange, Offset point) {
     final viewport = _viewport;
     final childRect = _childRect;
 
-    final scaleToFit = _fitScale(childRect.size, viewport.size) /
-        _transformationController.scale;
+    final targetScale = (_transformationController.scale * scaleChange)
+        .clamp(widget.minScale, widget.maxScale);
 
-    //  ensure child rect in center when scaling down.
+    // Zoom out, but has translation. we need check if scaled child rect should
+    // be centering in the viewport.
     if (scaleChange < 1 &&
         _transformationController.translate.distanceSquared > 0) {
-      var translateChange = math.log(scaleChange) / math.log(scaleToFit);
+      final nextRect = _calculateTransformedChildRect(
+        childRect: childRect,
+        translate: _transformationController.translate,
+        scale: targetScale,
+      );
 
-      if (translateChange >= 0.1) {
-        if (scaleChange > scaleToFit) {
-          d('translateChange = $translateChange');
-          translateChange = math.sqrt(translateChange);
-          _transformationController.translate -=
-              _transformationController.translate *
-                  math.min<double>(translateChange, 1);
-        } else {
-          _transformationController.translate = Offset.zero;
-        }
+      final focusPoint = _toScene(point);
+      if (childRect.contains(focusPoint)) {
+        final next = _toScene(point, scale: targetScale);
+        final offset = (next - focusPoint) * _transformationController.scale;
+        _transformationController.translate += offset;
+      }
+
+      // NOTE: can not replace with nextRect.size <= viewport.size,
+      // because:
+      // Size(10, 9) <= Size(11, 8)  false
+      // Size(10, 9) >= Size(11, 8)  false
+      if (!(nextRect.size > viewport.size)) {
+        _transformationController.translate = Offset.zero;
       } else {
-        var focusPoint = _toScene(event.localPosition);
+        assert(nextRect.size > viewport.size);
+        final offset = nextRect.offsetToContain(viewport);
+        if (offset.distanceSquared > 0) {
+          _transformationController.translate +=
+              offset * _transformationController.scale;
+        }
+      }
+    }
+
+    if (scaleChange > 1) {
+      final nextRect = _calculateTransformedChildRect(
+        childRect: childRect,
+        translate: _transformationController.translate,
+        scale: targetScale,
+      );
+
+      if (!(nextRect.size > viewport.size)) {
+        _transformationController.translate = Offset.zero;
+      } else {
+        final focusPoint = _toScene(point);
         if (childRect.contains(focusPoint)) {
-          final next = _toScene(
-            event.localPosition,
-            scale: _transformationController.scale * scaleChange,
-          );
+          final next = _toScene(point, scale: targetScale);
           final offset = (next - focusPoint) * _transformationController.scale;
           _transformationController.translate += offset;
         }
       }
     }
 
-    if (scaleChange > 1) {
-      final focusPoint = _toScene(event.localPosition);
-      if (childRect.contains(focusPoint)) {
-        final next = _toScene(
-          event.localPosition,
-          scale: _transformationController.scale * scaleChange,
-        );
-        final offset = (next - focusPoint) * _transformationController.scale;
-        _transformationController.translate += offset;
-      }
-    }
-
-    _transformationController.scale *= scaleChange;
+    _transformationController.scale = targetScale;
   }
 
   @override
@@ -345,10 +406,29 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   }
 }
 
+extension _RectExtension on Rect {
+  Offset offsetToContain(Rect viewport) {
+    assert(size > viewport.size);
+    final double dx;
+    if (left > viewport.left) {
+      dx = viewport.left - left;
+    } else if (right < viewport.right) {
+      dx = viewport.right - right;
+    } else {
+      dx = 0;
+    }
+    final double dy;
+    if (top > viewport.top) {
+      dy = viewport.top - top;
+    } else if (bottom < viewport.bottom) {
+      dy = viewport.bottom - bottom;
+    } else {
+      dy = 0;
+    }
+    return Offset(dx, dy);
+  }
+}
+
 // calculate the scale to a, so a can fit in b.
 double _fitScale(Size a, Size b) =>
     math.min(b.width / a.width, b.height / b.height);
-
-Offset _nearestPointInRect(Rect rect, Offset point) => Offset(
-    point.dx.clamp(rect.left, rect.right),
-    point.dy.clamp(rect.top, rect.bottom));

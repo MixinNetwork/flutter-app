@@ -16,7 +16,6 @@ import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/file.dart';
-import '../../../../utils/logger.dart';
 import '../../../../utils/platform.dart';
 import '../../../action_button.dart';
 import '../../../avatar_view/avatar_view.dart';
@@ -79,7 +78,7 @@ class ImagePreviewPage extends HookWidget {
     final next = useState<MessageItem?>(null);
 
     final controller = useMemoized(
-      () => TransformationController(),
+      () => TransformImageController(),
       [current.value?.messageId],
     );
 
@@ -294,7 +293,7 @@ class _Bar extends StatelessWidget {
   }) : super(key: key);
 
   final MessageItem message;
-  final TransformationController controller;
+  final TransformImageController controller;
   final bool isTranscriptPage;
 
   @override
@@ -417,7 +416,7 @@ class _Item extends HookWidget {
   }) : super(key: key);
   final MessageItem message;
   final bool isTranscriptPage;
-  final TransformationController controller;
+  final TransformImageController controller;
 
   // constraints of layout.
   final BoxConstraints constraints;
@@ -425,34 +424,20 @@ class _Item extends HookWidget {
   @override
   Widget build(BuildContext context) {
     // scale image to fit viewport on first show.
-    final imageSize = useMemoized(
-        () => Size(
-              (message.mediaWidth ?? 0).toDouble(),
-              (message.mediaHeight ?? 0).toDouble(),
-            ),
-        [message.messageId]);
-
-    assert(!imageSize.isEmpty);
-
-    final enablePan = useState(false);
-
-    final defaultScale = useMemoized(() {
+    final initialScale = useMemoized(() {
+      final imageSize = Size(
+        (message.mediaWidth ?? 0).toDouble(),
+        (message.mediaHeight ?? 0).toDouble(),
+      );
       if (imageSize.isEmpty) {
         assert(false, 'image message size is empty: ${message.messageId}');
-        return 1;
+        return 1.0;
       }
-      final layoutSize = constraints.biggest * 1;
+      final layoutSize = constraints.biggest;
 
       final scale = math.min(layoutSize.width / imageSize.width,
           layoutSize.height / imageSize.height);
-
-      d('layoutSize.width / imageSize.width = ${layoutSize.width / imageSize.width}');
-      d('layoutSize.height / imageSize.height = ${layoutSize.height / imageSize.height}');
-      d('scale: $layoutSize');
-
-      controller.value = controller.value.scaled(scale);
-      enablePan.value = false;
-      return scale;
+      return math.min<double>(scale, 1);
     }, [message.messageId]);
 
     return GestureDetector(
@@ -463,7 +448,10 @@ class _Item extends HookWidget {
         ),
         child: ClipRect(
           child: ImagPreviewWidget(
-            initialScale: defaultScale.toDouble(),
+            scale: initialScale,
+            minScale: math.min(initialScale / 2, 0.5),
+            maxScale: math.max(initialScale * 2, 2),
+            controller: controller,
             image: Image.file(
               File(context.accountServer
                   .convertMessageAbsolutePath(message, isTranscriptPage)),
@@ -505,16 +493,6 @@ class _PreviousImageIntent extends Intent {
 
 class _NextImageIntent extends Intent {
   const _NextImageIntent();
-}
-
-extension _TransformationExt on TransformationController {
-  void zoomIn() {
-    // TODO
-  }
-
-  void zoomOut() {
-    // TODO
-  }
 }
 
 class _ScaledRenderWidget extends SingleChildRenderObjectWidget {
