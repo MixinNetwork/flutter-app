@@ -11917,7 +11917,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<User> groupParticipants(String conversationId) {
     return customSelect(
-        'SELECT u.* FROM participants AS p LEFT JOIN users AS u ON p.user_id = u.user_id WHERE p.conversation_id = ?1',
+        'SELECT u.* FROM participants AS p,users AS u WHERE p.conversation_id = ?1 AND p.user_id = u.user_id',
         variables: [
           Variable<String>(conversationId)
         ],

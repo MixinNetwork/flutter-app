@@ -8,10 +8,7 @@ SELECT u.* FROM participants p, users u
         ORDER BY u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC;
 
 groupParticipants:
-SELECT u.*
-FROM participants AS p
-         left join users u on p.user_id = u.user_id
-WHERE p.conversation_id = :conversationId;
+SELECT u.* FROM participants p, users u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id;
 
 friends:
 SELECT * FROM users WHERE relationship = 'FRIEND' AND user_id NOT IN :filterIds ORDER BY full_name, user_id ASC;
