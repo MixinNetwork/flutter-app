@@ -269,70 +269,73 @@ class _UserProfileButtonBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSelf = user.userId == context.accountServer.userId;
+    final children = [
+      ActionButton(
+        name: Resources.assetsImagesInviteShareSvg,
+        size: 30,
+        onTap: () async {
+          final result = await showConversationSelector(
+            context: context,
+            singleSelect: true,
+            title: context.l10n.shareContact,
+            onlyContact: false,
+          );
+
+          if (result == null || result.isEmpty) return;
+          final conversationId = result[0].conversationId;
+
+          await runFutureWithToast(
+            context,
+            context.accountServer.sendContactMessage(
+              user.userId,
+              user.fullName!,
+              result.first.encryptCategory!,
+              conversationId: conversationId,
+              recipientId: result[0].userId,
+            ),
+          );
+        },
+        color: context.theme.icon,
+      ),
+      if (!isSelf)
+        ActionButton(
+          name: Resources.assetsImagesChatSmallSvg,
+          size: 30,
+          onTap: () async {
+            if (user.userId == context.accountServer.userId) {
+              // skip self.
+              return;
+            }
+            await ConversationCubit.selectUser(
+              context,
+              user.userId,
+            );
+            Navigator.pop(context);
+          },
+          color: context.theme.icon,
+        ),
+      if (!isSelf)
+        ActionButton(
+          name: Resources.assetsImagesInformationSvg,
+          size: 30,
+          onTap: () async {
+            await ConversationCubit.selectUser(
+              context,
+              user.userId,
+              initialChatSidePage: ChatSideCubit.infoPage,
+            );
+            Navigator.pop(context);
+          },
+          color: context.theme.icon,
+        )
+    ];
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 45),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          ActionButton(
-            name: Resources.assetsImagesInviteShareSvg,
-            size: 30,
-            onTap: () async {
-              final result = await showConversationSelector(
-                context: context,
-                singleSelect: true,
-                title: context.l10n.shareContact,
-                onlyContact: false,
-              );
-
-              if (result == null || result.isEmpty) return;
-              final conversationId = result[0].conversationId;
-
-              await runFutureWithToast(
-                context,
-                context.accountServer.sendContactMessage(
-                  user.userId,
-                  user.fullName!,
-                  result.first.encryptCategory!,
-                  conversationId: conversationId,
-                  recipientId: result[0].userId,
-                ),
-              );
-            },
-            color: context.theme.icon,
-          ),
-          if (!isSelf)
-            ActionButton(
-              name: Resources.assetsImagesChatSmallSvg,
-              size: 30,
-              onTap: () async {
-                if (user.userId == context.accountServer.userId) {
-                  // skip self.
-                  return;
-                }
-                await ConversationCubit.selectUser(
-                  context,
-                  user.userId,
-                );
-                Navigator.pop(context);
-              },
-              color: context.theme.icon,
-            ),
-          if (!isSelf)
-            ActionButton(
-              name: Resources.assetsImagesInformationSvg,
-              size: 30,
-              onTap: () async {
-                await ConversationCubit.selectUser(
-                  context,
-                  user.userId,
-                  initialChatSidePage: ChatSideCubit.infoPage,
-                );
-                Navigator.pop(context);
-              },
-              color: context.theme.icon,
-            )
-        ],
+        mainAxisAlignment: children.length == 1
+            ? MainAxisAlignment.center
+            : MainAxisAlignment.spaceBetween,
+        children: children,
       ),
     );
   }
