@@ -14,7 +14,6 @@ import '../utils/hook.dart';
 import '../utils/platform.dart';
 import '../utils/reg_exp_utils.dart';
 import 'avatar_view/avatar_view.dart';
-
 import 'high_light_text.dart';
 import 'interactive_decorated_box.dart';
 
@@ -46,9 +45,7 @@ class MentionPanelPortalEntry extends HookWidget {
       converter: (state) => state?.isGroup ?? false,
     );
 
-    final mentionState = useBlocState<MentionCubit, MentionState>(
-      when: (state) => state.users.isNotEmpty,
-    );
+    final mentionState = useBlocState<MentionCubit, MentionState>();
 
     return FocusableActionDetector(
       enabled: selectable,

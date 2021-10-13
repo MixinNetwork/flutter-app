@@ -82,30 +82,32 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       Rx.combineLatest2<String?, List<User>, MentionState>(
         mentionTextStream,
         participantsStream,
-        (a, b) {
+        (keyword, participants) {
           late List<User> users;
-          if (a == null) {
+          if (keyword == null) {
             users = [];
           } else {
-            final keyword = a.toLowerCase();
-            users = participantsCubit.state
+            final lowerCaseKeyword = keyword.toLowerCase();
+            users = participants
                 .where(
                   (user) =>
-                      (user.fullName?.toLowerCase().contains(keyword) ??
+                      (user.fullName
+                              ?.toLowerCase()
+                              .contains(lowerCaseKeyword) ??
                           false) ||
-                      user.identityNumber.contains(a),
+                      user.identityNumber.contains(keyword),
                 )
                 .toList()
               ..sort(compareValuesBy((e) {
                 final indexOf =
-                    e.fullName?.toLowerCase().indexOf(keyword) ?? -1;
+                    e.fullName?.toLowerCase().indexOf(lowerCaseKeyword) ?? -1;
                 if (indexOf != -1) return indexOf;
-                return e.identityNumber.indexOf(a);
+                return e.identityNumber.indexOf(keyword);
               }));
           }
 
           return MentionState(
-            text: a,
+            text: keyword,
             users: users,
             index: listEquals(users.map(_mapper).toList(),
                     state.users.map(_mapper).toList())

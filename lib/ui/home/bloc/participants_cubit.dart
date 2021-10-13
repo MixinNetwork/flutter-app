@@ -16,6 +16,7 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
     Future<void> resetConversationId(String? conversationId) async {
       if (conversationId?.isEmpty ?? true) return;
 
+      emit([]);
       await streamSubscription?.cancel();
 
       final selectable =
