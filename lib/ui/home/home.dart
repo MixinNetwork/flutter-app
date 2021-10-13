@@ -4,7 +4,9 @@ import 'package:provider/provider.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/hook.dart';
 import '../../widgets/automatic_keep_alive_client_widget.dart';
+import '../../widgets/dialog.dart';
 import '../../widgets/empty.dart';
 import '../setting/setting_page.dart';
 import 'bloc/conversation_cubit.dart';
@@ -15,9 +17,9 @@ import 'route/responsive_navigator_cubit.dart';
 import 'slide_page.dart';
 
 // chat category list min width
-const kSlidePageMinWidth = 80.0;
+const kSlidePageMinWidth = 64.0;
 // chat category and chat list max width
-const kSlidePageMaxWidth = 160.0;
+const kSlidePageMaxWidth = 200.0;
 // chat page min width, message list, setting page etc.
 const kResponsiveNavigationMinWidth = 300.0;
 // conversation list fixed width, conversation list, setting list etc.
@@ -27,20 +29,72 @@ const kChatSidePageWidth = 300.0;
 
 final _conversationPageKey = GlobalKey();
 
-class HomePage extends StatelessWidget {
+class HomePage extends HookWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) =>
-            _HomePage(
-          constraints: constraints,
+  Widget build(BuildContext context) {
+    final localTimeError = useMemoizedStream(
+            () => context
+                .accountServer.blaze.localTimeErrorStreamController.stream
+                .distinct(),
+            keys: [context.accountServer]).data ??
+        false;
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) =>
+              _HomePage(
+            constraints: constraints,
+          ),
         ),
-      );
+        if (localTimeError)
+          HookBuilder(builder: (context) {
+            final loading = useState(false);
+            return Material(
+              color: context.theme.background,
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      context.l10n.localTimeErrorDescription,
+                      style: TextStyle(
+                        color: context.theme.text,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    if (loading.value)
+                      CircularProgressIndicator(
+                        color: context.theme.accent,
+                      ),
+                    if (!loading.value)
+                      MixinButton(
+                        onTap: () async {
+                          loading.value = true;
+                          try {
+                            await context.accountServer.blaze.reconnect();
+                          } finally {
+                            loading.value = false;
+                          }
+                        },
+                        child: Text(context.l10n.continueText),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }),
+      ],
+    );
+  }
 }
 
-class HasDrawerValueNotifier extends ValueNotifier<bool> {
-  HasDrawerValueNotifier(bool value) : super(value);
+class CollapseValueNotifier extends ValueNotifier<bool> {
+  CollapseValueNotifier(bool value) : super(value);
 }
 
 class _HomePage extends HookWidget {
@@ -53,64 +107,34 @@ class _HomePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final animationController = useAnimationController(
-      initialValue: 1,
-      duration: const Duration(milliseconds: 150),
-    );
-
     final maxWidth = constraints.maxWidth;
     final clampSlideWidth = (maxWidth - kResponsiveNavigationMinWidth)
         .clamp(kSlidePageMinWidth, kSlidePageMaxWidth);
 
-    useValueChanged<double, void>(clampSlideWidth, (_, __) {
-      if (animationController.isAnimating) return;
-      if (clampSlideWidth <= kSlidePageMinWidth) {
-        animationController.reverse();
-      } else {
-        animationController.forward();
-      }
-    });
+    final collapseValueNotifier = useState(false);
 
-    final hasDrawerValueNotifier =
-        useMemoized(() => HasDrawerValueNotifier(false));
-
-    final animationProgress = useAnimation(animationController);
-
-    final slideWidth = animationProgress * clampSlideWidth;
-
-    final hasDrawer = animationProgress == 0;
-    if (hasDrawerValueNotifier.value != hasDrawer) {
-      hasDrawerValueNotifier.value = hasDrawer;
-    }
+    final collapse =
+        collapseValueNotifier.value || clampSlideWidth < kSlidePageMaxWidth;
 
     return ChangeNotifierProvider.value(
-      value: hasDrawerValueNotifier,
+      value: collapseValueNotifier,
       child: Scaffold(
         backgroundColor: context.theme.primary,
-        drawer: hasDrawer
-            ? Drawer(
-                child: Scaffold(
-                  backgroundColor: context.theme.primary,
-                  body: const SizedBox(
-                    width: double.infinity,
-                    child: SlidePage(),
-                  ),
-                ),
-              )
-            : null,
         body: SafeArea(
           child: Row(
             children: [
-              if (!hasDrawer)
-                SizedBox(
-                  width: slideWidth,
-                  child: OverflowBox(
-                    alignment: Alignment.centerLeft,
-                    minWidth: kSlidePageMinWidth,
-                    maxWidth: clampSlideWidth,
-                    child: const SlidePage(),
-                  ),
+              TweenAnimationBuilder(
+                tween: Tween<double>(
+                  end: collapse ? kSlidePageMinWidth : kSlidePageMaxWidth,
                 ),
+                duration: const Duration(milliseconds: 200),
+                builder: (BuildContext context, double? value, Widget? child) =>
+                    SizedBox(
+                  width: value,
+                  child: child,
+                ),
+                child: SlidePage(collapseValueNotifier: collapseValueNotifier),
+              ),
               Expanded(
                 child: ResponsiveNavigator(
                   switchWidth:

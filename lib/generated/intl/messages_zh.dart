@@ -106,10 +106,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("圈子"),
         "clear": MessageLookupByLibrary.simpleMessage("清除"),
         "clearChat": MessageLookupByLibrary.simpleMessage("清空聊天记录"),
+        "comingSoon": MessageLookupByLibrary.simpleMessage("即将到来..."),
         "confirm": MessageLookupByLibrary.simpleMessage("确定"),
         "contact": MessageLookupByLibrary.simpleMessage("联系人"),
         "contactMixinId": m7,
         "contacts": MessageLookupByLibrary.simpleMessage("联系人"),
+        "continueText": MessageLookupByLibrary.simpleMessage("继续"),
         "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ 添加机器人"),
         "conversationAddContact":
             MessageLookupByLibrary.simpleMessage("+ 添加联系人"),
@@ -181,6 +183,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "links": MessageLookupByLibrary.simpleMessage("链接"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
         "loading": MessageLookupByLibrary.simpleMessage("加载中"),
+        "localTimeErrorDescription":
+            MessageLookupByLibrary.simpleMessage("检测到系统时间异常，请校正后再继续使用"),
         "location": MessageLookupByLibrary.simpleMessage("位置"),
         "media": MessageLookupByLibrary.simpleMessage("媒体"),
         "messagePreview": MessageLookupByLibrary.simpleMessage("消息预览"),
@@ -250,6 +254,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "sendWithoutCompression":
             MessageLookupByLibrary.simpleMessage("发送原始文件"),
         "sendWithoutSound": MessageLookupByLibrary.simpleMessage("静音发送"),
+        "sendYouAMessage": MessageLookupByLibrary.simpleMessage("发来一条信息"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("主题"),
         "settingThemeAuto": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "settingThemeLight": MessageLookupByLibrary.simpleMessage("浅色"),

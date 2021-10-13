@@ -48,6 +48,8 @@ class Resources {
 
   static const String assetsImagesCloseOvalSvg = 'assets/images/close_oval.svg';
 
+  static const String assetsImagesCollapseSvg = 'assets/images/collapse.svg';
+
   static const String assetsImagesContactSvg = 'assets/images/contact.svg';
 
   static const String assetsImagesConversationEmptySvg =
@@ -74,6 +76,8 @@ class Resources {
 
   static const String assetsImagesExclamationMarkSvg =
       'assets/images/exclamation_mark.svg';
+
+  static const String assetsImagesExpandedSvg = 'assets/images/expanded.svg';
 
   static const String assetsImagesFailedSvg = 'assets/images/failed.svg';
 

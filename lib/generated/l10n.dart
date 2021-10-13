@@ -2119,6 +2119,46 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Coming soon...`
+  String get comingSoon {
+    return Intl.message(
+      'Coming soon...',
+      name: 'comingSoon',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Send you a message`
+  String get sendYouAMessage {
+    return Intl.message(
+      'Send you a message',
+      name: 'sendYouAMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Continue`
+  String get continueText {
+    return Intl.message(
+      'Continue',
+      name: 'continueText',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System time is unusual, please continue to use again after correction`
+  String get localTimeErrorDescription {
+    return Intl.message(
+      'System time is unusual, please continue to use again after correction',
+      name: 'localTimeErrorDescription',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

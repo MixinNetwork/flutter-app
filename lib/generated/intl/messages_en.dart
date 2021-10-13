@@ -125,10 +125,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "circles": MessageLookupByLibrary.simpleMessage("Circles"),
         "clear": MessageLookupByLibrary.simpleMessage("Clear"),
         "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+        "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
         "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contactMixinId": m7,
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
+        "continueText": MessageLookupByLibrary.simpleMessage("Continue"),
         "conversationAddBot": MessageLookupByLibrary.simpleMessage("+ Add Bot"),
         "conversationAddContact":
             MessageLookupByLibrary.simpleMessage("+ Add Contact"),
@@ -210,6 +212,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "links": MessageLookupByLibrary.simpleMessage("Links"),
         "live": MessageLookupByLibrary.simpleMessage("Live"),
         "loading": MessageLookupByLibrary.simpleMessage("Loading"),
+        "localTimeErrorDescription": MessageLookupByLibrary.simpleMessage(
+            "System time is unusual, please continue to use again after correction"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
         "media": MessageLookupByLibrary.simpleMessage("Media"),
         "messagePreview":
@@ -290,6 +294,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Send without compression"),
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
+        "sendYouAMessage":
+            MessageLookupByLibrary.simpleMessage("Send you a message"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),
