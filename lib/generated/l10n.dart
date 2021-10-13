@@ -2140,6 +2140,26 @@ class Localization {
     );
   }
 
+  /// `Continue`
+  String get continueText {
+    return Intl.message(
+      'Continue',
+      name: 'continueText',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `System time is unusual, please continue to use again after correction`
+  String get localTimeErrorDescription {
+    return Intl.message(
+      'System time is unusual, please continue to use again after correction',
+      name: 'localTimeErrorDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Collapse`
   String get collapse {
     return Intl.message(

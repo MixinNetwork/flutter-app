@@ -45,6 +45,9 @@ class Blaze {
   StreamController<bool> connectedStateStreamController =
       StreamController<bool>.broadcast();
 
+  StreamController<bool> localTimeErrorStreamController =
+      StreamController<bool>.broadcast();
+
   IOWebSocketChannel? channel;
   StreamSubscription? subscription;
 
@@ -60,7 +63,7 @@ class Blaze {
     try {
       _connect(_token!);
     } catch (_) {
-      await _reconnect();
+      await reconnect();
     }
   }
 
@@ -76,11 +79,12 @@ class Blaze {
         channel?.stream.cast<List<int>>().asyncMap(parseBlazeMessage).listen(
       (blazeMessage) async {
         connectedStateStreamController.add(true);
+        localTimeErrorStreamController.add(false);
         d('blazeMessage receive: ${blazeMessage.toJson()}');
 
         if (blazeMessage.action == errorAction &&
             blazeMessage.error?.code == authentication) {
-          await _reconnect();
+          await reconnect();
           return;
         }
 
@@ -107,11 +111,11 @@ class Blaze {
       },
       onError: (error, s) {
         i('ws error: $error, s: $s');
-        _reconnect();
+        reconnect();
       },
       onDone: () {
         i('web socket done');
-        _reconnect();
+        reconnect();
       },
       cancelOnError: true,
     );
@@ -232,6 +236,11 @@ class Blaze {
     channel = null;
   }
 
+  void waitSyncTime() {
+    _disconnect();
+    localTimeErrorStreamController.add(true);
+  }
+
   Future<BlazeMessage?> sendMessage(BlazeMessage blazeMessage) async {
     d('blaze send: ${blazeMessage.toJson()}');
     final transaction = WebSocketTransaction<BlazeMessage>(blazeMessage.id);
@@ -243,7 +252,7 @@ class Blaze {
         () => null);
   }
 
-  Future<void> _reconnect() async {
+  Future<void> reconnect() async {
     i('_reconnect reconnecting: $_reconnecting start: ${StackTrace.current}');
     if (_reconnecting) return;
     _reconnecting = true;
@@ -263,7 +272,7 @@ class Blaze {
       await Future.delayed(const Duration(seconds: 2));
       _reconnecting = false;
       i('reconnecting set false, ${StackTrace.current}');
-      return _reconnect();
+      return reconnect();
     }
   }
 
@@ -271,6 +280,7 @@ class Blaze {
     _disposed = true;
     _disconnect();
     connectedStateStreamController.close();
+    localTimeErrorStreamController.close();
   }
 }
 

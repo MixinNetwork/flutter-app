@@ -99,21 +99,6 @@ class ChatBar extends HookWidget {
                   .toList(),
             ),
           ),
-          MoveWindowBarrier(
-            child: ActionButton(
-              name: Resources.assetsImagesIcSearchSvg,
-              color: actionColor,
-              onTap: () {
-                final cubit = context.read<ChatSideCubit>();
-                if (cubit.state.pages.lastOrNull?.name ==
-                    ChatSideCubit.searchMessageHistory) {
-                  return cubit.pop();
-                }
-
-                cubit.replace(ChatSideCubit.searchMessageHistory);
-              },
-            ),
-          ),
           AnimatedSize(
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.centerLeft,
@@ -127,6 +112,21 @@ class ChatBar extends HookWidget {
                       ),
                     )
                   : const SizedBox(),
+            ),
+          ),
+          MoveWindowBarrier(
+            child: ActionButton(
+              name: Resources.assetsImagesIcSearchSvg,
+              color: actionColor,
+              onTap: () {
+                final cubit = context.read<ChatSideCubit>();
+                if (cubit.state.pages.lastOrNull?.name ==
+                    ChatSideCubit.searchMessageHistory) {
+                  return cubit.pop();
+                }
+
+                cubit.replace(ChatSideCubit.searchMessageHistory);
+              },
             ),
           ),
           AnimatedSize(
