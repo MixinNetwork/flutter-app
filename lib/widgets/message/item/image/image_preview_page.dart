@@ -1,16 +1,16 @@
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pasteboard/pasteboard.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../constants/resources.dart';
-import '../../../../db/mixin_database.dart';
+import '../../../../db/mixin_database.dart' hide Offset;
 import '../../../../enum/message_category.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/file.dart';
@@ -23,6 +23,7 @@ import '../../../toast.dart';
 import '../../../user_selector/conversation_selector.dart';
 import '../../message.dart';
 import '../transcript_message.dart';
+import 'preview_image_widget.dart';
 
 class ImagePreviewPage extends HookWidget {
   const ImagePreviewPage({
@@ -69,11 +70,15 @@ class ImagePreviewPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = useMemoized(() => PhotoViewScaleStateController());
     final _messageId = useState(messageId);
     final current = useState<MessageItem?>(null);
     final prev = useState<MessageItem?>(null);
     final next = useState<MessageItem?>(null);
+
+    final controller = useMemoized(
+      () => TransformImageController(),
+      [current.value?.messageId],
+    );
 
     final transcriptMessagesWatcher = useMemoized(() {
       try {
@@ -82,10 +87,6 @@ class ImagePreviewPage extends HookWidget {
         return null;
       }
     });
-
-    useEffect(() {
-      controller.scaleState = PhotoViewScaleState.initial;
-    }, [_messageId.value]);
 
     useEffect(() {
       if (transcriptMessagesWatcher != null) return;
@@ -173,6 +174,20 @@ class ImagePreviewPage extends HookWidget {
             const _PreviousImageIntent(),
         const SingleActivator(LogicalKeyboardKey.arrowRight):
             const _NextImageIntent(),
+        const SingleActivator(LogicalKeyboardKey.zoomIn):
+            const _ImageZoomInIntent(),
+        SingleActivator(
+          LogicalKeyboardKey.equal,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageZoomInIntent(),
+        SingleActivator(
+          LogicalKeyboardKey.minus,
+          meta: kPlatformIsDarwin,
+          control: !kPlatformIsDarwin,
+        ): const _ImageZoomOutIntent(),
+        const SingleActivator(LogicalKeyboardKey.zoomOut):
+            const _ImageZoomOutIntent(),
       },
       actions: {
         _CopyIntent: CallbackAction<Intent>(
@@ -198,6 +213,12 @@ class ImagePreviewPage extends HookWidget {
             _messageId.value = next.value!.messageId;
             return true;
           },
+        ),
+        _ImageZoomInIntent: CallbackAction<Intent>(
+          onInvoke: (intent) => controller.zoomIn(),
+        ),
+        _ImageZoomOutIntent: CallbackAction<Intent>(
+          onInvoke: (intent) => controller.zoomOut(),
         ),
       },
       autofocus: true,
@@ -236,10 +257,13 @@ class ImagePreviewPage extends HookWidget {
                     return Stack(
                       fit: StackFit.expand,
                       children: [
-                        _Item(
-                          message: current.value!,
-                          controller: controller,
-                          isTranscriptPage: isTranscriptPage,
+                        LayoutBuilder(
+                          builder: (context, constraints) => _Item(
+                            message: current.value!,
+                            controller: controller,
+                            isTranscriptPage: isTranscriptPage,
+                            constraints: constraints,
+                          ),
                         ),
                         Center(
                           child: Padding(
@@ -289,7 +313,7 @@ class _Bar extends StatelessWidget {
   }) : super(key: key);
 
   final MessageItem message;
-  final PhotoViewScaleStateController controller;
+  final TransformImageController controller;
   final bool isTranscriptPage;
 
   @override
@@ -327,14 +351,14 @@ class _Bar extends StatelessWidget {
             name: Resources.assetsImagesZoomInSvg,
             color: context.theme.icon,
             size: 20,
-            onTap: () => controller.scaleState = PhotoViewScaleState.covering,
+            onTap: controller.zoomIn,
           ),
           const SizedBox(width: 14),
           ActionButton(
             name: Resources.assetsImagesZoomOutSvg,
             size: 20,
             color: context.theme.icon,
-            onTap: () => controller.scaleState = PhotoViewScaleState.initial,
+            onTap: controller.zoomOut,
           ),
           const SizedBox(width: 14),
           if (!isTranscriptPage)
@@ -408,45 +432,58 @@ class _Item extends HookWidget {
     required this.message,
     required this.controller,
     required this.isTranscriptPage,
+    required this.constraints,
   }) : super(key: key);
   final MessageItem message;
-  final PhotoViewScaleStateController controller;
   final bool isTranscriptPage;
+  final TransformImageController controller;
+
+  // constraints of layout.
+  final BoxConstraints constraints;
 
   @override
   Widget build(BuildContext context) {
-    final zoomIn = useStream(controller.outputScaleStateStream,
-                initialData: PhotoViewScaleState.initial)
-            .data ==
-        PhotoViewScaleState.initial;
+    // scale image to fit viewport on first show.
+    final initialScale = useMemoized(() {
+      final imageSize = Size(
+        (message.mediaWidth ?? 0).toDouble(),
+        (message.mediaHeight ?? 0).toDouble(),
+      );
+      if (imageSize.isEmpty) {
+        assert(false, 'image message size is empty: ${message.messageId}');
+        return 1.0;
+      }
+      final layoutSize = constraints.biggest;
+
+      final scale = math.min(layoutSize.width / imageSize.width,
+          layoutSize.height / imageSize.height);
+      return math.min<double>(scale, 1);
+    }, [message.messageId]);
+
     return GestureDetector(
-      onTap: () => Navigator.pop(context),
+      onDoubleTap: () {
+        controller.animatedToScale(initialScale);
+      },
       child: Container(
         decoration: const BoxDecoration(
           color: Color.fromRGBO(62, 65, 72, 0.9),
         ),
-        child: Center(
-          child: ClipRect(
-            child: MouseRegion(
-              cursor: zoomIn
-                  ? SystemMouseCursors.zoomIn
-                  : SystemMouseCursors.zoomOut,
-              child: PhotoView(
-                tightMode: true,
-                imageProvider: FileImage(File(context.accountServer
-                    .convertMessageAbsolutePath(message, isTranscriptPage))),
-                maxScale: PhotoViewComputedScale.contained * 2.0,
-                minScale: PhotoViewComputedScale.contained * 0.8,
-                initialScale: PhotoViewComputedScale.contained,
-                scaleStateController: controller,
-                onTapUp: (_, __, ___) => controller.scaleState =
-                    controller.scaleState == PhotoViewScaleState.initial
-                        ? PhotoViewScaleState.covering
-                        : PhotoViewScaleState.initial,
-                errorBuilder: (_, __, ___) => ImageByBlurHashOrBase64(
-                  imageData: message.thumbImage!,
-                  fit: BoxFit.contain,
-                ),
+        child: ClipRect(
+          child: ImagPreviewWidget(
+            scale: initialScale,
+            minScale: math.min(initialScale / 2, 0.5),
+            maxScale: math.max(initialScale * 2, 2),
+            controller: controller,
+            onEmptyAreaTapped: () {
+              Navigator.pop(context);
+            },
+            image: Image.file(
+              File(context.accountServer
+                  .convertMessageAbsolutePath(message, isTranscriptPage)),
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, s) => ImageByBlurHashOrBase64(
+                imageData: message.thumbImage ?? '',
+                fit: BoxFit.contain,
               ),
             ),
           ),
@@ -481,4 +518,12 @@ class _PreviousImageIntent extends Intent {
 
 class _NextImageIntent extends Intent {
   const _NextImageIntent();
+}
+
+class _ImageZoomInIntent extends Intent {
+  const _ImageZoomInIntent();
+}
+
+class _ImageZoomOutIntent extends Intent {
+  const _ImageZoomOutIntent();
 }
