@@ -39,9 +39,13 @@ class TransformImageController extends ChangeNotifier {
   void zoomOut() {
     _state?._animateScale(0.8);
   }
+
+  void animatedToScale(double scale) {
+    assert(scale > 0);
+    _state?._animateScale(scale / this.scale);
+  }
 }
 
-// TODO extract as plugin.
 class ImagPreviewWidget extends StatefulWidget {
   const ImagPreviewWidget({
     Key? key,
@@ -50,6 +54,7 @@ class ImagPreviewWidget extends StatefulWidget {
     this.maxScale = 2.0,
     this.minScale = 0.5,
     this.controller,
+    this.onEmptyAreaTapped,
   })  : assert(maxScale > scale),
         assert(minScale < scale),
         assert(maxScale > minScale),
@@ -62,6 +67,8 @@ class ImagPreviewWidget extends StatefulWidget {
   final double minScale;
 
   final TransformImageController? controller;
+
+  final VoidCallback? onEmptyAreaTapped;
 
   @override
   State<ImagPreviewWidget> createState() => _ImagPreviewWidgetState();
@@ -98,7 +105,6 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   @override
   void initState() {
     super.initState();
-    assert(widget.controller?._state == null);
     _transformationController = widget.controller ?? TransformImageController();
     _transformationController
       .._state = this
@@ -212,47 +218,18 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         final offset = focalPoint - _focalPoint!;
         _focalPoint = focalPoint;
 
-        final childRect = _transformedChildRect;
-        final viewport = _viewport;
-
-        var computedOffset = Offset.zero;
-
-        // The left part of child is not fully displayed and move child to right.
-        if (childRect.left <= viewport.left && offset.dx > 0) {
-          // move to right
-          computedOffset = Offset(
-            math.min(viewport.left - childRect.left, offset.dx),
-            computedOffset.dy,
-          );
-        }
-
-        // The right part of child is not fully displayed and move child to left.
-        if (childRect.right >= viewport.right && offset.dx < 0) {
-          computedOffset = Offset(
-            math.max(viewport.right - childRect.right, offset.dx),
-            computedOffset.dy,
-          );
-        }
-
-        // The top part of child is not fully displayed and move child to bottom.
-        if (childRect.top <= viewport.top && offset.dy > 0) {
-          computedOffset = Offset(
-            computedOffset.dx,
-            math.min(viewport.top - childRect.top, offset.dy),
-          );
-        }
-
-        // The bottom part of child is not fully displayed and move child to top.
-        if (childRect.bottom >= viewport.bottom && offset.dy < 0) {
-          computedOffset = Offset(
-            computedOffset.dx,
-            math.max(viewport.bottom - childRect.bottom, offset.dy),
-          );
-        }
-
+        final computedOffset =
+            _transformedChildRect.ensureEdgeNotInViewport(_viewport, offset);
         _transformationController.translate += computedOffset;
         break;
       case _GestureType.scale:
+        assert(_scaleStart != null);
+        // details.scale gives us the amount to change the scale as of the
+        // start of this gesture, so calculate the amount to scale as of the
+        // previous call to _onScaleUpdate.
+        final desiredScale = _scaleStart! * details.scale;
+        final scaleChange = desiredScale / scale;
+        _applyScale(scaleChange, details.localFocalPoint);
         break;
       case _GestureType.rotate:
         // ignore rotate action.
@@ -348,7 +325,7 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     // In the Flutter engine, the mousewheel scrollDelta is hardcoded to 20
     // per scroll, while a trackpad scroll can be any amount. The calculation
     // for scaleChange here was arbitrarily chosen to feel natural for both
-    // trackpads and mousewheels on all platforms.
+    // trackpads and mouse wheels on all platforms.
     final scaleChange = math.exp(-event.scrollDelta.dy / 200);
 
     _applyScale(scaleChange, event.localPosition);
@@ -446,6 +423,15 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
     _scaleAnimationController.forward();
   }
 
+  void _onTap(TapUpDetails details) {
+    if (widget.onEmptyAreaTapped != null) {
+      final scenePoint = _toScene(details.localPosition);
+      if (!_childRect.contains(scenePoint)) {
+        widget.onEmptyAreaTapped!.call();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final matrix = Matrix4.identity()
@@ -463,6 +449,7 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
           onScaleStart: _onScaleStart,
           onScaleUpdate: _onScaleUpdate,
           onScaleEnd: _onScaleEnd,
+          onTapUp: _onTap,
           child: Transform(
             transform: matrix,
             alignment: Alignment.center,
@@ -543,10 +530,6 @@ extension _RectExtension on Rect {
     return computedOffset;
   }
 }
-
-// calculate the scale to a, so a can fit in b.
-double _fitScale(Size a, Size b) =>
-    math.min(b.width / a.width, b.height / b.height);
 
 // Given a velocity and drag, calculate the time at which motion will come to
 // a stop, within the margin of effectivelyMotionless.

@@ -1,9 +1,7 @@
 import 'dart:io';
 import 'dart:math' as math;
 
-import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -224,80 +222,82 @@ class ImagePreviewPage extends HookWidget {
         ),
       },
       autofocus: true,
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: Column(
-          children: [
-            Container(
-              height: 70,
-              decoration: BoxDecoration(
-                color: context.theme.primary,
-              ),
-              child: Builder(
-                builder: (context) {
-                  if (current.value == null) return const SizedBox();
-                  return Row(
-                    children: [
-                      const SizedBox(width: 100),
-                      Expanded(
-                        child: _Bar(
-                          message: current.value!,
-                          controller: controller,
-                          isTranscriptPage: isTranscriptPage,
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
-            Expanded(
-              child: Builder(
-                builder: (context) {
-                  if (current.value == null) return const SizedBox();
-                  return Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      LayoutBuilder(
-                        builder: (context, constraints) => _Item(
-                          message: current.value!,
-                          controller: controller,
-                          isTranscriptPage: isTranscriptPage,
-                          constraints: constraints,
-                        ),
-                      ),
-                      Center(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          child: Row(
-                            children: [
-                              if (prev.value != null)
-                                InteractiveDecoratedBox(
-                                  onTap: () =>
-                                      _messageId.value = prev.value!.messageId,
-                                  child: SvgPicture.asset(
-                                    Resources.assetsImagesNextSvg,
-                                  ),
-                                ),
-                              const Spacer(),
-                              if (next.value != null)
-                                InteractiveDecoratedBox(
-                                  onTap: () =>
-                                      _messageId.value = next.value!.messageId,
-                                  child: SvgPicture.asset(
-                                    Resources.assetsImagesPrevSvg,
-                                  ),
-                                ),
-                            ],
+      child: SafeArea(
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: Column(
+            children: [
+              Container(
+                height: 70,
+                decoration: BoxDecoration(
+                  color: context.theme.primary,
+                ),
+                child: Builder(
+                  builder: (context) {
+                    if (current.value == null) return const SizedBox();
+                    return Row(
+                      children: [
+                        const SizedBox(width: 100),
+                        Expanded(
+                          child: _Bar(
+                            message: current.value!,
+                            controller: controller,
+                            isTranscriptPage: isTranscriptPage,
                           ),
                         ),
-                      ),
-                    ],
-                  );
-                },
+                      ],
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    if (current.value == null) return const SizedBox();
+                    return Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        LayoutBuilder(
+                          builder: (context, constraints) => _Item(
+                            message: current.value!,
+                            controller: controller,
+                            isTranscriptPage: isTranscriptPage,
+                            constraints: constraints,
+                          ),
+                        ),
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 30),
+                            child: Row(
+                              children: [
+                                if (prev.value != null)
+                                  InteractiveDecoratedBox(
+                                    onTap: () => _messageId.value =
+                                        prev.value!.messageId,
+                                    child: SvgPicture.asset(
+                                      Resources.assetsImagesNextSvg,
+                                    ),
+                                  ),
+                                const Spacer(),
+                                if (next.value != null)
+                                  InteractiveDecoratedBox(
+                                    onTap: () => _messageId.value =
+                                        next.value!.messageId,
+                                    child: SvgPicture.asset(
+                                      Resources.assetsImagesPrevSvg,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -461,7 +461,9 @@ class _Item extends HookWidget {
     }, [message.messageId]);
 
     return GestureDetector(
-      // onTap: () => Navigator.pop(context),
+      onDoubleTap: () {
+        controller.animatedToScale(initialScale);
+      },
       child: Container(
         decoration: const BoxDecoration(
           color: Color.fromRGBO(62, 65, 72, 0.9),
@@ -472,6 +474,9 @@ class _Item extends HookWidget {
             minScale: math.min(initialScale / 2, 0.5),
             maxScale: math.max(initialScale * 2, 2),
             controller: controller,
+            onEmptyAreaTapped: () {
+              Navigator.pop(context);
+            },
             image: Image.file(
               File(context.accountServer
                   .convertMessageAbsolutePath(message, isTranscriptPage)),
