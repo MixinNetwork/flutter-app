@@ -40,10 +40,6 @@ class HomePage extends StatelessWidget {
       );
 }
 
-class CollapseValueNotifier extends ValueNotifier<bool> {
-  CollapseValueNotifier(bool value) : super(value);
-}
-
 class _HomePage extends HookWidget {
   const _HomePage({
     Key? key,
