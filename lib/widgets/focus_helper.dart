@@ -1,7 +1,8 @@
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_app/utils/logger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+
+import '../utils/logger.dart';
 
 class FocusHelper extends HookWidget {
   const FocusHelper({
