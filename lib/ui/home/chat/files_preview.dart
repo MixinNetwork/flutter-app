@@ -591,15 +591,13 @@ class _TileNormalFile extends HookWidget {
   final VoidCallback onDelete;
 
   static String _getFileExtension(_File file) {
-    var extension = 'FILE';
-    final fileName = path.basename(file.path);
-    if (fileName.isNotEmpty) {
-      final _lookupMimeType = lookupMimeType(fileName);
-      if (_lookupMimeType != null) {
-        extension = extensionFromMime(_lookupMimeType).toUpperCase();
-      }
+    var extension = '';
+    final mimeType = lookupMimeType(file.path);
+    // Only show the extension which is valid.
+    if (mimeType != null) {
+      extension = path.extension(file.path).trim().replaceFirst('.', '');
     }
-    return extension;
+    return extension.isEmpty ? 'FILE' : extension.toUpperCase();
   }
 
   @override

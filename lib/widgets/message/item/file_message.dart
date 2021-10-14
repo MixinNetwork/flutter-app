@@ -7,6 +7,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:open_file/open_file.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../constants/brightness_theme_data.dart';
 import '../../../enum/media_status.dart';
@@ -34,14 +35,16 @@ class FileMessage extends HookWidget {
     final mediaName = useMessageConverter(
         converter: (state) => state.mediaName?.overflow ?? '');
     final extension = useMessageConverter(converter: (state) {
-      var extension = 'FILE';
+      var extension = '';
       if (state.mediaName != null) {
-        final _lookupMimeType = lookupMimeType(state.mediaName!);
-        if (_lookupMimeType != null) {
-          extension = extensionFromMime(_lookupMimeType).toUpperCase();
+        final mimeType = lookupMimeType(state.mediaName!);
+        // Only show the extension which is valid.
+        if (mimeType != null) {
+          extension =
+              p.extension(state.mediaName!).trim().replaceFirst('.', '');
         }
       }
-      return extension;
+      return extension.isEmpty ? 'FILE' : extension.toUpperCase();
     });
     final mediaSizeText =
         useMessageConverter(converter: (state) => filesize(state.mediaSize));
