@@ -1,5 +1,6 @@
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/utils/logger.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 class FocusHelper extends HookWidget {
@@ -41,16 +42,23 @@ void useDesktopLifecycleAutoFocus() {
 }
 
 void _cleanSelection(BuildContext? context) {
-  if (context is! StatefulElement || context.widget is! EditableText) return;
-  final editableText = context.widget as EditableText;
+  try {
+    if (context is! StatefulElement || context.state is! EditableTextState) {
+      return;
+    }
+    final editableTextState = context.state as EditableTextState;
+    if (!editableTextState.mounted) return;
 
-  final controller = editableText.controller;
-  final selection = controller.selection;
-  controller.selection = selection.copyWith(
-    baseOffset: selection.baseOffset,
-    extentOffset: selection.baseOffset,
-    isDirectional: true,
-  );
+    final controller = editableTextState.widget.controller;
+    final selection = controller.selection;
+    controller.selection = selection.copyWith(
+      baseOffset: selection.baseOffset,
+      extentOffset: selection.baseOffset,
+      isDirectional: true,
+    );
+  } catch (error, stack) {
+    e('clean selection error: $error, $stack');
+  }
 }
 
 void useEditableTextAutoCleanSelection() {
