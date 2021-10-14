@@ -2,8 +2,6 @@ import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-import '../utils/logger.dart';
-
 class FocusHelper extends HookWidget {
   const FocusHelper({
     Key? key,
@@ -56,9 +54,7 @@ void _cleanSelection(BuildContext? context) {
       extentOffset: selection.baseOffset,
       isDirectional: true,
     );
-  } catch (error, stack) {
-    e('clean selection error: $error, $stack');
-  }
+  } catch (_) {}
 }
 
 void useEditableTextAutoCleanSelection() {
