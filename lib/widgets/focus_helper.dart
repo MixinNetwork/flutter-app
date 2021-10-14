@@ -43,13 +43,12 @@ void useDesktopLifecycleAutoFocus() {
 
 void _cleanSelection(BuildContext? context) {
   try {
-    if (context is! StatefulElement || context.state is! EditableTextState) {
+    if (context is! StatefulElement || context.widget is! EditableText) {
       return;
     }
-    final editableTextState = context.state as EditableTextState;
-    if (!editableTextState.mounted) return;
+    final editableText = context.widget as EditableText;
 
-    final controller = editableTextState.widget.controller;
+    final controller = editableText.controller;
     final selection = controller.selection;
     controller.selection = selection.copyWith(
       baseOffset: selection.baseOffset,
