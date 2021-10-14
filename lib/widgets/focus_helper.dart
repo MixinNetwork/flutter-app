@@ -2,8 +2,8 @@ import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
-class AutoFocus extends HookWidget {
-  const AutoFocus({
+class FocusHelper extends HookWidget {
+  const FocusHelper({
     Key? key,
     required this.child,
   }) : super(key: key);
