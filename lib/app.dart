@@ -31,9 +31,9 @@ import 'utils/extension/extension.dart';
 import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'utils/system/tray.dart';
+import 'widgets/auto_focus.dart';
 import 'widgets/brightness_observer.dart';
 import 'widgets/default_text_editing_focusable_action_detector.dart';
-import 'widgets/desktop_lifecycle_auto_fcous.dart';
 import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
 import 'widgets/window/window_shortcuts.dart';
@@ -45,7 +45,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     precacheImage(
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
-    return DesktopLifecycleAutoFocus(
+    return AutoFocus(
       child: DefaultTextEditingFocusableActionDetector(
         child: MultiBlocProvider(
           providers: [
