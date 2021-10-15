@@ -13,6 +13,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../blaze/vo/pin_message_minimal.dart';
 import '../../bloc/simple_cubit.dart';
 import '../../db/mixin_database.dart' hide Offset, Message;
+import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
 import '../../enum/message_status.dart';
 import '../../ui/home/bloc/blink_cubit.dart';
@@ -529,5 +530,6 @@ extension _MessageForward on MessageItem {
       type.isLocation ||
       (type == MessageCategory.appCard &&
           AppCardData.fromJson(jsonDecode(content!) as Map<String, dynamic>)
-              .shareable);
+              .shareable) ||
+      (type.isTranscript && mediaStatus == MediaStatus.done);
 }

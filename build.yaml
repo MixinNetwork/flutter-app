@@ -3,6 +3,7 @@ targets:
     builders:
       moor_generator:
         options:
+          mutable_classes: true
           apply_converters_on_variables: true
           generate_connect_constructor: true
           generate_values_in_copy_with: true

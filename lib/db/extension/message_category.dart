@@ -1,6 +1,14 @@
+import '../../enum/encrypt_category.dart';
 import '../../enum/message_category.dart';
 
 extension MessageCategoryExtension on String? {
+  EncryptCategory? get encryptCategory {
+    if (isPlain) return EncryptCategory.plain;
+    if (isSignal) return EncryptCategory.signal;
+    if (isEncrypted) return EncryptCategory.encrypted;
+    return null;
+  }
+
   bool get isPlain => this?.startsWith('PLAIN_') ?? false;
 
   bool get isSystem => this?.startsWith('SYSTEM_') ?? false;

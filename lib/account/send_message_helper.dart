@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cross_file/cross_file.dart';
@@ -8,17 +7,21 @@ import 'package:extended_image/extended_image.dart';
 import 'package:image/image.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 
 import '../blaze/vo/pin_message_minimal.dart';
 import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/recall_message.dart';
+import '../blaze/vo/transcript_minimal.dart';
 import '../constants/constants.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
 import '../db/dao/participant_dao.dart';
 import '../db/dao/pin_message_dao.dart';
+import '../db/dao/transcript_message_dao.dart';
+import '../db/dao/user_dao.dart';
 import '../db/database.dart';
 import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
@@ -46,6 +49,9 @@ class SendMessageHelper {
   late final ParticipantDao _participantDao = _database.participantDao;
   late final JobDao _jobDao = _database.jobDao;
   late final PinMessageDao _pinMessageDao = _database.pinMessageDao;
+  late final UserDao _userDao = _database.userDao;
+  late final TranscriptMessageDao _transcriptMessageDao =
+      _database.transcriptMessageDao;
   final AttachmentUtil _attachmentUtil;
 
   Future<void> sendTextMessage(
@@ -703,6 +709,233 @@ class SendMessageHelper {
           conversationId, senderId, message.content!, encryptCategory);
     } else if (message.category == MessageCategory.appCard) {
       await _sendAppCardMessage(conversationId, senderId, message.content!);
+    } else if (message.category.isTranscript) {
+      final transcripts = await _transcriptMessageDao
+          .transcriptMessageByTranscriptId(message.messageId)
+          .get();
+      await _sendTranscriptMessage(
+        conversationId: conversationId,
+        senderId: senderId,
+        transcripts: transcripts,
+        encryptCategory: encryptCategory,
+      );
+    }
+  }
+
+  Future<void> _sendTranscriptMessage({
+    required String conversationId,
+    required String senderId,
+    required List<TranscriptMessage> transcripts,
+    EncryptCategory encryptCategory = EncryptCategory.plain,
+  }) async {
+    final messageId = const Uuid().v4();
+
+    final category = encryptCategory.toCategory(
+      MessageCategory.plainTranscript,
+      MessageCategory.signalTranscript,
+      MessageCategory.encryptedTranscript,
+    );
+
+    final hasAttachments =
+        transcripts.any((element) => element.category.isAttachment);
+
+    final transcriptMessages = transcripts.map((e) {
+      var mediaUrl = e.mediaUrl;
+      var mediaStatus = e.mediaStatus;
+
+      if (e.category.isAttachment) {
+        mediaStatus = MediaStatus.canceled;
+        if (e.mediaUrl == null) mediaUrl = null;
+      }
+      return e.copyWith(
+        transcriptId: messageId,
+        mediaUrl: Value(mediaUrl),
+        mediaStatus: Value(mediaStatus),
+      );
+    }).toList();
+
+    final transcriptMinimals = transcriptMessages
+        .map((e) => TranscriptMinimal(
+              name: e.userFullName ?? '',
+              category: encryptCategory.asCategory(e.category),
+              content: e.content,
+            ).toJson())
+        .toList();
+
+    final message = Message(
+      messageId: messageId,
+      conversationId: conversationId,
+      userId: senderId,
+      category: category,
+      content: await jsonEncodeWithIsolate(transcriptMinimals),
+      createdAt: DateTime.now(),
+      status: MessageStatus.sending,
+      mediaStatus: hasAttachments ? MediaStatus.canceled : null,
+    );
+
+    Future<void> insertFts() async {
+      final contents = await Future.wait(transcriptMessages.where((transcript) {
+        final category = transcript.category;
+        return category.isText ||
+            category.isPost ||
+            category.isData ||
+            category.isContact;
+      }).map((transcript) async {
+        final category = transcript.category;
+        if (category.isData) {
+          return transcript.mediaName;
+        }
+
+        if (category.isContact &&
+            (transcript.sharedUserId?.isNotEmpty ?? false)) {
+          return _userDao
+              .userFullNameByUserId(transcript.sharedUserId!)
+              .getSingleOrNull();
+        }
+
+        return transcript.content;
+      }));
+
+      final join = contents.whereNotNull().join(' ');
+      await _messageDao.insertFts(
+        messageId,
+        conversationId,
+        join,
+        DateTime.now(),
+        senderId,
+      );
+    }
+
+    await Future.wait([
+      _transcriptMessageDao.insertAll(transcriptMessages),
+      insertFts(),
+      _messageDao.insert(message, senderId),
+    ]);
+
+    if (hasAttachments) {
+      await reUploadTranscriptAttachment(message.messageId);
+    } else {
+      await _jobDao.insertSendingJob(
+        message.messageId,
+        conversationId,
+      );
+    }
+  }
+
+  Future<void> reUploadTranscriptAttachment(String messageId) async {
+    final message = await _messageDao.findMessageByMessageId(messageId);
+    if (message == null) return;
+
+    final status = message.mediaStatus;
+    if (status == MediaStatus.done || status == MediaStatus.pending) return;
+    final transcripts = await _transcriptMessageDao
+        .transcriptMessageByTranscriptId(messageId)
+        .get();
+
+    if (!transcripts.any((element) => element.category.isAttachment)) {
+      await _jobDao.insertSendingJob(
+        message.messageId,
+        message.conversationId,
+      );
+      return;
+    }
+
+    Future<void> uploadAttachment(TranscriptMessage transcriptMessage) async {
+      if (transcriptMessage.mediaStatus == MediaStatus.done) return;
+      final category = transcriptMessage.category;
+
+      final isPlain = category.isPlain;
+      final isValidAttachment = category.isAttachment &&
+          ((isPlain &&
+                  transcriptMessage.mediaKey == null &&
+                  transcriptMessage.mediaDigest == null) ||
+              (transcriptMessage.mediaKey != null &&
+                  transcriptMessage.mediaDigest != null));
+      final isBefore24Hours = transcriptMessage.mediaCreatedAt
+              ?.isBefore(DateTime.now().subtract(const Duration(days: 1))) ??
+          true;
+      final encryptCategory = message.category.encryptCategory;
+
+      var needUpload =
+          encryptCategory != category.encryptCategory || isBefore24Hours;
+
+      String? attachmentId;
+      if (!needUpload) {
+        Future<String?> getAttachmentId(String? content) async {
+          try {
+            final map = await jsonBase64DecodeWithIsolate(content ?? '');
+            final attachmentMessage =
+                AttachmentMessage.fromJson(map as Map<String, dynamic>);
+            return attachmentMessage.attachmentId;
+          } catch (_) {
+            return content!;
+          }
+        }
+
+        if (isValidAttachment) {
+          attachmentId = await getAttachmentId(transcriptMessage.content);
+        } else {
+          needUpload = true;
+        }
+      }
+
+      if (needUpload || attachmentId == null) {
+        final absolutePath = _attachmentUtil.convertAbsolutePath(
+          fileName: transcriptMessage.mediaUrl,
+          messageId: transcriptMessage.messageId,
+          isTranscript: true,
+        );
+        final newCategory = encryptCategory?.asCategory(category) ?? category;
+        final attachmentResult = await _attachmentUtil.uploadAttachment(
+          File(absolutePath),
+          messageId,
+          newCategory,
+          transcriptId: transcriptMessage.transcriptId,
+        );
+        attachmentId = attachmentResult!.attachmentId;
+
+        await _transcriptMessageDao.updateTranscript(
+          transcriptId: transcriptMessage.transcriptId,
+          messageId: transcriptMessage.messageId,
+          attachmentId: attachmentId,
+          category: newCategory,
+          key: attachmentResult.keys,
+          digest: attachmentResult.digest,
+          mediaStatus: MediaStatus.done,
+          mediaCreatedAt: DateTime.tryParse(attachmentResult.createdAt ?? '') ??
+              DateTime.now(),
+        );
+      } else {
+        await _transcriptMessageDao.updateTranscript(
+          transcriptId: transcriptMessage.transcriptId,
+          messageId: transcriptMessage.messageId,
+          attachmentId: attachmentId,
+          category: transcriptMessage.category,
+          key: transcriptMessage.mediaKey,
+          digest: transcriptMessage.mediaDigest,
+          mediaStatus: MediaStatus.done,
+          mediaCreatedAt: transcriptMessage.mediaCreatedAt,
+        );
+      }
+    }
+
+    try {
+      await _messageDao.updateMediaStatus(
+          MediaStatus.pending, message.messageId);
+      final attachmentTranscripts =
+          transcripts.where((element) => element.category.isAttachment);
+      if (attachmentTranscripts.isNotEmpty) {
+        await Future.wait(attachmentTranscripts.map(uploadAttachment));
+      }
+
+      await _messageDao.updateMediaStatus(MediaStatus.done, message.messageId);
+      await _jobDao.insertSendingJob(
+        message.messageId,
+        message.conversationId,
+      );
+    } catch (_) {
+      await _messageDao.updateMediaStatus(
+          MediaStatus.canceled, message.messageId);
     }
   }
 

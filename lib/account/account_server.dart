@@ -27,6 +27,7 @@ import '../crypto/signal/signal_database.dart';
 import '../crypto/signal/signal_key_util.dart';
 import '../crypto/signal/signal_protocol.dart';
 import '../crypto/uuid/uuid.dart';
+import '../db/converter/utc_value_serializer.dart';
 import '../db/dao/job_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
@@ -409,6 +410,17 @@ class AccountServer {
       if (message == null) {
         await database.jobDao.deleteJobById(job.jobId);
         return;
+      }
+
+      if (message.category.isTranscript) {
+        final list = await database.transcriptMessageDao
+            .transcriptMessageByTranscriptId(messageId)
+            .get();
+        final json = list
+            .map((e) => e.toJson(serializer: const UtcValueSerializer())
+              ..remove('media_status'))
+            .toList();
+        message.content = jsonEncode(json);
       }
 
       MessageResult? result;
