@@ -1333,7 +1333,7 @@ packages:
       name: vector_math
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.1.0"
+    version: "2.1.1"
   very_good_analysis:
     dependency: "direct main"
     description:
@@ -1347,7 +1347,7 @@ packages:
       name: visibility_detector
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.0"
+    version: "0.2.2"
   watcher:
     dependency: "direct main"
     description:
