@@ -45,21 +45,21 @@ String? messagePreviewOptimize(
     _content = '[${Localization.current.audio}]';
   } else if (messageCategory == MessageCategory.appButtonGroup) {
     _content = '';
-    if (trimContent != null) {
-      final list = jsonDecode(trimContent) as List<dynamic>;
+    try {
+      final list = jsonDecode(trimContent!) as List<dynamic>;
       _content = list
           .map((e) => ActionData.fromJson(e as Map<String, dynamic>))
           // ignore: avoid_dynamic_calls
           .map((e) => '[${e.label}]')
           .join();
-    }
+    } catch (_) {}
   } else if (messageCategory == MessageCategory.appCard) {
-    _content = '';
-    if (trimContent != null) {
+    _content = '[${Localization.current.appCard}]';
+    try {
       _content =
-          AppCardData.fromJson(jsonDecode(trimContent) as Map<String, dynamic>)
+          AppCardData.fromJson(jsonDecode(trimContent!) as Map<String, dynamic>)
               .title;
-    }
+    } catch (_) {}
   } else if (messageCategory.isContact) {
     _content = '[${Localization.current.contact}]';
   } else if (messageCategory.isCallMessage) {
@@ -68,7 +68,7 @@ String? messagePreviewOptimize(
     _content =
         '[${isCurrentUser ? Localization.current.chatRecallMe : Localization.current.chatRecallDelete}]';
   } else if (messageCategory.isTranscript) {
-    _content = Localization.current.chatTranscript;
+    _content = '[${Localization.current.chatTranscript}]';
   } else {
     _content = Localization.current.chatNotSupport;
   }
