@@ -67,6 +67,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("此对话中的消息使用端对端加密。点击了解更多。"),
         "addAnnouncement": MessageLookupByLibrary.simpleMessage("添加群公告"),
         "addContact": MessageLookupByLibrary.simpleMessage("添加联系人"),
+        "appCard": MessageLookupByLibrary.simpleMessage("卡片"),
         "appearance": MessageLookupByLibrary.simpleMessage("显示偏好"),
         "archivedFolder": MessageLookupByLibrary.simpleMessage("存档文件夹"),
         "audio": MessageLookupByLibrary.simpleMessage("语音"),

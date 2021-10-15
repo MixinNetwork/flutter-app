@@ -73,6 +73,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "addAnnouncement":
             MessageLookupByLibrary.simpleMessage("Add group description"),
         "addContact": MessageLookupByLibrary.simpleMessage("Add contact"),
+        "appCard": MessageLookupByLibrary.simpleMessage("Card"),
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
         "archivedFolder":
             MessageLookupByLibrary.simpleMessage("archived folder"),
