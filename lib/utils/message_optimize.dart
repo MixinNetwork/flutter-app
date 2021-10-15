@@ -54,7 +54,7 @@ String? messagePreviewOptimize(
           .join();
     } catch (_) {}
   } else if (messageCategory == MessageCategory.appCard) {
-    _content = Localization.current.appCard;
+    _content = '[${Localization.current.appCard}]';
     try {
       _content =
           AppCardData.fromJson(jsonDecode(trimContent!) as Map<String, dynamic>)
