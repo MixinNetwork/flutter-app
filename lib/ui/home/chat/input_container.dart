@@ -30,6 +30,8 @@ import '../bloc/mention_cubit.dart';
 import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import '../bloc/recall_message_bloc.dart';
+import '../route/responsive_navigator_cubit.dart';
+import 'chat_page.dart';
 import 'files_preview.dart';
 
 class InputContainer extends HookWidget {
@@ -191,6 +193,19 @@ class _InputContainer extends HookWidget {
         RawKeyboard.instance.removeListener(onListen);
       };
     });
+
+    final chatSidePageSize =
+        useBlocStateConverter<ChatSideCubit, ResponsiveNavigatorState, int>(
+      bloc: context.read<ChatSideCubit>(),
+      converter: (state) => state.pages.length,
+    );
+    useEffect(() {
+      if (!context.textFieldAutoGainFocus) {
+        // Make sure on iPad/Android Pad the text field not get focused when the chat side
+        // pages all popped.
+        focusNode.unfocus();
+      }
+    }, [chatSidePageSize]);
 
     return MultiProvider(
       providers: [
