@@ -48,7 +48,7 @@ class AboutPage extends HookWidget {
               ),
               // SignalDatabase.get
               const SizedBox(height: 8),
-              Text(
+              SelectableText(
                 version,
                 style: TextStyle(
                   color: context.theme.secondaryText,
