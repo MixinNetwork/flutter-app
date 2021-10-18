@@ -344,6 +344,7 @@
 				"${BUILT_PRODUCTS_DIR}/system_clock/system_clock.framework",
 				"${BUILT_PRODUCTS_DIR}/system_tray/system_tray.framework",
 				"${BUILT_PRODUCTS_DIR}/url_launcher_macos/url_launcher_macos.framework",
+				"${BUILT_PRODUCTS_DIR}/webview_window/webview_window.framework",
 				"${BUILT_PRODUCTS_DIR}/window_size/window_size.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -367,6 +368,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/system_clock.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/system_tray.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/url_launcher_macos.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/webview_window.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/window_size.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;

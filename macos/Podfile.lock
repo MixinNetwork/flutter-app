@@ -56,6 +56,8 @@ PODS:
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
   - VLCKit (3.3.17)
+  - webview_window (0.0.1):
+    - FlutterMacOS
   - window_size (0.0.2):
     - FlutterMacOS
 
@@ -78,6 +80,7 @@ DEPENDENCIES:
   - system_clock (from `Flutter/ephemeral/.symlinks/plugins/system_clock/macos`)
   - system_tray (from `Flutter/ephemeral/.symlinks/plugins/system_tray/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
+  - webview_window (from `Flutter/ephemeral/.symlinks/plugins/webview_window/macos`)
   - window_size (from `Flutter/ephemeral/.symlinks/plugins/window_size/macos`)
 
 SPEC REPOS:
@@ -123,6 +126,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/system_tray/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
+  webview_window:
+    :path: Flutter/ephemeral/.symlinks/plugins/webview_window/macos
   window_size:
     :path: Flutter/ephemeral/.symlinks/plugins/window_size/macos
 
@@ -148,6 +153,7 @@ SPEC CHECKSUMS:
   system_tray: e53c972838c69589ff2e77d6d3abfd71332f9e5d
   url_launcher_macos: 45af3d61de06997666568a7149c1be98b41c95d4
   VLCKit: 21651e881f19774ecf9a86ca2c2010859fe68a08
+  webview_window: 5991f2348df591f40a0bdb8237f32ab30fd8b251
   window_size: 339dafa0b27a95a62a843042038fa6c3c48de195
 
 PODFILE CHECKSUM: 353c8bcc5d5b0994e508d035b5431cfe18c1dea7

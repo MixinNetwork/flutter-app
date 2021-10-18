@@ -22,6 +22,7 @@ import sqlite3_flutter_libs
 import system_clock
 import system_tray
 import url_launcher_macos
+import webview_window
 import window_size
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
@@ -42,5 +43,6 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   SystemClockPlugin.register(with: registry.registrar(forPlugin: "SystemClockPlugin"))
   SystemTrayPlugin.register(with: registry.registrar(forPlugin: "SystemTrayPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
+  WebviewWindowPlugin.register(with: registry.registrar(forPlugin: "WebviewWindowPlugin"))
   WindowSizePlugin.register(with: registry.registrar(forPlugin: "WindowSizePlugin"))
 }

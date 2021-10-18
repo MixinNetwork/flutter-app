@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
+import '../../../utils/webview.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/avatar_view/avatar_view.dart';
 import '../../../widgets/buttons.dart';
@@ -103,15 +106,7 @@ class ChatBar extends HookWidget {
             duration: const Duration(milliseconds: 200),
             alignment: Alignment.centerLeft,
             child: MoveWindowBarrier(
-              child: (conversation.isBot ?? false)
-                  ? Tooltip(
-                      message: context.l10n.comingSoon,
-                      child: ActionButton(
-                        name: Resources.assetsImagesBotSvg,
-                        color: actionColor,
-                      ),
-                    )
-                  : const SizedBox(),
+              child: _BotIcon(conversation: conversation),
             ),
           ),
           MoveWindowBarrier(
@@ -281,4 +276,39 @@ class ConversationAvatar extends StatelessWidget {
           },
         ),
       );
+}
+
+class _BotIcon extends StatelessWidget {
+  const _BotIcon({Key? key, required this.conversation}) : super(key: key);
+
+  final ConversationState conversation;
+
+  @override
+  Widget build(BuildContext context) {
+    if (conversation.isBot != true) {
+      return const SizedBox();
+    }
+
+    final supportWebview = Platform.isMacOS;
+
+    final child = ActionButton(
+      name: Resources.assetsImagesBotSvg,
+      color: context.theme.icon,
+      onTap: () {
+        if (!supportWebview) {
+          return;
+        }
+        openBotWebviewWindow(
+          context,
+          conversation.app!,
+          conversationId: conversation.conversationId,
+        );
+      },
+    );
+
+    if (supportWebview) {
+      return child;
+    }
+    return Tooltip(message: context.l10n.comingSoon, child: child);
+  }
 }
