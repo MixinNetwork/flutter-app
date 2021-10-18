@@ -211,5 +211,12 @@
   "continueText": "Continue",
   "localTimeErrorDescription": "System time is unusual, please continue to use again after correction",
   "collapse": "Collapse",
-  "appCard": "Card"
+  "appCard": "Card",
+  "assetType": "Asset Type",
+  "memo": "Memo",
+  "time": "Time",
+  "transactionsId": "Transaction Id",
+  "from": "From",
+  "to": "To"
 }
+

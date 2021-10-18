@@ -2179,6 +2179,66 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Asset Type`
+  String get assetType {
+    return Intl.message(
+      'Asset Type',
+      name: 'assetType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memo`
+  String get memo {
+    return Intl.message(
+      'Memo',
+      name: 'memo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time`
+  String get time {
+    return Intl.message(
+      'Time',
+      name: 'time',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transaction Id`
+  String get transactionsId {
+    return Intl.message(
+      'Transaction Id',
+      name: 'transactionsId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `From`
+  String get from {
+    return Intl.message(
+      'From',
+      name: 'from',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To`
+  String get to {
+    return Intl.message(
+      'To',
+      name: 'to',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

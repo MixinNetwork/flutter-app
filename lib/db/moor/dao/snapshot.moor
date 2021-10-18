@@ -1,0 +1,21 @@
+import '../mixin.moor';
+
+snapshotItems as SnapshotItem:
+SELECT
+  snapshot.*,
+  opponent.avatar_url,
+  opponent.full_name AS opponent_ful_name,
+  asset.chain_id,
+  asset.symbol,
+  asset.name AS symbolName,
+  asset.tag,
+  asset.confirmations AS asset_confirmations,
+  asset.icon_url AS symbolIconUrl,
+  tempAsset.icon_url AS chainIconUrl
+FROM snapshots snapshot
+  LEFT JOIN users opponent ON opponent.user_id = snapshot.opponent_id
+  LEFT JOIN assets asset ON asset.asset_id = snapshot.asset_id
+  LEFT JOIN assets tempAsset ON asset.chain_id = tempAsset.asset_id
+WHERE $where
+ORDER BY $order
+LIMIT $limit;
