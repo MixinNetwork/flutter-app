@@ -155,6 +155,7 @@ extension MessageCategoryExtension on String? {
       isAudio ||
       isSticker ||
       isContact ||
+      isTranscript ||
       this == MessageCategory.appCard ||
       this == MessageCategory.appButtonGroup;
 }
