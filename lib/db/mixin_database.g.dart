@@ -314,43 +314,24 @@ class Conversation extends DataClass implements Insertable<Conversation> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          ownerId.hashCode,
-          $mrjc(
-              category.hashCode,
-              $mrjc(
-                  name.hashCode,
-                  $mrjc(
-                      iconUrl.hashCode,
-                      $mrjc(
-                          announcement.hashCode,
-                          $mrjc(
-                              codeUrl.hashCode,
-                              $mrjc(
-                                  payType.hashCode,
-                                  $mrjc(
-                                      createdAt.hashCode,
-                                      $mrjc(
-                                          pinTime.hashCode,
-                                          $mrjc(
-                                              lastMessageId.hashCode,
-                                              $mrjc(
-                                                  lastMessageCreatedAt.hashCode,
-                                                  $mrjc(
-                                                      lastReadMessageId
-                                                          .hashCode,
-                                                      $mrjc(
-                                                          unseenMessageCount
-                                                              .hashCode,
-                                                          $mrjc(
-                                                              status.hashCode,
-                                                              $mrjc(
-                                                                  draft
-                                                                      .hashCode,
-                                                                  muteUntil
-                                                                      .hashCode)))))))))))))))));
+  int get hashCode => Object.hash(
+      conversationId,
+      ownerId,
+      category,
+      name,
+      iconUrl,
+      announcement,
+      codeUrl,
+      payType,
+      createdAt,
+      pinTime,
+      lastMessageId,
+      lastMessageCreatedAt,
+      lastReadMessageId,
+      unseenMessageCount,
+      status,
+      draft,
+      muteUntil);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -900,8 +881,7 @@ class FloodMessage extends DataClass implements Insertable<FloodMessage> {
   }
 
   @override
-  int get hashCode => $mrjf(
-      $mrjc(messageId.hashCode, $mrjc(data.hashCode, createdAt.hashCode)));
+  int get hashCode => Object.hash(messageId, data, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1226,24 +1206,8 @@ class Job extends DataClass implements Insertable<Job> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      jobId.hashCode,
-      $mrjc(
-          action.hashCode,
-          $mrjc(
-              createdAt.hashCode,
-              $mrjc(
-                  orderId.hashCode,
-                  $mrjc(
-                      priority.hashCode,
-                      $mrjc(
-                          userId.hashCode,
-                          $mrjc(
-                              blazeMessage.hashCode,
-                              $mrjc(
-                                  conversationId.hashCode,
-                                  $mrjc(resendMessageId.hashCode,
-                                      runCount.hashCode))))))))));
+  int get hashCode => Object.hash(jobId, action, createdAt, orderId, priority,
+      userId, blazeMessage, conversationId, resendMessageId, runCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1640,8 +1604,7 @@ class MessageMention extends DataClass implements Insertable<MessageMention> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode, $mrjc(conversationId.hashCode, hasRead.hashCode)));
+  int get hashCode => Object.hash(messageId, conversationId, hasRead);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2284,49 +2247,39 @@ class Message extends DataClass implements Insertable<Message> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          conversationId.hashCode,
-          $mrjc(
-              userId.hashCode,
-              $mrjc(
-                  category.hashCode,
-                  $mrjc(
-                      content.hashCode,
-                      $mrjc(
-                          mediaUrl.hashCode,
-                          $mrjc(
-                              mediaMimeType.hashCode,
-                              $mrjc(
-                                  mediaSize.hashCode,
-                                  $mrjc(
-                                      mediaDuration.hashCode,
-                                      $mrjc(
-                                          mediaWidth.hashCode,
-                                          $mrjc(
-                                              mediaHeight.hashCode,
-                                              $mrjc(
-                                                  mediaHash.hashCode,
-                                                  $mrjc(
-                                                      thumbImage.hashCode,
-                                                      $mrjc(
-                                                          mediaKey.hashCode,
-                                                          $mrjc(
-                                                              mediaDigest
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  mediaStatus
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      status
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          createdAt
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              action.hashCode,
-                                                                              $mrjc(participantId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(hyperlink.hashCode, $mrjc(name.hashCode, $mrjc(albumId.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mediaWaveform.hashCode, $mrjc(quoteMessageId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(thumbUrl.hashCode, caption.hashCode)))))))))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        messageId,
+        conversationId,
+        userId,
+        category,
+        content,
+        mediaUrl,
+        mediaMimeType,
+        mediaSize,
+        mediaDuration,
+        mediaWidth,
+        mediaHeight,
+        mediaHash,
+        thumbImage,
+        mediaKey,
+        mediaDigest,
+        mediaStatus,
+        status,
+        createdAt,
+        action,
+        participantId,
+        snapshotId,
+        hyperlink,
+        name,
+        albumId,
+        stickerId,
+        sharedUserId,
+        mediaWaveform,
+        quoteMessageId,
+        quoteContent,
+        thumbUrl,
+        caption
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3218,8 +3171,7 @@ class Participant extends DataClass implements Insertable<Participant> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(conversationId.hashCode,
-      $mrjc(userId.hashCode, $mrjc(role.hashCode, createdAt.hashCode))));
+  int get hashCode => Object.hash(conversationId, userId, role, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3532,18 +3484,8 @@ class StickerAlbum extends DataClass implements Insertable<StickerAlbum> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      albumId.hashCode,
-      $mrjc(
-          name.hashCode,
-          $mrjc(
-              iconUrl.hashCode,
-              $mrjc(
-                  createdAt.hashCode,
-                  $mrjc(
-                      updateAt.hashCode,
-                      $mrjc(userId.hashCode,
-                          $mrjc(category.hashCode, description.hashCode))))))));
+  int get hashCode => Object.hash(albumId, name, iconUrl, createdAt, updateAt,
+      userId, category, description);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3901,8 +3843,7 @@ class PinMessage extends DataClass implements Insertable<PinMessage> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode, $mrjc(conversationId.hashCode, createdAt.hashCode)));
+  int get hashCode => Object.hash(messageId, conversationId, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4211,22 +4152,8 @@ class Addresse extends DataClass implements Insertable<Addresse> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      addressId.hashCode,
-      $mrjc(
-          type.hashCode,
-          $mrjc(
-              assetId.hashCode,
-              $mrjc(
-                  destination.hashCode,
-                  $mrjc(
-                      label.hashCode,
-                      $mrjc(
-                          updatedAt.hashCode,
-                          $mrjc(
-                              reserve.hashCode,
-                              $mrjc(fee.hashCode,
-                                  $mrjc(tag.hashCode, dust.hashCode))))))))));
+  int get hashCode => Object.hash(addressId, type, assetId, destination, label,
+      updatedAt, reserve, fee, tag, dust);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4757,32 +4684,20 @@ class App extends DataClass implements Insertable<App> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      appId.hashCode,
-      $mrjc(
-          appNumber.hashCode,
-          $mrjc(
-              homeUri.hashCode,
-              $mrjc(
-                  redirectUri.hashCode,
-                  $mrjc(
-                      name.hashCode,
-                      $mrjc(
-                          iconUrl.hashCode,
-                          $mrjc(
-                              category.hashCode,
-                              $mrjc(
-                                  description.hashCode,
-                                  $mrjc(
-                                      appSecret.hashCode,
-                                      $mrjc(
-                                          capabilities.hashCode,
-                                          $mrjc(
-                                              creatorId.hashCode,
-                                              $mrjc(
-                                                  resourcePatterns.hashCode,
-                                                  updatedAt
-                                                      .hashCode)))))))))))));
+  int get hashCode => Object.hash(
+      appId,
+      appNumber,
+      homeUri,
+      redirectUri,
+      name,
+      iconUrl,
+      category,
+      description,
+      appSecret,
+      capabilities,
+      creatorId,
+      resourcePatterns,
+      updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -5408,36 +5323,22 @@ class Asset extends DataClass implements Insertable<Asset> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      assetId.hashCode,
-      $mrjc(
-          symbol.hashCode,
-          $mrjc(
-              name.hashCode,
-              $mrjc(
-                  iconUrl.hashCode,
-                  $mrjc(
-                      balance.hashCode,
-                      $mrjc(
-                          destination.hashCode,
-                          $mrjc(
-                              tag.hashCode,
-                              $mrjc(
-                                  priceBtc.hashCode,
-                                  $mrjc(
-                                      priceUsd.hashCode,
-                                      $mrjc(
-                                          chainId.hashCode,
-                                          $mrjc(
-                                              changeUsd.hashCode,
-                                              $mrjc(
-                                                  changeBtc.hashCode,
-                                                  $mrjc(
-                                                      confirmations.hashCode,
-                                                      $mrjc(
-                                                          assetKey.hashCode,
-                                                          reserve
-                                                              .hashCode)))))))))))))));
+  int get hashCode => Object.hash(
+      assetId,
+      symbol,
+      name,
+      iconUrl,
+      balance,
+      destination,
+      tag,
+      priceBtc,
+      priceUsd,
+      chainId,
+      changeUsd,
+      changeBtc,
+      confirmations,
+      assetKey,
+      reserve);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6003,12 +5904,8 @@ class CircleConversation extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          circleId.hashCode,
-          $mrjc(
-              userId.hashCode, $mrjc(createdAt.hashCode, pinTime.hashCode)))));
+  int get hashCode =>
+      Object.hash(conversationId, circleId, userId, createdAt, pinTime);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6297,8 +6194,7 @@ class Circle extends DataClass implements Insertable<Circle> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(circleId.hashCode,
-      $mrjc(name.hashCode, $mrjc(createdAt.hashCode, orderedAt.hashCode))));
+  int get hashCode => Object.hash(circleId, name, createdAt, orderedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6574,12 +6470,8 @@ class Hyperlink extends DataClass implements Insertable<Hyperlink> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      hyperlink.hashCode,
-      $mrjc(
-          siteName.hashCode,
-          $mrjc(siteTitle.hashCode,
-              $mrjc(siteDescription.hashCode, siteImage.hashCode)))));
+  int get hashCode =>
+      Object.hash(hyperlink, siteName, siteTitle, siteDescription, siteImage);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6893,16 +6785,8 @@ class MessagesFt extends DataClass implements Insertable<MessagesFt> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          conversationId.hashCode,
-          $mrjc(
-              content.hashCode,
-              $mrjc(
-                  createdAt.hashCode,
-                  $mrjc(userId.hashCode,
-                      $mrjc(reservedInt.hashCode, reservedText.hashCode)))))));
+  int get hashCode => Object.hash(messageId, conversationId, content, createdAt,
+      userId, reservedInt, reservedText);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7210,7 +7094,7 @@ class MessagesHistoryData extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf(messageId.hashCode);
+  int get hashCode => messageId.hashCode;
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7368,7 +7252,7 @@ class Offset extends DataClass implements Insertable<Offset> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(key.hashCode, timestamp.hashCode));
+  int get hashCode => Object.hash(key, timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7614,14 +7498,8 @@ class ParticipantSessionData extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          userId.hashCode,
-          $mrjc(
-              sessionId.hashCode,
-              $mrjc(sentToServer.hashCode,
-                  $mrjc(createdAt.hashCode, publicKey.hashCode))))));
+  int get hashCode => Object.hash(
+      conversationId, userId, sessionId, sentToServer, createdAt, publicKey);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -7945,12 +7823,8 @@ class ResendSessionMessage extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          userId.hashCode,
-          $mrjc(sessionId.hashCode,
-              $mrjc(status.hashCode, createdAt.hashCode)))));
+  int get hashCode =>
+      Object.hash(messageId, userId, sessionId, status, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -8271,14 +8145,8 @@ class SentSessionSenderKey extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          userId.hashCode,
-          $mrjc(
-              sessionId.hashCode,
-              $mrjc(sentToServer.hashCode,
-                  $mrjc(senderKeyId.hashCode, createdAt.hashCode))))));
+  int get hashCode => Object.hash(
+      conversationId, userId, sessionId, sentToServer, senderKeyId, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -8698,26 +8566,8 @@ class Snapshot extends DataClass implements Insertable<Snapshot> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      snapshotId.hashCode,
-      $mrjc(
-          type.hashCode,
-          $mrjc(
-              assetId.hashCode,
-              $mrjc(
-                  amount.hashCode,
-                  $mrjc(
-                      createdAt.hashCode,
-                      $mrjc(
-                          opponentId.hashCode,
-                          $mrjc(
-                              transactionHash.hashCode,
-                              $mrjc(
-                                  sender.hashCode,
-                                  $mrjc(
-                                      receiver.hashCode,
-                                      $mrjc(memo.hashCode,
-                                          confirmations.hashCode)))))))))));
+  int get hashCode => Object.hash(snapshotId, type, assetId, amount, createdAt,
+      opponentId, transactionHash, sender, receiver, memo, confirmations);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -9120,7 +8970,7 @@ class StickerRelationship extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(albumId.hashCode, stickerId.hashCode));
+  int get hashCode => Object.hash(albumId, stickerId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -9400,22 +9250,8 @@ class Sticker extends DataClass implements Insertable<Sticker> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      stickerId.hashCode,
-      $mrjc(
-          albumId.hashCode,
-          $mrjc(
-              name.hashCode,
-              $mrjc(
-                  assetUrl.hashCode,
-                  $mrjc(
-                      assetType.hashCode,
-                      $mrjc(
-                          assetWidth.hashCode,
-                          $mrjc(
-                              assetHeight.hashCode,
-                              $mrjc(createdAt.hashCode,
-                                  lastUseAt.hashCode)))))))));
+  int get hashCode => Object.hash(stickerId, albumId, name, assetUrl, assetType,
+      assetWidth, assetHeight, createdAt, lastUseAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -9949,30 +9785,20 @@ class User extends DataClass implements Insertable<User> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      userId.hashCode,
-      $mrjc(
-          identityNumber.hashCode,
-          $mrjc(
-              relationship.hashCode,
-              $mrjc(
-                  fullName.hashCode,
-                  $mrjc(
-                      avatarUrl.hashCode,
-                      $mrjc(
-                          phone.hashCode,
-                          $mrjc(
-                              isVerified.hashCode,
-                              $mrjc(
-                                  createdAt.hashCode,
-                                  $mrjc(
-                                      muteUntil.hashCode,
-                                      $mrjc(
-                                          hasPin.hashCode,
-                                          $mrjc(
-                                              appId.hashCode,
-                                              $mrjc(biography.hashCode,
-                                                  isScam.hashCode)))))))))))));
+  int get hashCode => Object.hash(
+      userId,
+      identityNumber,
+      relationship,
+      fullName,
+      avatarUrl,
+      phone,
+      isVerified,
+      createdAt,
+      muteUntil,
+      hasPin,
+      appId,
+      biography,
+      isScam);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -10789,50 +10615,35 @@ class TranscriptMessage extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      transcriptId.hashCode,
-      $mrjc(
-          messageId.hashCode,
-          $mrjc(
-              userId.hashCode,
-              $mrjc(
-                  userFullName.hashCode,
-                  $mrjc(
-                      category.hashCode,
-                      $mrjc(
-                          createdAt.hashCode,
-                          $mrjc(
-                              content.hashCode,
-                              $mrjc(
-                                  mediaUrl.hashCode,
-                                  $mrjc(
-                                      mediaName.hashCode,
-                                      $mrjc(
-                                          mediaSize.hashCode,
-                                          $mrjc(
-                                              mediaWidth.hashCode,
-                                              $mrjc(
-                                                  mediaHeight.hashCode,
-                                                  $mrjc(
-                                                      mediaMimeType.hashCode,
-                                                      $mrjc(
-                                                          mediaDuration
-                                                              .hashCode,
-                                                          $mrjc(
-                                                              mediaStatus
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  mediaWaveform
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      thumbImage
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          thumbUrl
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              mediaKey.hashCode,
-                                                                              $mrjc(mediaDigest.hashCode, $mrjc(mediaCreatedAt.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mentions.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, caption.hashCode)))))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        transcriptId,
+        messageId,
+        userId,
+        userFullName,
+        category,
+        createdAt,
+        content,
+        mediaUrl,
+        mediaName,
+        mediaSize,
+        mediaWidth,
+        mediaHeight,
+        mediaMimeType,
+        mediaDuration,
+        mediaStatus,
+        mediaWaveform,
+        thumbImage,
+        thumbUrl,
+        mediaKey,
+        mediaDigest,
+        mediaCreatedAt,
+        stickerId,
+        sharedUserId,
+        mentions,
+        quoteId,
+        quoteContent,
+        caption
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -12501,16 +12312,75 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<int> fuzzySearchMessageCount(String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.message_id = fts.message_id',
         variables: [
           Variable<String>(query)
         ],
         readsFrom: {
           messages,
           messagesFts,
-          conversations,
-          users,
         }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<int> fuzzySearchMessageCountByCategories(
+      String query, List<String> categories) {
+    var $arrayStartIndex = 2;
+    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
+    $arrayStartIndex += categories.length;
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts WHERE m.message_id = fts.message_id AND m.category IN ($expandedcategories)',
+        variables: [
+          Variable<String>(query),
+          for (var $ in categories) Variable<String>($)
+        ],
+        readsFrom: {
+          messages,
+          messagesFts,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageByCategories(
+      String query,
+      List<String> categories,
+      Limit Function(Messages m, Conversations c, Users u) limit) {
+    var $arrayStartIndex = 2;
+    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
+    $arrayStartIndex += categories.length;
+    final generatedlimit = $write(
+        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u')),
+        hasMultipleTables: true);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(query),
+          for (var $ in categories) Variable<String>($),
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
   }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
@@ -12590,38 +12460,39 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<int> fuzzySearchMessageCountByConversationId(
       String conversationId, String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2)',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query)
         ],
         readsFrom: {
           messages,
-          conversations,
-          users,
           messagesFts,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
-  Selectable<int> messageCountByConversationIdAndUserId(
-      String conversationId, String userId) {
+  Selectable<int> fuzzySearchMessageCountByConversationIdAndCategories(
+      String conversationId, String query, List<String> categories) {
+    var $arrayStartIndex = 3;
+    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
+    $arrayStartIndex += categories.length;
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) AND m.category IN ($expandedcategories)',
         variables: [
           Variable<String>(conversationId),
-          Variable<String>(userId)
+          Variable<String>(query),
+          for (var $ in categories) Variable<String>($)
         ],
         readsFrom: {
           messages,
-          conversations,
-          users,
+          messagesFts,
         }).map((QueryRow row) => row.read<int>('_c0'));
   }
 
   Selectable<int> fuzzySearchMessageCountByConversationIdAndUserId(
       String conversationId, String userId, String query) {
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3)',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12629,10 +12500,77 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         ],
         readsFrom: {
           messages,
-          conversations,
-          users,
           messagesFts,
         }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<int> fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
+      String conversationId,
+      String userId,
+      String query,
+      List<String> categories) {
+    var $arrayStartIndex = 4;
+    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
+    $arrayStartIndex += categories.length;
+    return customSelect(
+        'SELECT COUNT(1) AS _c0 FROM messages AS m WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) AND m.category IN ($expandedcategories)',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId),
+          Variable<String>(query),
+          for (var $ in categories) Variable<String>($)
+        ],
+        readsFrom: {
+          messages,
+          messagesFts,
+        }).map((QueryRow row) => row.read<int>('_c0'));
+  }
+
+  Selectable<SearchMessageDetailItem>
+      fuzzySearchMessageByConversationIdAndCategories(
+          String conversationId,
+          String query,
+          List<String> categories,
+          Limit Function(Messages m, Conversations c, Users u) limit) {
+    var $arrayStartIndex = 3;
+    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
+    $arrayStartIndex += categories.length;
+    final generatedlimit = $write(
+        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u')),
+        hasMultipleTables: true);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(query),
+          for (var $ in categories) Variable<String>($),
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
   }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
@@ -12669,20 +12607,78 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
-  Selectable<SearchMessageDetailItem> messageByConversationIdAndUserId(
-      String conversationId, String userId, int limit, int offset) {
+  Selectable<SearchMessageDetailItem> searchMessage(
+      Expression<bool?> Function(Messages m, Conversations c, Users u) where,
+      Limit Function(Messages m, Conversations c, Users u) limit) {
+    final generatedwhere = $write(
+        where(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u')),
+        hasMultipleTables: true);
+    final generatedlimit = $write(
+        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u')),
+        hasMultipleTables: true);
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
-          Variable<String>(conversationId),
-          Variable<String>(userId),
-          Variable<int>(limit),
-          Variable<int>(offset)
+          ...generatedwhere.introducedVariables,
+          ...generatedlimit.introducedVariables
         ],
         readsFrom: {
           messages,
           users,
           conversations,
+          ...generatedwhere.watchedTables,
+          ...generatedlimit.watchedTables,
+        }).map((QueryRow row) {
+      return SearchMessageDetailItem(
+        messageId: row.read<String>('messageId'),
+        userId: row.read<String>('userId'),
+        userAvatarUrl: row.read<String?>('userAvatarUrl'),
+        userFullName: row.read<String?>('userFullName'),
+        type: row.read<String>('type'),
+        content: row.read<String?>('content'),
+        createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
+        mediaName: row.read<String?>('mediaName'),
+        groupIconUrl: row.read<String?>('groupIconUrl'),
+        category:
+            Conversations.$converter0.mapToDart(row.read<String?>('category')),
+        groupName: row.read<String?>('groupName'),
+        conversationId: row.read<String>('conversationId'),
+      );
+    });
+  }
+
+  Selectable<SearchMessageDetailItem>
+      fuzzySearchMessageByConversationIdAndUserIdAndCategories(
+          String conversationId,
+          String userId,
+          String query,
+          List<String> categories,
+          Limit Function(Messages m, Conversations c, Users u) limit) {
+    var $arrayStartIndex = 4;
+    final expandedcategories = $expandVar($arrayStartIndex, categories.length);
+    $arrayStartIndex += categories.length;
+    final generatedlimit = $write(
+        limit(alias(this.messages, 'm'), alias(this.conversations, 'c'),
+            alias(this.users, 'u')),
+        hasMultipleTables: true);
+    $arrayStartIndex += generatedlimit.amountOfVariables;
+    return customSelect(
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId),
+          Variable<String>(query),
+          for (var $ in categories) Variable<String>($),
+          ...generatedlimit.introducedVariables
+        ],
+        readsFrom: {
+          messages,
+          users,
+          conversations,
+          messagesFts,
+          ...generatedlimit.watchedTables,
         }).map((QueryRow row) {
       return SearchMessageDetailItem(
         messageId: row.read<String>('messageId'),
@@ -13160,48 +13156,63 @@ class MessageItem {
     required this.pinned,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          conversationId.hashCode,
-          $mrjc(
-              type.hashCode,
-              $mrjc(
-                  content.hashCode,
-                  $mrjc(
-                      createdAt.hashCode,
-                      $mrjc(
-                          status.hashCode,
-                          $mrjc(
-                              mediaStatus.hashCode,
-                              $mrjc(
-                                  mediaWaveform.hashCode,
-                                  $mrjc(
-                                      mediaName.hashCode,
-                                      $mrjc(
-                                          mediaMimeType.hashCode,
-                                          $mrjc(
-                                              mediaSize.hashCode,
-                                              $mrjc(
-                                                  mediaWidth.hashCode,
-                                                  $mrjc(
-                                                      mediaHeight.hashCode,
-                                                      $mrjc(
-                                                          thumbImage.hashCode,
-                                                          $mrjc(
-                                                              thumbUrl.hashCode,
-                                                              $mrjc(
-                                                                  mediaUrl
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      mediaDuration
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          quoteId
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              quoteContent.hashCode,
-                                                                              $mrjc(actionName.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(userId.hashCode, $mrjc(userFullName.hashCode, $mrjc(userIdentityNumber.hashCode, $mrjc(appId.hashCode, $mrjc(relationship.hashCode, $mrjc(avatarUrl.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(conversationOwnerId.hashCode, $mrjc(conversionCategory.hashCode, $mrjc(groupName.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(snapshotType.hashCode, $mrjc(snapshotAmount.hashCode, $mrjc(assetId.hashCode, $mrjc(assetSymbol.hashCode, $mrjc(assetIcon.hashCode, $mrjc(siteName.hashCode, $mrjc(siteTitle.hashCode, $mrjc(siteDescription.hashCode, $mrjc(siteImage.hashCode, $mrjc(mentionRead.hashCode, pinned.hashCode)))))))))))))))))))))))))))))))))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        messageId,
+        conversationId,
+        type,
+        content,
+        createdAt,
+        status,
+        mediaStatus,
+        mediaWaveform,
+        mediaName,
+        mediaMimeType,
+        mediaSize,
+        mediaWidth,
+        mediaHeight,
+        thumbImage,
+        thumbUrl,
+        mediaUrl,
+        mediaDuration,
+        quoteId,
+        quoteContent,
+        actionName,
+        sharedUserId,
+        userId,
+        userFullName,
+        userIdentityNumber,
+        appId,
+        relationship,
+        avatarUrl,
+        sharedUserFullName,
+        sharedUserIdentityNumber,
+        sharedUserAvatarUrl,
+        sharedUserIsVerified,
+        sharedUserAppId,
+        conversationOwnerId,
+        conversionCategory,
+        groupName,
+        assetUrl,
+        assetWidth,
+        assetHeight,
+        stickerId,
+        assetName,
+        assetType,
+        participantFullName,
+        participantUserId,
+        snapshotId,
+        snapshotType,
+        snapshotAmount,
+        assetId,
+        assetSymbol,
+        assetIcon,
+        siteName,
+        siteTitle,
+        siteDescription,
+        siteImage,
+        mentionRead,
+        pinned
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13332,7 +13343,7 @@ class LastPinMessageItemResult {
     this.userFullName,
   });
   @override
-  int get hashCode => $mrjf($mrjc(content.hashCode, userFullName.hashCode));
+  int get hashCode => Object.hash(content, userFullName);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13363,12 +13374,8 @@ class ConversationCircleItem {
     this.unseenMessageCount,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      circleId.hashCode,
-      $mrjc(
-          name.hashCode,
-          $mrjc(createdAt.hashCode,
-              $mrjc(count.hashCode, unseenMessageCount.hashCode)))));
+  int get hashCode =>
+      Object.hash(circleId, name, createdAt, count, unseenMessageCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13401,8 +13408,7 @@ class ConversationCircleManagerItem {
     required this.count,
   });
   @override
-  int get hashCode =>
-      $mrjf($mrjc(circleId.hashCode, $mrjc(name.hashCode, count.hashCode)));
+  int get hashCode => Object.hash(circleId, name, count);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13431,8 +13437,7 @@ class MentionUser {
     this.fullName,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      userId.hashCode, $mrjc(identityNumber.hashCode, fullName.hashCode)));
+  int get hashCode => Object.hash(userId, identityNumber, fullName);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13463,8 +13468,7 @@ class ParticipantSessionKey {
     this.publicKey,
   });
   @override
-  int get hashCode => $mrjf($mrjc(conversationId.hashCode,
-      $mrjc(userId.hashCode, $mrjc(sessionId.hashCode, publicKey.hashCode))));
+  int get hashCode => Object.hash(conversationId, userId, sessionId, publicKey);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13521,38 +13525,23 @@ class ParticipantUser {
     this.isScam,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          role.hashCode,
-          $mrjc(
-              createdAt.hashCode,
-              $mrjc(
-                  userId.hashCode,
-                  $mrjc(
-                      identityNumber.hashCode,
-                      $mrjc(
-                          relationship.hashCode,
-                          $mrjc(
-                              biography.hashCode,
-                              $mrjc(
-                                  fullName.hashCode,
-                                  $mrjc(
-                                      avatarUrl.hashCode,
-                                      $mrjc(
-                                          phone.hashCode,
-                                          $mrjc(
-                                              isVerified.hashCode,
-                                              $mrjc(
-                                                  userCreatedAt.hashCode,
-                                                  $mrjc(
-                                                      muteUntil.hashCode,
-                                                      $mrjc(
-                                                          hasPin.hashCode,
-                                                          $mrjc(
-                                                              appId.hashCode,
-                                                              isScam
-                                                                  .hashCode))))))))))))))));
+  int get hashCode => Object.hash(
+      conversationId,
+      role,
+      createdAt,
+      userId,
+      identityNumber,
+      relationship,
+      biography,
+      fullName,
+      avatarUrl,
+      phone,
+      isVerified,
+      userCreatedAt,
+      muteUntil,
+      hasPin,
+      appId,
+      isScam);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13671,50 +13660,43 @@ class QuoteMessageItem {
     this.sharedUserAppId,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          conversationId.hashCode,
-          $mrjc(
-              userId.hashCode,
-              $mrjc(
-                  userFullName.hashCode,
-                  $mrjc(
-                      userIdentityNumber.hashCode,
-                      $mrjc(
-                          appId.hashCode,
-                          $mrjc(
-                              type.hashCode,
-                              $mrjc(
-                                  content.hashCode,
-                                  $mrjc(
-                                      createdAt.hashCode,
-                                      $mrjc(
-                                          status.hashCode,
-                                          $mrjc(
-                                              mediaStatus.hashCode,
-                                              $mrjc(
-                                                  mediaWaveform.hashCode,
-                                                  $mrjc(
-                                                      mediaName.hashCode,
-                                                      $mrjc(
-                                                          mediaMimeType
-                                                              .hashCode,
-                                                          $mrjc(
-                                                              mediaSize
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  mediaWidth
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      mediaHeight
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          thumbImage
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              thumbUrl.hashCode,
-                                                                              $mrjc(mediaUrl.hashCode, $mrjc(mediaDuration.hashCode, $mrjc(quoteId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, $mrjc(assetType.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, sharedUserAppId.hashCode)))))))))))))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        messageId,
+        conversationId,
+        userId,
+        userFullName,
+        userIdentityNumber,
+        appId,
+        type,
+        content,
+        createdAt,
+        status,
+        mediaStatus,
+        mediaWaveform,
+        mediaName,
+        mediaMimeType,
+        mediaSize,
+        mediaWidth,
+        mediaHeight,
+        thumbImage,
+        thumbUrl,
+        mediaUrl,
+        mediaDuration,
+        quoteId,
+        quoteContent,
+        assetUrl,
+        assetWidth,
+        assetHeight,
+        stickerId,
+        assetName,
+        assetType,
+        sharedUserId,
+        sharedUserFullName,
+        sharedUserIdentityNumber,
+        sharedUserAvatarUrl,
+        sharedUserIsVerified,
+        sharedUserAppId
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13865,49 +13847,40 @@ class SendingMessage {
     this.resendSessionId,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          conversationId.hashCode,
-          $mrjc(
-              userId.hashCode,
-              $mrjc(
-                  category.hashCode,
-                  $mrjc(
-                      content.hashCode,
-                      $mrjc(
-                          mediaUrl.hashCode,
-                          $mrjc(
-                              mediaMimeType.hashCode,
-                              $mrjc(
-                                  mediaSize.hashCode,
-                                  $mrjc(
-                                      mediaDuration.hashCode,
-                                      $mrjc(
-                                          mediaWidth.hashCode,
-                                          $mrjc(
-                                              mediaHeight.hashCode,
-                                              $mrjc(
-                                                  mediaHash.hashCode,
-                                                  $mrjc(
-                                                      thumbImage.hashCode,
-                                                      $mrjc(
-                                                          mediaKey.hashCode,
-                                                          $mrjc(
-                                                              mediaDigest
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  mediaStatus
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      status
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          createdAt
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              action.hashCode,
-                                                                              $mrjc(participantId.hashCode, $mrjc(snapshotId.hashCode, $mrjc(hyperlink.hashCode, $mrjc(name.hashCode, $mrjc(albumId.hashCode, $mrjc(stickerId.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(mediaWaveform.hashCode, $mrjc(quoteMessageId.hashCode, $mrjc(quoteContent.hashCode, $mrjc(resendStatus.hashCode, $mrjc(resendUserId.hashCode, resendSessionId.hashCode))))))))))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        messageId,
+        conversationId,
+        userId,
+        category,
+        content,
+        mediaUrl,
+        mediaMimeType,
+        mediaSize,
+        mediaDuration,
+        mediaWidth,
+        mediaHeight,
+        mediaHash,
+        thumbImage,
+        mediaKey,
+        mediaDigest,
+        mediaStatus,
+        status,
+        createdAt,
+        action,
+        participantId,
+        snapshotId,
+        hyperlink,
+        name,
+        albumId,
+        stickerId,
+        sharedUserId,
+        mediaWaveform,
+        quoteMessageId,
+        quoteContent,
+        resendStatus,
+        resendUserId,
+        resendSessionId
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -14012,30 +13985,19 @@ class SearchMessageDetailItem {
     required this.conversationId,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          userId.hashCode,
-          $mrjc(
-              userAvatarUrl.hashCode,
-              $mrjc(
-                  userFullName.hashCode,
-                  $mrjc(
-                      type.hashCode,
-                      $mrjc(
-                          content.hashCode,
-                          $mrjc(
-                              createdAt.hashCode,
-                              $mrjc(
-                                  mediaName.hashCode,
-                                  $mrjc(
-                                      groupIconUrl.hashCode,
-                                      $mrjc(
-                                          category.hashCode,
-                                          $mrjc(
-                                              groupName.hashCode,
-                                              conversationId
-                                                  .hashCode))))))))))));
+  int get hashCode => Object.hash(
+      messageId,
+      userId,
+      userAvatarUrl,
+      userFullName,
+      type,
+      content,
+      createdAt,
+      mediaName,
+      groupIconUrl,
+      category,
+      groupName,
+      conversationId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -14114,47 +14076,26 @@ class NotificationMessage {
     this.participantUserId,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      messageId.hashCode,
-      $mrjc(
-          conversationId.hashCode,
-          $mrjc(
-              senderId.hashCode,
-              $mrjc(
-                  senderFullName.hashCode,
-                  $mrjc(
-                      type.hashCode,
-                      $mrjc(
-                          content.hashCode,
-                          $mrjc(
-                              quoteContent.hashCode,
-                              $mrjc(
-                                  status.hashCode,
-                                  $mrjc(
-                                      groupName.hashCode,
-                                      $mrjc(
-                                          muteUntil.hashCode,
-                                          $mrjc(
-                                              ownerMuteUntil.hashCode,
-                                              $mrjc(
-                                                  ownerUserId.hashCode,
-                                                  $mrjc(
-                                                      ownerFullName.hashCode,
-                                                      $mrjc(
-                                                          createdAt.hashCode,
-                                                          $mrjc(
-                                                              category.hashCode,
-                                                              $mrjc(
-                                                                  actionName
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      relationship
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          participantFullName
-                                                                              .hashCode,
-                                                                          participantUserId
-                                                                              .hashCode)))))))))))))))))));
+  int get hashCode => Object.hash(
+      messageId,
+      conversationId,
+      senderId,
+      senderFullName,
+      type,
+      content,
+      quoteContent,
+      status,
+      groupName,
+      muteUntil,
+      ownerMuteUntil,
+      ownerUserId,
+      ownerFullName,
+      createdAt,
+      category,
+      actionName,
+      relationship,
+      participantFullName,
+      participantUserId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -14271,50 +14212,39 @@ class ConversationItem {
     this.relationship,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          groupIconUrl.hashCode,
-          $mrjc(
-              category.hashCode,
-              $mrjc(
-                  draft.hashCode,
-                  $mrjc(
-                      groupName.hashCode,
-                      $mrjc(
-                          status.hashCode,
-                          $mrjc(
-                              lastReadMessageId.hashCode,
-                              $mrjc(
-                                  unseenMessageCount.hashCode,
-                                  $mrjc(
-                                      ownerId.hashCode,
-                                      $mrjc(
-                                          pinTime.hashCode,
-                                          $mrjc(
-                                              muteUntil.hashCode,
-                                              $mrjc(
-                                                  avatarUrl.hashCode,
-                                                  $mrjc(
-                                                      name.hashCode,
-                                                      $mrjc(
-                                                          ownerVerified
-                                                              .hashCode,
-                                                          $mrjc(
-                                                              ownerIdentityNumber
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  ownerMuteUntil
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      appId
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          content
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              contentType.hashCode,
-                                                                              $mrjc(createdAt.hashCode, $mrjc(lastMessageCreatedAt.hashCode, $mrjc(mediaUrl.hashCode, $mrjc(senderId.hashCode, $mrjc(actionName.hashCode, $mrjc(messageStatus.hashCode, $mrjc(senderFullName.hashCode, $mrjc(snapshotType.hashCode, $mrjc(participantFullName.hashCode, $mrjc(participantUserId.hashCode, $mrjc(mentionCount.hashCode, relationship.hashCode)))))))))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        conversationId,
+        groupIconUrl,
+        category,
+        draft,
+        groupName,
+        status,
+        lastReadMessageId,
+        unseenMessageCount,
+        ownerId,
+        pinTime,
+        muteUntil,
+        avatarUrl,
+        name,
+        ownerVerified,
+        ownerIdentityNumber,
+        ownerMuteUntil,
+        appId,
+        content,
+        contentType,
+        createdAt,
+        lastMessageCreatedAt,
+        mediaUrl,
+        senderId,
+        actionName,
+        messageStatus,
+        senderFullName,
+        snapshotType,
+        participantFullName,
+        participantUserId,
+        mentionCount,
+        relationship
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -14419,30 +14349,20 @@ class SearchConversationItem {
     this.appId,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          groupIconUrl.hashCode,
-          $mrjc(
-              category.hashCode,
-              $mrjc(
-                  groupName.hashCode,
-                  $mrjc(
-                      pinTime.hashCode,
-                      $mrjc(
-                          muteUntil.hashCode,
-                          $mrjc(
-                              ownerId.hashCode,
-                              $mrjc(
-                                  ownerMuteUntil.hashCode,
-                                  $mrjc(
-                                      ownerIdentityNumber.hashCode,
-                                      $mrjc(
-                                          fullName.hashCode,
-                                          $mrjc(
-                                              avatarUrl.hashCode,
-                                              $mrjc(isVerified.hashCode,
-                                                  appId.hashCode)))))))))))));
+  int get hashCode => Object.hash(
+      conversationId,
+      groupIconUrl,
+      category,
+      groupName,
+      pinTime,
+      muteUntil,
+      ownerId,
+      ownerMuteUntil,
+      ownerIdentityNumber,
+      fullName,
+      avatarUrl,
+      isVerified,
+      appId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -14503,22 +14423,8 @@ class ConversationStorageUsage {
     this.isVerified,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      conversationId.hashCode,
-      $mrjc(
-          ownerId.hashCode,
-          $mrjc(
-              category.hashCode,
-              $mrjc(
-                  iconUrl.hashCode,
-                  $mrjc(
-                      name.hashCode,
-                      $mrjc(
-                          identityNumber.hashCode,
-                          $mrjc(
-                              fullName.hashCode,
-                              $mrjc(avatarUrl.hashCode,
-                                  isVerified.hashCode)))))))));
+  int get hashCode => Object.hash(conversationId, ownerId, category, iconUrl,
+      name, identityNumber, fullName, avatarUrl, isVerified);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
