@@ -28,6 +28,7 @@ import 'dao/asset_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
+import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
 import 'dao/hyperlink_dao.dart';
 import 'dao/job_dao.dart';
@@ -87,6 +88,7 @@ part 'mixin_database.g.dart';
     StickerRelationshipDao,
     UserDao,
     PinMessageDao,
+    FiatDao,
   ],
   queries: {},
 )
@@ -94,7 +96,7 @@ class MixinDatabase extends _$MixinDatabase {
   MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   final eventBus = DataBaseEventBus();
 
@@ -153,6 +155,9 @@ class MixinDatabase extends _$MixinDatabase {
           if (from <= 5) {
             await m.createTable(pinMessages);
             await m.createIndex(indexPinMessagesConversationId);
+          }
+          if (from <= 6) {
+            await m.createTable(fiats);
           }
         },
       );

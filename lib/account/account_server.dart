@@ -1498,4 +1498,19 @@ class AccountServer {
         pinMessageMinimals: pinMessageMinimals,
         pin: false,
       );
+
+  Future<void> updateSnapshotById({required String snapshotId}) async {
+    final data = await client.snapshotApi.getSnapshotById(snapshotId);
+    await database.snapshotDao.insertSdkSnapshot(data.data);
+  }
+
+  Future<void> updateAssetById({required String assetId}) async {
+    final data = await client.assetApi.getAssetById(assetId);
+    await database.assetDao.insertSdkAsset(data.data);
+  }
+
+  Future<void> updateFiats() async {
+    final data = await client.accountApi.getFiats();
+    await database.fiatDao.insertAllSdkFiat(data.data);
+  }
 }

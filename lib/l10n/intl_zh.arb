@@ -206,5 +206,14 @@
   "continueText": "继续",
   "localTimeErrorDescription": "检测到系统时间异常，请校正后再继续使用",
   "collapse": "折叠",
-  "appCard": "卡片"
+  "appCard": "卡片",
+  "assetType": "资产类型",
+  "memo": "备注",
+  "time": "时间",
+  "transactionsId": "交易编号",
+  "from": "来自",
+  "to": "至",
+  "walletTransactionCurrentValue": "价值 {value}",
+  "walletTransactionThatTimeValue": "当时价值 {value}",
+  "walletTransactionThatTimeNoValue": "当时价值 暂无"
 }
