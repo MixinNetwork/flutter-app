@@ -59,6 +59,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m20(count) => "${count} 条相关的消息";
 
+  static String m21(value) => "价值 ${value}";
+
+  static String m22(value) => "当时价值 ${value}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aMessage": MessageLookupByLibrary.simpleMessage("一条消息"),
@@ -297,6 +301,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("正在等待这个消息。"),
+        "walletTransactionCurrentValue": m21,
+        "walletTransactionThatTimeNoValue":
+            MessageLookupByLibrary.simpleMessage("当时价值 暂无"),
+        "walletTransactionThatTimeValue": m22,
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youStart": MessageLookupByLibrary.simpleMessage("您")
       };

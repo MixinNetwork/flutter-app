@@ -29,8 +29,13 @@ class _TransferPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    useEffect(() {
+      context.accountServer.updateFiats();
+    });
+
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
-        .snapshotById(snapshotId)
+        .snapshotById(
+            snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
         .watchSingleOrNull()).data;
 
     useEffect(() {
@@ -133,9 +138,86 @@ class _SnapshotDetailHeader extends HookWidget {
               textAlign: TextAlign.center,
             ),
           ),
+          const SizedBox(height: 4),
+          AnimatedSize(
+            duration: const Duration(milliseconds: 200),
+            alignment: Alignment.topCenter,
+            child: Builder(
+              builder: (context) {
+                if (snapshot.priceUsd != null && snapshot.fiatRate != null) {
+                  return _ValuesDescription(snapshot: snapshot);
+                }
+                return const SizedBox();
+              },
+            ),
+          ),
           const SizedBox(height: 24),
         ],
       );
+}
+
+class _ValuesDescription extends HookWidget {
+  const _ValuesDescription({
+    Key? key,
+    required this.snapshot,
+  }) : super(key: key);
+
+  final SnapshotItem snapshot;
+
+  @override
+  Widget build(BuildContext context) {
+    final ticker = useMemoizedFuture(
+      () => context.accountServer.client.snapshotApi.getTicker(
+        snapshot.assetId,
+        offset: snapshot.createdAt.toIso8601String(),
+      ),
+      null,
+      keys: [snapshot.snapshotId],
+    ).data?.data;
+
+    final String? thatTimeValue;
+
+    final currentValue = context.l10n.walletTransactionCurrentValue(
+      context.currencyFormat(snapshot.amountOfCurrentCurrency().abs()),
+    );
+
+    if (ticker == null) {
+      thatTimeValue = null;
+    } else if (ticker.priceUsd == '0') {
+      thatTimeValue = context.l10n.walletTransactionThatTimeNoValue;
+    } else {
+      thatTimeValue = context.l10n.walletTransactionThatTimeValue(
+        context.currencyFormat((snapshot.amount.asDecimal *
+                ticker.priceUsd.asDecimal *
+                snapshot.fiatRate!.asDecimal)
+            .abs()),
+      );
+    }
+    return DefaultTextStyle(
+      style: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: context.theme.secondaryText,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SelectableText(
+            currentValue,
+            enableInteractiveSelection: false,
+          ),
+          if (thatTimeValue != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: SelectableText(
+                thatTimeValue,
+                enableInteractiveSelection: false,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class _TransactionDetailInfo extends StatelessWidget {

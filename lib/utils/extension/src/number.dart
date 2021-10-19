@@ -1,11 +1,11 @@
 part of '../extension.dart';
 
 extension CurrencyExtension on BuildContext {
-  String get currencyFormat =>
-      currentCurrencyNumberFormat.format(num.tryParse('$this'));
+  String currencyFormat(dynamic value) =>
+      currentCurrencyNumberFormat.format(num.tryParse('$value'));
 
-  String get currencyFormatWithoutSymbol =>
-      currencyFormat.replaceAll(currentCurrencyNumberFormat.currencySymbol, '');
+  String currencyFormatWithoutSymbol(dynamic value) => currencyFormat(value)
+      .replaceAll(currentCurrencyNumberFormat.currencySymbol, '');
 
   String get currencyFormatCoin => NumberFormat().format(num.tryParse('$this'));
 
@@ -64,7 +64,6 @@ extension DoubleCurrencyExtension on num {
   Decimal get asDecimal => Decimal.parse('$this');
 }
 
-
 // extension AssetResultExtension on AssetResult {
 //   Decimal get amountOfUsd => balance.asDecimal * priceUsd.asDecimal;
 //
@@ -96,12 +95,9 @@ extension DoubleCurrencyExtension on num {
 // }
 //
 extension SnapshotItemExtension on SnapshotItem {
-  // Decimal amountOfCurrentCurrency(AssetResult asset) {
-  //   assert(asset.assetId == assetId);
-  //   return amount.asDecimal *
-  //       asset.priceUsd.asDecimal *
-  //       asset.fiatRate.asDecimal;
-  // }
+  Decimal amountOfCurrentCurrency() =>
+      amount.asDecimal * priceUsd!.asDecimal * fiatRate!.asDecimal;
+
   bool get isPositive => (double.tryParse(amount) ?? 0) > 0;
 }
 //

@@ -40,10 +40,13 @@ class SnapshotDao extends DatabaseAccessor<MixinDatabase>
   Future deleteSnapshot(Snapshot snapshot) =>
       delete(db.snapshots).delete(snapshot);
 
-  Selectable<SnapshotItem> snapshotById(String snapshotId) => snapshotItems(
-        (snapshot, opponent, asset, tempAsset) =>
+  Selectable<SnapshotItem> snapshotById(
+          String snapshotId, String currentFiat) =>
+      snapshotItems(
+        currentFiat,
+        (snapshot, opponent, asset, tempAsset, fiats) =>
             snapshot.snapshotId.equals(snapshotId),
-        (snapshot, opponent, asset, tempAsset) => ignoreOrderBy,
-        (snapshot, opponent, asset, tempAsset) => Limit(1, 0),
+        (snapshot, opponent, asset, tempAsset, fiats) => ignoreOrderBy,
+        (snapshot, opponent, asset, tempAsset, fiats) => Limit(1, 0),
       );
 }

@@ -217,6 +217,9 @@
   "time": "Time",
   "transactionsId": "Transaction Id",
   "from": "From",
-  "to": "To"
+  "to": "To",
+  "walletTransactionCurrentValue": "value now {value}",
+  "walletTransactionThatTimeValue": "value then {value}",
+  "walletTransactionThatTimeNoValue": "value then N/A"
 }
 

@@ -38,31 +38,46 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
   Users get users => attachedDatabase.users;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
+  Fiats get fiats => attachedDatabase.fiats;
   Selectable<SnapshotItem> snapshotItems(
+      String currentFiat,
       Expression<bool?> Function(Snapshots snapshot, Users opponent,
-              Assets asset, Assets tempAsset)
+              Assets asset, Assets tempAsset, Fiats fiat)
           where,
       OrderBy Function(Snapshots snapshot, Users opponent, Assets asset,
-              Assets tempAsset)
+              Assets tempAsset, Fiats fiat)
           order,
       Limit Function(Snapshots snapshot, Users opponent, Assets asset,
-              Assets tempAsset)
+              Assets tempAsset, Fiats fiat)
           limit) {
     final generatedwhere = $write(
-        where(alias(this.snapshots, 'snapshot'), alias(this.users, 'opponent'),
-            alias(this.assets, 'asset'), alias(this.assets, 'tempAsset')),
+        where(
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'opponent'),
+            alias(this.assets, 'asset'),
+            alias(this.assets, 'tempAsset'),
+            alias(this.fiats, 'fiat')),
         hasMultipleTables: true);
     final generatedorder = $write(
-        order(alias(this.snapshots, 'snapshot'), alias(this.users, 'opponent'),
-            alias(this.assets, 'asset'), alias(this.assets, 'tempAsset')),
+        order(
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'opponent'),
+            alias(this.assets, 'asset'),
+            alias(this.assets, 'tempAsset'),
+            alias(this.fiats, 'fiat')),
         hasMultipleTables: true);
     final generatedlimit = $write(
-        limit(alias(this.snapshots, 'snapshot'), alias(this.users, 'opponent'),
-            alias(this.assets, 'asset'), alias(this.assets, 'tempAsset')),
+        limit(
+            alias(this.snapshots, 'snapshot'),
+            alias(this.users, 'opponent'),
+            alias(this.assets, 'asset'),
+            alias(this.assets, 'tempAsset'),
+            alias(this.fiats, 'fiat')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT snapshot.*, opponent.avatar_url, opponent.full_name AS opponent_ful_name, asset.chain_id, asset.symbol, asset.name AS symbolName, asset.tag, asset.confirmations AS asset_confirmations, asset.icon_url AS symbolIconUrl, tempAsset.icon_url AS chainIconUrl FROM snapshots AS snapshot LEFT JOIN users AS opponent ON opponent.user_id = snapshot.opponent_id LEFT JOIN assets AS asset ON asset.asset_id = snapshot.asset_id LEFT JOIN assets AS tempAsset ON asset.chain_id = tempAsset.asset_id WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
+        'SELECT snapshot.*, opponent.avatar_url, opponent.full_name AS opponent_ful_name, asset.price_usd, asset.chain_id, asset.symbol, asset.name AS symbolName, asset.tag, asset.confirmations AS asset_confirmations, asset.icon_url AS symbolIconUrl, tempAsset.icon_url AS chainIconUrl, fiat.rate AS fiatRate FROM snapshots AS snapshot LEFT JOIN users AS opponent ON opponent.user_id = snapshot.opponent_id LEFT JOIN assets AS asset ON asset.asset_id = snapshot.asset_id LEFT JOIN assets AS tempAsset ON asset.chain_id = tempAsset.asset_id LEFT JOIN fiats AS fiat ON fiat.code = ?1 WHERE ${generatedwhere.sql} ${generatedorder.sql} ${generatedlimit.sql}',
         variables: [
+          Variable<String>(currentFiat),
           ...generatedwhere.introducedVariables,
           ...generatedorder.introducedVariables,
           ...generatedlimit.introducedVariables
@@ -70,6 +85,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         readsFrom: {
           users,
           assets,
+          fiats,
           snapshots,
           ...generatedwhere.watchedTables,
           ...generatedorder.watchedTables,
@@ -90,6 +106,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         confirmations: row.read<int?>('confirmations'),
         avatarUrl: row.read<String?>('avatar_url'),
         opponentFulName: row.read<String?>('opponent_ful_name'),
+        priceUsd: row.read<String?>('price_usd'),
         chainId: row.read<String?>('chain_id'),
         symbol: row.read<String?>('symbol'),
         symbolName: row.read<String?>('symbolName'),
@@ -97,6 +114,7 @@ mixin _$SnapshotDaoMixin on DatabaseAccessor<MixinDatabase> {
         assetConfirmations: row.read<int?>('asset_confirmations'),
         symbolIconUrl: row.read<String?>('symbolIconUrl'),
         chainIconUrl: row.read<String?>('chainIconUrl'),
+        fiatRate: row.read<double?>('fiatRate'),
       );
     });
   }
@@ -116,6 +134,7 @@ class SnapshotItem {
   int? confirmations;
   String? avatarUrl;
   String? opponentFulName;
+  String? priceUsd;
   String? chainId;
   String? symbol;
   String? symbolName;
@@ -123,6 +142,7 @@ class SnapshotItem {
   int? assetConfirmations;
   String? symbolIconUrl;
   String? chainIconUrl;
+  double? fiatRate;
   SnapshotItem({
     required this.snapshotId,
     required this.type,
@@ -137,6 +157,7 @@ class SnapshotItem {
     this.confirmations,
     this.avatarUrl,
     this.opponentFulName,
+    this.priceUsd,
     this.chainId,
     this.symbol,
     this.symbolName,
@@ -144,6 +165,7 @@ class SnapshotItem {
     this.assetConfirmations,
     this.symbolIconUrl,
     this.chainIconUrl,
+    this.fiatRate,
   });
   @override
   int get hashCode => $mrjf($mrjc(
@@ -173,21 +195,21 @@ class SnapshotItem {
                                                   $mrjc(
                                                       opponentFulName.hashCode,
                                                       $mrjc(
-                                                          chainId.hashCode,
+                                                          priceUsd.hashCode,
                                                           $mrjc(
-                                                              symbol.hashCode,
+                                                              chainId.hashCode,
                                                               $mrjc(
-                                                                  symbolName
+                                                                  symbol
                                                                       .hashCode,
                                                                   $mrjc(
-                                                                      tag
+                                                                      symbolName
                                                                           .hashCode,
                                                                       $mrjc(
-                                                                          assetConfirmations
+                                                                          tag
                                                                               .hashCode,
                                                                           $mrjc(
-                                                                              symbolIconUrl.hashCode,
-                                                                              chainIconUrl.hashCode))))))))))))))))))));
+                                                                              assetConfirmations.hashCode,
+                                                                              $mrjc(symbolIconUrl.hashCode, $mrjc(chainIconUrl.hashCode, fiatRate.hashCode))))))))))))))))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -205,13 +227,15 @@ class SnapshotItem {
           other.confirmations == this.confirmations &&
           other.avatarUrl == this.avatarUrl &&
           other.opponentFulName == this.opponentFulName &&
+          other.priceUsd == this.priceUsd &&
           other.chainId == this.chainId &&
           other.symbol == this.symbol &&
           other.symbolName == this.symbolName &&
           other.tag == this.tag &&
           other.assetConfirmations == this.assetConfirmations &&
           other.symbolIconUrl == this.symbolIconUrl &&
-          other.chainIconUrl == this.chainIconUrl);
+          other.chainIconUrl == this.chainIconUrl &&
+          other.fiatRate == this.fiatRate);
   @override
   String toString() {
     return (StringBuffer('SnapshotItem(')
@@ -228,13 +252,15 @@ class SnapshotItem {
           ..write('confirmations: $confirmations, ')
           ..write('avatarUrl: $avatarUrl, ')
           ..write('opponentFulName: $opponentFulName, ')
+          ..write('priceUsd: $priceUsd, ')
           ..write('chainId: $chainId, ')
           ..write('symbol: $symbol, ')
           ..write('symbolName: $symbolName, ')
           ..write('tag: $tag, ')
           ..write('assetConfirmations: $assetConfirmations, ')
           ..write('symbolIconUrl: $symbolIconUrl, ')
-          ..write('chainIconUrl: $chainIconUrl')
+          ..write('chainIconUrl: $chainIconUrl, ')
+          ..write('fiatRate: $fiatRate')
           ..write(')'))
         .toString();
   }

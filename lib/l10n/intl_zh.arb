@@ -212,5 +212,8 @@
   "time": "时间",
   "transactionsId": "交易编号",
   "from": "来自",
-  "to": "至"
+  "to": "至",
+  "walletTransactionCurrentValue": "价值 {value}",
+  "walletTransactionThatTimeValue": "当时价值 {value}",
+  "walletTransactionThatTimeNoValue": "当时价值 暂无"
 }

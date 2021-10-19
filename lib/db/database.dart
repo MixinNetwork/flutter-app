@@ -3,6 +3,7 @@ import 'dao/asset_dao.dart';
 import 'dao/circle_conversation_dao.dart';
 import 'dao/circle_dao.dart';
 import 'dao/conversation_dao.dart';
+import 'dao/fiat_dao.dart';
 import 'dao/flood_message_dao.dart';
 import 'dao/job_dao.dart';
 import 'dao/message_dao.dart';
@@ -44,6 +45,7 @@ class Database {
     userDao = UserDao(mixinDatabase);
     transcriptMessageDao = TranscriptMessageDao(mixinDatabase);
     pinMessageDao = PinMessageDao(mixinDatabase);
+    fiatDao = FiatDao(mixinDatabase);
   }
 
   // static MixinDatabase _database;
@@ -94,6 +96,8 @@ class Database {
   late final TranscriptMessageDao transcriptMessageDao;
 
   late final PinMessageDao pinMessageDao;
+
+  late final FiatDao fiatDao;
 
   Future<void> dispose() async {
     await mixinDatabase.eventBus.dispose();

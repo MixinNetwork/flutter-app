@@ -1,21 +1,24 @@
 import '../mixin.moor';
 
-snapshotItems as SnapshotItem:
+snapshotItems(:currentFiat AS TEXT) as SnapshotItem:
 SELECT
   snapshot.*,
   opponent.avatar_url,
   opponent.full_name AS opponent_ful_name,
+  asset.price_usd,
   asset.chain_id,
   asset.symbol,
   asset.name AS symbolName,
   asset.tag,
   asset.confirmations AS asset_confirmations,
   asset.icon_url AS symbolIconUrl,
-  tempAsset.icon_url AS chainIconUrl
+  tempAsset.icon_url AS chainIconUrl,
+  fiat.rate AS fiatRate
 FROM snapshots snapshot
   LEFT JOIN users opponent ON opponent.user_id = snapshot.opponent_id
   LEFT JOIN assets asset ON asset.asset_id = snapshot.asset_id
   LEFT JOIN assets tempAsset ON asset.chain_id = tempAsset.asset_id
+  LEFT JOIN fiats fiat ON fiat.code = :currentFiat
 WHERE $where
 ORDER BY $order
 LIMIT $limit;

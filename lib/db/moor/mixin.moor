@@ -62,6 +62,8 @@ CREATE TABLE transcript_messages (transcript_id TEXT NOT NULL, message_id TEXT N
 
 CREATE TABLE pin_messages ( message_id TEXT NOT NULL, conversation_id TEXT NOT NULL, created_at INTEGER NOT NULL MAPPED BY `const MillisDateConverter()`, PRIMARY KEY (message_id));
 
+CREATE TABLE fiats (code TEXT NOT NULL, rate DOUBLE NOT NULL, PRIMARY KEY(code));
+
 CREATE INDEX IF NOT EXISTS index_conversations_category_status ON conversations(category, status);
 CREATE INDEX IF NOT EXISTS index_conversations_mute_until ON conversations(mute_until);
 CREATE INDEX IF NOT EXISTS index_flood_messages_created_at ON flood_messages(created_at);

@@ -1508,4 +1508,9 @@ class AccountServer {
     final data = await client.assetApi.getAssetById(assetId);
     await database.assetDao.insertSdkAsset(data.data);
   }
+
+  Future<void> updateFiats() async {
+    final data = await client.accountApi.getFiats();
+    await database.fiatDao.insertAllSdkFiat(data.data);
+  }
 }
