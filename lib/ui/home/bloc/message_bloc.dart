@@ -477,7 +477,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
           bottom = [...bottom, item]
             ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
         } else {
-          top = [...top, item]
+          top = [item, ...top]
             ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
         }
         final position = scrollController.position;
