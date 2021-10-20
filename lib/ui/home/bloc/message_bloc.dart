@@ -438,11 +438,10 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
 
   MessageState? _insertOrReplace(
       String conversationId, List<MessageItem> list) {
-    final top = state.top.toList();
+    var top = state.top.toList();
     var center = state.center;
     var bottom = state.bottom.toList();
 
-    final bottomMessage = state.bottomMessage;
     var jumpToBottom = false;
     for (final item in list) {
       if (item.conversationId != conversationId) continue;
@@ -466,14 +465,19 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
         continue;
       }
 
-      // New message must be after last bottom message.
-      if (bottomMessage != null &&
-          bottomMessage.createdAt.isAfter(item.createdAt)) continue;
+      // if don't have messages or older message after then item
+      if (state.topMessage?.createdAt.isAfter(item.createdAt) ?? false) continue;
 
       final currentUserSent = item.relationship == UserRelationship.me;
 
       if (state.isLatest) {
-        bottom = [...bottom, item];
+        if (center?.createdAt.isBefore(item.createdAt) ?? true) {
+          bottom = [...bottom, item]
+            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        } else {
+          top = [...top, item]
+            ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        }
         final position = scrollController.position;
         jumpToBottom = currentUserSent ||
             (position.hasContentDimensions &&
