@@ -212,5 +212,14 @@
   "localTimeErrorDescription": "System time is unusual, please continue to use again after correction",
   "collapse": "Collapse",
   "appCard": "Card",
+  "assetType": "Asset Type",
+  "memo": "Memo",
+  "time": "Time",
+  "transactionsId": "Transaction Id",
+  "from": "From",
+  "to": "To",
+  "walletTransactionCurrentValue": "value now {value}",
+  "walletTransactionThatTimeValue": "value then {value}",
+  "walletTransactionThatTimeNoValue": "value then N/A",
   "text": "Text"
 }

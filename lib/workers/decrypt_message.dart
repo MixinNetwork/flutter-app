@@ -898,13 +898,18 @@ class DecryptMessage extends Injector {
   Future<void> _processSystemSnapshotMessage(
       BlazeMessageData data, SnapshotMessage snapshotMessage) async {
     final snapshot = db.Snapshot(
-        snapshotId: snapshotMessage.snapshotId,
-        type: snapshotMessage.type,
-        assetId: snapshotMessage.assetId,
-        amount: snapshotMessage.amount,
-        createdAt: DateTime.parse(snapshotMessage.createdAt));
+      snapshotId: snapshotMessage.snapshotId,
+      type: snapshotMessage.type,
+      assetId: snapshotMessage.assetId,
+      opponentId: snapshotMessage.opponentId,
+      amount: snapshotMessage.amount,
+      createdAt: DateTime.parse(
+        snapshotMessage.createdAt,
+      ),
+    );
     await database.snapshotDao.insert(snapshot);
-    final exists = await database.assetDao.findAssetById(snapshot.assetId);
+    final exists =
+        await database.assetDao.assetById(snapshot.assetId).getSingleOrNull();
     if (exists == null) {
       final a =
           (await client.assetApi.getAssetById(snapshotMessage.assetId)).data;

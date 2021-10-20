@@ -38,6 +38,7 @@ mixin _$TranscriptMessageDaoMixin on DatabaseAccessor<MixinDatabase> {
   Users get users => attachedDatabase.users;
   TranscriptMessages get transcriptMessages =>
       attachedDatabase.transcriptMessages;
+  Fiats get fiats => attachedDatabase.fiats;
   Selectable<TranscriptMessageItem> baseTranscriptMessageItem(
       Expression<bool?> Function(
               TranscriptMessages transcript,

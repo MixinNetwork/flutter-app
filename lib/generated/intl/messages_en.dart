@@ -62,6 +62,10 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m20(count) => "${count} related messages";
 
+  static String m21(value) => "value now ${value}";
+
+  static String m22(value) => "value then ${value}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aMessage": MessageLookupByLibrary.simpleMessage("a message"),
@@ -77,6 +81,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "appearance": MessageLookupByLibrary.simpleMessage("Appearance"),
         "archivedFolder":
             MessageLookupByLibrary.simpleMessage("archived folder"),
+        "assetType": MessageLookupByLibrary.simpleMessage("Asset Type"),
         "audio": MessageLookupByLibrary.simpleMessage("Audio"),
         "audios": MessageLookupByLibrary.simpleMessage("Audios"),
         "autoBackup": MessageLookupByLibrary.simpleMessage("Auto Backup"),
@@ -179,6 +184,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "followTwitter":
             MessageLookupByLibrary.simpleMessage("Follow us on Twitter"),
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
+        "from": MessageLookupByLibrary.simpleMessage("From"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("From: "),
         "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
@@ -218,6 +224,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "System time is unusual, please continue to use again after correction"),
         "location": MessageLookupByLibrary.simpleMessage("Location"),
         "media": MessageLookupByLibrary.simpleMessage("Media"),
+        "memo": MessageLookupByLibrary.simpleMessage("Memo"),
         "messagePreview":
             MessageLookupByLibrary.simpleMessage("Message Preview"),
         "messagePreviewDescription": MessageLookupByLibrary.simpleMessage(
@@ -318,9 +325,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "successful": MessageLookupByLibrary.simpleMessage("Successful"),
         "termsService":
             MessageLookupByLibrary.simpleMessage("Terms of Service"),
-        "text": MessageLookupByLibrary.simpleMessage("Text"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),
         "transactions": MessageLookupByLibrary.simpleMessage("Transactions"),
+        "transactionsId":
+            MessageLookupByLibrary.simpleMessage("Transaction Id"),
         "transfer": MessageLookupByLibrary.simpleMessage("Transfer"),
         "unMute": MessageLookupByLibrary.simpleMessage("Unmute"),
         "unPin": MessageLookupByLibrary.simpleMessage("Unpin"),
@@ -336,6 +344,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
+        "walletTransactionCurrentValue": m21,
+        "walletTransactionThatTimeNoValue":
+            MessageLookupByLibrary.simpleMessage("value then N/A"),
+        "walletTransactionThatTimeValue": m22,
         "you": MessageLookupByLibrary.simpleMessage("you"),
         "youStart": MessageLookupByLibrary.simpleMessage("You")
       };

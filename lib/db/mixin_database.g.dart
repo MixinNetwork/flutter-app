@@ -11344,6 +11344,185 @@ class TranscriptMessages extends Table
   bool get dontWriteConstraints => true;
 }
 
+class Fiat extends DataClass implements Insertable<Fiat> {
+  String code;
+  double rate;
+  Fiat({required this.code, required this.rate});
+  factory Fiat.fromData(Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return Fiat(
+      code: const StringType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}code'])!,
+      rate: const RealType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}rate'])!,
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['code'] = Variable<String>(code);
+    map['rate'] = Variable<double>(rate);
+    return map;
+  }
+
+  FiatsCompanion toCompanion(bool nullToAbsent) {
+    return FiatsCompanion(
+      code: Value(code),
+      rate: Value(rate),
+    );
+  }
+
+  factory Fiat.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return Fiat(
+      code: serializer.fromJson<String>(json['code']),
+      rate: serializer.fromJson<double>(json['rate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'code': serializer.toJson<String>(code),
+      'rate': serializer.toJson<double>(rate),
+    };
+  }
+
+  Fiat copyWith({String? code, double? rate}) => Fiat(
+        code: code ?? this.code,
+        rate: rate ?? this.rate,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('Fiat(')
+          ..write('code: $code, ')
+          ..write('rate: $rate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(code.hashCode, rate.hashCode));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Fiat && other.code == this.code && other.rate == this.rate);
+}
+
+class FiatsCompanion extends UpdateCompanion<Fiat> {
+  Value<String> code;
+  Value<double> rate;
+  FiatsCompanion({
+    this.code = const Value.absent(),
+    this.rate = const Value.absent(),
+  });
+  FiatsCompanion.insert({
+    required String code,
+    required double rate,
+  })  : code = Value(code),
+        rate = Value(rate);
+  static Insertable<Fiat> custom({
+    Expression<String>? code,
+    Expression<double>? rate,
+  }) {
+    return RawValuesInsertable({
+      if (code != null) 'code': code,
+      if (rate != null) 'rate': rate,
+    });
+  }
+
+  FiatsCompanion copyWith({Value<String>? code, Value<double>? rate}) {
+    return FiatsCompanion(
+      code: code ?? this.code,
+      rate: rate ?? this.rate,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (rate.present) {
+      map['rate'] = Variable<double>(rate.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('FiatsCompanion(')
+          ..write('code: $code, ')
+          ..write('rate: $rate')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class Fiats extends Table with TableInfo<Fiats, Fiat> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  Fiats(this._db, [this._alias]);
+  final VerificationMeta _codeMeta = const VerificationMeta('code');
+  late final GeneratedColumn<String?> code = GeneratedColumn<String?>(
+      'code', aliasedName, false,
+      typeName: 'TEXT',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  final VerificationMeta _rateMeta = const VerificationMeta('rate');
+  late final GeneratedColumn<double?> rate = GeneratedColumn<double?>(
+      'rate', aliasedName, false,
+      typeName: 'REAL',
+      requiredDuringInsert: true,
+      $customConstraints: 'NOT NULL');
+  @override
+  List<GeneratedColumn> get $columns => [code, rate];
+  @override
+  String get aliasedName => _alias ?? 'fiats';
+  @override
+  String get actualTableName => 'fiats';
+  @override
+  VerificationContext validateIntegrity(Insertable<Fiat> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('code')) {
+      context.handle(
+          _codeMeta, code.isAcceptableOrUnknown(data['code']!, _codeMeta));
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('rate')) {
+      context.handle(
+          _rateMeta, rate.isAcceptableOrUnknown(data['rate']!, _rateMeta));
+    } else if (isInserting) {
+      context.missing(_rateMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {code};
+  @override
+  Fiat map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return Fiat.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  Fiats createAlias(String alias) {
+    return Fiats(_db, alias);
+  }
+
+  @override
+  List<String> get customConstraints => const ['PRIMARY KEY(code)'];
+  @override
+  bool get dontWriteConstraints => true;
+}
+
 abstract class _$MixinDatabase extends GeneratedDatabase {
   _$MixinDatabase(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$MixinDatabase.connect(DatabaseConnection c) : super.connect(c);
@@ -11408,6 +11587,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Stickers stickers = Stickers(this);
   late final Users users = Users(this);
   late final TranscriptMessages transcriptMessages = TranscriptMessages(this);
+  late final Fiats fiats = Fiats(this);
   late final AddressDao addressDao = AddressDao(this as MixinDatabase);
   late final AppDao appDao = AppDao(this as MixinDatabase);
   late final AssetDao assetDao = AssetDao(this as MixinDatabase);
@@ -11442,6 +11622,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       StickerRelationshipDao(this as MixinDatabase);
   late final UserDao userDao = UserDao(this as MixinDatabase);
   late final PinMessageDao pinMessageDao = PinMessageDao(this as MixinDatabase);
+  late final FiatDao fiatDao = FiatDao(this as MixinDatabase);
   Selectable<MessageItem> basePinMessageItems(
       String conversationId,
       OrderBy Function(
@@ -13005,7 +13186,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         stickerRelationships,
         stickers,
         users,
-        transcriptMessages
+        transcriptMessages,
+        fiats
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
