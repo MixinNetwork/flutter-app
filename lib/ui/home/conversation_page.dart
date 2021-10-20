@@ -508,99 +508,107 @@ class _SearchItem extends StatelessWidget {
   final DateTime? date;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 72,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 12,
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 6),
+    child: InteractiveDecoratedBox(
+          decoration: const BoxDecoration(),
+          hoveringDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: context.theme.listSelected,
           ),
-          child: Row(
-            children: [
-              SizedBox(
-                height: ConversationPage.conversationItemAvatarSize,
-                width: ConversationPage.conversationItemAvatarSize,
-                child: avatar,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: HighlightText(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: context.theme.text,
-                              fontSize: 16,
-                            ),
-                            highlightTextSpans: [
-                              if (nameHighlight)
-                                HighlightTextSpan(
-                                  keyword,
-                                  style: TextStyle(
-                                    color: context.theme.accent,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        if (date != null)
-                          BlocConverter<MinuteTimerCubit, DateTime, String>(
-                            converter: (_) => date!.format,
-                            builder: (context, text) => Text(
-                              text,
-                              style: TextStyle(
-                                color: context.theme.secondaryText,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (description != null)
+          onTap: onTap,
+          child: Container(
+            height: 72,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 6,
+              vertical: 12,
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  height: ConversationPage.conversationItemAvatarSize,
+                  width: ConversationPage.conversationItemAvatarSize,
+                  child: avatar,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
                         children: [
-                          if (descriptionIcon != null)
-                            SvgPicture.asset(
-                              descriptionIcon!,
-                              color: context.theme.secondaryText,
-                            ),
                           Expanded(
                             child: HighlightText(
-                              description!,
+                              name,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: context.theme.secondaryText,
-                                fontSize: 14,
+                                color: context.theme.text,
+                                fontSize: 16,
                               ),
                               highlightTextSpans: [
-                                HighlightTextSpan(
-                                  keyword,
-                                  style: TextStyle(
-                                    color: context.theme.accent,
+                                if (nameHighlight)
+                                  HighlightTextSpan(
+                                    keyword,
+                                    style: TextStyle(
+                                      color: context.theme.accent,
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
+                          if (date != null)
+                            BlocConverter<MinuteTimerCubit, DateTime, String>(
+                              converter: (_) => date!.format,
+                              builder: (context, text) => Text(
+                                text,
+                                style: TextStyle(
+                                  color: context.theme.secondaryText,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                  ],
+                      if (description != null)
+                        Row(
+                          children: [
+                            if (descriptionIcon != null)
+                              SvgPicture.asset(
+                                descriptionIcon!,
+                                color: context.theme.secondaryText,
+                              ),
+                            Expanded(
+                              child: HighlightText(
+                                description!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: context.theme.secondaryText,
+                                  fontSize: 14,
+                                ),
+                                highlightTextSpans: [
+                                  HighlightTextSpan(
+                                    keyword,
+                                    style: TextStyle(
+                                      color: context.theme.accent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-      );
+  );
 }
 
 class _SearchHeader extends StatelessWidget {
