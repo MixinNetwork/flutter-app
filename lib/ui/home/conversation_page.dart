@@ -195,6 +195,10 @@ class _SearchList extends HookWidget {
                     avatarUrl: user.avatarUrl,
                   ),
                   name: user.fullName ?? '?',
+                  trailing: VerifiedOrBotWidget(
+                    verified: user.isVerified,
+                    isBot: user.appId != null,
+                  ),
                   keyword: keyword,
                   onTap: () async {
                     await ConversationCubit.selectUser(
@@ -250,6 +254,10 @@ class _SearchList extends HookWidget {
                     name: conversationValidName(
                       conversation.groupName,
                       conversation.fullName,
+                    ),
+                    trailing: VerifiedOrBotWidget(
+                      verified: conversation.isVerified,
+                      isBot: conversation.appId != null,
                     ),
                     keyword: keyword,
                     onTap: () async {
@@ -377,6 +385,10 @@ class SearchMessageItem extends StatelessWidget {
               message.groupName,
               message.userFullName,
             ),
+      trailing: VerifiedOrBotWidget(
+        verified: message.verified,
+        isBot: message.appId != null,
+      ),
       nameHighlight: false,
       keyword: keyword,
       descriptionIcon: icon,
@@ -496,9 +508,11 @@ class _SearchItem extends StatelessWidget {
     this.description,
     this.descriptionIcon,
     this.date,
+    this.trailing,
   }) : super(key: key);
 
   final Widget avatar;
+  final Widget? trailing;
   final String name;
   final String keyword;
   final bool nameHighlight;
@@ -540,22 +554,27 @@ class _SearchItem extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: HighlightText(
-                              name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: context.theme.text,
-                                fontSize: 16,
-                              ),
-                              highlightTextSpans: [
-                                if (nameHighlight)
-                                  HighlightTextSpan(
-                                    keyword,
-                                    style: TextStyle(
-                                      color: context.theme.accent,
-                                    ),
+                            child: Row(
+                              children: [
+                                HighlightText(
+                                  name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    color: context.theme.text,
+                                    fontSize: 16,
                                   ),
+                                  highlightTextSpans: [
+                                    if (nameHighlight)
+                                      HighlightTextSpan(
+                                        keyword,
+                                        style: TextStyle(
+                                          color: context.theme.accent,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (trailing != null) trailing!,
                               ],
                             ),
                           ),

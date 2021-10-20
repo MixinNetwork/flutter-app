@@ -12506,7 +12506,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         hasMultipleTables: true);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(query),
           for (var $ in categories) Variable<String>($),
@@ -12528,6 +12528,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -12540,7 +12542,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessage(
       String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m,(SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?1) AS fts INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON c.owner_id = u.user_id WHERE m.message_id = fts.message_id ORDER BY m.created_at DESC LIMIT ?2 OFFSET ?3',
         variables: [
           Variable<String>(query),
           Variable<int>(limit),
@@ -12561,6 +12563,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -12695,7 +12699,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         hasMultipleTables: true);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12718,6 +12722,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -12730,7 +12736,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId(
       String conversationId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?2) ORDER BY m.created_at DESC LIMIT ?3 OFFSET ?4',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(query),
@@ -12752,6 +12758,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -12773,7 +12781,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
             alias(this.users, 'u')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE ${generatedwhere.sql} ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           ...generatedwhere.introducedVariables,
           ...generatedlimit.introducedVariables
@@ -12794,6 +12802,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -12819,7 +12829,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         hasMultipleTables: true);
     $arrayStartIndex += generatedlimit.amountOfVariables;
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) AND m.category IN ($expandedcategories) ORDER BY m.created_at DESC ${generatedlimit.sql}',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12843,6 +12853,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -12856,7 +12868,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
       fuzzySearchMessageByConversationIdAndUserId(String conversationId,
           String userId, String query, int limit, int offset) {
     return customSelect(
-        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
+        'SELECT m.message_id AS messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName, m.category AS type, m.content AS content, m.created_at AS createdAt, m.name AS mediaName, u.app_id AS appId, u.is_verified AS verified, c.icon_url AS groupIconUrl, c.category AS category, c.name AS groupName, c.conversation_id AS conversationId FROM messages AS m INNER JOIN conversations AS c ON c.conversation_id = m.conversation_id INNER JOIN users AS u ON m.user_id = u.user_id WHERE m.conversation_id = ?1 AND m.user_id = ?2 AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH ?3) ORDER BY m.created_at DESC LIMIT ?4 OFFSET ?5',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId),
@@ -12879,6 +12891,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         content: row.read<String?>('content'),
         createdAt: Messages.$converter2.mapToDart(row.read<int>('createdAt'))!,
         mediaName: row.read<String?>('mediaName'),
+        appId: row.read<String?>('appId'),
+        verified: row.read<bool?>('verified'),
         groupIconUrl: row.read<String?>('groupIconUrl'),
         category:
             Conversations.$converter0.mapToDart(row.read<String?>('category')),
@@ -14121,6 +14135,8 @@ class SearchMessageDetailItem {
   String? content;
   DateTime createdAt;
   String? mediaName;
+  String? appId;
+  bool? verified;
   String? groupIconUrl;
   ConversationCategory? category;
   String? groupName;
@@ -14134,6 +14150,8 @@ class SearchMessageDetailItem {
     this.content,
     required this.createdAt,
     this.mediaName,
+    this.appId,
+    this.verified,
     this.groupIconUrl,
     this.category,
     this.groupName,
@@ -14149,6 +14167,8 @@ class SearchMessageDetailItem {
       content,
       createdAt,
       mediaName,
+      appId,
+      verified,
       groupIconUrl,
       category,
       groupName,
@@ -14165,6 +14185,8 @@ class SearchMessageDetailItem {
           other.content == this.content &&
           other.createdAt == this.createdAt &&
           other.mediaName == this.mediaName &&
+          other.appId == this.appId &&
+          other.verified == this.verified &&
           other.groupIconUrl == this.groupIconUrl &&
           other.category == this.category &&
           other.groupName == this.groupName &&
@@ -14180,6 +14202,8 @@ class SearchMessageDetailItem {
           ..write('content: $content, ')
           ..write('createdAt: $createdAt, ')
           ..write('mediaName: $mediaName, ')
+          ..write('appId: $appId, ')
+          ..write('verified: $verified, ')
           ..write('groupIconUrl: $groupIconUrl, ')
           ..write('category: $category, ')
           ..write('groupName: $groupName, ')
