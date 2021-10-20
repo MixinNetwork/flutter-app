@@ -39,7 +39,7 @@ dependencies:
   dio: ^4.0.0
   ecache: ^2.0.1
   equatable: ^2.0.3
-  extended_image: ^5.1.2
+  extended_image: ^4.1.0
   file_picker: ^4.0.0
   file_selector: ^0.8.2
   file_selector_linux: ^0.0.2
