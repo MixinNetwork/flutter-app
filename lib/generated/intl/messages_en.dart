@@ -325,6 +325,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "successful": MessageLookupByLibrary.simpleMessage("Successful"),
         "termsService":
             MessageLookupByLibrary.simpleMessage("Terms of Service"),
+        "text": MessageLookupByLibrary.simpleMessage("Text"),
         "time": MessageLookupByLibrary.simpleMessage("Time"),
         "to": MessageLookupByLibrary.simpleMessage("To"),
         "today": MessageLookupByLibrary.simpleMessage("Today"),

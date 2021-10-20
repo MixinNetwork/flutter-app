@@ -220,6 +220,6 @@
   "to": "To",
   "walletTransactionCurrentValue": "value now {value}",
   "walletTransactionThatTimeValue": "value then {value}",
-  "walletTransactionThatTimeNoValue": "value then N/A"
+  "walletTransactionThatTimeNoValue": "value then N/A",
+  "text": "Text"
 }
-

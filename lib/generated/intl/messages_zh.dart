@@ -282,6 +282,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "strangers": MessageLookupByLibrary.simpleMessage("陌生人"),
         "successful": MessageLookupByLibrary.simpleMessage("成功"),
         "termsService": MessageLookupByLibrary.simpleMessage("服务条款"),
+        "text": MessageLookupByLibrary.simpleMessage("文字"),
         "time": MessageLookupByLibrary.simpleMessage("时间"),
         "to": MessageLookupByLibrary.simpleMessage("至"),
         "today": MessageLookupByLibrary.simpleMessage("今天"),

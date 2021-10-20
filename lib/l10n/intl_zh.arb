@@ -215,5 +215,6 @@
   "to": "至",
   "walletTransactionCurrentValue": "价值 {value}",
   "walletTransactionThatTimeValue": "当时价值 {value}",
-  "walletTransactionThatTimeNoValue": "当时价值 暂无"
+  "walletTransactionThatTimeNoValue": "当时价值 暂无",
+  "text": "文字"
 }

@@ -860,15 +860,129 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     required String query,
     required int limit,
     int offset = 0,
-  }) =>
-      db.fuzzySearchMessage(
-        query.trim().escapeFts5(),
+    String? conversationId,
+    String? userId,
+    List<String>? categories,
+  }) {
+    final keywordFts5 = query.trim().escapeFts5();
+    if (conversationId != null && userId != null) {
+      if (categories != null) {
+        return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(
+          conversationId,
+          userId,
+          keywordFts5,
+          categories,
+          (_, __, ___) => Limit(limit, offset),
+        );
+      }
+
+      return db.fuzzySearchMessageByConversationIdAndUserId(
+        conversationId,
+        userId,
+        keywordFts5,
         limit,
         offset,
       );
+    }
 
-  Selectable<int> fuzzySearchMessageCount(String keyword) =>
-      db.fuzzySearchMessageCount(keyword.trim().escapeFts5());
+    if (conversationId != null) {
+      if (categories != null) {
+        return db.fuzzySearchMessageByConversationIdAndCategories(
+          conversationId,
+          keywordFts5,
+          categories,
+          (_, __, ___) => Limit(limit, offset),
+        );
+      }
+
+      return db.fuzzySearchMessageByConversationId(
+        conversationId,
+        keywordFts5,
+        limit,
+        offset,
+      );
+    }
+
+    if (categories != null) {
+      return db.fuzzySearchMessageByCategories(
+        keywordFts5,
+        categories,
+        (_, __, ___) => Limit(limit, offset),
+      );
+    }
+
+    return db.fuzzySearchMessage(
+      keywordFts5,
+      limit,
+      offset,
+    );
+  }
+
+  Selectable<int> fuzzySearchMessageCount(
+    String keyword, {
+    String? conversationId,
+    String? userId,
+    List<String>? categories,
+  }) {
+    final keywordFts5 = keyword.trim().escapeFts5();
+
+    if (conversationId != null && userId != null) {
+      if (categories != null) {
+        return db.fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
+          conversationId,
+          userId,
+          keywordFts5,
+          categories,
+        );
+      }
+
+      return db.fuzzySearchMessageCountByConversationIdAndUserId(
+        conversationId,
+        userId,
+        keywordFts5,
+      );
+    }
+
+    // var $ in categories
+    if (conversationId != null) {
+      if (categories != null) {
+        return db.fuzzySearchMessageCountByConversationIdAndCategories(
+          conversationId,
+          keywordFts5,
+          categories,
+        );
+      }
+
+      return db.fuzzySearchMessageCountByConversationId(
+        conversationId,
+        keywordFts5,
+      );
+    }
+
+    if (categories != null) {
+      return db.fuzzySearchMessageCountByCategories(keywordFts5, categories);
+    }
+    return db.fuzzySearchMessageCount(keywordFts5);
+  }
+
+  Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationAndUser({
+    required String conversationId,
+    required String userId,
+    required String query,
+    List<String>? categories,
+    required int limit,
+    int offset = 0,
+  }) {
+    final keywordFts5 = query.trim().escapeFts5();
+
+    return db.fuzzySearchMessageByConversationIdAndUserId(
+      conversationId,
+      userId,
+      keywordFts5,
+      limit,
+      offset,
+    );
+  }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessageByConversationId({
     required String conversationId,
@@ -883,18 +997,21 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         offset,
       );
 
-  Selectable<SearchMessageDetailItem> messageByConversationIdAndUserId({
+  Selectable<SearchMessageDetailItem> messageByConversationAndUser({
     required String conversationId,
     required String userId,
     required int limit,
     int offset = 0,
+    List<String>? categories,
   }) =>
-      db.messageByConversationIdAndUserId(
-        conversationId,
-        userId,
-        limit,
-        offset,
-      );
+      db.searchMessage((m, c, u) {
+        var predicate =
+            m.conversationId.equals(conversationId) & m.userId.equals(userId);
+        if (categories?.isNotEmpty ?? false) {
+          predicate = predicate & m.category.isIn(categories!);
+        }
+        return predicate;
+      }, (m, c, u) => Limit(limit, offset));
 
   Selectable<SearchMessageDetailItem>
       fuzzySearchMessageByConversationIdAndUserId({
@@ -912,32 +1029,25 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             offset,
           );
 
-  Selectable<int> fuzzySearchMessageCountByConversationId(
-          String keyword, String conversationId) =>
-      db.fuzzySearchMessageCountByConversationId(
-        conversationId,
-        keyword.trim().escapeFts5(),
-      );
-
-  Selectable<int> messageCountByConversationIdAndUserId(
+  Selectable<int> messageCountByConversationAndUser(
     String conversationId,
     String userId,
-  ) =>
-      db.messageCountByConversationIdAndUserId(
-        conversationId,
-        userId,
-      );
-
-  Selectable<int> fuzzySearchMessageCountByConversationIdAndUserId(
-    String keyword,
-    String conversationId,
-    String userId,
-  ) =>
-      db.fuzzySearchMessageCountByConversationIdAndUserId(
-        conversationId,
-        userId,
-        keyword.trim().escapeFts5(),
-      );
+    List<String>? categories,
+  ) {
+    final countExp = countAll();
+    final messages = db.messages;
+    var predicate = messages.conversationId.equals(conversationId) &
+        messages.userId.equals(userId);
+    if (categories?.isNotEmpty ?? false) {
+      predicate = predicate & messages.category.isIn(categories!);
+    }
+    return (db.selectOnly(messages)
+          ..addColumns([countExp])
+          ..where(predicate))
+        .map(
+      (row) => row.read(countExp),
+    );
+  }
 
   Selectable<int?> messageRowId(String messageId) => (selectOnly(db.messages)
         ..addColumns([db.messages.rowId])

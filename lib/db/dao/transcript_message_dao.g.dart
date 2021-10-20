@@ -207,49 +207,46 @@ class TranscriptMessageItem {
     this.assetType,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      transcriptId.hashCode,
-      $mrjc(
-          messageId.hashCode,
-          $mrjc(
-              conversationId.hashCode,
-              $mrjc(
-                  type.hashCode,
-                  $mrjc(
-                      content.hashCode,
-                      $mrjc(
-                          createdAt.hashCode,
-                          $mrjc(
-                              status.hashCode,
-                              $mrjc(
-                                  mediaStatus.hashCode,
-                                  $mrjc(
-                                      mediaWaveform.hashCode,
-                                      $mrjc(
-                                          mediaName.hashCode,
-                                          $mrjc(
-                                              mediaMimeType.hashCode,
-                                              $mrjc(
-                                                  mediaSize.hashCode,
-                                                  $mrjc(
-                                                      mediaWidth.hashCode,
-                                                      $mrjc(
-                                                          mediaHeight.hashCode,
-                                                          $mrjc(
-                                                              thumbImage
-                                                                  .hashCode,
-                                                              $mrjc(
-                                                                  thumbUrl
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      mediaUrl
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          mediaDuration
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              quoteId.hashCode,
-                                                                              $mrjc(quoteContent.hashCode, $mrjc(sharedUserId.hashCode, $mrjc(userId.hashCode, $mrjc(userFullName.hashCode, $mrjc(userIdentityNumber.hashCode, $mrjc(appId.hashCode, $mrjc(relationship.hashCode, $mrjc(avatarUrl.hashCode, $mrjc(sharedUserFullName.hashCode, $mrjc(sharedUserIdentityNumber.hashCode, $mrjc(sharedUserAvatarUrl.hashCode, $mrjc(sharedUserIsVerified.hashCode, $mrjc(sharedUserAppId.hashCode, $mrjc(assetUrl.hashCode, $mrjc(assetWidth.hashCode, $mrjc(assetHeight.hashCode, $mrjc(stickerId.hashCode, $mrjc(assetName.hashCode, assetType.hashCode))))))))))))))))))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        transcriptId,
+        messageId,
+        conversationId,
+        type,
+        content,
+        createdAt,
+        status,
+        mediaStatus,
+        mediaWaveform,
+        mediaName,
+        mediaMimeType,
+        mediaSize,
+        mediaWidth,
+        mediaHeight,
+        thumbImage,
+        thumbUrl,
+        mediaUrl,
+        mediaDuration,
+        quoteId,
+        quoteContent,
+        sharedUserId,
+        userId,
+        userFullName,
+        userIdentityNumber,
+        appId,
+        relationship,
+        avatarUrl,
+        sharedUserFullName,
+        sharedUserIdentityNumber,
+        sharedUserAvatarUrl,
+        sharedUserIsVerified,
+        sharedUserAppId,
+        assetUrl,
+        assetWidth,
+        assetHeight,
+        stickerId,
+        assetName,
+        assetType
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
