@@ -289,7 +289,7 @@ class _BotIcon extends StatelessWidget {
       return const SizedBox();
     }
 
-    final supportWebview = Platform.isMacOS;
+    final supportWebview = Platform.isMacOS || Platform.isWindows;
 
     final child = ActionButton(
       name: Resources.assetsImagesBotSvg,

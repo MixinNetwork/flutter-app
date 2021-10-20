@@ -13,6 +13,10 @@ void initWebview() {
   WebviewWindow.init();
 }
 
+void clearWebviewCacheAndCookies() {
+  WebviewWindow.clearAll();
+}
+
 Future<Map<String, dynamic>> _mixinContext(
   BuildContext context,
   String? conversationId,
@@ -33,12 +37,22 @@ Future<Map<String, dynamic>> _mixinContext(
   };
 }
 
+String _mixinContextProviderJavaScript(String contextJson) => '''
+  window.MixinContext = {
+    getContext: function() {
+      return '$contextJson'
+    }
+  }
+  ''';
+
 Future<void> openBotWebviewWindow(
   BuildContext context,
   App app, {
   String? conversationId,
 }) async {
-  final webview = await WebviewWindow.create();
+  final webview = await WebviewWindow.create(
+    configuration: CreateConfiguration(title: app.name),
+  );
   final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
   webview
     ..setPromptHandler((prompt, defaultText) {
@@ -52,5 +66,8 @@ Future<void> openBotWebviewWindow(
       // if we can prompt MixinContent.getContext().
       // https://developers.mixin.one/docs/js-bridge#getcontext
     })
+    ..setBrightness(context.read<SettingCubit>().brightness)
+    ..addScriptToExecuteOnDocumentCreated(
+        _mixinContextProviderJavaScript(mixinContext))
     ..launch(app.homeUri);
 }

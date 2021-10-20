@@ -15,6 +15,7 @@
 #include <system_clock/system_clock_plugin.h>
 #include <system_tray/system_tray_plugin.h>
 #include <url_launcher_windows/url_launcher_windows.h>
+#include <webview_window/webview_window_plugin.h>
 #include <win_toast/win_toast_plugin.h>
 #include <window_size/window_size_plugin.h>
 
@@ -37,6 +38,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("SystemTrayPlugin"));
   UrlLauncherWindowsRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("UrlLauncherWindows"));
+  WebviewWindowPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("WebviewWindowPlugin"));
   WinToastPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("WinToastPlugin"));
   WindowSizePluginRegisterWithRegistrar(

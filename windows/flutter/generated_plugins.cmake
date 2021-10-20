@@ -12,6 +12,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   system_clock
   system_tray
   url_launcher_windows
+  webview_window
   win_toast
   window_size
 )
