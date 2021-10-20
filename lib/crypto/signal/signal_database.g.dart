@@ -23,8 +23,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
       this.privateKey,
       this.nextPrekeyId,
       required this.timestamp});
-  factory Identitie.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory Identitie.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return Identitie(
       id: const IntType()
@@ -82,7 +81,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
 
   factory Identitie.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return Identitie(
       id: serializer.fromJson<int>(json['id']),
       address: serializer.fromJson<String>(json['address']),
@@ -95,7 +94,7 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'address': serializer.toJson<String>(address),
@@ -374,7 +373,7 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Identitie map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Identitie.fromData(data, _db,
+    return Identitie.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -392,8 +391,7 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   int prekeyId;
   Uint8List record;
   Prekey({required this.id, required this.prekeyId, required this.record});
-  factory Prekey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory Prekey.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return Prekey(
       id: const IntType()
@@ -423,7 +421,7 @@ class Prekey extends DataClass implements Insertable<Prekey> {
 
   factory Prekey.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return Prekey(
       id: serializer.fromJson<int>(json['id']),
       prekeyId: serializer.fromJson<int>(json['prekey_id']),
@@ -432,7 +430,7 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'prekey_id': serializer.toJson<int>(prekeyId),
@@ -583,7 +581,7 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Prekey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Prekey.fromData(data, _db,
+    return Prekey.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -606,8 +604,7 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
       required this.prekeyId,
       required this.record,
       required this.timestamp});
-  factory SignedPrekey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory SignedPrekey.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return SignedPrekey(
       id: const IntType()
@@ -641,7 +638,7 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
 
   factory SignedPrekey.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return SignedPrekey(
       id: serializer.fromJson<int>(json['id']),
       prekeyId: serializer.fromJson<int>(json['prekey_id']),
@@ -651,7 +648,7 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'prekey_id': serializer.toJson<int>(prekeyId),
@@ -834,7 +831,7 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   SignedPrekey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return SignedPrekey.fromData(data, _db,
+    return SignedPrekey.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -859,8 +856,7 @@ class Session extends DataClass implements Insertable<Session> {
       required this.device,
       required this.record,
       required this.timestamp});
-  factory Session.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory Session.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return Session(
       id: const IntType()
@@ -898,7 +894,7 @@ class Session extends DataClass implements Insertable<Session> {
 
   factory Session.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return Session(
       id: serializer.fromJson<int>(json['id']),
       address: serializer.fromJson<String>(json['address']),
@@ -909,7 +905,7 @@ class Session extends DataClass implements Insertable<Session> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'address': serializer.toJson<String>(address),
@@ -1125,7 +1121,7 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Session map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Session.fromData(data, _db,
+    return Session.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -1144,8 +1140,7 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   Uint8List record;
   SenderKey(
       {required this.groupId, required this.senderId, required this.record});
-  factory SenderKey.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory SenderKey.fromData(Map<String, dynamic> data, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return SenderKey(
       groupId: const StringType()
@@ -1175,7 +1170,7 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
 
   factory SenderKey.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return SenderKey(
       groupId: serializer.fromJson<String>(json['group_id']),
       senderId: serializer.fromJson<String>(json['sender_id']),
@@ -1184,7 +1179,7 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'group_id': serializer.toJson<String>(groupId),
       'sender_id': serializer.toJson<String>(senderId),
@@ -1342,7 +1337,7 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
   @override
   SenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return SenderKey.fromData(data, _db,
+    return SenderKey.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
@@ -1371,8 +1366,7 @@ class RatchetSenderKey extends DataClass
       required this.status,
       this.messageId,
       required this.createdAt});
-  factory RatchetSenderKey.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
+  factory RatchetSenderKey.fromData(Map<String, dynamic> data,
       {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return RatchetSenderKey(
@@ -1415,7 +1409,7 @@ class RatchetSenderKey extends DataClass
 
   factory RatchetSenderKey.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return RatchetSenderKey(
       groupId: serializer.fromJson<String>(json['group_id']),
       senderId: serializer.fromJson<String>(json['sender_id']),
@@ -1426,7 +1420,7 @@ class RatchetSenderKey extends DataClass
   }
   @override
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= moorRuntimeOptions.defaultSerializer;
+    serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'group_id': serializer.toJson<String>(groupId),
       'sender_id': serializer.toJson<String>(senderId),
@@ -1643,7 +1637,7 @@ class RatchetSenderKeys extends Table
   Set<GeneratedColumn> get $primaryKey => {groupId, senderId};
   @override
   RatchetSenderKey map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return RatchetSenderKey.fromData(data, _db,
+    return RatchetSenderKey.fromData(data,
         prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 

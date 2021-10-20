@@ -1,4 +1,4 @@
-import '../mixin.moor';
+import '../mixin.drift';
 
 recentUsedStickers:
 SELECT * FROM stickers WHERE last_use_at > 0 ORDER BY last_use_at DESC LIMIT 20;

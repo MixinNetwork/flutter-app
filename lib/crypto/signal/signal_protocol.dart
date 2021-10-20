@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:drift/drift.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart'
     hide generateIdentityKeyPair;
+
 // ignore: implementation_imports
 import 'package:libsignal_protocol_dart/src/invalid_message_exception.dart';
-import 'package:moor/moor.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../blaze/blaze_message.dart';

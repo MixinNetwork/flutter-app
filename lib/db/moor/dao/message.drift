@@ -1,4 +1,4 @@
-import '../mixin.moor';
+import '../mixin.drift';
 
 baseMessageItems AS MessageItem:
 SELECT message.message_id AS messageId,

@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'sticker_album_dao.g.dart';
 
-@UseDao(tables: [StickerAlbums])
+@DriftAccessor(tables: [StickerAlbums])
 class StickerAlbumDao extends DatabaseAccessor<MixinDatabase>
     with _$StickerAlbumDaoMixin {
   StickerAlbumDao(MixinDatabase db) : super(db);

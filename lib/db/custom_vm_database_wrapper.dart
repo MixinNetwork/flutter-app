@@ -1,5 +1,5 @@
-import 'package:moor/ffi.dart';
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 
 import '../utils/logger.dart';
 
@@ -8,7 +8,7 @@ class CustomVmDatabaseWrapper extends QueryExecutor {
 
   final bool logStatements;
 
-  late final VmDatabase queryExecutor;
+  late final NativeDatabase queryExecutor;
 
   @override
   TransactionExecutor beginTransaction() => queryExecutor.beginTransaction();

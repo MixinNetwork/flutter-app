@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'flood_message_dao.g.dart';
 
-@UseDao(tables: [FloodMessages])
+@DriftAccessor(tables: [FloodMessages])
 class FloodMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$FloodMessageDaoMixin {
   FloodMessageDao(MixinDatabase db) : super(db);

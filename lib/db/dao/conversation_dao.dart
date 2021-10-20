@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
-import 'package:moor/moor.dart';
 
 import '../../utils/extension/extension.dart';
 import '../converter/conversation_status_type_converter.dart';
@@ -12,7 +12,7 @@ import '../util/util.dart';
 
 part 'conversation_dao.g.dart';
 
-@UseDao(tables: [Conversations])
+@DriftAccessor(tables: [Conversations])
 class ConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationDaoMixin {
   ConversationDao(MixinDatabase db) : super(db);

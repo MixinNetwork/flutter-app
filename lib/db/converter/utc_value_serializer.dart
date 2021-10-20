@@ -1,4 +1,4 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 class UtcValueSerializer extends ValueSerializer {
   const UtcValueSerializer();

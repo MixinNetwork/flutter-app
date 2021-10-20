@@ -1,4 +1,4 @@
-import '../mixin.moor';
+import '../mixin.drift';
 
 snapshotItems(:currentFiat AS TEXT) as SnapshotItem:
 SELECT

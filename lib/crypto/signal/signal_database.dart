@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:moor/ffi.dart';
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
 
 import '../../utils/file.dart';
@@ -14,14 +14,14 @@ import 'dao/signed_pre_key_dao.dart';
 
 part 'signal_database.g.dart';
 
-@UseMoor(include: {
-  'moor/signal.moor',
-  'moor/dao/identity.moor',
-  'moor/dao/pre_key.moor',
-  'moor/dao/sender_key.moor',
-  'moor/dao/session.moor',
-  'moor/dao/signed_pre_key.moor',
-  'moor/dao/ratchet_sender_key.moor',
+@DriftDatabase(include: {
+  'moor/signal.drift',
+  'moor/dao/identity.drift',
+  'moor/dao/pre_key.drift',
+  'moor/dao/sender_key.drift',
+  'moor/dao/session.drift',
+  'moor/dao/signed_pre_key.drift',
+  'moor/dao/ratchet_sender_key.drift'
 }, daos: [
   IdentityDao,
   PreKeyDao,
@@ -59,5 +59,5 @@ class SignalDatabase extends _$SignalDatabase {
 LazyDatabase _openConnection() => LazyDatabase(() {
       final dbFolder = mixinDocumentsDirectory;
       final file = File(p.join(dbFolder.path, 'signal.db'));
-      return VmDatabase(file);
+      return NativeDatabase(file);
     });

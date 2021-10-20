@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'circle_conversation_dao.g.dart';
 
-@UseDao(tables: [CircleConversation])
+@DriftAccessor(tables: [CircleConversation])
 class CircleConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$CircleConversationDaoMixin {
   CircleConversationDao(MixinDatabase db) : super(db);

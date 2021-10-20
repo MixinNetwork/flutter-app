@@ -1,4 +1,4 @@
-import '../mixin.moor';
+import '../mixin.drift';
 
 allCircles AS ConversationCircleItem:
 SELECT ci.circle_id, ci.name, ci.created_at, count(c.conversation_id) as count, sum(c.unseen_message_count) as unseen_message_count

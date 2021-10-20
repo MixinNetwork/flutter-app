@@ -1,11 +1,11 @@
+import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' as sdk;
-import 'package:moor/moor.dart';
 
 import '../mixin_database.dart';
 
 part 'fiat_dao.g.dart';
 
-@UseDao(tables: [Fiat])
+@DriftAccessor(tables: [Fiat])
 class FiatDao extends DatabaseAccessor<MixinDatabase> with _$FiatDaoMixin {
   FiatDao(MixinDatabase db) : super(db);
 

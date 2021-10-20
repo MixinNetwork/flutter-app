@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../signal_database.dart';
 
 part 'sender_key_dao.g.dart';
 
-@UseDao(tables: [SenderKeys])
+@DriftAccessor(tables: [SenderKeys])
 class SenderKeyDao extends DatabaseAccessor<SignalDatabase> {
   SenderKeyDao(SignalDatabase db) : super(db);
 
