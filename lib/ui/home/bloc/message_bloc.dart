@@ -466,7 +466,9 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
       }
 
       // if don't have messages or older message after then item
-      if (state.topMessage?.createdAt.isAfter(item.createdAt) ?? false) continue;
+      if (state.topMessage?.createdAt.isAfter(item.createdAt) ?? false) {
+        continue;
+      }
 
       final currentUserSent = item.relationship == UserRelationship.me;
 
