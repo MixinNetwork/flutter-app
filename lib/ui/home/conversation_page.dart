@@ -509,8 +509,8 @@ class _SearchItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 6),
-    child: InteractiveDecoratedBox(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: InteractiveDecoratedBox(
           decoration: const BoxDecoration(),
           hoveringDecoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
@@ -608,7 +608,7 @@ class _SearchItem extends StatelessWidget {
             ),
           ),
         ),
-  );
+      );
 }
 
 class _SearchHeader extends StatelessWidget {
