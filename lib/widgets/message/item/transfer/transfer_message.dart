@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:intl/intl.dart';
 
-import '../../../constants/constants.dart';
-import '../../../utils/extension/extension.dart';
-import '../../../utils/uri_utils.dart';
-import '../../cache_image.dart';
-import '../../interactive_decorated_box.dart';
-import '../message.dart';
-import '../message_bubble.dart';
-import '../message_datetime_and_status.dart';
+import '../../../../utils/extension/extension.dart';
+import '../../../cache_image.dart';
+import '../../../interactive_decorated_box.dart';
+import '../../message.dart';
+import '../../message_bubble.dart';
+import '../../message_datetime_and_status.dart';
+import 'transfer_page.dart';
 
 class TransferMessage extends HookWidget {
   const TransferMessage({
@@ -28,8 +26,11 @@ class TransferMessage extends HookWidget {
     return MessageBubble(
       outerTimeAndStatusWidget: const MessageDatetimeAndStatus(),
       child: InteractiveDecoratedBox(
-        onTap: () => openUri(context,
-            '${mixinProtocolUrls[MixinSchemeHost.snapshots]}/${context.message.snapshotId}'),
+        onTap: () {
+          final snapshotId = context.message.snapshotId;
+          if (snapshotId == null) return;
+          showTransferDialog(context, snapshotId, context.message.userFullName);
+        },
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -50,16 +51,12 @@ class TransferMessage extends HookWidget {
                   children: [
                     Flexible(
                       child: Builder(builder: (context) {
-                        var amount = snapshotAmount;
-                        if (amount?.isEmpty ?? true) return const SizedBox();
+                        if (snapshotAmount?.isEmpty ?? true) {
+                          return const SizedBox();
+                        }
 
-                        try {
-                          final numberFormat = NumberFormat.decimalPattern(
-                              Intl.getCurrentLocale());
-                          amount = numberFormat.format(int.parse(amount!));
-                        } catch (_) {}
                         return Text(
-                          amount!,
+                          snapshotAmount!.numberFormat(),
                           style: TextStyle(
                             color: context.theme.text,
                             fontSize: MessageItemWidget.secondaryFontSize,

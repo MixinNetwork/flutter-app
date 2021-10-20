@@ -2179,6 +2179,106 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Asset Type`
+  String get assetType {
+    return Intl.message(
+      'Asset Type',
+      name: 'assetType',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Memo`
+  String get memo {
+    return Intl.message(
+      'Memo',
+      name: 'memo',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Time`
+  String get time {
+    return Intl.message(
+      'Time',
+      name: 'time',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Transaction Id`
+  String get transactionsId {
+    return Intl.message(
+      'Transaction Id',
+      name: 'transactionsId',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `From`
+  String get from {
+    return Intl.message(
+      'From',
+      name: 'from',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `To`
+  String get to {
+    return Intl.message(
+      'To',
+      name: 'to',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `value now {value}`
+  String walletTransactionCurrentValue(Object value) {
+    return Intl.message(
+      'value now $value',
+      name: 'walletTransactionCurrentValue',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `value then {value}`
+  String walletTransactionThatTimeValue(Object value) {
+    return Intl.message(
+      'value then $value',
+      name: 'walletTransactionThatTimeValue',
+      desc: '',
+      args: [value],
+    );
+  }
+
+  /// `value then N/A`
+  String get walletTransactionThatTimeNoValue {
+    return Intl.message(
+      'value then N/A',
+      name: 'walletTransactionThatTimeNoValue',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Text`
+  String get text {
+    return Intl.message(
+      'Text',
+      name: 'text',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

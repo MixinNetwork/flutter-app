@@ -1,3 +1,5 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -7,6 +9,7 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../../bloc/paging/paging_bloc.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
+import '../../../enum/message_category.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
@@ -27,6 +30,27 @@ class SearchMessagePage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final categories = useMemoized(() => [
+          _Category(
+            context.l10n.text,
+            const [
+              MessageCategory.plainText,
+              MessageCategory.signalText,
+              MessageCategory.encryptedText,
+            ],
+          ),
+          _Category(
+            context.l10n.post,
+            const [
+              MessageCategory.plainPost,
+              MessageCategory.signalPost,
+              MessageCategory.encryptedPost,
+            ],
+          ),
+        ]);
+
+    final selectedCategories = useState<List<String>?>(null);
+
     final isGroup = useMemoized(
         () => context.read<ConversationCubit>().state?.isGroup ?? false);
 
@@ -40,6 +64,10 @@ class SearchMessagePage extends HookWidget {
           () => keywordStream.map((event) => event.text.isEmpty).distinct(),
         ).data ??
         editingController.text.isEmpty;
+
+    useEffect(() {
+      if (keywordIsEmpty) selectedCategories.value = null;
+    }, [keywordIsEmpty]);
 
     useEffect(() {
       if (!context.textFieldAutoGainFocus) {
@@ -112,15 +140,14 @@ class SearchMessagePage extends HookWidget {
                                     color: context.theme.text,
                                   ),
                                 ),
-                                if (selectedUser.value?.fullName != null)
+                                if (selectedUser.value != null)
                                   Padding(
                                     padding: const EdgeInsets.only(right: 8),
-                                    child: Text(
-                                      selectedUser.value!.fullName!,
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: context.theme.accent,
-                                      ),
+                                    child: AvatarWidget(
+                                      size: 20,
+                                      name: selectedUser.value!.fullName ?? '',
+                                      avatarUrl: selectedUser.value!.avatarUrl,
+                                      userId: selectedUser.value!.userId,
                                     ),
                                   ),
                               ],
@@ -165,6 +192,46 @@ class SearchMessagePage extends HookWidget {
               ],
             ),
           ),
+          AnimatedSize(
+            alignment: Alignment.bottomCenter,
+            duration: const Duration(milliseconds: 200),
+            child: Builder(builder: (context) {
+              if (keywordIsEmpty ||
+                  (userMode.value && selectedUser.value == null)) {
+                return const SizedBox(height: 8);
+              }
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Container(
+                  padding: const EdgeInsets.only(left: 16),
+                  height: 32,
+                  alignment: Alignment.center,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: EdgeInsets.zero,
+                    itemCount: categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categories[index];
+                      return _CategoryItem(
+                        name: category.name,
+                        categories: category.categories,
+                        selectedCategories: selectedCategories.value,
+                        onSelected: (List<String> value) {
+                          if (selectedCategories.value == value) {
+                            selectedCategories.value = null;
+                            return;
+                          }
+                          selectedCategories.value = value;
+                        },
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const SizedBox(width: 8),
+                  ),
+                ),
+              );
+            }),
+          ),
           Expanded(
             child: userMode.value && selectedUser.value == null
                 ? _SearchParticipantList(
@@ -176,6 +243,7 @@ class SearchMessagePage extends HookWidget {
                   )
                 : _SearchMessageList(
                     selectedUserId: selectedUser.value?.userId,
+                    categories: selectedCategories.value,
                   ),
           ),
         ],
@@ -188,8 +256,11 @@ class _SearchMessageList extends HookWidget {
   const _SearchMessageList({
     Key? key,
     this.selectedUserId,
+    this.categories,
   }) : super(key: key);
+
   final String? selectedUserId;
+  final List<String>? categories;
 
   @override
   Widget build(BuildContext context) {
@@ -217,62 +288,65 @@ class _SearchMessageList extends HookWidget {
         initState: const PagingState<SearchMessageDetailItem>(),
         limit: context.read<ConversationListBloc>().limit,
         queryCount: () async {
-          if (selectedUserId != null) {
-            if (keyword.trim().isEmpty) {
+          if (keyword.trim().isEmpty) {
+            if (selectedUserId != null) {
               return context.database.messageDao
-                  .messageCountByConversationIdAndUserId(
-                      conversationId, selectedUserId!)
+                  .messageCountByConversationAndUser(
+                    conversationId,
+                    selectedUserId!,
+                    categories,
+                  )
                   .getSingle();
+            } else {
+              return 0;
             }
-            return context.database.messageDao
-                .fuzzySearchMessageCountByConversationIdAndUserId(
-                    keyword, conversationId, selectedUserId!)
-                .getSingle();
           }
 
-          if (keyword.trim().isEmpty) return 0;
           return context.database.messageDao
-              .fuzzySearchMessageCountByConversationId(keyword, conversationId)
+              .fuzzySearchMessageCount(
+                keyword,
+                conversationId: conversationId,
+                userId: selectedUserId,
+                categories: categories,
+              )
               .getSingle();
         },
         queryRange: (int limit, int offset) async {
-          if (selectedUserId != null) {
-            if (keyword.trim().isEmpty) {
+          if (keyword.trim().isEmpty) {
+            if (selectedUserId != null) {
               return context.database.messageDao
-                  .messageByConversationIdAndUserId(
-                      conversationId: conversationId,
-                      userId: selectedUserId!,
-                      limit: limit,
-                      offset: offset)
-                  .get();
-            }
-            return context.database.messageDao
-                .fuzzySearchMessageByConversationIdAndUserId(
+                  .messageByConversationAndUser(
                     conversationId: conversationId,
                     userId: selectedUserId!,
-                    query: keyword,
                     limit: limit,
-                    offset: offset)
-                .get();
+                    offset: offset,
+                  )
+                  .get();
+            } else {
+              return [];
+            }
           }
-          if (keyword.trim().isEmpty) return [];
+
           return context.database.messageDao
-              .fuzzySearchMessageByConversationId(
-                  conversationId: conversationId,
-                  query: keyword,
-                  limit: limit,
-                  offset: offset)
+              .fuzzySearchMessage(
+                conversationId: conversationId,
+                userId: selectedUserId,
+                query: keyword,
+                limit: limit,
+                offset: offset,
+                categories: categories,
+              )
               .get();
         },
       ),
-      keys: [keyword],
+      keys: [keyword, categories],
     );
 
     useEffect(
       () => context.database.messageDao.searchMessageUpdateEvent
           .listen((event) => searchMessageBloc.add(PagingUpdateEvent()))
           .cancel,
-      [keyword],
+      [keyword, categories],
     );
 
     final pageState = useBlocState<PagingBloc<SearchMessageDetailItem>,
@@ -281,7 +355,6 @@ class _SearchMessageList extends HookWidget {
     return ScrollablePositionedList.builder(
       itemPositionsListener: searchMessageBloc.itemPositionsListener,
       itemCount: pageState.count,
-      padding: const EdgeInsets.only(top: 8),
       itemBuilder: (context, index) {
         final message = pageState.map[index];
         if (message == null) return const SizedBox(height: 80);
@@ -336,7 +409,6 @@ class _SearchParticipantList extends HookWidget {
             keys: [keyword]);
 
     return ListView.builder(
-      padding: const EdgeInsets.only(top: 8),
       itemCount: filteredUser.length,
       itemBuilder: (context, index) {
         final user = filteredUser[index];
@@ -367,6 +439,59 @@ class _SearchParticipantList extends HookWidget {
       },
     );
   }
+}
+
+class _CategoryItem extends StatelessWidget {
+  const _CategoryItem({
+    Key? key,
+    required this.name,
+    required this.categories,
+    required this.selectedCategories,
+    required this.onSelected,
+  }) : super(key: key);
+
+  final String name;
+  final List<String> categories;
+  final List<String>? selectedCategories;
+  final ValueChanged<List<String>> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final selected = listEquals(categories, selectedCategories);
+    return InteractiveDecoratedBox(
+      onTap: () {
+        onSelected(categories);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: ShapeDecoration(
+          color: selected ? context.theme.accent : context.theme.listSelected,
+          shape: const StadiumBorder(),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        height: 32,
+        alignment: Alignment.center,
+        child: Text(
+          name,
+          style: TextStyle(
+            color: selected ? Colors.white : context.theme.text,
+            fontSize: 16,
+            height: 1,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Category extends Equatable {
+  const _Category(this.name, this.categories);
+
+  final String name;
+  final List<String> categories;
+
+  @override
+  List<Object?> get props => [name, categories];
 }
 
 class _ResetModeIntent extends Intent {

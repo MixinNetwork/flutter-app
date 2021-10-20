@@ -141,16 +141,8 @@ class Identitie extends DataClass implements Insertable<Identitie> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(
-          address.hashCode,
-          $mrjc(
-              registrationId.hashCode,
-              $mrjc(
-                  publicKey.hashCode,
-                  $mrjc(privateKey.hashCode,
-                      $mrjc(nextPrekeyId.hashCode, timestamp.hashCode)))))));
+  int get hashCode => Object.hash(id, address, registrationId, publicKey,
+      privateKey, nextPrekeyId, timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -464,8 +456,7 @@ class Prekey extends DataClass implements Insertable<Prekey> {
   }
 
   @override
-  int get hashCode =>
-      $mrjf($mrjc(id.hashCode, $mrjc(prekeyId.hashCode, record.hashCode)));
+  int get hashCode => Object.hash(id, prekeyId, record);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -689,8 +680,7 @@ class SignedPrekey extends DataClass implements Insertable<SignedPrekey> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(id.hashCode,
-      $mrjc(prekeyId.hashCode, $mrjc(record.hashCode, timestamp.hashCode))));
+  int get hashCode => Object.hash(id, prekeyId, record, timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -955,10 +945,7 @@ class Session extends DataClass implements Insertable<Session> {
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      id.hashCode,
-      $mrjc(address.hashCode,
-          $mrjc(device.hashCode, $mrjc(record.hashCode, timestamp.hashCode)))));
+  int get hashCode => Object.hash(id, address, device, record, timestamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1222,8 +1209,7 @@ class SenderKey extends DataClass implements Insertable<SenderKey> {
   }
 
   @override
-  int get hashCode =>
-      $mrjf($mrjc(groupId.hashCode, $mrjc(senderId.hashCode, record.hashCode)));
+  int get hashCode => Object.hash(groupId, senderId, record);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1476,12 +1462,8 @@ class RatchetSenderKey extends DataClass
   }
 
   @override
-  int get hashCode => $mrjf($mrjc(
-      groupId.hashCode,
-      $mrjc(
-          senderId.hashCode,
-          $mrjc(status.hashCode,
-              $mrjc(messageId.hashCode, createdAt.hashCode)))));
+  int get hashCode =>
+      Object.hash(groupId, senderId, status, messageId, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
