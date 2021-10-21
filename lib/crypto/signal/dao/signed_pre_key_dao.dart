@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../signal_database.dart';
 
 part 'signed_pre_key_dao.g.dart';
 
-@UseDao(tables: [SignedPrekeys])
+@DriftAccessor(tables: [SignedPrekeys])
 class SignedPreKeyDao extends DatabaseAccessor<SignalDatabase> {
   SignedPreKeyDao(SignalDatabase db) : super(db);
 

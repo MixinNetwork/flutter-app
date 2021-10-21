@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
@@ -8,7 +8,7 @@ import '../mixin_database.dart';
 
 part 'job_dao.g.dart';
 
-@UseDao(tables: [MessagesHistory])
+@DriftAccessor(tables: [MessagesHistory])
 class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   JobDao(MixinDatabase db) : super(db);
 

@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'resend_session_message_dao.g.dart';
 
-@UseDao(tables: [ResendSessionMessages])
+@DriftAccessor(tables: [ResendSessionMessages])
 class ResendSessionMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$ResendSessionMessageDaoMixin {
   ResendSessionMessageDao(MixinDatabase db) : super(db);

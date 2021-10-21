@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'sent_session_sender_key_dao.g.dart';
 
-@UseDao(tables: [SentSessionSenderKeys])
+@DriftAccessor(tables: [SentSessionSenderKeys])
 class SentSessionSenderKeyDao extends DatabaseAccessor<MixinDatabase>
     with _$SentSessionSenderKeyDaoMixin {
   SentSessionSenderKeyDao(MixinDatabase db) : super(db);

@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../signal_database.dart';
 
 part 'session_dao.g.dart';
 
-@UseDao(tables: [Sessions])
+@DriftAccessor(tables: [Sessions])
 class SessionDao extends DatabaseAccessor<SignalDatabase>
     with _$SessionDaoMixin {
   SessionDao(SignalDatabase db) : super(db);

@@ -1,11 +1,11 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../../constants/constants.dart';
 import '../mixin_database.dart';
 
 part 'offset_dao.g.dart';
 
-@UseDao(tables: [Offsets])
+@DriftAccessor(tables: [Offsets])
 class OffsetDao extends DatabaseAccessor<MixinDatabase> with _$OffsetDaoMixin {
   OffsetDao(MixinDatabase db) : super(db);
 

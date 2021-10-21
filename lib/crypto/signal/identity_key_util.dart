@@ -1,5 +1,5 @@
+import 'package:drift/drift.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
-import 'package:moor/moor.dart';
 
 import '../crypto_key_value.dart';
 import 'signal_database.dart';

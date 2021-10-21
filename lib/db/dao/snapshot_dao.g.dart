@@ -168,48 +168,30 @@ class SnapshotItem {
     this.fiatRate,
   });
   @override
-  int get hashCode => $mrjf($mrjc(
-      snapshotId.hashCode,
-      $mrjc(
-          type.hashCode,
-          $mrjc(
-              assetId.hashCode,
-              $mrjc(
-                  amount.hashCode,
-                  $mrjc(
-                      createdAt.hashCode,
-                      $mrjc(
-                          opponentId.hashCode,
-                          $mrjc(
-                              transactionHash.hashCode,
-                              $mrjc(
-                                  sender.hashCode,
-                                  $mrjc(
-                                      receiver.hashCode,
-                                      $mrjc(
-                                          memo.hashCode,
-                                          $mrjc(
-                                              confirmations.hashCode,
-                                              $mrjc(
-                                                  avatarUrl.hashCode,
-                                                  $mrjc(
-                                                      opponentFulName.hashCode,
-                                                      $mrjc(
-                                                          priceUsd.hashCode,
-                                                          $mrjc(
-                                                              chainId.hashCode,
-                                                              $mrjc(
-                                                                  symbol
-                                                                      .hashCode,
-                                                                  $mrjc(
-                                                                      symbolName
-                                                                          .hashCode,
-                                                                      $mrjc(
-                                                                          tag
-                                                                              .hashCode,
-                                                                          $mrjc(
-                                                                              assetConfirmations.hashCode,
-                                                                              $mrjc(symbolIconUrl.hashCode, $mrjc(chainIconUrl.hashCode, fiatRate.hashCode))))))))))))))))))))));
+  int get hashCode => Object.hashAll([
+        snapshotId,
+        type,
+        assetId,
+        amount,
+        createdAt,
+        opponentId,
+        transactionHash,
+        sender,
+        receiver,
+        memo,
+        confirmations,
+        avatarUrl,
+        opponentFulName,
+        priceUsd,
+        chainId,
+        symbol,
+        symbolName,
+        tag,
+        assetConfirmations,
+        symbolIconUrl,
+        chainIconUrl,
+        fiatRate
+      ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

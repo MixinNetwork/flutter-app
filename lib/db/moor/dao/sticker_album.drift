@@ -1,4 +1,4 @@
-import '../mixin.moor';
+import '../mixin.drift';
 
 systemAlbums:
 SELECT * FROM sticker_albums WHERE category = 'SYSTEM' ORDER BY created_at DESC;

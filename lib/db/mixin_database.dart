@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:drift/drift.dart';
+import 'package:drift/isolate.dart';
+import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:moor/ffi.dart';
-import 'package:moor/isolate.dart';
-import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
 
 import '../enum/media_status.dart';
@@ -51,18 +51,18 @@ import 'util/util.dart';
 
 part 'mixin_database.g.dart';
 
-@UseMoor(
+@DriftDatabase(
   include: {
-    'moor/mixin.moor',
-    'moor/dao/conversation.moor',
-    'moor/dao/message.moor',
-    'moor/dao/participant.moor',
-    'moor/dao/sticker.moor',
-    'moor/dao/sticker_album.moor',
-    'moor/dao/user.moor',
-    'moor/dao/circle.moor',
-    'moor/dao/flood.moor',
-    'moor/dao/pin_message.moor',
+    'moor/mixin.drift',
+    'moor/dao/conversation.drift',
+    'moor/dao/message.drift',
+    'moor/dao/participant.drift',
+    'moor/dao/sticker.drift',
+    'moor/dao/sticker_album.drift',
+    'moor/dao/user.drift',
+    'moor/dao/circle.drift',
+    'moor/dao/flood.drift',
+    'moor/dao/pin_message.drift'
   },
   daos: [
     AddressDao,
@@ -190,7 +190,7 @@ class MixinDatabase extends _$MixinDatabase {
 }
 
 LazyDatabase _openConnection(File dbFile) => LazyDatabase(() {
-      final vmDatabase = VmDatabase(dbFile);
+      final vmDatabase = NativeDatabase(dbFile);
       if (!kDebugMode) {
         return vmDatabase;
       }
@@ -205,19 +205,19 @@ Future<MixinDatabase> createMoorIsolate(String identityNumber) async {
   return MixinDatabase.connect(databaseConnection);
 }
 
-Future<MoorIsolate> _createMoorIsolate(File dbFile) async {
+Future<DriftIsolate> _createMoorIsolate(File dbFile) async {
   final receivePort = ReceivePort();
   await Isolate.spawn(
     _startBackground,
     _IsolateStartRequest(receivePort.sendPort, dbFile),
   );
 
-  return await receivePort.first as MoorIsolate;
+  return await receivePort.first as DriftIsolate;
 }
 
 void _startBackground(_IsolateStartRequest request) {
   final executor = _openConnection(request.dbFile);
-  final moorIsolate = MoorIsolate.inCurrent(
+  final moorIsolate = DriftIsolate.inCurrent(
     () => DatabaseConnection.fromExecutor(executor),
   );
   request.sendMoorIsolate.send(moorIsolate);

@@ -1,5 +1,5 @@
+import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
-import 'package:moor/moor.dart';
 
 import '../../enum/media_status.dart';
 import '../../enum/message_status.dart';
@@ -8,11 +8,9 @@ import '../util/util.dart';
 
 part 'transcript_message_dao.g.dart';
 
-@UseDao(tables: [
-  TranscriptMessages
-], include: {
-  '../moor/dao/transcript_message.moor',
-})
+@DriftAccessor(
+    tables: [TranscriptMessages],
+    include: {'../moor/dao/transcript_message.drift'})
 class TranscriptMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$TranscriptMessageDaoMixin {
   TranscriptMessageDao(MixinDatabase db) : super(db);

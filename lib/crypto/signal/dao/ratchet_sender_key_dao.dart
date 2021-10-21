@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../signal_database.dart';
 
 part 'ratchet_sender_key_dao.g.dart';
 
-@UseDao(tables: [RatchetSenderKeys])
+@DriftAccessor(tables: [RatchetSenderKeys])
 class RatchetSenderKeyDao extends DatabaseAccessor<SignalDatabase> {
   RatchetSenderKeyDao(SignalDatabase db) : super(db);
 

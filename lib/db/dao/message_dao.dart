@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
@@ -14,7 +14,7 @@ import '../util/util.dart';
 
 part 'message_dao.g.dart';
 
-@UseDao(tables: [Messages])
+@DriftAccessor(tables: [Messages])
 class MessageDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageDaoMixin {
   MessageDao(MixinDatabase db) : super(db);
