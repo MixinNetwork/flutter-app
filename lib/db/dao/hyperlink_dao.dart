@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'hyperlink_dao.g.dart';
 
-@UseDao(tables: [Hyperlinks])
+@DriftAccessor(tables: [Hyperlinks])
 class HyperlinkDao extends DatabaseAccessor<MixinDatabase>
     with _$HyperlinkDaoMixin {
   HyperlinkDao(MixinDatabase db) : super(db);

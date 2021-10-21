@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'message_history_dao.g.dart';
 
-@UseDao(tables: [MessagesHistory])
+@DriftAccessor(tables: [MessagesHistory])
 class MessageHistoryDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageHistoryDaoMixin {
   MessageHistoryDao(MixinDatabase db) : super(db);

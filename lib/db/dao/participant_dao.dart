@@ -1,12 +1,12 @@
+import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, transaction;
-import 'package:moor/moor.dart';
 
 import '../mixin_database.dart';
 
 part 'participant_dao.g.dart';
 
-@UseDao(tables: [Participants])
+@DriftAccessor(tables: [Participants])
 class ParticipantDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantDaoMixin {
   ParticipantDao(MixinDatabase db) : super(db);

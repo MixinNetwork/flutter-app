@@ -195,6 +195,10 @@ class _SearchList extends HookWidget {
                     avatarUrl: user.avatarUrl,
                   ),
                   name: user.fullName ?? '?',
+                  trailing: VerifiedOrBotWidget(
+                    verified: user.isVerified,
+                    isBot: user.appId != null,
+                  ),
                   keyword: keyword,
                   onTap: () async {
                     await ConversationCubit.selectUser(
@@ -250,6 +254,10 @@ class _SearchList extends HookWidget {
                     name: conversationValidName(
                       conversation.groupName,
                       conversation.fullName,
+                    ),
+                    trailing: VerifiedOrBotWidget(
+                      verified: conversation.isVerified,
+                      isBot: conversation.appId != null,
                     ),
                     keyword: keyword,
                     onTap: () async {
@@ -377,6 +385,10 @@ class SearchMessageItem extends StatelessWidget {
               message.groupName,
               message.userFullName,
             ),
+      trailing: VerifiedOrBotWidget(
+        verified: message.verified,
+        isBot: message.appId != null,
+      ),
       nameHighlight: false,
       keyword: keyword,
       descriptionIcon: icon,
@@ -496,9 +508,11 @@ class _SearchItem extends StatelessWidget {
     this.description,
     this.descriptionIcon,
     this.date,
+    this.trailing,
   }) : super(key: key);
 
   final Widget avatar;
+  final Widget? trailing;
   final String name;
   final String keyword;
   final bool nameHighlight;
@@ -508,96 +522,109 @@ class _SearchItem extends StatelessWidget {
   final DateTime? date;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 72,
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 12,
-            vertical: 12,
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 6),
+        child: InteractiveDecoratedBox(
+          decoration: const BoxDecoration(),
+          hoveringDecoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: context.theme.listSelected,
           ),
-          child: Row(
-            children: [
-              SizedBox(
-                height: ConversationPage.conversationItemAvatarSize,
-                width: ConversationPage.conversationItemAvatarSize,
-                child: avatar,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: HighlightText(
-                            name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: context.theme.text,
-                              fontSize: 16,
-                            ),
-                            highlightTextSpans: [
-                              if (nameHighlight)
-                                HighlightTextSpan(
-                                  keyword,
-                                  style: TextStyle(
-                                    color: context.theme.accent,
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        if (date != null)
-                          BlocConverter<MinuteTimerCubit, DateTime, String>(
-                            converter: (_) => date!.format,
-                            builder: (context, text) => Text(
-                              text,
-                              style: TextStyle(
-                                color: context.theme.secondaryText,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    if (description != null)
+          onTap: onTap,
+          child: Container(
+            height: 72,
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 6,
+              vertical: 12,
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  height: ConversationPage.conversationItemAvatarSize,
+                  width: ConversationPage.conversationItemAvatarSize,
+                  child: avatar,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
                         children: [
-                          if (descriptionIcon != null)
-                            SvgPicture.asset(
-                              descriptionIcon!,
-                              color: context.theme.secondaryText,
-                            ),
                           Expanded(
-                            child: HighlightText(
-                              description!,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                color: context.theme.secondaryText,
-                                fontSize: 14,
-                              ),
-                              highlightTextSpans: [
-                                HighlightTextSpan(
-                                  keyword,
+                            child: Row(
+                              children: [
+                                HighlightText(
+                                  name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    color: context.theme.accent,
+                                    color: context.theme.text,
+                                    fontSize: 16,
                                   ),
+                                  highlightTextSpans: [
+                                    if (nameHighlight)
+                                      HighlightTextSpan(
+                                        keyword,
+                                        style: TextStyle(
+                                          color: context.theme.accent,
+                                        ),
+                                      ),
+                                  ],
                                 ),
+                                if (trailing != null) trailing!,
                               ],
                             ),
                           ),
+                          if (date != null)
+                            BlocConverter<MinuteTimerCubit, DateTime, String>(
+                              converter: (_) => date!.format,
+                              builder: (context, text) => Text(
+                                text,
+                                style: TextStyle(
+                                  color: context.theme.secondaryText,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
                         ],
                       ),
-                  ],
+                      if (description != null)
+                        Row(
+                          children: [
+                            if (descriptionIcon != null)
+                              SvgPicture.asset(
+                                descriptionIcon!,
+                                color: context.theme.secondaryText,
+                              ),
+                            Expanded(
+                              child: HighlightText(
+                                description!,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  color: context.theme.secondaryText,
+                                  fontSize: 14,
+                                ),
+                                highlightTextSpans: [
+                                  HighlightTextSpan(
+                                    keyword,
+                                    style: TextStyle(
+                                      color: context.theme.accent,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );

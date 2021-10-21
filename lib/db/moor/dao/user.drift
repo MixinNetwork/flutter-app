@@ -1,4 +1,4 @@
-import '../mixin.moor';
+import '../mixin.drift';
 
 fuzzySearchGroupUser:
 SELECT u.* FROM participants p, users u

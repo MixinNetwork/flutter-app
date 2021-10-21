@@ -1,4 +1,4 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../../ui/home/bloc/multi_auth_cubit.dart';
 import '../../utils/extension/extension.dart';
@@ -7,7 +7,7 @@ import '../mixin_database.dart';
 
 part 'message_mention_dao.g.dart';
 
-@UseDao(tables: [MessageMentions])
+@DriftAccessor(tables: [MessageMentions])
 class MessageMentionDao extends DatabaseAccessor<MixinDatabase>
     with _$MessageMentionDaoMixin {
   MessageMentionDao(MixinDatabase db) : super(db);

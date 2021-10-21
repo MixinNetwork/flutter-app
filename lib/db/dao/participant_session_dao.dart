@@ -1,10 +1,10 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 
 part 'participant_session_dao.g.dart';
 
-@UseDao(tables: [ParticipantSession])
+@DriftAccessor(tables: [ParticipantSession])
 class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
     with _$ParticipantSessionDaoMixin {
   ParticipantSessionDao(MixinDatabase db) : super(db);

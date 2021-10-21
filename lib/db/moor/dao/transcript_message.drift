@@ -1,4 +1,4 @@
-import '../mixin.moor';
+import '../mixin.drift';
 
 
 baseTranscriptMessageItem AS TranscriptMessageItem:

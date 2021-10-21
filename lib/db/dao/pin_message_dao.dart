@@ -1,11 +1,11 @@
-import 'package:moor/moor.dart';
+import 'package:drift/drift.dart';
 
 import '../mixin_database.dart';
 import '../util/util.dart';
 
 part 'pin_message_dao.g.dart';
 
-@UseDao(tables: [PinMessages])
+@DriftAccessor(tables: [PinMessages])
 class PinMessageDao extends DatabaseAccessor<MixinDatabase>
     with _$PinMessageDaoMixin {
   PinMessageDao(MixinDatabase attachedDatabase) : super(attachedDatabase);
