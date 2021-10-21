@@ -134,7 +134,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
         "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
-        "contact": MessageLookupByLibrary.simpleMessage("Contact"),
+        "contact": MessageLookupByLibrary.simpleMessage("Contacts"),
         "contactMixinId": m7,
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "continueText": MessageLookupByLibrary.simpleMessage("Continue"),

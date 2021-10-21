@@ -550,10 +550,10 @@ class Localization {
     );
   }
 
-  /// `Contact`
+  /// `Contacts`
   String get contact {
     return Intl.message(
-      'Contact',
+      'Contacts',
       name: 'contact',
       desc: '',
       args: [],
