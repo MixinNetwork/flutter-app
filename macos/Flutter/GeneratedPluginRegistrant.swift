@@ -9,6 +9,7 @@ import bitsdojo_window_macos
 import dart_vlc
 import desktop_drop
 import desktop_lifecycle
+import desktop_webview_window
 import device_info_plus_macos
 import file_selector_macos
 import flutter_app_icon_badge
@@ -22,7 +23,6 @@ import sqlite3_flutter_libs
 import system_clock
 import system_tray
 import url_launcher_macos
-import webview_window
 import window_size
 
 func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
@@ -30,6 +30,7 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   DartVlcPlugin.register(with: registry.registrar(forPlugin: "DartVlcPlugin"))
   DesktopDropPlugin.register(with: registry.registrar(forPlugin: "DesktopDropPlugin"))
   DesktopLifecyclePlugin.register(with: registry.registrar(forPlugin: "DesktopLifecyclePlugin"))
+  DesktopWebviewWindowPlugin.register(with: registry.registrar(forPlugin: "DesktopWebviewWindowPlugin"))
   DeviceInfoPlusMacosPlugin.register(with: registry.registrar(forPlugin: "DeviceInfoPlusMacosPlugin"))
   FileSelectorPlugin.register(with: registry.registrar(forPlugin: "FileSelectorPlugin"))
   FlutterAppIconBadgePlugin.register(with: registry.registrar(forPlugin: "FlutterAppIconBadgePlugin"))
@@ -43,6 +44,5 @@ func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
   SystemClockPlugin.register(with: registry.registrar(forPlugin: "SystemClockPlugin"))
   SystemTrayPlugin.register(with: registry.registrar(forPlugin: "SystemTrayPlugin"))
   UrlLauncherPlugin.register(with: registry.registrar(forPlugin: "UrlLauncherPlugin"))
-  WebviewWindowPlugin.register(with: registry.registrar(forPlugin: "WebviewWindowPlugin"))
   WindowSizePlugin.register(with: registry.registrar(forPlugin: "WindowSizePlugin"))
 }
