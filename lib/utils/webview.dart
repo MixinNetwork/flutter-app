@@ -51,17 +51,6 @@ Future<void> openBotWebviewWindow(
   );
   final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
   webview
-    ..setPromptHandler((prompt, defaultText) {
-      if (prompt == 'MixinContext.getContext()') {
-        return mixinContext;
-      }
-      return '';
-    })
-    ..registerJavaScriptMessageHandler('MixinContext', (name, body) {
-      // Webkit need a 'MixinContext' slot to check
-      // if we can prompt MixinContent.getContext().
-      // https://developers.mixin.one/docs/js-bridge#getcontext
-    })
     ..setBrightness(context.read<SettingCubit>().brightness)
     ..addScriptToExecuteOnDocumentCreated(
         _mixinContextProviderJavaScript(mixinContext))
