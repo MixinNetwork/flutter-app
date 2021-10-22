@@ -230,7 +230,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "pageRightEmptyMessage":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
         "participantsCount": m17,
-        "people": MessageLookupByLibrary.simpleMessage("通讯录"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pin": MessageLookupByLibrary.simpleMessage("置顶"),

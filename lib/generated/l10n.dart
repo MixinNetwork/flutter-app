@@ -1160,16 +1160,6 @@ class Localization {
     );
   }
 
-  /// `People`
-  String get people {
-    return Intl.message(
-      'People',
-      name: 'people',
-      desc: '',
-      args: [],
-    );
-  }
-
   /// `Chats`
   String get chats {
     return Intl.message(

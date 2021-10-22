@@ -263,7 +263,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
         "participantsCount": m17,
-        "people": MessageLookupByLibrary.simpleMessage("People"),
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
