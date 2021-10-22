@@ -1,17 +1,13 @@
 import 'dart:convert';
 
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:webview_window/webview_window.dart';
 
 import '../bloc/setting_cubit.dart';
 import '../db/mixin_database.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
-
-void initWebview() {
-  WebviewWindow.init();
-}
 
 void clearWebviewCacheAndCookies() {
   WebviewWindow.clearAll();

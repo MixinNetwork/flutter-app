@@ -325,6 +325,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.6.1"
+  desktop_webview_window:
+    dependency: "direct main"
+    description:
+      name: desktop_webview_window
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.0.2"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -1390,15 +1397,6 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
-  webview_window:
-    dependency: "direct main"
-    description:
-      path: "packages/webview_window"
-      ref: "9ee23b17760ddfac2c5f85d5d02f7a44786272db"
-      resolved-ref: "9ee23b17760ddfac2c5f85d5d02f7a44786272db"
-      url: "https://github.com/MixinNetwork/flutter-plugins.git"
-    source: git
-    version: "0.0.1"
   win32:
     dependency: transitive
     description:
