@@ -110,7 +110,6 @@
   "loading": "Loading",
   "failed": "Failed",
   "successful": "Successful",
-  "people": "People",
   "chats": "Chats",
   "circleTitle": "{name}'s Circles",
   "conversationCount": "{count} Conversations",

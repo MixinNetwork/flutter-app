@@ -13,7 +13,7 @@ class SelectItem extends HookWidget {
     this.count = 0,
     required this.onTap,
     this.selected = false,
-    this.showTooltip = false,
+    this.showTooltip = true,
     Key? key,
   }) : super(key: key);
 

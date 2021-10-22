@@ -106,7 +106,6 @@
   "loading": "加载中",
   "failed": "失败",
   "successful": "成功",
-  "people": "通讯录",
   "chats": "全部聊天",
   "circleTitle": "{name}的圈子",
   "conversationCount": "{count} 个会话",
