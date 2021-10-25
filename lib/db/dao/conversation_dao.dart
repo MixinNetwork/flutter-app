@@ -191,18 +191,17 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       owner.relationship.equalsValue(UserRelationship.friend) &
       owner.appId.isNull();
 
-  Selectable<int> _baseUnseenConversationCount(
-          Expression<bool?> Function(Conversations conversation, Users owner,
-                  CircleConversations circleConversation)
+  Selectable<BaseUnseenConversationCountResult> _baseUnseenConversationCount(
+          Expression<bool?> Function(Conversations conversation, Users owner)
               where) =>
-      db.baseUnseenConversationCount((conversation, owner,
-              circleConversation) =>
-          _baseConversationItemWhere(conversation, owner, circleConversation) &
+      db.baseUnseenConversationCount((conversation, owner) =>
+          _baseConversationItemWhere(conversation, owner) &
           conversation.unseenMessageCount.isBiggerThanValue(0) &
-          where(conversation, owner, circleConversation));
+          where(conversation, owner));
 
-  Selectable<int?> contactUnseenConversationCount() =>
-      _baseUnseenConversationCount(_contactWhere);
+  Selectable<BaseUnseenConversationCountResult>
+      contactUnseenConversationCount() =>
+          _baseUnseenConversationCount(_contactWhere);
 
   Selectable<int> contactConversationCount() =>
       _baseConversationItemCount(_contactWhere);
@@ -232,8 +231,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       owner.relationship.equalsValue(UserRelationship.stranger) &
       owner.appId.isNull();
 
-  Selectable<int?> strangerUnseenConversationCount() =>
-      _baseUnseenConversationCount(_strangerWhere);
+  Selectable<BaseUnseenConversationCountResult>
+      strangerUnseenConversationCount() =>
+          _baseUnseenConversationCount(_strangerWhere);
 
   Selectable<int> strangerConversationCount() =>
       _baseConversationItemCount(_strangerWhere);
@@ -261,8 +261,9 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
   ]) =>
       conversation.category.equalsValue(ConversationCategory.group);
 
-  Selectable<int?> groupUnseenConversationCount() =>
-      _baseUnseenConversationCount(_groupWhere);
+  Selectable<BaseUnseenConversationCountResult>
+      groupUnseenConversationCount() =>
+          _baseUnseenConversationCount(_groupWhere);
 
   Selectable<int> groupConversationCount() =>
       _baseConversationItemCount(_groupWhere);
@@ -291,7 +292,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       conversation.category.equalsValue(ConversationCategory.contact) &
       owner.appId.isNotNull();
 
-  Selectable<int?> botUnseenConversationCount() =>
+  Selectable<BaseUnseenConversationCountResult> botUnseenConversationCount() =>
       _baseUnseenConversationCount(_botWhere);
 
   Selectable<int> botConversationCount() =>
@@ -322,10 +323,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
             conversation.category.isIn(['CONTACT', 'GROUP']),
         (_, __, ___, ____, ______, _______, ________) => maxLimit,
       );
-
-  Selectable<int?> unseenConversationCountByCircleId(String circleId) =>
-      _baseUnseenConversationCount((_, __, circleConversation) =>
-          circleConversation.circleId.equals(circleId));
 
   Selectable<int> conversationsCountByCircleId(String circleId) =>
       _baseConversationItemCount((_, __, circleConversation) =>

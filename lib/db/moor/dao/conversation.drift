@@ -49,9 +49,11 @@ WHERE $where
 LIMIT 1;
 
 baseUnseenConversationCount:
-SELECT COUNT(1) FROM conversations conversation
+SELECT
+  COUNT(1) unseen_conversation_count,
+  SUM(CASE WHEN (CASE WHEN conversation.category = 'GROUP' THEN conversation.mute_until ELSE owner.mute_until END) >= (strftime('%s', 'now') * 1000) AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count
+  FROM conversations conversation
   INNER JOIN users owner ON owner.user_id = conversation.owner_id
-  LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
 WHERE $where
 LIMIT 1;
 

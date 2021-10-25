@@ -313,6 +313,7 @@ class _CircleList extends HookWidget {
                       },
                       selected: selected,
                       count: circle.unseenConversationCount,
+                      mutedCount: circle.unseenMutedConversationCount,
                     ),
                   ),
                 );
@@ -363,25 +364,24 @@ class _Item extends HookWidget {
       converter: (state) => state.type == type,
       keys: [type],
     );
-    final unseenConversationCount = useMemoizedStream<int?>(
-          () {
-            final dao = context.database.conversationDao;
-            switch (type) {
-              case SlideCategoryType.contacts:
-                return dao.contactUnseenConversationCount().watchSingle();
-              case SlideCategoryType.groups:
-                return dao.groupUnseenConversationCount().watchSingle();
-              case SlideCategoryType.bots:
-                return dao.botUnseenConversationCount().watchSingle();
-              case SlideCategoryType.strangers:
-                return dao.strangerUnseenConversationCount().watchSingle();
-              default:
-                return Stream.value(0);
-            }
-          },
-          keys: [type],
-        ).data ??
-        0;
+    final result = useMemoizedStream<BaseUnseenConversationCountResult>(
+      () {
+        final dao = context.database.conversationDao;
+        switch (type) {
+          case SlideCategoryType.contacts:
+            return dao.contactUnseenConversationCount().watchSingle();
+          case SlideCategoryType.groups:
+            return dao.groupUnseenConversationCount().watchSingle();
+          case SlideCategoryType.bots:
+            return dao.botUnseenConversationCount().watchSingle();
+          case SlideCategoryType.strangers:
+            return dao.strangerUnseenConversationCount().watchSingle();
+          default:
+            return const Stream.empty();
+        }
+      },
+      keys: [type],
+    ).data;
 
     return MoveWindowBarrier(
       child: SelectItem(
@@ -402,7 +402,8 @@ class _Item extends HookWidget {
           }
         },
         selected: selected,
-        count: unseenConversationCount,
+        count: result?.unseenConversationCount ?? 0,
+        mutedCount: result?.unseenMutedConversationCount ?? 0,
       ),
     );
   }

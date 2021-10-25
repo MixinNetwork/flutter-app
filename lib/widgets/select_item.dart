@@ -11,6 +11,7 @@ class SelectItem extends HookWidget {
     required this.title,
     required this.icon,
     this.count = 0,
+    this.mutedCount = 0,
     required this.onTap,
     this.selected = false,
     this.showTooltip = true,
@@ -21,6 +22,7 @@ class SelectItem extends HookWidget {
   final String title;
   final bool selected;
   final int count;
+  final int mutedCount;
   final bool showTooltip;
   final VoidCallback onTap;
 
@@ -52,12 +54,13 @@ class SelectItem extends HookWidget {
             fontSize: 14,
           ),
         );
+        final dynamicColor = context.dynamicColor(
+          const Color.fromRGBO(51, 51, 51, 0.16),
+          darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+        );
         final unreadTextWidget = UnreadText(
           data: '$count',
-          backgroundColor: context.dynamicColor(
-            const Color.fromRGBO(51, 51, 51, 0.16),
-            darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-          ),
+          backgroundColor: dynamicColor,
           textColor: context.theme.text,
         );
         return PortalEntry(
@@ -113,7 +116,9 @@ class SelectItem extends HookWidget {
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: count > 0 && hideUnreadText
-                        ? context.theme.red
+                        ? count == mutedCount
+                            ? dynamicColor
+                            : context.theme.red
                         : Colors.transparent,
                   ),
                   duration: const Duration(milliseconds: 100),

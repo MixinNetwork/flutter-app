@@ -11767,11 +11767,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, ci.created_at, COUNT(c.conversation_id) AS count, SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, ci.created_at, COUNT(c.conversation_id) AS count, SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [],
         readsFrom: {
           circles,
           conversations,
+          users,
           circleConversations,
         }).map((QueryRow row) {
       return ConversationCircleItem(
@@ -11780,6 +11781,8 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         createdAt: Circles.$converter0.mapToDart(row.read<int>('created_at'))!,
         count: row.read<int>('count'),
         unseenConversationCount: row.read<int>('unseen_conversation_count'),
+        unseenMutedConversationCount:
+            row.read<int>('unseen_muted_conversation_count'),
       );
     });
   }
@@ -13068,27 +13071,29 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<int?>('_c0'));
   }
 
-  Selectable<int> baseUnseenConversationCount(
-      Expression<bool?> Function(Conversations conversation, Users owner,
-              CircleConversations circleConversation)
+  Selectable<BaseUnseenConversationCountResult> baseUnseenConversationCount(
+      Expression<bool?> Function(Conversations conversation, Users owner)
           where) {
     final generatedwhere = $write(
-        where(
-            alias(this.conversations, 'conversation'),
-            alias(this.users, 'owner'),
-            alias(this.circleConversations, 'circleConversation')),
+        where(alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner')),
         hasMultipleTables: true);
     return customSelect(
-        'SELECT COUNT(1) AS _c0 FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN circle_conversations AS circleConversation ON conversation.conversation_id = circleConversation.conversation_id WHERE ${generatedwhere.sql} LIMIT 1',
+        'SELECT COUNT(1) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN conversation.category = \'GROUP\' THEN conversation.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} LIMIT 1',
         variables: [
           ...generatedwhere.introducedVariables
         ],
         readsFrom: {
           conversations,
           users,
-          circleConversations,
           ...generatedwhere.watchedTables,
-        }).map((QueryRow row) => row.read<int>('_c0'));
+        }).map((QueryRow row) {
+      return BaseUnseenConversationCountResult(
+        unseenConversationCount: row.read<int>('unseen_conversation_count'),
+        unseenMutedConversationCount:
+            row.read<int>('unseen_muted_conversation_count'),
+      );
+    });
   }
 
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
@@ -13558,16 +13563,18 @@ class ConversationCircleItem {
   DateTime createdAt;
   int count;
   int unseenConversationCount;
+  int unseenMutedConversationCount;
   ConversationCircleItem({
     required this.circleId,
     required this.name,
     required this.createdAt,
     required this.count,
     required this.unseenConversationCount,
+    required this.unseenMutedConversationCount,
   });
   @override
-  int get hashCode =>
-      Object.hash(circleId, name, createdAt, count, unseenConversationCount);
+  int get hashCode => Object.hash(circleId, name, createdAt, count,
+      unseenConversationCount, unseenMutedConversationCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13576,7 +13583,9 @@ class ConversationCircleItem {
           other.name == this.name &&
           other.createdAt == this.createdAt &&
           other.count == this.count &&
-          other.unseenConversationCount == this.unseenConversationCount);
+          other.unseenConversationCount == this.unseenConversationCount &&
+          other.unseenMutedConversationCount ==
+              this.unseenMutedConversationCount);
   @override
   String toString() {
     return (StringBuffer('ConversationCircleItem(')
@@ -13584,7 +13593,8 @@ class ConversationCircleItem {
           ..write('name: $name, ')
           ..write('createdAt: $createdAt, ')
           ..write('count: $count, ')
-          ..write('unseenConversationCount: $unseenConversationCount')
+          ..write('unseenConversationCount: $unseenConversationCount, ')
+          ..write('unseenMutedConversationCount: $unseenMutedConversationCount')
           ..write(')'))
         .toString();
   }
@@ -14516,6 +14526,33 @@ class ConversationItem {
           ..write('participantUserId: $participantUserId, ')
           ..write('mentionCount: $mentionCount, ')
           ..write('relationship: $relationship')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class BaseUnseenConversationCountResult {
+  int unseenConversationCount;
+  int unseenMutedConversationCount;
+  BaseUnseenConversationCountResult({
+    required this.unseenConversationCount,
+    required this.unseenMutedConversationCount,
+  });
+  @override
+  int get hashCode =>
+      Object.hash(unseenConversationCount, unseenMutedConversationCount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BaseUnseenConversationCountResult &&
+          other.unseenConversationCount == this.unseenConversationCount &&
+          other.unseenMutedConversationCount ==
+              this.unseenMutedConversationCount);
+  @override
+  String toString() {
+    return (StringBuffer('BaseUnseenConversationCountResult(')
+          ..write('unseenConversationCount: $unseenConversationCount, ')
+          ..write('unseenMutedConversationCount: $unseenMutedConversationCount')
           ..write(')'))
         .toString();
   }
