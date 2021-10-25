@@ -13,7 +13,7 @@ BlazeMessageData _$BlazeMessageDataFromJson(Map<String, dynamic> json) =>
       json['message_id'] as String,
       json['category'] as String?,
       json['data'] as String,
-      _$enumDecode(_$MessageStatusEnumMap, json['status']),
+      $enumDecode(_$MessageStatusEnumMap, json['status']),
       DateTime.parse(json['created_at'] as String),
       DateTime.parse(json['updated_at'] as String),
       json['source'] as String,
@@ -38,32 +38,6 @@ Map<String, dynamic> _$BlazeMessageDataToJson(BlazeMessageData instance) =>
       'session_id': instance.sessionId,
       'silent': instance.silent,
     };
-
-K _$enumDecode<K, V>(
-  Map<K, V> enumValues,
-  Object? source, {
-  K? unknownValue,
-}) {
-  if (source == null) {
-    throw ArgumentError(
-      'A value must be provided. Supported values: '
-      '${enumValues.values.join(', ')}',
-    );
-  }
-
-  return enumValues.entries.singleWhere(
-    (e) => e.value == source,
-    orElse: () {
-      if (unknownValue == null) {
-        throw ArgumentError(
-          '`$source` is not one of the supported values: '
-          '${enumValues.values.join(', ')}',
-        );
-      }
-      return MapEntry(unknownValue, enumValues.values.first);
-    },
-  ).key;
-}
 
 const _$MessageStatusEnumMap = {
   MessageStatus.failed: 'FAILED',

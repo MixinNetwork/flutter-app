@@ -1,6 +1,6 @@
 import '../mixin.drift';
 
-snapshotItems(:currentFiat AS TEXT) as SnapshotItem:
+snapshotItems(:currentFiat AS TEXT) AS SnapshotItem:
 SELECT
   snapshot.*,
   opponent.avatar_url,

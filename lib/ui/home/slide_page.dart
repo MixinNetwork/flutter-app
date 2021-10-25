@@ -312,7 +312,7 @@ class _CircleList extends HookWidget {
                         }
                       },
                       selected: selected,
-                      count: circle.unseenMessageCount ?? 0,
+                      count: circle.unseenConversationCount,
                     ),
                   ),
                 );
@@ -363,24 +363,20 @@ class _Item extends HookWidget {
       converter: (state) => state.type == type,
       keys: [type],
     );
-    final unseenMessageCount = useMemoizedStream<int?>(
+    final unseenConversationCount = useMemoizedStream<int?>(
           () {
             final dao = context.database.conversationDao;
             switch (type) {
               case SlideCategoryType.contacts:
-                return dao
-                    .contactConversationUnseenMessageCount()
-                    .watchSingle();
+                return dao.contactUnseenConversationCount().watchSingle();
               case SlideCategoryType.groups:
-                return dao.groupConversationUnseenMessageCount().watchSingle();
+                return dao.groupUnseenConversationCount().watchSingle();
               case SlideCategoryType.bots:
-                return dao.botConversationUnseenMessageCount().watchSingle();
+                return dao.botUnseenConversationCount().watchSingle();
               case SlideCategoryType.strangers:
-                return dao
-                    .strangerConversationUnseenMessageCount()
-                    .watchSingle();
+                return dao.strangerUnseenConversationCount().watchSingle();
               default:
-                return const Stream.empty();
+                return Stream.value(0);
             }
           },
           keys: [type],
@@ -406,7 +402,7 @@ class _Item extends HookWidget {
           }
         },
         selected: selected,
-        count: unseenMessageCount,
+        count: unseenConversationCount,
       ),
     );
   }
