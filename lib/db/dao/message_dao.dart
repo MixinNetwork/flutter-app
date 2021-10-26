@@ -854,6 +854,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     await db.pinMessageDao.deleteByIds([messageId]);
     // Maybe use another event
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [messageId]);
+    db.eventBus.send(DatabaseEvent.notification, messageId);
   }
 
   Selectable<SearchMessageDetailItem> fuzzySearchMessage({

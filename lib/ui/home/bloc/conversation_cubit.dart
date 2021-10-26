@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_app/utils/local_notification_center.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
+import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';
@@ -217,6 +219,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
         .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+    unawaited(dismissByConversationId(conversationId));
   }
 
   static Future<void> selectUser(
@@ -264,6 +268,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
         .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+    unawaited(dismissByConversationId(conversationId));
   }
 
   static Future<ConversationItem?> _conversationItem(
