@@ -78,8 +78,9 @@ dependencies:
   package_info_plus: ^1.0.6
   pasteboard:
     git:
-      url: https://github.com/MixinNetwork/flutter_pasteboard.git
-      ref: 107f500cb5946d6ca228dbb53b7d7d0bb31c6db2
+      url: https://github.com/MixinNetwork/flutter-plugins.git
+      ref: 7bf203f0ea9e3c21ed2d0473a793a4c68d499051
+      path: packages/pasteboard
   path: ^1.8.0
   path_provider: ^2.0.2
   photo_view:
