@@ -7,10 +7,10 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:filesize/filesize.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app/utils/system/clipboard.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mime/mime.dart';
-import 'package:pasteboard/pasteboard.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:tuple/tuple.dart';
@@ -18,7 +18,6 @@ import 'package:tuple/tuple.dart';
 import '../../../constants/brightness_theme_data.dart';
 import '../../../constants/resources.dart';
 import '../../../utils/extension/extension.dart';
-import '../../../utils/file.dart';
 import '../../../utils/load_balancer_utils.dart';
 import '../../../utils/platform.dart';
 import '../../../widgets/action_button.dart';
@@ -677,19 +676,8 @@ class _FileInputOverlay extends HookWidget {
       },
       actions: {
         _PasteFileOrImageIntent: CallbackAction<Intent>(onInvoke: (_) async {
-          final uri = await Pasteboard.uri;
-          if (uri != null) {
-            final file = File(uri.toFilePath(windows: Platform.isWindows));
-            if (!file.existsSync()) return;
-            onFileAdded([await _File.createFromFile(file)]);
-          } else {
-            final bytes = await Pasteboard.image;
-            if (bytes == null) return;
-            final file = await saveBytesToTempFile(
-                bytes, 'mixin_paste_board_image', '.png');
-            if (file == null) return;
-            onFileAdded([await _File.createFromFile(file)]);
-          }
+          final files = await getClipboardFiles();
+          onFileAdded(await Future.wait(files.map(_File.createFromFile)));
         })
       },
       child: DropTarget(
