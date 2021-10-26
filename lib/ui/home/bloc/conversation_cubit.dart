@@ -1,3 +1,4 @@
+import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
@@ -148,10 +149,26 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
             state?.copyWith(user: event),
           )),
     );
+
+    DesktopLifecycle.instance.isActive.addListener(onListen);
   }
 
   final AccountServer accountServer;
   final ResponsiveNavigatorCubit responsiveNavigatorCubit;
+
+  @override
+  Future<void> close() async {
+    await super.close();
+    DesktopLifecycle.instance.isActive.removeListener(onListen);
+  }
+
+  void onListen() {
+    if (DesktopLifecycle.instance.isActive.value &&
+        state?.conversationId != null) {
+      dismissByConversationId(state!.conversationId);
+      return;
+    }
+  }
 
   void unselected() {
     emit(null);
