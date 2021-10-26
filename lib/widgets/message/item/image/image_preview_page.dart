@@ -498,13 +498,7 @@ Future<void> _copyUrl(BuildContext context, String? filePath) async {
     return showToastFailed(context, null);
   }
   try {
-    final String file;
-    if (Platform.isWindows) {
-      file = filePath!;
-    } else {
-      file = Uri.file(filePath!, windows: Platform.isWindows).toString();
-    }
-    await Pasteboard.writeFiles([file]);
+    await Pasteboard.writeFiles([filePath!]);
   } catch (error) {
     await showToastFailed(context, error);
     return;
