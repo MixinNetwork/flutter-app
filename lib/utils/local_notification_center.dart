@@ -1,18 +1,32 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:desktop_notifications/desktop_notifications.dart';
+import 'package:desktop_notifications/desktop_notifications.dart' as linux;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+import 'package:tuple/tuple.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
-import 'package:win_toast/win_toast.dart';
+import 'package:win_toast/win_toast.dart' as win;
 
 import 'logger.dart';
+
+class Notification {
+  Notification({
+    required this.conversationId,
+    required this.messageId,
+    required this.notification,
+  });
+
+  final String conversationId;
+  final String messageId;
+  final dynamic notification;
+}
 
 abstract class _NotificationManager {
   final StreamController<Uri> _payloadStreamController =
       StreamController<Uri>.broadcast();
+  final List<Notification> notifications = [];
 
   Future<void> initialize();
 
@@ -21,7 +35,13 @@ abstract class _NotificationManager {
     String? body,
     required Uri uri,
     required int id,
+    required String conversationId,
+    required String messageId,
   });
+
+  Future<void> dismissByConversationId(String conversationId);
+
+  Future<void> dismissByMessageId(String messageId);
 
   @protected
   void onNotificationSelected(Uri uri) => _payloadStreamController.add(uri);
@@ -50,6 +70,8 @@ class _MacosNotificationManager extends _NotificationManager {
     String? body,
     required Uri uri,
     required int id,
+    required String conversationId,
+    required String messageId,
   }) async {
     await _requestPermission();
     // TODO Set mixin.caf to be invalid.
@@ -63,6 +85,11 @@ class _MacosNotificationManager extends _NotificationManager {
       platformChannelSpecifics,
       payload: uri.toString(),
     );
+    notifications.add(Notification(
+      conversationId: conversationId,
+      messageId: messageId,
+      notification: Tuple2(uri, id),
+    ));
   }
 
   Future<bool?>? _requestPermission() => flutterLocalNotificationsPlugin
@@ -78,7 +105,38 @@ class _MacosNotificationManager extends _NotificationManager {
     if (payload?.isEmpty ?? true) return;
     final uri = Uri.tryParse(payload!);
     if (uri == null) return;
+
+    final notification = notifications.cast<Notification?>().firstWhere(
+        (element) =>
+            element != null &&
+            (element.notification as Tuple2<Uri, int>).item1 == uri,
+        orElse: () => null);
+    if (notification != null) notifications.remove(notification);
+
     onNotificationSelected(uri);
+  }
+
+  @override
+  Future<void> dismissByConversationId(String conversationId) async {
+    final list = await Future.wait(notifications
+        .where((element) => element.conversationId == conversationId)
+        .map((e) async {
+      final id = (e.notification as Tuple2<Uri, int>).item2;
+      await flutterLocalNotificationsPlugin.cancel(id);
+      return e;
+    }));
+    return list.forEach(notifications.remove);
+  }
+
+  @override
+  Future<void> dismissByMessageId(String messageId) async {
+    final notification = notifications.cast<Notification?>().firstWhere(
+        (element) => element?.messageId == messageId,
+        orElse: () => null);
+    if (notification == null) return;
+    final id = (notification.notification as Tuple2<Uri, int>).item2;
+    await flutterLocalNotificationsPlugin.cancel(id);
+    notifications.remove(notification);
   }
 }
 
@@ -86,7 +144,7 @@ class _LinuxNotificationManager extends _NotificationManager {
   // default action key. https://developer.gnome.org/notification-spec/
   static const kDefaultAction = 'default';
 
-  final _client = NotificationsClient();
+  final _client = linux.NotificationsClient();
 
   @override
   Future<void> initialize() async {}
@@ -97,6 +155,8 @@ class _LinuxNotificationManager extends _NotificationManager {
     String? body,
     required Uri uri,
     required int id,
+    required String conversationId,
+    required String messageId,
   }) async {
     i('show linux notification: $title $body');
     final notification = await _client.notify(title,
@@ -105,28 +165,61 @@ class _LinuxNotificationManager extends _NotificationManager {
         expireTimeoutMs: 5000,
         appName: 'Mixin',
         hints: [
-          NotificationHint.category(NotificationCategory.imReceived()),
+          linux.NotificationHint.category(
+              linux.NotificationCategory.imReceived()),
         ],
         actions: const [
-          NotificationAction(kDefaultAction, ''),
+          linux.NotificationAction(kDefaultAction, ''),
         ]);
+
+    final notificationObj = Notification(
+        conversationId: conversationId,
+        messageId: messageId,
+        notification: notification);
+    notifications.add(notificationObj);
 
     unawaited(notification.action.then((action) async {
       if (action != kDefaultAction) return;
+
+      notifications.remove(notificationObj);
+
       onNotificationSelected(uri);
       await notification.close();
     }));
+  }
+
+  @override
+  Future<void> dismissByConversationId(String conversationId) async {
+    final list = await Future.wait(notifications
+        .where((element) => element.conversationId == conversationId)
+        .map((e) async {
+      await (e.notification as linux.Notification).close();
+      return e;
+    }));
+    list.forEach(notifications.remove);
+  }
+
+  @override
+  Future<void> dismissByMessageId(String messageId) async {
+    final notificationObj = notifications.cast<Notification?>().firstWhere(
+        (element) => element?.messageId == messageId,
+        orElse: () => null);
+    if (notificationObj == null) return;
+    final notification = notificationObj.notification as linux.Notification;
+    await notification.close();
+    notifications.remove(notificationObj);
   }
 }
 
 class _WindowsNotificationManager extends _NotificationManager {
   @override
   Future<void> initialize() async {
-    await WinToast.instance().initialize(
+    await win.WinToast.instance().initialize(
       appName: 'Mixin',
       productName: 'mixin_desktop',
       companyName: 'mixin',
     );
+    await win.WinToast.instance().clear();
   }
 
   @override
@@ -135,10 +228,13 @@ class _WindowsNotificationManager extends _NotificationManager {
     String? body,
     required Uri uri,
     required int id,
+    required String conversationId,
+    required String messageId,
   }) async {
-    final type =
-        body == null || body.isEmpty ? ToastType.text01 : ToastType.text02;
-    final toast = await WinToast.instance().showToast(
+    final type = body == null || body.isEmpty
+        ? win.ToastType.text01
+        : win.ToastType.text02;
+    final toast = await win.WinToast.instance().showToast(
       type: type,
       title: title,
       subtitle: body ?? '',
@@ -146,12 +242,44 @@ class _WindowsNotificationManager extends _NotificationManager {
     if (toast == null) {
       return;
     }
+
+    final notificationObj = Notification(
+        conversationId: conversationId,
+        messageId: messageId,
+        notification: toast);
+    notifications.add(notificationObj);
+
     toast.eventStream.listen((event) {
-      if (event is ActivatedEvent) {
-        WinToast.instance().bringWindowToFront();
+      if (event is win.ActivatedEvent) {
+        win.WinToast.instance().bringWindowToFront();
+
+        notifications.remove(notificationObj);
+
         onNotificationSelected(uri);
       }
     });
+  }
+
+  @override
+  Future<void> dismissByConversationId(String conversationId) async {
+    notifications.removeWhere((element) {
+      if (element.conversationId == conversationId) {
+        (element.notification as win.Toast).dismiss();
+
+        return true;
+      }
+      return false;
+    });
+  }
+
+  @override
+  Future<void> dismissByMessageId(String messageId) async {
+    final notificationObj = notifications.cast<Notification?>().firstWhere(
+        (element) => element?.messageId == messageId,
+        orElse: () => null);
+    if (notificationObj == null) return;
+    (notificationObj.notification as win.Toast).dismiss();
+    notifications.remove(notificationObj);
   }
 }
 
@@ -193,12 +321,20 @@ Future<void> showNotification({
   required String title,
   String? body,
   required Uri uri,
-}) async {
-  if (_notificationManager == null) return;
-  await _notificationManager!.showNotification(
-    title: title,
-    uri: uri,
-    id: _incrementAndGetId(),
-    body: body,
-  );
-}
+  required String conversationId,
+  required String messageId,
+}) async =>
+    await _notificationManager?.showNotification(
+      title: title,
+      uri: uri,
+      id: _incrementAndGetId(),
+      body: body,
+      conversationId: conversationId,
+      messageId: messageId,
+    );
+
+Future<void> dismissByConversationId(String conversationId) async =>
+    await _notificationManager?.dismissByConversationId(conversationId);
+
+Future<void> dismissByMessageId(String messageId) async =>
+    await _notificationManager?.dismissByMessageId(messageId);

@@ -1,7 +1,9 @@
+import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
 import 'package:rxdart/rxdart.dart';
+import 'package:very_good_analysis/very_good_analysis.dart';
 
 import '../../../account/account_server.dart';
 import '../../../bloc/simple_cubit.dart';
@@ -10,6 +12,7 @@ import '../../../crypto/uuid/uuid.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
 import '../../../utils/extension/extension.dart';
+import '../../../utils/local_notification_center.dart';
 import '../../../widgets/toast.dart';
 import '../route/responsive_navigator_cubit.dart';
 import 'conversation_list_bloc.dart';
@@ -146,10 +149,26 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
             state?.copyWith(user: event),
           )),
     );
+
+    DesktopLifecycle.instance.isActive.addListener(onListen);
   }
 
   final AccountServer accountServer;
   final ResponsiveNavigatorCubit responsiveNavigatorCubit;
+
+  @override
+  Future<void> close() async {
+    await super.close();
+    DesktopLifecycle.instance.isActive.removeListener(onListen);
+  }
+
+  void onListen() {
+    if (DesktopLifecycle.instance.isActive.value &&
+        state?.conversationId != null) {
+      dismissByConversationId(state!.conversationId);
+      return;
+    }
+  }
 
   void unselected() {
     emit(null);
@@ -217,6 +236,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
         .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+    unawaited(dismissByConversationId(conversationId));
   }
 
   static Future<void> selectUser(
@@ -264,6 +285,8 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
     accountServer.selectConversation(conversationId);
     conversationCubit.responsiveNavigatorCubit
         .pushPage(ResponsiveNavigatorCubit.chatPage);
+
+    unawaited(dismissByConversationId(conversationId));
   }
 
   static Future<ConversationItem?> _conversationItem(

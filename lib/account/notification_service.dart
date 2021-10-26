@@ -26,6 +26,10 @@ class NotificationService {
   }) {
     streamSubscriptions
       ..add(context.database.messageDao.notificationMessageStream
+          .where((event) => event.type == MessageCategory.messageRecall)
+          .asyncMap((event) => dismissByMessageId(event.messageId))
+          .listen((event) {}))
+      ..add(context.database.messageDao.notificationMessageStream
           .where((event) {
             if (DesktopLifecycle.instance.isActive.value) {
               final conversationState = context.read<ConversationCubit>().state;
@@ -36,6 +40,7 @@ class NotificationService {
             return true;
           })
           .where((event) => event.senderId != context.accountServer.userId)
+          .where((event) => event.type != MessageCategory.messageRecall)
           .asyncWhere((event) async {
             final muteUntil = event.category == ConversationCategory.group
                 ? event.muteUntil
@@ -132,6 +137,8 @@ class NotificationService {
                 host: event.conversationId,
                 path: event.messageId,
               ),
+              messageId: event.messageId,
+              conversationId: event.conversationId,
             );
           })
           .listen((_) {}))
