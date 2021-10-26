@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/widgets/user/user_dialog.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
-
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
@@ -277,6 +277,15 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
+            if (conversation.app?.creatorId != null)
+              CellGroup(
+                child: CellItem(
+                  title: Text(context.l10n.developer),
+                  trailing: null,
+                  onTap: () =>
+                      showUserDialog(context, conversation.app?.creatorId),
+                ),
+              ),
             CellGroup(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

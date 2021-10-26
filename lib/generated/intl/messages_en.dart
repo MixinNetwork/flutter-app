@@ -165,6 +165,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Delete for Everyone"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("Delete for me"),
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
+        "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
         "editAnnouncement":
             MessageLookupByLibrary.simpleMessage("Edit group description"),
