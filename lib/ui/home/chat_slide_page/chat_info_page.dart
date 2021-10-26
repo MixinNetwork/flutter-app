@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/widgets/user/user_dialog.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:intl/intl.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -14,6 +13,7 @@ import '../../../widgets/cell.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
+import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
