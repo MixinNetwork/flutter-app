@@ -2269,6 +2269,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Developer`
+  String get developer {
+    return Intl.message(
+      'Developer',
+      name: 'developer',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

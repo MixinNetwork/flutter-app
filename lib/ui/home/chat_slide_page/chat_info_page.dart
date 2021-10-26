@@ -5,7 +5,6 @@ import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart';
-
 import '../../../utils/extension/extension.dart';
 import '../../../utils/hook.dart';
 import '../../../widgets/action_button.dart';
@@ -14,6 +13,7 @@ import '../../../widgets/cell.dart';
 import '../../../widgets/dialog.dart';
 import '../../../widgets/more_extended_text.dart';
 import '../../../widgets/toast.dart';
+import '../../../widgets/user/user_dialog.dart';
 import '../../../widgets/user_selector/conversation_selector.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/message_bloc.dart';
@@ -277,6 +277,15 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
+            if (conversation.app?.creatorId != null)
+              CellGroup(
+                child: CellItem(
+                  title: Text(context.l10n.developer),
+                  trailing: null,
+                  onTap: () =>
+                      showUserDialog(context, conversation.app?.creatorId),
+                ),
+              ),
             CellGroup(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

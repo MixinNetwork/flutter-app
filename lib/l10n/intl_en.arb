@@ -220,5 +220,6 @@
   "walletTransactionCurrentValue": "value now {value}",
   "walletTransactionThatTimeValue": "value then {value}",
   "walletTransactionThatTimeNoValue": "value then N/A",
-  "text": "Text"
+  "text": "Text",
+  "developer": "Developer"
 }

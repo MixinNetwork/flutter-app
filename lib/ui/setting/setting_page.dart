@@ -47,11 +47,6 @@ class SettingPage extends HookWidget {
                               title: context.l10n.notification,
                             ),
                             _Item(
-                              assetName: Resources.assetsImagesIcBackupSvg,
-                              pageName: ResponsiveNavigatorCubit.chatBackupPage,
-                              title: context.l10n.chatBackup,
-                            ),
-                            _Item(
                               assetName:
                                   Resources.assetsImagesIcStorageUsageSvg,
                               pageName: ResponsiveNavigatorCubit
