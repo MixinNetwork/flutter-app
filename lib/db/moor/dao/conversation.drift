@@ -27,7 +27,7 @@ SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS 
     (SELECT COUNT(1)
      FROM message_mentions messageMention
      WHERE messageMention.conversation_id = conversation.conversation_id AND
-         messageMention.has_read = 0) as mentionCount,
+         messageMention.has_read = 0) AS mentionCount,
     owner.relationship AS relationship
 FROM conversations conversation
          INNER JOIN users owner ON owner.user_id = conversation.owner_id
@@ -47,6 +47,16 @@ SELECT SUM(unseen_message_count) FROM conversations conversation
   LEFT JOIN circle_conversations circleConversation ON conversation.conversation_id = circleConversation.conversation_id
 WHERE $where
 LIMIT 1;
+
+baseUnseenConversationCount:
+SELECT
+  COUNT(1) unseen_conversation_count,
+  SUM(CASE WHEN (CASE WHEN conversation.category = 'GROUP' THEN conversation.mute_until ELSE owner.mute_until END) >= (strftime('%s', 'now') * 1000) AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count
+  FROM conversations conversation
+  INNER JOIN users owner ON owner.user_id = conversation.owner_id
+WHERE $where
+LIMIT 1;
+
 
 fuzzySearchConversation AS SearchConversationItem:
 SELECT conversation.conversation_id AS conversationId,

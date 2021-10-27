@@ -11767,11 +11767,12 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
 
   Selectable<ConversationCircleItem> allCircles() {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, ci.created_at, count(c.conversation_id) AS count, sum(c.unseen_message_count) AS unseen_message_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, ci.created_at, COUNT(c.conversation_id) AS count, SUM(CASE WHEN IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN c.category = \'GROUP\' THEN c.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(c.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id LEFT JOIN users AS owner ON owner.user_id = c.owner_id GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [],
         readsFrom: {
           circles,
           conversations,
+          users,
           circleConversations,
         }).map((QueryRow row) {
       return ConversationCircleItem(
@@ -11779,7 +11780,9 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         name: row.read<String>('name'),
         createdAt: Circles.$converter0.mapToDart(row.read<int>('created_at'))!,
         count: row.read<int>('count'),
-        unseenMessageCount: row.read<int?>('unseen_message_count'),
+        unseenConversationCount: row.read<int>('unseen_conversation_count'),
+        unseenMutedConversationCount:
+            row.read<int>('unseen_muted_conversation_count'),
       );
     });
   }
@@ -11787,7 +11790,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ConversationCircleManagerItem> circleByConversationId(
       String? conversationId) {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, COUNT(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [
           Variable<String?>(conversationId)
         ],
@@ -11807,7 +11810,7 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   Selectable<ConversationCircleManagerItem> otherCircleByConversationId(
       String? conversationId) {
     return customSelect(
-        'SELECT ci.circle_id, ci.name, count(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id NOT IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
+        'SELECT ci.circle_id, ci.name, COUNT(c.conversation_id) AS count FROM circles AS ci LEFT JOIN circle_conversations AS cc ON ci.circle_id = cc.circle_id LEFT JOIN conversations AS c ON c.conversation_id = cc.conversation_id WHERE ci.circle_id NOT IN (SELECT cir.circle_id FROM circles AS cir LEFT JOIN circle_conversations AS ccr ON cir.circle_id = ccr.circle_id WHERE ccr.conversation_id = ?1) GROUP BY ci.circle_id ORDER BY ci.ordered_at ASC, ci.created_at ASC',
         variables: [
           Variable<String?>(conversationId)
         ],
@@ -13068,6 +13071,31 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map((QueryRow row) => row.read<int?>('_c0'));
   }
 
+  Selectable<BaseUnseenConversationCountResult> baseUnseenConversationCount(
+      Expression<bool?> Function(Conversations conversation, Users owner)
+          where) {
+    final generatedwhere = $write(
+        where(alias(this.conversations, 'conversation'),
+            alias(this.users, 'owner')),
+        hasMultipleTables: true);
+    return customSelect(
+        'SELECT COUNT(1) AS unseen_conversation_count, SUM(CASE WHEN(CASE WHEN conversation.category = \'GROUP\' THEN conversation.mute_until ELSE owner.mute_until END)>=(strftime(\'%s\', \'now\') * 1000)AND IFNULL(conversation.unseen_message_count, 0) > 0 THEN 1 ELSE 0 END) AS unseen_muted_conversation_count FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id WHERE ${generatedwhere.sql} LIMIT 1',
+        variables: [
+          ...generatedwhere.introducedVariables
+        ],
+        readsFrom: {
+          conversations,
+          users,
+          ...generatedwhere.watchedTables,
+        }).map((QueryRow row) {
+      return BaseUnseenConversationCountResult(
+        unseenConversationCount: row.read<int>('unseen_conversation_count'),
+        unseenMutedConversationCount:
+            row.read<int>('unseen_muted_conversation_count'),
+      );
+    });
+  }
+
   Selectable<SearchConversationItem> fuzzySearchConversation(String query) {
     return customSelect(
         'SELECT conversation.conversation_id AS conversationId, conversation.icon_url AS groupIconUrl, conversation.category AS category, conversation.name AS groupName, conversation.pin_time AS pinTime, conversation.mute_until AS muteUntil, conversation.owner_id AS ownerId, owner.mute_until AS ownerMuteUntil, owner.identity_number AS ownerIdentityNumber, owner.full_name AS fullName, owner.avatar_url AS avatarUrl, owner.is_verified AS isVerified, owner.app_id AS appId FROM conversations AS conversation INNER JOIN users AS owner ON owner.user_id = conversation.owner_id LEFT JOIN messages AS message ON conversation.last_message_id = message.message_id WHERE(conversation.category = \'GROUP\' AND conversation.name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\')OR(conversation.category = \'CONTACT\' AND(owner.full_name LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\' OR owner.identity_number LIKE \'%\' || ?1 || \'%\' ESCAPE \'\\\'))ORDER BY(conversation.category = \'GROUP\' AND conversation.name = ?1 COLLATE NOCASE)OR(conversation.category = \'CONTACT\' AND(owner.full_name = ?1 COLLATE NOCASE OR owner.identity_number = ?1 COLLATE NOCASE))DESC, conversation.pin_time DESC, message.created_at DESC',
@@ -13534,17 +13562,19 @@ class ConversationCircleItem {
   String name;
   DateTime createdAt;
   int count;
-  int? unseenMessageCount;
+  int unseenConversationCount;
+  int unseenMutedConversationCount;
   ConversationCircleItem({
     required this.circleId,
     required this.name,
     required this.createdAt,
     required this.count,
-    this.unseenMessageCount,
+    required this.unseenConversationCount,
+    required this.unseenMutedConversationCount,
   });
   @override
-  int get hashCode =>
-      Object.hash(circleId, name, createdAt, count, unseenMessageCount);
+  int get hashCode => Object.hash(circleId, name, createdAt, count,
+      unseenConversationCount, unseenMutedConversationCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -13553,7 +13583,9 @@ class ConversationCircleItem {
           other.name == this.name &&
           other.createdAt == this.createdAt &&
           other.count == this.count &&
-          other.unseenMessageCount == this.unseenMessageCount);
+          other.unseenConversationCount == this.unseenConversationCount &&
+          other.unseenMutedConversationCount ==
+              this.unseenMutedConversationCount);
   @override
   String toString() {
     return (StringBuffer('ConversationCircleItem(')
@@ -13561,7 +13593,8 @@ class ConversationCircleItem {
           ..write('name: $name, ')
           ..write('createdAt: $createdAt, ')
           ..write('count: $count, ')
-          ..write('unseenMessageCount: $unseenMessageCount')
+          ..write('unseenConversationCount: $unseenConversationCount, ')
+          ..write('unseenMutedConversationCount: $unseenMutedConversationCount')
           ..write(')'))
         .toString();
   }
@@ -14493,6 +14526,33 @@ class ConversationItem {
           ..write('participantUserId: $participantUserId, ')
           ..write('mentionCount: $mentionCount, ')
           ..write('relationship: $relationship')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class BaseUnseenConversationCountResult {
+  int unseenConversationCount;
+  int unseenMutedConversationCount;
+  BaseUnseenConversationCountResult({
+    required this.unseenConversationCount,
+    required this.unseenMutedConversationCount,
+  });
+  @override
+  int get hashCode =>
+      Object.hash(unseenConversationCount, unseenMutedConversationCount);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BaseUnseenConversationCountResult &&
+          other.unseenConversationCount == this.unseenConversationCount &&
+          other.unseenMutedConversationCount ==
+              this.unseenMutedConversationCount);
+  @override
+  String toString() {
+    return (StringBuffer('BaseUnseenConversationCountResult(')
+          ..write('unseenConversationCount: $unseenConversationCount, ')
+          ..write('unseenMutedConversationCount: $unseenMutedConversationCount')
           ..write(')'))
         .toString();
   }

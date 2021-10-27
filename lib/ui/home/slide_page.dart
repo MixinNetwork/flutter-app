@@ -312,7 +312,8 @@ class _CircleList extends HookWidget {
                         }
                       },
                       selected: selected,
-                      count: circle.unseenMessageCount ?? 0,
+                      count: circle.unseenConversationCount,
+                      mutedCount: circle.unseenMutedConversationCount,
                     ),
                   ),
                 );
@@ -363,29 +364,24 @@ class _Item extends HookWidget {
       converter: (state) => state.type == type,
       keys: [type],
     );
-    final unseenMessageCount = useMemoizedStream<int?>(
-          () {
-            final dao = context.database.conversationDao;
-            switch (type) {
-              case SlideCategoryType.contacts:
-                return dao
-                    .contactConversationUnseenMessageCount()
-                    .watchSingle();
-              case SlideCategoryType.groups:
-                return dao.groupConversationUnseenMessageCount().watchSingle();
-              case SlideCategoryType.bots:
-                return dao.botConversationUnseenMessageCount().watchSingle();
-              case SlideCategoryType.strangers:
-                return dao
-                    .strangerConversationUnseenMessageCount()
-                    .watchSingle();
-              default:
-                return const Stream.empty();
-            }
-          },
-          keys: [type],
-        ).data ??
-        0;
+    final result = useMemoizedStream<BaseUnseenConversationCountResult>(
+      () {
+        final dao = context.database.conversationDao;
+        switch (type) {
+          case SlideCategoryType.contacts:
+            return dao.contactUnseenConversationCount().watchSingle();
+          case SlideCategoryType.groups:
+            return dao.groupUnseenConversationCount().watchSingle();
+          case SlideCategoryType.bots:
+            return dao.botUnseenConversationCount().watchSingle();
+          case SlideCategoryType.strangers:
+            return dao.strangerUnseenConversationCount().watchSingle();
+          default:
+            return const Stream.empty();
+        }
+      },
+      keys: [type],
+    ).data;
 
     return MoveWindowBarrier(
       child: SelectItem(
@@ -406,7 +402,8 @@ class _Item extends HookWidget {
           }
         },
         selected: selected,
-        count: unseenMessageCount,
+        count: result?.unseenConversationCount ?? 0,
+        mutedCount: result?.unseenMutedConversationCount ?? 0,
       ),
     );
   }

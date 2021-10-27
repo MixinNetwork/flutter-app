@@ -84,7 +84,7 @@ SELECT message.message_id AS messageId, message.conversation_id AS conversationI
     message.media_width AS mediaWidth, message.media_height AS mediaHeight,
     message.thumb_image AS thumbImage, message.thumb_url AS thumbUrl, message.media_url AS mediaUrl,
     message.media_duration AS mediaDuration,
-    message.quote_message_id as quoteId, message.quote_content as quoteContent,
+    message.quote_message_id AS quoteId, message.quote_content AS quoteContent,
     sticker.asset_url AS assetUrl, sticker.asset_width AS assetWidth,
     sticker.asset_height AS assetHeight,
     sticker.sticker_id AS stickerId,
@@ -111,7 +111,7 @@ SELECT m.message_id, m.conversation_id, m.user_id, m.category, m.content, m.medi
       m.media_size, m.media_duration, m.media_width, m.media_height, m.media_hash, m.thumb_image, m.media_key,
       m.media_digest, m.media_status, m.status, m.created_at, m.action, m.participant_id, m.snapshot_id, m.hyperlink,
       m.name, m.album_id, m.sticker_id, m.shared_user_id, m.media_waveform, m.quote_message_id, m.quote_content,
-      rm.status as resend_status, rm.user_id as resend_user_id, rm.session_id as resend_session_id
+      rm.status AS resend_status, rm.user_id AS resend_user_id, rm.session_id AS resend_session_id
       FROM messages m LEFT JOIN resend_session_messages rm on m.message_id = rm.message_id
       WHERE m.message_id = :message_id AND (m.status = 'SENDING' OR rm.status = 1) AND m.content IS NOT NULL LIMIT 1;
 
