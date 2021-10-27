@@ -169,8 +169,8 @@ class _Item extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => ShareMediaItemMenuWrapper(
-    messageId: message.messageId,
-    child: InteractiveDecoratedBox(
+        messageId: message.messageId,
+        child: InteractiveDecoratedBox(
           onTap: () async {
             if (message.mediaStatus == MediaStatus.canceled) {
               if (message.relationship == UserRelationship.me &&
@@ -224,8 +224,8 @@ class _Item extends StatelessWidget {
                           final _lookupMimeType =
                               lookupMimeType(message.mediaName!);
                           if (_lookupMimeType != null) {
-                            extension =
-                                extensionFromMime(_lookupMimeType).toUpperCase();
+                            extension = extensionFromMime(_lookupMimeType)
+                                .toUpperCase();
                           }
                         }
                         return Text(
@@ -265,5 +265,5 @@ class _Item extends StatelessWidget {
             ),
           ),
         ),
-  );
+      );
 }
