@@ -47,7 +47,8 @@ Future<void> openBotWebviewWindow(
   String? conversationId,
 }) async {
   final webview = await WebviewWindow.create(
-    configuration: CreateConfiguration(title: app.name),
+    configuration: CreateConfiguration(
+        title: app.name, windowWidth: 380, windowHeight: 750),
   );
   final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
   webview
