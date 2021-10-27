@@ -596,6 +596,8 @@ class AccountServer {
     await Future.wait(jobSubscribers.map((s) => s.cancel()));
     jobSubscribers.clear();
     await clearKeyValues();
+    // Re-init keyValue to prepare for next login.
+    await initKeyValues();
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);
     await database.participantSessionDao.updateSentToServer();
