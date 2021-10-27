@@ -10,6 +10,7 @@
 #include <dart_vlc/dart_vlc_plugin.h>
 #include <desktop_drop/desktop_drop_plugin.h>
 #include <desktop_lifecycle/desktop_lifecycle_plugin.h>
+#include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_selector_windows/file_selector_plugin.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
 #include <pasteboard/pasteboard_plugin.h>
@@ -28,6 +29,8 @@ void RegisterPlugins(flutter::PluginRegistry* registry) {
       registry->GetRegistrarForPlugin("DesktopDropPlugin"));
   DesktopLifecyclePluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("DesktopLifecyclePlugin"));
+  DesktopWebviewWindowPluginRegisterWithRegistrar(
+      registry->GetRegistrarForPlugin("DesktopWebviewWindowPlugin"));
   FileSelectorPluginRegisterWithRegistrar(
       registry->GetRegistrarForPlugin("FileSelectorPlugin"));
   FlutterAppIconBadgePluginRegisterWithRegistrar(

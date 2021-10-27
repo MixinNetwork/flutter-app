@@ -43,6 +43,7 @@ import '../utils/hive_key_values.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
 import '../utils/reg_exp_utils.dart';
+import '../utils/webview.dart';
 import '../workers/decrypt_message.dart';
 import '../workers/sender.dart';
 import 'account_key_value.dart';
@@ -601,6 +602,8 @@ class AccountServer {
     await SignalDatabase.get.clear();
     await database.participantSessionDao.deleteBySessionId(sessionId);
     await database.participantSessionDao.updateSentToServer();
+
+    clearWebviewCacheAndCookies();
   }
 
   Future<void> sendTextMessage(

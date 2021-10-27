@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dart_vlc
   desktop_drop
   desktop_lifecycle
+  desktop_webview_window
   file_selector_windows
   flutter_app_icon_badge
   pasteboard
