@@ -18,7 +18,6 @@ import '../../constants/resources.dart';
 import '../../db/extension/conversation.dart';
 import '../../db/mixin_database.dart';
 import '../../enum/message_category.dart';
-import '../../generated/l10n.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/message_optimize.dart';
@@ -696,7 +695,7 @@ class _Empty extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          Localization.current.noData,
+          context.l10n.noData,
           style: TextStyle(
             color: dynamicColor,
             fontSize: 14,
@@ -825,7 +824,7 @@ class _ConversationMenuWrapper extends StatelessWidget {
       buildMenus: () => [
         if (pinTime != null)
           ContextMenu(
-            title: Localization.current.unPin,
+            title: context.l10n.unPin,
             onTap: () => runFutureWithToast(
               context,
               context.accountServer.unpin(conversationId),
@@ -833,7 +832,7 @@ class _ConversationMenuWrapper extends StatelessWidget {
           ),
         if (pinTime == null)
           ContextMenu(
-            title: Localization.current.pin,
+            title: context.l10n.pin,
             onTap: () => runFutureWithToast(
               context,
               context.accountServer.pin(conversationId),
@@ -841,7 +840,7 @@ class _ConversationMenuWrapper extends StatelessWidget {
           ),
         if (isMute)
           ContextMenu(
-            title: Localization.current.unMute,
+            title: context.l10n.unMute,
             onTap: () async {
               await runFutureWithToast(
                 context,
@@ -855,7 +854,7 @@ class _ConversationMenuWrapper extends StatelessWidget {
           )
         else
           ContextMenu(
-            title: Localization.current.muted,
+            title: context.l10n.muted,
             onTap: () async {
               final result = await showMixinDialog<int?>(
                   context: context, child: const MuteDialog());
@@ -872,7 +871,7 @@ class _ConversationMenuWrapper extends StatelessWidget {
             },
           ),
         ContextMenu(
-          title: Localization.current.deleteChat,
+          title: context.l10n.deleteChat,
           isDestructiveAction: true,
           onTap: () async {
             await context.database.conversationDao
@@ -896,7 +895,7 @@ class _ConversationMenuWrapper extends StatelessWidget {
             if (circleId?.isEmpty ?? true) return const SizedBox();
 
             return ContextMenu(
-              title: Localization.current.removeChatFromCircle,
+              title: context.l10n.removeChatFromCircle,
               isDestructiveAction: true,
               onTap: () async {
                 await runFutureWithToast(

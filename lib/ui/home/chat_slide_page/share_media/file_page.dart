@@ -20,6 +20,7 @@ import '../../../../utils/file.dart';
 import '../../../../utils/hook.dart';
 import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/status.dart';
+import '../shared_media_page.dart';
 
 class FilePage extends HookWidget {
   const FilePage({
@@ -167,98 +168,101 @@ class _Item extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => InteractiveDecoratedBox(
-        onTap: () async {
-          if (message.mediaStatus == MediaStatus.canceled) {
-            if (message.relationship == UserRelationship.me &&
-                message.mediaUrl?.isNotEmpty == true) {
-              await context.accountServer.reUploadAttachment(message);
-            } else {
-              await context.accountServer.downloadAttachment(message);
+  Widget build(BuildContext context) => ShareMediaItemMenuWrapper(
+        messageId: message.messageId,
+        child: InteractiveDecoratedBox(
+          onTap: () async {
+            if (message.mediaStatus == MediaStatus.canceled) {
+              if (message.relationship == UserRelationship.me &&
+                  message.mediaUrl?.isNotEmpty == true) {
+                await context.accountServer.reUploadAttachment(message);
+              } else {
+                await context.accountServer.downloadAttachment(message);
+              }
+            } else if (message.mediaStatus == MediaStatus.done &&
+                message.mediaUrl != null) {
+              if (message.mediaUrl?.isEmpty ?? true) return;
+              await saveFileToSystem(
+                context,
+                context.accountServer.convertMessageAbsolutePath(message),
+                suggestName: message.mediaName,
+              );
             }
-          } else if (message.mediaStatus == MediaStatus.done &&
-              message.mediaUrl != null) {
-            if (message.mediaUrl?.isEmpty ?? true) return;
-            await saveFileToSystem(
-              context,
-              context.accountServer.convertMessageAbsolutePath(message),
-              suggestName: message.mediaName,
-            );
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              SizedBox.fromSize(
-                size: const Size.square(50),
-                child: Builder(builder: (context) {
-                  switch (message.mediaStatus) {
-                    case MediaStatus.canceled:
-                      if (message.relationship == UserRelationship.me &&
-                          message.mediaUrl?.isNotEmpty == true) {
-                        return const StatusUpload();
-                      } else {
-                        return const StatusDownload();
-                      }
-                    case MediaStatus.pending:
-                      return const StatusPending();
-                    case MediaStatus.expired:
-                      return const StatusWarning();
-                    default:
-                      break;
-                  }
-
-                  return Container(
-                    decoration: BoxDecoration(
-                      color: context.theme.statusBackground,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: Builder(builder: (context) {
-                      var extension = 'FILE';
-                      if (message.mediaName != null) {
-                        final _lookupMimeType =
-                            lookupMimeType(message.mediaName!);
-                        if (_lookupMimeType != null) {
-                          extension =
-                              extensionFromMime(_lookupMimeType).toUpperCase();
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                SizedBox.fromSize(
+                  size: const Size.square(50),
+                  child: Builder(builder: (context) {
+                    switch (message.mediaStatus) {
+                      case MediaStatus.canceled:
+                        if (message.relationship == UserRelationship.me &&
+                            message.mediaUrl?.isNotEmpty == true) {
+                          return const StatusUpload();
+                        } else {
+                          return const StatusDownload();
                         }
-                      }
-                      return Text(
-                        extension,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: lightBrightnessThemeData.secondaryText,
-                        ),
-                      );
-                    }),
-                  );
-                }),
-              ),
-              const SizedBox(width: 10),
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message.mediaName?.overflow ?? '',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: context.theme.text,
+                      case MediaStatus.pending:
+                        return const StatusPending();
+                      case MediaStatus.expired:
+                        return const StatusWarning();
+                      default:
+                        break;
+                    }
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: context.theme.statusBackground,
+                        shape: BoxShape.circle,
+                      ),
+                      alignment: Alignment.center,
+                      child: Builder(builder: (context) {
+                        var extension = 'FILE';
+                        if (message.mediaName != null) {
+                          final _lookupMimeType =
+                              lookupMimeType(message.mediaName!);
+                          if (_lookupMimeType != null) {
+                            extension = extensionFromMime(_lookupMimeType)
+                                .toUpperCase();
+                          }
+                        }
+                        return Text(
+                          extension,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: lightBrightnessThemeData.secondaryText,
+                          ),
+                        );
+                      }),
+                    );
+                  }),
+                ),
+                const SizedBox(width: 10),
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message.mediaName?.overflow ?? '',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: context.theme.text,
+                      ),
+                      maxLines: 1,
                     ),
-                    maxLines: 1,
-                  ),
-                  Text(
-                    filesize(message.mediaSize),
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: context.theme.secondaryText,
+                    Text(
+                      filesize(message.mediaSize),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: context.theme.secondaryText,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       );

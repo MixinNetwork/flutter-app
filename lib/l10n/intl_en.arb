@@ -221,5 +221,6 @@
   "walletTransactionThatTimeValue": "value then {value}",
   "walletTransactionThatTimeNoValue": "value then N/A",
   "text": "Text",
-  "developer": "Developer"
+  "developer": "Developer",
+  "goToChat": "Go to chat"
 }

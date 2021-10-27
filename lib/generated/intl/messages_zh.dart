@@ -160,6 +160,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("转发"),
         "from": MessageLookupByLibrary.simpleMessage("来自"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("来自: "),
+        "goToChat": MessageLookupByLibrary.simpleMessage("定位到聊天"),
         "groupAdd": MessageLookupByLibrary.simpleMessage("添加成员"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("管理员"),
         "groupCantSendDes":

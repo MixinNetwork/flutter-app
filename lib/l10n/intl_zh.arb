@@ -216,5 +216,6 @@
   "walletTransactionThatTimeValue": "当时价值 {value}",
   "walletTransactionThatTimeNoValue": "当时价值 暂无",
   "text": "文字",
-  "developer": "开发者"
+  "developer": "开发者",
+  "goToChat": "定位到聊天"
 }

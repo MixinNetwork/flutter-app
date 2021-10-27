@@ -21,6 +21,7 @@ import '../../../../widgets/image.dart';
 import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/message/item/image/image_preview_page.dart';
 import '../../chat/chat_page.dart';
+import '../shared_media_page.dart';
 
 class MediaPage extends HookWidget {
   const MediaPage({
@@ -178,39 +179,42 @@ class _Item extends StatelessWidget {
   final MessageItem message;
 
   @override
-  Widget build(BuildContext context) => InteractiveDecoratedBox(
-        onTap: () {
-          switch (message.mediaStatus) {
-            case MediaStatus.done:
-              ImagePreviewPage.push(
-                context,
-                conversationId: message.conversationId,
-                messageId: message.messageId,
-              );
-              break;
-            case MediaStatus.canceled:
-              if (message.relationship == UserRelationship.me &&
-                  message.mediaUrl?.isNotEmpty == true) {
-                context.accountServer.reUploadAttachment(message);
-              } else {
-                context.accountServer.downloadAttachment(message);
-              }
-              ImagePreviewPage.push(
-                context,
-                conversationId: message.conversationId,
-                messageId: message.messageId,
-              );
-              break;
-            default:
-              break;
-          }
-        },
-        child: Image(
-          image: MixinFileImage(
-              File(context.accountServer.convertMessageAbsolutePath(message))),
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) =>
-              ImageByBlurHashOrBase64(imageData: message.thumbImage!),
+  Widget build(BuildContext context) => ShareMediaItemMenuWrapper(
+        messageId: message.messageId,
+        child: InteractiveDecoratedBox(
+          onTap: () {
+            switch (message.mediaStatus) {
+              case MediaStatus.done:
+                ImagePreviewPage.push(
+                  context,
+                  conversationId: message.conversationId,
+                  messageId: message.messageId,
+                );
+                break;
+              case MediaStatus.canceled:
+                if (message.relationship == UserRelationship.me &&
+                    message.mediaUrl?.isNotEmpty == true) {
+                  context.accountServer.reUploadAttachment(message);
+                } else {
+                  context.accountServer.downloadAttachment(message);
+                }
+                ImagePreviewPage.push(
+                  context,
+                  conversationId: message.conversationId,
+                  messageId: message.messageId,
+                );
+                break;
+              default:
+                break;
+            }
+          },
+          child: Image(
+            image: MixinFileImage(File(
+                context.accountServer.convertMessageAbsolutePath(message))),
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) =>
+                ImageByBlurHashOrBase64(imageData: message.thumbImage!),
+          ),
         ),
       );
 }
