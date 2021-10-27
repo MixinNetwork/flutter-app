@@ -16,6 +16,7 @@ import '../../../../utils/extension/extension.dart';
 import '../../../../utils/hook.dart';
 import '../../../../widgets/interactive_decorated_box.dart';
 import '../../../../widgets/message/item/post_message.dart';
+import '../shared_media_page.dart';
 
 class PostPage extends HookWidget {
   const PostPage({
@@ -166,34 +167,38 @@ class _Item extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(left: 10, right: 10, bottom: 10),
-        child: InteractiveDecoratedBox(
-          onTap: () => PostPreview.push(context, message: message),
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: context.theme.sidebarSelected,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Stack(
-              children: [
-                MarkdownBody(
-                  data:
-                      message.content!.postOptimize(10).postLengthOptimize(256),
-                  extensionSet: ExtensionSet.gitHubWeb,
-                  styleSheet: context.markdownStyleSheet,
-                  softLineBreak: true,
-                  imageBuilder: (_, __, ___) => const SizedBox(),
-                ),
-                Positioned(
-                  right: 0,
-                  top: 0,
-                  child: SvgPicture.asset(
-                    Resources.assetsImagesPostDetailSvg,
-                    width: 20,
-                    height: 20,
+        child: ShareMediaItemMenuWrapper(
+          messageId: message.messageId,
+          child: InteractiveDecoratedBox(
+            onTap: () => PostPreview.push(context, message: message),
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.theme.sidebarSelected,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Stack(
+                children: [
+                  MarkdownBody(
+                    data: message.content!
+                        .postOptimize(10)
+                        .postLengthOptimize(256),
+                    extensionSet: ExtensionSet.gitHubWeb,
+                    styleSheet: context.markdownStyleSheet,
+                    softLineBreak: true,
+                    imageBuilder: (_, __, ___) => const SizedBox(),
                   ),
-                ),
-              ],
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    child: SvgPicture.asset(
+                      Resources.assetsImagesPostDetailSvg,
+                      width: 20,
+                      height: 20,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

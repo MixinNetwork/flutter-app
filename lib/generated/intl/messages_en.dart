@@ -187,6 +187,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "forward": MessageLookupByLibrary.simpleMessage("Forward"),
         "from": MessageLookupByLibrary.simpleMessage("From"),
         "fromWithColon": MessageLookupByLibrary.simpleMessage("From: "),
+        "goToChat": MessageLookupByLibrary.simpleMessage("Go to chat"),
         "groupAdd": MessageLookupByLibrary.simpleMessage("Add Participants"),
         "groupAdmin": MessageLookupByLibrary.simpleMessage("admin"),
         "groupCantSendDes": MessageLookupByLibrary.simpleMessage(

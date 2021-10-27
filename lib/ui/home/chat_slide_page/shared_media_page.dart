@@ -3,7 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/app_bar.dart';
+import '../../../widgets/menu.dart';
+import '../bloc/blink_cubit.dart';
 import '../bloc/conversation_cubit.dart';
+import '../bloc/message_bloc.dart';
 import 'share_media/file_page.dart';
 import 'share_media/media_page.dart';
 import 'share_media/post_page.dart';
@@ -85,4 +88,29 @@ class SharedMediaPage extends HookWidget {
       ),
     );
   }
+}
+
+class ShareMediaItemMenuWrapper extends StatelessWidget {
+  const ShareMediaItemMenuWrapper({
+    Key? key,
+    required this.child,
+    required this.messageId,
+  }) : super(key: key);
+
+  final Widget child;
+  final String messageId;
+
+  @override
+  Widget build(BuildContext context) => ContextMenuPortalEntry(
+      buildMenus: () => [
+        ContextMenu(
+          title: context.l10n.goToChat,
+          onTap: () {
+            context.read<BlinkCubit>().blinkByMessageId(messageId);
+            context.read<MessageBloc>().scrollTo(messageId);
+          },
+        )
+      ],
+      child: child,
+    );
 }

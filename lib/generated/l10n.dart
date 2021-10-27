@@ -2279,6 +2279,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Go to chat`
+  String get goToChat {
+    return Intl.message(
+      'Go to chat',
+      name: 'goToChat',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
