@@ -18,4 +18,7 @@ class AppDao extends DatabaseAccessor<MixinDatabase> with _$AppDaoMixin {
 
   SimpleSelectStatement<Apps, App> appInIds(Iterable<String> ids) =>
       select(db.apps)..where((tbl) => tbl.appId.isIn(ids));
+
+  Selectable<App> findAppByAppNumber(String conversationId, String appNumber) =>
+      db.findAppByAppNumber(conversationId, appNumber);
 }

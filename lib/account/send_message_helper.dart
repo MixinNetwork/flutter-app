@@ -15,10 +15,10 @@ import '../blaze/vo/pin_message_payload.dart';
 import '../blaze/vo/recall_message.dart';
 import '../blaze/vo/transcript_minimal.dart';
 import '../constants/constants.dart';
+import '../db/dao/app_dao.dart';
 import '../db/dao/job_dao.dart';
 import '../db/dao/message_dao.dart';
 import '../db/dao/message_mention_dao.dart';
-import '../db/dao/participant_dao.dart';
 import '../db/dao/pin_message_dao.dart';
 import '../db/dao/transcript_message_dao.dart';
 import '../db/dao/user_dao.dart';
@@ -46,7 +46,7 @@ class SendMessageHelper {
   final Database _database;
   late final MessageDao _messageDao = _database.messageDao;
   late final MessageMentionDao _messageMentionDao = _database.messageMentionDao;
-  late final ParticipantDao _participantDao = _database.participantDao;
+  late final AppDao _appDao = _database.appDao;
   late final JobDao _jobDao = _database.jobDao;
   late final PinMessageDao _pinMessageDao = _database.pinMessageDao;
   late final UserDao _userDao = _database.userDao;
@@ -70,10 +70,15 @@ class SendMessageHelper {
     String? recipientId;
     final botNumber = botNumberStartRegExp.firstMatch(content)?[1];
     if (botNumber?.isNotEmpty == true) {
-      recipientId = await _participantDao
-          .userIdByIdentityNumber(conversationId, botNumber!)
+      final bot = await _appDao
+          .findAppByAppNumber(conversationId, botNumber!)
           .getSingleOrNull();
-      category = recipientId != null ? MessageCategory.plainText : category;
+      recipientId = bot?.appId;
+      if (bot?.capabilities?.contains('ENCRYPTED') == true) {
+        category = MessageCategory.encryptedText;
+      } else {
+        category = MessageCategory.plainText;
+      }
     }
 
     final message = Message(

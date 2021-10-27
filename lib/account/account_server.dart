@@ -32,6 +32,7 @@ import '../db/dao/job_dao.dart';
 import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart' as db;
+import '../db/mixin_database.dart';
 import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
@@ -448,9 +449,8 @@ class AccountServer {
             .conversationById(message.conversationId)
             .getSingleOrNull();
         if (conversation == null) return;
-        final participantSessionKey = await database.participantSessionDao
-            .getParticipantSessionKeyWithoutSelf(
-                message.conversationId, userId);
+        final participantSessionKey = await _getBotSessionKey(
+            message.conversationId, userId, recipientId);
         final otherSessionKey = await database.participantSessionDao
             .getOtherParticipantSessionKey(
                 message.conversationId, userId, sessionId);
@@ -489,6 +489,17 @@ class AccountServer {
     });
 
     await Future.wait(futures);
+  }
+
+  Future<ParticipantSessionKey?> _getBotSessionKey(
+      String conversationId, String accountId, String? recipientId) async {
+    if (recipientId != null) {
+      return database.participantSessionDao
+          .getParticipantSessionKeyByUserId(conversationId, recipientId);
+    } else {
+      return database.participantSessionDao
+          .getParticipantSessionKeyWithoutSelf(conversationId, accountId);
+    }
   }
 
   Future<MessageResult?> _sendSignalMessage(

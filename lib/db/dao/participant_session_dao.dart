@@ -15,7 +15,11 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
           String conversationId, String userId) =>
-      db.participantSessionKeyWithoutSelf(conversationId, userId).getSingle();
+      db.getParticipantSessionKeyByUserId(conversationId, userId).getSingle();
+
+  Future<ParticipantSessionKey?> getParticipantSessionKeyByUserId(
+          String conversationId, String userId) =>
+      db.getParticipantSessionKeyByUserId(conversationId, userId).getSingle();
 
   Future<ParticipantSessionKey?> getOtherParticipantSessionKey(
           String conversationId, String userId, String sessionId) =>

@@ -11979,6 +11979,19 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
     });
   }
 
+  Selectable<App> findAppByAppNumber(String conversationId, String appNumber) {
+    return customSelect(
+        'SELECT a.* FROM apps AS a INNER JOIN participants AS p ON p.user_id = a.app_id WHERE p.conversation_id = ?1 AND a.app_number = ?2',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(appNumber)
+        ],
+        readsFrom: {
+          apps,
+          participants,
+        }).map(apps.mapFromRow);
+  }
+
   Selectable<StickerAlbum> systemAlbums() {
     return customSelect(
         'SELECT * FROM sticker_albums WHERE category = \'SYSTEM\' ORDER BY created_at DESC',
@@ -12029,10 +12042,30 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         }).map(users.mapFromRow);
   }
 
-  Selectable<ParticipantSessionKey> participantSessionKeyWithoutSelf(
+  Selectable<ParticipantSessionKey> getParticipantSessionKeyWithoutSelf(
       String conversationId, String userId) {
     return customSelect(
         'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id != ?2 LIMIT 1',
+        variables: [
+          Variable<String>(conversationId),
+          Variable<String>(userId)
+        ],
+        readsFrom: {
+          participantSession,
+        }).map((QueryRow row) {
+      return ParticipantSessionKey(
+        conversationId: row.read<String>('conversation_id'),
+        userId: row.read<String>('user_id'),
+        sessionId: row.read<String>('session_id'),
+        publicKey: row.read<String?>('public_key'),
+      );
+    });
+  }
+
+  Selectable<ParticipantSessionKey> getParticipantSessionKeyByUserId(
+      String conversationId, String userId) {
+    return customSelect(
+        'SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = ?1 AND user_id == ?2 LIMIT 1',
         variables: [
           Variable<String>(conversationId),
           Variable<String>(userId)

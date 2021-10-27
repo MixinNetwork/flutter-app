@@ -34,3 +34,6 @@ SELECT biography FROM users WHERE user_id = :user_id;
 
 userByIdentityNumbers AS MentionUser:
 SELECT user_id, identity_number, full_name FROM users WHERE identity_number IN :numbers;
+
+findAppByAppNumber:
+SELECT a.* FROM apps a INNER JOIN participants p ON p.user_id = a.app_id WHERE p.conversation_id = :conversationId AND a.app_number = :appNumber

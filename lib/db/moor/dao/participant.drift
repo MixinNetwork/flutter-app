@@ -8,8 +8,11 @@ WHERE participant.conversation_id = :conversationId
 ORDER BY participant.created_at ASC
 LIMIT 4;
 
-participantSessionKeyWithoutSelf AS ParticipantSessionKey:
+getParticipantSessionKeyWithoutSelf AS ParticipantSessionKey:
 SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id != :userId LIMIT 1;
+
+getParticipantSessionKeyByUserId AS ParticipantSessionKey:
+SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id == :userId LIMIT 1;
 
 otherParticipantSessionKey AS ParticipantSessionKey:
 SELECT conversation_id, user_id, session_id, public_key FROM participant_session WHERE conversation_id = :conversationId AND user_id == :userId AND session_id != :sessionId;
