@@ -9,6 +9,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_lifecycle
   file_selector_windows
   flutter_app_icon_badge
+  pasteboard
   system_clock
   system_tray
   url_launcher_windows

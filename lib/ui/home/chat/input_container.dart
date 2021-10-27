@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:pasteboard/pasteboard.dart';
 import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -18,6 +15,7 @@ import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
 import '../../../utils/platform.dart';
 import '../../../utils/reg_exp_utils.dart';
+import '../../../utils/system/clipboard.dart';
 import '../../../widgets/action_button.dart';
 import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
@@ -400,26 +398,15 @@ class _SendTextField extends HookWidget {
             onInvoke: (Intent intent,
                 TextEditingActionTarget? textEditingActionTarget,
                 [_]) async {
-              if (!Platform.isMacOS) {
-                return textEditingActionTarget!
-                    .pasteText(SelectionChangedCause.keyboard);
-              }
-              final uri = await Pasteboard.uri;
-              if (uri != null) {
-                final file = File(uri.toFilePath(windows: Platform.isWindows));
-
-                if (!file.existsSync()) return;
-                await showFilesPreviewDialog(context, [file.xFile]);
+              final files = await getClipboardFiles();
+              if (files.isNotEmpty) {
+                await showFilesPreviewDialog(
+                  context,
+                  files.map((e) => e.xFile).toList(),
+                );
               } else {
-                final bytes = await Pasteboard.image;
-                if (bytes == null) {
-                  return textEditingActionTarget!
-                      .pasteText(SelectionChangedCause.keyboard);
-                }
-                final file = await saveBytesToTempFile(
-                    bytes, 'mixin_paste_board_image', '.png');
-                if (file == null) return;
-                await showFilesPreviewDialog(context, [file.xFile]);
+                await textEditingActionTarget!
+                    .pasteText(SelectionChangedCause.keyboard);
               }
             },
           ),

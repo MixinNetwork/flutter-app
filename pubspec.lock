@@ -908,10 +908,10 @@ packages:
   pasteboard:
     dependency: "direct main"
     description:
-      path: "."
-      ref: "107f500cb5946d6ca228dbb53b7d7d0bb31c6db2"
-      resolved-ref: "107f500cb5946d6ca228dbb53b7d7d0bb31c6db2"
-      url: "https://github.com/MixinNetwork/flutter_pasteboard.git"
+      path: "packages/pasteboard"
+      ref: "7bf203f0ea9e3c21ed2d0473a793a4c68d499051"
+      resolved-ref: "7bf203f0ea9e3c21ed2d0473a793a4c68d499051"
+      url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
   path:
