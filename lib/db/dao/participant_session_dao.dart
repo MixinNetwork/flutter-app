@@ -15,13 +15,15 @@ class ParticipantSessionDao extends DatabaseAccessor<MixinDatabase>
 
   Future<ParticipantSessionKey?> getParticipantSessionKeyWithoutSelf(
           String conversationId, String userId) =>
-      db.participantSessionKeyWithoutSelf(conversationId, userId).getSingle();
+      db
+          .participantSessionKeyWithoutSelf(conversationId, userId)
+          .getSingleOrNull();
 
   Future<ParticipantSessionKey?> getOtherParticipantSessionKey(
           String conversationId, String userId, String sessionId) =>
       db
           .otherParticipantSessionKey(conversationId, userId, sessionId)
-          .getSingle();
+          .getSingleOrNull();
 
   Future deleteByStatus(String conversationId) async {
     await (delete(db.participantSession)
