@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,9 @@ import 'package:provider/provider.dart';
 import '../bloc/setting_cubit.dart';
 import '../db/mixin_database.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
+
+final kIsSupportWebview =
+    Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 
 void clearWebviewCacheAndCookies() {
   WebviewWindow.clearAll();
@@ -56,4 +60,25 @@ Future<void> openBotWebviewWindow(
     ..addScriptToExecuteOnDocumentCreated(
         _mixinContextProviderJavaScript(mixinContext))
     ..launch(app.homeUri);
+}
+
+Future<void> openWebviewWindowWithUrl(
+  BuildContext context,
+  String url, {
+  String? conversationId,
+  String? title,
+}) async {
+  final webview = await WebviewWindow.create(
+    configuration: CreateConfiguration(
+      windowWidth: 380,
+      windowHeight: 750,
+      title: title ?? '',
+    ),
+  );
+  final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
+  webview
+    ..setBrightness(context.read<SettingCubit>().brightness)
+    ..addScriptToExecuteOnDocumentCreated(
+        _mixinContextProviderJavaScript(mixinContext))
+    ..launch(url);
 }

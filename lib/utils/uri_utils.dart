@@ -8,7 +8,11 @@ import '../widgets/toast.dart';
 import '../widgets/user/user_dialog.dart';
 import 'extension/extension.dart';
 
-Future<bool> openUri(BuildContext context, String text) async {
+Future<bool> openUri(
+  BuildContext context,
+  String text, {
+  Future<bool> Function(String url) fallbackHandler = launch,
+}) async {
   final uri = Uri.parse(text);
   if (uri.scheme.isEmpty) return Future.value(false);
 
@@ -39,7 +43,7 @@ Future<bool> openUri(BuildContext context, String text) async {
     }
   }
 
-  return launch(uri.toString());
+  return fallbackHandler(uri.toString());
 }
 
 extension _MixinUriExtension on Uri {
