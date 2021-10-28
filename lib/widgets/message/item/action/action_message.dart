@@ -3,10 +3,12 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../utils/color_utils.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
+import '../../../../utils/webview.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -49,10 +51,23 @@ class ActionMessage extends HookWidget {
               (e) => InteractiveDecoratedBox.color(
                 cursor: MaterialStateMouseCursor.clickable,
                 onTap: () {
-                  // ignore: avoid_dynamic_calls
                   if (context.openAction(e.action)) return;
-                  // ignore: avoid_dynamic_calls
-                  openUri(context, e.action);
+                  if (kIsSupportWebview) {
+                    openUri(context, e.action, fallbackHandler: (url) async {
+                      await openWebviewWindowWithUrl(
+                        context,
+                        url,
+                        title: e.label,
+                        conversationId: context
+                            .read<ConversationCubit>()
+                            .state
+                            ?.conversationId,
+                      );
+                      return true;
+                    });
+                  } else {
+                    openUri(context, e.action);
+                  }
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(1),

@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 
+import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
+import '../../../../utils/webview.dart';
 import '../../../cache_image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
@@ -43,7 +45,20 @@ class ActionCardMessage extends HookWidget {
       child: InteractiveDecoratedBox(
         onTap: () {
           if (context.openAction(appCardData.action)) return;
-          openUri(context, appCardData.action);
+          if (kIsSupportWebview) {
+            openUri(context, appCardData.action, fallbackHandler: (url) async {
+              await openWebviewWindowWithUrl(
+                context,
+                url,
+                title: appCardData.title,
+                conversationId:
+                    context.read<ConversationCubit>().state?.conversationId,
+              );
+              return false;
+            });
+          } else {
+            openUri(context, appCardData.action);
+          }
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,

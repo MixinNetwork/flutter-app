@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -289,14 +288,11 @@ class _BotIcon extends StatelessWidget {
       return const SizedBox();
     }
 
-    final supportWebview =
-        Platform.isMacOS || Platform.isWindows || Platform.isLinux;
-
     final child = ActionButton(
       name: Resources.assetsImagesBotSvg,
       color: context.theme.icon,
       onTap: () {
-        if (!supportWebview) {
+        if (!kIsSupportWebview) {
           return;
         }
         openBotWebviewWindow(
@@ -307,7 +303,7 @@ class _BotIcon extends StatelessWidget {
       },
     );
 
-    if (supportWebview) {
+    if (kIsSupportWebview) {
       return child;
     }
     return Tooltip(message: context.l10n.comingSoon, child: child);
