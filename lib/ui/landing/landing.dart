@@ -1,20 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
+import '../../main.dart';
 import '../../utils/extension/extension.dart';
-
+import '../../utils/hook.dart';
 import 'bloc/landing_cubit.dart';
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends HookWidget {
   const LandingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final info = useMemoizedFuture(() => packageInfoFuture, null).data;
     final locale = Localizations.localeOf(context);
     return BlocProvider(
       create: (context) => LandingCubit(
@@ -27,27 +30,45 @@ class LandingPage extends StatelessWidget {
             const Color.fromRGBO(255, 255, 255, 1),
             darkColor: const Color.fromRGBO(35, 39, 43, 1),
           ),
-          body: Center(
-            child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
-              converter: (state) => state.status,
-              builder: (context, status) {
-                if (status == LandingStatus.init) {
-                  return _Loading(
-                    title: context.l10n.initializing,
-                    message: context.l10n.chatInputHint,
-                  );
-                }
+          body: Stack(
+            children: [
+              Positioned.fill(
+                child: Center(
+                  child:
+                      BlocConverter<LandingCubit, LandingState, LandingStatus>(
+                    converter: (state) => state.status,
+                    builder: (context, status) {
+                      if (status == LandingStatus.init) {
+                        return _Loading(
+                          title: context.l10n.initializing,
+                          message: context.l10n.chatInputHint,
+                        );
+                      }
 
-                if (status == LandingStatus.provisioning) {
-                  return _Loading(
-                    title: context.l10n.provisioning,
-                    message: Localization.current.chatInputHint,
-                  );
-                }
+                      if (status == LandingStatus.provisioning) {
+                        return _Loading(
+                          title: context.l10n.provisioning,
+                          message: Localization.current.chatInputHint,
+                        );
+                      }
 
-                return const _QrCode();
-              },
-            ),
+                      return const _QrCode();
+                    },
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 16,
+                right: 16,
+                child: Text(
+                  info?.versionAndBuildNumber ?? '',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: context.theme.secondaryText,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

@@ -15,6 +15,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:intl/intl.dart';
 import 'package:markdown/markdown.dart';
 import 'package:mime/mime.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:ulid/ulid.dart';
@@ -57,5 +58,6 @@ part 'src/regexp.dart';
 part 'src/stream.dart';
 part 'src/string.dart';
 part 'src/ui.dart';
+part 'src/info.dart';
 
 void importExtension() {}
