@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -35,7 +37,12 @@ class PinMessageWidget extends HookWidget {
         pinMessageMinimal: pinMessageMinimal,
         mentionCache: context.read<MentionCache>(),
       );
-      return context.l10n.pinned(userFullName, preview);
+
+      final lines = const LineSplitter().convert(preview);
+      final singleLinePreview =
+          lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
+
+      return context.l10n.pinned(userFullName, singleLinePreview);
     }, [userFullName, content]);
 
     final text = useMemoizedFuture(
@@ -47,7 +54,10 @@ class PinMessageWidget extends HookWidget {
           mentionCache: context.read<MentionCache>(),
         );
 
-        return context.l10n.pinned(userFullName, preview).overflow;
+        final lines = const LineSplitter().convert(preview);
+        final singleLinePreview =
+            lines.length > 1 ? '${lines.first}...' : lines.firstOrNull ?? '';
+        return context.l10n.pinned(userFullName, singleLinePreview).overflow;
       },
       cachePreview,
       keys: [userFullName, content],
