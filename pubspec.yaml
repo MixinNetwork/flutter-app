@@ -22,7 +22,7 @@ dependencies:
   archive: ^3.1.2
   async: ^2.8.1
   bitsdojo_window: ^0.1.1+1
-  bloc: ^7.0.0
+  bloc: ^7.2.0
   blurhash_dart: ^1.0.2
   cached_network_image: ^3.0.0
   cached_network_image_platform_interface: ^1.0.0
@@ -51,7 +51,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_app_icon_badge: ^2.0.0
-  flutter_bloc: ^7.1.0
+  flutter_bloc: ^7.3.0
   flutter_cache_manager: ^3.1.2
   flutter_hooks: ^0.18.0
   flutter_local_notifications: 8.2.0
@@ -63,7 +63,7 @@ dependencies:
   hive: ^2.0.4
   hive_flutter: ^1.0.0
   http: ^0.13.3
-  hydrated_bloc: ^7.0.1
+  hydrated_bloc: ^7.1.0
   intl: ^0.17.0
   isolate: ^2.1.0
   json_annotation: ^4.3.0
