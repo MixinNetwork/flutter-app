@@ -522,8 +522,14 @@ class DecryptMessage extends Injector {
 
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isImage) {
+      final String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final attachment = AttachmentMessage.fromJson(
-          await _jsonDecodeWithIsolate(plainText) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -555,9 +561,14 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isVideo) {
-      final plain = await _decodeWithIsolate(plainText);
+      final String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -591,9 +602,14 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isData) {
-      final plain = await _decodeWithIsolate(plainText);
+      final String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -623,9 +639,14 @@ class DecryptMessage extends Injector {
         ));
       }
     } else if (data.category.isAudio) {
-      final plain = await _decodeWithIsolate(plainText);
+      final String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -655,9 +676,14 @@ class DecryptMessage extends Injector {
         attachmentMessage: attachment,
       ));
     } else if (data.category.isSticker) {
-      final plain = await _decodeWithIsolate(plainText);
+      final String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final stickerMessage = StickerMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
           .getStickerByUnique(stickerMessage.stickerId)
           .getSingleOrNull();
@@ -677,9 +703,14 @@ class DecryptMessage extends Injector {
           createdAt: data.createdAt);
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isContact) {
-      final plain = await _decodeWithIsolate(plainText);
+      final String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
       final contactMessage = ContactMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
           data,
@@ -697,9 +728,14 @@ class DecryptMessage extends Injector {
               quoteContent: quoteContent?.toJson()));
       await database.messageDao.insert(message, accountId, data.silent);
     } else if (data.category.isLive) {
-      final plain = await _decodeWithIsolate(plainText);
-      final liveMessage = LiveMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+      final String plain;
+      if (data.category.isEncrypted) {
+        plain = plainText;
+      } else {
+        plain = await _decodeWithIsolate(plainText);
+      }
+      final liveMessage =
+          LiveMessage.fromJson(await jsonDecode(plain) as Map<String, dynamic>);
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,

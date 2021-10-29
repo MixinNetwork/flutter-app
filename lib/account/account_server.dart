@@ -462,9 +462,18 @@ class AccountServer {
           await _sender.checkConversation(message.conversationId);
           return;
         }
+        final List<int> plaintext;
+        if (message.category.isAttachment ||
+            message.category.isSticker ||
+            message.category.isContact ||
+            message.category.isLive) {
+          plaintext = await base64DecodeWithIsolate(message.content!);
+        } else {
+          plaintext = await utf8EncodeWithIsolate(message.content!);
+        }
         final content = _encryptedProtocol.encryptMessage(
             privateKey,
-            await utf8EncodeWithIsolate(message.content!),
+            plaintext,
             await base64DecodeWithIsolate(
                 base64.normalize(participantSessionKey.publicKey!)),
             participantSessionKey.sessionId,
