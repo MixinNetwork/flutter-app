@@ -26,7 +26,7 @@ dependencies:
   blurhash_dart: ^1.0.2
   cached_network_image: ^3.0.0
   cached_network_image_platform_interface: ^1.0.0
-  dart_vlc: ^0.1.7
+  dart_vlc: 0.1.7
   decimal: ^1.3.0
   desktop_drop:
     git:
