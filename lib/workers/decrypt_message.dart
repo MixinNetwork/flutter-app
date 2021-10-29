@@ -529,7 +529,7 @@ class DecryptMessage extends Injector {
         plain = await _decodeWithIsolate(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
-          await _jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -568,7 +568,7 @@ class DecryptMessage extends Injector {
         plain = await _decodeWithIsolate(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -609,7 +609,7 @@ class DecryptMessage extends Injector {
         plain = await _decodeWithIsolate(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -646,7 +646,7 @@ class DecryptMessage extends Injector {
         plain = await _decodeWithIsolate(plainText);
       }
       final attachment = AttachmentMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final message = await _generateMessage(
           data,
           (QuoteMessageItem? quoteContent) => Message(
@@ -683,7 +683,7 @@ class DecryptMessage extends Injector {
         plain = await _decodeWithIsolate(plainText);
       }
       final stickerMessage = StickerMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final sticker = await database.stickerDao
           .getStickerByUnique(stickerMessage.stickerId)
           .getSingleOrNull();
@@ -710,7 +710,7 @@ class DecryptMessage extends Injector {
         plain = await _decodeWithIsolate(plainText);
       }
       final contactMessage = ContactMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+          await jsonDecode(plain) as Map<String, dynamic>);
       final user = (await refreshUsers(<String>[contactMessage.userId]))?.first;
       final message = await _generateMessage(
           data,
@@ -734,8 +734,8 @@ class DecryptMessage extends Injector {
       } else {
         plain = await _decodeWithIsolate(plainText);
       }
-      final liveMessage = LiveMessage.fromJson(
-          await jsonDecodeWithIsolate(plain) as Map<String, dynamic>);
+      final liveMessage =
+          LiveMessage.fromJson(await jsonDecode(plain) as Map<String, dynamic>);
       final message = Message(
           messageId: data.messageId,
           conversationId: data.conversationId,
