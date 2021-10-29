@@ -7,7 +7,6 @@ import 'dart:typed_data';
 import 'package:dio/adapter.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mime/mime.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:path/path.dart' as p;
@@ -135,24 +134,18 @@ class AttachmentUtil extends ChangeNotifier {
         String? mediaKey;
         String? mediaDigest;
 
-        if (category.isSignal || category.isEncrypted) {
-          mediaKey = attachmentMessage?.key as String?;
-          mediaDigest = attachmentMessage?.digest as String?;
-          if (mediaKey == null || mediaDigest == null) {
-            if (message != null) {
-              mediaKey = message.mediaKey;
-              mediaDigest = message.mediaDigest;
-            }
+        mediaKey = attachmentMessage?.key as String?;
+        mediaDigest = attachmentMessage?.digest as String?;
+        if (mediaKey == null || mediaDigest == null) {
+          if (message != null) {
+            mediaKey = message.mediaKey;
+            mediaDigest = message.mediaDigest;
           }
-          if (mediaKey == null || mediaDigest == null) {
-            if (transcriptMessage != null) {
-              mediaKey = transcriptMessage.mediaKey;
-              mediaDigest = transcriptMessage.mediaDigest;
-            }
-          }
-          if (mediaKey == null || mediaDigest == null) {
-            throw InvalidKeyException(
-                'decrypt attachment key: ${attachmentMessage?.key}, digest: ${attachmentMessage?.digest}');
+        }
+        if (mediaKey == null || mediaDigest == null) {
+          if (transcriptMessage != null) {
+            mediaKey = transcriptMessage.mediaKey;
+            mediaDigest = transcriptMessage.mediaDigest;
           }
         }
 
