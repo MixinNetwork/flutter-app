@@ -313,6 +313,9 @@ class DecryptMessage extends Injector {
             createdAt: DateTime.now()));
         continue;
       }
+      if (!needResendMessage.category.isSignal) {
+        continue;
+      }
       if (p.createdAt.isAfter(needResendMessage.createdAt)) {
         continue;
       }
