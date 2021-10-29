@@ -1,135 +1,157 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
 import '../../generated/l10n.dart';
+import '../../main.dart';
 import '../../utils/extension/extension.dart';
-
+import '../../utils/hook.dart';
 import 'bloc/landing_cubit.dart';
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends HookWidget {
   const LandingPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final locale = Localizations.localeOf(context);
-    return BlocProvider(
-      create: (context) => LandingCubit(
-        context.multiAuthCubit,
-        locale,
-      ),
-      child: Builder(
-        builder: (BuildContext context) => Scaffold(
-          backgroundColor: context.dynamicColor(
-            const Color.fromRGBO(255, 255, 255, 1),
-            darkColor: const Color.fromRGBO(35, 39, 43, 1),
-          ),
-          body: Center(
-            child: BlocConverter<LandingCubit, LandingState, LandingStatus>(
-              converter: (state) => state.status,
-              builder: (context, status) {
-                if (status == LandingStatus.init) {
-                  return _Loading(
-                    title: context.l10n.initializing,
-                    message: context.l10n.chatInputHint,
-                  );
-                }
+    final info = useMemoizedFuture(() => packageInfoFuture, null).data;
+    final locale = useMemoized(() => Localizations.localeOf(context));
 
-                if (status == LandingStatus.provisioning) {
-                  return _Loading(
-                    title: context.l10n.provisioning,
-                    message: Localization.current.chatInputHint,
-                  );
-                }
+    final landingCubit = useBloc(() => LandingCubit(
+          context.multiAuthCubit,
+          locale,
+        ));
 
-                return const _QrCode();
-              },
+    final status =
+        useBlocStateConverter<LandingCubit, LandingState, LandingStatus>(
+      bloc: landingCubit,
+      converter: (state) => state.status,
+    );
+
+    final Widget child;
+    if (status == LandingStatus.init) {
+      child = _Loading(
+        title: context.l10n.initializing,
+        message: context.l10n.chatInputHint,
+      );
+    } else if (status == LandingStatus.provisioning) {
+      child = _Loading(
+        title: context.l10n.provisioning,
+        message: Localization.current.chatInputHint,
+      );
+    } else {
+      child = const _QrCode();
+    }
+
+    return BlocProvider.value(
+      value: landingCubit,
+      child: Scaffold(
+        backgroundColor: context.dynamicColor(
+          const Color.fromRGBO(255, 255, 255, 1),
+          darkColor: const Color.fromRGBO(35, 39, 43, 1),
+        ),
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Center(
+                child: child,
+              ),
             ),
-          ),
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: Text(
+                info?.versionAndBuildNumber ?? '',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: context.theme.secondaryText,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _QrCode extends StatelessWidget {
+class _QrCode extends HookWidget {
   const _QrCode({
     Key? key,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        width: 423,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(11),
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              child: SizedBox.fromSize(
-                size: const Size.square(200),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    BlocConverter<LandingCubit, LandingState, String?>(
-                      converter: (state) => state.authUrl,
-                      builder: (context, url) {
-                        if (url == null) {
-                          return const SizedBox();
-                        }
-                        return QrImage(
-                          data: url,
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white,
-                          embeddedImage:
-                              const AssetImage(Resources.assetsImagesLogoPng),
-                          embeddedImageStyle: QrEmbeddedImageStyle(
-                            size: const Size(44, 44),
-                          ),
-                        );
-                      },
-                    ),
-                    BlocConverter<LandingCubit, LandingState, bool>(
-                      converter: (state) =>
-                          state.status == LandingStatus.needReload,
-                      builder: (context, visible) => Visibility(
-                        visible: visible,
-                        child: _Retry(
-                          onTap: () => BlocProvider.of<LandingCubit>(context)
-                              .requestAuthUrl(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              context.l10n.pageLandingLoginTitle,
-              style: TextStyle(
-                fontSize: 22,
-                color: context.theme.text,
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              context.l10n.pageLandingLoginMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: context.dynamicColor(
-                  const Color.fromRGBO(187, 190, 195, 1),
-                  darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
-                ),
-              ),
-            ),
-          ],
+  Widget build(BuildContext context) {
+    final url = useBlocStateConverter<LandingCubit, LandingState, String?>(
+        converter: (state) => state.authUrl);
+
+    final visible = useBlocStateConverter<LandingCubit, LandingState, bool>(
+        converter: (state) => state.status == LandingStatus.needReload);
+
+    Widget? qrCode;
+    if (url != null) {
+      qrCode = QrImage(
+        data: url,
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.white,
+        embeddedImage: const AssetImage(Resources.assetsImagesLogoPng),
+        embeddedImageStyle: QrEmbeddedImageStyle(
+          size: const Size(44, 44),
         ),
       );
+    }
+
+    return SizedBox(
+      width: 423,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(11),
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: SizedBox.fromSize(
+              size: const Size.square(200),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  qrCode ?? const SizedBox(),
+                  Visibility(
+                    visible: visible,
+                    child: _Retry(
+                      onTap: () =>
+                          context.read<LandingCubit>().requestAuthUrl(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            context.l10n.pageLandingLoginTitle,
+            style: TextStyle(
+              fontSize: 22,
+              color: context.theme.text,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            context.l10n.pageLandingLoginMessage,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.dynamicColor(
+                const Color.fromRGBO(187, 190, 195, 1),
+                darkColor: const Color.fromRGBO(255, 255, 255, 0.4),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _Loading extends StatelessWidget {

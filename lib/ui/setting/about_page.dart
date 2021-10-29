@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../constants/resources.dart';
+import '../../main.dart';
 import '../../utils/extension/extension.dart';
 import '../../utils/hook.dart';
 import '../../utils/uri_utils.dart';
@@ -14,14 +14,7 @@ class AboutPage extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final info = useMemoizedFuture(PackageInfo.fromPlatform, null).data;
-    final String buildNumber;
-    if (info?.buildNumber == null || info?.buildNumber == '') {
-      buildNumber = '';
-    } else {
-      buildNumber = '(${info?.buildNumber})';
-    }
-    final version = info == null ? '' : '${info.version}$buildNumber';
+    final info = useMemoizedFuture(() => packageInfoFuture, null).data;
     return Scaffold(
       backgroundColor: context.theme.background,
       appBar: MixinAppBar(
@@ -49,7 +42,7 @@ class AboutPage extends HookWidget {
               // SignalDatabase.get
               const SizedBox(height: 8),
               SelectableText(
-                version,
+                info?.versionAndBuildNumber ?? '',
                 style: TextStyle(
                   color: context.theme.secondaryText,
                   fontSize: 16,

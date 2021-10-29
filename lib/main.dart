@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:isolate/isolate.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:very_good_analysis/very_good_analysis.dart';
 
 import 'app.dart';
@@ -17,6 +18,8 @@ import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
 import 'utils/logger.dart';
+
+final packageInfoFuture = PackageInfo.fromPlatform();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
