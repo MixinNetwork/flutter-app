@@ -15,6 +15,7 @@ class ConversationAvatarWidget extends HookWidget {
     this.conversation,
     required this.size,
     this.conversationId,
+    this.userId,
     this.fullName,
     this.groupIconUrl,
     this.avatarUrl,
@@ -22,6 +23,7 @@ class ConversationAvatarWidget extends HookWidget {
   }) : super(key: key);
 
   final ConversationItem? conversation;
+  final String? userId;
   final String? conversationId;
   final String? fullName;
   final String? groupIconUrl;
@@ -38,6 +40,9 @@ class ConversationAvatarWidget extends HookWidget {
     final _avatarUrl = conversation?.avatarUrl ?? avatarUrl;
     final _category = conversation?.category ?? category;
     assert(_category != null);
+
+    final _userId = conversation?.ownerId ?? userId;
+    assert(_userId != null);
 
     final list = useStream(
           useMemoized(
@@ -62,9 +67,9 @@ class ConversationAvatarWidget extends HookWidget {
         <User>[];
 
     Widget child;
-    if (!(_category == ConversationCategory.group)) {
+    if (_category == ConversationCategory.contact) {
       child = AvatarWidget(
-        userId: _conversationId!,
+        userId: _userId!,
         name: _name ?? '',
         avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
         size: size,
@@ -82,7 +87,7 @@ class ConversationAvatarWidget extends HookWidget {
   }
 }
 
-class AvatarPuzzlesWidget extends StatelessWidget {
+class AvatarPuzzlesWidget extends HookWidget {
   const AvatarPuzzlesWidget(this.users, this.size, {Key? key})
       : super(key: key);
 
