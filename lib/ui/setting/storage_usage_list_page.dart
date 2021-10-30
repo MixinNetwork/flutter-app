@@ -113,6 +113,7 @@ class _Item extends HookWidget {
             avatarUrl: item.avatarUrl,
             category: item.category,
             size: 50,
+            userId: item.ownerId,
           ),
           title: Column(
             mainAxisSize: MainAxisSize.min,

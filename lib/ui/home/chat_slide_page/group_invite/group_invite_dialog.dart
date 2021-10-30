@@ -90,6 +90,7 @@ class _GroupInviteBody extends StatelessWidget {
             fullName: conversation.name,
             groupIconUrl: conversation.iconUrl,
             category: conversation.category,
+            userId: conversation.ownerId,
           ),
           const SizedBox(height: 16),
           Text(
