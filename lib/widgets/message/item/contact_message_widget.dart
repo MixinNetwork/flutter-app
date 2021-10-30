@@ -44,7 +44,7 @@ class ContactMessageWidget extends HookWidget {
             AvatarWidget(
               size: 40,
               avatarUrl: sharedUserAvatarUrl,
-              userId: sharedUserId!,
+              userId: sharedUserId,
               name: sharedUserFullName!,
             ),
             const SizedBox(width: 8),
