@@ -176,7 +176,9 @@ class AvatarWidget extends StatelessWidget {
       size: Size.square(size),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: userId != null ? getAvatarColorById(userId!) : context.theme.listSelected,
+          color: userId != null
+              ? getAvatarColorById(userId!)
+              : context.theme.listSelected,
         ),
         child: Center(
           child: Text(
