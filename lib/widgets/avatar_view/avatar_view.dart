@@ -42,7 +42,6 @@ class ConversationAvatarWidget extends HookWidget {
     assert(_category != null);
 
     final _userId = conversation?.ownerId ?? userId;
-    assert(_userId != null);
 
     final list = useStream(
           useMemoized(
@@ -69,7 +68,7 @@ class ConversationAvatarWidget extends HookWidget {
     Widget child;
     if (_category == ConversationCategory.contact) {
       child = AvatarWidget(
-        userId: _userId!,
+        userId: _userId,
         name: _name ?? '',
         avatarUrl: _groupIconUrl ?? _avatarUrl ?? '',
         size: size,
@@ -166,7 +165,7 @@ class AvatarWidget extends StatelessWidget {
   }) : super(key: key);
 
   final String? avatarUrl;
-  final String userId;
+  final String? userId;
   final String name;
   final double size;
   final bool clipOval;
@@ -177,7 +176,9 @@ class AvatarWidget extends StatelessWidget {
       size: Size.square(size),
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: getAvatarColorById(userId),
+          color: userId != null
+              ? getAvatarColorById(userId!)
+              : context.theme.listSelected,
         ),
         child: Center(
           child: Text(

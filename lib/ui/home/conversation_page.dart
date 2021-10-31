@@ -249,6 +249,7 @@ class _SearchList extends HookWidget {
                       avatarUrl: conversation.avatarUrl,
                       category: conversation.category,
                       size: ConversationPage.conversationItemAvatarSize,
+                      userId: conversation.ownerId,
                     ),
                     name: conversationValidName(
                       conversation.groupName,
@@ -375,6 +376,7 @@ class SearchMessageItem extends StatelessWidget {
             avatarUrl: message.userAvatarUrl,
             category: message.category,
             size: ConversationPage.conversationItemAvatarSize,
+            userId: message.userId,
           );
     return _SearchItem(
       avatar: avatar,
@@ -555,23 +557,25 @@ class _SearchItem extends StatelessWidget {
                           Expanded(
                             child: Row(
                               children: [
-                                HighlightText(
-                                  name,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    color: context.theme.text,
-                                    fontSize: 16,
-                                  ),
-                                  highlightTextSpans: [
-                                    if (nameHighlight)
-                                      HighlightTextSpan(
-                                        keyword,
-                                        style: TextStyle(
-                                          color: context.theme.accent,
+                                Expanded(
+                                  child: HighlightText(
+                                    name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: context.theme.text,
+                                      fontSize: 16,
+                                    ),
+                                    highlightTextSpans: [
+                                      if (nameHighlight)
+                                        HighlightTextSpan(
+                                          keyword,
+                                          style: TextStyle(
+                                            color: context.theme.accent,
+                                          ),
                                         ),
-                                      ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                                 if (trailing != null) trailing!,
                               ],
