@@ -1,12 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:desktop_notifications/desktop_notifications.dart' as linux;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:tuple/tuple.dart';
-import 'package:very_good_analysis/very_good_analysis.dart';
 import 'package:win_toast/win_toast.dart' as win;
 
 import 'logger.dart';
@@ -51,14 +49,27 @@ abstract class _NotificationManager {
           .where((e) => e.scheme == enumConvertToString(notificationScheme));
 }
 
-class _MacosNotificationManager extends _NotificationManager {
+// Implement by FlutterLocalNotificationsPlugin.
+// Platforms: Linux, Android, macOS, iOS.
+class _LocalNotificationManager extends _NotificationManager {
   final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   @override
   Future<void> initialize() async {
     const initializationSettingsMacOS = MacOSInitializationSettings();
-    const initializationSettings =
-        InitializationSettings(macOS: initializationSettingsMacOS);
+    final initializationSettingsIOS =
+        IOSInitializationSettings(onDidReceiveLocalNotification: (
+      int id,
+      String? title,
+      String? body,
+      String? payload,
+    ) {
+      debugPrint('onDidReceiveLocalNotification: $id');
+    });
+    final initializationSettings = InitializationSettings(
+      iOS: initializationSettingsIOS,
+      macOS: initializationSettingsMacOS,
+    );
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: _onSelectNotification);
     await flutterLocalNotificationsPlugin.cancelAll();
@@ -76,8 +87,12 @@ class _MacosNotificationManager extends _NotificationManager {
     await _requestPermission();
     // TODO Set mixin.caf to be invalid.
     const platformChannelSpecifics = NotificationDetails(
-      macOS: MacOSNotificationDetails(sound: 'mixin.caf'),
-    );
+        macOS: MacOSNotificationDetails(sound: 'mixin.caf'),
+        iOS: IOSNotificationDetails(
+          sound: 'mixin.caf',
+          presentSound: true,
+        ));
+
     await flutterLocalNotificationsPlugin.show(
       id,
       title,
@@ -144,7 +159,7 @@ class _LinuxNotificationManager extends _NotificationManager {
   // default action key. https://developer.gnome.org/notification-spec/
   static const kDefaultAction = 'default';
 
-  final _client = linux.NotificationsClient();
+  // final _client = linux.NotificationsClient();
 
   @override
   Future<void> initialize() async {}
@@ -159,55 +174,55 @@ class _LinuxNotificationManager extends _NotificationManager {
     required String messageId,
   }) async {
     i('show linux notification: $title $body');
-    final notification = await _client.notify(title,
-        body: body ?? '',
-        replacesId: id,
-        expireTimeoutMs: 5000,
-        appName: 'Mixin',
-        hints: [
-          linux.NotificationHint.category(
-              linux.NotificationCategory.imReceived()),
-        ],
-        actions: const [
-          linux.NotificationAction(kDefaultAction, ''),
-        ]);
-
-    final notificationObj = Notification(
-        conversationId: conversationId,
-        messageId: messageId,
-        notification: notification);
-    notifications.add(notificationObj);
-
-    unawaited(notification.action.then((action) async {
-      if (action != kDefaultAction) return;
-
-      notifications.remove(notificationObj);
-
-      onNotificationSelected(uri);
-      await notification.close();
-    }));
+    // final notification = await _client.notify(title,
+    //     body: body ?? '',
+    //     replacesId: id,
+    //     expireTimeoutMs: 5000,
+    //     appName: 'Mixin',
+    //     hints: [
+    //       linux.NotificationHint.category(
+    //           linux.NotificationCategory.imReceived()),
+    //     ],
+    //     actions: const [
+    //       linux.NotificationAction(kDefaultAction, ''),
+    //     ]);
+    //
+    // final notificationObj = Notification(
+    //     conversationId: conversationId,
+    //     messageId: messageId,
+    //     notification: notification);
+    // notifications.add(notificationObj);
+    //
+    // unawaited(notification.action.then((action) async {
+    //   if (action != kDefaultAction) return;
+    //
+    //   notifications.remove(notificationObj);
+    //
+    //   onNotificationSelected(uri);
+    //   await notification.close();
+    // }));
   }
 
   @override
   Future<void> dismissByConversationId(String conversationId) async {
-    final list = await Future.wait(notifications
-        .where((element) => element.conversationId == conversationId)
-        .map((e) async {
-      await (e.notification as linux.Notification).close();
-      return e;
-    }));
-    list.forEach(notifications.remove);
+    // final list = await Future.wait(notifications
+    //     .where((element) => element.conversationId == conversationId)
+    //     .map((e) async {
+    //   await (e.notification as linux.Notification).close();
+    //   return e;
+    // }));
+    // list.forEach(notifications.remove);
   }
 
   @override
   Future<void> dismissByMessageId(String messageId) async {
-    final notificationObj = notifications.cast<Notification?>().firstWhere(
-        (element) => element?.messageId == messageId,
-        orElse: () => null);
-    if (notificationObj == null) return;
-    final notification = notificationObj.notification as linux.Notification;
-    await notification.close();
-    notifications.remove(notificationObj);
+    // final notificationObj = notifications.cast<Notification?>().firstWhere(
+    //     (element) => element?.messageId == messageId,
+    //     orElse: () => null);
+    // if (notificationObj == null) return;
+    // final notification = notificationObj.notification as linux.Notification;
+    // await notification.close();
+    // notifications.remove(notificationObj);
   }
 }
 
@@ -292,8 +307,8 @@ int _id = 0;
 
 Future<void> initListener() async {
   _id = 0;
-  if (Platform.isMacOS) {
-    _notificationManager = _MacosNotificationManager();
+  if (Platform.isMacOS || Platform.isIOS) {
+    _notificationManager = _LocalNotificationManager();
   } else if (Platform.isLinux) {
     _notificationManager = _LinuxNotificationManager();
   } else if (Platform.isWindows) {
