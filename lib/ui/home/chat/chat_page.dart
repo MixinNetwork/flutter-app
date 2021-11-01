@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/account/scam_warning.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_svg/svg.dart';
@@ -414,6 +415,12 @@ class ChatContainer extends HookWidget {
                                   const _NotificationListener(
                                     child: _List(),
                                   ),
+                                  const Positioned(
+                                    left: 6,
+                                    right: 6,
+                                    bottom: 6,
+                                    child: _BottomBanner(),
+                                  ),
                                   Positioned(
                                     bottom: 16,
                                     right: 16,
@@ -656,6 +663,85 @@ class _JumpCurrentButton extends HookWidget {
             Resources.assetsImagesJumpCurrentArrowSvg,
             color: context.theme.text,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomBanner extends HookWidget {
+  const _BottomBanner({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final userId =
+        useBlocStateConverter<ConversationCubit, ConversationState?, String?>(
+            converter: (state) => state?.userId);
+    final isScam =
+        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
+            converter: (state) => (state?.user?.isScam ?? 0) > 0);
+
+    final showScamWarning = useMemoizedStream(
+          () {
+            if (userId == null || !isScam) return Stream.value(false);
+            return ScamWarningKeyValue.instance.watch(userId);
+          },
+          initialData: false,
+          keys: [userId],
+        ).data ??
+        false;
+
+    return AnimatedVisibility(
+      visible: showScamWarning,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: context.messageBubbleColor(false),
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromRGBO(0, 0, 0, 0.15),
+              offset: Offset(0, 2),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 8,
+                right: 16,
+                top: 8,
+                bottom: 8,
+              ),
+              child: SvgPicture.asset(
+                Resources.assetsImagesTriangleWarningSvg,
+                color: context.theme.red,
+                width: 26,
+                height: 26,
+              ),
+            ),
+            Expanded(
+              child: Text(
+                context.l10n.scamWarning,
+                style: TextStyle(
+                  color: context.theme.text,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            ActionButton(
+              name: Resources.assetsImagesIcCloseSvg,
+              color: context.theme.icon,
+              size: 20,
+              onTap: () {
+                final userId = context.read<ConversationCubit>().state?.userId;
+                if (userId == null) return;
+                ScamWarningKeyValue.instance.dismiss(userId);
+              },
+            ),
+          ],
         ),
       ),
     );

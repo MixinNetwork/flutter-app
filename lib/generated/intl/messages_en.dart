@@ -288,6 +288,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "reportWarning": MessageLookupByLibrary.simpleMessage(
             "Do you want to report and block this contact?"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "scamWarning": MessageLookupByLibrary.simpleMessage(
+            "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"),
         "search": MessageLookupByLibrary.simpleMessage("Search"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),

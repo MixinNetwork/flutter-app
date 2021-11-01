@@ -222,5 +222,6 @@
   "walletTransactionThatTimeNoValue": "value then N/A",
   "text": "Text",
   "developer": "Developer",
-  "goToChat": "Go to chat"
+  "goToChat": "Go to chat",
+  "scamWarning": "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"
 }
