@@ -13,6 +13,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:octo_image/octo_image.dart';
 
+import '../utils/logger.dart';
+
 class CacheImage extends StatelessWidget {
   const CacheImage(
     this.src, {
@@ -401,8 +403,21 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 }
 
 class MixinFileImage extends FileImage {
-  const MixinFileImage(File file, {double scale = 1.0})
-      : super(file, scale: scale);
+  MixinFileImage(File file, {double scale = 1.0})
+      : _lastModified = _fileLastModified(file),
+        super(file, scale: scale);
+
+  // used to check if the file has been modified.
+  final int _lastModified;
+
+  static int _fileLastModified(File file) {
+    try {
+      return file.lastModifiedSync().millisecondsSinceEpoch;
+    } catch (error, stack) {
+      i('failed to get file lastModified. $error $stack');
+      return 0;
+    }
+  }
 
   @override
   ImageStreamCompleter load(FileImage key, DecoderCallback decode) =>
@@ -436,6 +451,15 @@ class MixinFileImage extends FileImage {
 
     return decode(bytes);
   }
+
+  @override
+  bool operator ==(Object other) =>
+      other is MixinFileImage &&
+      super == other &&
+      _lastModified == other._lastModified;
+
+  @override
+  int get hashCode => hashValues(super.hashCode, _lastModified);
 }
 
 class _CachedNetworkImageProvider extends CachedNetworkImageProvider {
