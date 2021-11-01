@@ -217,5 +217,6 @@
   "walletTransactionThatTimeNoValue": "当时价值 暂无",
   "text": "文字",
   "developer": "开发者",
-  "goToChat": "定位到聊天"
+  "goToChat": "定位到聊天",
+  "scamWarning": "警告：此账号被大量用户举报，请谨防网络诈骗，注意个人财产安全"
 }

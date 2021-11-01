@@ -234,6 +234,9 @@ class Resources {
 
   static const String assetsImagesTransferSvg = 'assets/images/transfer.svg';
 
+  static const String assetsImagesTriangleWarningSvg =
+      'assets/images/triangle_warning.svg';
+
   static const String assetsImagesUploadSvg = 'assets/images/upload.svg';
 
   static const String assetsImagesVerifiedSvg = 'assets/images/verified.svg';

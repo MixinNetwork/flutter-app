@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 import 'package:path/path.dart' as p;
 
 import '../account/account_key_value.dart';
+import '../account/scam_warning.dart';
 import '../account/show_pin_message_key_value.dart';
 import '../crypto/crypto_key_value.dart';
 import '../crypto/privacy_key_value.dart';
@@ -16,6 +17,7 @@ Future<void> initKeyValues() => Future.wait([
       CryptoKeyValue.instance.init(),
       AccountKeyValue.instance.init(),
       ShowPinMessageKeyValue.instance.init(),
+      ScamWarningKeyValue.instance.init(),
     ]);
 
 Future<void> clearKeyValues() => Future.wait([
@@ -23,6 +25,7 @@ Future<void> clearKeyValues() => Future.wait([
       CryptoKeyValue.instance.delete(),
       AccountKeyValue.instance.delete(),
       ShowPinMessageKeyValue.instance.delete(),
+      ScamWarningKeyValue.instance.delete(),
     ]);
 
 abstract class HiveKeyValue<E> {

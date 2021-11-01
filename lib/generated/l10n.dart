@@ -2289,6 +2289,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money`
+  String get scamWarning {
+    return Intl.message(
+      'Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money',
+      name: 'scamWarning',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
