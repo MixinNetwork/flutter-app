@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cross_file/cross_file.dart';
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
@@ -36,6 +35,7 @@ import '../enum/encrypt_category.dart';
 import '../enum/message_category.dart';
 import '../enum/message_status.dart';
 import '../ui/home/bloc/multi_auth_cubit.dart';
+import '../utils/app_lifecycle.dart';
 import '../utils/attachment/attachment_util.dart';
 import '../utils/extension/extension.dart';
 import '../utils/file.dart';
@@ -131,9 +131,8 @@ class AccountServer {
 
     start();
 
-    DesktopLifecycle.instance.isActive.addListener(() {
-      final active = DesktopLifecycle.instance.isActive.value;
-      if (!active || _activeConversationId == null) return;
+    appActiveListener.addListener(() {
+      if (!isAppActive || _activeConversationId == null) return;
       markRead(_activeConversationId!);
     });
   }

@@ -1,4 +1,3 @@
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart' hide User;
@@ -11,6 +10,7 @@ import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/uuid/uuid.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/encrypt_category.dart';
+import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/local_notification_center.dart';
 import '../../../widgets/toast.dart';
@@ -150,7 +150,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           )),
     );
 
-    DesktopLifecycle.instance.isActive.addListener(onListen);
+    appActiveListener.addListener(onListen);
   }
 
   final AccountServer accountServer;
@@ -159,12 +159,11 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
   @override
   Future<void> close() async {
     await super.close();
-    DesktopLifecycle.instance.isActive.removeListener(onListen);
+    appActiveListener.removeListener(onListen);
   }
 
   void onListen() {
-    if (DesktopLifecycle.instance.isActive.value &&
-        state?.conversationId != null) {
+    if (isAppActive && state?.conversationId != null) {
       dismissByConversationId(state!.conversationId);
       return;
     }

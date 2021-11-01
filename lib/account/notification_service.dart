@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 import 'package:stream_transform/stream_transform.dart';
@@ -11,6 +10,7 @@ import '../enum/message_category.dart';
 import '../generated/l10n.dart';
 import '../ui/home/bloc/conversation_cubit.dart';
 import '../ui/home/bloc/slide_category_cubit.dart';
+import '../utils/app_lifecycle.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/local_notification_center.dart';
@@ -31,7 +31,7 @@ class NotificationService {
           .listen((event) {}))
       ..add(context.database.messageDao.notificationMessageStream
           .where((event) {
-            if (DesktopLifecycle.instance.isActive.value) {
+            if (isAppActive) {
               final conversationState = context.read<ConversationCubit>().state;
               return event.conversationId !=
                   (conversationState?.conversationId ??
