@@ -14,6 +14,7 @@ import 'package:very_good_analysis/very_good_analysis.dart';
 import 'app.dart';
 import 'bloc/custom_bloc_observer.dart';
 import 'ui/home/home.dart';
+import 'utils/app_lifecycle.dart';
 import 'utils/file.dart';
 import 'utils/load_balancer_utils.dart';
 import 'utils/local_notification_center.dart';
@@ -23,6 +24,7 @@ final packageInfoFuture = PackageInfo.fromPlatform();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initAppLifecycleObserver();
 
   final result = await Future.wait<dynamic>([
     LoadBalancer.create(Platform.numberOfProcessors, IsolateRunner.spawn),

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
@@ -14,6 +13,7 @@ import '../../../db/database.dart';
 import '../../../db/mixin_database.dart';
 import '../../../enum/message_category.dart';
 import '../../../enum/message_status.dart';
+import '../../../utils/app_lifecycle.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../widgets/clamping_custom_scroll_view/scroller_scroll_controller.dart';
 import '../../../widgets/message/item/text/mention_builder.dart';
@@ -545,7 +545,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final _messageState = messageState.copyWith(
       top: top,
     );
-    if (DesktopLifecycle.instance.isActive.value) {
+    if (isAppActive) {
       accountServer.markRead(conversationCubit.state!.conversationId);
     }
     return _messageState;

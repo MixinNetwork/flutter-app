@@ -1,4 +1,3 @@
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +8,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
+import '../../../utils/app_lifecycle.dart';
 import '../../../utils/callback_text_editing_action.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
@@ -165,7 +165,7 @@ class _InputContainer extends HookWidget {
 
     useEffect(() {
       void onListen(RawKeyEvent value) {
-        if (!DesktopLifecycle.instance.isActive.value) return;
+        if (!isAppActive) return;
         final focusContext = FocusManager.instance.primaryFocus?.context;
         if (focusContext == null) return;
         final focusWidget = focusContext.widget;
