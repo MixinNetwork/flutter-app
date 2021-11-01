@@ -11,22 +11,23 @@ class ScamWarningKeyValue extends HiveKeyValue<DateTime?> {
   static ScamWarningKeyValue get instance =>
       _instance ??= ScamWarningKeyValue._();
 
-  bool isShow(String userId) {
-    final dateTime = box.get(userId, defaultValue: null);
-    if (dateTime == null) return true;
-    return DateTime.now().isAfter(dateTime);
-  }
+  bool _isShow(String userId) => box.get(userId, defaultValue: null).isShow;
 
   Future<void> dismiss(String userId) =>
       box.put(userId, DateTime.now().add(const Duration(days: 1)));
 
   Stream<bool> watch(String userId) => box
-          .watch(key: userId)
-          .map((event) => event.value)
-          .where((event) => event is DateTime?)
-          .cast<DateTime?>()
-          .map((dateTime) {
-        if (dateTime == null) return true;
-        return DateTime.now().isAfter(dateTime);
-      }).startWith(isShow(userId));
+      .watch(key: userId)
+      .map((event) => event.value)
+      .where((event) => event is DateTime?)
+      .cast<DateTime?>()
+      .map((dateTime) => dateTime.isShow)
+      .startWith(_isShow(userId));
+}
+
+extension _IsShowScamWarningExtension on DateTime? {
+  bool get isShow {
+    if (this == null) return true;
+    return DateTime.now().isAfter(this!);
+  }
 }
