@@ -34,7 +34,6 @@ dependencies:
       ref: 85ced7872c3c4c257a32c73989786b679e804453
       path: packages/desktop_drop
   desktop_lifecycle: ^0.0.1
-  desktop_notifications: ^0.6.1
   desktop_webview_window: ^0.0.4
   device_info_plus: ^3.1.0
   dio: ^4.0.0
@@ -54,7 +53,7 @@ dependencies:
   flutter_bloc: ^7.3.0
   flutter_cache_manager: ^3.1.2
   flutter_hooks: ^0.18.0
-  flutter_local_notifications: 8.2.0
+  flutter_local_notifications: ^9.0.2
   flutter_localizations:
     sdk: flutter
   flutter_markdown: ^0.6.6
@@ -94,7 +93,6 @@ dependencies:
   rxdart: ^0.27.1
   scrollable_positioned_list: ^0.2.0-nullsafety.0
   sliver_tools: ^0.2.5
-  sqlite3_flutter_libs: ^0.5.1
   stream_transform: ^2.0.0
   system_tray: ^0.0.7
   tuple: ^2.0.0
