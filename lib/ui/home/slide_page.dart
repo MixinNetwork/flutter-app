@@ -91,7 +91,6 @@ class SlidePage extends StatelessWidget {
                 const Expanded(child: _CircleList()),
                 AnimatedVisibility(
                   alignment: Alignment.bottomCenter,
-                  duration: const Duration(milliseconds: 200),
                   visible: showCollapse,
                   child: HookBuilder(builder: (context) {
                     final collapse = useBlocStateConverter<MultiAuthCubit,

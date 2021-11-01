@@ -114,7 +114,6 @@ class SearchTextField extends HookWidget {
               ).requireData;
 
               return AnimatedVisibility(
-                duration: const Duration(milliseconds: 200),
                 visible: showClear || isNotEmpty,
                 child: _SearchClearIcon(onTap: () {
                   controller.text = '';
