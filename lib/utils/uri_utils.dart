@@ -39,6 +39,7 @@ Future<bool> openUri(
         }
       } catch (e) {
         await showToastFailed(context, e);
+        return false;
       }
     }
   }
