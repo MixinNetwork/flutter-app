@@ -10,6 +10,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   file_selector_linux
   flutter_app_icon_badge
+  pasteboard
   system_clock
   system_tray
   url_launcher_linux

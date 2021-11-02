@@ -13,6 +13,7 @@
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <file_selector_linux/file_selector_plugin.h>
 #include <flutter_app_icon_badge/flutter_app_icon_badge_plugin.h>
+#include <pasteboard/pasteboard_plugin.h>
 #include <system_clock/system_clock_plugin.h>
 #include <system_tray/system_tray_plugin.h>
 #include <url_launcher_linux/url_launcher_plugin.h>
@@ -40,6 +41,9 @@ void fl_register_plugins(FlPluginRegistry* registry) {
   g_autoptr(FlPluginRegistrar) flutter_app_icon_badge_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "FlutterAppIconBadgePlugin");
   flutter_app_icon_badge_plugin_register_with_registrar(flutter_app_icon_badge_registrar);
+  g_autoptr(FlPluginRegistrar) pasteboard_registrar =
+      fl_plugin_registry_get_registrar_for_plugin(registry, "PasteboardPlugin");
+  pasteboard_plugin_register_with_registrar(pasteboard_registrar);
   g_autoptr(FlPluginRegistrar) system_clock_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "SystemClockPlugin");
   system_clock_plugin_register_with_registrar(system_clock_registrar);
