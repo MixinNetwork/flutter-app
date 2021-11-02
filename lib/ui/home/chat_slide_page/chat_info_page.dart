@@ -43,7 +43,7 @@ class ChatInfoPage extends HookWidget {
       useMemoized(
         () => accountServer.database.participantDao
             .participantById(conversationId, accountServer.userId)
-            .watchSingleOrNull(),
+            .watchSingleOrNullThrottle(),
         [conversationId, accountServer.userId],
       ),
       initialData: null,
@@ -60,7 +60,7 @@ class ChatInfoPage extends HookWidget {
     final announcement = useStream<String?>(
             useMemoized(() => context.database.conversationDao
                 .announcement(conversationId)
-                .watchSingle()),
+                .watchSingleThrottle()),
             initialData: null)
         .data;
     if (!conversation.isLoaded) return const SizedBox();
@@ -462,9 +462,9 @@ class ConversationBio extends HookWidget {
       if (isGroup) {
         return database.conversationDao
             .announcement(conversationId)
-            .watchSingle();
+            .watchSingleThrottle();
       }
-      return database.userDao.biography(userId!).watchSingle();
+      return database.userDao.biography(userId!).watchSingleThrottle();
     }, [
       conversationId,
       userId,

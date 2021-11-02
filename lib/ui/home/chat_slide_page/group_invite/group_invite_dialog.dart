@@ -37,7 +37,7 @@ class _GroupInviteByLinkDialog extends HookWidget {
         context.accountServer.refreshGroup(conversationId);
         return context.database.conversationDao
             .conversationById(conversationId)
-            .watchSingleOrNull();
+            .watchSingleOrNullThrottle();
       }, [conversationId]),
     ).data;
     return Material(

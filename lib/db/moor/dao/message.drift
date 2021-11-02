@@ -123,7 +123,7 @@ SELECT COUNT(1)
 fuzzySearchMessageCountByCategories:
 SELECT COUNT(1)
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
-    WHERE m.message_id = fts.message_id AND m.category in :categories;
+    WHERE m.category IN :categories AND m.message_id = fts.message_id;
 
 fuzzySearchMessageByCategories AS SearchMessageDetailItem:
 SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUrl, u.full_name AS userFullName,
@@ -132,7 +132,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m, (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) fts
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON c.owner_id = u.user_id
-    WHERE m.message_id = fts.message_id AND m.category in :categories
+    WHERE m.category IN :categories AND m.message_id = fts.message_id
     ORDER BY m.created_at DESC
     LIMIT $limit;
 
@@ -190,7 +190,7 @@ SELECT COUNT(1)
 fuzzySearchMessageCountByConversationIdAndCategories:
 SELECT COUNT(1)
     FROM messages m
-    WHERE m.conversation_id = :conversationId AND  m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AND m.category in :categories;
+    WHERE m.conversation_id = :conversationId AND m.category IN :categories AND  m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query);
 
 fuzzySearchMessageCountByConversationIdAndUserId:
 SELECT COUNT(1)
@@ -200,7 +200,7 @@ SELECT COUNT(1)
 fuzzySearchMessageCountByConversationIdAndUserIdAndCategories:
 SELECT COUNT(1)
     FROM messages m
-    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND  m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AND m.category in :categories;
+    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.category IN :categories AND  m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) ;
 
 
 fuzzySearchMessageByConversationIdAndCategories AS SearchMessageDetailItem:
@@ -210,7 +210,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    WHERE m.conversation_id = :conversationId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AND m.category in :categories
+    WHERE m.conversation_id = :conversationId AND m.category IN :categories AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)
     ORDER BY m.created_at DESC
     LIMIT $limit;
 
@@ -243,7 +243,7 @@ SELECT m.message_id messageId, u.user_id AS userId, u.avatar_url AS userAvatarUr
     FROM messages m
     INNER JOIN conversations c ON c.conversation_id = m.conversation_id
     INNER JOIN users u ON m.user_id = u.user_id
-    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query) AND m.category in :categories
+    WHERE m.conversation_id = :conversationId AND m.user_id = :userId AND m.category IN :categories AND m.message_id IN (SELECT message_id FROM messages_fts WHERE messages_fts MATCH :query)
     ORDER BY m.created_at DESC
     LIMIT $limit;
 

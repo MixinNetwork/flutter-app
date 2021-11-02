@@ -32,7 +32,7 @@ class CircleManagerPage extends HookWidget {
           useMemoized(
             () => context.database.circleDao
                 .circleByConversationId(conversationId)
-                .watch(),
+                .watchThrottle(),
             [conversationId],
           ),
           initialData: [],
@@ -42,7 +42,7 @@ class CircleManagerPage extends HookWidget {
           useMemoized(
             () => context.database.circleDao
                 .otherCircleByConversationId(conversationId)
-                .watch(),
+                .watchThrottle(),
             [conversationId],
           ),
           initialData: [],

@@ -125,7 +125,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
           .distinct()
           .switchMap((event) => accountServer.database.conversationDao
               .conversationItem(event!)
-              .watchSingleOrNull())
+              .watchSingleOrNullThrottle())
           .listen((event) {
         String? userId;
         if (event != null && !event.isGroupConversation) {
@@ -144,7 +144,7 @@ class ConversationCubit extends SimpleCubit<ConversationState?>
         if (userId == null) return Stream.value(null);
         return accountServer.database.userDao
             .userById(userId)
-            .watchSingleOrNull();
+            .watchSingleOrNullThrottle();
       }).listen((event) => emit(
             state?.copyWith(user: event),
           )),

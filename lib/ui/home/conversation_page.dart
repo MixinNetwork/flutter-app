@@ -127,7 +127,7 @@ class _SearchList extends HookWidget {
                   id: accountServer.userId,
                   username: keyword,
                   identityNumber: keyword)
-              .watch();
+              .watchThrottle();
         }, keys: [keyword]).data ??
         [];
 
@@ -137,7 +137,7 @@ class _SearchList extends HookWidget {
           } else {
             return accountServer.database.messageDao
                 .fuzzySearchMessage(query: keyword, limit: 4)
-                .watch();
+                .watchThrottle();
           }
         }, keys: [keyword]).data ??
         [];
@@ -148,7 +148,7 @@ class _SearchList extends HookWidget {
           }
           return accountServer.database.conversationDao
               .fuzzySearchConversation(keyword)
-              .watch();
+              .watchThrottle();
         }, keys: [keyword]).data ??
         [];
 

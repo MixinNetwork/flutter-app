@@ -377,16 +377,20 @@ packages:
   drift:
     dependency: "direct main"
     description:
-      name: drift
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "1.0.1"
+      path: drift
+      ref: develop
+      resolved-ref: "594b5f43c54cf03218099c895f2ada5ff12d0b09"
+      url: "https://github.com/simolus3/moor.git"
+    source: git
+    version: "1.0.0"
   drift_dev:
     dependency: "direct dev"
     description:
-      name: drift_dev
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: drift_dev
+      ref: develop
+      resolved-ref: "594b5f43c54cf03218099c895f2ada5ff12d0b09"
+      url: "https://github.com/simolus3/moor.git"
+    source: git
     version: "1.0.2"
   ecache:
     dependency: "direct main"

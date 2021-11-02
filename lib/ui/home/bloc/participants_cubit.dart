@@ -5,6 +5,7 @@ import 'package:bloc/bloc.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/user_dao.dart';
 import '../../../db/mixin_database.dart';
+import '../../../utils/extension/extension.dart';
 import 'conversation_cubit.dart';
 
 class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
@@ -22,7 +23,7 @@ class ParticipantsCubit extends Cubit<List<User>> with SubscribeMixin {
       final selectable =
           userDao.groupParticipants(conversationId: conversationId!);
       emit(await selectable.get());
-      final stream = selectable.watch();
+      final stream = selectable.watchThrottle();
       streamSubscription = stream.listen(emit);
       addSubscription(streamSubscription);
     }

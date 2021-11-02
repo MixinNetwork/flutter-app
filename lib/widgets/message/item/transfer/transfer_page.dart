@@ -36,7 +36,7 @@ class _TransferPage extends HookWidget {
     final snapshotItem = useMemoizedStream(() => context.database.snapshotDao
         .snapshotById(
             snapshotId, context.multiAuthState.currentUser!.fiatCurrency)
-        .watchSingleOrNull()).data;
+        .watchSingleOrNullThrottle()).data;
 
     useEffect(() {
       context.accountServer.updateSnapshotById(snapshotId: snapshotId);
