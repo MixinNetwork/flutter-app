@@ -8,7 +8,8 @@ import 'package:pasteboard/pasteboard.dart';
 import '../file.dart';
 import '../logger.dart';
 
-final _supportedPlatform = Platform.isWindows || Platform.isMacOS;
+final _supportedPlatform =
+    Platform.isWindows || Platform.isMacOS || Platform.isLinux;
 
 Future<List<File>> getClipboardFiles() async {
   if (!_supportedPlatform) {

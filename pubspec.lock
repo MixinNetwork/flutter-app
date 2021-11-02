@@ -916,8 +916,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/pasteboard"
-      ref: "7bf203f0ea9e3c21ed2d0473a793a4c68d499051"
-      resolved-ref: "7bf203f0ea9e3c21ed2d0473a793a4c68d499051"
+      ref: "36b1bb63c931b9295a1a908998ad5c3f4ce440ca"
+      resolved-ref: "36b1bb63c931b9295a1a908998ad5c3f4ce440ca"
       url: "https://github.com/MixinNetwork/flutter-plugins.git"
     source: git
     version: "0.0.1"
