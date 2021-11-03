@@ -79,7 +79,7 @@ dependencies:
   pasteboard:
     git:
       url: https://github.com/MixinNetwork/flutter-plugins.git
-      ref: 36b1bb63c931b9295a1a908998ad5c3f4ce440ca
+      ref: 7909b17640c06e9bf91b68e1e52105c3b16af284
       path: packages/pasteboard
   path: ^1.8.0
   path_provider: ^2.0.2
