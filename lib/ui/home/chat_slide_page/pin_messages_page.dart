@@ -30,9 +30,7 @@ class PinMessagesPage extends HookWidget {
         () => context.read<ConversationCubit>().state!.conversationId);
 
     final rawList = useMemoizedStream<List<MessageItem>>(
-      () => context.database.pinMessageDao
-          .messageItems(conversationId)
-          .watchThrottle(),
+      () => context.database.pinMessageDao.messageItems(conversationId).watch(),
       keys: [conversationId],
     ).data;
 

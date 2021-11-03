@@ -871,8 +871,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         return db.fuzzySearchMessageByConversationIdAndUserIdAndCategories(
           conversationId,
           userId,
-          categories,
           keywordFts5,
+          categories,
           (_, __, ___) => Limit(limit, offset),
         );
       }
@@ -890,8 +890,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       if (categories != null) {
         return db.fuzzySearchMessageByConversationIdAndCategories(
           conversationId,
-          categories,
           keywordFts5,
+          categories,
           (_, __, ___) => Limit(limit, offset),
         );
       }
@@ -932,8 +932,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
         return db.fuzzySearchMessageCountByConversationIdAndUserIdAndCategories(
           conversationId,
           userId,
-          categories,
           keywordFts5,
+          categories,
         );
       }
 
@@ -949,8 +949,8 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       if (categories != null) {
         return db.fuzzySearchMessageCountByConversationIdAndCategories(
           conversationId,
-          categories,
           keywordFts5,
+          categories,
         );
       }
 

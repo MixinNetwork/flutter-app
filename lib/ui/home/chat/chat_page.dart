@@ -858,7 +858,7 @@ class _JumpMentionButton extends HookWidget {
           useMemoized(
               () => context.database.messageMentionDao
                   .unreadMentionMessageByConversationId(conversationId)
-                  .watchThrottle(),
+                  .watch(),
               [conversationId]),
         ).data ??
         [];

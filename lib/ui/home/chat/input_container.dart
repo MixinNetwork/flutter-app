@@ -55,11 +55,11 @@ class InputContainer extends HookWidget {
               return CombineLatestStream([
                 database.conversationDao
                     .conversationItem(conversationId!)
-                    .watchSingleOrNullThrottle(),
+                    .watchSingleOrNull(),
                 database.participantDao
                     .participantById(
                         conversationId, context.multiAuthState.currentUserId!)
-                    .watchSingleOrNullThrottle(),
+                    .watchSingleOrNull(),
               ], (list) {
                 if (list[0] == null) return true;
                 return list[1] != null;
@@ -537,7 +537,7 @@ class _StickerButton extends HookWidget {
 
     final stickerAlbumsCubit = useBloc(
       () => StickerAlbumsCubit(
-          context.database.stickerAlbumDao.systemAlbums().watchThrottle()),
+          context.database.stickerAlbumDao.systemAlbums().watch()),
     );
 
     final tabLength =

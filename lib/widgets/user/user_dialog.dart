@@ -119,9 +119,8 @@ class _UserProfileLoader extends HookWidget {
   Widget build(BuildContext context) {
     final accountServer = context.accountServer;
     final user = useStream(useMemoized(
-        () => accountServer.database.userDao
-            .userById(userId)
-            .watchSingleOrNullThrottle(),
+        () =>
+            accountServer.database.userDao.userById(userId).watchSingleOrNull(),
         [userId])).data;
 
     useEffect(() {
