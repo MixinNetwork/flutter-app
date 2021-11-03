@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(runner LANGUAGES CXX)
 
-set(BINARY_NAME "flutter_app")
+set(BINARY_NAME "mixin_desktop")
 set(APPLICATION_ID "one.mixin.messenger.desktop")
 
 cmake_policy(SET CMP0063 NEW)
