@@ -1,6 +1,7 @@
-import 'package:desktop_lifecycle/desktop_lifecycle.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+
+import '../utils/app_lifecycle.dart';
 
 class FocusHelper extends HookWidget {
   const FocusHelper({
@@ -23,7 +24,7 @@ void useDesktopLifecycleAutoFocus() {
   final ref = useRef<FocusNode?>(null);
   useEffect(() {
     void onListen() {
-      if (DesktopLifecycle.instance.isActive.value) {
+      if (isAppActive) {
         ref.value?.requestFocus();
         ref.value = null;
         return;
@@ -32,9 +33,9 @@ void useDesktopLifecycleAutoFocus() {
       ref.value?.unfocus();
     }
 
-    DesktopLifecycle.instance.isActive.addListener(onListen);
+    appActiveListener.addListener(onListen);
     return () {
-      DesktopLifecycle.instance.isActive.removeListener(onListen);
+      appActiveListener.removeListener(onListen);
       ref.value = null;
     };
   });
@@ -61,7 +62,7 @@ void useEditableTextAutoCleanSelection() {
   final previousFocusRef = useRef<FocusNode?>(null);
   useEffect(() {
     void listener() {
-      if (!DesktopLifecycle.instance.isActive.value) return;
+      if (!isAppActive) return;
 
       final primaryFocus = FocusManager.instance.primaryFocus;
       if (previousFocusRef.value == primaryFocus) return;
