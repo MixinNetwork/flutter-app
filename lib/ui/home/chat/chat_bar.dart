@@ -160,7 +160,7 @@ class ConversationIDOrCount extends HookWidget {
         if (isGroup) {
           return context.database.participantDao
               .conversationParticipantsCount(conversationState!.conversationId)
-              .watchSingle();
+              .watchSingleThrottle();
         }
 
         return const Stream<int>.empty();

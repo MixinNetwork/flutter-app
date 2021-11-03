@@ -216,7 +216,7 @@ class TranscriptPage extends HookWidget {
     Stream<List<MessageItem>> watchMessages() => context
         .database.transcriptMessageDao
         .transactionMessageItem(messageId)
-        .watch()
+        .watchThrottle()
         .map((list) => list
             .map((transcriptMessageItem) => transcriptMessageItem.messageItem)
             .toList());

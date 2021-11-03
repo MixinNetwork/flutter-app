@@ -419,7 +419,7 @@ class _PinMenu extends HookWidget {
         return context.database.participantDao
             .participantById(
                 message.conversationId, context.multiAuthState.currentUserId!)
-            .watchSingleOrNull()
+            .watchSingleOrNullThrottle()
             .map((event) => event?.role);
       },
       keys: [message.conversionCategory, message.conversationId],
