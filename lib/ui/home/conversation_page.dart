@@ -1207,9 +1207,9 @@ class _MessageContent extends HookWidget {
         if (conversation.contentType == MessageCategory.systemConversation) {
           return generateSystemText(
             actionName: conversation.actionName,
-            participantIsCurrentUser:
-                conversation.participantUserId == context.accountServer.userId,
-            relationship: conversation.relationship,
+            participantUserId: conversation.participantUserId,
+            senderId: conversation.senderId,
+            currentUserId: context.accountServer.userId,
             participantFullName: conversation.participantFullName,
             senderFullName: conversation.senderFullName,
             groupName: conversation.groupName,
