@@ -7,6 +7,7 @@ import '../widgets/conversation/conversation_dialog.dart';
 import '../widgets/toast.dart';
 import '../widgets/user/user_dialog.dart';
 import 'extension/extension.dart';
+import 'logger.dart';
 
 Future<bool> openUri(
   BuildContext context,
@@ -31,14 +32,15 @@ Future<bool> openUri(
             await context.accountServer.client.accountApi.code(code);
         final data = mixinResponse.data;
         if (data is User) {
-          await showUserDialog(context, userId);
+          await showUserDialog(context, data.userId);
           return true;
         } else if (data is ConversationResponse) {
           await showConversationDialog(context, data, code);
           return true;
         }
-      } catch (e) {
-        await showToastFailed(context, e);
+      } catch (error) {
+        e('open code: $error');
+        await showToastFailed(context, error);
         return false;
       }
     }
