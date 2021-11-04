@@ -321,9 +321,9 @@ packages:
   desktop_webview_window:
     dependency: "direct main"
     description:
-      name: desktop_webview_window
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../flutter-plugins/packages/desktop_webview_window"
+      relative: true
+    source: path
     version: "0.0.4"
   device_info_plus:
     dependency: "direct main"
