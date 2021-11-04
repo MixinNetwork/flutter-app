@@ -42,6 +42,8 @@ abstract class _NotificationManager {
 
   Future<void> dismissByMessageId(String messageId);
 
+  Future<bool?> requestPermission();
+
   @protected
   void onNotificationSelected(Uri uri) => _payloadStreamController.add(uri);
 
@@ -93,7 +95,7 @@ class _LocalNotificationManager extends _NotificationManager {
     required String conversationId,
     required String messageId,
   }) async {
-    await _requestPermission();
+    await requestPermission();
     // TODO Set mixin.caf to be invalid.
     const platformChannelSpecifics = NotificationDetails(
       macOS: MacOSNotificationDetails(sound: 'mixin.caf'),
@@ -117,7 +119,8 @@ class _LocalNotificationManager extends _NotificationManager {
     ));
   }
 
-  Future<bool?>? _requestPermission() => flutterLocalNotificationsPlugin
+  @override
+  Future<bool?> requestPermission() async => flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
           MacOSFlutterLocalNotificationsPlugin>()
       ?.requestPermissions(
@@ -235,6 +238,9 @@ class _WindowsNotificationManager extends _NotificationManager {
     (notificationObj.notification as win.Toast).dismiss();
     notifications.remove(notificationObj);
   }
+
+  @override
+  Future<bool?> requestPermission() async => null;
 }
 
 enum NotificationScheme {
@@ -290,3 +296,6 @@ Future<void> dismissByConversationId(String conversationId) async =>
 
 Future<void> dismissByMessageId(String messageId) async =>
     await _notificationManager?.dismissByMessageId(messageId);
+
+Future<bool?> requestNotificationPermission() async =>
+    _notificationManager?.requestPermission();

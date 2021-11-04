@@ -254,6 +254,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("NO MEDIA"),
         "noPost": MessageLookupByLibrary.simpleMessage("NO POST"),
         "notification": MessageLookupByLibrary.simpleMessage("Notification"),
+        "notificationPermissionDescription":
+            MessageLookupByLibrary.simpleMessage(
+                "Don\'t miss messages from you friends."),
+        "notificationPermissionManually": MessageLookupByLibrary.simpleMessage(
+            "Notifications are not allowed, please go to Notification Settings to turn on."),
+        "notificationPermissionTitle":
+            MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
         "pageDeleteCircle": m15,
         "pageEditProfileJoin": m16,
         "pageLandingClickToReload":

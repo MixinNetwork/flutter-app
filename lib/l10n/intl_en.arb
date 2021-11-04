@@ -223,5 +223,8 @@
   "text": "Text",
   "developer": "Developer",
   "goToChat": "Go to chat",
-  "scamWarning": "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money"
+  "scamWarning": "Warning: Many users reported this account as a scam. Please be careful, especially if it asks you for money",
+  "notificationPermissionDescription": "Don't miss messages from you friends.",
+  "notificationPermissionTitle": "Turn On Notifications",
+  "notificationPermissionManually": "Notifications are not allowed, please go to Notification Settings to turn on."
 }
