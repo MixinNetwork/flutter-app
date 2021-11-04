@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 import 'package:ed25519_edwards/ed25519_edwards.dart';
 import 'package:libsignal_protocol_dart/libsignal_protocol_dart.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
+
 // ignore: implementation_imports
 import 'package:mixin_bot_sdk_dart/src/vo/signal_key_count.dart';
 import 'package:uuid/uuid.dart';
@@ -885,7 +886,8 @@ class DecryptMessage extends Injector {
         systemMessage.participantId!,
         systemMessage.role,
       );
-      if (systemMessage.participantId != accountId) {
+      if (systemMessage.participantId != accountId ||
+          systemMessage.role == null) {
         return;
       }
     }
