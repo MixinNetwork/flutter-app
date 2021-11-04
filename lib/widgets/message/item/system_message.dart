@@ -1,6 +1,5 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart';
 
 import '../../../enum/message_action.dart';
 import '../../../generated/l10n.dart';
@@ -18,8 +17,7 @@ class SystemMessage extends HookWidget {
         useMessageConverter(converter: (state) => state.actionName);
     final participantUserId =
         useMessageConverter(converter: (state) => state.participantUserId);
-    final relationship =
-        useMessageConverter(converter: (state) => state.relationship);
+    final senderId = useMessageConverter(converter: (state) => state.userId);
     final participantFullName =
         useMessageConverter(converter: (state) => state.participantFullName);
     final userFullName =
@@ -50,9 +48,9 @@ class SystemMessage extends HookWidget {
               child: Text(
                 generateSystemText(
                   actionName: actionName,
-                  participantIsCurrentUser:
-                      participantUserId == context.accountServer.userId,
-                  relationship: relationship,
+                  participantUserId: participantUserId,
+                  senderId: senderId,
+                  currentUserId: context.accountServer.userId,
                   participantFullName: participantFullName,
                   senderFullName: userFullName,
                   groupName: groupName,
@@ -74,12 +72,16 @@ class SystemMessage extends HookWidget {
 
 String generateSystemText({
   required MessageAction? actionName,
-  required bool participantIsCurrentUser,
-  required UserRelationship? relationship,
+  required String? participantUserId,
+  required String? senderId,
+  required String currentUserId,
   required String? participantFullName,
   required String? senderFullName,
   required String? groupName,
 }) {
+  final participantIsCurrentUser = participantUserId == currentUserId;
+  final senderIsCurrentUser = senderId == currentUserId;
+
   String text;
   switch (actionName) {
     case MessageAction.join:
@@ -98,9 +100,7 @@ String generateSystemText({
       break;
     case MessageAction.add:
       text = Localization.current.chatGroupAdd(
-        relationship == UserRelationship.me
-            ? Localization.current.youStart
-            : senderFullName!,
+        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
@@ -108,9 +108,7 @@ String generateSystemText({
       break;
     case MessageAction.remove:
       text = Localization.current.chatGroupRemove(
-        relationship == UserRelationship.me
-            ? Localization.current.youStart
-            : senderFullName!,
+        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
         participantIsCurrentUser
             ? Localization.current.you
             : participantFullName ?? '',
@@ -118,9 +116,7 @@ String generateSystemText({
       break;
     case MessageAction.create:
       text = Localization.current.chatGroupCreate(
-        relationship == UserRelationship.me
-            ? Localization.current.youStart
-            : senderFullName!,
+        senderIsCurrentUser ? Localization.current.youStart : senderFullName!,
         groupName!,
       );
       break;
