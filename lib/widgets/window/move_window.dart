@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 
@@ -52,18 +54,24 @@ class GlobalMoveWindow extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => Stack(
-        fit: StackFit.expand,
-        textDirection: TextDirection.ltr,
-        children: [
-          child,
-          const Align(
-            alignment: Alignment.topCenter,
-            child: SizedBox(
-              height: 28,
-              child: MoveWindow(),
-            ),
+  Widget build(BuildContext context) {
+    // Windows already has a title bar.
+    if (Platform.isWindows) {
+      return child;
+    }
+    return Stack(
+      fit: StackFit.expand,
+      textDirection: TextDirection.ltr,
+      children: [
+        child,
+        const Align(
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            height: 28,
+            child: MoveWindow(),
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
 }
