@@ -54,14 +54,14 @@ class SettingPage extends HookWidget {
                             title: context.l10n.notification,
                             trailing: hasNotificationPermission == false
                                 ? Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: SvgPicture.asset(
+                                    padding: const EdgeInsets.all(4),
+                                    child: SvgPicture.asset(
                                       Resources.assetsImagesTriangleWarningSvg,
                                       color: context.theme.red,
                                       width: 22,
                                       height: 22,
                                     ),
-                                )
+                                  )
                                 : const Arrow(),
                             color: hasNotificationPermission == false
                                 ? context.theme.red
