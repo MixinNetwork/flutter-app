@@ -134,28 +134,35 @@ class AttachmentUtil extends ChangeNotifier {
         String? mediaKey;
         String? mediaDigest;
 
-        mediaKey = attachmentMessage?.key as String?;
-        mediaDigest = attachmentMessage?.digest as String?;
+        void setKeyAndDigestInvalid(String? _mediaKey, String? _mediaDigest) {
+          mediaKey = _mediaKey?.trim().isEmpty ?? true ? null : _mediaKey;
+          mediaDigest =
+              _mediaDigest?.trim().isEmpty ?? true ? null : _mediaDigest;
+        }
+
+        setKeyAndDigestInvalid(attachmentMessage?.key as String?,
+            attachmentMessage?.digest as String?);
+
         if (mediaKey == null || mediaDigest == null) {
           if (message != null) {
-            mediaKey = message.mediaKey;
-            mediaDigest = message.mediaDigest;
+            setKeyAndDigestInvalid(message.mediaKey, message.mediaDigest);
           }
         }
         if (mediaKey == null || mediaDigest == null) {
           if (transcriptMessage != null) {
-            mediaKey = transcriptMessage.mediaKey;
-            mediaDigest = transcriptMessage.mediaDigest;
+            setKeyAndDigestInvalid(
+                transcriptMessage.mediaKey, transcriptMessage.mediaDigest);
           }
         }
 
         final attachmentDownloadJob = _AttachmentDownloadJob(
           path: file.absolute.path,
           url: response.data.viewUrl!,
-          keys:
-              mediaKey != null ? await base64DecodeWithIsolate(mediaKey) : null,
+          keys: mediaKey != null
+              ? await base64DecodeWithIsolate(mediaKey!)
+              : null,
           digest: mediaDigest != null
-              ? await base64DecodeWithIsolate(mediaDigest)
+              ? await base64DecodeWithIsolate(mediaDigest!)
               : null,
         );
 
