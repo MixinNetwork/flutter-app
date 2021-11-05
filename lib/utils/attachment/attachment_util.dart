@@ -140,8 +140,10 @@ class AttachmentUtil extends ChangeNotifier {
               _mediaDigest?.trim().isEmpty ?? true ? null : _mediaDigest;
         }
 
-        setKeyAndDigestInvalid(attachmentMessage?.key as String?,
-            attachmentMessage?.digest as String?);
+        setKeyAndDigestInvalid(
+          attachmentMessage?.key as String?,
+          attachmentMessage?.digest as String?,
+        );
 
         if ((mediaKey == null || mediaDigest == null) && message != null) {
           setKeyAndDigestInvalid(
