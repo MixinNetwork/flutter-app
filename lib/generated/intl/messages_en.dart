@@ -306,8 +306,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Send without compression"),
         "sendWithoutSound":
             MessageLookupByLibrary.simpleMessage("Send Without Sound"),
-        "sendYouAMessage":
-            MessageLookupByLibrary.simpleMessage("Send you a message"),
+        "sentYouAMessage":
+            MessageLookupByLibrary.simpleMessage("Sent you a message"),
         "settingTheme": MessageLookupByLibrary.simpleMessage("Theme"),
         "settingThemeAuto":
             MessageLookupByLibrary.simpleMessage("Follow system"),
