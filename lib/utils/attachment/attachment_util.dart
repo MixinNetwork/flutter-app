@@ -143,16 +143,19 @@ class AttachmentUtil extends ChangeNotifier {
         setKeyAndDigestInvalid(attachmentMessage?.key as String?,
             attachmentMessage?.digest as String?);
 
-        if (mediaKey == null || mediaDigest == null) {
-          if (message != null) {
-            setKeyAndDigestInvalid(message.mediaKey, message.mediaDigest);
-          }
+        if ((mediaKey == null || mediaDigest == null) && message != null) {
+          setKeyAndDigestInvalid(
+            message.mediaKey,
+            message.mediaDigest,
+          );
         }
-        if (mediaKey == null || mediaDigest == null) {
-          if (transcriptMessage != null) {
-            setKeyAndDigestInvalid(
-                transcriptMessage.mediaKey, transcriptMessage.mediaDigest);
-          }
+
+        if ((mediaKey == null || mediaDigest == null) &&
+            transcriptMessage != null) {
+          setKeyAndDigestInvalid(
+            transcriptMessage.mediaKey,
+            transcriptMessage.mediaDigest,
+          );
         }
 
         final attachmentDownloadJob = _AttachmentDownloadJob(
