@@ -127,9 +127,11 @@ class VideoMessageWidget extends HookWidget {
                     ),
                     HookBuilder(builder: (context) {
                       final durationText = useMessageConverter(
-                        converter: (state) => formatVideoDuration(Duration(
-                            milliseconds:
-                                int.tryParse(state.mediaDuration ?? '') ?? 0)),
+                        converter: (state) => Duration(
+                                milliseconds:
+                                    int.tryParse(state.mediaDuration ?? '') ??
+                                        0)
+                            .asMinutesSeconds,
                       );
 
                       return Positioned(
@@ -182,6 +184,3 @@ class VideoMessageWidget extends HookWidget {
     );
   }
 }
-
-String formatVideoDuration(Duration duration) =>
-    '${duration.inMinutes.toString().padLeft(2, '0')}:${duration.inSeconds.remainder(60).toString().padLeft(2, '0')}';

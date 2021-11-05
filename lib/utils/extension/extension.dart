@@ -59,5 +59,6 @@ part 'src/stream.dart';
 part 'src/string.dart';
 part 'src/ui.dart';
 part 'src/info.dart';
+part 'src/duration.dart';
 
 void importExtension() {}
