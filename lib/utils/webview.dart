@@ -49,18 +49,13 @@ Future<void> openBotWebviewWindow(
   BuildContext context,
   App app, {
   String? conversationId,
-}) async {
-  final webview = await WebviewWindow.create(
-    configuration: CreateConfiguration(
-        title: app.name, windowWidth: 380, windowHeight: 750),
-  );
-  final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
-  webview
-    ..setBrightness(context.read<SettingCubit>().brightness)
-    ..addScriptToExecuteOnDocumentCreated(
-        _mixinContextProviderJavaScript(mixinContext))
-    ..launch(app.homeUri);
-}
+}) =>
+    openWebviewWindowWithUrl(
+      context,
+      app.homeUri,
+      conversationId: conversationId,
+      title: app.name,
+    );
 
 Future<void> openWebviewWindowWithUrl(
   BuildContext context,
@@ -68,6 +63,8 @@ Future<void> openWebviewWindowWithUrl(
   String? conversationId,
   String? title,
 }) async {
+  final brightness = context.read<SettingCubit>().brightness;
+  final packageInfo = await PackageInfo.fromPlatform();
   final webview = await WebviewWindow.create(
     configuration: CreateConfiguration(
       windowWidth: 380,
@@ -77,8 +74,10 @@ Future<void> openWebviewWindowWithUrl(
   );
   final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
   webview
-    ..setBrightness(context.read<SettingCubit>().brightness)
+    ..setBrightness(brightness)
     ..addScriptToExecuteOnDocumentCreated(
-        _mixinContextProviderJavaScript(mixinContext))
-    ..launch(url);
+      _mixinContextProviderJavaScript(mixinContext),
+    );
+  await webview.setApplicationNameForUserAgent(' Mixin/${packageInfo.version}');
+  webview.launch(url);
 }
