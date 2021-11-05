@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:cross_file/cross_file.dart';
@@ -120,10 +121,11 @@ class SendMessageHelper {
     final _bytes = bytes ?? await file!.readAsBytes();
 
     // Only retrieve image bounds info.
-    final imageInfo = findDecoderForData(_bytes)?.startDecode(_bytes);
+    final buffer = await ui.ImmutableBuffer.fromUint8List(_bytes);
+    final descriptor = await ui.ImageDescriptor.encoded(buffer);
 
-    final imageWidth = imageInfo!.width;
-    final imageHeight = imageInfo.height;
+    final imageWidth = descriptor.width;
+    final imageHeight = descriptor.height;
 
     attachment = await attachment.create(recursive: true);
 
