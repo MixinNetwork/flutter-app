@@ -116,7 +116,7 @@ class AudioMessage extends HookWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${duration.inSeconds}‘',
+                    duration.asMinutesSeconds,
                     style: TextStyle(
                       fontSize: MessageItemWidget.tertiaryFontSize,
                       color: context.theme.secondaryText,
