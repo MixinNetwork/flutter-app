@@ -76,8 +76,8 @@ Future<void> openWebviewWindowWithUrl(
   webview
     ..setBrightness(brightness)
     ..addScriptToExecuteOnDocumentCreated(
-        _mixinContextProviderJavaScript(mixinContext))
-    // ignore: unawaited_futures
-    ..setApplicationNameForUserAgent(' Mixin/${packageInfo.version}')
-    ..launch(url);
+      _mixinContextProviderJavaScript(mixinContext),
+    );
+  await webview.setApplicationNameForUserAgent(' Mixin/${packageInfo.version}');
+  webview.launch(url);
 }
