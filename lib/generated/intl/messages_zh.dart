@@ -221,6 +221,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "noMedia": MessageLookupByLibrary.simpleMessage("没有媒体"),
         "noPost": MessageLookupByLibrary.simpleMessage("没有文章"),
         "notification": MessageLookupByLibrary.simpleMessage("通知"),
+        "notificationPermissionDescription":
+            MessageLookupByLibrary.simpleMessage("不再遗漏好友的消息。"),
+        "notificationPermissionManually":
+            MessageLookupByLibrary.simpleMessage("未允许通知，请到通知设置开启。"),
+        "notificationPermissionTitle":
+            MessageLookupByLibrary.simpleMessage("打开通知"),
         "pageDeleteCircle": m15,
         "pageEditProfileJoin": m16,
         "pageLandingClickToReload":

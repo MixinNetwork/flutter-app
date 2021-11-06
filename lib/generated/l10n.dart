@@ -2299,6 +2299,36 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Don't miss messages from you friends.`
+  String get notificationPermissionDescription {
+    return Intl.message(
+      'Don\'t miss messages from you friends.',
+      name: 'notificationPermissionDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Turn On Notifications`
+  String get notificationPermissionTitle {
+    return Intl.message(
+      'Turn On Notifications',
+      name: 'notificationPermissionTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Notifications are not allowed, please go to Notification Settings to turn on.`
+  String get notificationPermissionManually {
+    return Intl.message(
+      'Notifications are not allowed, please go to Notification Settings to turn on.',
+      name: 'notificationPermissionManually',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

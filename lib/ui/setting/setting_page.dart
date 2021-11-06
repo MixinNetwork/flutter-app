@@ -4,7 +4,10 @@ import 'package:flutter_svg/svg.dart';
 
 import '../../bloc/bloc_converter.dart';
 import '../../constants/resources.dart';
+import '../../utils/app_lifecycle.dart';
 import '../../utils/extension/extension.dart';
+import '../../utils/hook.dart';
+import '../../utils/local_notification_center.dart';
 import '../../widgets/app_bar.dart';
 import '../../widgets/avatar_view/avatar_view.dart';
 import '../../widgets/cell.dart';
@@ -16,80 +19,98 @@ class SettingPage extends HookWidget {
   const SettingPage({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: [
-          const MixinAppBar(
-            backgroundColor: Colors.transparent,
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  const _UserProfile(),
-                  const SizedBox(height: 24),
-                  Column(
-                    children: [
-                      CellGroup(
-                        child: _Item(
-                          assetName: Resources.assetsImagesIcProfileSvg,
-                          pageName: ResponsiveNavigatorCubit.editProfilePage,
-                          title: context.l10n.editProfile,
-                        ),
+  Widget build(BuildContext context) {
+    final appActive = useValueListenable(appActiveListener);
+    final hasNotificationPermission = useMemoizedFuture(
+        requestNotificationPermission, null,
+        keys: [appActive]).data;
+
+    return Column(
+      children: [
+        const MixinAppBar(
+          backgroundColor: Colors.transparent,
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const _UserProfile(),
+                const SizedBox(height: 24),
+                Column(
+                  children: [
+                    CellGroup(
+                      child: _Item(
+                        assetName: Resources.assetsImagesIcProfileSvg,
+                        pageName: ResponsiveNavigatorCubit.editProfilePage,
+                        title: context.l10n.editProfile,
                       ),
-                      CellGroup(
-                        child: Column(
-                          children: [
-                            _Item(
-                              assetName:
-                                  Resources.assetsImagesIcNotificationSvg,
-                              pageName:
-                                  ResponsiveNavigatorCubit.notificationPage,
-                              title: context.l10n.notification,
-                            ),
-                            _Item(
-                              assetName:
-                                  Resources.assetsImagesIcStorageUsageSvg,
-                              pageName: ResponsiveNavigatorCubit
-                                  .dataAndStorageUsagePage,
-                              title: context.l10n.dataAndStorageUsage,
-                            ),
-                            _Item(
-                              assetName: Resources.assetsImagesIcAppearanceSvg,
-                              pageName: ResponsiveNavigatorCubit.appearancePage,
-                              title: context.l10n.appearance,
-                            ),
-                            _Item(
-                              assetName: Resources.assetsImagesIcAboutSvg,
-                              pageName: ResponsiveNavigatorCubit.aboutPage,
-                              title: context.l10n.about,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  CellGroup(
-                    child: _Item(
-                      assetName: Resources.assetsImagesIcSignOutSvg,
-                      title: context.l10n.signOut,
-                      onTap: () async {
-                        final succeed = await runFutureWithToast(
-                          context,
-                          context.accountServer.signOutAndClear(),
-                        );
-                        if (!succeed) return;
-                        context.multiAuthCubit.signOut();
-                      },
-                      color: context.theme.red,
-                      enableTrailingArrow: false,
                     ),
+                    CellGroup(
+                      child: Column(
+                        children: [
+                          _Item(
+                            assetName: Resources.assetsImagesIcNotificationSvg,
+                            pageName: ResponsiveNavigatorCubit.notificationPage,
+                            title: context.l10n.notification,
+                            trailing: hasNotificationPermission == false
+                                ? Padding(
+                                    padding: const EdgeInsets.all(4),
+                                    child: SvgPicture.asset(
+                                      Resources.assetsImagesTriangleWarningSvg,
+                                      color: context.theme.red,
+                                      width: 22,
+                                      height: 22,
+                                    ),
+                                  )
+                                : const Arrow(),
+                            color: hasNotificationPermission == false
+                                ? context.theme.red
+                                : context.theme.text,
+                          ),
+                          _Item(
+                            assetName: Resources.assetsImagesIcStorageUsageSvg,
+                            pageName: ResponsiveNavigatorCubit
+                                .dataAndStorageUsagePage,
+                            title: context.l10n.dataAndStorageUsage,
+                          ),
+                          _Item(
+                            assetName: Resources.assetsImagesIcAppearanceSvg,
+                            pageName: ResponsiveNavigatorCubit.appearancePage,
+                            title: context.l10n.appearance,
+                          ),
+                          _Item(
+                            assetName: Resources.assetsImagesIcAboutSvg,
+                            pageName: ResponsiveNavigatorCubit.aboutPage,
+                            title: context.l10n.about,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                CellGroup(
+                  child: _Item(
+                    assetName: Resources.assetsImagesIcSignOutSvg,
+                    title: context.l10n.signOut,
+                    onTap: () async {
+                      final succeed = await runFutureWithToast(
+                        context,
+                        context.accountServer.signOutAndClear(),
+                      );
+                      if (!succeed) return;
+                      context.multiAuthCubit.signOut();
+                    },
+                    color: context.theme.red,
+                    trailing: const SizedBox(),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-        ],
-      );
+        ),
+      ],
+    );
+  }
 }
 
 class _Item extends StatelessWidget {
@@ -100,7 +121,7 @@ class _Item extends StatelessWidget {
     this.pageName,
     this.color,
     this.onTap,
-    this.enableTrailingArrow = true,
+    this.trailing = const Arrow(),
   }) : super(key: key);
 
   final String assetName;
@@ -108,7 +129,7 @@ class _Item extends StatelessWidget {
   final String? pageName;
   final Color? color;
   final VoidCallback? onTap;
-  final bool enableTrailingArrow;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) =>
@@ -124,7 +145,7 @@ class _Item extends StatelessWidget {
             color: color ?? context.theme.text,
           ),
           title: Text(title),
-          color: color,
+          color: color ?? context.theme.text,
           selected: selected,
           onTap: () {
             if (onTap == null && pageName != null) {
@@ -137,7 +158,7 @@ class _Item extends StatelessWidget {
 
             onTap?.call();
           },
-          trailing: enableTrailingArrow ? const Arrow() : null,
+          trailing: trailing,
         ),
       );
 }

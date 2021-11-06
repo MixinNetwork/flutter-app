@@ -218,5 +218,8 @@
   "text": "文字",
   "developer": "开发者",
   "goToChat": "定位到聊天",
-  "scamWarning": "警告：此账号被大量用户举报，请谨防网络诈骗，注意个人财产安全"
+  "scamWarning": "警告：此账号被大量用户举报，请谨防网络诈骗，注意个人财产安全",
+  "notificationPermissionDescription": "不再遗漏好友的消息。",
+  "notificationPermissionTitle": "打开通知",
+  "notificationPermissionManually": "未允许通知，请到通知设置开启。"
 }
