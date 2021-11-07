@@ -948,27 +948,9 @@ class DecryptMessage extends Injector {
       ),
     );
     await database.snapshotDao.insert(snapshot);
-    final exists =
-        await database.assetDao.assetById(snapshot.assetId).getSingleOrNull();
-    if (exists == null) {
-      final a =
-          (await client.assetApi.getAssetById(snapshotMessage.assetId)).data;
-      final asset = db.Asset(
-          assetId: a.assetId,
-          symbol: a.symbol,
-          name: a.name,
-          iconUrl: a.iconUrl,
-          balance: a.balance,
-          // TODO
-          destination: a.destination!,
-          priceBtc: a.priceBtc,
-          priceUsd: a.priceUsd,
-          chainId: a.chainId,
-          changeUsd: a.changeUsd,
-          changeBtc: a.changeBtc,
-          confirmations: a.confirmations);
-      await database.assetDao.insert(asset);
-    }
+    final a =
+        (await client.assetApi.getAssetById(snapshotMessage.assetId)).data;
+    await database.assetDao.insertSdkAsset(a);
     var status = data.status;
     if (_conversationId == data.conversationId && data.userId != accountId) {
       status = MessageStatus.read;
