@@ -29,9 +29,6 @@ extension AssetConverter on sdk.Asset {
 class AssetDao extends DatabaseAccessor<MixinDatabase> with _$AssetDaoMixin {
   AssetDao(MixinDatabase db) : super(db);
 
-  Future<int> insert(Asset asset) =>
-      into(db.assets).insertOnConflictUpdate(asset);
-
   Future<int> insertSdkAsset(sdk.Asset asset) =>
       into(db.assets).insertOnConflictUpdate(asset.asAssetsCompanion);
 
