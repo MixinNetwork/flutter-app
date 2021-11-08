@@ -415,9 +415,10 @@ class DecryptMessage extends Injector {
           content: message.category.isText ? message.content : null,
         );
         await database.pinMessageDao.insert(PinMessage(
-            messageId: messageId,
-            conversationId: message.conversationId,
-            createdAt: data.createdAt));
+          messageId: messageId,
+          conversationId: message.conversationId,
+          createdAt: data.createdAt,
+        ));
         await database.messageDao.insert(
           Message(
             messageId: const Uuid().v4(),
@@ -426,7 +427,7 @@ class DecryptMessage extends Injector {
             userId: data.userId,
             status: MessageStatus.read,
             content: await jsonEncodeWithIsolate(pinMessageMinimal),
-            createdAt: DateTime.now(),
+            createdAt: data.createdAt,
             category: MessageCategory.messagePin,
           ),
           accountId,
