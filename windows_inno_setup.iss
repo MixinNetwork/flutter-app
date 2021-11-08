@@ -28,6 +28,7 @@ SetupIconFile={#SourcePath}\windows\runner\resources\app_icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+AppMutex=Mixin_flutter_single_instance_identity_mutex_name,Global/Mixin_flutter_single_instance_identity_mutex_name
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -38,7 +39,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 [Files]
 Source: "{#SourcePath}\build\windows\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#SourcePath}\build\windows\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SourcePath}\windows\libs\vclibs\*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#SourcePath}\windows\libs\vclibs\*"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
