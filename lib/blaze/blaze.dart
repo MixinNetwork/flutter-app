@@ -73,10 +73,12 @@ class Blaze {
         // ProductName: macOS
         // ProductVersion: 12.0.1
         // BuildVersion: 21A559
-        systemAndVersion = '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
+        systemAndVersion =
+            '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
       }
     }
-    systemAndVersion ??= '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
+    systemAndVersion ??=
+        '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
     return 'Mixin/${version.version} (Flutter $systemAndVersion; ${Platform.localeName})';
   }
 
