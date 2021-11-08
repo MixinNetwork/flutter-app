@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
@@ -12,6 +13,7 @@ import '../db/database.dart';
 import '../db/extension/job.dart';
 import '../db/mixin_database.dart';
 import '../enum/message_status.dart';
+import '../main.dart';
 import '../utils/extension/extension.dart';
 import '../utils/load_balancer_utils.dart';
 import '../utils/logger.dart';
@@ -53,6 +55,31 @@ class Blaze {
 
   final transactions = <String, WebSocketTransaction>{};
 
+  String? _userAgent;
+
+  Future<String> _getUserAgent() async {
+    final version = await packageInfoFuture;
+    String? systemAndVersion;
+    if (Platform.isMacOS) {
+      final result = await Process.run('sw_vers', []);
+      if (result.stdout != null) {
+        final stdout = result.stdout as String;
+        final map = Map.fromEntries(const LineSplitter()
+            .convert(stdout)
+            .map((e) => e.split(':'))
+            .where((element) => element.length >= 2)
+            .map((e) => MapEntry(e[0].trim(), e[1].trim())));
+        // example
+        // ProductName: macOS
+        // ProductVersion: 12.0.1
+        // BuildVersion: 21A559
+        systemAndVersion = '${map['ProductName']} ${map['ProductVersion']}(${map['BuildVersion']})';
+      }
+    }
+    systemAndVersion ??= '${Platform.operatingSystem}(${Platform.operatingSystemVersion})';
+    return 'Mixin/${version.version} (Flutter $systemAndVersion; ${Platform.localeName})';
+  }
+
   Future<void> connect() async {
     i('reconnecting set false, ${StackTrace.current}');
     _reconnecting = false;
@@ -60,6 +87,7 @@ class Blaze {
     i('ws connect');
     _token ??= signAuthTokenWithEdDSA(
         userId, sessionId, privateKey, scp, 'GET', '/', '');
+    _userAgent ??= await _getUserAgent();
     try {
       _connect(_token!);
     } catch (_) {
@@ -72,7 +100,10 @@ class Blaze {
     channel = IOWebSocketChannel.connect(
       _host,
       protocols: ['Mixin-Blaze-1'],
-      headers: {'Authorization': 'Bearer $token'},
+      headers: {
+        'User-Agent': _userAgent,
+        'Authorization': 'Bearer $token',
+      },
       pingInterval: const Duration(seconds: 10),
     );
     subscription =
