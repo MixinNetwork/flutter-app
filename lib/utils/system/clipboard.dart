@@ -16,16 +16,26 @@ Future<List<File>> getClipboardFiles() async {
     return const [];
   }
 
-  final filePaths = await Pasteboard.files();
-  if (filePaths.isNotEmpty) {
-    final files =
-        filePaths.map((e) => File(e)).where((e) => e.existsSync()).toList();
-    if (files.isNotEmpty) {
-      return files;
+  try {
+    final filePaths = await Pasteboard.files();
+    if (filePaths.isNotEmpty) {
+      final files =
+          filePaths.map((e) => File(e)).where((e) => e.existsSync()).toList();
+      if (files.isNotEmpty) {
+        return files;
+      }
     }
+  } catch (error, stack) {
+    e('Pasteboard.files: $error $stack');
   }
 
-  var imageBytes = await Pasteboard.image;
+  Uint8List? imageBytes;
+  try {
+    imageBytes = await Pasteboard.image;
+  } catch (error, stack) {
+    e('Pasteboard.image: $error $stack');
+  }
+
   if (imageBytes != null) {
     if (Platform.isWindows) {
       try {
