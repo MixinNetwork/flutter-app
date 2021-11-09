@@ -38,7 +38,7 @@ class BrightnessObserver extends HookWidget {
     final refresh = useCallback((Brightness currentBrightness) {
       if (currentBrightness == brightnessRef.value) return;
 
-      brightnessRef.value = _getBrightness(context);
+      brightnessRef.value = currentBrightness;
       brightnessRefreshKey.value = Object();
     }, []);
 
