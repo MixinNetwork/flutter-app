@@ -45,6 +45,8 @@ class VideoMessageWidget extends HookWidget {
     final relationship =
         useMessageConverter(converter: (state) => state.relationship);
     final mediaUrl = useMessageConverter(converter: (state) => state.mediaUrl);
+    final isVideo =
+        useMessageConverter(converter: (state) => state.type.isVideo);
 
     return LayoutBuilder(
       builder: (context, boxConstraints) {
@@ -125,36 +127,37 @@ class VideoMessageWidget extends HookWidget {
                         },
                       ),
                     ),
-                    HookBuilder(builder: (context) {
-                      final durationText = useMessageConverter(
-                        converter: (state) => Duration(
-                                milliseconds:
-                                    int.tryParse(state.mediaDuration ?? '') ??
-                                        0)
-                            .asMinutesSeconds,
-                      );
+                    if (isVideo)
+                      HookBuilder(builder: (context) {
+                        final durationText = useMessageConverter(
+                          converter: (state) => Duration(
+                                  milliseconds:
+                                      int.tryParse(state.mediaDuration ?? '') ??
+                                          0)
+                              .asMinutesSeconds,
+                        );
 
-                      return Positioned(
-                        top: 6,
-                        left: isCurrentUser ? 6 : 14,
-                        child: DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(0, 0, 0, 0.3),
-                            borderRadius: BorderRadius.circular(5),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(4),
-                            child: Text(
-                              durationText,
-                              style: const TextStyle(
-                                fontSize: MessageItemWidget.tertiaryFontSize,
-                                color: Colors.white,
+                        return Positioned(
+                          top: 6,
+                          left: isCurrentUser ? 6 : 14,
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(0, 0, 0, 0.3),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Text(
+                                durationText,
+                                style: const TextStyle(
+                                  fontSize: MessageItemWidget.tertiaryFontSize,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      }),
                     Positioned(
                       bottom: 4,
                       right: isCurrentUser ? 12 : 4,
