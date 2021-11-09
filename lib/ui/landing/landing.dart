@@ -90,6 +90,11 @@ class _QrCode extends HookWidget {
     final visible = useBlocStateConverter<LandingCubit, LandingState, bool>(
         converter: (state) => state.status == LandingStatus.needReload);
 
+    final errorMessage =
+        useBlocStateConverter<LandingCubit, LandingState, String?>(
+      converter: (state) => state.errorMessage,
+    );
+
     Widget? qrCode;
     if (url != null) {
       qrCode = QrImage(
@@ -120,6 +125,7 @@ class _QrCode extends HookWidget {
                   Visibility(
                     visible: visible,
                     child: _Retry(
+                      errorMessage: errorMessage,
                       onTap: () =>
                           context.read<LandingCubit>().requestAuthUrl(),
                     ),
@@ -206,9 +212,12 @@ class _Retry extends StatelessWidget {
   const _Retry({
     Key? key,
     required this.onTap,
+    this.errorMessage,
   }) : super(key: key);
 
   final VoidCallback onTap;
+
+  final String? errorMessage;
 
   @override
   Widget build(BuildContext context) => DecoratedBox(
@@ -218,28 +227,32 @@ class _Retry extends StatelessWidget {
         child: GestureDetector(
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SvgPicture.asset(
-                  Resources.assetsImagesIcRetrySvg,
-                  width: 50,
-                  height: 50,
-                ),
-                const SizedBox(height: 14),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(
-                    context.l10n.pageLandingClickToReload,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Color.fromRGBO(255, 255, 255, 0.9),
-                      fontSize: 14,
+          child: Tooltip(
+            message: errorMessage,
+            excludeFromSemantics: true,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    Resources.assetsImagesIcRetrySvg,
+                    width: 50,
+                    height: 50,
+                  ),
+                  const SizedBox(height: 14),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Text(
+                      context.l10n.pageLandingClickToReload,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Color.fromRGBO(255, 255, 255, 0.9),
+                        fontSize: 14,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
