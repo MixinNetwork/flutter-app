@@ -1,8 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
-class BrightnessObserver extends StatelessWidget {
+import '../utils/app_lifecycle.dart';
+
+class BrightnessObserver extends HookWidget {
   const BrightnessObserver({
     Key? key,
     this.duration = const Duration(milliseconds: 200),
@@ -22,26 +25,63 @@ class BrightnessObserver extends StatelessWidget {
   final BrightnessThemeData darkThemeData;
   final Brightness? forceBrightness;
 
+  Brightness _getBrightness(BuildContext context) =>
+      forceBrightness ?? MediaQuery.platformBrightnessOf(context);
+
   @override
-  Widget build(BuildContext context) => TweenAnimationBuilder<double>(
-        duration: duration,
-        curve: curve,
-        onEnd: onEnd,
-        tween: Tween<double>(
-          end: const {
-            Brightness.light: 0.0,
-            Brightness.dark: 1.0,
-          }[forceBrightness ?? MediaQuery.platformBrightnessOf(context)],
-        ),
-        builder: (BuildContext context, double value, Widget? child) =>
-            BrightnessData(
-          value: value,
-          brightnessThemeData:
-              BrightnessThemeData.lerp(lightThemeData, darkThemeData, value),
-          child: child!,
-        ),
-        child: child,
-      );
+  Widget build(BuildContext context) {
+    final currentBrightness = _getBrightness(context);
+    final brightnessRef = useRef(currentBrightness);
+
+    final brightnessRefreshKey = useState(Object());
+
+    final refresh = useCallback((Brightness currentBrightness) {
+      if (currentBrightness == brightnessRef.value) return;
+
+      brightnessRef.value = currentBrightness;
+      brightnessRefreshKey.value = Object();
+    }, []);
+
+    refresh(currentBrightness);
+
+    // If platform brightness changed and app do not rebuild, we check brightness on next appActive changed.
+    useEffect(() {
+      void onListener() {
+        // Cannot listen to inherited widgets inside HookState.initState.
+        try {
+          final currentBrightness = _getBrightness(context);
+          refresh(currentBrightness);
+        } catch (_) {}
+      }
+
+      // But first time it would be called inside HookState.initState
+      onListener();
+      appActiveListener.addListener(onListener);
+      return () {
+        appActiveListener.removeListener(onListener);
+      };
+    });
+
+    return TweenAnimationBuilder<double>(
+      duration: duration,
+      curve: curve,
+      onEnd: onEnd,
+      tween: Tween<double>(
+        end: const {
+          Brightness.light: 0.0,
+          Brightness.dark: 1.0,
+        }[currentBrightness],
+      ),
+      builder: (BuildContext context, double value, Widget? child) =>
+          BrightnessData(
+        value: value,
+        brightnessThemeData:
+            BrightnessThemeData.lerp(lightThemeData, darkThemeData, value),
+        child: child!,
+      ),
+      child: child,
+    );
+  }
 }
 
 class BrightnessData extends InheritedWidget {
