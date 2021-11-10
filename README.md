@@ -12,6 +12,14 @@ flutter run -d linux
 flutter run -d windows
 ```
 
+## Release
+
+```
+flutter build macos --release
+flutter build linux --release
+flutter build windows --release
+```
+
 ## Linux build Requirement
 
 there are some addition library needed.
