@@ -18,11 +18,13 @@ class DefaultTextEditingFocusableActionDetector
         const SingleActivator(
           LogicalKeyboardKey.keyA,
           control: true,
-        ): const MoveSelectionLeftByLineTextIntent(),
+        ): const ExtendSelectionToLineBreakIntent(
+            forward: false, collapseSelection: false),
         const SingleActivator(
           LogicalKeyboardKey.keyE,
           control: true,
-        ): const MoveSelectionRightByLineTextIntent(),
+        ): const ExtendSelectionToLineBreakIntent(
+            forward: true, collapseSelection: false),
       };
 
   static Map<ShortcutActivator, Intent> get _shortcuts {

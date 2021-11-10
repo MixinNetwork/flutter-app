@@ -9,7 +9,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../utils/app_lifecycle.dart';
-import '../../../utils/callback_text_editing_action.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
@@ -359,6 +358,8 @@ class _SendTextField extends HookWidget {
       return subscription.cancel;
     }, [textEditingController]);
 
+    final textFieldKey = useMemoized(() => GlobalKey());
+
     return Container(
       constraints: const BoxConstraints(minHeight: 40),
       decoration: BoxDecoration(
@@ -394,10 +395,8 @@ class _SendTextField extends HookWidget {
             onInvoke: (Intent intent) =>
                 _sendMessage(context, textEditingController),
           ),
-          _PasteIntent: CallbackTextEditingAction<Intent>(
-            onInvoke: (Intent intent,
-                TextEditingActionTarget? textEditingActionTarget,
-                [_]) async {
+          _PasteIntent: CallbackAction<Intent>(
+            onInvoke: (intent) async {
               final files = await getClipboardFiles();
               if (files.isNotEmpty) {
                 await showFilesPreviewDialog(
@@ -405,8 +404,11 @@ class _SendTextField extends HookWidget {
                   files.map((e) => e.xFile).toList(),
                 );
               } else {
-                await textEditingActionTarget!
-                    .pasteText(SelectionChangedCause.keyboard);
+                // ignore: avoid_dynamic_calls
+                final globalKey = (textFieldKey.currentState as dynamic)
+                    ?.editableTextKey as GlobalKey<EditableTextState>?;
+                await globalKey?.currentState
+                    ?.pasteText(SelectionChangedCause.keyboard);
               }
             },
           ),
@@ -421,6 +423,7 @@ class _SendTextField extends HookWidget {
           curve: Curves.easeOut,
           duration: const Duration(milliseconds: 200),
           child: TextField(
+            key: textFieldKey,
             maxLines: 7,
             minLines: 1,
             focusNode: focusNode,
