@@ -945,11 +945,11 @@ class _ChatDropOverlay extends HookWidget {
     final dragging = useState(false);
     final enable = useState(true);
     return DropTarget(
-      onDragEntered: () => dragging.value = true,
-      onDragExited: () => dragging.value = false,
-      onDragDone: (urls) async {
+      onDragEntered: (_) => dragging.value = true,
+      onDragExited: (_) => dragging.value = false,
+      onDragDone: (details) async {
         final files = <XFile>[];
-        for (final uri in urls) {
+        for (final uri in details.urls) {
           final file = File(uri.toFilePath(windows: Platform.isWindows));
           if (!file.existsSync()) {
             continue;
