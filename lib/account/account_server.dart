@@ -1346,15 +1346,17 @@ class AccountServer {
     }
   }
 
-  Future<void> editGroupAnnouncement(
-    String conversationId,
-    String announcement,
-  ) async {
+  Future<void> editGroup(
+    String conversationId, {
+    String? announcement,
+    String? name,
+  }) async {
     final response = await client.conversationApi.update(
       conversationId,
       ConversationRequest(
         conversationId: conversationId,
         announcement: announcement,
+        name: name,
       ),
     );
 

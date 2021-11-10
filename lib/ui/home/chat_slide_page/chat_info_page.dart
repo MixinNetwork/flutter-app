@@ -67,6 +67,8 @@ class ChatInfoPage extends HookWidget {
 
     final isGroupConversation = conversation.isGroup!;
     final muting = conversation.conversation?.isMute == true;
+    final isOwnerOrAdmin = userParticipant?.role == ParticipantRole.owner ||
+        userParticipant?.role == ParticipantRole.admin;
 
     return Scaffold(
       appBar: MixinAppBar(
@@ -171,9 +173,7 @@ class ChatInfoPage extends HookWidget {
                 ],
               ),
             ),
-            if (isGroupConversation &&
-                (userParticipant?.role == ParticipantRole.owner ||
-                    userParticipant?.role == ParticipantRole.admin))
+            if (isGroupConversation && isOwnerOrAdmin)
               CellGroup(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -196,9 +196,9 @@ class ChatInfoPage extends HookWidget {
 
                           await runFutureWithToast(
                             context,
-                            context.accountServer.editGroupAnnouncement(
+                            context.accountServer.editGroup(
                               conversationId,
-                              result,
+                              announcement: result,
                             ),
                           );
                         },
@@ -251,7 +251,8 @@ class ChatInfoPage extends HookWidget {
                           ));
                     },
                   ),
-                  if (!isGroupConversation)
+                  if (!isGroupConversation ||
+                      (isGroupConversation && isOwnerOrAdmin))
                     CellItem(
                       title: Text(context.l10n.editName),
                       trailing: null,
@@ -269,8 +270,13 @@ class ChatInfoPage extends HookWidget {
 
                         await runFutureWithToast(
                           context,
-                          accountServer.editContactName(
-                              conversation.userId!, name!),
+                          isGroupConversation
+                              ? accountServer.editGroup(
+                                  conversation.conversationId,
+                                  name: name,
+                                )
+                              : accountServer.editContactName(
+                                  conversation.userId!, name!),
                         );
                       },
                     ),
