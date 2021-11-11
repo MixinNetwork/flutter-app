@@ -13,7 +13,7 @@ import '../widgets/dialog.dart';
 import 'extension/extension.dart';
 import 'uri_utils.dart';
 
-final kIsSupportWebview =
+final kIsSupportWebView =
     Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 
 // https://docs.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution
@@ -75,7 +75,7 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
   }
 }
 
-void clearWebviewCacheAndCookies() {
+void clearWebViewCacheAndCookies() {
   WebviewWindow.clearAll();
 }
 
@@ -107,16 +107,16 @@ String _mixinContextProviderJavaScript(String contextJson) => '''
   }
   ''';
 
-Future<void> openBotWebviewWindow(
+Future<void> openBotWebViewWindow(
   BuildContext context,
   App app, {
   String? conversationId,
 }) async {
-  if (!await isWebViewRuntimeAvailable()) {
+  if (await isWebViewRuntimeAvailable()) {
     await showBotWebViewUnavailableDialog(context: context);
     return;
   }
-  return openWebviewWindowWithUrl(
+  return openWebViewWindowWithUrl(
     context,
     app.homeUri,
     conversationId: conversationId,
@@ -124,7 +124,7 @@ Future<void> openBotWebviewWindow(
   );
 }
 
-Future<void> openWebviewWindowWithUrl(
+Future<void> openWebViewWindowWithUrl(
   BuildContext context,
   String url, {
   String? conversationId,
@@ -132,7 +132,7 @@ Future<void> openWebviewWindowWithUrl(
 }) async {
   final brightness = context.read<SettingCubit>().brightness;
   final packageInfo = await PackageInfo.fromPlatform();
-  final webview = await WebviewWindow.create(
+  final webView = await WebviewWindow.create(
     configuration: CreateConfiguration(
       windowWidth: 380,
       windowHeight: 750,
@@ -140,11 +140,11 @@ Future<void> openWebviewWindowWithUrl(
     ),
   );
   final mixinContext = jsonEncode(await _mixinContext(context, conversationId));
-  webview
+  webView
     ..setBrightness(brightness)
     ..addScriptToExecuteOnDocumentCreated(
       _mixinContextProviderJavaScript(mixinContext),
     );
-  await webview.setApplicationNameForUserAgent(' Mixin/${packageInfo.version}');
-  webview.launch(url);
+  await webView.setApplicationNameForUserAgent(' Mixin/${packageInfo.version}');
+  webView.launch(url);
 }

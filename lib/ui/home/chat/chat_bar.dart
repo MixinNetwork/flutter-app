@@ -291,10 +291,10 @@ class _BotIcon extends HookWidget {
       name: Resources.assetsImagesBotSvg,
       color: context.theme.icon,
       onTap: () {
-        if (!kIsSupportWebview) {
+        if (!kIsSupportWebView) {
           return;
         }
-        openBotWebviewWindow(
+        openBotWebViewWindow(
           context,
           conversation.app!,
           conversationId: conversation.conversationId,
@@ -302,7 +302,7 @@ class _BotIcon extends HookWidget {
       },
     );
 
-    if (kIsSupportWebview) {
+    if (kIsSupportWebView) {
       return child;
     }
     return Tooltip(message: context.l10n.comingSoon, child: child);

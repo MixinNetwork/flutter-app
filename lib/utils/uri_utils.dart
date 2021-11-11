@@ -18,10 +18,10 @@ Future<bool> openUriWithWebView(
   String? title,
   String? conversationId,
 }) async {
-  if (kIsSupportWebview) {
+  if (kIsSupportWebView) {
     return openUri(context, text, fallbackHandler: (url) async {
       if (await isWebViewRuntimeAvailable()) {
-        await openWebviewWindowWithUrl(
+        await openWebViewWindowWithUrl(
           context,
           url,
           conversationId: conversationId,
