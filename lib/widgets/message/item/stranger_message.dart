@@ -44,8 +44,8 @@ class StrangerMessage extends StatelessWidget {
                   final app =
                       await context.database.appDao.findAppById(message.appId!);
                   if (app == null) return;
-                  if (kIsSupportWebview) {
-                    await openBotWebviewWindow(context, app,
+                  if (kIsSupportWebView) {
+                    await openBotWebViewWindow(context, app,
                         conversationId: message.conversationId);
                   } else {
                     await openUri(context, app.homeUri);

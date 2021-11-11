@@ -616,7 +616,7 @@ class AccountServer {
     await database.participantSessionDao.deleteBySessionId(sessionId);
     await database.participantSessionDao.updateSentToServer();
 
-    clearWebviewCacheAndCookies();
+    clearWebViewCacheAndCookies();
   }
 
   Future<void> sendTextMessage(
