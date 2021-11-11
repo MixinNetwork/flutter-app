@@ -8,6 +8,7 @@
 // ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
 // ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
 // ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
+// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
@@ -143,6 +144,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteGroup": MessageLookupByLibrary.simpleMessage("删除群组"),
         "developer": MessageLookupByLibrary.simpleMessage("开发者"),
         "done": MessageLookupByLibrary.simpleMessage("完成"),
+        "downloadLink": MessageLookupByLibrary.simpleMessage("下载链接："),
         "editAnnouncement": MessageLookupByLibrary.simpleMessage("编辑群公告"),
         "editCircle": MessageLookupByLibrary.simpleMessage("管理圈子"),
         "editCircleName": MessageLookupByLibrary.simpleMessage("编辑圈子名称"),
@@ -315,6 +317,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("当时价值 暂无"),
         "walletTransactionThatTimeValue": m22,
+        "webView2RuntimeInstallDescription":
+            MessageLookupByLibrary.simpleMessage(
+                "该设备暂未安装 WebView 组件，请先下载并安装 WebView2 Runtime。"),
+        "webViewRuntimeNotAvailable":
+            MessageLookupByLibrary.simpleMessage("WebView 组件不可用"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youStart": MessageLookupByLibrary.simpleMessage("您")
       };

@@ -8,6 +8,33 @@ import '../widgets/toast.dart';
 import '../widgets/user/user_dialog.dart';
 import 'extension/extension.dart';
 import 'logger.dart';
+import 'webview.dart';
+
+// Try open url in app webview.
+// fallback to launch system browser if WebView is not available.
+Future<bool> openUriWithWebView(
+  BuildContext context,
+  String text, {
+  String? title,
+  String? conversationId,
+}) async {
+  if (kIsSupportWebview) {
+    return openUri(context, text, fallbackHandler: (url) async {
+      if (await isWebViewRuntimeAvailable()) {
+        await openWebviewWindowWithUrl(
+          context,
+          url,
+          conversationId: conversationId,
+          title: title,
+        );
+        return true;
+      }
+      return launch(url);
+    });
+  } else {
+    return openUri(context, text);
+  }
+}
 
 Future<bool> openUri(
   BuildContext context,

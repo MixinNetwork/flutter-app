@@ -2329,6 +2329,36 @@ class Localization {
       args: [],
     );
   }
+
+  /// `WebView Runtime is not available`
+  String get webViewRuntimeNotAvailable {
+    return Intl.message(
+      'WebView Runtime is not available',
+      name: 'webViewRuntimeNotAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The device has not installed the WebView Runtime component. Please download and install WebView2 Runtime first.`
+  String get webView2RuntimeInstallDescription {
+    return Intl.message(
+      'The device has not installed the WebView Runtime component. Please download and install WebView2 Runtime first.',
+      name: 'webView2RuntimeInstallDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Download Link: `
+  String get downloadLink {
+    return Intl.message(
+      'Download Link: ',
+      name: 'downloadLink',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
