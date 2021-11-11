@@ -276,7 +276,7 @@ class ConversationAvatar extends StatelessWidget {
       );
 }
 
-class _BotIcon extends StatelessWidget {
+class _BotIcon extends HookWidget {
   const _BotIcon({Key? key, required this.conversation}) : super(key: key);
 
   final ConversationState conversation;

@@ -8,7 +8,6 @@ import '../../../../utils/color_utils.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../../utils/webview.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
 import '../../message_bubble.dart';
@@ -52,22 +51,13 @@ class ActionMessage extends HookWidget {
                 cursor: MaterialStateMouseCursor.clickable,
                 onTap: () {
                   if (context.openAction(e.action)) return;
-                  if (kIsSupportWebview) {
-                    openUri(context, e.action, fallbackHandler: (url) async {
-                      await openWebviewWindowWithUrl(
-                        context,
-                        url,
-                        title: e.label,
-                        conversationId: context
-                            .read<ConversationCubit>()
-                            .state
-                            ?.conversationId,
-                      );
-                      return true;
-                    });
-                  } else {
-                    openUri(context, e.action);
-                  }
+                  openUriWithWebView(
+                    context,
+                    e.action,
+                    title: e.label,
+                    conversationId:
+                        context.read<ConversationCubit>().state?.conversationId,
+                  );
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(1),

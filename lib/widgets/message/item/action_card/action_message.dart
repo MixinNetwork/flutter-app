@@ -8,7 +8,6 @@ import '../../../../ui/home/bloc/conversation_cubit.dart';
 import '../../../../utils/extension/extension.dart';
 import '../../../../utils/logger.dart';
 import '../../../../utils/uri_utils.dart';
-import '../../../../utils/webview.dart';
 import '../../../cache_image.dart';
 import '../../../interactive_decorated_box.dart';
 import '../../message.dart';
@@ -45,20 +44,13 @@ class ActionCardMessage extends HookWidget {
       child: InteractiveDecoratedBox(
         onTap: () {
           if (context.openAction(appCardData.action)) return;
-          if (kIsSupportWebview) {
-            openUri(context, appCardData.action, fallbackHandler: (url) async {
-              await openWebviewWindowWithUrl(
-                context,
-                url,
-                title: appCardData.title,
-                conversationId:
-                    context.read<ConversationCubit>().state?.conversationId,
-              );
-              return false;
-            });
-          } else {
-            openUri(context, appCardData.action);
-          }
+          openUriWithWebView(
+            context,
+            appCardData.action,
+            title: appCardData.title,
+            conversationId:
+                context.read<ConversationCubit>().state?.conversationId,
+          );
         },
         child: Row(
           mainAxisSize: MainAxisSize.min,

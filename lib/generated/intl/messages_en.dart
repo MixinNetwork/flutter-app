@@ -8,6 +8,7 @@
 // ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
 // ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
 // ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
+// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
@@ -167,6 +168,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteGroup": MessageLookupByLibrary.simpleMessage("Delete Group"),
         "developer": MessageLookupByLibrary.simpleMessage("Developer"),
         "done": MessageLookupByLibrary.simpleMessage("Done"),
+        "downloadLink": MessageLookupByLibrary.simpleMessage("Download Link: "),
         "editAnnouncement":
             MessageLookupByLibrary.simpleMessage("Edit group description"),
         "editCircle": MessageLookupByLibrary.simpleMessage("Manage Circle"),
@@ -361,6 +363,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("value then N/A"),
         "walletTransactionThatTimeValue": m22,
+        "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
+            "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
+        "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(
+            "WebView2 Runtime is not available"),
         "you": MessageLookupByLibrary.simpleMessage("you"),
         "youStart": MessageLookupByLibrary.simpleMessage("You")
       };
