@@ -227,7 +227,7 @@
   "notificationPermissionDescription": "Don't miss messages from you friends.",
   "notificationPermissionTitle": "Turn On Notifications",
   "notificationPermissionManually": "Notifications are not allowed, please go to Notification Settings to turn on.",
-  "webViewRuntimeNotAvailable": "WebView Runtime is not available",
-  "webView2RuntimeInstallDescription": "The device has not installed the WebView Runtime component. Please download and install WebView2 Runtime first.",
+  "webViewRuntimeNotAvailable": "WebView2 Runtime is not available",
+  "webView2RuntimeInstallDescription": "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first.",
   "downloadLink": "Download Link: "
 }

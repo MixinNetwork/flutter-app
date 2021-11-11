@@ -42,9 +42,10 @@ class _BotWebViewRuntimeInstallDialog extends StatelessWidget {
       child: AlertDialogLayout(
         title: Text(context.l10n.webViewRuntimeNotAvailable),
         content: DefaultTextStyle(
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.normal,
+            color: context.theme.text,
           ),
           child: Column(
             children: [

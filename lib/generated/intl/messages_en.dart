@@ -364,9 +364,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("value then N/A"),
         "walletTransactionThatTimeValue": m22,
         "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
-            "The device has not installed the WebView Runtime component. Please download and install WebView2 Runtime first."),
+            "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(
-            "WebView Runtime is not available"),
+            "WebView2 Runtime is not available"),
         "you": MessageLookupByLibrary.simpleMessage("you"),
         "youStart": MessageLookupByLibrary.simpleMessage("You")
       };

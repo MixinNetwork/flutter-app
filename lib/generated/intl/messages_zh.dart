@@ -319,9 +319,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "walletTransactionThatTimeValue": m22,
         "webView2RuntimeInstallDescription":
             MessageLookupByLibrary.simpleMessage(
-                "该设备暂未安装 WebView 组件，请先下载并安装 WebView2 Runtime。"),
+                "该设备暂未安装 WebView2 组件，请先下载并安装 WebView2 Runtime。"),
         "webViewRuntimeNotAvailable":
-            MessageLookupByLibrary.simpleMessage("WebView 组件不可用"),
+            MessageLookupByLibrary.simpleMessage("WebView2 组件不可用"),
         "you": MessageLookupByLibrary.simpleMessage("你"),
         "youStart": MessageLookupByLibrary.simpleMessage("您")
       };
