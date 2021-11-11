@@ -28,11 +28,7 @@ dependencies:
   cached_network_image_platform_interface: ^1.0.0
   dart_vlc: 0.1.7
   decimal: ^1.3.0
-  desktop_drop:
-    git:
-      url: https://github.com/MixinNetwork/flutter-plugins.git
-      ref: 85ced7872c3c4c257a32c73989786b679e804453
-      path: packages/desktop_drop
+  desktop_drop: ^0.1.2
   desktop_lifecycle: ^0.0.1
   desktop_webview_window: ^0.0.5
   device_info_plus: ^3.1.0
