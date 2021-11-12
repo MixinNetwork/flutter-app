@@ -300,6 +300,7 @@ class Blaze {
       w('ws ping error: $e');
       if (e is MixinApiError &&
           (e.error as MixinError).code == authentication) {
+        _reconnecting = false;
         return;
       }
       await Future.delayed(const Duration(seconds: 2));

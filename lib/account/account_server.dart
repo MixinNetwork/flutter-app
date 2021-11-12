@@ -96,11 +96,11 @@ class AccountServer {
               final serverTime = int.tryParse(
                   e.response?.headers.value('x-server-time') ?? '');
               if (serverTime != null) {
-                if ((serverTime / 1000000 -
-                            DateTime.now().millisecondsSinceEpoch)
-                        .abs() >=
-                    5 * 60 * 1000) {
+                final time = DateTime.fromMicrosecondsSinceEpoch(serverTime);
+                final difference = time.difference(DateTime.now());
+                if (difference.inMinutes > 5) {
                   blaze.waitSyncTime();
+                  handler.next(e);
                   return;
                 }
               }
