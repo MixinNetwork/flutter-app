@@ -138,7 +138,8 @@ class MessageItemWidget extends HookWidget {
 
     final sameDayPrev = isSameDay(prev?.createdAt, message.createdAt);
     final prevIsSystem = prev?.type.isSystem ?? false;
-    final sameUserPrev = !prevIsSystem && prev?.userId == message.userId;
+    final prevIsPin = prev?.type.isPin ?? false;
+    final sameUserPrev = !prevIsSystem && !prevIsPin && prev?.userId == message.userId;
 
     final sameDayNext = isSameDay(next?.createdAt, message.createdAt);
     final sameUserNext = next?.userId == message.userId;
