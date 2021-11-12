@@ -19,7 +19,7 @@ final kIsSupportWebView =
 // https://docs.microsoft.com/en-us/microsoft-edge/webview2/concepts/distribution
 // We need check WebView Runtime is available on Windows.
 Future<bool> isWebViewRuntimeAvailable() async =>
-    Platform.isWindows && await WebviewWindow.isWebviewAvailable();
+    !Platform.isWindows || await WebviewWindow.isWebviewAvailable();
 
 Future<void> showBotWebViewUnavailableDialog({
   required BuildContext context,
@@ -112,7 +112,7 @@ Future<void> openBotWebViewWindow(
   App app, {
   String? conversationId,
 }) async {
-  if (await isWebViewRuntimeAvailable()) {
+  if (!await isWebViewRuntimeAvailable()) {
     await showBotWebViewUnavailableDialog(context: context);
     return;
   }
