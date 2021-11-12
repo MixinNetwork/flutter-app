@@ -77,9 +77,9 @@ class HomePage extends HookWidget {
                           loading.value = true;
                           try {
                             await context.accountServer.blaze.reconnect();
-                          } finally {
-                            loading.value = false;
-                          }
+                          } catch (_) {}
+
+                          loading.value = false;
                         },
                         child: Text(context.l10n.continueText),
                       ),
