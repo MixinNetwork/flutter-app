@@ -252,7 +252,12 @@ class MessageItemWidget extends HookWidget {
                       onTap: () => Clipboard.setData(
                           ClipboardData(text: message.content)),
                     ),
-                  if (!isTranscriptPage &&
+                  if ([
+                        MessageStatus.sent,
+                        MessageStatus.delivered,
+                        MessageStatus.read,
+                      ].contains(message.status) &&
+                      !isTranscriptPage &&
                       isCurrentUser &&
                       !message.type.isRecall &&
                       DateTime.now().isBefore(
