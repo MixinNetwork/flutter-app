@@ -353,6 +353,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     String conversationId,
     String messageId,
     DateTime lastMessageCreatedAt,
+    int unseenMessageCount,
   ) =>
       (update(db.conversations)
             ..where((tbl) => tbl.conversationId.equals(conversationId)))
@@ -360,6 +361,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         ConversationsCompanion(
           lastMessageId: Value(messageId),
           lastMessageCreatedAt: Value(lastMessageCreatedAt),
+          unseenMessageCount: Value(unseenMessageCount),
         ),
       );
 

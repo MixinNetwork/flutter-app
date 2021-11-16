@@ -1000,15 +1000,16 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _insertInvalidMessage(BlazeMessageData data) async {
-    final message = MessagesCompanion.insert(
+    final message = Message(
         messageId: data.messageId,
         conversationId: data.conversationId,
         userId: data.senderId,
-        content: Value(data.data),
+        content: data.data,
         category: data.category!,
         status: MessageStatus.unknown,
-        createdAt: data.createdAt);
-    await database.messageDao.insertCompanion(message);
+        createdAt: data.createdAt,
+    );
+    await database.messageDao.insert(message, data.senderId, data.silent,);
   }
 
   Future<void> _insertFailedMessage(BlazeMessageData data) async {
