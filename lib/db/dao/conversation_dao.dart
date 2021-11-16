@@ -59,15 +59,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
       (select(db.conversations)
         ..where((tbl) => tbl.conversationId.equals(conversationId)));
 
-  Expression<bool?> _baseConversationItemWhere(Conversations conversation,
-          [Users? owner,
-          CircleConversations? circleConversation,
-          Messages? message,
-          Users? lastMessageSender,
-          Snapshots? snapshot,
-          Users? participant]) =>
-      conversation.status.isBiggerOrEqualValue(2);
-
   OrderBy _baseConversationItemOrder(
           Conversations conversation,
           Users user,
@@ -89,60 +80,47 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
                   CircleConversations circleConversation)
               where) =>
       db.baseConversationItemCount((conversation, owner, circleConversation) =>
-          _baseConversationItemWhere(conversation, owner, circleConversation) &
           where(conversation, owner, circleConversation));
 
   Selectable<ConversationItem> _baseConversationItems(
-    Expression<bool?> Function(
-            Conversations conversation,
-            Users owner,
-            CircleConversations circleConversation,
-            Messages message,
-            Users lastMessageSender,
-            Snapshots snapshot,
-            Users participant)
-        where,
-    Limit Function(
-      Conversations conversation,
-      Users user,
-      CircleConversations circleConversation,
-      Messages message,
-      Users lastMessageSender,
-      Snapshots snapshot,
-      Users participant,
-    )
-        limit, {
-    bool useBaseWhere = true,
-  }) =>
-      db.baseConversationItems((Conversations conversation,
-          Users owner,
-          CircleConversations circleConversation,
-          Messages message,
-          Users lastMessageSender,
-          Snapshots snapshot,
-          Users participant) {
-        final expression = where(
-          conversation,
-          owner,
-          circleConversation,
-          message,
-          lastMessageSender,
-          snapshot,
-          participant,
-        );
-        if (useBaseWhere) {
-          return expression &
-              _baseConversationItemWhere(
-                  conversation,
-                  owner,
-                  circleConversation,
-                  message,
-                  lastMessageSender,
-                  snapshot,
-                  participant);
-        }
-        return expression;
-      }, _baseConversationItemOrder, limit);
+          Expression<bool?> Function(
+                  Conversations conversation,
+                  Users owner,
+                  CircleConversations circleConversation,
+                  Messages message,
+                  Users lastMessageSender,
+                  Snapshots snapshot,
+                  Users participant)
+              where,
+          Limit Function(
+    Conversations conversation,
+    Users user,
+    CircleConversations circleConversation,
+    Messages message,
+    Users lastMessageSender,
+    Snapshots snapshot,
+    Users participant,
+  )
+              limit) =>
+      db.baseConversationItems(
+          (Conversations conversation,
+                  Users owner,
+                  CircleConversations circleConversation,
+                  Messages message,
+                  Users lastMessageSender,
+                  Snapshots snapshot,
+                  Users participant) =>
+              where(
+                conversation,
+                owner,
+                circleConversation,
+                message,
+                lastMessageSender,
+                snapshot,
+                participant,
+              ),
+          _baseConversationItemOrder,
+          limit);
 
   Future<bool> _conversationHasData(Expression<bool?> predicate) => db.hasData(
       db.conversations,
@@ -195,7 +173,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           Expression<bool?> Function(Conversations conversation, Users owner)
               where) =>
       db.baseUnseenConversationCount((conversation, owner) =>
-          _baseConversationItemWhere(conversation, owner) &
           conversation.unseenMessageCount.isBiggerThanValue(0) &
           where(conversation, owner));
 
@@ -315,7 +292,6 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         (conversation, _, __, ___, ____, ______, _______) =>
             conversation.conversationId.equals(conversationId),
         (_, __, ___, ____, ______, _______, ________) => Limit(1, null),
-        useBaseWhere: false,
       );
 
   Selectable<ConversationItem> conversationItems() => _baseConversationItems(
@@ -346,8 +322,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
           useColumns: false,
         )
       ],
-      _baseConversationItemWhere(db.conversations) &
-          db.circleConversations.circleId.equals(circleId));
+      db.circleConversations.circleId.equals(circleId));
 
   Future<int> updateLastMessageId(
     String conversationId,
