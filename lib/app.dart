@@ -20,7 +20,6 @@ import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
-import 'ui/home/bloc/participants_cubit.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
 import 'ui/home/conversation_page.dart';
@@ -143,12 +142,6 @@ class _Providers extends StatelessWidget {
                   accountServer: accountServer,
                   responsiveNavigatorCubit:
                       context.read<ResponsiveNavigatorCubit>(),
-                ),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => ParticipantsCubit(
-                  userDao: accountServer.database.userDao,
-                  conversationCubit: context.read<ConversationCubit>(),
                 ),
               ),
               BlocProvider(

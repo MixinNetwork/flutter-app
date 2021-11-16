@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:provider/provider.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:tuple/tuple.dart';
 
 AsyncSnapshot<T> useMemoizedFuture<T>(
@@ -86,14 +87,15 @@ Stream<T> useValueNotifierConvertSteam<T>(ValueNotifier<T> valueNotifier) {
   useEffect(() {
     void onListen() => streamController.add(valueNotifier.value);
 
-    onListen();
     valueNotifier.addListener(onListen);
     return () {
       valueNotifier.removeListener(onListen);
     };
   }, [valueNotifier]);
 
-  final stream = useMemoized(() => streamController.stream, [valueNotifier]);
+  final stream = useMemoized(
+      () => streamController.stream.startWith(valueNotifier.value),
+      [valueNotifier]);
   return stream;
 }
 

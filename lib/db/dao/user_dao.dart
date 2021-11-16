@@ -55,23 +55,43 @@ class UserDao extends DatabaseAccessor<MixinDatabase> with _$UserDaoMixin {
             ..limit(1))
           .map((row) => row.read(db.users.fullName));
 
-  Selectable<User> fuzzySearchGroupUser({
-    required String id,
+  Selectable<User> fuzzySearchBotGroupUser({
+    required String currentUserId,
     required String conversationId,
-    required String username,
-    required String identityNumber,
+    required String keyword,
+  }) =>
+      db.fuzzySearchBotGroupUser(
+        conversationId,
+        DateTime.now().subtract(const Duration(days: 7)),
+        currentUserId,
+        keyword,
+        keyword,
+      );
+
+  Selectable<User> fuzzySearchGroupUser({
+    required String currentUserId,
+    required String conversationId,
+    required String keyword,
   }) =>
       db.fuzzySearchGroupUser(
-        id,
+        currentUserId,
         conversationId,
-        username,
-        identityNumber,
+        keyword,
+        keyword,
       );
 
   Selectable<User> groupParticipants({required String conversationId}) =>
       db.groupParticipants(conversationId);
 
-  Selectable<User> friends(List<String> filterIds) => db.friends(filterIds);
+  Selectable<User> friends() => (select(db.users)
+    ..where((tbl) => tbl.relationship.equalsValue(sdk.UserRelationship.friend))
+    ..orderBy([
+      (tbl) => OrderingTerm.asc(tbl.fullName),
+      (tbl) => OrderingTerm.asc(tbl.userId),
+    ]));
+
+  Selectable<User> notInFriends(List<String> filterIds) =>
+      db.notInFriends(filterIds);
 
   Selectable<User> usersByIn(List<String> userIds) => db.usersByIn(userIds);
 
