@@ -174,8 +174,8 @@ class DecryptMessage extends Injector {
 
   Future<void> _processSignalMessage(BlazeMessageData data) async {
     final deviceId = data.sessionId.getDeviceId();
-    final composeMessageData = _signalProtocol.decodeMessageData(data.data);
     try {
+      final composeMessageData = _signalProtocol.decodeMessageData(data.data);
       await _signalProtocol.decrypt(
           data.conversationId,
           data.senderId,
@@ -1000,6 +1000,9 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _insertInvalidMessage(BlazeMessageData data) async {
+    if (data.category == MessageCategory.signalKey) {
+      return;
+    }
     final message = MessagesCompanion.insert(
         messageId: data.messageId,
         conversationId: data.conversationId,
