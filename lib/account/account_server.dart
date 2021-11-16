@@ -424,13 +424,7 @@ class AccountServer {
       }
 
       MessageResult? result;
-
       var content = message.content;
-
-      await database.conversationDao.updateConversationStatusById(
-        message.conversationId,
-        ConversationStatus.success,
-      );
 
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
