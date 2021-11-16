@@ -1004,13 +1004,13 @@ class DecryptMessage extends Injector {
       return;
     }
     final message = Message(
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        userId: data.senderId,
-        content: data.data,
-        category: data.category!,
-        status: MessageStatus.unknown,
-        createdAt: data.createdAt,
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      content: data.data,
+      category: data.category!,
+      status: MessageStatus.unknown,
+      createdAt: data.createdAt,
     );
     await database.messageDao.insert(message, data.senderId, data.silent);
   }
