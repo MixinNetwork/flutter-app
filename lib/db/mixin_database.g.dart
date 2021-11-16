@@ -11533,9 +11533,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
   late final Index indexPinMessagesConversationId = Index(
       'index_pin_messages_conversation_id',
       'CREATE INDEX IF NOT EXISTS index_pin_messages_conversation_id ON pin_messages (conversation_id)');
-  late final Trigger conversationLastMessageUpdate = Trigger(
-      'CREATE TRIGGER IF NOT EXISTS conversation_last_message_update AFTER INSERT ON messages BEGIN UPDATE conversations SET last_message_id = new.message_id, last_message_created_at = new.created_at WHERE conversation_id = new.conversation_id;END',
-      'conversation_last_message_update');
   late final Trigger conversationLastMessageDelete = Trigger(
       'CREATE TRIGGER IF NOT EXISTS conversation_last_message_delete AFTER DELETE ON messages BEGIN UPDATE conversations SET last_message_id = (SELECT message_id FROM messages WHERE conversation_id = old.conversation_id ORDER BY created_at DESC LIMIT 1) WHERE conversation_id = old.conversation_id;END',
       'conversation_last_message_delete');
@@ -13183,7 +13180,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
         indexStickerAlbumsCategoryCreatedAt,
         pinMessages,
         indexPinMessagesConversationId,
-        conversationLastMessageUpdate,
         conversationLastMessageDelete,
         addresses,
         apps,
@@ -13219,13 +13215,6 @@ abstract class _$MixinDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('participants', kind: UpdateKind.delete),
-            ],
-          ),
-          WritePropagation(
-            on: TableUpdateQuery.onTableName('messages',
-                limitUpdateKind: UpdateKind.insert),
-            result: [
-              TableUpdate('conversations', kind: UpdateKind.update),
             ],
           ),
           WritePropagation(

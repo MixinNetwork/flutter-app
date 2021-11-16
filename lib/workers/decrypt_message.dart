@@ -1003,15 +1003,16 @@ class DecryptMessage extends Injector {
     if (data.category == MessageCategory.signalKey) {
       return;
     }
-    final message = MessagesCompanion.insert(
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        userId: data.senderId,
-        content: Value(data.data),
-        category: data.category!,
-        status: MessageStatus.unknown,
-        createdAt: data.createdAt);
-    await database.messageDao.insertCompanion(message);
+    final message = Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      content: data.data,
+      category: data.category!,
+      status: MessageStatus.unknown,
+      createdAt: data.createdAt,
+    );
+    await database.messageDao.insert(message, data.senderId, data.silent);
   }
 
   Future<void> _insertFailedMessage(BlazeMessageData data) async {
