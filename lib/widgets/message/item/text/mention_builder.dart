@@ -34,8 +34,7 @@ class MentionCache {
     final map = <String, MentionUser>{};
     final noCacheContents = <String>{};
 
-    final contents =
-        _contents.whereNotNull().toSet();
+    final contents = _contents.whereNotNull().toSet();
 
     for (final element in contents) {
       final cache = _contentMentionLruCache.get(element.hashCode);

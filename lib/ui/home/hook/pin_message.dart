@@ -48,8 +48,7 @@ PinMessageState usePinMessageState() {
       return context.database.pinMessageDao
           .getPinMessageIds(conversationId)
           .watch()
-          .map(
-              (event) => event.whereNotNull().toList());
+          .map((event) => event.whereNotNull().toList());
     },
     initialData: [],
     keys: [conversationId],

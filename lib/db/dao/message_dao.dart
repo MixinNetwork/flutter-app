@@ -448,8 +448,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   db.messages.status.isIn(['SENT', 'DELIVERED'])))
             .map((row) => row.read(db.messages.messageId))
             .get();
-        final ids =
-            list.whereNotNull().toList();
+        final ids = list.whereNotNull().toList();
         if (ids.isNotEmpty) {
           await markMessageRead(userId, ids);
         }
