@@ -879,7 +879,7 @@ class _ConversationMenuWrapper extends StatelessWidget {
               context.l10n.deleteChatHint(name),
               description: context.l10n.deleteChatDescription,
             );
-            if (ret != true) {
+            if (!ret) {
               return;
             }
             await context.database.conversationDao
