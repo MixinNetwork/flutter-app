@@ -43,25 +43,27 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m12(ID) => "我的 Mixin ID: ${ID}";
 
-  static String m13(name) => "发送消息至 ${name}";
+  static String m13(value) => "删除对话：${value}";
 
-  static String m14(name) => "移除 ${name}";
+  static String m14(name) => "发送消息至 ${name}";
 
-  static String m15(name) => "确定删除${name}圈子吗？";
+  static String m15(name) => "移除 ${name}";
 
-  static String m16(date) => "${date}加入";
+  static String m16(name) => "确定删除${name}圈子吗？";
 
-  static String m17(count) => "共 ${count} 人";
+  static String m17(date) => "${date}加入";
 
-  static String m18(count) => "${count}条置顶消息";
+  static String m18(count) => "共 ${count} 人";
 
-  static String m19(user, preview) => "${user}置顶了${preview}";
+  static String m19(count) => "${count}条置顶消息";
 
-  static String m20(count) => "${count} 条相关的消息";
+  static String m20(user, preview) => "${user}置顶了${preview}";
 
-  static String m21(value) => "价值 ${value}";
+  static String m21(count) => "${count} 条相关的消息";
 
-  static String m22(value) => "当时价值 ${value}";
+  static String m22(value) => "价值 ${value}";
+
+  static String m23(value) => "当时价值 ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -137,6 +139,9 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("数据和存储使用情况"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("删除对话"),
+        "deleteChatDescription":
+            MessageLookupByLibrary.simpleMessage("删除对话只会删除此设备的聊天记录，不会影响其他设备。"),
+        "deleteChatHint": m13,
         "deleteCircle": MessageLookupByLibrary.simpleMessage("删除圈子"),
         "deleteForEveryone": MessageLookupByLibrary.simpleMessage("撤回"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("删除"),
@@ -178,8 +183,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("撤销管理员身份"),
         "groupPopMenuMakeAdmin":
             MessageLookupByLibrary.simpleMessage("设定为群组管理员"),
-        "groupPopMenuMessage": m13,
-        "groupPopMenuRemoveParticipants": m14,
+        "groupPopMenuMessage": m14,
+        "groupPopMenuRemoveParticipants": m15,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, 昵称"),
         "groups": MessageLookupByLibrary.simpleMessage("群组"),
@@ -228,8 +233,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("未允许通知，请到通知设置开启。"),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("打开通知"),
-        "pageDeleteCircle": m15,
-        "pageEditProfileJoin": m16,
+        "pageDeleteCircle": m16,
+        "pageEditProfileJoin": m17,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("点击重新加载二维码"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -238,12 +243,12 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("通过二维码登录 Mixin Messenger"),
         "pageRightEmptyMessage":
             MessageLookupByLibrary.simpleMessage("选择一个对话，开始发送信息"),
-        "participantsCount": m17,
+        "participantsCount": m18,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("手机号"),
         "photos": MessageLookupByLibrary.simpleMessage("照片"),
         "pin": MessageLookupByLibrary.simpleMessage("置顶"),
-        "pinMessageCount": m18,
-        "pinned": m19,
+        "pinMessageCount": m19,
+        "pinned": m20,
         "pleaseWait": MessageLookupByLibrary.simpleMessage("请稍等一下"),
         "post": MessageLookupByLibrary.simpleMessage("文章"),
         "preview": MessageLookupByLibrary.simpleMessage("预览"),
@@ -264,7 +269,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "search": MessageLookupByLibrary.simpleMessage("搜索"),
         "searchEmpty": MessageLookupByLibrary.simpleMessage("找不到联系人或消息。"),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("搜索聊天记录"),
-        "searchRelatedMessage": m20,
+        "searchRelatedMessage": m21,
         "searchUser": MessageLookupByLibrary.simpleMessage("搜索用户"),
         "searchUserHint": MessageLookupByLibrary.simpleMessage("Mixin ID 或手机号"),
         "send": MessageLookupByLibrary.simpleMessage("发送"),
@@ -312,10 +317,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("视频"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("正在等待这个消息。"),
-        "walletTransactionCurrentValue": m21,
+        "walletTransactionCurrentValue": m22,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("当时价值 暂无"),
-        "walletTransactionThatTimeValue": m22,
+        "walletTransactionThatTimeValue": m23,
         "webView2RuntimeInstallDescription":
             MessageLookupByLibrary.simpleMessage(
                 "该设备暂未安装 WebView2 组件，请先下载并安装 WebView2 Runtime。"),
