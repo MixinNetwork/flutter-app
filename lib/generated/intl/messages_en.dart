@@ -160,6 +160,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Data and Storage Usage"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("Delete Chat"),
+        "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
+            "Deleting chat will remove messages form this devices only. They will not be removed from other devices."),
         "deleteCircle": MessageLookupByLibrary.simpleMessage("Delete Circle"),
         "deleteForEveryone":
             MessageLookupByLibrary.simpleMessage("Delete for Everyone"),

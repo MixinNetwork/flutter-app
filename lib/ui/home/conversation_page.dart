@@ -878,6 +878,14 @@ class _ConversationMenuWrapper extends StatelessWidget {
           title: context.l10n.deleteChat,
           isDestructiveAction: true,
           onTap: () async {
+            final ret = await showConfirmMixinDialog(
+              context,
+              context.l10n.deleteChat,
+              description: context.l10n.deleteChatDescription,
+            );
+            if (ret != true) {
+              return;
+            }
             await context.database.conversationDao
                 .deleteConversation(conversationId);
             await context.database.pinMessageDao

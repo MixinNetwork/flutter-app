@@ -229,5 +229,6 @@
   "notificationPermissionManually": "Notifications are not allowed, please go to Notification Settings to turn on.",
   "webViewRuntimeNotAvailable": "WebView2 Runtime is not available",
   "webView2RuntimeInstallDescription": "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first.",
-  "downloadLink": "Download Link: "
+  "downloadLink": "Download Link: ",
+  "deleteChatDescription": "Deleting chat will remove messages form this devices only. They will not be removed from other devices."
 }

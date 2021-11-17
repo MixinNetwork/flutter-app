@@ -137,6 +137,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("数据和存储使用情况"),
         "delete": MessageLookupByLibrary.simpleMessage("删除"),
         "deleteChat": MessageLookupByLibrary.simpleMessage("删除对话"),
+        "deleteChatDescription":
+            MessageLookupByLibrary.simpleMessage("删除对话只会删除此设备的聊天记录，不会影响其他设备。"),
         "deleteCircle": MessageLookupByLibrary.simpleMessage("删除圈子"),
         "deleteForEveryone": MessageLookupByLibrary.simpleMessage("撤回"),
         "deleteForMe": MessageLookupByLibrary.simpleMessage("删除"),
