@@ -137,17 +137,18 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<int> insert(Message message, String userId,
+  Future<int> insert(Message message, String currentUserId,
       [bool? silent = false]) async {
     final unseenMessageCount = await _getUnseenMessageCount(
-      userId: userId,
+      userId: currentUserId,
       conversationId: message.conversationId,
     );
 
-    final unseen =
-        [MessageStatus.sent, MessageStatus.delivered].contains(message.status)
-            ? 1
-            : 0;
+    final unseen = message.userId != currentUserId &&
+            [MessageStatus.sent, MessageStatus.delivered]
+                .contains(message.status)
+        ? 1
+        : 0;
 
     final result = await db.transaction(() async {
       final futures = <Future>[
