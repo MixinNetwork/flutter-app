@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,6 +24,7 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
+import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../bloc/conversation_cubit.dart';
@@ -119,7 +123,7 @@ class _InputContainer extends HookWidget {
           highlightTextStyle: TextStyle(
             color: context.theme.accent,
           ),
-          mentionCubit: mentionCubit,
+          mentionCache: context.read<MentionCache>(),
         )..selection = TextSelection.fromPosition(
             TextPosition(
               offset: draft?.length ?? 0,
@@ -620,12 +624,32 @@ class _StickerPagePositionedLayoutDelegate extends SingleChildLayoutDelegate {
 class HighlightTextEditingController extends TextEditingController {
   HighlightTextEditingController({
     required this.highlightTextStyle,
-    required this.mentionCubit,
     String? initialText,
-  }) : super(text: initialText);
+    required this.mentionCache,
+  }) : super(text: initialText) {
+    mentionsStreamController.stream
+        .map((event) => mentionNumberRegExp
+            .allMatches(event)
+            .map((e) => e[1])
+            .whereNotNull()
+            .where(
+                (element) => mentionCache.identityNumberCache(element) == null)
+            .toSet())
+        .where((event) => event.isNotEmpty)
+        .distinct(setEquals)
+        .asyncMap(mentionCache.checkIdentityNumbers)
+        .listen((event) => notifyListeners());
+  }
 
   final TextStyle highlightTextStyle;
-  final MentionCubit mentionCubit;
+  final MentionCache mentionCache;
+  final mentionsStreamController = StreamController<String>();
+
+  @override
+  Future<void> dispose() async {
+    await mentionsStreamController.close();
+    return super.dispose();
+  }
 
   @override
   TextSpan buildTextSpan({
@@ -633,6 +657,7 @@ class HighlightTextEditingController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
+    mentionsStreamController.add(text);
     if (!value.isComposingRangeValid || !withComposing) {
       return _buildTextSpan(text, style);
     }
@@ -655,8 +680,19 @@ class HighlightTextEditingController extends TextEditingController {
       mentionNumberRegExp,
       onMatch: (match) {
         final text = match[0];
-        children
-            .add(TextSpan(text: text, style: style?.merge(highlightTextStyle)));
+        final identityNumber = match[1];
+
+        final bool valid;
+        if (identityNumber != null) {
+          final user = mentionCache.identityNumberCache(identityNumber);
+          valid = user != null;
+        } else {
+          valid = false;
+        }
+
+        children.add(TextSpan(
+            text: text,
+            style: valid ? style?.merge(highlightTextStyle) : style));
         return text ?? '';
       },
       onNonMatch: (text) {

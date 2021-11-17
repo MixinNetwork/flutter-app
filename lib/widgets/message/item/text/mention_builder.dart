@@ -35,7 +35,7 @@ class MentionCache {
     final noCacheContents = <String>{};
 
     final contents =
-        _contents.where((element) => element != null).cast<String>().toSet();
+        _contents.whereNotNull().toSet();
 
     for (final element in contents) {
       final cache = _contentMentionLruCache.get(element.hashCode);
@@ -113,6 +113,35 @@ class MentionCache {
 
     return s.replaceAllMapped(RegExp(pattern, caseSensitive: false),
         (match) => mentionMap[match[0]!]!.fullName!);
+  }
+
+  MentionUser? identityNumberCache(String identityNumber) =>
+      _userLruCache.get(identityNumber);
+
+  Future<Map<String, MentionUser>> checkIdentityNumbers(
+      Set<String> identityNumbers) async {
+    final toChecks = identityNumbers
+        .where((element) => _userLruCache.get(element) == null)
+        .toSet();
+
+    final mentionUsers = identityNumbers.map(_userLruCache.get).whereNotNull();
+    final map = Map.fromIterables(
+        mentionUsers.map((e) => e.identityNumber), mentionUsers);
+
+    if (toChecks.isEmpty) {
+      return map;
+    }
+
+    final list = await _userDao.userByIdentityNumbers(toChecks.toList()).get();
+
+    list
+        .where((element) => element.fullName?.isNotEmpty ?? false)
+        .forEach((element) {
+      _userLruCache.set(element.identityNumber, element);
+      map[element.identityNumber] = element;
+    });
+
+    return map;
   }
 }
 

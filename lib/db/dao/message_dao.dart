@@ -59,8 +59,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.notification)
       .asyncMap((event) => db.notificationMessage(event).getSingleOrNull())
-      .where((event) => event != null)
-      .cast<NotificationMessage>();
+      .whereNotNull();
 
   late Stream<String> deleteMessageIdStream =
       db.eventBus.watch<String>(DatabaseEvent.delete);
@@ -413,7 +412,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..where(db.messages.messageId.isIn(messageIds)))
         .map((row) => row.read(db.messages.conversationId))
         .get();
-    return future.where((element) => element != null).cast<String>().toList();
+    return future.whereNotNull().toList();
   }
 
   Selectable<MessageItem> messagesByConversationId(
@@ -450,7 +449,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
             .map((row) => row.read(db.messages.messageId))
             .get();
         final ids =
-            list.where((element) => element != null).cast<String>().toList();
+            list.whereNotNull().toList();
         if (ids.isNotEmpty) {
           await markMessageRead(userId, ids);
         }
@@ -550,7 +549,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..where(db.messages.quoteMessageId.equals(quoteMessageId)))
         .map((row) => row.read(db.messages.messageId))
         .get();
-    return future.where((element) => element != null).cast<String>().toList();
+    return future.whereNotNull().toList();
   }
 
   Future<int> updateAttachmentMessageContentAndStatus(
