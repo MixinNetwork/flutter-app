@@ -283,12 +283,33 @@ class DialogTextField extends HookWidget {
 }
 
 Future<bool> showConfirmMixinDialog(
-        BuildContext context, String content) async =>
+  BuildContext context,
+  String content, {
+  String? description,
+}) async =>
     await showMixinDialog<bool>(
       context: context,
       child: Builder(
         builder: (context) => AlertDialogLayout(
-          content: Text(content),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(content),
+              if (description != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Text(
+                    description,
+                    style: TextStyle(
+                      color: context.theme.text,
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                    ),
+                  ),
+                ),
+            ],
+          ),
           actions: [
             MixinButton(
                 backgroundTransparent: true,

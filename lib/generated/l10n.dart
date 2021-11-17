@@ -2359,6 +2359,26 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Deleting chat will remove messages form this devices only. They will not be removed from other devices.`
+  String get deleteChatDescription {
+    return Intl.message(
+      'Deleting chat will remove messages form this devices only. They will not be removed from other devices.',
+      name: 'deleteChatDescription',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete chat: {value}`
+  String deleteChatHint(Object value) {
+    return Intl.message(
+      'Delete chat: $value',
+      name: 'deleteChatHint',
+      desc: '',
+      args: [value],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

@@ -174,8 +174,8 @@ class DecryptMessage extends Injector {
 
   Future<void> _processSignalMessage(BlazeMessageData data) async {
     final deviceId = data.sessionId.getDeviceId();
-    final composeMessageData = _signalProtocol.decodeMessageData(data.data);
     try {
+      final composeMessageData = _signalProtocol.decodeMessageData(data.data);
       await _signalProtocol.decrypt(
           data.conversationId,
           data.senderId,
@@ -1000,15 +1000,19 @@ class DecryptMessage extends Injector {
   }
 
   Future<void> _insertInvalidMessage(BlazeMessageData data) async {
-    final message = MessagesCompanion.insert(
-        messageId: data.messageId,
-        conversationId: data.conversationId,
-        userId: data.senderId,
-        content: Value(data.data),
-        category: data.category!,
-        status: MessageStatus.unknown,
-        createdAt: data.createdAt);
-    await database.messageDao.insertCompanion(message);
+    if (data.category == MessageCategory.signalKey) {
+      return;
+    }
+    final message = Message(
+      messageId: data.messageId,
+      conversationId: data.conversationId,
+      userId: data.senderId,
+      content: data.data,
+      category: data.category!,
+      status: MessageStatus.unknown,
+      createdAt: data.createdAt,
+    );
+    await database.messageDao.insert(message, accountId, data.silent);
   }
 
   Future<void> _insertFailedMessage(BlazeMessageData data) async {
@@ -1030,7 +1034,7 @@ class DecryptMessage extends Injector {
         status: MessageStatus.failed,
         createdAt: data.createdAt,
       );
-      await database.messageDao.insert(message, data.senderId, data.silent);
+      await database.messageDao.insert(message, accountId, data.silent);
     }
   }
 

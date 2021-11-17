@@ -8,6 +8,8 @@ extension SearchConversationItemExtension on SearchConversationItem {
   bool get isMute =>
       (isGroupConversation && muteUntil?.isAfter(DateTime.now()) == true) ||
       (!isGroupConversation && ownerMuteUntil?.isAfter(DateTime.now()) == true);
+
+  String get validName => conversationValidName(groupName, fullName);
 }
 
 extension ConversationItemExtension on ConversationItem {

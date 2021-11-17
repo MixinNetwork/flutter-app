@@ -315,7 +315,7 @@ packages:
       name: desktop_lifecycle
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.1"
+    version: "0.1.0"
   desktop_webview_window:
     dependency: "direct main"
     description:

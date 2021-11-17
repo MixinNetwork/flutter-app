@@ -136,8 +136,19 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     return result;
   }
 
-  Future<int> insert(Message message, String userId,
+  Future<int> insert(Message message, String currentUserId,
       [bool? silent = false]) async {
+    final unseenMessageCount = await _getUnseenMessageCount(
+      userId: currentUserId,
+      conversationId: message.conversationId,
+    );
+
+    final unseen = message.userId != currentUserId &&
+            [MessageStatus.sent, MessageStatus.delivered]
+                .contains(message.status)
+        ? 1
+        : 0;
+
     final result = await db.transaction(() async {
       final futures = <Future>[
         into(db.messages).insertOnConflictUpdate(message),
@@ -146,11 +157,11 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           message.conversationId,
           message.messageId,
           message.createdAt,
+          unseenMessageCount + unseen,
         ),
       ];
       return (await Future.wait(futures))[0] as int;
     });
-    await takeUnseen(userId, message.conversationId);
     db.eventBus.send(DatabaseEvent.insertOrReplaceMessage, [message.messageId]);
     if (!(silent ?? false)) {
       db.eventBus.send(DatabaseEvent.notification, message.messageId);
@@ -158,9 +169,6 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
     return result;
   }
-
-  Future<void> insertCompanion(MessagesCompanion messagesCompanion) async =>
-      into(db.messages).insert(messagesCompanion);
 
   Future<void> _insertMessageFts(Message message) async {
     String? ftsContent;
@@ -363,6 +371,28 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
       mediaStatus: mediaStatus.converter.mapToDart(result.read(mediaStatus))!,
       content: result.read(content),
     );
+  }
+
+  Future<int> _getUnseenMessageCount({
+    required String conversationId,
+    required String userId,
+  }) async {
+    final count = db.messages.messageId.count();
+    final status = db.messages.status;
+    return (await (db.selectOnly(db.messages)
+              ..addColumns([count])
+              ..where(
+                db.messages.conversationId.equals(conversationId) &
+                    db.messages.userId.equals(userId).not() &
+                    status.isIn(
+                      [MessageStatus.sent, MessageStatus.delivered]
+                          .map(status.converter.mapToSql),
+                    ),
+              )
+              ..limit(1))
+            .map((row) => row.read(count))
+            .getSingleOrNull()) ??
+        0;
   }
 
   Future<int> takeUnseen(String userId, String conversationId) async {

@@ -96,7 +96,8 @@ class AccountServer {
               final serverTime = int.tryParse(
                   e.response?.headers.value('x-server-time') ?? '');
               if (serverTime != null) {
-                final time = DateTime.fromMicrosecondsSinceEpoch(serverTime);
+                final time =
+                    DateTime.fromMicrosecondsSinceEpoch(serverTime ~/ 1000);
                 final difference = time.difference(DateTime.now());
                 if (difference.inMinutes > 5) {
                   blaze.waitSyncTime();
@@ -424,13 +425,7 @@ class AccountServer {
       }
 
       MessageResult? result;
-
       var content = message.content;
-
-      await database.conversationDao.updateConversationStatusById(
-        message.conversationId,
-        ConversationStatus.success,
-      );
 
       if (message.category.isPlain ||
           message.category == MessageCategory.appCard ||
