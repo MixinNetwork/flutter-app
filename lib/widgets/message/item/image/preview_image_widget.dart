@@ -166,6 +166,20 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         scale: _transformationController.scale,
       );
 
+  // the rect of child which fit the viewport.
+  Rect get _bestFitInRect {
+    final childRect = _childRect;
+    final viewport = _viewport;
+    final scaleX = viewport.width / childRect.width;
+    final scaleY = viewport.height / childRect.height;
+    final scaleFactor = math.min(scaleX, scaleY);
+    final width = childRect.width * scaleFactor;
+    final height = childRect.height * scaleFactor;
+    final x = (viewport.width - width) / 2;
+    final y = (viewport.height - height) / 2;
+    return Rect.fromLTWH(x, y, width, height);
+  }
+
   Rect _calculateTransformedChildRect({
     required Rect childRect,
     required Offset translate,
@@ -332,7 +346,6 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
   }
 
   void _applyScale(double scaleChange, Offset point) {
-    final viewport = _viewport;
     final childRect = _childRect;
 
     final targetScale = (_transformationController.scale * scaleChange)
@@ -355,15 +368,12 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         _transformationController.translate += offset;
       }
 
-      // NOTE: can not replace with nextRect.size <= viewport.size,
-      // because:
-      // Size(10, 9) <= Size(11, 8)  false
-      // Size(10, 9) >= Size(11, 8)  false
-      if (!(nextRect.size > viewport.size)) {
+      final bestFitRect = _bestFitInRect;
+      if (nextRect.size <= bestFitRect.size) {
         _transformationController.translate = Offset.zero;
       } else {
-        assert(nextRect.size > viewport.size);
-        final offset = nextRect.offsetToContain(viewport);
+        assert(nextRect.size > bestFitRect.size);
+        final offset = nextRect.offsetToContain(bestFitRect);
         if (offset.distanceSquared > 0) {
           _transformationController.translate +=
               offset * _transformationController.scale;
@@ -378,7 +388,7 @@ class _ImagPreviewWidgetState extends State<ImagPreviewWidget>
         scale: targetScale,
       );
 
-      if (!(nextRect.size > viewport.size)) {
+      if (nextRect.size <= _bestFitInRect.size) {
         _transformationController.translate = Offset.zero;
       } else {
         final focusPoint = _toScene(point);
