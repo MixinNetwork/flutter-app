@@ -1012,7 +1012,7 @@ class DecryptMessage extends Injector {
       status: MessageStatus.unknown,
       createdAt: data.createdAt,
     );
-    await database.messageDao.insert(message, data.senderId, data.silent);
+    await database.messageDao.insert(message, accountId, data.silent);
   }
 
   Future<void> _insertFailedMessage(BlazeMessageData data) async {
@@ -1034,7 +1034,7 @@ class DecryptMessage extends Injector {
         status: MessageStatus.failed,
         createdAt: data.createdAt,
       );
-      await database.messageDao.insert(message, data.senderId, data.silent);
+      await database.messageDao.insert(message, accountId, data.silent);
     }
   }
 
