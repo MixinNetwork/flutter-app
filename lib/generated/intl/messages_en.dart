@@ -46,25 +46,27 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m12(ID) => "My Mixin ID: ${ID}";
 
-  static String m13(name) => "Message ${name}";
+  static String m13(value) => "Delete chat: ${value}";
 
-  static String m14(name) => "Remove ${name}";
+  static String m14(name) => "Message ${name}";
 
-  static String m15(name) => "Do you want to delete ${name} circle?";
+  static String m15(name) => "Remove ${name}";
 
-  static String m16(date) => "${date} join";
+  static String m16(name) => "Do you want to delete ${name} circle?";
 
-  static String m17(count) => "${count} Participants";
+  static String m17(date) => "${date} join";
 
-  static String m18(count) => "${count} Pinned Messages";
+  static String m18(count) => "${count} Participants";
 
-  static String m19(user, preview) => "${user} pinned ${preview}";
+  static String m19(count) => "${count} Pinned Messages";
 
-  static String m20(count) => "${count} related messages";
+  static String m20(user, preview) => "${user} pinned ${preview}";
 
-  static String m21(value) => "value now ${value}";
+  static String m21(count) => "${count} related messages";
 
-  static String m22(value) => "value then ${value}";
+  static String m22(value) => "value now ${value}";
+
+  static String m23(value) => "value then ${value}";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -162,6 +164,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "deleteChat": MessageLookupByLibrary.simpleMessage("Delete Chat"),
         "deleteChatDescription": MessageLookupByLibrary.simpleMessage(
             "Deleting chat will remove messages form this devices only. They will not be removed from other devices."),
+        "deleteChatHint": m13,
         "deleteCircle": MessageLookupByLibrary.simpleMessage("Delete Circle"),
         "deleteForEveryone":
             MessageLookupByLibrary.simpleMessage("Delete for Everyone"),
@@ -209,8 +212,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Dismiss admin"),
         "groupPopMenuMakeAdmin":
             MessageLookupByLibrary.simpleMessage("Make group admin"),
-        "groupPopMenuMessage": m13,
-        "groupPopMenuRemoveParticipants": m14,
+        "groupPopMenuMessage": m14,
+        "groupPopMenuRemoveParticipants": m15,
         "groupSearchParticipants":
             MessageLookupByLibrary.simpleMessage("Mixin ID, Name"),
         "groups": MessageLookupByLibrary.simpleMessage("Groups"),
@@ -264,8 +267,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Notifications are not allowed, please go to Notification Settings to turn on."),
         "notificationPermissionTitle":
             MessageLookupByLibrary.simpleMessage("Turn On Notifications"),
-        "pageDeleteCircle": m15,
-        "pageEditProfileJoin": m16,
+        "pageDeleteCircle": m16,
+        "pageEditProfileJoin": m17,
         "pageLandingClickToReload":
             MessageLookupByLibrary.simpleMessage("CLICK TO RELOAD QR CODE"),
         "pageLandingLoginMessage": MessageLookupByLibrary.simpleMessage(
@@ -274,12 +277,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Login to Mixin Messenger by QR Code"),
         "pageRightEmptyMessage": MessageLookupByLibrary.simpleMessage(
             "Select a conversation to start messaging"),
-        "participantsCount": m17,
+        "participantsCount": m18,
         "phoneNumber": MessageLookupByLibrary.simpleMessage("Phone number"),
         "photos": MessageLookupByLibrary.simpleMessage("Photos"),
         "pin": MessageLookupByLibrary.simpleMessage("Pin"),
-        "pinMessageCount": m18,
-        "pinned": m19,
+        "pinMessageCount": m19,
+        "pinned": m20,
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait a moment"),
         "post": MessageLookupByLibrary.simpleMessage("Post"),
@@ -304,7 +307,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchEmpty": MessageLookupByLibrary.simpleMessage(
             "No chats, \ncontacts or messages found."),
         "searchMessageHistory": MessageLookupByLibrary.simpleMessage("Search"),
-        "searchRelatedMessage": m20,
+        "searchRelatedMessage": m21,
         "searchUser": MessageLookupByLibrary.simpleMessage("Search contact"),
         "searchUserHint":
             MessageLookupByLibrary.simpleMessage("Mixin ID or Phone number"),
@@ -360,10 +363,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "videos": MessageLookupByLibrary.simpleMessage("Videos"),
         "waitingForThisMessage":
             MessageLookupByLibrary.simpleMessage("Waiting for this message."),
-        "walletTransactionCurrentValue": m21,
+        "walletTransactionCurrentValue": m22,
         "walletTransactionThatTimeNoValue":
             MessageLookupByLibrary.simpleMessage("value then N/A"),
-        "walletTransactionThatTimeValue": m22,
+        "walletTransactionThatTimeValue": m23,
         "webView2RuntimeInstallDescription": MessageLookupByLibrary.simpleMessage(
             "The device has not installed the WebView2 Runtime component. Please download and install WebView2 Runtime first."),
         "webViewRuntimeNotAvailable": MessageLookupByLibrary.simpleMessage(

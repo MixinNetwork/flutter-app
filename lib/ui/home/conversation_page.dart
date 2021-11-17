@@ -241,20 +241,14 @@ class _SearchList extends HookWidget {
                   child: _SearchItem(
                     avatar: ConversationAvatarWidget(
                       conversationId: conversation.conversationId,
-                      fullName: conversationValidName(
-                        conversation.groupName,
-                        conversation.fullName,
-                      ),
+                      fullName: conversation.validName,
                       groupIconUrl: conversation.groupIconUrl,
                       avatarUrl: conversation.avatarUrl,
                       category: conversation.category,
                       size: ConversationPage.conversationItemAvatarSize,
                       userId: conversation.ownerId,
                     ),
-                    name: conversationValidName(
-                      conversation.groupName,
-                      conversation.fullName,
-                    ),
+                    name: conversation.validName,
                     trailing: VerifiedOrBotWidget(
                       verified: conversation.isVerified,
                       isBot: conversation.appId != null,
@@ -878,9 +872,11 @@ class _ConversationMenuWrapper extends StatelessWidget {
           title: context.l10n.deleteChat,
           isDestructiveAction: true,
           onTap: () async {
+            final name =
+                conversation?.validName ?? searchConversation!.validName;
             final ret = await showConfirmMixinDialog(
               context,
-              context.l10n.deleteChat,
+              context.l10n.deleteChatHint(name),
               description: context.l10n.deleteChatDescription,
             );
             if (ret != true) {

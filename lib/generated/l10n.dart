@@ -2369,6 +2369,16 @@ class Localization {
       args: [],
     );
   }
+
+  /// `Delete chat: {value}`
+  String deleteChatHint(Object value) {
+    return Intl.message(
+      'Delete chat: $value',
+      name: 'deleteChatHint',
+      desc: '',
+      args: [value],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {
