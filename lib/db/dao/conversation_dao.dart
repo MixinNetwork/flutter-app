@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:mixin_bot_sdk_dart/mixin_bot_sdk_dart.dart'
     hide User, Conversation;
+import 'package:rxdart/rxdart.dart';
 
 import '../../utils/extension/extension.dart';
 import '../converter/conversation_status_type_converter.dart';
@@ -17,14 +18,16 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
     with _$ConversationDaoMixin {
   ConversationDao(MixinDatabase db) : super(db);
 
-  late Stream<void> updateEvent = db.tableUpdates(TableUpdateQuery.onAllTables([
-    db.conversations,
-    db.users,
-    db.messages,
-    db.snapshots,
-    db.messageMentions,
-    db.circleConversations,
-  ]));
+  late Stream<void> updateEvent = db
+      .tableUpdates(TableUpdateQuery.onAllTables([
+        db.conversations,
+        db.users,
+        db.messages,
+        db.snapshots,
+        db.messageMentions,
+        db.circleConversations,
+      ]))
+      .throttleTime(const Duration(milliseconds: 330), trailing: true);
 
   late Stream<int> allUnseenIgnoreMuteMessageCountEvent = db
       .tableUpdates(TableUpdateQuery.onAllTables([
