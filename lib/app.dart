@@ -36,7 +36,6 @@ import 'widgets/default_text_editing_focusable_action_detector.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
-import 'widgets/window/title_bar.dart';
 import 'widgets/window/window_shortcuts.dart';
 
 class App extends StatelessWidget {
@@ -225,9 +224,7 @@ class _App extends StatelessWidget {
                         ? textScaleFactor
                         : mediaQueryData.textScaleFactor,
                   ),
-                  child: SystemTrayWidget(
-                    child: WindowTitleBar(child: child!),
-                  ),
+                  child: SystemTrayWidget(child: child!),
                 ),
               );
             },
