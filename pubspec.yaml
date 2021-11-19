@@ -85,6 +85,7 @@ dependencies:
       ref: 52685ab7beaf8a9107904bdb8a1590924015d016
   provider: ^6.0.1
   qr_flutter: ^4.0.0
+  quick_breakpad: ^0.3.0
   recase: ^4.0.0
   rxdart: ^0.27.1
   scrollable_positioned_list: ^0.2.0-nullsafety.0
