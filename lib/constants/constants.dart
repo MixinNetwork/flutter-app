@@ -21,6 +21,9 @@ const createSignalKeyMessages = 'CREATE_SIGNAL_KEY_MESSAGES';
 const countSignalKeys = 'COUNT_SIGNAL_KEYS';
 const syncSignalKeys = 'SYNC_SIGNAL_KEYS';
 
+// Only from local.
+const updateAsset = 'LOCAL_UPDATE_ASSET';
+
 const mixinScheme = 'mixin';
 const mixinHost = 'mixin.one';
 

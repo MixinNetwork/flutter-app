@@ -949,9 +949,14 @@ class DecryptMessage extends Injector {
       ),
     );
     await database.snapshotDao.insert(snapshot);
-    final a =
-        (await client.assetApi.getAssetById(snapshotMessage.assetId)).data;
-    await database.assetDao.insertSdkAsset(a);
+    await database.jobDao.insertUpdateAssetJob(Job(
+      jobId: const Uuid().v4(),
+      action: updateAsset,
+      priority: 5,
+      runCount: 0,
+      createdAt: DateTime.now(),
+      blazeMessage: snapshotMessage.assetId,
+    ));
     var status = data.status;
     if (_conversationId == data.conversationId && data.userId != accountId) {
       status = MessageStatus.read;
