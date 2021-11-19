@@ -227,17 +227,17 @@ abstract class PagingBloc<T> extends Bloc<PagingEvent, PagingState<T>>
   List<Tuple2<int, int>> differenceMaxExpectRange(int _start, int _end) {
     final start = max(_start, 0);
     final end = min(_end, state.count);
-    final loadedindexes = state.map.keys.toList();
+    final loadedIndexes = state.map.keys.toList();
 
     Tuple2<int, int>? before;
     Tuple2<int, int>? after;
 
-    if (start < loadedindexes.first) {
-      before = Tuple2(start, min(loadedindexes.first, end));
+    if (start < loadedIndexes.first) {
+      before = Tuple2(start, min(loadedIndexes.first, end));
     }
 
-    if (loadedindexes.last < end) {
-      after = Tuple2(max(loadedindexes.last, start), end);
+    if (loadedIndexes.last < end) {
+      after = Tuple2(max(loadedIndexes.last, start), end);
     }
 
     return [

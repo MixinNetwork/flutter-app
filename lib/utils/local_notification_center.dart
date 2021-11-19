@@ -259,7 +259,11 @@ Future<void> initListener() async {
   } else {
     e('notification unsupported for platform: ${Platform.operatingSystem}');
   }
-  await _notificationManager?.initialize();
+  try {
+    await _notificationManager?.initialize();
+  } catch (error, s) {
+    e('notification manager initialize failed: $error $s');
+  }
 }
 
 Stream<Uri> notificationSelectEvent(NotificationScheme notificationScheme) =>
