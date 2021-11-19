@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
@@ -48,51 +49,51 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   Future<void> deleteJobById(String jobId) => batch(
       (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
 
-  Stream<List<Job>> findAckJobs() {
-    final query = select(db.jobs)
-      ..where((Jobs row) => row.action.equals(acknowledgeMessageReceipts))
-      ..limit(100);
-    return query.watch();
-  }
+  Stream<bool> _watchHasJobs(String action) => db
+      .watchHasData(db.jobs, [], db.jobs.action.equals(action) & db.jobs.blazeMessage.isNotNull())
+      .where((event) => event)
+      .throttleTime(const Duration(milliseconds: 50), trailing: true);
 
-  Stream<List<Job>> findSessionAckJobs() {
-    final query = select(db.jobs)
-      ..where((Jobs row) => row.action.equals(createMessage))
-      ..limit(100);
-    return query.watch();
-  }
+  Stream<bool> watchHasAckJobs() => _watchHasJobs(acknowledgeMessageReceipts);
 
-  Future<Job?> findAckJobById(String jobId) =>
+  SimpleSelectStatement<Jobs, Job> ackJobs() => select(db.jobs)
+    ..where((Jobs row) => row.action.equals(acknowledgeMessageReceipts) & row.blazeMessage.isNotNull())
+    ..limit(100);
+
+  Stream<bool> watchHasSessionAckJobs() => _watchHasJobs(createMessage);
+
+  SimpleSelectStatement<Jobs, Job> sessionAckJobs() => select(db.jobs)
+    ..where((Jobs row) => row.action.equals(createMessage) & row.blazeMessage.isNotNull())
+    ..limit(100);
+
+  Stream<bool> watchHasRecallMessageJobs() => _watchHasJobs(recallMessage);
+
+  SimpleSelectStatement<Jobs, Job> recallMessageJobs() => select(db.jobs)
+    ..where((Jobs row) => row.action.equals(recallMessage)& row.blazeMessage.isNotNull())
+    ..limit(100);
+
+  Stream<bool> watchHasPinMessageJobs() => _watchHasJobs(pinMessage);
+
+  SimpleSelectStatement<Jobs, Job> pinMessageJobs() => select(db.jobs)
+    ..where((Jobs row) => row.action.equals(pinMessage)& row.blazeMessage.isNotNull())
+    ..limit(100);
+
+  Stream<bool> watchHasSendingJobs() => _watchHasJobs(sendingMessage);
+
+  SimpleSelectStatement<Jobs, Job> sendingJobs() => select(db.jobs)
+    ..where((Jobs row) => row.action.equals(sendingMessage)& row.blazeMessage.isNotNull())
+    ..limit(100);
+
+  Future<Job?> ackJobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
           .getSingleOrNull();
-
-  Stream<List<Job>> findRecallMessageJobs() {
-    final query = select(db.jobs)
-      ..where((Jobs row) => row.action.equals(recallMessage))
-      ..limit(100);
-    return query.watch();
-  }
-
-  Stream<List<Job>> findPinMessageJobs() {
-    final query = select(db.jobs)
-      ..where((Jobs row) => row.action.equals(pinMessage))
-      ..limit(100);
-    return query.watch();
-  }
-
-  Stream<List<Job>> findSendingJobs() {
-    final query = select(db.jobs)
-      ..where((Jobs row) => row.action.equals(sendingMessage))
-      ..limit(100);
-    return query.watch();
-  }
 
   Future<void> insertAll(List<Job> jobs) => batch((batch) {
         batch.insertAllOnConflictUpdate(db.jobs, jobs);
       });
 
   Future<void> insertNoReplace(Job job) async {
-    final exists = await findAckJobById(job.jobId);
+    final exists = await ackJobById(job.jobId);
     if (exists == null) {
       await insert(job);
     }

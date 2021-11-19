@@ -21,6 +21,7 @@ extension StreamExtension<T> on Stream<T> {
       final addError = controller.addError;
       void resume() {
         drop = false;
+        subscription.resume();
       }
 
       subscription.onData((T event) {
@@ -35,6 +36,7 @@ extension StreamExtension<T> on Stream<T> {
         }
         if (newValue is Future<E>) {
           drop = true;
+          subscription.pause();
           newValue.then(add, onError: addError).whenComplete(resume);
         } else {
           controller.add(newValue);

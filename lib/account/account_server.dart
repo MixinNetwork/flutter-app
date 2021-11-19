@@ -203,8 +203,6 @@ class AccountServer {
 
   String? _activeConversationId;
 
-  bool _floodJobRunning = false;
-
   final jobSubscribers = <StreamSubscription>{};
 
   void start() {
@@ -217,43 +215,38 @@ class AccountServer {
         database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-      ]).listen((event) => _runFloodJob()))
+      ]).asyncMapDrop((_) => _runProcessFloodJob()).listen((_) {}))
       ..add(database.jobDao
-          .findAckJobs()
-          .where((jobs) => jobs.isNotEmpty == true)
-          .asyncMapDrop(_runAckJob)
+          .watchHasAckJobs()
+          .asyncMapDrop((_) => _runAckJob())
           .listen((_) {}));
 
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId != null) {
       jobSubscribers.add(database.jobDao
-          .findSessionAckJobs()
-          .where((jobs) => jobs.isNotEmpty == true)
-          .asyncMapDrop(_runSessionAckJob)
+          .watchHasSessionAckJobs()
+          .asyncMapDrop((_) => _runSessionAckJob())
           .listen((_) {}));
     }
 
     jobSubscribers
       ..add(database.jobDao
-          .findPinMessageJobs()
-          .where((jobs) => jobs.isNotEmpty == true)
-          .asyncMapDrop(_runPinJob)
+          .watchHasPinMessageJobs()
+          .asyncMapDrop((_) => _runPinJob())
           .listen((_) {}))
       ..add(database.jobDao
-          .findRecallMessageJobs()
-          .where((jobs) => jobs.isNotEmpty == true)
-          .asyncMapDrop(_runRecallJob)
+          .watchHasRecallMessageJobs()
+          .asyncMapDrop((_) => _runRecallJob())
           .listen((_) {}))
       ..add(database.jobDao
-          .findSendingJobs()
-          .where((jobs) => jobs.isNotEmpty == true)
-          .asyncMapDrop(_runSendJob)
+          .watchHasSendingJobs()
+          .asyncMapDrop((_) => _runSendJob())
           .listen((_) {}));
 
     // database.mock();
   }
 
-  Future<void> _processFloodJob() async {
+  Future<void> _runProcessFloodJob() async {
     final floodMessages =
         await database.floodMessageDao.findFloodMessage().get();
     if (floodMessages.isEmpty) {
@@ -271,22 +264,15 @@ class AccountServer {
         d('process execution time: ${stopwatch.elapsedMilliseconds}');
       }
     }
-    await _processFloodJob();
+    await _runProcessFloodJob();
   }
 
-  void _runFloodJob() {
-    if (_floodJobRunning) {
-      return;
-    }
-    _floodJobRunning = true;
-    _processFloodJob().whenComplete(() {
-      _floodJobRunning = false;
-    });
-  }
+  Future<void> _runAckJob() async {
+    final jobs = await database.jobDao.ackJobs().get();
+    if (jobs.isEmpty) return;
 
-  Future<void> _runAckJob(List<db.Job> jobs) async {
     final ack = await Future.wait(
-      jobs.where((element) => element.blazeMessage != null).map(
+      jobs.map(
         (e) async {
           final map = await jsonDecodeWithIsolate(e.blazeMessage!)
               as Map<String, dynamic>;
@@ -305,16 +291,21 @@ class AccountServer {
     } catch (e, s) {
       w('Send ack error: $e, stack: $s');
     }
+
+    await _runAckJob();
   }
 
-  Future<void> _runSessionAckJob(List<db.Job> jobs) async {
+  Future<void> _runSessionAckJob() async {
+    final jobs = await database.jobDao.sessionAckJobs().get();
+    if (jobs.isEmpty) return;
+
     final conversationId =
         await database.participantDao.findJoinedConversationId(userId);
     if (conversationId == null) {
       return;
     }
     final ack = await Future.wait(
-      jobs.where((element) => element.blazeMessage != null).map(
+      jobs.map(
         (e) async {
           final map = await jsonDecodeWithIsolate(e.blazeMessage!)
               as Map<String, dynamic>;
@@ -328,7 +319,8 @@ class AccountServer {
     final jobIds = jobs.map((e) => e.jobId).toList();
     final plainText = PlainJsonMessage(
         acknowledgeMessageReceipts, null, null, null, null, ack);
-    final encode = base64Encode(utf8.encode(jsonEncode(plainText)));
+    final encode = await base64EncodeWithIsolate(
+        await utf8EncodeWithIsolate(await jsonEncodeWithIsolate(plainText)));
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     final bm = createParamBlazeMessage(createPlainJsonParam(
         conversationId, userId, encode,
@@ -341,65 +333,80 @@ class AccountServer {
     } catch (e, s) {
       w('Send session ack error: $e, stack: $s');
     }
+
+    await _runSessionAckJob();
   }
 
-  Future<void> _runRecallJob(List<db.Job> jobs) async {
-    final map = jobs.where((element) => element.blazeMessage != null).map(
-      (e) async {
-        final list = await utf8EncodeWithIsolate(e.blazeMessage!);
-        final data = await base64EncodeWithIsolate(list);
+  Future<void> _runRecallJob() async {
+    final jobs = await database.jobDao.recallMessageJobs().get();
+    if (jobs.isEmpty) return;
 
-        final blazeParam = BlazeMessageParam(
-          conversationId: e.conversationId,
-          messageId: const Uuid().v4(),
-          category: MessageCategory.messageRecall,
-          data: data,
-        );
-        final blazeMessage = BlazeMessage(
-            id: const Uuid().v4(), action: createMessage, params: blazeParam);
+    await Future.forEach(jobs, (db.Job e) async {
+      final list = await utf8EncodeWithIsolate(e.blazeMessage!);
+      final data = await base64EncodeWithIsolate(list);
+
+      final blazeParam = BlazeMessageParam(
+        conversationId: e.conversationId,
+        messageId: const Uuid().v4(),
+        category: MessageCategory.messageRecall,
+        data: data,
+      );
+      final blazeMessage = BlazeMessage(
+          id: const Uuid().v4(), action: createMessage, params: blazeParam);
+      try {
         final result = await _sender.deliver(blazeMessage);
         if (result.success) {
           await database.jobDao.deleteJobById(e.jobId);
         }
-      },
-    );
+      } catch (e, s) {
+        w('Send recall error: $e, stack: $s');
+      }
+    });
 
-    await Future.wait(map);
+    await _runRecallJob();
   }
 
-  Future<void> _runPinJob(List<db.Job> jobs) async {
-    final map = jobs.where((element) => element.blazeMessage != null).map(
-      (e) async {
-        final list = await utf8EncodeWithIsolate(e.blazeMessage!);
-        final data = await base64EncodeWithIsolate(list);
+  Future<void> _runPinJob() async {
+    final jobs = await database.jobDao.pinMessageJobs().get();
+    if (jobs.isEmpty) return;
 
-        final blazeParam = BlazeMessageParam(
-          conversationId: e.conversationId,
-          messageId: const Uuid().v4(),
-          category: MessageCategory.messagePin,
-          data: data,
-        );
-        final blazeMessage = BlazeMessage(
-            id: const Uuid().v4(), action: createMessage, params: blazeParam);
+    await Future.forEach(jobs, (db.Job e) async {
+      final list = await utf8EncodeWithIsolate(e.blazeMessage!);
+      final data = await base64EncodeWithIsolate(list);
+
+      final blazeParam = BlazeMessageParam(
+        conversationId: e.conversationId,
+        messageId: const Uuid().v4(),
+        category: MessageCategory.messagePin,
+        data: data,
+      );
+      final blazeMessage = BlazeMessage(
+          id: const Uuid().v4(), action: createMessage, params: blazeParam);
+      try {
         final result = await _sender.deliver(blazeMessage);
         if (result.success) {
           await database.jobDao.deleteJobById(e.jobId);
         }
-      },
-    );
+      } catch (e, s) {
+        w('Send pin error: $e, stack: $s');
+      }
+    });
 
-    await Future.wait(map);
+    await _runPinJob();
   }
 
-  Future<void> _runSendJob(List<db.Job> jobs) async {
-    final futures =
-        jobs.where((element) => element.blazeMessage != null).map((job) async {
+  Future<void> _runSendJob() async {
+    final jobs = await database.jobDao.sendingJobs().get();
+    if (jobs.isEmpty) return;
+
+    Future<void> send(db.Job job) async {
       assert(job.blazeMessage != null);
       String messageId;
       String? recipientId;
       var silent = false;
       try {
-        final json = jsonDecode(job.blazeMessage!) as Map<String, dynamic>;
+        final json = await jsonDecodeWithIsolate(job.blazeMessage!)
+            as Map<String, dynamic>;
         messageId = json[JobDao.messageIdKey] as String;
         recipientId = json[JobDao.recipientIdKey] as String?;
         silent = json[JobDao.silentKey] as bool;
@@ -421,7 +428,7 @@ class AccountServer {
             .map((e) => e.toJson(serializer: const UtcValueSerializer())
               ..remove('media_status'))
             .toList();
-        message.content = jsonEncode(json);
+        message.content = await jsonEncodeWithIsolate(json);
       }
 
       MessageResult? result;
@@ -495,9 +502,17 @@ class AccountServer {
             .updateMessageStatusById(message.messageId, MessageStatus.sent);
         await database.jobDao.deleteJobById(job.jobId);
       }
+    }
+
+    await Future.forEach(jobs, (db.Job job) async {
+      try {
+        await send(job);
+      } catch (e, s) {
+        w('Send job error: $e, stack: $s');
+      }
     });
 
-    await Future.wait(futures);
+    await _runSendJob();
   }
 
   Future<MessageResult?> _sendSignalMessage(
@@ -1399,18 +1414,18 @@ class AccountServer {
   Future<void> markMentionRead(String messageId, String conversationId) =>
       Future.wait([
         database.messageMentionDao.markMentionRead(messageId),
-        database.jobDao.insert(
-          db.Job(
-            jobId: const Uuid().v4(),
-            action: createMessage,
-            createdAt: DateTime.now(),
-            conversationId: conversationId,
-            runCount: 0,
-            priority: 5,
-            blazeMessage: jsonEncode(
-                BlazeAckMessage(messageId: messageId, status: 'MENTION_READ')),
-          ),
-        )
+        (() async => database.jobDao.insert(
+              db.Job(
+                jobId: const Uuid().v4(),
+                action: createMessage,
+                createdAt: DateTime.now(),
+                conversationId: conversationId,
+                runCount: 0,
+                priority: 5,
+                blazeMessage: await jsonEncodeWithIsolate(BlazeAckMessage(
+                    messageId: messageId, status: 'MENTION_READ')),
+              ),
+            ))()
       ]);
 
   Future<List<db.User>?> refreshUsers(List<String> ids, {bool force = false}) =>
