@@ -215,33 +215,28 @@ class AccountServer {
         database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-      ]).asyncMapDrop((_) => _runProcessFloodJob()).listen((_) {}))
+      ]).asyncDropListen((_) => _runProcessFloodJob()))
       ..add(database.jobDao
           .watchHasAckJobs()
-          .asyncMapDrop((_) => _runAckJob())
-          .listen((_) {}));
+          .asyncDropListen((_) => _runAckJob()));
 
     final primarySessionId = AccountKeyValue.instance.primarySessionId;
     if (primarySessionId != null) {
       jobSubscribers.add(database.jobDao
           .watchHasSessionAckJobs()
-          .asyncMapDrop((_) => _runSessionAckJob())
-          .listen((_) {}));
+          .asyncDropListen((_) => _runSessionAckJob()));
     }
 
     jobSubscribers
       ..add(database.jobDao
           .watchHasPinMessageJobs()
-          .asyncMapDrop((_) => _runPinJob())
-          .listen((_) {}))
+          .asyncDropListen((_) => _runPinJob()))
       ..add(database.jobDao
           .watchHasRecallMessageJobs()
-          .asyncMapDrop((_) => _runRecallJob())
-          .listen((_) {}))
+          .asyncDropListen((_) => _runRecallJob()))
       ..add(database.jobDao
           .watchHasSendingJobs()
-          .asyncMapDrop((_) => _runSendJob())
-          .listen((_) {}));
+          .asyncDropListen((_) => _runSendJob()));
 
     // database.mock();
   }
