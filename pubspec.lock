@@ -1077,6 +1077,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0"
+  quick_breakpad:
+    dependency: "direct main"
+    description:
+      name: quick_breakpad
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.0"
   quiver:
     dependency: transitive
     description:
