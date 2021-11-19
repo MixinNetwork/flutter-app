@@ -65,6 +65,10 @@ Future<bool> openUri(
           await showConversationDialog(context, data, code);
           return true;
         }
+
+        await showToastFailed(
+            context, ToastError(context.l10n.uriCheckOnPhone));
+        return false;
       } catch (error) {
         e('open code: $error');
         await showToastFailed(context, error);

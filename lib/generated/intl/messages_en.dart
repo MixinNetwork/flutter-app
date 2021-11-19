@@ -8,7 +8,6 @@
 // ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
 // ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
 // ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
-// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
@@ -358,6 +357,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesDescription": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to unpin all messages?"),
         "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
+        "uriCheckOnPhone": MessageLookupByLibrary.simpleMessage(
+            "This type of url is not supported, please check on your phone."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videoCall": MessageLookupByLibrary.simpleMessage("Video call"),

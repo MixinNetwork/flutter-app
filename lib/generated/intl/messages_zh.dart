@@ -8,7 +8,6 @@
 // ignore_for_file:prefer_single_quotes,comment_references, directives_ordering
 // ignore_for_file:annotate_overrides,prefer_generic_function_type_aliases
 // ignore_for_file:unused_import, file_names, avoid_escaping_inner_quotes
-// ignore_for_file:unnecessary_string_interpolations, unnecessary_string_escapes
 
 import 'package:intl/intl.dart';
 import 'package:intl/message_lookup_by_library.dart';
@@ -312,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesDescription":
             MessageLookupByLibrary.simpleMessage("确认取消所有置顶吗？"),
         "unread": MessageLookupByLibrary.simpleMessage("未读消息"),
+        "uriCheckOnPhone":
+            MessageLookupByLibrary.simpleMessage("不支持此链接，请在手机上查看。"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "video": MessageLookupByLibrary.simpleMessage("视频"),
         "videoCall": MessageLookupByLibrary.simpleMessage("语音电话"),
