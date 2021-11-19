@@ -27,7 +27,7 @@ class ConversationDao extends DatabaseAccessor<MixinDatabase>
         db.messageMentions,
         db.circleConversations,
       ]))
-      .throttleTime(const Duration(milliseconds: 330), trailing: true);
+      .throttleTime(kDefaultThrottleDuration, trailing: true);
 
   late Stream<int> allUnseenIgnoreMuteMessageCountEvent = db
       .tableUpdates(TableUpdateQuery.onAllTables([

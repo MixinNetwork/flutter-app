@@ -42,7 +42,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           db.messagesFts,
         ]),
       )
-      .throttleTime(const Duration(milliseconds: 330), trailing: true);
+      .throttleTime(kDefaultThrottleDuration, trailing: true);
 
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
@@ -61,7 +61,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.notification)
-      .bufferTime(const Duration(milliseconds: 330))
+      .bufferTime(kDefaultThrottleDuration)
       .asyncMap((event) => db.notificationMessage(event).get())
       .flatMapIterable((value) => Stream.value(value));
 
