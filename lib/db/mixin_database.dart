@@ -51,6 +51,8 @@ import 'util/util.dart';
 
 part 'mixin_database.g.dart';
 
+const kDefaultThrottleDuration = Duration(milliseconds: 333);
+
 @DriftDatabase(
   include: {
     'moor/mixin.drift',

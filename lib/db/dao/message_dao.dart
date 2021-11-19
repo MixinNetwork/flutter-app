@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:drift/drift.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../../enum/media_status.dart';
 import '../../enum/message_category.dart';
@@ -32,14 +33,16 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
     ]),
   );
 
-  late Stream<void> searchMessageUpdateEvent = db.tableUpdates(
-    TableUpdateQuery.onAllTables([
-      db.messages,
-      db.users,
-      db.conversations,
-      db.messagesFts,
-    ]),
-  );
+  late Stream<void> searchMessageUpdateEvent = db
+      .tableUpdates(
+        TableUpdateQuery.onAllTables([
+          db.messages,
+          db.users,
+          db.conversations,
+          db.messagesFts,
+        ]),
+      )
+      .throttleTime(kDefaultThrottleDuration, trailing: true);
 
   late Stream<List<MessageItem>> insertOrReplaceMessageStream = db.eventBus
       .watch<Iterable<String>>(DatabaseEvent.insertOrReplaceMessage)
@@ -58,9 +61,9 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
 
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.notification)
-      .asyncMap((event) => db.notificationMessage(event).getSingleOrNull())
-      .where((event) => event != null)
-      .cast<NotificationMessage>();
+      .bufferTime(kDefaultThrottleDuration)
+      .asyncMap((event) => db.notificationMessage(event).get())
+      .flatMapIterable((value) => Stream.value(value));
 
   late Stream<String> deleteMessageIdStream =
       db.eventBus.watch<String>(DatabaseEvent.delete);

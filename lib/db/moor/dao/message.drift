@@ -179,7 +179,7 @@ FROM   messages m
               ON m.message_id = mm.message_id
        LEFT JOIN users pu
               ON pu.user_id = m.participant_id
-WHERE  m.message_id = :messageId
+WHERE  m.message_id in :messageId
 ORDER  BY m.created_at DESC;
 
 fuzzySearchMessageCountByConversationId:
