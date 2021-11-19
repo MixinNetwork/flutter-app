@@ -1,4 +1,5 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MoveWindowBarrier extends StatelessWidget {
@@ -39,6 +40,11 @@ class MoveWindow extends StatelessWidget {
   Widget build(BuildContext context) => GestureDetector(
         behavior: behavior,
         onPanStart: (details) {
+          if (defaultTargetPlatform == TargetPlatform.windows) {
+            // Disable MoveWindow for windows.
+            // Windows already has a title bar.
+            return;
+          }
           appWindow.startDragging();
         },
         child: child,

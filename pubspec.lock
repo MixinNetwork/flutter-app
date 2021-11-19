@@ -86,11 +86,13 @@ packages:
     source: hosted
     version: "0.1.0"
   bitsdojo_window_windows:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: bitsdojo_window_windows
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: bitsdojo_window_windows
+      ref: b823ae5b9f2f82635067add7eadfc32d9054bc2b
+      resolved-ref: b823ae5b9f2f82635067add7eadfc32d9054bc2b
+      url: "https://github.com/abutcher-gh/bitsdojo_window.git"
+    source: git
     version: "0.1.0"
   bloc:
     dependency: "direct main"
@@ -1075,6 +1077,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "4.0.0"
+  quick_breakpad:
+    dependency: "direct main"
+    description:
+      name: quick_breakpad
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.3.0"
   quiver:
     dependency: transitive
     description:
@@ -1387,7 +1396,7 @@ packages:
       name: win_toast
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.0.1"
+    version: "0.0.2"
   window_size:
     dependency: "direct main"
     description:
