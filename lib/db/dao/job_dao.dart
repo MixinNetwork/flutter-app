@@ -50,38 +50,45 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
       (b) => {b.deleteWhere(db.jobs, (Jobs row) => row.jobId.equals(jobId))});
 
   Stream<bool> _watchHasJobs(String action) => db
-      .watchHasData(db.jobs, [], db.jobs.action.equals(action) & db.jobs.blazeMessage.isNotNull())
+      .watchHasData(db.jobs, [],
+          db.jobs.action.equals(action) & db.jobs.blazeMessage.isNotNull())
       .where((event) => event)
       .throttleTime(const Duration(milliseconds: 50), trailing: true);
 
   Stream<bool> watchHasAckJobs() => _watchHasJobs(acknowledgeMessageReceipts);
 
   SimpleSelectStatement<Jobs, Job> ackJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(acknowledgeMessageReceipts) & row.blazeMessage.isNotNull())
+    ..where((Jobs row) =>
+        row.action.equals(acknowledgeMessageReceipts) &
+        row.blazeMessage.isNotNull())
     ..limit(100);
 
   Stream<bool> watchHasSessionAckJobs() => _watchHasJobs(createMessage);
 
   SimpleSelectStatement<Jobs, Job> sessionAckJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(createMessage) & row.blazeMessage.isNotNull())
+    ..where((Jobs row) =>
+        row.action.equals(createMessage) & row.blazeMessage.isNotNull())
     ..limit(100);
 
   Stream<bool> watchHasRecallMessageJobs() => _watchHasJobs(recallMessage);
 
   SimpleSelectStatement<Jobs, Job> recallMessageJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(recallMessage)& row.blazeMessage.isNotNull())
+    ..where((Jobs row) =>
+        row.action.equals(recallMessage) & row.blazeMessage.isNotNull())
     ..limit(100);
 
   Stream<bool> watchHasPinMessageJobs() => _watchHasJobs(pinMessage);
 
   SimpleSelectStatement<Jobs, Job> pinMessageJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(pinMessage)& row.blazeMessage.isNotNull())
+    ..where((Jobs row) =>
+        row.action.equals(pinMessage) & row.blazeMessage.isNotNull())
     ..limit(100);
 
   Stream<bool> watchHasSendingJobs() => _watchHasJobs(sendingMessage);
 
   SimpleSelectStatement<Jobs, Job> sendingJobs() => select(db.jobs)
-    ..where((Jobs row) => row.action.equals(sendingMessage)& row.blazeMessage.isNotNull())
+    ..where((Jobs row) =>
+        row.action.equals(sendingMessage) & row.blazeMessage.isNotNull())
     ..limit(100);
 
   Future<Job?> ackJobById(String jobId) =>
