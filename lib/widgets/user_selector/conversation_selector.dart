@@ -402,7 +402,7 @@ class _ConversationSelector extends HookWidget {
                       ),
                     if (conversationFilterState.friends.isNotEmpty)
                       _Section(
-                        title: context.l10n.contact,
+                        title: context.l10n.contacts,
                         count: conversationFilterState.friends.length,
                         builder: (BuildContext context, int index) {
                           final item = conversationFilterState.friends[index];
