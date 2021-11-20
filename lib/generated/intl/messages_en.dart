@@ -357,6 +357,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesDescription": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to unpin all messages?"),
         "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
+        "uriCheckOnPhone": MessageLookupByLibrary.simpleMessage(
+            "This type of url is not supported, please check on your phone."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videoCall": MessageLookupByLibrary.simpleMessage("Video call"),

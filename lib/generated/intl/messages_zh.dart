@@ -311,6 +311,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesDescription":
             MessageLookupByLibrary.simpleMessage("确认取消所有置顶吗？"),
         "unread": MessageLookupByLibrary.simpleMessage("未读消息"),
+        "uriCheckOnPhone":
+            MessageLookupByLibrary.simpleMessage("不支持此链接，请在手机上查看。"),
         "userNotFound": MessageLookupByLibrary.simpleMessage("找不到这个用户"),
         "video": MessageLookupByLibrary.simpleMessage("视频"),
         "videoCall": MessageLookupByLibrary.simpleMessage("语音电话"),

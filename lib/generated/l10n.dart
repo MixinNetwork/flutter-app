@@ -2379,6 +2379,16 @@ class Localization {
       args: [value],
     );
   }
+
+  /// `This type of url is not supported, please check on your phone.`
+  String get uriCheckOnPhone {
+    return Intl.message(
+      'This type of url is not supported, please check on your phone.',
+      name: 'uriCheckOnPhone',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<Localization> {

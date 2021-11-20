@@ -226,5 +226,6 @@
   "webView2RuntimeInstallDescription": "该设备暂未安装 WebView2 组件，请先下载并安装 WebView2 Runtime。",
   "downloadLink": "下载链接：",
   "deleteChatDescription": "删除对话只会删除此设备的聊天记录，不会影响其他设备。",
-  "deleteChatHint": "删除对话：{value}"
+  "deleteChatHint": "删除对话：{value}",
+  "uriCheckOnPhone": "不支持此链接，请在手机上查看。"
 }
