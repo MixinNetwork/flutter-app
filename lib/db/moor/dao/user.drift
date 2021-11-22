@@ -1,5 +1,14 @@
 import '../mixin.drift';
 
+fuzzySearchBotGroupUser:
+SELECT u.* FROM users u
+        WHERE (u.user_id in (SELECT m.user_id FROM messages m WHERE conversation_id = :conversationId AND m.created_at > :createdAt)
+        OR u.user_id in (SELECT f.user_id FROM users f WHERE relationship = 'FRIEND'))
+        AND u.user_id != :id
+        AND (u.full_name LIKE '%' || :username || '%' ESCAPE '\' OR u.identity_number like '%' || :identityNumber || '%' ESCAPE '\')
+        ORDER BY CASE u.relationship WHEN 'FRIEND' THEN 1 ELSE 2 END,
+        u.relationship OR u.full_name = :username COLLATE NOCASE OR u.identity_number = :identityNumber COLLATE NOCASE DESC;
+
 fuzzySearchGroupUser:
 SELECT u.* FROM participants p, users u
         WHERE u.user_id != :id
@@ -10,7 +19,7 @@ SELECT u.* FROM participants p, users u
 groupParticipants:
 SELECT u.* FROM participants p, users u WHERE p.conversation_id = :conversationId AND p.user_id = u.user_id;
 
-friends:
+notInFriends:
 SELECT * FROM users WHERE relationship = 'FRIEND' AND user_id NOT IN :filterIds ORDER BY full_name, user_id ASC;
 
 usersByIn:

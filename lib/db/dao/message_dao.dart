@@ -446,7 +446,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..where(db.messages.messageId.isIn(messageIds)))
         .map((row) => row.read(db.messages.conversationId))
         .get();
-    return future.where((element) => element != null).cast<String>().toList();
+    return future.whereNotNull().toList();
   }
 
   Selectable<MessageItem> messagesByConversationId(
@@ -482,8 +482,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   db.messages.status.isIn(['SENT', 'DELIVERED'])))
             .map((row) => row.read(db.messages.messageId))
             .get();
-        final ids =
-            list.where((element) => element != null).cast<String>().toList();
+        final ids = list.whereNotNull().toList();
         if (ids.isNotEmpty) {
           await markMessageRead(userId, ids);
         }
@@ -583,7 +582,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
           ..where(db.messages.quoteMessageId.equals(quoteMessageId)))
         .map((row) => row.read(db.messages.messageId))
         .get();
-    return future.where((element) => element != null).cast<String>().toList();
+    return future.whereNotNull().toList();
   }
 
   Future<int> updateAttachmentMessageContentAndStatus(

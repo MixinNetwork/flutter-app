@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,11 +24,11 @@ import '../../../widgets/hover_overlay.dart';
 import '../../../widgets/mention_panel.dart';
 import '../../../widgets/menu.dart';
 import '../../../widgets/message/item/quote_message.dart';
+import '../../../widgets/message/item/text/mention_builder.dart';
 import '../../../widgets/sticker_page/bloc/cubit/sticker_albums_cubit.dart';
 import '../../../widgets/sticker_page/sticker_page.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/mention_cubit.dart';
-import '../bloc/participants_cubit.dart';
 import '../bloc/quote_message_cubit.dart';
 import '../bloc/recall_message_bloc.dart';
 import '../route/responsive_navigator_cubit.dart';
@@ -97,7 +100,6 @@ class _InputContainer extends HookWidget {
       () => MentionCubit(
         userDao: context.database.userDao,
         multiAuthCubit: context.multiAuthCubit,
-        participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
       ),
     );
 
@@ -121,7 +123,7 @@ class _InputContainer extends HookWidget {
           highlightTextStyle: TextStyle(
             color: context.theme.accent,
           ),
-          participantsCubit: BlocProvider.of<ParticipantsCubit>(context),
+          mentionCache: context.read<MentionCache>(),
         )..selection = TextSelection.fromPosition(
             TextPosition(
               offset: draft?.length ?? 0,
@@ -136,11 +138,12 @@ class _InputContainer extends HookWidget {
         useValueNotifierConvertSteam(textEditingController);
 
     useEffect(() {
+      if (conversationId == null) return;
       mentionCubit.setTextEditingValueStream(
         textEditingValueStream,
-        textEditingController.value,
+        context.read<ConversationCubit>().state!,
       );
-    }, [identityHashCode(textEditingValueStream)]);
+    }, [textEditingValueStream.hashCode, conversationId]);
 
     useEffect(() {
       final updateDraft = context.database.conversationDao.updateDraft;
@@ -336,7 +339,7 @@ class _SendTextField extends HookWidget {
     final sendable = useStream(
           useMemoized(
               () => Rx.combineLatest2<TextEditingValue, MentionState, bool>(
-                  textEditingValueStream.startWith(textEditingController.value),
+                  textEditingValueStream,
                   mentionStream.startWith(mentionCubit.state),
                   (textEditingValue, mentionState) =>
                       (textEditingValue.text.trim().isNotEmpty) &&
@@ -621,12 +624,32 @@ class _StickerPagePositionedLayoutDelegate extends SingleChildLayoutDelegate {
 class HighlightTextEditingController extends TextEditingController {
   HighlightTextEditingController({
     required this.highlightTextStyle,
-    required this.participantsCubit,
     String? initialText,
-  }) : super(text: initialText);
+    required this.mentionCache,
+  }) : super(text: initialText) {
+    mentionsStreamController.stream
+        .map((event) => mentionNumberRegExp
+            .allMatches(event)
+            .map((e) => e[1])
+            .whereNotNull()
+            .where(
+                (element) => mentionCache.identityNumberCache(element) == null)
+            .toSet())
+        .where((event) => event.isNotEmpty)
+        .distinct(setEquals)
+        .asyncMap(mentionCache.checkIdentityNumbers)
+        .listen((event) => notifyListeners());
+  }
 
   final TextStyle highlightTextStyle;
-  final ParticipantsCubit participantsCubit;
+  final MentionCache mentionCache;
+  final mentionsStreamController = StreamController<String>();
+
+  @override
+  Future<void> dispose() async {
+    await mentionsStreamController.close();
+    return super.dispose();
+  }
 
   @override
   TextSpan buildTextSpan({
@@ -634,6 +657,7 @@ class HighlightTextEditingController extends TextEditingController {
     TextStyle? style,
     required bool withComposing,
   }) {
+    mentionsStreamController.add(text);
     if (!value.isComposingRangeValid || !withComposing) {
       return _buildTextSpan(text, style);
     }
@@ -656,11 +680,19 @@ class HighlightTextEditingController extends TextEditingController {
       mentionNumberRegExp,
       onMatch: (match) {
         final text = match[0];
-        final index = participantsCubit.state
-            .indexWhere((user) => user.identityNumber == match[1]);
+        final identityNumber = match[1];
+
+        final bool valid;
+        if (identityNumber != null) {
+          final user = mentionCache.identityNumberCache(identityNumber);
+          valid = user != null;
+        } else {
+          valid = false;
+        }
+
         children.add(TextSpan(
             text: text,
-            style: index > -1 ? style?.merge(highlightTextStyle) : style));
+            style: valid ? style?.merge(highlightTextStyle) : style));
         return text ?? '';
       },
       onNonMatch: (text) {

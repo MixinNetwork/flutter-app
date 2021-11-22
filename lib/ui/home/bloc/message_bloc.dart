@@ -234,8 +234,7 @@ class MessageBloc extends Bloc<_MessageEvent, MessageState>
     final set = {...state.top, state.center, ...state.bottom};
     await mentionCache.checkMentionCache(
       {...set.map((e) => e?.content), ...set.map((e) => e?.quoteContent)}
-          .where((element) => element != null)
-          .cast<String>()
+          .whereNotNull()
           .toSet(),
     );
   }
