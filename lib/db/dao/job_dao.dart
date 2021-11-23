@@ -91,6 +91,13 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
         row.action.equals(sendingMessage) & row.blazeMessage.isNotNull())
     ..limit(100);
 
+  Stream<bool> watchHasUpdateAssetJobs() => _watchHasJobs(updateAsset);
+
+  SimpleSelectStatement<Jobs, Job> updateAssetJobs() => select(db.jobs)
+    ..where((Jobs row) =>
+        row.action.equals(updateAsset) & row.blazeMessage.isNotNull())
+    ..limit(100);
+
   Future<Job?> ackJobById(String jobId) =>
       (select(db.jobs)..where((tbl) => tbl.jobId.equals(jobId)))
           .getSingleOrNull();
@@ -104,5 +111,16 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
     if (exists == null) {
       await insert(job);
     }
+  }
+
+  Future<void> insertUpdateAssetJob(Job job) async {
+    assert(job.action == updateAsset);
+
+    final exists = await db.hasData(
+        db.jobs,
+        [],
+        db.jobs.action.equals(updateAsset) &
+            db.jobs.blazeMessage.equals(job.blazeMessage).not());
+    if (!exists) await insert(job);
   }
 }

@@ -208,6 +208,13 @@ class AccountServer {
   void start() {
     blaze.connect();
 
+    final primarySessionId = AccountKeyValue.instance.primarySessionId;
+    if (primarySessionId != null) {
+      jobSubscribers.add(database.jobDao
+          .watchHasSessionAckJobs()
+          .asyncDropListen((_) => _runSessionAckJob()));
+    }
+
     jobSubscribers
       ..add(Rx.merge([
         // runFloodJob when socket connected.
@@ -218,16 +225,7 @@ class AccountServer {
       ]).asyncDropListen((_) => _runProcessFloodJob()))
       ..add(database.jobDao
           .watchHasAckJobs()
-          .asyncDropListen((_) => _runAckJob()));
-
-    final primarySessionId = AccountKeyValue.instance.primarySessionId;
-    if (primarySessionId != null) {
-      jobSubscribers.add(database.jobDao
-          .watchHasSessionAckJobs()
-          .asyncDropListen((_) => _runSessionAckJob()));
-    }
-
-    jobSubscribers
+          .asyncDropListen((_) => _runAckJob()))
       ..add(database.jobDao
           .watchHasPinMessageJobs()
           .asyncDropListen((_) => _runPinJob()))
@@ -236,9 +234,10 @@ class AccountServer {
           .asyncDropListen((_) => _runRecallJob()))
       ..add(database.jobDao
           .watchHasSendingJobs()
-          .asyncDropListen((_) => _runSendJob()));
-
-    // database.mock();
+          .asyncDropListen((_) => _runSendJob()))
+      ..add(database.jobDao
+          .watchHasUpdateAssetJobs()
+          .asyncDropListen((_) => _runUpdateAssetJob()));
   }
 
   Future<void> _runProcessFloodJob() async {
@@ -508,6 +507,23 @@ class AccountServer {
     });
 
     await _runSendJob();
+  }
+
+  Future<void> _runUpdateAssetJob() async {
+    final jobs = await database.jobDao.updateAssetJobs().get();
+    if (jobs.isEmpty) return;
+
+    await Future.forEach(jobs, (db.Job job) async {
+      try {
+        final a = (await client.assetApi.getAssetById(job.blazeMessage!)).data;
+        await database.assetDao.insertSdkAsset(a);
+        await database.jobDao.deleteJobById(job.jobId);
+      } catch (e, s) {
+        w('Update asset job error: $e, stack: $s');
+      }
+    });
+
+    await _runUpdateAssetJob();
   }
 
   Future<MessageResult?> _sendSignalMessage(
