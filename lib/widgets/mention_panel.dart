@@ -33,19 +33,17 @@ class MentionPanelPortalEntry extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final visible = useBlocStateConverter<MentionCubit, MentionState, bool>(
-      converter: (state) => state.users.isNotEmpty,
-    );
+    final mentionState = useBlocState<MentionCubit, MentionState>();
+    final visible = mentionState.users.isNotEmpty;
 
     final selectable =
         useValueListenable(textEditingController).composing.composed && visible;
 
-    final isGroup =
+    final isGroupOrBot =
         useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
-      converter: (state) => state?.isGroup ?? false,
+      converter: (state) =>
+          (state?.isGroup ?? false) || (state?.isBot ?? false),
     );
-
-    final mentionState = useBlocState<MentionCubit, MentionState>();
 
     return FocusableActionDetector(
       enabled: selectable,
@@ -84,7 +82,7 @@ class MentionPanelPortalEntry extends HookWidget {
         ),
       },
       child: PortalEntry(
-        visible: visible && isGroup,
+        visible: visible && isGroupOrBot,
         childAnchor: Alignment.topCenter,
         portalAnchor: Alignment.bottomCenter,
         closeDuration: const Duration(milliseconds: 150),

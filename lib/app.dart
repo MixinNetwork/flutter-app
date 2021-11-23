@@ -20,7 +20,6 @@ import 'generated/l10n.dart';
 import 'ui/home/bloc/conversation_cubit.dart';
 import 'ui/home/bloc/conversation_list_bloc.dart';
 import 'ui/home/bloc/multi_auth_cubit.dart';
-import 'ui/home/bloc/participants_cubit.dart';
 import 'ui/home/bloc/recall_message_bloc.dart';
 import 'ui/home/bloc/slide_category_cubit.dart';
 import 'ui/home/conversation_page.dart';
@@ -32,7 +31,6 @@ import 'utils/hook.dart';
 import 'utils/logger.dart';
 import 'utils/system/tray.dart';
 import 'widgets/brightness_observer.dart';
-import 'widgets/default_text_editing_focusable_action_detector.dart';
 import 'widgets/focus_helper.dart';
 import 'widgets/message/item/text/mention_builder.dart';
 import 'widgets/window/move_window.dart';
@@ -46,59 +44,57 @@ class App extends StatelessWidget {
     precacheImage(
         const AssetImage(Resources.assetsImagesChatBackgroundPng), context);
     return FocusHelper(
-      child: DefaultTextEditingFocusableActionDetector(
-        child: MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (context) => MultiAuthCubit(),
-            ),
-            BlocProvider(create: (context) => SettingCubit()),
-          ],
-          child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
-            converter: (state) => state.current,
-            builder: (context, authState) {
-              const app = _App();
-              if (authState == null) return app;
-              return FutureProvider<AccountServer?>(
-                key: ValueKey(Tuple4(
-                  authState.account.userId,
-                  authState.account.sessionId,
-                  authState.account.identityNumber,
-                  authState.privateKey,
-                )),
-                create: (BuildContext context) async {
-                  final accountServer = AccountServer(context.multiAuthCubit);
-                  try {
-                    await accountServer.initServer(
-                      authState.account.userId,
-                      authState.account.sessionId,
-                      authState.account.identityNumber,
-                      authState.privateKey,
-                    );
-                  } catch (e, s) {
-                    w('accountServer.initServer error: $e, $s');
-                    rethrow;
-                  }
-                  return accountServer;
-                },
-                initialData: null,
-                builder: (BuildContext context, _) => Consumer<AccountServer?>(
-                  builder: (context, accountServer, child) {
-                    if (accountServer != null) {
-                      return _Providers(
-                        app: Portal(
-                          child: child!,
-                        ),
-                        accountServer: accountServer,
-                      );
-                    }
-                    return child!;
-                  },
-                  child: app,
-                ),
-              );
-            },
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => MultiAuthCubit(),
           ),
+          BlocProvider(create: (context) => SettingCubit()),
+        ],
+        child: BlocConverter<MultiAuthCubit, MultiAuthState, AuthState?>(
+          converter: (state) => state.current,
+          builder: (context, authState) {
+            const app = _App();
+            if (authState == null) return app;
+            return FutureProvider<AccountServer?>(
+              key: ValueKey(Tuple4(
+                authState.account.userId,
+                authState.account.sessionId,
+                authState.account.identityNumber,
+                authState.privateKey,
+              )),
+              create: (BuildContext context) async {
+                final accountServer = AccountServer(context.multiAuthCubit);
+                try {
+                  await accountServer.initServer(
+                    authState.account.userId,
+                    authState.account.sessionId,
+                    authState.account.identityNumber,
+                    authState.privateKey,
+                  );
+                } catch (e, s) {
+                  w('accountServer.initServer error: $e, $s');
+                  rethrow;
+                }
+                return accountServer;
+              },
+              initialData: null,
+              builder: (BuildContext context, _) => Consumer<AccountServer?>(
+                builder: (context, accountServer, child) {
+                  if (accountServer != null) {
+                    return _Providers(
+                      app: Portal(
+                        child: child!,
+                      ),
+                      accountServer: accountServer,
+                    );
+                  }
+                  return child!;
+                },
+                child: app,
+              ),
+            );
+          },
         ),
       ),
     );
@@ -142,12 +138,6 @@ class _Providers extends StatelessWidget {
                   accountServer: accountServer,
                   responsiveNavigatorCubit:
                       context.read<ResponsiveNavigatorCubit>(),
-                ),
-              ),
-              BlocProvider(
-                create: (BuildContext context) => ParticipantsCubit(
-                  userDao: accountServer.database.userDao,
-                  conversationCubit: context.read<ConversationCubit>(),
                 ),
               ),
               BlocProvider(

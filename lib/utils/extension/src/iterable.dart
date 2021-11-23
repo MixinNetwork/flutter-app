@@ -6,7 +6,7 @@ extension IterableExtension<T> on Iterable<T> {
 }
 
 extension IterableExtenstionNull<T> on Iterable<T?> {
-  Iterable<T> whereNotNull() => where((e) => e != null).cast();
+  Iterable<T> whereNotNull() => where((e) => e != null).cast<T>();
 }
 
 extension ListExtension<T> on List<T> {

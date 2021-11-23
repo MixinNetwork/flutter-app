@@ -1,5 +1,9 @@
 part of '../extension.dart';
 
+extension StreamExtensionWhereNotNull<T> on Stream<T?> {
+  Stream<T> whereNotNull() => where((e) => e != null).cast<T>();
+}
+
 extension StreamExtension<T> on Stream<T> {
   StreamSubscription<T> asyncDropListen<E>(
       FutureOr<E> Function(T event) convert) {

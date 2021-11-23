@@ -550,10 +550,10 @@ class Localization {
     );
   }
 
-  /// `Contacts`
+  /// `Contact`
   String get contact {
     return Intl.message(
-      'Contacts',
+      'Contact',
       name: 'contact',
       desc: '',
       args: [],
@@ -2377,6 +2377,16 @@ class Localization {
       name: 'deleteChatHint',
       desc: '',
       args: [value],
+    );
+  }
+
+  /// `This type of url is not supported, please check on your phone.`
+  String get uriCheckOnPhone {
+    return Intl.message(
+      'This type of url is not supported, please check on your phone.',
+      name: 'uriCheckOnPhone',
+      desc: '',
+      args: [],
     );
   }
 }

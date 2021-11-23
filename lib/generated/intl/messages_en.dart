@@ -136,7 +136,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "collapse": MessageLookupByLibrary.simpleMessage("Collapse"),
         "comingSoon": MessageLookupByLibrary.simpleMessage("Coming soon..."),
         "confirm": MessageLookupByLibrary.simpleMessage("OK"),
-        "contact": MessageLookupByLibrary.simpleMessage("Contacts"),
+        "contact": MessageLookupByLibrary.simpleMessage("Contact"),
         "contactMixinId": m7,
         "contacts": MessageLookupByLibrary.simpleMessage("Contacts"),
         "continueText": MessageLookupByLibrary.simpleMessage("Continue"),
@@ -357,6 +357,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "unpinAllMessagesDescription": MessageLookupByLibrary.simpleMessage(
             "Are you sure you want to unpin all messages?"),
         "unread": MessageLookupByLibrary.simpleMessage("New Messages"),
+        "uriCheckOnPhone": MessageLookupByLibrary.simpleMessage(
+            "This type of url is not supported, please check on your phone."),
         "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
         "video": MessageLookupByLibrary.simpleMessage("Video"),
         "videoCall": MessageLookupByLibrary.simpleMessage("Video call"),

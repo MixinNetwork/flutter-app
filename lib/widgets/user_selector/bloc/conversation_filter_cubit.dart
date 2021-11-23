@@ -48,7 +48,8 @@ class ConversationFilterCubit extends Cubit<ConversationFilterState> {
     friends = <User>[];
     bots = <User>[];
 
-    final Iterable<User> users = await accountServer.database.userDao.friends([
+    final Iterable<User> users =
+        await accountServer.database.userDao.notInFriends([
       ...contactConversationIds,
       ...botConversationIds,
     ]).get();

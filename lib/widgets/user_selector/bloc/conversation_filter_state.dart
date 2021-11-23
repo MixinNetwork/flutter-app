@@ -14,10 +14,7 @@ class ConversationFilterState extends Equatable {
   final String? keyword;
 
   Set<String> get appIds => {
-        ...recentConversations
-            .map((e) => e.ownerId)
-            .where((element) => element != null)
-            .cast<String>(),
+        ...recentConversations.map((e) => e.ownerId).whereNotNull(),
         ...[...bots, ...friends].map((e) => e.userId),
       };
 
