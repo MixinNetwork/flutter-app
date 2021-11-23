@@ -271,41 +271,45 @@ class Identities extends Table with TableInfo<Identities, Identitie> {
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _addressMeta = const VerificationMeta('address');
   late final GeneratedColumn<String?> address = GeneratedColumn<String?>(
       'address', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _registrationIdMeta =
       const VerificationMeta('registrationId');
   late final GeneratedColumn<int?> registrationId = GeneratedColumn<int?>(
       'registration_id', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _publicKeyMeta = const VerificationMeta('publicKey');
   late final GeneratedColumn<Uint8List?> publicKey =
       GeneratedColumn<Uint8List?>('public_key', aliasedName, false,
-          typeName: 'BLOB',
+          type: const BlobType(),
           requiredDuringInsert: true,
           $customConstraints: 'NOT NULL');
   final VerificationMeta _privateKeyMeta = const VerificationMeta('privateKey');
   late final GeneratedColumn<Uint8List?> privateKey =
       GeneratedColumn<Uint8List?>('private_key', aliasedName, true,
-          typeName: 'BLOB',
+          type: const BlobType(),
           requiredDuringInsert: false,
           $customConstraints: '');
   final VerificationMeta _nextPrekeyIdMeta =
       const VerificationMeta('nextPrekeyId');
   late final GeneratedColumn<int?> nextPrekeyId = GeneratedColumn<int?>(
       'next_prekey_id', aliasedName, true,
-      typeName: 'INTEGER', requiredDuringInsert: false, $customConstraints: '');
+      type: const IntType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   late final GeneratedColumn<int?> timestamp = GeneratedColumn<int?>(
       'timestamp', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -533,19 +537,19 @@ class Prekeys extends Table with TableInfo<Prekeys, Prekey> {
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
   late final GeneratedColumn<int?> prekeyId = GeneratedColumn<int?>(
       'prekey_id', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
       'record', aliasedName, false,
-      typeName: 'BLOB',
+      type: const BlobType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -771,25 +775,25 @@ class SignedPrekeys extends Table with TableInfo<SignedPrekeys, SignedPrekey> {
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _prekeyIdMeta = const VerificationMeta('prekeyId');
   late final GeneratedColumn<int?> prekeyId = GeneratedColumn<int?>(
       'prekey_id', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
       'record', aliasedName, false,
-      typeName: 'BLOB',
+      type: const BlobType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   late final GeneratedColumn<int?> timestamp = GeneratedColumn<int?>(
       'timestamp', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -1048,31 +1052,31 @@ class Sessions extends Table with TableInfo<Sessions, Session> {
   final VerificationMeta _idMeta = const VerificationMeta('id');
   late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
       'id', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: false,
       $customConstraints: 'PRIMARY KEY AUTOINCREMENT NOT NULL');
   final VerificationMeta _addressMeta = const VerificationMeta('address');
   late final GeneratedColumn<String?> address = GeneratedColumn<String?>(
       'address', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _deviceMeta = const VerificationMeta('device');
   late final GeneratedColumn<int?> device = GeneratedColumn<int?>(
       'device', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
       'record', aliasedName, false,
-      typeName: 'BLOB',
+      type: const BlobType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _timestampMeta = const VerificationMeta('timestamp');
   late final GeneratedColumn<int?> timestamp = GeneratedColumn<int?>(
       'timestamp', aliasedName, false,
-      typeName: 'INTEGER',
+      type: const IntType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -1286,19 +1290,19 @@ class SenderKeys extends Table with TableInfo<SenderKeys, SenderKey> {
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
   late final GeneratedColumn<String?> groupId = GeneratedColumn<String?>(
       'group_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
   late final GeneratedColumn<String?> senderId = GeneratedColumn<String?>(
       'sender_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _recordMeta = const VerificationMeta('record');
   late final GeneratedColumn<Uint8List?> record = GeneratedColumn<Uint8List?>(
       'record', aliasedName, false,
-      typeName: 'BLOB',
+      type: const BlobType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
@@ -1565,29 +1569,31 @@ class RatchetSenderKeys extends Table
   final VerificationMeta _groupIdMeta = const VerificationMeta('groupId');
   late final GeneratedColumn<String?> groupId = GeneratedColumn<String?>(
       'group_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _senderIdMeta = const VerificationMeta('senderId');
   late final GeneratedColumn<String?> senderId = GeneratedColumn<String?>(
       'sender_id', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumn<String?> status = GeneratedColumn<String?>(
       'status', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   final VerificationMeta _messageIdMeta = const VerificationMeta('messageId');
   late final GeneratedColumn<String?> messageId = GeneratedColumn<String?>(
       'message_id', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: '');
+      type: const StringType(),
+      requiredDuringInsert: false,
+      $customConstraints: '');
   final VerificationMeta _createdAtMeta = const VerificationMeta('createdAt');
   late final GeneratedColumn<String?> createdAt = GeneratedColumn<String?>(
       'created_at', aliasedName, false,
-      typeName: 'TEXT',
+      type: const StringType(),
       requiredDuringInsert: true,
       $customConstraints: 'NOT NULL');
   @override
