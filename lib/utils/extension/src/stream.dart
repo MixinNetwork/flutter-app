@@ -5,52 +5,57 @@ extension StreamExtensionWhereNotNull<T> on Stream<T?> {
 }
 
 extension StreamExtension<T> on Stream<T> {
-  Stream<E> asyncMapDrop<E>(FutureOr<E> Function(T event) convert) {
-    StreamController<E> controller;
-    if (isBroadcast) {
-      controller = StreamController<E>.broadcast();
-    } else {
-      controller = StreamController<E>();
+  StreamSubscription<T> asyncDropListen<E>(
+      FutureOr<E> Function(T event) convert) {
+    final subscription = listen(null);
+
+    var drop = false;
+    void resume() {
+      drop = false;
     }
 
-    controller.onListen = () {
-      final subscription = listen(null,
-          onError: controller.addError, // Avoid Zone error replacement.
-          onDone: controller.close);
-      FutureOr<void> add(E value) {
-        controller.add(value);
-      }
+    subscription.onData((T event) {
+      if (drop) return;
 
-      var drop = false;
-      final addError = controller.addError;
-      void resume() {
-        drop = false;
+      FutureOr<E> newValue;
+      try {
+        newValue = convert(event);
+      } catch (_) {
+        return;
       }
-
-      subscription.onData((T event) {
-        if (drop) return;
-
-        FutureOr<E> newValue;
-        try {
-          newValue = convert(event);
-        } catch (e, s) {
-          controller.addError(e, s);
-          return;
-        }
-        if (newValue is Future<E>) {
-          drop = true;
-          newValue.then(add, onError: addError).whenComplete(resume);
-        } else {
-          controller.add(newValue);
-        }
-      });
-      controller.onCancel = subscription.cancel;
-      if (!isBroadcast) {
-        controller
-          ..onPause = subscription.pause
-          ..onResume = subscription.resume;
+      if (newValue is Future<E>) {
+        drop = true;
+        newValue.whenComplete(resume).catchError((_) {
+          resume();
+        });
       }
-    };
-    return controller.stream;
+    });
+
+    return subscription;
+  }
+
+  StreamSubscription<T> asyncListen<E>(FutureOr<E> Function(T event) convert) {
+    final subscription = listen(null);
+
+    void resume() {
+      subscription.resume();
+    }
+
+    subscription.onData((T event) {
+      FutureOr<E> newValue;
+      try {
+        newValue = convert(event);
+      } catch (_) {
+        return;
+      }
+      if (newValue is Future<E>) {
+        subscription.pause();
+        newValue.whenComplete(resume).catchError((_) {
+          resume();
+        });
+      }
+    });
+
+    return subscription;
   }
 }
