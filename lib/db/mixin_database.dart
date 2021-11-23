@@ -12,6 +12,7 @@ import 'package:path/path.dart' as p;
 import '../enum/media_status.dart';
 import '../enum/message_action.dart';
 import '../enum/message_status.dart';
+import '../utils/extension/extension.dart';
 import '../utils/file.dart';
 import 'converter/conversation_category_type_converter.dart';
 import 'converter/conversation_status_type_converter.dart';
@@ -177,7 +178,7 @@ class MixinDatabase extends _$MixinDatabase {
             ..join(joins)
             ..where(predicate)
             ..limit(1))
-          .watch()
+          .watchThrottle()
           .map((event) => event.isNotEmpty);
 
   Future<bool> hasData<T extends HasResultSet, R>(

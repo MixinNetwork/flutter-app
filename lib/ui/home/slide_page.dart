@@ -170,7 +170,8 @@ class _CircleList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final circles = useStream<List<ConversationCircleItem>>(
-      useMemoized(() => context.database.circleDao.allCircles().watch()),
+      useMemoized(
+          () => context.database.circleDao.allCircles().watchThrottle()),
       initialData: [],
     );
     if (circles.data?.isEmpty ?? true) return const SizedBox();
@@ -368,13 +369,13 @@ class _Item extends HookWidget {
         final dao = context.database.conversationDao;
         switch (type) {
           case SlideCategoryType.contacts:
-            return dao.contactUnseenConversationCount().watchSingle();
+            return dao.contactUnseenConversationCount().watchSingleThrottle();
           case SlideCategoryType.groups:
-            return dao.groupUnseenConversationCount().watchSingle();
+            return dao.groupUnseenConversationCount().watchSingleThrottle();
           case SlideCategoryType.bots:
-            return dao.botUnseenConversationCount().watchSingle();
+            return dao.botUnseenConversationCount().watchSingleThrottle();
           case SlideCategoryType.strangers:
-            return dao.strangerUnseenConversationCount().watchSingle();
+            return dao.strangerUnseenConversationCount().watchSingleThrottle();
           default:
             return const Stream.empty();
         }
