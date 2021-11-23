@@ -57,7 +57,7 @@ class MessageDao extends DatabaseAccessor<MixinDatabase>
                   __________, ___________) =>
               Limit(ids.length, 0)).get();
     },
-  ).distinct();
+  );
 
   late Stream<NotificationMessage> notificationMessageStream = db.eventBus
       .watch<String>(DatabaseEvent.notification)

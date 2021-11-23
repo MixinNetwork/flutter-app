@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:drift/drift.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../constants/constants.dart';
@@ -52,8 +51,7 @@ class JobDao extends DatabaseAccessor<MixinDatabase> with _$JobDaoMixin {
   Stream<bool> _watchHasJobs(String action) => db
       .watchHasData(db.jobs, [],
           db.jobs.action.equals(action) & db.jobs.blazeMessage.isNotNull())
-      .where((event) => event)
-      .throttleTime(const Duration(milliseconds: 50), trailing: true);
+      .where((event) => event);
 
   Stream<bool> watchHasAckJobs() => _watchHasJobs(acknowledgeMessageReceipts);
 

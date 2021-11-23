@@ -47,28 +47,17 @@ class InputContainer extends HookWidget {
       when: (state) => state != null,
     );
 
+    final hasParticipant =
+        useBlocStateConverter<ConversationCubit, ConversationState?, bool>(
+      converter: (state) {
+        if (state?.conversation == null) return true;
+        return state?.participant != null;
+      },
+    );
+
     useEffect(() {
       context.read<QuoteMessageCubit>().emit(null);
     }, [conversationId]);
-
-    final hasParticipant = useStream(
-            useMemoized(() {
-              final database = context.database;
-              return CombineLatestStream([
-                database.conversationDao
-                    .conversationItem(conversationId!)
-                    .watchSingleOrNullThrottle(),
-                database.participantDao
-                    .participantById(
-                        conversationId, context.multiAuthState.currentUserId!)
-                    .watchSingleOrNullThrottle(),
-              ], (list) {
-                if (list[0] == null) return true;
-                return list[1] != null;
-              }).debounceTime(const Duration(milliseconds: 500));
-            }, [conversationId, context.multiAuthState.currentUserId]),
-            initialData: true)
-        .data!;
 
     return hasParticipant
         ? const _InputContainer()
@@ -518,8 +507,9 @@ class _StickerButton extends HookWidget {
     final key = useMemoized(() => GlobalKey());
 
     final stickerAlbumsCubit = useBloc(
-      () => StickerAlbumsCubit(
-          context.database.stickerAlbumDao.systemAlbums().watchThrottle()),
+      () => StickerAlbumsCubit(context.database.stickerAlbumDao
+          .systemAlbums()
+          .watchThrottle(kVerySlowThrottleDuration)),
     );
 
     final tabLength =

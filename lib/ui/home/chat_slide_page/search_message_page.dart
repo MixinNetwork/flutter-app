@@ -398,7 +398,7 @@ class _SearchParticipantList extends HookWidget {
               if (value.isEmpty) {
                 return userDao
                     .groupParticipants(conversationId: conversationId)
-                    .watchThrottle();
+                    .watchThrottle(kSlowThrottleDuration);
               }
               return userDao
                   .fuzzySearchGroupUser(
@@ -406,7 +406,7 @@ class _SearchParticipantList extends HookWidget {
                     conversationId: conversationId,
                     keyword: value,
                   )
-                  .watchThrottle();
+                  .watchThrottle(kSlowThrottleDuration);
             })).data ??
         [];
 

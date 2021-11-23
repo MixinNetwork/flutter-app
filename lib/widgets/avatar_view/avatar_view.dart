@@ -49,7 +49,7 @@ class ConversationAvatarWidget extends HookWidget {
               if (_category == ConversationCategory.group) {
                 return context.database.participantDao
                     .participantsAvatar(_conversationId!)
-                    .watchThrottle()
+                    .watchThrottle(const Duration(minutes: 6))
                     .map((event) => _category == ConversationCategory.contact
                         ? event
                             .where((element) =>

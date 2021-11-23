@@ -212,7 +212,7 @@ class AccountServer {
     if (primarySessionId != null) {
       jobSubscribers.add(database.jobDao
           .watchHasSessionAckJobs()
-          .asyncDropListen((_) => _runSessionAckJob()));
+          .asyncListen((_) => _runSessionAckJob()));
     }
 
     jobSubscribers
@@ -222,22 +222,20 @@ class AccountServer {
         database.mixinDatabase.tableUpdates(
           TableUpdateQuery.onTable(database.mixinDatabase.floodMessages),
         )
-      ]).asyncDropListen((_) => _runProcessFloodJob()))
-      ..add(database.jobDao
-          .watchHasAckJobs()
-          .asyncDropListen((_) => _runAckJob()))
+      ]).asyncListen((_) => _runProcessFloodJob()))
+      ..add(database.jobDao.watchHasAckJobs().asyncListen((_) => _runAckJob()))
       ..add(database.jobDao
           .watchHasPinMessageJobs()
-          .asyncDropListen((_) => _runPinJob()))
+          .asyncListen((_) => _runPinJob()))
       ..add(database.jobDao
           .watchHasRecallMessageJobs()
-          .asyncDropListen((_) => _runRecallJob()))
+          .asyncListen((_) => _runRecallJob()))
       ..add(database.jobDao
           .watchHasSendingJobs()
-          .asyncDropListen((_) => _runSendJob()))
+          .asyncListen((_) => _runSendJob()))
       ..add(database.jobDao
           .watchHasUpdateAssetJobs()
-          .asyncDropListen((_) => _runUpdateAssetJob()));
+          .asyncListen((_) => _runUpdateAssetJob()));
   }
 
   Future<void> _runProcessFloodJob() async {

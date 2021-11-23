@@ -78,14 +78,14 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
         if (conversationState.isBot ?? false) {
           return userDao
               .friends()
-              .watchThrottle()
+              .watchThrottle(kVerySlowThrottleDuration)
               .map((value) => _resultToMentionState(keyword, value));
         }
         if (conversationState.isGroup ?? false) {
           return userDao
               .groupParticipants(
                   conversationId: conversationState.conversationId)
-              .watchThrottle()
+              .watchThrottle(kVerySlowThrottleDuration)
               .map((value) => _resultToMentionState(
                   keyword,
                   value
@@ -103,7 +103,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
               conversationId: conversationState.conversationId,
               keyword: keyword,
             )
-            .watchThrottle()
+            .watchThrottle(kVerySlowThrottleDuration)
             .map((value) => _resultToMentionState(keyword, value));
       }
       if (conversationState.isGroup ?? false) {
@@ -113,7 +113,7 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
               conversationId: conversationState.conversationId,
               keyword: keyword,
             )
-            .watchThrottle()
+            .watchThrottle(kVerySlowThrottleDuration)
             .map((value) => _resultToMentionState(keyword, value));
       }
       return Stream.value(MentionState(text: keyword));

@@ -36,7 +36,7 @@ class GroupParticipantsPage extends HookWidget {
           final dao = context.database.participantDao;
           return dao
               .groupParticipantsByConversationId(conversationId)
-              .watchThrottle();
+              .watchThrottle(kSlowThrottleDuration);
         }, [conversationId])).data ??
         const <ParticipantUser>[];
 

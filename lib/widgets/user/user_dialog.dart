@@ -121,7 +121,7 @@ class _UserProfileLoader extends HookWidget {
     final user = useStream(useMemoized(
         () => accountServer.database.userDao
             .userById(userId)
-            .watchSingleOrNullThrottle(),
+            .watchSingleOrNullThrottle(kDefaultThrottleDuration),
         [userId])).data;
 
     useEffect(() {

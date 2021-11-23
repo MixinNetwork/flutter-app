@@ -84,17 +84,21 @@ class _StickerAlbumPage extends HookWidget {
       Stream<List<Sticker>> stream;
       switch (index) {
         case 0:
-          stream = stickerDao.recentUsedStickers().watchThrottle();
+          stream = stickerDao
+              .recentUsedStickers()
+              .watchThrottle(kVerySlowThrottleDuration);
           break;
         case 1:
-          stream = stickerDao.personalStickers().watchThrottle();
+          stream = stickerDao
+              .personalStickers()
+              .watchThrottle(kVerySlowThrottleDuration);
           break;
         default:
           stream = stickerDao
               .stickerByAlbumId(BlocProvider.of<StickerAlbumsCubit>(context)
                   .state[index - 2]
                   .albumId)
-              .watchThrottle();
+              .watchThrottle(kVerySlowThrottleDuration);
       }
       return StickerCubit(stream);
     }, keys: [index]);

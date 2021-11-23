@@ -47,7 +47,7 @@ PinMessageState usePinMessageState() {
       if (conversationId == null) return Stream.value([]);
       return context.database.pinMessageDao
           .getPinMessageIds(conversationId)
-          .watchThrottle()
+          .watchThrottle(kDefaultThrottleDuration)
           .map((event) => event.whereNotNull().toList());
     },
     initialData: [],
@@ -70,7 +70,7 @@ PinMessageState usePinMessageState() {
       }
       return context.database.pinMessageDao
           .lastPinMessageItem(conversationId)
-          .watchSingleOrNullThrottle()
+          .watchSingleOrNullThrottle(kDefaultThrottleDuration)
           .asyncMap((message) async {
         if (message == null) return null;
 

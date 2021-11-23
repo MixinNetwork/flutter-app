@@ -1,21 +1,23 @@
 part of '../extension.dart';
 
-const _kDefaultThrottleDuration = Duration(milliseconds: 50);
+const kDefaultThrottleDuration = Duration(milliseconds: 333);
+const kSlowThrottleDuration = Duration(seconds: 1);
+const kVerySlowThrottleDuration = Duration(seconds: 3);
 
 extension SelectedableThrottle<T> on Selectable<T> {
-  Stream<List<T>> watchThrottle({
-    Duration duration = _kDefaultThrottleDuration,
-  }) =>
+  Stream<List<T>> watchThrottle(
+    Duration duration,
+  ) =>
       watch().throttled(duration);
 
-  Stream<T> watchSingleThrottle({
-    Duration duration = _kDefaultThrottleDuration,
-  }) =>
+  Stream<T> watchSingleThrottle(
+    Duration duration,
+  ) =>
       watchSingle().throttled(duration);
 
-  Stream<T?> watchSingleOrNullThrottle({
-    Duration duration = _kDefaultThrottleDuration,
-  }) =>
+  Stream<T?> watchSingleOrNullThrottle(
+    Duration duration,
+  ) =>
       watchSingleOrNull().throttled(duration);
 }
 

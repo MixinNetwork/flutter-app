@@ -32,7 +32,7 @@ class PinMessagesPage extends HookWidget {
     final rawList = useMemoizedStream<List<MessageItem>>(
       () => context.database.pinMessageDao
           .messageItems(conversationId)
-          .watchThrottle(),
+          .watchThrottle(kDefaultThrottleDuration),
       keys: [conversationId],
     ).data;
 
