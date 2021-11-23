@@ -12,10 +12,9 @@ import '../../../bloc/subscribe_mixin.dart';
 import '../../../db/dao/user_dao.dart';
 import '../../../db/mixin_database.dart';
 import '../../../utils/reg_exp_utils.dart';
-import '../../../utils/sort.dart';
 import '../../../widgets/mention_panel.dart';
+import 'conversation_cubit.dart';
 import 'multi_auth_cubit.dart';
-import 'participants_cubit.dart';
 
 class MentionState extends Equatable {
   const MentionState({
@@ -47,19 +46,18 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
   MentionCubit({
     required this.userDao,
     required this.multiAuthCubit,
-    required this.participantsCubit,
   }) : super(const MentionState());
 
-  Future<void> setTextEditingValueStream(
+  void setTextEditingValueStream(
     Stream<TextEditingValue> textEditingValueStream,
-    TextEditingValue initialValue,
-  ) async {
-    subscriptions
-      ..forEach((subscription) => subscription?.cancel())
-      ..clear();
+    ConversationState conversationState,
+  ) {
+    Future.wait(subscriptions
+        .toList()
+        .where((element) => element != null)
+        .map((e) => e!.cancel()));
 
-    final mentionTextStream =
-        textEditingValueStream.startWith(initialValue).map((event) {
+    final mentionTextStream = textEditingValueStream.map((event) {
       final text = event.text.substring(0, max(event.selection.baseOffset, 0));
       return mentionRegExp.firstMatch(text)?[1];
     }).asBroadcastStream();
@@ -71,53 +69,65 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
       }),
     );
 
-    final participantsStream = participantsCubit.stream
-        .startWith(participantsCubit.state)
-        .map((event) => event
-            .where((element) =>
-                element.userId != multiAuthCubit.state.currentUserId)
-            .toList());
+    addSubscription(mentionTextStream.switchMap((keyword) {
+      if (keyword == null) {
+        return Stream.value(MentionState(text: keyword));
+      }
+      if (keyword.isEmpty) {
+        if (conversationState.isBot ?? false) {
+          return userDao
+              .friends()
+              .watch()
+              .map((value) => _resultToMentionState(keyword, value));
+        }
+        if (conversationState.isGroup ?? false) {
+          return userDao
+              .groupParticipants(
+                  conversationId: conversationState.conversationId)
+              .watch()
+              .map((value) => _resultToMentionState(
+                  keyword,
+                  value
+                    ..removeWhere(
+                      (element) =>
+                          element.userId == multiAuthCubit.state.currentUserId,
+                    )));
+        }
+      }
 
-    addSubscription(
-      Rx.combineLatest2<String?, List<User>, MentionState>(
-        mentionTextStream,
-        participantsStream,
-        (keyword, participants) {
-          late List<User> users;
-          if (keyword == null) {
-            users = [];
-          } else {
-            final lowerCaseKeyword = keyword.toLowerCase();
-            users = participants
-                .where(
-                  (user) =>
-                      (user.fullName
-                              ?.toLowerCase()
-                              .contains(lowerCaseKeyword) ??
-                          false) ||
-                      user.identityNumber.contains(keyword),
-                )
-                .toList()
-              ..sort(compareValuesBy((e) {
-                final indexOf =
-                    e.fullName?.toLowerCase().indexOf(lowerCaseKeyword) ?? -1;
-                if (indexOf != -1) return indexOf;
-                return e.identityNumber.indexOf(keyword);
-              }));
-          }
-
-          return MentionState(
-            text: keyword,
-            users: users,
-            index: listEquals(users.map(_mapper).toList(),
-                    state.users.map(_mapper).toList())
-                ? state.index
-                : 0,
-          );
-        },
-      ).listen(emit),
-    );
+      if (conversationState.isBot ?? false) {
+        return userDao
+            .fuzzySearchBotGroupUser(
+              currentUserId: multiAuthCubit.state.currentUserId ?? '',
+              conversationId: conversationState.conversationId,
+              keyword: keyword,
+            )
+            .watch()
+            .map((value) => _resultToMentionState(keyword, value));
+      }
+      if (conversationState.isGroup ?? false) {
+        return userDao
+            .fuzzySearchGroupUser(
+              currentUserId: multiAuthCubit.state.currentUserId ?? '',
+              conversationId: conversationState.conversationId,
+              keyword: keyword,
+            )
+            .watch()
+            .map((value) => _resultToMentionState(keyword, value));
+      }
+      return Stream.value(MentionState(text: keyword));
+    }).listen(emit));
   }
+
+  MentionState _resultToMentionState(String? keyword, List<User> users) =>
+      MentionState(
+        text: keyword,
+        users: users,
+        index: listEquals(
+                users.map(_mapper).toList(), state.users.map(_mapper).toList())
+            ? state.index
+            : 0,
+      );
 
   String _mapper(User e) => e.userId;
 
@@ -153,7 +163,6 @@ class MentionCubit extends Cubit<MentionState> with SubscribeMixin {
 
   final UserDao userDao;
   final MultiAuthCubit multiAuthCubit;
-  final ParticipantsCubit participantsCubit;
   final scrollController = ScrollController();
 
   @override

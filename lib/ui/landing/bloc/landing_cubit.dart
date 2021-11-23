@@ -18,6 +18,7 @@ import '../../../account/account_key_value.dart';
 import '../../../bloc/subscribe_mixin.dart';
 import '../../../crypto/crypto_key_value.dart';
 import '../../../crypto/signal/signal_protocol.dart';
+import '../../../utils/extension/extension.dart';
 import '../../../utils/logger.dart';
 import '../../../utils/platform.dart';
 import '../../home/bloc/multi_auth_cubit.dart';
@@ -103,8 +104,7 @@ class LandingCubit extends Cubit<LandingState> with SubscribeMixin {
           e('_verify: $error $stack');
           return null;
         })
-        .where((auth) => auth != null)
-        .cast<Tuple2<Account, String>>()
+        .whereNotNull()
         .listen((auth) => authCubit.signIn(
               AuthState(
                 account: auth.item1,

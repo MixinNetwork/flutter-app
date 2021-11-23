@@ -19,7 +19,6 @@ import '../../../widgets/interactive_decorated_box.dart';
 import '../../../widgets/search_text_field.dart';
 import '../bloc/conversation_cubit.dart';
 import '../bloc/conversation_list_bloc.dart';
-import '../bloc/participants_cubit.dart';
 import '../chat/chat_page.dart';
 import '../conversation_page.dart';
 
@@ -386,27 +385,30 @@ class _SearchParticipantList extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final keywordStream = useValueNotifierConvertSteam(editingController);
-    final keyword = useMemoizedStream(
-          () => keywordStream
-              .throttleTime(const Duration(milliseconds: 100), trailing: true)
-              .map((event) => event.text)
-              .distinct(),
-        ).data ??
-        editingController.text;
 
-    final filteredUser =
-        useBlocStateConverter<ParticipantsCubit, List<User>, List<User>>(
-            converter: (state) {
-              if (keyword.isEmpty) return state;
-              return state
-                  .where((e) =>
-                      e.fullName
-                          ?.toLowerCase()
-                          .contains(keyword.trim().toLowerCase()) ??
-                      false)
-                  .toList();
-            },
-            keys: [keyword]);
+    final filteredUser = useMemoizedStream(() => keywordStream
+                .throttleTime(const Duration(milliseconds: 100), trailing: true)
+                .map((event) => event.text)
+                .switchMap((value) {
+              final conversationId =
+                  context.read<ConversationCubit>().state?.conversationId;
+              if (conversationId == null) return Stream.value(<User>[]);
+              final userDao = context.database.userDao;
+
+              if (value.isEmpty) {
+                return userDao
+                    .groupParticipants(conversationId: conversationId)
+                    .watch();
+              }
+              return userDao
+                  .fuzzySearchGroupUser(
+                    currentUserId: context.multiAuthState.currentUserId ?? '',
+                    conversationId: conversationId,
+                    keyword: value,
+                  )
+                  .watch();
+            })).data ??
+        [];
 
     return ListView.builder(
       itemCount: filteredUser.length,
