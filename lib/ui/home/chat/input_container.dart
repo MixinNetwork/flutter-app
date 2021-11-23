@@ -12,7 +12,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../constants/resources.dart';
 import '../../../db/mixin_database.dart' hide Offset;
 import '../../../utils/app_lifecycle.dart';
-import '../../../utils/callback_text_editing_action.dart';
 import '../../../utils/extension/extension.dart';
 import '../../../utils/file.dart';
 import '../../../utils/hook.dart';
@@ -384,11 +383,6 @@ class _SendTextField extends HookWidget {
             shift: true,
             alt: !kPlatformIsDarwin,
           ): const _SendPostMessageIntent(),
-          SingleActivator(
-            LogicalKeyboardKey.keyV,
-            meta: kPlatformIsDarwin,
-            control: !kPlatformIsDarwin,
-          ): const _PasteIntent(),
           const SingleActivator(LogicalKeyboardKey.escape):
               const _EscapeIntent(),
         },
@@ -397,22 +391,7 @@ class _SendTextField extends HookWidget {
             onInvoke: (Intent intent) =>
                 _sendMessage(context, textEditingController),
           ),
-          _PasteIntent: CallbackTextEditingAction<Intent>(
-            onInvoke: (Intent intent,
-                TextEditingActionTarget? textEditingActionTarget,
-                [_]) async {
-              final files = await getClipboardFiles();
-              if (files.isNotEmpty) {
-                await showFilesPreviewDialog(
-                  context,
-                  files.map((e) => e.xFile).toList(),
-                );
-              } else {
-                await textEditingActionTarget!
-                    .pasteText(SelectionChangedCause.keyboard);
-              }
-            },
-          ),
+          PasteTextIntent: _PasteContextAction(context),
           _SendPostMessageIntent: CallbackAction<Intent>(
             onInvoke: (_) => _sendPostMessage(context, textEditingController),
           ),
@@ -715,10 +694,31 @@ class _SendPostMessageIntent extends Intent {
   const _SendPostMessageIntent();
 }
 
-class _PasteIntent extends Intent {
-  const _PasteIntent();
-}
-
 class _EscapeIntent extends Intent {
   const _EscapeIntent();
+}
+
+class _PasteContextAction extends Action<PasteTextIntent> {
+  _PasteContextAction(this.context);
+
+  final BuildContext context;
+
+  @override
+  Object? invoke(PasteTextIntent intent) {
+    final callingAction = this.callingAction;
+    assert(callingAction != null,
+        '_PasteContextAction: calling action can not be null.');
+    scheduleMicrotask(() async {
+      final files = await getClipboardFiles();
+      if (files.isNotEmpty) {
+        await showFilesPreviewDialog(
+          context,
+          files.map((e) => e.xFile).toList(),
+        );
+      } else {
+        // Use default paste action to paste text.
+        callingAction?.invoke(intent);
+      }
+    });
+  }
 }
